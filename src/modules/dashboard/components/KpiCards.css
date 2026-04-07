@@ -1,0 +1,57 @@
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.kpi-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.kpi-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.kpi-title {
+  font-size: 0.875rem;
+  color: var(--gray-500);
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.kpi-value {
+  font-size: 1.75rem;
+  color: var(--gray-900);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.kpi-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kpi-trend {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+  margin: 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--gray-200);
+}
+
+/* Icon Colors */
+.color-blue { background-color: var(--primary-blue-light); color: var(--primary-blue); }
+.color-green { background-color: var(--status-success-bg); color: var(--status-success); }
+.color-orange { background-color: var(--status-warning-bg); color: var(--status-warning); }
+.color-red { background-color: var(--status-danger-bg); color: var(--status-danger); }
+.color-purple { background-color: #F3E8FF; color: #9333EA; }
+.color-teal { background-color: #CCFBF1; color: #14B8A6; }
