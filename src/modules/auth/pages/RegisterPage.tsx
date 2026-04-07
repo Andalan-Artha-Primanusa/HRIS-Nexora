@@ -20,18 +20,18 @@ const RegisterPage = () => {
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    try {
-      await handleRegister(form);
-      alert("Register berhasil");
+    console.log("FORM DATA:", form); // Debug log untuk melihat data form
 
-      navigate("/login");
+    try {
+        await handleRegister(form);
+        alert("Register berhasil");
     } catch (err: any) {
-      alert(err.message || "Register gagal");
+        alert(err.message || "Register gagal");
     }
-  };
+    };
 
   return (
     <div style={styles.container}>
