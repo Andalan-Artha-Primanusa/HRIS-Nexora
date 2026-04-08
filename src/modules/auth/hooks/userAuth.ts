@@ -1,6 +1,5 @@
-import { login } from "../services/auth.service";
+import { login, register } from "../services/auth.service";
 import { useAuthStore } from "@/store/auth.store";
-import { register } from "../services/auth.service";
 
 export const useAuth = () => {
   const setAuth = useAuthStore((state) => state.setAuth);
@@ -12,6 +11,8 @@ export const useAuth = () => {
     try {
       const res = await login(payload);
 
+      console.log("LOGIN RESPONSE:", res);
+
       const { user, token } = res.data;
 
       setAuth(user, token);
@@ -22,19 +23,16 @@ export const useAuth = () => {
     }
   };
 
-    const handleRegister = async (payload: any) => {
+  const handleRegister = async (payload: any) => {
     try {
-        const res = await register(payload);
+      const res = await register(payload);
 
-        const { user, token } = res.data;
-
-        setAuth(user, token);
-
-        return res;
+      // ❌ JANGAN AUTO LOGIN
+      return res;
     } catch (error: any) {
-        throw error.response?.data || error;
+      throw error.response?.data || error;
     }
-    };
+  };
 
   return { handleLogin, handleRegister };
 };

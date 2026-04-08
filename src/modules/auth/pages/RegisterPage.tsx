@@ -28,6 +28,9 @@ const RegisterPage = () => {
     try {
         await handleRegister(form);
         alert("Register berhasil");
+        
+        // Setelah register berhasil, arahkan pengguna ke halaman login
+        navigate("/login");
     } catch (err: any) {
         alert(err.message || "Register gagal");
     }
