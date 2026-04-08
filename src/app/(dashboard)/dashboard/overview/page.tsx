@@ -1,13 +1,11 @@
 import React from 'react';
-import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { KpiCards } from '../components/KpiCards';
-import { ChartsSection } from '../components/ChartsSection';
-import { RecentActivity } from '../components/RecentActivity';
-import './OverviewPage.css';
+import { KpiCards } from '@/features/dashboard/components/KpiCards';
+import { ChartsSection } from '@/features/dashboard/components/ChartsSection';
+import { RecentActivity } from '@/features/dashboard/components/RecentActivity';
+import './page.css';
 
 const OverviewPage: React.FC = () => {
   return (
-    <DashboardLayout>
       <div className="overview-page">
         <div className="page-header">
           <div>
@@ -28,7 +26,6 @@ const OverviewPage: React.FC = () => {
           <RecentActivity />
         </div>
       </div>
-    </DashboardLayout>
   );
 };
 

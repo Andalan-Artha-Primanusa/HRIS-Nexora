@@ -1,93 +1,64 @@
 import { useState } from "react";
-import { useAuth } from "../hooks/userAuth";
+import { useAuth } from "@/features/auth/hooks/userAuth";
 import { useNavigate } from "react-router-dom";
 
-const RegisterPage = () => {
-  const { handleRegister } = useAuth();
+const LoginPage = () => {
+  const { handleLogin } = useAuth();
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-    password_confirmation: "",
-  });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-    const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    console.log("FORM DATA:", form); // Debug log untuk melihat data form
-
     try {
-        await handleRegister(form);
-        alert("Register berhasil");
+      await handleLogin({ email, password });
+      alert("Login berhasil");
     } catch (err: any) {
-        alert(err.message || "Register gagal");
+      alert(err.message || "Login gagal");
     }
-    };
+  };
 
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <h2 style={styles.title}>Register HRIS</h2>
+        <h2 style={styles.title}>HRIS Login</h2>
 
         <form onSubmit={handleSubmit} style={styles.form}>
           <input
-            name="name"
-            placeholder="Full Name"
-            onChange={handleChange}
-            style={styles.input}
-          />
-
-          <input
-            name="email"
             type="email"
             placeholder="Email"
-            onChange={handleChange}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             style={styles.input}
           />
 
           <input
-            name="password"
             type="password"
             placeholder="Password"
-            onChange={handleChange}
-            style={styles.input}
-          />
-
-          <input
-            name="password_confirmation"
-            type="password"
-            placeholder="Confirm Password"
-            onChange={handleChange}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             style={styles.input}
           />
 
           <button type="submit" style={styles.button}>
-            Register
-          </button>
-
-          <button
-            type="button"
-            style={styles.loginButton}
-            onClick={() => navigate("/login")}
-          >
-            Back to Login
+            Login
           </button>
         </form>
+        <button
+            type="button"
+            style={styles.registerButton}
+            onClick={() => navigate("/register")}
+            >
+            Create Account
+            </button>
       </div>
     </div>
   );
 };
 
-export default RegisterPage;
+export default LoginPage;
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
@@ -102,7 +73,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: "10px",
     backgroundColor: "#fff",
     boxShadow: "0 5px 20px rgba(0,0,0,0.1)",
-    width: "320px",
+    width: "300px",
   },
   title: {
     marginBottom: "20px",
@@ -122,11 +93,11 @@ const styles: Record<string, React.CSSProperties> = {
     padding: "10px",
     borderRadius: "6px",
     border: "none",
-    backgroundColor: "#16a34a",
+    backgroundColor: "#4f46e5",
     color: "#fff",
     cursor: "pointer",
   },
-  loginButton: {
+    registerButton: {
     marginTop: "10px",
     padding: "10px",
     borderRadius: "6px",
@@ -134,5 +105,5 @@ const styles: Record<string, React.CSSProperties> = {
     backgroundColor: "transparent",
     color: "#4f46e5",
     cursor: "pointer",
-  },
+    },
 };

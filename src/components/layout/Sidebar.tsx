@@ -1,103 +1,94 @@
-import React from 'react';
+import React, { useState } from 'react';
 import clsx from 'clsx';
-import { 
-  Building2, 
-  Users, 
-  CalendarClock, 
-  CalendarDays, 
-  CreditCard,
-  Receipt,
-  Target,
-  UserCircle,
-  FileBarChart,
-  Settings,
-  LayoutDashboard
-} from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import './Sidebar.css';
+import { menuItems } from '@/config/menu';
+import type { MenuItem } from '@/config/menu';
 
 interface SidebarProps {
   collapsed: boolean;
 }
 
-const menuGroups = [
-  {
-    title: 'Dashboard',
-    items: [
-      { label: 'Overview', icon: LayoutDashboard, path: '/', active: true },
-    ]
-  },
-  {
-    title: 'Management',
-    items: [
-      { label: 'Employee', icon: Users, path: '/employees' },
-      { label: 'Attendance', icon: CalendarClock, path: '/attendance' },
-      { label: 'Leave', icon: CalendarDays, path: '/leave' },
-    ]
-  },
-  {
-    title: 'Finance',
-    items: [
-      { label: 'Payroll', icon: CreditCard, path: '/payroll' },
-      { label: 'Reimbursement', icon: Receipt, path: '/reimbursement' },
-    ]
-  },
-  {
-    title: 'Performance',
-    items: [
-      { label: 'KPI & Goals', icon: Target, path: '/kpi' },
-    ]
-  },
-  {
-    title: 'ESS & Reports',
-    items: [
-      { label: 'Self Service', icon: UserCircle, path: '/ess' },
-      { label: 'Reports', icon: FileBarChart, path: '/reports' },
-    ]
-  },
-  {
-    title: 'System',
-    items: [
-      { label: 'Settings', icon: Settings, path: '/settings' },
-    ]
+const MenuItemComponent: React.FC<{ item: MenuItem; collapsed: boolean; level: number }> = ({ item, collapsed, level }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const hasSubItems = item.subItems && item.subItems.length > 0;
+  
+  // Calculate dynamic padding based on depth level, but only if not collapsed
+  const paddingLeft = !collapsed && level > 0 ? `${0.75 + (level * 1.25)}rem` : undefined;
+
+  const Icon = item.icon;
+
+  if (hasSubItems) {
+    return (
+      <li className="menu-item-wrapper">
+        <div 
+          className={clsx('menu-item', 'has-submenu', collapsed && 'collapsed')}
+          onClick={() => !collapsed && setIsExpanded(!isExpanded)}
+          title={collapsed ? item.label : undefined}
+          style={{ paddingLeft }}
+        >
+          {Icon && <Icon size={20} className="menu-icon" />}
+          {!collapsed && (
+            <>
+              <span className={clsx('menu-label', !Icon && 'no-icon')}>{item.label}</span>
+              <span className={clsx('menu-chevron', isExpanded && 'expanded')}>
+                <ChevronRight size={16} />
+              </span>
+            </>
+          )}
+        </div>
+
+        {/* Submenu Overlay or Dropdown */}
+        {!collapsed && (
+          <div className={clsx('submenu-wrapper', isExpanded && 'expanded')}>
+            <ul className="submenu-list">
+              {item.subItems!.map((subItem, subIdx) => (
+                <MenuItemComponent key={subIdx} item={subItem} collapsed={collapsed} level={level + 1} />
+              ))}
+            </ul>
+          </div>
+        )}
+      </li>
+    );
   }
-];
+
+  // Leaf Menu Item (No subitems)
+  return (
+    <li className="menu-item-wrapper">
+      <a 
+        href={item.path} 
+        className={clsx(level > 0 ? 'submenu-item' : 'menu-item', item.active && 'active', collapsed && 'collapsed')}
+        title={collapsed ? item.label : undefined}
+        style={{ paddingLeft }}
+        onClick={(e) => {
+          e.preventDefault();
+          if (item.path) window.location.href = item.path;
+        }}
+      >
+        {Icon ? <Icon size={20} className="menu-icon" /> : (!collapsed && level > 0 && <span className="submenu-dot" />)}
+        {!collapsed && <span className={clsx('menu-label', !Icon && 'no-icon')}>{item.label}</span>}
+      </a>
+    </li>
+  );
+};
 
 export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
   return (
     <aside className={clsx('dashboard-sidebar', collapsed && 'collapsed')}>
       <div className="sidebar-logo">
-        <Building2 className="logo-icon text-primary" size={28} />
-        {!collapsed && <span className="logo-text">HRIS Pro</span>}
+        <img 
+          src="/logo-mahya.png" 
+          alt="MAHYA Logo" 
+          className={clsx('company-logo', collapsed && 'collapsed')}
+        />
       </div>
       
       <div className="sidebar-menu-container">
-        {menuGroups.map((group, groupIdx) => (
-          <div key={groupIdx} className="sidebar-menu-group">
-            {!collapsed && <div className="menu-group-title">{group.title}</div>}
-            
-            <ul className="menu-list">
-              {group.items.map((item, itemIdx) => {
-                const Icon = item.icon;
-                return (
-                  <li key={itemIdx} className="menu-item-wrapper">
-                    <a 
-                      href={item.path} 
-                      className={clsx('menu-item', item.active && 'active', collapsed && 'collapsed')}
-                      title={collapsed ? item.label : undefined}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (item.path === '/') window.location.href = '/';
-                      }}
-                    >
-                      <Icon size={20} className="menu-icon" />
-                      {!collapsed && <span className="menu-label">{item.label}</span>}
-                    </a>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        ))}
+        <ul className="menu-list">
+          {menuItems.map((item, idx) => (
+            <MenuItemComponent key={idx} item={item} collapsed={collapsed} level={0} />
+          ))}
+        </ul>
       </div>
     </aside>
   );

@@ -2,8 +2,15 @@
   height: var(--header-height);
   display: flex;
   align-items: center;
-  padding: 0 1.5rem;
-  border-bottom: 1px solid var(--gray-200);
+  padding: 0 1.25rem;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.dashboard-sidebar {
+  border-right: 1px solid rgba(226, 232, 240, 0.5);
+  box-shadow: 2px 0 20px rgba(0, 0, 0, 0.015);
+  background-color: var(--white);
+  z-index: 20;
 }
 
 .dashboard-sidebar.collapsed .sidebar-logo {
@@ -11,67 +18,90 @@
   padding: 0;
 }
 
-.logo-text {
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin-left: 0.75rem;
-  color: var(--gray-900);
+.company-logo {
+  height: 54px; /* Force it much bigger to combat internal image padding */
+  width: 100%;
+  object-fit: contain;
+  object-position: left; /* Keep it nicely aligned with text */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.company-logo.collapsed {
+  height: 32px;
+  width: 32px;
+  object-fit: cover;
+  object-position: left;
 }
 
 .sidebar-menu-container {
-  padding: 1.5rem 1rem;
+  padding: 1rem 0.75rem; 
   overflow-y: auto;
+  overflow-x: hidden; 
   flex: 1;
+  /* Completely hide ugly scrollbars for a clean SaaS look */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+}
+
+.sidebar-menu-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
 }
 
 .sidebar-menu-group {
   margin-bottom: 1.5rem;
 }
 
-.menu-group-title {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--gray-400);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 0.5rem;
-  padding-left: 0.5rem;
-}
-
 .menu-list {
   list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem; 
 }
 
 .menu-item-wrapper {
-  margin-bottom: 0.25rem;
+  /* Used as wrapper for items and submenus */
 }
 
 .menu-item {
   display: flex;
   align-items: center;
-  padding: 0.75rem;
-  border-radius: var(--radius-md);
+  padding: 0.5rem 0.75rem; 
+  border-radius: var(--radius-md); 
   color: var(--gray-600);
   font-weight: 500;
   font-size: 0.875rem;
+  transition: all 0.2s ease-in-out;
+  position: relative;
+  overflow: hidden; 
+}
+
+.menu-icon {
+  flex-shrink: 0;
+  color: var(--gray-400);
   transition: all 0.2s ease;
 }
 
 .menu-item:hover {
   background-color: var(--gray-100);
-  color: var(--gray-900);
+  color: var(--gray-800);
+  transform: none; 
 }
 
+.menu-item:hover .menu-icon {
+  color: var(--primary-blue);
+}
+
+/* Active State Design */
 .menu-item.active {
   background-color: var(--primary-blue-light);
   color: var(--primary-blue);
-  position: relative;
+  font-weight: 600;
 }
 
 .menu-item.active::before {
   content: '';
   position: absolute;
-  left: -1rem;
+  left: 0; 
   top: 50%;
   transform: translateY(-50%);
   height: 60%;
@@ -80,17 +110,20 @@
   border-radius: 0 4px 4px 0;
 }
 
-.dashboard-sidebar.collapsed .menu-item.active::before {
-  left: -0.25rem;
+.menu-item.active .menu-icon {
+  color: var(--primary-blue);
 }
 
-.menu-icon {
-  flex-shrink: 0;
+.dashboard-sidebar.collapsed .menu-item.active {
+  background-color: var(--primary-blue-light);
 }
 
 .menu-label {
-  margin-left: 0.75rem;
+  margin-left: 0.75rem; 
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; 
+  flex: 1; /* This takes up space, pushing chevron right! */
 }
 
 .dashboard-sidebar.collapsed .menu-item {
@@ -100,4 +133,92 @@
 
 .dashboard-sidebar.collapsed .menu-icon {
   margin: 0;
+}
+
+/* Submenu Styles */
+.menu-item.has-submenu {
+  cursor: pointer;
+  user-select: none;
+}
+
+.menu-chevron {
+  flex-shrink: 0; 
+  margin-left: auto; /* CRITICAL: Pushes the chevron to the far right edge! */
+  display: flex;
+  align-items: center;
+  color: var(--gray-400);
+  transition: transform 0.25s ease-in-out;
+}
+
+.menu-item.has-submenu:hover .menu-chevron {
+  color: var(--gray-600);
+}
+
+.menu-chevron.expanded {
+  transform: rotate(90deg);
+  color: var(--primary-blue);
+}
+
+.submenu-wrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.submenu-wrapper.expanded {
+  grid-template-rows: 1fr;
+}
+
+.submenu-list {
+  min-height: 0;
+  overflow: hidden;
+  list-style: none;
+}
+
+.submenu-item {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-md);
+  color: var(--gray-500);
+  font-weight: 500;
+  font-size: 0.8125rem;
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+  margin-top: 0.125rem;
+}
+
+.submenu-item:hover {
+  color: var(--primary-blue);
+  background-color: rgba(37, 99, 235, 0.04);
+}
+
+.submenu-item.active {
+  color: var(--primary-blue);
+  font-weight: 600;
+  background-color: var(--primary-blue-light);
+}
+
+/* Decorative dot for submenu */
+.submenu-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: var(--gray-300);
+  /* REmoved margin-right so it doesn't double-gap with menu-label */
+  margin-right: 0;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  opacity: 0.7;
+}
+
+.submenu-item.active .submenu-dot {
+  background-color: var(--primary-blue);
+  opacity: 1;
+}
+
+.submenu-item:hover .submenu-dot {
+  background-color: var(--primary-blue);
+  transform: scale(1.5);
+  opacity: 1;
 }

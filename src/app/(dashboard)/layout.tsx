@@ -1,12 +1,9 @@
 import React from 'react';
-import { Sidebar } from './Sidebar';
-import { Header } from './Header';
+import { Outlet } from 'react-router-dom';
+import { Sidebar } from '@/components/layout/Sidebar';
+import { Header } from '@/components/layout/Header';
 
-interface DashboardLayoutProps {
-  children: React.ReactNode;
-}
-
-export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
+export default function DashboardLayout() {
   const [collapsed, setCollapsed] = React.useState(false);
 
   const toggleSidebar = () => {
@@ -19,7 +16,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
       <div className="dashboard-main">
         <Header toggleSidebar={toggleSidebar} />
         <main className="dashboard-content">
-          {children}
+          <Outlet />
         </main>
       </div>
     </div>
