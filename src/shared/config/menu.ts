@@ -4,14 +4,17 @@ import {
   FileText, Clock, Banknote, Database
 } from 'lucide-react';
 
+import type { LucideIcon } from 'lucide-react';
+
+// 🔥 TYPE FINAL (NO any, NO active)
 export type MenuItem = {
   label: string;
-  icon?: any;
+  icon?: LucideIcon;
   path?: string;
-  active?: boolean;
   subItems?: MenuItem[];
 };
 
+// 🔥 MENU FINAL (rapi + scalable)
 export const menuItems: MenuItem[] = [
   {
     label: 'Dashboard',
@@ -59,7 +62,7 @@ export const menuItems: MenuItem[] = [
     label: 'Attendance & Time Tracking',
     icon: Clock,
     subItems: [
-      { label: 'Dashboard', path: '/attendance' },
+      { label: 'Overview', path: '/attendance' },
       { label: 'Daily Attendance', path: '/attendance/daily' },
       { label: 'Timesheet', path: '/attendance/timesheet' },
       { label: 'Shift Management', path: '/attendance/shifts' },
@@ -84,7 +87,7 @@ export const menuItems: MenuItem[] = [
     label: 'Payroll & Payslip',
     icon: Banknote,
     subItems: [
-      { label: 'Dashboard', path: '/payroll' },
+      { label: 'Overview', path: '/payroll' },
       { label: 'Run Payroll', path: '/payroll/run' },
       { label: 'Payslip', path: '/payroll/payslip' },
       {
@@ -114,7 +117,7 @@ export const menuItems: MenuItem[] = [
     label: 'KPI & Performance',
     icon: Target,
     subItems: [
-      { label: 'Dashboard', path: '/performance' },
+      { label: 'Overview', path: '/performance' },
       { label: 'Goals / Target', path: '/performance/goals' },
       { label: 'Performance Review', path: '/performance/review' },
       { label: 'Appraisal', path: '/performance/appraisal' },
