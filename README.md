@@ -1,73 +1,68 @@
-# React + TypeScript + Vite
+﻿# HRIS Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend HRIS berbasis React + TypeScript + Vite dengan struktur folder clean agar lebih mudah dikembangkan dan di-maintain.
 
-Currently, two official plugins are available:
+## Tech Stack
+- React 19
+- TypeScript
+- Vite
+- React Router
+- Zustand
+- Axios
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Struktur Folder
+```text
+src/
+  app/
+    layouts/            # Layout level aplikasi (contoh: dashboard shell)
+    routes/             # Konfigurasi router + guard route
+    store/              # Global app store (auth, ui, dll)
 
-## React Compiler
+  pages/                # Halaman route-level (entry point UI per route)
+    auth/
+      login/
+      register/
+    dashboard/
+      overview/
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+  features/             # Domain feature (logic + komponen per fitur)
+    auth/
+      api/
+      hooks/
+    dashboard/
+      components/
 
-## Expanding the ESLint configuration
+  widgets/              # Komponen komposit lintas page (Header, Sidebar)
+    layout/
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+  shared/               # Reusable lintas domain
+    api/                # HTTP client, base config
+    assets/             # Gambar/icon statis
+    config/             # Konstanta & konfigurasi global
+    hooks/              # Shared hooks
+    types/              # Shared types
+    ui/                 # Reusable UI components
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+  main.tsx              # Bootstrap aplikasi
+  index.css             # Global styles
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Aturan Penempatan Kode
+- Taruh **route page** di `pages/*`.
+- Taruh **logic/domain feature** di `features/*`.
+- Taruh **komponen reusable umum** di `shared/ui`.
+- Taruh **layout gabungan** (mis. Header + Sidebar) di `widgets/*`.
+- Taruh **state global app** di `app/store/*`.
+- Hindari import silang yang melompat-lompat layer tanpa alasan.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Menjalankan Project
+```bash
+npm install
+npm run dev
+```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Build Production
+```bash
+npm run build
+npm run preview
 ```

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card } from '@/components/ui/Card';
+import { Card } from '@/shared/ui/Card';
 import { Users, UserCheck, CalendarOff, Clock, CreditCard, TrendingDown } from 'lucide-react';
 import './KpiCards.css';
 
@@ -35,3 +35,4 @@ export const KpiCards: React.FC = () => {
     </div>
   );
 };
+

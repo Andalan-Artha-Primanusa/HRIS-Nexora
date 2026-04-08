@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "@/features/auth/hooks/userAuth";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
 const RegisterPage = () => {
@@ -23,11 +23,10 @@ const RegisterPage = () => {
     const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    console.log("FORM DATA:", form); // Debug log untuk melihat data form
-
     try {
         await handleRegister(form);
         alert("Register berhasil");
+        navigate("/dashboard");
     } catch (err: any) {
         alert(err.message || "Register gagal");
     }
@@ -136,3 +135,4 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: "pointer",
   },
 };
+

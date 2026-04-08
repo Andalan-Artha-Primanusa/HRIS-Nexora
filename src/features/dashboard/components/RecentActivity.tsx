@@ -1,7 +1,7 @@
 import React from 'react';
-import { Card } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
+import { Card } from '@/shared/ui/Card';
+import { Badge } from '@/shared/ui/Badge';
+import { Button } from '@/shared/ui/Button';
 import { MoreHorizontal } from 'lucide-react';
 import './RecentActivity.css';
 
@@ -54,3 +54,4 @@ export const RecentActivity: React.FC = () => {
     </Card>
   );
 };
+

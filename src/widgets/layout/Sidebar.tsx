@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import clsx from 'clsx';
 import { ChevronRight } from 'lucide-react';
 import './Sidebar.css';
-import { menuItems } from '@/config/menu';
-import type { MenuItem } from '@/config/menu';
+import { menuItems } from '@/shared/config/menu';
+import type { MenuItem } from '@/shared/config/menu';
 
 interface SidebarProps {
   collapsed: boolean;
@@ -93,3 +93,4 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
     </aside>
   );
 };
+

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { Sidebar } from '@/components/layout/Sidebar';
-import { Header } from '@/components/layout/Header';
+import { Sidebar } from '@/widgets/layout/Sidebar';
+import { Header } from '@/widgets/layout/Header';
 
 export default function DashboardLayout() {
   const [collapsed, setCollapsed] = React.useState(false);
@@ -22,3 +22,4 @@ export default function DashboardLayout() {
     </div>
   );
 };
+

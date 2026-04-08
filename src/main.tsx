@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
-import { router } from "@/lib/routes";
+import { router } from "@/app/routes";
 import "./index.css";
 
 class ErrorBoundary extends React.Component<{children: any}, {hasError: boolean, error: any}> {

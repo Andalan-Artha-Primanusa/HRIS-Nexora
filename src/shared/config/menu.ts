@@ -17,7 +17,7 @@ export const menuItems: MenuItem[] = [
     label: 'Dashboard',
     icon: LayoutDashboard,
     subItems: [
-      { label: 'Overview', path: '/' },
+      { label: 'Overview', path: '/dashboard' },
       { label: 'HR Summary', path: '/hr-summary' },
       { label: 'Analytics', path: '/analytics' },
     ]

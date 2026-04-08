@@ -1,6 +1,6 @@
-import { login } from "../services/auth.service";
-import { useAuthStore } from "@/store/auth.store";
-import { register } from "../services/auth.service";
+import { login } from "../api/auth.service";
+import { useAuthStore } from "@/app/store/auth.store";
+import { register } from "../api/auth.service";
 
 export const useAuth = () => {
   const setAuth = useAuthStore((state) => state.setAuth);

@@ -2,7 +2,7 @@ import React from 'react';
 import { KpiCards } from '@/features/dashboard/components/KpiCards';
 import { ChartsSection } from '@/features/dashboard/components/ChartsSection';
 import { RecentActivity } from '@/features/dashboard/components/RecentActivity';
-import './page.css';
+import "./OverviewPage.css";
 
 const OverviewPage: React.FC = () => {
   return (

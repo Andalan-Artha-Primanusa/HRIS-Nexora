@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "@/features/auth/hooks/userAuth";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
@@ -15,6 +15,7 @@ const LoginPage = () => {
     try {
       await handleLogin({ email, password });
       alert("Login berhasil");
+      navigate("/dashboard");
     } catch (err: any) {
       alert(err.message || "Login gagal");
     }
@@ -107,3 +108,4 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: "pointer",
     },
 };
+

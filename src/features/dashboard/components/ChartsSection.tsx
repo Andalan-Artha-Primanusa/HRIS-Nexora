@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card } from '@/components/ui/Card';
+import { Card } from '@/shared/ui/Card';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend
@@ -85,3 +85,4 @@ export const ChartsSection: React.FC = () => {
     </div>
   );
 };
+
