@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
-import { Clock, CheckCircle2 } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import './AttendancePages.css';
 
 const AttendanceCheckOutPage = () => {

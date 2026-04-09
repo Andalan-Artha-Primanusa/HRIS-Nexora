@@ -8,6 +8,8 @@ import AttendanceCheckInPage from "../../pages/attendance/AttendanceCheckInPage"
 import AttendanceCheckOutPage from "../../pages/attendance/AttendanceCheckOutPage";
 import AttendanceHistoryPage from "../../pages/attendance/AttendanceHistoryPage";
 import AttendanceTodayPage from "../../pages/attendance/AttendanceTodayPage";
+import PayrollPage from "../../pages/dashboard/payroll/PayrollPage";
+import KpiPage from "../../pages/dashboard/kpi/KpiPage";
 import SectionPage from "../../pages/dashboard/SectionPage";
 import PlaceholderPage from "../../pages/dashboard/PlaceholderPage";
 
@@ -28,6 +30,14 @@ const sectionRoutes = [
   { path: "/documents/ktp" },
   { path: "/documents/contract" },
   { path: "/documents/others" },
+  { path: "/profiles" },
+  { path: "/reimbursements" },
+  { path: "/locations" },
+  { path: "/admin/users" },
+  { path: "/admin/roles" },
+  { path: "/admin/permissions" },
+  { path: "/my/reimbursements" },
+  { path: "/my/payroll" },
   { path: "/attendance/daily" },
   { path: "/attendance/timesheet" },
   { path: "/attendance/shifts" },
@@ -40,7 +50,6 @@ const sectionRoutes = [
   { path: "/leave/balance" },
   { path: "/leave/type" },
   { path: "/leave/policy" },
-  { path: "/payroll" },
   { path: "/payroll/run" },
   { path: "/payroll/payslip" },
   { path: "/payroll/component/allowance" },
@@ -172,6 +181,36 @@ export const router = createBrowserRouter([
           {
             index: true,
             element: <AttendanceTodayPage />,
+          },
+        ],
+      },
+      {
+        path: "/kpis",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <KpiPage />,
+          },
+        ],
+      },
+      {
+        path: "/my/kpi",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <KpiPage />,
+          },
+        ],
+      },
+      {
+        path: "/payroll",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <PayrollPage />,
           },
         ],
       },

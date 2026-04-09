@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
-import { CalendarDays, Clock } from 'lucide-react';
+import { CalendarDays } from 'lucide-react';
 import './AttendancePages.css';
 
 const AttendanceHistoryPage = () => {
