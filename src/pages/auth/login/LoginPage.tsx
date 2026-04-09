@@ -1,6 +1,14 @@
 import { useState } from "react";
+import { AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import AuthLayout from "../AuthLayout";
+import GoogleIcon from "../GoogleIcon";
+
+interface LoginFieldErrors {
+  email?: string;
+  password?: string;
+}
 
 const LoginPage = () => {
   const { handleLogin } = useAuth();
@@ -8,119 +16,154 @@ const LoginPage = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<LoginFieldErrors>({});
+  const [formError, setFormError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const validate = () => {
+    const nextErrors: LoginFieldErrors = {};
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail) {
+      nextErrors.email = "Email address is required.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      nextErrors.email = "Invalid email is and now invalid";
+    }
+
+    if (!password) {
+      nextErrors.password = "Password is required.";
+    }
+
+    setFieldErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMessage(null);
+    setFormError(null);
 
-    if (!email || !password) {
-      setErrorMessage("Email dan password wajib diisi.");
+    if (!validate()) {
       return;
     }
 
+    setIsSubmitting(true);
+
     try {
-      await handleLogin({ email, password });
+      await handleLogin({ email: email.trim(), password });
       navigate("/dashboard");
-    } catch (err: any) {
-      setErrorMessage(err || "Login gagal");
+    } catch (err: unknown) {
+      setFormError(typeof err === "string" ? err : "Login gagal.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h2 style={styles.title}>HRIS Login</h2>
-
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={styles.input}
-          />
-
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={styles.input}
-          />
-
-          <button type="submit" style={styles.button}>
-            Login
+    <AuthLayout
+      title="Welcome back!"
+      subtitle="Secure Login"
+      footer={
+        <p className="auth-footer">
+          Don't have an account?{" "}
+          <button
+            type="button"
+            className="auth-footer-link"
+            onClick={() => navigate("/register")}
+          >
+            Register
           </button>
-        </form>
+        </p>
+      }
+    >
+      <form className="auth-form" onSubmit={handleSubmit} noValidate>
+        <div className="auth-field">
+          <label className="auth-label" htmlFor="email">
+            Email Address
+          </label>
+          <input
+            id="email"
+            type="email"
+            autoComplete="email"
+            placeholder="Email email@gmail.com"
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setFieldErrors((prev) => ({ ...prev, email: undefined }));
+              setFormError(null);
+            }}
+            className={`auth-input ${fieldErrors.email ? "auth-input-error" : ""}`}
+          />
+          {fieldErrors.email && (
+            <p className="auth-field-error">
+              <AlertCircle size={16} />
+              {fieldErrors.email}
+            </p>
+          )}
+        </div>
 
-        {errorMessage && <div style={styles.error}>{errorMessage}</div>}
+        <div className="auth-field">
+          <label className="auth-label" htmlFor="password">
+            Password
+          </label>
+          <div className="auth-password-wrap">
+            <input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              autoComplete="current-password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setFieldErrors((prev) => ({ ...prev, password: undefined }));
+                setFormError(null);
+              }}
+              className={`auth-input ${fieldErrors.password ? "auth-input-error" : ""}`}
+            />
+            <button
+              type="button"
+              className="auth-password-toggle"
+              onClick={() => setShowPassword((prev) => !prev)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
+          {fieldErrors.password && (
+            <p className="auth-field-error">
+              <AlertCircle size={16} />
+              {fieldErrors.password}
+            </p>
+          )}
+        </div>
 
         <button
           type="button"
-          style={styles.registerButton}
-          onClick={() => navigate("/register")}
+          className="auth-link-button"
+          onClick={() => setFormError("Fitur Forgot Password belum tersedia.")}
         >
-          Create Account
+          Forgot Password?
         </button>
-      </div>
-    </div>
+
+        {formError && <p className="auth-form-error">{formError}</p>}
+
+        <button type="submit" className="auth-primary-button" disabled={isSubmitting}>
+          {isSubmitting ? <Loader2 size={18} className="auth-button-spinner" /> : null}
+          Login
+        </button>
+
+        <button
+          type="button"
+          className="auth-social-button"
+          onClick={() => setFormError("Fitur Login with Google (SSO) belum tersedia.")}
+        >
+          <GoogleIcon />
+          Login with Google (SSO)
+        </button>
+      </form>
+    </AuthLayout>
   );
 };
 
 export default LoginPage;
-
-const styles: Record<string, React.CSSProperties> = {
-  container: {
-    height: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f5f7fb",
-  },
-  card: {
-    padding: "30px",
-    borderRadius: "10px",
-    backgroundColor: "#fff",
-    boxShadow: "0 5px 20px rgba(0,0,0,0.1)",
-    width: "300px",
-  },
-  title: {
-    marginBottom: "20px",
-    textAlign: "center",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "10px",
-  },
-  input: {
-    padding: "10px",
-    borderRadius: "6px",
-    border: "1px solid #ccc",
-  },
-  error: {
-    marginTop: "16px",
-    color: "#dc2626",
-    fontSize: "0.9rem",
-    textAlign: "center",
-  },
-  button: {
-    padding: "10px",
-    borderRadius: "6px",
-    border: "none",
-    backgroundColor: "#4f46e5",
-    color: "#fff",
-    cursor: "pointer",
-  },
-    registerButton: {
-    marginTop: "10px",
-    padding: "10px",
-    borderRadius: "6px",
-    border: "1px solid #4f46e5",
-    backgroundColor: "transparent",
-    color: "#4f46e5",
-    cursor: "pointer",
-    },
-};
 

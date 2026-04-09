@@ -1,6 +1,16 @@
 import { useState } from "react";
+import { AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import AuthLayout from "../AuthLayout";
+import GoogleIcon from "../GoogleIcon";
+
+interface RegisterFieldErrors {
+  name?: string;
+  email?: string;
+  password?: string;
+  password_confirmation?: string;
+}
 
 const RegisterPage = () => {
   const { handleRegister } = useAuth();
@@ -12,147 +22,216 @@ const RegisterPage = () => {
     password: "",
     password_confirmation: "",
   });
+  const [fieldErrors, setFieldErrors] = useState<RegisterFieldErrors>({});
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({
       ...form,
       [e.target.name]: e.target.value,
     });
+    setFieldErrors((prev) => ({ ...prev, [e.target.name]: undefined }));
+    setErrorMessage(null);
   };
 
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const validate = () => {
+    const nextErrors: RegisterFieldErrors = {};
+
+    if (!form.name.trim()) {
+      nextErrors.name = "Full name is required.";
+    }
+
+    if (!form.email.trim()) {
+      nextErrors.email = "Email address is required.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      nextErrors.email = "Invalid email is and now invalid";
+    }
+
+    if (!form.password) {
+      nextErrors.password = "Password is required.";
+    }
+
+    if (!form.password_confirmation) {
+      nextErrors.password_confirmation = "Confirm password is required.";
+    } else if (form.password !== form.password_confirmation) {
+      nextErrors.password_confirmation = "Password and confirmation must match.";
+    }
+
+    setFieldErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
 
-    if (!form.name || !form.email || !form.password || !form.password_confirmation) {
-      setErrorMessage("Semua kolom wajib diisi.");
+    if (!validate()) {
       return;
     }
 
-    if (form.password !== form.password_confirmation) {
-      setErrorMessage("Password dan konfirmasi password tidak cocok.");
-      return;
-    }
+    setIsSubmitting(true);
 
     try {
-      await handleRegister(form);
+      await handleRegister({
+        ...form,
+        name: form.name.trim(),
+        email: form.email.trim(),
+      });
       navigate("/dashboard");
-    } catch (err: any) {
-      setErrorMessage(err || "Register gagal");
+    } catch (err: unknown) {
+      setErrorMessage(typeof err === "string" ? err : "Register gagal.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h2 style={styles.title}>Register HRIS</h2>
-
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <input
-            name="name"
-            placeholder="Full Name"
-            onChange={handleChange}
-            style={styles.input}
-          />
-
-          <input
-            name="email"
-            type="email"
-            placeholder="Email"
-            onChange={handleChange}
-            style={styles.input}
-          />
-
-          <input
-            name="password"
-            type="password"
-            placeholder="Password"
-            onChange={handleChange}
-            style={styles.input}
-          />
-
-          <input
-            name="password_confirmation"
-            type="password"
-            placeholder="Confirm Password"
-            onChange={handleChange}
-            style={styles.input}
-          />
-
-          <button type="submit" style={styles.button}>
-            Register
-          </button>
-
-          {errorMessage && <div style={styles.error}>{errorMessage}</div>}
-
+    <AuthLayout
+      title="Create account!"
+      subtitle="Secure Register"
+      footer={
+        <p className="auth-footer">
+          Already have an account?{" "}
           <button
             type="button"
-            style={styles.loginButton}
+            className="auth-footer-link"
             onClick={() => navigate("/login")}
           >
-            Back to Login
+            Login
           </button>
-        </form>
-      </div>
-    </div>
+        </p>
+      }
+    >
+      <form className="auth-form" onSubmit={handleSubmit} noValidate>
+        <div className="auth-field">
+          <label className="auth-label" htmlFor="name">
+            Full Name
+          </label>
+          <input
+            id="name"
+            name="name"
+            value={form.name}
+            autoComplete="name"
+            placeholder="John Doe"
+            onChange={handleChange}
+            className={`auth-input ${fieldErrors.name ? "auth-input-error" : ""}`}
+          />
+          {fieldErrors.name && (
+            <p className="auth-field-error">
+              <AlertCircle size={16} />
+              {fieldErrors.name}
+            </p>
+          )}
+        </div>
+
+        <div className="auth-field">
+          <label className="auth-label" htmlFor="email">
+            Email Address
+          </label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            value={form.email}
+            autoComplete="email"
+            placeholder="Email email@gmail.com"
+            onChange={handleChange}
+            className={`auth-input ${fieldErrors.email ? "auth-input-error" : ""}`}
+          />
+          {fieldErrors.email && (
+            <p className="auth-field-error">
+              <AlertCircle size={16} />
+              {fieldErrors.email}
+            </p>
+          )}
+        </div>
+
+        <div className="auth-field">
+          <label className="auth-label" htmlFor="password">
+            Password
+          </label>
+          <div className="auth-password-wrap">
+            <input
+              id="password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              value={form.password}
+              autoComplete="new-password"
+              placeholder="Password"
+              onChange={handleChange}
+              className={`auth-input ${fieldErrors.password ? "auth-input-error" : ""}`}
+            />
+            <button
+              type="button"
+              className="auth-password-toggle"
+              onClick={() => setShowPassword((prev) => !prev)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
+          {fieldErrors.password && (
+            <p className="auth-field-error">
+              <AlertCircle size={16} />
+              {fieldErrors.password}
+            </p>
+          )}
+        </div>
+
+        <div className="auth-field">
+          <label className="auth-label" htmlFor="password_confirmation">
+            Confirm Password
+          </label>
+          <div className="auth-password-wrap">
+            <input
+              id="password_confirmation"
+              name="password_confirmation"
+              type={showConfirmPassword ? "text" : "password"}
+              value={form.password_confirmation}
+              autoComplete="new-password"
+              placeholder="Confirm Password"
+              onChange={handleChange}
+              className={`auth-input ${fieldErrors.password_confirmation ? "auth-input-error" : ""}`}
+            />
+            <button
+              type="button"
+              className="auth-password-toggle"
+              onClick={() => setShowConfirmPassword((prev) => !prev)}
+              aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+            >
+              {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
+          {fieldErrors.password_confirmation && (
+            <p className="auth-field-error">
+              <AlertCircle size={16} />
+              {fieldErrors.password_confirmation}
+            </p>
+          )}
+        </div>
+
+        {errorMessage && <p className="auth-form-error">{errorMessage}</p>}
+
+        <button type="submit" className="auth-primary-button" disabled={isSubmitting}>
+          {isSubmitting ? <Loader2 size={18} className="auth-button-spinner" /> : null}
+          Register
+        </button>
+
+        <button
+          type="button"
+          className="auth-social-button"
+          onClick={() => setErrorMessage("Fitur Register with Google (SSO) belum tersedia.")}
+        >
+          <GoogleIcon />
+          Register with Google (SSO)
+        </button>
+      </form>
+    </AuthLayout>
   );
 };
 
 export default RegisterPage;
-
-const styles: Record<string, React.CSSProperties> = {
-  container: {
-    height: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f5f7fb",
-  },
-  card: {
-    padding: "30px",
-    borderRadius: "10px",
-    backgroundColor: "#fff",
-    boxShadow: "0 5px 20px rgba(0,0,0,0.1)",
-    width: "320px",
-  },
-  title: {
-    marginBottom: "20px",
-    textAlign: "center",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "10px",
-  },
-  input: {
-    padding: "10px",
-    borderRadius: "6px",
-    border: "1px solid #ccc",
-  },
-  button: {
-    padding: "10px",
-    borderRadius: "6px",
-    border: "none",
-    backgroundColor: "#16a34a",
-    color: "#fff",
-    cursor: "pointer",
-  },
-  loginButton: {
-    marginTop: "10px",
-    padding: "10px",
-    borderRadius: "6px",
-    border: "1px solid #4f46e5",
-    backgroundColor: "transparent",
-    color: "#4f46e5",
-    cursor: "pointer",
-  },
-  error: {
-    marginTop: "10px",
-    color: "#dc2626",
-    fontSize: "0.9rem",
-    textAlign: "center",
-  },
-};
 
