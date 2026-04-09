@@ -66,45 +66,34 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
           />
         </div>
       </div>
+      
+      <div className="header-right">
+        <button className="icon-button" aria-label="Toggle Dark Mode">
+          <Sun size={20} />
+        </button>
+        
+        <div className="notification-wrapper">
+          <button className="icon-button" aria-label="Notifications">
+            <Bell size={20} />
+            <span className="notification-badge"></span>
           </button>
         </div>
-<<<<<<< HEAD
-
-=======
         
         <div className="user-profile">
           <div className="avatar">
             <span>{initials}</span>
           </div>
-<<<<<<< HEAD
-
-=======
->>>>>>> d84f09b4f2b4699527dca4e8cb163465cbb4a5c3
           <div className="user-info">
             <span className="user-name">{displayName}</span>
             <span className="user-role">{displayRole}</span>
           </div>
-<<<<<<< HEAD
-
-          {/* LOGOUT */}
-          <button className="user-dropdown" onClick={handleLogout}>
-            <LogOut size={16} className="text-gray" />
-            <span>Logout</span>
-          </button>
-=======
           
           <div className="user-dropdown">
             <LogOut size={16} className="text-gray" />
             <span>Logout</span>
           </div>
->>>>>>> d84f09b4f2b4699527dca4e8cb163465cbb4a5c3
         </div>
       </div>
     </header>
   );
-<<<<<<< HEAD
 };
-=======
-};
-
->>>>>>> d84f09b4f2b4699527dca4e8cb163465cbb4a5c3
