@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import { ChevronRight } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import './Sidebar.css';
 
 import { menuItems } from '@/shared/config/menu';
@@ -103,31 +103,26 @@ const MenuItemComponent: React.FC<{
 
   return (
     <li className="menu-item-wrapper">
-      <a
-        href={item.path}
-        className={clsx(
-          level > 0 ? 'submenu-item' : 'menu-item',
-          isActive && 'active',
-          collapsed && 'collapsed'
-        )}
+      <NavLink
+        to={item.path ?? '#'}
+        className={({ isActive: isLinkActive }) =>
+          clsx(
+            level > 0 ? 'submenu-item' : 'menu-item',
+            (isActive || isLinkActive) && 'active',
+            collapsed && 'collapsed'
+          )
+        }
         title={collapsed ? item.label : undefined}
         style={{ paddingLeft }}
-        onClick={(e) => {
-          e.preventDefault();
-          if (item.path) window.location.href = item.path;
-        }}
       >
         {Icon ? (
           <Icon size={20} className="menu-icon" />
         ) : (
-          !collapsed &&
-          level > 0 && <span className="submenu-dot" />
+          !collapsed && level > 0 && <span className="submenu-dot" />
         )}
 
-        {!collapsed && (
-          <span className="menu-label">{item.label}</span>
-        )}
-      </a>
+        {!collapsed && <span className="menu-label">{item.label}</span>}
+      </NavLink>
     </li>
   );
 };

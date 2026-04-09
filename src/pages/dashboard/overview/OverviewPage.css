@@ -30,10 +30,44 @@
   gap: 1.5rem;
 }
 
+.placeholder-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.placeholder-card {
+  min-height: 180px;
+  padding: 1.5rem;
+}
+
+.placeholder-card-header {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.placeholder-card-header h3 {
+  margin-bottom: 0.25rem;
+  font-size: 1rem;
+}
+
+.placeholder-card-header p {
+  margin: 0;
+  color: var(--gray-500);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
 @media (max-width: 768px) {
   .page-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
+  }
+
+  .placeholder-grid {
+    grid-template-columns: 1fr;
   }
 }

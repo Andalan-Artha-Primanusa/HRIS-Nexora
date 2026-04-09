@@ -1,7 +1,7 @@
 import { 
   Users, CalendarDays, CreditCard, Receipt, Target, UserCircle, 
   FileBarChart, Settings, LayoutDashboard, Network, Briefcase, 
-  FileText, Clock, Banknote, Database
+  FileText, Clock, Banknote, Database, ShieldCheck
 } from 'lucide-react';
 
 import type { LucideIcon } from 'lucide-react';
@@ -29,6 +29,7 @@ export const menuItems: MenuItem[] = [
     label: 'Employee Management',
     icon: Users,
     subItems: [
+      { label: 'Profiles', path: '/profiles' },
       { label: 'Employee List', path: '/employees' },
       { label: 'Add Employee', path: '/employees/add' },
       { 
@@ -63,6 +64,10 @@ export const menuItems: MenuItem[] = [
     icon: Clock,
     subItems: [
       { label: 'Overview', path: '/attendance' },
+      { label: 'Check In', path: '/attendance/check-in' },
+      { label: 'Check Out', path: '/attendance/check-out' },
+      { label: 'Today', path: '/attendance/today' },
+      { label: 'History', path: '/attendance/history' },
       { label: 'Daily Attendance', path: '/attendance/daily' },
       { label: 'Timesheet', path: '/attendance/timesheet' },
       { label: 'Shift Management', path: '/attendance/shifts' },
@@ -133,6 +138,9 @@ export const menuItems: MenuItem[] = [
       { label: 'My Leave', path: '/ess/leave' },
       { label: 'My Payslip', path: '/ess/payslip' },
       { label: 'My Requests', path: '/ess/requests' },
+      { label: 'My KPI', path: '/my/kpi' },
+      { label: 'My Reimbursements', path: '/my/reimbursements' },
+      { label: 'My Payroll', path: '/my/payroll' },
     ]
   },
   {
@@ -144,6 +152,15 @@ export const menuItems: MenuItem[] = [
       { label: 'Leave Report', path: '/reports/leave' },
       { label: 'Payroll Report', path: '/reports/payroll' },
       { label: 'Custom Report', path: '/reports/custom' },
+    ]
+  },
+  {
+    label: 'Admin Tools',
+    icon: ShieldCheck,
+    subItems: [
+      { label: 'Users', path: '/admin/users' },
+      { label: 'Roles', path: '/admin/roles' },
+      { label: 'Permissions', path: '/admin/permissions' },
     ]
   },
   {

@@ -1,0 +1,142 @@
+.kpi-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.kpi-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.kpi-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--blue-700);
+  margin-bottom: 0.5rem;
+}
+
+.kpi-header h1 {
+  margin: 0;
+}
+
+.kpi-header p {
+  margin: 0.5rem 0 0;
+  color: var(--gray-600);
+}
+
+.kpi-header-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.kpi-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+.kpi-card {
+  padding: 1.5rem;
+}
+
+.kpi-card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.kpi-form-row,
+.kpi-action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.kpi-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.kpi-form-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.kpi-form-grid input,
+.kpi-form-row input {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--gray-200);
+  background: var(--white);
+  color: var(--gray-900);
+}
+
+.kpi-full-width {
+  grid-column: span 2;
+}
+
+.kpi-table-card,
+.kpi-response-card {
+  padding: 1.5rem;
+}
+
+.kpi-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.kpi-response-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.kpi-response {
+  background: var(--gray-100);
+  border-radius: 1rem;
+  padding: 1rem;
+  min-height: 160px;
+  overflow-x: auto;
+}
+
+.kpi-response-status {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+  color: var(--gray-600);
+}
+
+.kpi-loading {
+  color: var(--blue-700);
+}
+
+@media (max-width: 900px) {
+  .kpi-actions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kpi-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kpi-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

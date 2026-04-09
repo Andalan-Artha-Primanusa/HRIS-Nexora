@@ -1,0 +1,214 @@
+.attendance-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.attendance-hero-card,
+.attendance-page-header,
+.attendance-form-card,
+.attendance-history-card,
+.attendance-today-card {
+  padding: 1.75rem;
+  border-radius: var(--radius-xl);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-soft);
+}
+
+.attendance-hero-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.attendance-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--primary-blue);
+  margin-bottom: 0.75rem;
+}
+
+.attendance-hero-copy,
+.attendance-page-header p {
+  color: var(--gray-600);
+  max-width: 58rem;
+}
+
+.attendance-hero-actions,
+.attendance-action-row {
+  display: flex;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.attendance-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.attendance-summary-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 200px;
+}
+
+.summary-card-head {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.summary-label {
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.summary-subtitle {
+  color: var(--gray-600);
+  font-size: 0.95rem;
+}
+
+.attendance-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+}
+
+.attendance-status-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  border: 1px solid var(--border-light);
+}
+
+.attendance-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.attendance-form-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--gray-700);
+}
+
+.attendance-form-grid input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.95rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--gray-200);
+  background: var(--white);
+  color: var(--gray-900);
+}
+
+.attendance-action-row {
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.attendance-response-panel {
+  background: var(--gray-50);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+}
+
+.attendance-response-panel h2 {
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+}
+
+.attendance-response-panel pre {
+  margin: 0;
+  min-height: 160px;
+  overflow-x: auto;
+  padding: 1rem;
+  background: var(--white);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--gray-200);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.attendance-table-wrapper {
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+
+.attendance-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.attendance-table th,
+.attendance-table td {
+  padding: 0.95rem 1rem;
+  border-bottom: 1px solid var(--border-light);
+  text-align: left;
+}
+
+.attendance-table th {
+  font-weight: 700;
+  color: var(--gray-700);
+}
+
+.attendance-empty {
+  color: var(--gray-500);
+}
+
+.attendance-today-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.attendance-today-item {
+  padding: 1rem;
+  background: var(--white);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+}
+
+.attendance-key {
+  display: block;
+  color: var(--gray-500);
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 900px) {
+  .attendance-grid,
+  .attendance-form-grid,
+  .attendance-today-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .attendance-page-header,
+  .attendance-hero-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

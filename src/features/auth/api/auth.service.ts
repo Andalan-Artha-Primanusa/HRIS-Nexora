@@ -20,10 +20,10 @@ export interface RegisterPayload {
 ========================= */
 export const login = async (payload: LoginPayload) => {
   const response = await api.post("/login", payload);
-  return response.data;
+  return response;
 };
 
 export const register = async (payload: RegisterPayload) => {
   const response = await api.post("/register", payload);
-  return response.data;
+  return response;
 };
