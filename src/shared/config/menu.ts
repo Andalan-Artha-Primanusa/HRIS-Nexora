@@ -63,6 +63,10 @@ export const menuItems: MenuItem[] = [
     icon: Clock,
     subItems: [
       { label: 'Overview', path: '/attendance' },
+      { label: 'Check In', path: '/attendance/check-in' },
+      { label: 'Check Out', path: '/attendance/check-out' },
+      { label: 'Today', path: '/attendance/today' },
+      { label: 'History', path: '/attendance/history' },
       { label: 'Daily Attendance', path: '/attendance/daily' },
       { label: 'Timesheet', path: '/attendance/timesheet' },
       { label: 'Shift Management', path: '/attendance/shifts' },

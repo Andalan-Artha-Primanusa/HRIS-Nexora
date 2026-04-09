@@ -20,17 +20,29 @@ const RegisterPage = () => {
     });
   };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage(null);
+
+    if (!form.name || !form.email || !form.password || !form.password_confirmation) {
+      setErrorMessage("Semua kolom wajib diisi.");
+      return;
+    }
+
+    if (form.password !== form.password_confirmation) {
+      setErrorMessage("Password dan konfirmasi password tidak cocok.");
+      return;
+    }
 
     try {
-        await handleRegister(form);
-        alert("Register berhasil");
-        navigate("/dashboard");
+      await handleRegister(form);
+      navigate("/dashboard");
     } catch (err: any) {
-        alert(err.message || "Register gagal");
+      setErrorMessage(err || "Register gagal");
     }
-    };
+  };
 
   return (
     <div style={styles.container}>
@@ -72,6 +84,8 @@ const RegisterPage = () => {
           <button type="submit" style={styles.button}>
             Register
           </button>
+
+          {errorMessage && <div style={styles.error}>{errorMessage}</div>}
 
           <button
             type="button"
@@ -133,6 +147,12 @@ const styles: Record<string, React.CSSProperties> = {
     backgroundColor: "transparent",
     color: "#4f46e5",
     cursor: "pointer",
+  },
+  error: {
+    marginTop: "10px",
+    color: "#dc2626",
+    fontSize: "0.9rem",
+    textAlign: "center",
   },
 };
 

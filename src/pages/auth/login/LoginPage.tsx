@@ -8,16 +8,22 @@ const LoginPage = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage(null);
+
+    if (!email || !password) {
+      setErrorMessage("Email dan password wajib diisi.");
+      return;
+    }
 
     try {
       await handleLogin({ email, password });
-      alert("Login berhasil");
       navigate("/dashboard");
     } catch (err: any) {
-      alert(err.message || "Login gagal");
+      setErrorMessage(err || "Login gagal");
     }
   };
 
@@ -47,13 +53,16 @@ const LoginPage = () => {
             Login
           </button>
         </form>
+
+        {errorMessage && <div style={styles.error}>{errorMessage}</div>}
+
         <button
-            type="button"
-            style={styles.registerButton}
-            onClick={() => navigate("/register")}
-            >
-            Create Account
-            </button>
+          type="button"
+          style={styles.registerButton}
+          onClick={() => navigate("/register")}
+        >
+          Create Account
+        </button>
       </div>
     </div>
   );
@@ -89,6 +98,12 @@ const styles: Record<string, React.CSSProperties> = {
     padding: "10px",
     borderRadius: "6px",
     border: "1px solid #ccc",
+  },
+  error: {
+    marginTop: "16px",
+    color: "#dc2626",
+    fontSize: "0.9rem",
+    textAlign: "center",
   },
   button: {
     padding: "10px",
