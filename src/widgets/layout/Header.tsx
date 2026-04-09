@@ -1,19 +1,35 @@
-import React from "react";
-import { Menu, Search, Bell, Sun, LogOut } from "lucide-react";
-import { useNavigate } from "react-router-dom"; // ✅ [NEW]
-import { useAuthStore } from "@/app/store/auth.store";
-import type { User } from "@/features/auth/types/auth.types";
-import "./Header.css";
+import React from 'react';
+import { Menu, Search, Bell, Sun, LogOut } from 'lucide-react';
+import { useAuthStore } from '@/app/store/auth.store';
+import './Header.css';
 
 interface HeaderProps {
   toggleSidebar: () => void;
 }
 
-/* =========================
-   HELPERS
-========================= */
+const getDisplayName = (user: any) => {
+  return (
+    user?.name ||
+    user?.full_name ||
+    user?.fullname ||
+    user?.username ||
+    user?.email ||
+    "User"
+  );
+};
 
-const getInitials = (name: string): string => {
+const getDisplayRole = (user: any) => {
+  const role =
+    user?.role?.name ||
+    user?.role_name ||
+    user?.role ||
+    user?.position?.name ||
+    user?.position;
+
+  return typeof role === "string" && role.trim().length > 0 ? role : "Employee";
+};
+
+const getInitials = (name: string) => {
   const words = name.trim().split(/\s+/).filter(Boolean);
 
   if (words.length === 0) return "U";
@@ -24,93 +40,71 @@ const getInitials = (name: string): string => {
     .join("");
 };
 
-const getDisplayName = (user: User | null): string => {
-  return user?.name || user?.email || "User";
-};
-
-const getDisplayRole = (user: User | null): string => {
-  return user?.role?.name || "Employee";
-};
-
-/* =========================
-   COMPONENT
-========================= */
-
 export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
-  const { user, logout } = useAuthStore();
-
-  const navigate = useNavigate(); // ✅ [NEW]
-
+  const user = useAuthStore((state) => state.user);
   const displayName = getDisplayName(user);
   const displayRole = getDisplayRole(user);
   const initials = getInitials(displayName);
 
-  // ✅ [UPDATED]
-  const handleLogout = async () => {
-    const confirmed = window.confirm("Are you sure you want to logout?");
-    if (!confirmed) return;
-
-    await logout();
-
-    // 🔥 GANTI INI
-    window.location.href = "/login";
-  };
-
   return (
     <header className="dashboard-header">
-      {/* LEFT */}
       <div className="header-left">
-        <button
-          className="icon-button"
+        <button 
+          className="icon-button" 
           onClick={toggleSidebar}
           aria-label="Toggle Sidebar"
         >
           <Menu size={20} />
         </button>
-
+        
         <div className="search-bar">
           <Search size={18} className="search-icon text-gray" />
-          <input
-            type="text"
-            placeholder="Search employee, leave, payroll..."
+          <input 
+            type="text" 
+            placeholder="Search employee, leave, payroll..." 
             className="search-input"
           />
         </div>
       </div>
-
-      {/* RIGHT */}
-      <div className="header-right">
-        {/* DARK MODE */}
-        <button className="icon-button" aria-label="Toggle Dark Mode">
-          <Sun size={20} />
-        </button>
-
-        {/* NOTIFICATION */}
-        <div className="notification-wrapper">
-          <button className="icon-button" aria-label="Notifications">
-            <Bell size={20} />
-            <span className="notification-badge"></span>
           </button>
         </div>
+<<<<<<< HEAD
 
-        {/* USER */}
+=======
+        
         <div className="user-profile">
           <div className="avatar">
             <span>{initials}</span>
           </div>
+<<<<<<< HEAD
 
+=======
+>>>>>>> d84f09b4f2b4699527dca4e8cb163465cbb4a5c3
           <div className="user-info">
             <span className="user-name">{displayName}</span>
             <span className="user-role">{displayRole}</span>
           </div>
+<<<<<<< HEAD
 
           {/* LOGOUT */}
           <button className="user-dropdown" onClick={handleLogout}>
             <LogOut size={16} className="text-gray" />
             <span>Logout</span>
           </button>
+=======
+          
+          <div className="user-dropdown">
+            <LogOut size={16} className="text-gray" />
+            <span>Logout</span>
+          </div>
+>>>>>>> d84f09b4f2b4699527dca4e8cb163465cbb4a5c3
         </div>
       </div>
     </header>
   );
+<<<<<<< HEAD
 };
+=======
+};
+
+>>>>>>> d84f09b4f2b4699527dca4e8cb163465cbb4a5c3
