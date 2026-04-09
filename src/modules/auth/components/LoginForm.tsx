@@ -1,10 +1,10 @@
-interface Props {
+type Props = {
   email: string;
   password: string;
   loading: boolean;
   onChange: (field: string, value: string) => void;
-  onSubmit: () => void;
-}
+  onSubmit: React.FormEventHandler<HTMLFormElement>;
+};
 
 const LoginForm = ({
   email,
@@ -14,48 +14,42 @@ const LoginForm = ({
   onSubmit,
 }: Props) => {
   return (
-    <form
-      className="stitch-form"
-      onSubmit={(e) => {
-        e.preventDefault();
-        onSubmit();
-      }}
-    >
+    <form className="stitch-form" onSubmit={onSubmit}>
       {/* EMAIL */}
-        <div className="form-group">
+      <div className="form-group">
         <label>Email Address</label>
 
         <div className="input-wrapper">
-            <input
+          <input
             type="email"
             placeholder="name@company.com"
             value={email}
             onChange={(e) => onChange("email", e.target.value)}
-            />
-            <div className="input-border"></div>
+          />
+          <div className="input-border"></div>
         </div>
-        </div>
+      </div>
 
       {/* PASSWORD */}
-        <div className="form-group">
+      <div className="form-group">
         <div className="form-label-row">
-            <label>Password</label>
-            <span className="forgot">Forgot password?</span>
+          <label>Password</label>
+          <span className="forgot">Forgot password?</span>
         </div>
 
         <div className="input-wrapper">
-            <input
+          <input
             type="password"
             placeholder="••••••••"
             value={password}
             onChange={(e) => onChange("password", e.target.value)}
-            />
+          />
 
-            <span className="eye">👁</span>
+          <span className="eye">👁</span>
 
-            <div className="input-border"></div>
+          <div className="input-border"></div>
         </div>
-        </div>
+      </div>
 
       {/* REMEMBER */}
       <div className="remember">
@@ -64,7 +58,7 @@ const LoginForm = ({
       </div>
 
       {/* BUTTON */}
-      <button className="btn-stitch" disabled={loading}>
+      <button type="submit" className="btn-stitch" disabled={loading}>
         {loading ? "Loading..." : "Sign In →"}
       </button>
     </form>
