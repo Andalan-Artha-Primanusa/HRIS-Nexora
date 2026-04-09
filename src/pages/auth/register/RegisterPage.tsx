@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { getRoleBasedDashboardPath } from "@/features/auth/utils/roleRedirect";
 import { useNavigate } from "react-router-dom";
 import AuthLayout from "../AuthLayout";
 import GoogleIcon from "../GoogleIcon";
@@ -13,7 +14,7 @@ interface RegisterFieldErrors {
 }
 
 const RegisterPage = () => {
-  const { handleRegister } = useAuth();
+  const { handleRegister, handleGoogleLogin } = useAuth();
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -27,6 +28,7 @@ const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSsoSubmitting, setIsSsoSubmitting] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({
@@ -75,16 +77,29 @@ const RegisterPage = () => {
     setIsSubmitting(true);
 
     try {
-      await handleRegister({
+      const authResult = await handleRegister({
         ...form,
         name: form.name.trim(),
         email: form.email.trim(),
       });
-      navigate("/dashboard");
+      navigate(getRoleBasedDashboardPath(authResult.user));
     } catch (err: unknown) {
       setErrorMessage(typeof err === "string" ? err : "Register gagal.");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleGoogleSignUp = async () => {
+    setErrorMessage(null);
+    setIsSsoSubmitting(true);
+
+    try {
+      const redirectUrl = await handleGoogleLogin();
+      window.location.assign(redirectUrl);
+    } catch (err: unknown) {
+      setErrorMessage(typeof err === "string" ? err : "Register with Google gagal.");
+      setIsSsoSubmitting(false);
     }
   };
 
@@ -215,7 +230,11 @@ const RegisterPage = () => {
 
         {errorMessage && <p className="auth-form-error">{errorMessage}</p>}
 
-        <button type="submit" className="auth-primary-button" disabled={isSubmitting}>
+        <button
+          type="submit"
+          className="auth-primary-button"
+          disabled={isSubmitting || isSsoSubmitting}
+        >
           {isSubmitting ? <Loader2 size={18} className="auth-button-spinner" /> : null}
           Register
         </button>
@@ -223,10 +242,11 @@ const RegisterPage = () => {
         <button
           type="button"
           className="auth-social-button"
-          onClick={() => setErrorMessage("Fitur Register with Google (SSO) belum tersedia.")}
+          onClick={handleGoogleSignUp}
+          disabled={isSubmitting || isSsoSubmitting}
         >
-          <GoogleIcon />
-          Register with Google (SSO)
+          {isSsoSubmitting ? <Loader2 size={18} className="auth-button-spinner" /> : <GoogleIcon />}
+          {isSsoSubmitting ? "Redirecting to Google..." : "Register with Google (SSO)"}
         </button>
       </form>
     </AuthLayout>

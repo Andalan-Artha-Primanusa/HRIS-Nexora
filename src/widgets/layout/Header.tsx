@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Menu, Search, Bell, Sun, LogOut, Settings, UserCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/app/store/auth.store';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 import './Header.css';
 
 interface HeaderProps {
@@ -44,15 +45,15 @@ const getInitials = (name: string) => {
 export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
   const [openDropdown, setOpenDropdown] = useState(false);
   const user = useAuthStore((state) => state.user);
-  const logout = useAuthStore((state) => state.logout);
+  const { handleLogout } = useAuth();
   const navigate = useNavigate();
   const displayName = getDisplayName(user);
   const displayRole = getDisplayRole(user);
   const initials = getInitials(displayName);
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
+  const onLogout = async () => {
+    await handleLogout();
+    navigate("/login", { replace: true });
   };
 
   return (
@@ -116,7 +117,7 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
               <Settings size={16} />
               <span>Settings</span>
             </button>
-            <button className="dropdown-item logout-item" type="button" onClick={handleLogout}>
+            <button className="dropdown-item logout-item" type="button" onClick={() => void onLogout()}>
               <LogOut size={16} />
               <span>Logout</span>
             </button>

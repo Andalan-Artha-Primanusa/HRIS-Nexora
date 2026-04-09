@@ -303,7 +303,7 @@ const supportsList = (pathname: string) => {
 const getDefaultFormState = (pathname: string) => {
   switch (pathname) {
     case '/profiles':
-      return { phone: '', address: '', city: '', province: '', postal_code: '' };
+      return { id: '', phone: '', address: '', city: '', province: '', postal_code: '' };
     case '/employees/add':
       return { user_id: '', employee_code: '', position: '', department: '', hire_date: '', salary: '' };
     case '/leave/requests':
@@ -402,6 +402,19 @@ const SectionPage = () => {
 
   const handleFieldChange = (key: string, value: string) => {
     setFormState((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const getRequiredProfileId = () => {
+    const id = formState.id?.trim();
+    if (!id) {
+      throw new Error('Profile ID wajib diisi untuk operasi detail, update, atau delete.');
+    }
+    return id;
+  };
+
+  const buildProfilePayload = () => {
+    const { id: _id, ...payload } = formState;
+    return payload;
   };
 
   const formatResponse = (payload: unknown) => {
@@ -506,8 +519,23 @@ const SectionPage = () => {
       let result;
       switch (action) {
         case 'createProfile':
-          result = await api.post('/profiles', formState);
+          result = await api.post('/profiles', buildProfilePayload());
           break;
+        case 'getProfileDetail': {
+          const id = getRequiredProfileId();
+          result = await api.get(`/profiles/${id}`);
+          break;
+        }
+        case 'updateProfile': {
+          const id = getRequiredProfileId();
+          result = await api.put(`/profiles/${id}`, buildProfilePayload());
+          break;
+        }
+        case 'deleteProfile': {
+          const id = getRequiredProfileId();
+          result = await api.delete(`/profiles/${id}`);
+          break;
+        }
         case 'createEmployee':
           result = await api.post('/employees', formState);
           break;
@@ -597,6 +625,15 @@ const SectionPage = () => {
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('createProfile')} disabled={loading}>
               Create Profile
+            </Button>
+            <Button variant="outline" size="md" onClick={() => void performAction('getProfileDetail')} disabled={loading}>
+              Get Profile Detail
+            </Button>
+            <Button variant="secondary" size="md" onClick={() => void performAction('updateProfile')} disabled={loading}>
+              Update Profile
+            </Button>
+            <Button variant="outline" size="md" onClick={() => void performAction('deleteProfile')} disabled={loading}>
+              Delete Profile
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
               Refresh Profiles

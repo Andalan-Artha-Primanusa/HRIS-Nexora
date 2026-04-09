@@ -3,71 +3,92 @@
   align-items: center;
   justify-content: center;
   font-family: inherit;
-  font-weight: 500;
+  font-weight: 600;
   border-radius: var(--radius-md);
   border: 1px solid transparent;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease,
+    border-color 0.2s ease;
   white-space: nowrap;
+  letter-spacing: 0.01em;
+  user-select: none;
+  position: relative;
+  overflow: hidden;
 }
 
 .ui-button:disabled {
-  opacity: 0.6;
+  opacity: 0.55;
   cursor: not-allowed;
+  transform: none !important;
 }
 
-/* Variants */
+.ui-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(29, 98, 240, 0.2);
+}
+
 .ui-button--primary {
-  background-color: var(--primary-blue);
+  background: linear-gradient(110deg, var(--primary-blue), var(--primary-cyan));
   color: var(--white);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 12px 24px -14px rgba(29, 98, 240, 0.9);
 }
 
 .ui-button--primary:hover:not(:disabled) {
-  background-color: var(--primary-blue-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 18px 28px -16px rgba(29, 98, 240, 0.95);
+  filter: saturate(1.06);
 }
 
 .ui-button--secondary {
-  background-color: var(--gray-100);
-  color: var(--gray-800);
+  background: linear-gradient(180deg, #f9fbff, #edf3ff);
+  color: var(--gray-700);
+  border-color: rgba(147, 172, 198, 0.4);
+  box-shadow: 0 8px 18px -16px rgba(15, 23, 42, 0.85);
 }
 
 .ui-button--secondary:hover:not(:disabled) {
-  background-color: var(--gray-200);
+  transform: translateY(-1px);
+  background: linear-gradient(180deg, #ffffff, #e7f0ff);
+  border-color: rgba(29, 98, 240, 0.35);
+  color: var(--primary-blue);
 }
 
 .ui-button--outline {
-  background-color: transparent;
-  border-color: var(--gray-300);
+  background-color: rgba(255, 255, 255, 0.62);
+  border-color: rgba(147, 172, 198, 0.55);
   color: var(--gray-700);
+  backdrop-filter: blur(3px);
 }
 
 .ui-button--outline:hover:not(:disabled) {
-  background-color: var(--gray-50);
+  transform: translateY(-1px);
+  background-color: rgba(255, 255, 255, 0.92);
+  border-color: rgba(29, 98, 240, 0.38);
+  color: var(--primary-blue);
 }
 
 .ui-button--ghost {
   background-color: transparent;
   color: var(--gray-600);
+  border-color: transparent;
 }
 
 .ui-button--ghost:hover:not(:disabled) {
-  background-color: var(--gray-100);
+  background-color: rgba(226, 236, 248, 0.7);
   color: var(--gray-900);
 }
 
-/* Sizes */
 .ui-button--sm {
-  padding: 0.375rem 0.75rem;
-  font-size: 0.875rem;
+  padding: 0.38rem 0.78rem;
+  font-size: 0.81rem;
 }
 
 .ui-button--md {
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
+  padding: 0.54rem 1.04rem;
+  font-size: 0.86rem;
 }
 
 .ui-button--lg {
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
+  padding: 0.76rem 1.5rem;
+  font-size: 0.98rem;
 }
