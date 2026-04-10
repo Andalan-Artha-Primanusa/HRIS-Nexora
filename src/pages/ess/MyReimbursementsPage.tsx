@@ -9,13 +9,14 @@ import {
 import type { GenericApiItem, MyReimbursementPayload } from "@/features/ess/types/ess.types";
 import "./EssPages.css";
 
+// 🔒 SECURITY: No default/demo data exposed
 const DEFAULT_FORM: MyReimbursementPayload = {
-  title: "Business Trip Expenses",
-  description: "Travel to Jakarta for client meeting",
-  amount: 500000,
-  category: "travel",
-  expense_date: "2026-04-09",
-  receipt_path: "/receipts/travel_001.pdf",
+  title: "",
+  description: "",
+  amount: 0,
+  category: "",
+  expense_date: new Date().toISOString().split('T')[0],
+  receipt_path: "",
 };
 
 const asDisplay = (value: unknown) => {

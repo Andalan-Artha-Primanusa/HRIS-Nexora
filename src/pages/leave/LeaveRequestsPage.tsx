@@ -1,186 +1,65 @@
-import { useEffect, useMemo, useState } from "react";
-import { Card } from "@/shared/ui/Card";
-import { Button } from "@/shared/ui/Button";
-import {
-  createLeaveRequest,
-  deleteLeaveRequest,
-  getAllLeaves,
-  getLeaveDetail,
-  updateLeaveRequest,
-} from "@/features/leave/api/leave.service";
-import type { LeaveCreatePayload, LeaveItem, LeaveUpdatePayload } from "@/features/leave/types/leave.types";
-import "./LeavePages.css";
-
-type LeaveFormState = LeaveCreatePayload & { id: string };
-
-const DEFAULT_FORM: LeaveFormState = {
-  id: "",
-  type: "annual",
-  start_date: "2026-05-01",
-  end_date: "2026-05-05",
-  total_days: 5,
-  reason: "Family vacation",
-};
-
-const asDisplay = (value: unknown) => {
-  if (value === null || value === undefined) return "-";
-  if (typeof value === "object") return JSON.stringify(value);
-  return String(value);
-};
-
-const getColumns = (items: LeaveItem[]) => {
-  if (items.length === 0) {
-    return ["id", "type", "start_date", "end_date", "total_days", "status"];
-  }
-
-  const keys = Object.keys(items[0]);
-  const preferred = ["id", "type", "start_date", "end_date", "total_days", "reason", "status"];
-  const merged = [...preferred, ...keys.filter((key) => !preferred.includes(key))];
-  return merged.filter((key, index) => merged.indexOf(key) === index);
-};
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card } from '@/shared/ui/Card';
+import { Button } from '@/shared/ui/Button';
+import { getAllLeaves, deleteLeaveRequest, approveLeave, rejectLeave } from '@/features/leave/api/leave.service';
+import type { LeaveItem } from '@/features/leave/types/leave.types';
+import { AlertCircle, Trash2, Edit3, Plus, Eye, Check, X } from 'lucide-react';
+import './LeavePages.css';
 
 const LeaveRequestsPage = () => {
+  const navigate = useNavigate();
   const [items, setItems] = useState<LeaveItem[]>([]);
-  const [selectedDetail, setSelectedDetail] = useState<Record<string, unknown> | null>(null);
-  const [form, setForm] = useState<LeaveFormState>(DEFAULT_FORM);
-  const [responseText, setResponseText] = useState("");
-  const [statusMessage, setStatusMessage] = useState("Ready to call leave requests API");
   const [loading, setLoading] = useState(false);
-
-  const columns = useMemo(() => getColumns(items), [items]);
-
-  const formatResponse = (payload: unknown) => {
-    setResponseText(typeof payload === "string" ? payload : JSON.stringify(payload, null, 2));
-  };
-
-  const requireId = () => {
-    const id = form.id.trim();
-    if (!id) {
-      setStatusMessage("Leave ID wajib diisi untuk detail/update/delete.");
-      return null;
-    }
-    return id;
-  };
+  const [error, setError] = useState('');
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   const loadLeaves = async () => {
     setLoading(true);
-    setStatusMessage("Memuat semua leaves...");
-    setResponseText("");
+    setError('');
 
     try {
       const result = await getAllLeaves();
       setItems(result.items);
-      formatResponse(result.raw);
-      setStatusMessage("Semua leaves berhasil dimuat.");
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal memuat leaves.";
-      formatResponse(message);
-      setStatusMessage("Gagal memuat leaves.");
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || 'Gagal memuat pengajuan cuti');
     } finally {
       setLoading(false);
     }
   };
 
-  const createLeave = async () => {
+  const handleDelete = async (id: string) => {
     setLoading(true);
-    setStatusMessage("Membuat leave request...");
-    setResponseText("");
-
     try {
-      const payload: LeaveCreatePayload = {
-        type: form.type,
-        start_date: form.start_date,
-        end_date: form.end_date,
-        total_days: Number(form.total_days) || 0,
-        reason: form.reason,
-      };
-
-      const result = await createLeaveRequest(payload);
-      formatResponse(result.raw);
-      setStatusMessage("Leave request berhasil dibuat.");
+      await deleteLeaveRequest(id);
       await loadLeaves();
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal membuat leave request.";
-      formatResponse(message);
-      setStatusMessage("Gagal membuat leave request.");
+      setDeleteConfirm(null);
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || 'Gagal menghapus pengajuan cuti');
     } finally {
       setLoading(false);
     }
   };
 
-  const getDetail = async () => {
-    const id = requireId();
-    if (!id) return;
-
+  const handleApprove = async (id: string) => {
     setLoading(true);
-    setStatusMessage("Memuat detail leave...");
-    setResponseText("");
-
     try {
-      const result = await getLeaveDetail(id);
-      const payload =
-        result.payload && typeof result.payload === "object"
-          ? (result.payload as Record<string, unknown>)
-          : null;
-
-      setSelectedDetail(payload);
-      formatResponse(result.raw);
-      setStatusMessage("Detail leave berhasil dimuat.");
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal memuat detail leave.";
-      formatResponse(message);
-      setStatusMessage("Gagal memuat detail leave.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateLeave = async () => {
-    const id = requireId();
-    if (!id) return;
-
-    setLoading(true);
-    setStatusMessage("Mengupdate leave request...");
-    setResponseText("");
-
-    try {
-      const payload: LeaveUpdatePayload = {
-        start_date: form.start_date,
-        end_date: form.end_date,
-        total_days: Number(form.total_days) || 0,
-        reason: form.reason,
-      };
-
-      const result = await updateLeaveRequest(id, payload);
-      formatResponse(result.raw);
-      setStatusMessage("Leave request berhasil diupdate.");
+      await approveLeave(id, { note: 'Approved' });
       await loadLeaves();
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal update leave request.";
-      formatResponse(message);
-      setStatusMessage("Gagal update leave request.");
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || 'Gagal menyetujui pengajuan cuti');
     } finally {
       setLoading(false);
     }
   };
 
-  const deleteLeave = async () => {
-    const id = requireId();
-    if (!id) return;
-
+  const handleReject = async (id: string) => {
     setLoading(true);
-    setStatusMessage("Menghapus leave request...");
-    setResponseText("");
-
     try {
-      const result = await deleteLeaveRequest(id);
-      formatResponse(result.raw);
-      setStatusMessage("Leave request berhasil dihapus.");
+      await rejectLeave(id, { note: 'Rejected' });
       await loadLeaves();
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal menghapus leave request.";
-      formatResponse(message);
-      setStatusMessage("Gagal menghapus leave request.");
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || 'Gagal menolak pengajuan cuti');
     } finally {
       setLoading(false);
     }
@@ -188,133 +67,254 @@ const LeaveRequestsPage = () => {
 
   useEffect(() => {
     void loadLeaves();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const getLeaveTypeLabel = (type: string) => {
+    const typeMap: Record<string, string> = {
+      annual: 'Cuti Tahunan',
+      sick: 'Cuti Sakit',
+      personal: 'Cuti Pribadi',
+      maternity: 'Cuti Melahirkan',
+      parental: 'Cuti Orang Tua',
+      unpaid: 'Cuti Tanpa Gaji',
+    };
+    return typeMap[type] || type;
+  };
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '-';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('id-ID', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      });
+    } catch {
+      return dateString;
+    }
+  };
 
   return (
     <div className="leave-page">
+      {/* Header */}
       <div className="leave-header">
         <div>
-          <h1>Leave Requests</h1>
-          <p>Get all, create, detail, update, dan delete leave request.</p>
+          <h1>Pengajuan Cuti</h1>
+          <p>Kelola pengajuan cuti Anda dengan mudah</p>
         </div>
-        <Button variant="outline" size="md" onClick={() => void loadLeaves()} disabled={loading}>
-          Refresh
+        <Button
+          variant="primary"
+          size="md"
+          onClick={() => navigate('/leave/requests/create')}
+          disabled={loading}
+        >
+          <Plus size={18} />
+          Buat Pengajuan
         </Button>
       </div>
 
-      <Card className="leave-card" glass>
-        <h2>Leave Request Form</h2>
-        <div className="leave-form-grid">
-          <label>
-            ID
-            <input
-              className="leave-input"
-              value={form.id}
-              onChange={(event) => setForm((prev) => ({ ...prev, id: event.target.value }))}
-              placeholder="leave id"
-            />
-          </label>
-          <label>
-            Type
-            <input
-              className="leave-input"
-              value={form.type}
-              onChange={(event) => setForm((prev) => ({ ...prev, type: event.target.value }))}
-            />
-          </label>
-          <label>
-            Start Date
-            <input
-              className="leave-input"
-              type="date"
-              value={form.start_date}
-              onChange={(event) => setForm((prev) => ({ ...prev, start_date: event.target.value }))}
-            />
-          </label>
-          <label>
-            End Date
-            <input
-              className="leave-input"
-              type="date"
-              value={form.end_date}
-              onChange={(event) => setForm((prev) => ({ ...prev, end_date: event.target.value }))}
-            />
-          </label>
-          <label>
-            Total Days
-            <input
-              className="leave-input"
-              value={String(form.total_days)}
-              onChange={(event) => setForm((prev) => ({ ...prev, total_days: Number(event.target.value) || 0 }))}
-            />
-          </label>
-          <label className="leave-form-full">
-            Reason
-            <input
-              className="leave-input"
-              value={form.reason}
-              onChange={(event) => setForm((prev) => ({ ...prev, reason: event.target.value }))}
-            />
-          </label>
-        </div>
-        <div className="leave-actions">
-          <Button variant="primary" size="md" onClick={() => void createLeave()} disabled={loading}>
-            Create Leave
-          </Button>
-          <Button variant="outline" size="md" onClick={() => void getDetail()} disabled={loading}>
-            Get Detail
-          </Button>
-          <Button variant="secondary" size="md" onClick={() => void updateLeave()} disabled={loading}>
-            Update Leave
-          </Button>
-          <Button variant="ghost" size="md" onClick={() => void deleteLeave()} disabled={loading}>
-            Delete Leave
-          </Button>
+      {/* Error Alert */}
+      {error && (
+        <Card className="leave-card" glass style={{ marginBottom: '1.5rem' }}>
+          <div className="leave-alert leave-alert-error">
+            <AlertCircle size={20} />
+            <span>{error}</span>
+          </div>
+        </Card>
+      )}
+
+      {/* Statistics Card */}
+      <Card className="leave-card" glass style={{ marginBottom: '2rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1.5rem' }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#3b82f6' }}>
+              {items.length}
+            </div>
+            <div style={{ fontSize: '0.9rem', color: '#64748b', marginTop: '0.5rem' }}>
+              Total Pengajuan
+            </div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#f59e0b' }}>
+              {items.filter((i) => (i as any).status === 'pending').length}
+            </div>
+            <div style={{ fontSize: '0.9rem', color: '#64748b', marginTop: '0.5rem' }}>
+              Menunggu Persetujuan
+            </div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#10b981' }}>
+              {items.filter((i) => (i as any).status === 'approved').length}
+            </div>
+            <div style={{ fontSize: '0.9rem', color: '#64748b', marginTop: '0.5rem' }}>
+              Disetujui
+            </div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#ef4444' }}>
+              {items.filter((i) => (i as any).status === 'rejected').length}
+            </div>
+            <div style={{ fontSize: '0.9rem', color: '#64748b', marginTop: '0.5rem' }}>
+              Ditolak
+            </div>
+          </div>
         </div>
       </Card>
 
+      {/* Leaves Table */}
       <Card className="leave-card" glass>
-        <h2>Leave Detail</h2>
-        <pre className="leave-response">
-          {selectedDetail ? JSON.stringify(selectedDetail, null, 2) : "Belum ada leave detail dipilih."}
-        </pre>
-      </Card>
+        <>
+          <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '1rem' }}>
+            <Button
+              variant="outline"
+              size="md"
+              onClick={() => void loadLeaves()}
+              disabled={loading}
+            >
+              Refresh
+            </Button>
+          </div>
 
-      <Card className="leave-card" glass>
-        <h2>Leaves Table</h2>
-        <div className="leave-table-wrap">
-          <table className="leave-table">
-            <thead>
-              <tr>
-                {columns.map((column) => (
-                  <th key={column}>{column}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {items.length > 0 ? (
-                items.map((item, index) => (
-                  <tr key={String(item.id ?? index)}>
-                    {columns.map((column) => (
-                      <td key={`${String(item.id ?? index)}-${column}`}>{asDisplay(item[column])}</td>
-                    ))}
+          {items.length > 0 ? (
+            <div className="leave-table-wrap">
+              <table className="leave-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Tipe Cuti</th>
+                    <th>Dari - Ke</th>
+                    <th>Hari</th>
+                    <th>Alasan</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={columns.length}>No leave data available.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </Card>
-
-      <Card className="leave-card" glass>
-        <h2>Raw Response</h2>
-        <pre className="leave-response">{responseText || "Response API akan tampil di sini."}</pre>
-        <p className="leave-status">{statusMessage}</p>
+                </thead>
+                <tbody>
+                  {items.map((item, idx) => {
+                    const leave = item as any;
+                    const status = leave.status || 'pending';
+                    return (
+                      <tr key={String(leave.id ?? idx)}>
+                        <td className="leave-table-id">{idx + 1}</td>
+                        <td className="leave-table-type">{getLeaveTypeLabel(leave.type)}</td>
+                        <td className="leave-table-dates">
+                          <div>{formatDate(leave.start_date)}</div>
+                          <div className="leave-table-dates-sub">hingga {formatDate(leave.end_date)}</div>
+                        </td>
+                        <td className="leave-table-days">{leave.total_days} hari</td>
+                        <td className="leave-table-reason" title={leave.reason}>
+                          {leave.reason ? leave.reason.substring(0, 40) + (leave.reason.length > 40 ? '...' : '') : '-'}
+                        </td>
+                        <td>
+                          <span
+                            className={`leave-status-badge leave-status-${status}`}
+                          >
+                            {status.charAt(0).toUpperCase() + status.slice(1)}
+                          </span>
+                        </td>
+                        <td>
+                          <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => navigate(`/leave/requests/view/${leave.id}`)}
+                              disabled={loading}
+                              title="Lihat detail"
+                            >
+                              <Eye size={14} />
+                            </Button>
+                            {status === 'pending' && (
+                              <>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleApprove(String(leave.id))}
+                                  disabled={loading}
+                                  title="Setujui pengajuan"
+                                  style={{ color: '#10b981', borderColor: '#10b981' }}
+                                >
+                                  <Check size={14} />
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleReject(String(leave.id))}
+                                  disabled={loading}
+                                  title="Tolak pengajuan"
+                                  style={{ color: '#ef4444', borderColor: '#ef4444' }}
+                                >
+                                  <X size={14} />
+                                </Button>
+                              </>
+                            )}
+                            {status === 'pending' && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => navigate(`/leave/requests/edit/${leave.id}`)}
+                                disabled={loading}
+                                title="Edit pengajuan"
+                              >
+                                <Edit3 size={14} />
+                              </Button>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                if (deleteConfirm === String(leave.id)) {
+                                  void handleDelete(String(leave.id));
+                                } else {
+                                  setDeleteConfirm(String(leave.id));
+                                }
+                              }}
+                              disabled={loading}
+                              style={{
+                                color: deleteConfirm === String(leave.id) ? '#ef4444' : '#666',
+                              }}
+                              title="Hapus pengajuan"
+                            >
+                              <Trash2 size={14} />
+                            </Button>
+                            {deleteConfirm === String(leave.id) && (
+                              <span style={{ fontSize: '0.8rem', color: '#ef4444', display: 'flex', alignItems: 'center' }}>
+                                Hapus?{' '}
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setDeleteConfirm(null)}
+                                  disabled={loading}
+                                  style={{ padding: '0 0.5rem', color: '#666' }}
+                                >
+                                  Batal
+                                </Button>
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '3rem' }}>
+              <p style={{ color: '#999', marginBottom: '1rem' }}>
+                Belum ada pengajuan cuti. Buat pengajuan baru untuk memulai.
+              </p>
+              <Button
+                variant="primary"
+                size="md"
+                onClick={() => navigate('/leave/requests/create')}
+              >
+                <Plus size={18} />
+                Buat Pengajuan Pertama
+              </Button>
+            </div>
+          )}
+        </>
       </Card>
     </div>
   );

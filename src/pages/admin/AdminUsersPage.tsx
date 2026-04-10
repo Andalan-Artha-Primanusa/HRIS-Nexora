@@ -1,94 +1,67 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
-import { assignRolesToUser, getAllUsers } from "@/features/admin/api/admin.service";
-import type { AdminEntityItem } from "@/features/admin/types/admin.types";
+import { Alert } from "@/shared/ui/Alert";
+import { getAllUsers } from "@/features/admin/api/admin.service";
+import { getErrorMessage } from "@/shared/api/errorHandler";
+import { RBACUtils } from "@/shared/hooks/rbac";
 import "./AdminCrudPages.css";
 
-const asDisplay = (value: unknown) => {
-  if (value === null || value === undefined) return "-";
-  if (typeof value === "object") return JSON.stringify(value);
-  return String(value);
-};
-
-const getColumns = (items: AdminEntityItem[]) => {
-  if (items.length === 0) {
-    return ["id", "name", "email", "roles"];
-  }
-
-  const keys = Object.keys(items[0]);
-  const preferred = ["id", "name", "email", "roles"];
-  const merged = [...preferred, ...keys.filter((key) => !preferred.includes(key))];
-  return merged.filter((key, index) => merged.indexOf(key) === index);
-};
-
-const parseNumberArray = (value: string) =>
-  value
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean)
-    .map((item) => Number(item))
-    .filter((item) => !Number.isNaN(item));
+interface UserData {
+  id: number;
+  name: string;
+  email: string;
+  role_names?: string[];
+}
 
 const AdminUsersPage = () => {
-  const [items, setItems] = useState<AdminEntityItem[]>([]);
-  const [userId, setUserId] = useState("");
-  const [roleIdsText, setRoleIdsText] = useState("2,3");
-  const [responseText, setResponseText] = useState("");
-  const [statusMessage, setStatusMessage] = useState("Ready to call admin users API");
+  const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
+  const canViewUsers = RBACUtils.canViewUsers(user);
+  
+  if (!canViewUsers) {
+    return (
+      <div className="crud-page">
+        <div className="crud-header">
+          <h1>🚫 Akses Ditolak</h1>
+          <p>Anda tidak memiliki izin untuk mengakses halaman ini.</p>
+        </div>
+        <Card className="crud-card" glass>
+          <p>Silahkan hubungi Administrator untuk mendapatkan akses.</p>
+        </Card>
+      </div>
+    );
+  }
+  
+  const [users, setUsers] = useState<UserData[]>([]);
+  const [statusMessage, setStatusMessage] = useState("");
+  const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>
+('info');
   const [loading, setLoading] = useState(false);
-
-  const columns = useMemo(() => getColumns(items), [items]);
-
-  const formatResponse = (payload: unknown) => {
-    setResponseText(typeof payload === "string" ? payload : JSON.stringify(payload, null, 2));
-  };
 
   const loadUsers = async () => {
     setLoading(true);
-    setStatusMessage("Memuat users...");
-    setResponseText("");
+    setStatusMessage("Memuat data users...");
 
     try {
       const result = await getAllUsers();
-      setItems(result.items);
-      formatResponse(result.raw);
-      setStatusMessage("Data users berhasil dimuat.");
+      const formattedUsers = result.items.map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        email: item.email,
+        role_names: Array.isArray(item.roles) 
+          ? item.roles.map((r: any) => r.display_name || r.name) 
+          : [],
+      }));
+      setUsers(formattedUsers);
+      setStatusMessage(`${formattedUsers.length} user berhasil dimuat.`);
+      setAlertType('success');
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal memuat users.";
-      formatResponse(message);
-      setStatusMessage("Gagal memuat users.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const assignRoles = async () => {
-    const id = userId.trim();
-    if (!id) {
-      setStatusMessage("User ID wajib diisi.");
-      return;
-    }
-
-    const roleIds = parseNumberArray(roleIdsText);
-    if (roleIds.length === 0) {
-      setStatusMessage("role_ids wajib diisi, contoh: 2,3");
-      return;
-    }
-
-    setLoading(true);
-    setStatusMessage("Assign role ke user...");
-    setResponseText("");
-
-    try {
-      const result = await assignRolesToUser(id, { role_ids: roleIds });
-      formatResponse(result.raw);
-      setStatusMessage("Role berhasil di-assign ke user.");
-      await loadUsers();
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal assign role ke user.";
-      formatResponse(message);
-      setStatusMessage("Gagal assign role ke user.");
+      const message = getErrorMessage(error as any);
+      setStatusMessage(message);
+      setAlertType('error');
     } finally {
       setLoading(false);
     }
@@ -101,69 +74,95 @@ const AdminUsersPage = () => {
 
   return (
     <div className="crud-page">
+      {/* Header */}
       <div className="crud-header">
         <div>
-          <h1>User Management (Admin)</h1>
-          <p>Endpoint: GET /admin/users, POST /admin/users/{"{id}"}/assign-role</p>
+          <h1>👥 User Management</h1>
+          <p>Kelola dan tampilkan daftar users</p>
         </div>
-        <Button variant="outline" size="md" onClick={() => void loadUsers()} disabled={loading}>
-          Refresh
-        </Button>
-      </div>
-
-      <Card className="crud-card" glass>
-        <h2>Assign Role to User</h2>
-        <div className="crud-form-grid">
-          <label>
-            User ID
-            <input className="crud-input" value={userId} onChange={(event) => setUserId(event.target.value)} />
-          </label>
-          <label>
-            Role IDs (comma separated)
-            <input className="crud-input" value={roleIdsText} onChange={(event) => setRoleIdsText(event.target.value)} />
-          </label>
-        </div>
-        <div className="crud-actions">
-          <Button variant="primary" size="md" onClick={() => void assignRoles()} disabled={loading}>
-            Assign Roles
+        <div style={{ display: "flex", gap: "10px" }}>
+          <Button 
+            variant="primary" 
+            size="md" 
+            onClick={() => navigate("/admin/users/assign-roles")}
+          >
+            ➕ Assign Role
+          </Button>
+          <Button 
+            variant="outline" 
+            size="md" 
+            onClick={() => void loadUsers()} 
+            disabled={loading}
+          >
+            {loading ? "Loading..." : "🔄 Refresh"}
           </Button>
         </div>
-      </Card>
+      </div>
 
+      {/* Status Message */}
+      {statusMessage && (
+        <Alert 
+          type={alertType} 
+          message={statusMessage} 
+          onClose={() => setStatusMessage('')}
+          dismissible
+        />
+      )}
+
+      {/* Users Table */}
       <Card className="crud-card" glass>
-        <h2>Users Table</h2>
-        <div className="crud-table-wrap">
-          <table className="crud-table">
-            <thead>
-              <tr>
-                {columns.map((column) => (
-                  <th key={column}>{column}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {items.length > 0 ? (
-                items.map((item, index) => (
-                  <tr key={String(item.id ?? index)}>
-                    {columns.map((column) => (
-                      <td key={`${String(item.id ?? index)}-${column}`}>{asDisplay(item[column])}</td>
-                    ))}
-                  </tr>
-                ))
-              ) : (
+        <h2>👤 Daftar Users</h2>
+        
+        {users.length === 0 ? (
+          <div style={{ padding: "40px 20px", textAlign: "center", color: "#888" }}>
+            Tidak ada data user
+          </div>
+        ) : (
+          <div className="crud-table-wrap">
+            <table className="crud-table">
+              <thead>
                 <tr>
-                  <td colSpan={columns.length}>No user data available.</td>
+                  <th style={{ width: "60px" }}>ID</th>
+                  <th>Nama</th>
+                  <th>Email</th>
+                  <th>Roles</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </Card>
-
-      <Card className="crud-card" glass>
-        <h2>Raw Response</h2>
-        <pre className="crud-response">{responseText || "Response API akan tampil di sini."}</pre>
-        <p className="crud-status">{statusMessage}</p>
+              </thead>
+              <tbody>
+                {users.map((u) => (
+                  <tr key={u.id}>
+                    <td>{u.id}</td>
+                    <td style={{ fontWeight: "500" }}>{u.name}</td>
+                    <td style={{ color: "#666" }}>{u.email}</td>
+                    <td>
+                      {u.role_names && u.role_names.length > 0 ? (
+                        <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                          {u.role_names.map((role, idx) => (
+                            <span
+                              key={idx}
+                              style={{
+                                padding: "4px 10px",
+                                borderRadius: "6px",
+                                fontSize: "12px",
+                                fontWeight: "500",
+                                backgroundColor: role === "Super Administrator" ? "#fee2e2" : role === "Administrator" ? "#dbeafe" : "#f0fdf4",
+                                color: role === "Super Administrator" ? "#7f1d1d" : role === "Administrator" ? "#1e40af" : "#15803d",
+                              }}
+                            >
+                              {role}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span style={{ color: "#999", fontSize: "14px" }}>-</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </Card>
     </div>
   );

@@ -1,20 +1,22 @@
 import { useEffect, useState } from 'react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { Alert } from '@/shared/ui/Alert';
 import { api } from '@/shared/api/httpClient';
-import { Clock, AlertCircle } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import './AttendancePages.css';
 
 const AttendanceTodayPage = () => {
   const [today, setToday] = useState<Record<string, any> | null>(null);
   const [status, setStatus] = useState('Memuat data hari ini...');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('error');
 
   const loadToday = async () => {
     setLoading(true);
     setStatus('Mengambil data hari ini...');
-    setError('');
+    setAlertMessage('');
 
     try {
       const result = await api.get('/attendance/today');
@@ -23,7 +25,9 @@ const AttendanceTodayPage = () => {
       setStatus('Attendance hari ini berhasil dimuat.');
     } catch (error: any) {
       setStatus('Gagal memuat data hari ini.');
-      setError(error.response?.data?.message || error.message || 'Terjadi kesalahan');
+      const message = error.response?.data?.message || error.message || 'Terjadi kesalahan';
+      setAlertMessage(message);
+      setAlertType('error');
     } finally {
       setLoading(false);
     }
@@ -57,11 +61,13 @@ const AttendanceTodayPage = () => {
           </Button>
         </div>
 
-        {error && (
-          <div style={{ padding: '1rem', backgroundColor: '#ffebee', borderRadius: '0.5rem', marginBottom: '1rem', color: '#c41e3a', display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-            <AlertCircle size={20} />
-            {error}
-          </div>
+        {alertMessage && (
+          <Alert 
+            type={alertType} 
+            message={alertMessage}
+            onClose={() => setAlertMessage('')}
+            dismissible
+          />
         )}
 
         {today ? (

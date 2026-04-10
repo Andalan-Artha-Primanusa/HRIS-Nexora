@@ -1,20 +1,28 @@
 import { create } from 'zustand';
+import type { AuthUser } from '@/shared/types/rbac.types';
 
 interface AuthState {
-  user: any | null;
+  user: AuthUser | null;
   token: string | null;
   isAuthenticated: boolean;
-  setAuth: (user: any, token: string) => void;
+  setAuth: (user: AuthUser, token: string) => void;
   logout: () => void;
+  updateUser: (user: AuthUser) => void;
 }
 
-const getStoredUser = () => {
+const getStoredUser = (): AuthUser | null => {
   const rawUser = localStorage.getItem("user");
 
   if (!rawUser) return null;
 
   try {
-    return JSON.parse(rawUser);
+    const parsed = JSON.parse(rawUser) as AuthUser;
+    // Ensure roles and permissions are arrays
+    return {
+      ...parsed,
+      roles: parsed.roles ?? [],
+      permissions: parsed.permissions ?? [],
+    };
   } catch {
     return null;
   }
@@ -26,10 +34,24 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: getStoredUser(),
   token: getStoredToken(),
   isAuthenticated: Boolean(getStoredToken()),
-  setAuth: (user, token) => {
+  setAuth: (user: AuthUser, token: string) => {
+    const authUser: AuthUser = {
+      ...user,
+      roles: user.roles ?? [],
+      permissions: user.permissions ?? [],
+    };
     localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(user));
-    set({ user, token, isAuthenticated: true });
+    localStorage.setItem("user", JSON.stringify(authUser));
+    set({ user: authUser, token, isAuthenticated: true });
+  },
+  updateUser: (user: AuthUser) => {
+    const authUser: AuthUser = {
+      ...user,
+      roles: user.roles ?? [],
+      permissions: user.permissions ?? [],
+    };
+    localStorage.setItem("user", JSON.stringify(authUser));
+    set({ user: authUser });
   },
   logout: () => {
     localStorage.removeItem("token");

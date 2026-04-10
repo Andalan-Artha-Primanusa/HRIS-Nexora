@@ -26,7 +26,11 @@ import EditLocationPage from "../../pages/locations/EditLocationPage";
 import AdminUsersPage from "../../pages/admin/AdminUsersPage";
 import AdminRolesPage from "../../pages/admin/AdminRolesPage";
 import AdminPermissionsPage from "../../pages/admin/AdminPermissionsPage";
+import AdminUserAssignRolesPage from "../../pages/admin/AdminUserAssignRolesPage";
+import AdminRoleAssignPermissionsPage from "../../pages/admin/AdminRoleAssignPermissionsPage";
 import LeaveRequestsPage from "../../pages/leave/LeaveRequestsPage";
+import CreateLeavePage from "../../pages/leave/CreateLeavePage";
+import UpdateLeavePage from "../../pages/leave/UpdateLeavePage";
 import LeaveCalendarPage from "../../pages/leave/LeaveCalendarPage";
 import LeaveApprovalPage from "../../pages/leave/LeaveApprovalPage";
 import PayrollManagementPage from "../../pages/payroll/PayrollManagementPage";
@@ -257,6 +261,36 @@ export const router = createBrowserRouter([
         ],
       },
       {
+        path: "/leave/requests/create",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <CreateLeavePage />,
+          },
+        ],
+      },
+      {
+        path: "/leave/requests/edit/:id",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <UpdateLeavePage />,
+          },
+        ],
+      },
+      {
+        path: "/leave/requests/view/:id",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <UpdateLeavePage />,
+          },
+        ],
+      },
+      {
         path: "/leave/calendar",
         element: <DashboardLayout />,
         children: [
@@ -413,6 +447,26 @@ export const router = createBrowserRouter([
           {
             index: true,
             element: <AdminRolesPage />,
+          },
+        ],
+      },
+      {
+        path: "/admin/users/assign-roles",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <AdminUserAssignRolesPage />,
+          },
+        ],
+      },
+      {
+        path: "/admin/roles/assign-permissions",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <AdminRoleAssignPermissionsPage />,
           },
         ],
       },

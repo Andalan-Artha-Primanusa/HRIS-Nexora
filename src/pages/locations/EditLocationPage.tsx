@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { Alert } from '@/shared/ui/Alert';
 import { getLocationDetail, updateLocation } from '@/features/location/api/location.service';
 import type { LocationUpdatePayload } from '@/features/location/types/location.types';
-import { MapPin, AlertCircle, Check, ArrowLeft } from 'lucide-react';
+import { MapPin, Check, ArrowLeft } from 'lucide-react';
 import './LocationForm.css';
 
 const EditLocationPage = () => {
@@ -18,8 +19,8 @@ const EditLocationPage = () => {
     radius: '100',
   });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('info');
 
   useEffect(() => {
     const loadDetail = async () => {
@@ -39,9 +40,11 @@ const EditLocationPage = () => {
           longitude: String(payload.longitude || ''),
           radius: String(payload.radius || '100'),
         });
-        setError('');
+        setAlertMessage('');
       } catch (err: any) {
-        setError(err.response?.data?.message || err.message || 'Gagal memuat data lokasi');
+        const message = err.response?.data?.message || err.message || 'Gagal memuat data lokasi';
+        setAlertMessage(message);
+        setAlertType('error');
       } finally {
         setLoading(false);
       }
@@ -60,11 +63,13 @@ const EditLocationPage = () => {
 
   const validateForm = (): boolean => {
     if (!formData.name.trim()) {
-      setError('Nama lokasi wajib diisi');
+      setAlertMessage('Nama lokasi wajib diisi');
+      setAlertType('error');
       return false;
     }
     if (!formData.radius || parseFloat(formData.radius) <= 0) {
-      setError('Radius harus lebih dari 0');
+      setAlertMessage('Radius harus lebih dari 0');
+      setAlertType('error');
       return false;
     }
     return true;
@@ -74,8 +79,7 @@ const EditLocationPage = () => {
     if (!validateForm() || !id) return;
 
     setLoading(true);
-    setError('');
-    setSuccess('');
+    setAlertMessage('');
 
     try {
       const payload: LocationUpdatePayload = {
@@ -84,12 +88,15 @@ const EditLocationPage = () => {
       };
 
       await updateLocation(id, payload);
-      setSuccess('✓ Lokasi berhasil diupdate!');
+      setAlertMessage('Lokasi berhasil diupdate!');
+      setAlertType('success');
       setTimeout(() => {
         navigate('/locations');
       }, 1500);
     } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Gagal mengupdate lokasi');
+      const message = err.response?.data?.message || err.message || 'Gagal mengupdate lokasi';
+      setAlertMessage(message);
+      setAlertType('error');
     } finally {
       setLoading(false);
     }
@@ -130,18 +137,13 @@ const EditLocationPage = () => {
 
       {/* Form Card */}
       <Card className="location-form-card" glass>
-        {error && (
-          <div className="location-alert location-alert-error">
-            <AlertCircle size={20} />
-            <span>{error}</span>
-          </div>
-        )}
-
-        {success && (
-          <div className="location-alert location-alert-success">
-            <Check size={20} />
-            <span>{success}</span>
-          </div>
+        {alertMessage && (
+          <Alert 
+            type={alertType} 
+            message={alertMessage}
+            onClose={() => setAlertMessage('')}
+            dismissible
+          />
         )}
 
         <form className="location-form" onSubmit={(e) => { e.preventDefault(); void handleUpdateLocation(); }}>

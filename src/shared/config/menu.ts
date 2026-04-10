@@ -5,6 +5,8 @@ import {
 } from 'lucide-react';
 
 import type { LucideIcon } from 'lucide-react';
+import type { AuthUser } from '@/shared/types/rbac.types';
+import { RBACUtils } from '@/shared/hooks/rbac';
 
 // 🔥 TYPE FINAL (NO any, NO active)
 export type MenuItem = {
@@ -12,6 +14,7 @@ export type MenuItem = {
   icon?: LucideIcon;
   path?: string;
   subItems?: MenuItem[];
+  requiredChecker?: (user: AuthUser | null) => boolean;
 };
 
 // 🔥 MENU FINAL (rapi + scalable)
@@ -28,6 +31,7 @@ export const menuItems: MenuItem[] = [
   {
     label: 'Employee Management',
     icon: Users,
+    requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
     subItems: [
       { label: 'Profiles', path: '/profiles' },
       { label: 'Employee List', path: '/employees' },
@@ -90,6 +94,7 @@ export const menuItems: MenuItem[] = [
   {
     label: 'Payroll & Payslip',
     icon: Banknote,
+    requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
     subItems: [
       { label: 'Overview', path: '/payroll' },
       { label: 'Run Payroll', path: '/payroll/run' },
@@ -108,6 +113,7 @@ export const menuItems: MenuItem[] = [
   {
     label: 'Reimbursement & Expense',
     icon: Receipt,
+    requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
     subItems: [
       { label: 'Submit Expense', path: '/expense/submit' },
       { label: 'Expense List', path: '/expense/list' },
@@ -119,6 +125,7 @@ export const menuItems: MenuItem[] = [
   {
     label: 'KPI & Performance',
     icon: Target,
+    requiredChecker: (user) => RBACUtils.isManager(user) || RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
     subItems: [
       { label: 'Overview', path: '/performance' },
       { label: 'Goals / Target', path: '/performance/goals' },
@@ -144,6 +151,7 @@ export const menuItems: MenuItem[] = [
   {
     label: 'Reports & Analytics',
     icon: FileBarChart,
+    requiredChecker: (user) => RBACUtils.isManager(user) || RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
     subItems: [
       { label: 'Attendance Report', path: '/reports/attendance' },
       { label: 'Leave Report', path: '/reports/leave' },
@@ -154,6 +162,7 @@ export const menuItems: MenuItem[] = [
   {
     label: 'Admin Tools',
     icon: ShieldCheck,
+    requiredChecker: (user) => RBACUtils.isAdmin(user) || RBACUtils.canViewUsers(user) || RBACUtils.canViewRoles(user),
     subItems: [
       { label: 'Locations', path: '/locations' },
       { label: 'Users', path: '/admin/users' },
@@ -164,6 +173,7 @@ export const menuItems: MenuItem[] = [
   {
     label: 'Settings',
     icon: Settings,
+    requiredChecker: (user) => RBACUtils.isAdmin(user),
     subItems: [
       { label: 'Company Settings', path: '/settings/company' },
       { label: 'User & Role Management', path: '/settings/user-role' },

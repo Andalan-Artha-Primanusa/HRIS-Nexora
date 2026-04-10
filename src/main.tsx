@@ -14,11 +14,29 @@ class ErrorBoundary extends React.Component<{children: any}, {hasError: boolean,
   }
   render() {
     if (this.state.hasError) {
+      // 🔒 SECURITY: Don't expose error stack traces in production
+      const isDev = import.meta.env.DEV;
+      
       return (
         <div style={{ padding: 20, color: 'red', fontFamily: 'monospace' }}>
-          <h2>Something went wrong.</h2>
-          <pre style={{ whiteSpace: 'pre-wrap' }}>{this.state.error?.toString()}</pre>
-          <pre style={{ whiteSpace: 'pre-wrap' }}>{this.state.error?.stack}</pre>
+          <h2>⚠️ Something went wrong</h2>
+          <p>An unexpected error occurred. Please refresh the page and try again.</p>
+          {isDev && (
+            <>
+              <hr />
+              <details style={{ marginTop: 20, cursor: 'pointer' }}>
+                <summary>Error Details (Development Only)</summary>
+                <pre style={{ whiteSpace: 'pre-wrap', marginTop: 10 }}>{this.state.error?.toString()}</pre>
+                <pre style={{ whiteSpace: 'pre-wrap' }}>{this.state.error?.stack}</pre>
+              </details>
+            </>
+          )}
+          <button 
+            onClick={() => window.location.href = '/'}
+            style={{ marginTop: 20, padding: '8px 16px', cursor: 'pointer' }}
+          >
+            Go Home
+          </button>
         </div>
       );
     }

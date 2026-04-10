@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { Alert } from '@/shared/ui/Alert';
 import { createLocation } from '@/features/location/api/location.service';
-import { MapPin, AlertCircle, Check, ArrowLeft } from 'lucide-react';
+import { MapPin, ArrowLeft } from 'lucide-react';
 import './LocationForm.css';
 
 const CreateLocationPage = () => {
@@ -15,8 +16,8 @@ const CreateLocationPage = () => {
     radius: '100',
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('info');
   const [locationDetected, setLocationDetected] = useState(false);
 
   useEffect(() => {
@@ -29,15 +30,17 @@ const CreateLocationPage = () => {
             longitude: position.coords.longitude.toFixed(6),
           }));
           setLocationDetected(true);
-          setError('');
+          setAlertMessage('');
         },
         (err) => {
-          setError(`GPS Error: ${err.message}`);
+          setAlertMessage(err.message);
+          setAlertType('error');
           setLocationDetected(false);
         }
       );
     } else {
-      setError('Geolocation tidak didukung oleh browser ini');
+      setAlertMessage('Geolocation tidak didukung oleh browser ini');
+      setAlertType('error');
       setLocationDetected(false);
     }
   }, []);
@@ -52,19 +55,23 @@ const CreateLocationPage = () => {
 
   const validateForm = (): boolean => {
     if (!formData.name.trim()) {
-      setError('Nama lokasi wajib diisi');
+      setAlertMessage('Nama lokasi wajib diisi');
+      setAlertType('error');
       return false;
     }
     if (!formData.latitude) {
-      setError('Latitude wajib diisi');
+      setAlertMessage('Latitude wajib diisi');
+      setAlertType('error');
       return false;
     }
     if (!formData.longitude) {
-      setError('Longitude wajib diisi');
+      setAlertMessage('Longitude wajib diisi');
+      setAlertType('error');
       return false;
     }
     if (!formData.radius || parseFloat(formData.radius) <= 0) {
-      setError('Radius harus lebih dari 0');
+      setAlertMessage('Radius harus lebih dari 0');
+      setAlertType('error');
       return false;
     }
     return true;
@@ -74,8 +81,7 @@ const CreateLocationPage = () => {
     if (!validateForm()) return;
 
     setLoading(true);
-    setError('');
-    setSuccess('');
+    setAlertMessage('');
 
     try {
       await createLocation({
@@ -85,12 +91,15 @@ const CreateLocationPage = () => {
         radius: parseFloat(formData.radius),
       });
 
-      setSuccess('✓ Lokasi berhasil dibuat!');
+      setAlertMessage('Lokasi berhasil dibuat!');
+      setAlertType('success');
       setTimeout(() => {
         navigate('/locations');
       }, 1500);
     } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Gagal membuat lokasi');
+      const message = err.response?.data?.message || err.message || 'Gagal membuat lokasi';
+      setAlertMessage(message);
+      setAlertType('error');
     } finally {
       setLoading(false);
     }
@@ -115,18 +124,13 @@ const CreateLocationPage = () => {
 
       {/* Form Card */}
       <Card className="location-form-card" glass>
-        {error && (
-          <div className="location-alert location-alert-error">
-            <AlertCircle size={20} />
-            <span>{error}</span>
-          </div>
-        )}
-
-        {success && (
-          <div className="location-alert location-alert-success">
-            <Check size={20} />
-            <span>{success}</span>
-          </div>
+        {alertMessage && (
+          <Alert 
+            type={alertType} 
+            message={alertMessage}
+            onClose={() => setAlertMessage('')}
+            dismissible
+          />
         )}
 
         <form className="location-form" onSubmit={(e) => { e.preventDefault(); void handleCreateLocation(); }}>
