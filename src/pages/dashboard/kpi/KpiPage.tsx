@@ -2,8 +2,18 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
-import { api } from '@/shared/api/httpClient';
 import { FileText, Target, Users, ShieldCheck } from 'lucide-react';
+import {
+  approveKpi,
+  createKpi,
+  deleteKpi,
+  getAllKpis,
+  getKpiDetail,
+  getKpisByEmployee,
+  getMyKpis,
+  submitMyKpi,
+  updateKpi,
+} from '@/features/dashboard/api/kpi.service';
 import './KpiPage.css';
 
 type KpiRecord = {
@@ -69,8 +79,8 @@ const KpiPage = () => {
     setResponseText('');
 
     try {
-      const result = await api.get('/kpis');
-      const payload = result.data?.data ?? result.data;
+      const result = await getAllKpis();
+      const payload = result.items;
       formatResponse(payload);
       setKpis(Array.isArray(payload) ? payload : []);
       setStatusMessage('Semua KPI berhasil dimuat.');
@@ -88,8 +98,8 @@ const KpiPage = () => {
     setResponseText('');
 
     try {
-      const result = await api.get('/my/kpi');
-      const payload = result.data?.data ?? result.data;
+      const result = await getMyKpis();
+      const payload = result.items;
       formatResponse(payload);
       setKpis(Array.isArray(payload) ? payload : []);
       setStatusMessage('KPI pribadi berhasil dimuat.');
@@ -108,10 +118,10 @@ const KpiPage = () => {
     setResponseText('');
 
     try {
-      const result = await api.get(`/kpis/employee/${searchEmployee}`);
-      const payload = result.data?.data ?? result.data;
+      const result = await getKpisByEmployee(searchEmployee);
+      const payload = result.items.length > 0 ? result.items : [result.payload];
       formatResponse(payload);
-      setKpis(Array.isArray(payload) ? payload : [payload]);
+      setKpis(payload as KpiRecord[]);
       setStatusMessage('KPI per employee berhasil dimuat.');
     } catch (error: any) {
       setStatusMessage('Gagal memuat KPI per employee.');
@@ -130,37 +140,37 @@ const KpiPage = () => {
       let result;
       switch (action) {
         case 'create':
-          result = await api.post('/kpis', {
+          result = await createKpi({
             employee_id: Number(formState.employee_id),
-            title: formState.title,
+            title: String(formState.title ?? ''),
             description: formState.description,
             target: Number(formState.target),
           });
           break;
         case 'detail':
-          result = await api.get(`/kpis/${formState.id}`);
+          result = await getKpiDetail(String(formState.id));
           break;
         case 'update':
-          result = await api.put(`/kpis/${formState.id}`, {
+          result = await updateKpi(String(formState.id), {
             title: formState.title,
             target: Number(formState.target),
             achievement: formState.achievement ? Number(formState.achievement) : undefined,
           });
           break;
         case 'delete':
-          result = await api.delete(`/kpis/${formState.id}`);
+          result = await deleteKpi(String(formState.id));
           break;
         case 'approve':
-          result = await api.put(`/kpis/${formState.id}/approve`);
+          result = await approveKpi(String(formState.id));
           break;
         case 'submit':
-          result = await api.post(`/my/kpi/${formState.id}/submit`);
+          result = await submitMyKpi(String(formState.id));
           break;
         default:
-          result = { data: { message: 'Action not configured' } };
+          result = { payload: { message: 'Action not configured' } };
       }
 
-      formatResponse(result.data);
+      formatResponse((result as { raw?: unknown; payload?: unknown }).raw ?? result);
       setStatusMessage('Request berhasil.');
       if (isMyKpi) {
         void loadMyKpis();

@@ -1,7 +1,28 @@
 .section-page {
+  --section-accent: #2563eb;
+  --section-soft: rgba(37, 99, 235, 0.08);
+  --section-border: rgba(37, 99, 235, 0.2);
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+}
+
+.section-page::before {
+  content: "";
+  position: fixed;
+  right: -120px;
+  top: 80px;
+  width: 340px;
+  height: 340px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, var(--section-soft) 0%, rgba(255, 255, 255, 0) 68%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.section-page > * {
+  position: relative;
+  z-index: 1;
 }
 
 .section-header {
@@ -23,7 +44,7 @@
   border-radius: 18px;
   display: grid;
   place-items: center;
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.12);
+  box-shadow: 0 8px 20px var(--section-soft);
 }
 
 .section-title {
@@ -125,6 +146,7 @@
 .section-action-card {
   padding: 1.5rem;
   border-radius: var(--radius-xl);
+  border: 1px solid var(--section-border);
 }
 
 .section-action-header {
@@ -143,7 +165,7 @@
 }
 
 .action-status {
-  color: var(--primary-blue);
+  color: var(--section-accent);
   font-weight: 600;
 }
 
@@ -208,7 +230,7 @@
 
 .section-action-response {
   background: var(--gray-50);
-  border: 1px solid var(--border-light);
+  border: 1px solid var(--section-border);
   border-radius: var(--radius-lg);
   padding: 1rem;
   min-height: 240px;
@@ -222,7 +244,7 @@
   align-items: center;
   gap: 0.5rem;
   font-weight: 600;
-  color: var(--gray-700);
+  color: var(--section-accent);
 }
 
 .action-response {
@@ -241,4 +263,58 @@
   .section-action-grid {
     grid-template-columns: 1fr;
   }
+}
+
+.section-variant-employees,
+.section-variant-organization,
+.section-variant-employment {
+  --section-accent: #0369a1;
+  --section-soft: rgba(3, 105, 161, 0.14);
+  --section-border: rgba(3, 105, 161, 0.24);
+}
+
+.section-variant-attendance,
+.section-variant-leave {
+  --section-accent: #0f766e;
+  --section-soft: rgba(15, 118, 110, 0.14);
+  --section-border: rgba(15, 118, 110, 0.24);
+}
+
+.section-variant-payroll,
+.section-variant-expense,
+.section-variant-reimbursements {
+  --section-accent: #7c3aed;
+  --section-soft: rgba(124, 58, 237, 0.14);
+  --section-border: rgba(124, 58, 237, 0.24);
+}
+
+.section-variant-kpis,
+.section-variant-performance {
+  --section-accent: #b45309;
+  --section-soft: rgba(180, 83, 9, 0.14);
+  --section-border: rgba(180, 83, 9, 0.24);
+}
+
+.section-variant-admin,
+.section-variant-settings {
+  --section-accent: #be123c;
+  --section-soft: rgba(190, 18, 60, 0.14);
+  --section-border: rgba(190, 18, 60, 0.24);
+}
+
+.section-variant-locations,
+.section-variant-profiles,
+.section-variant-ess {
+  --section-accent: #4338ca;
+  --section-soft: rgba(67, 56, 202, 0.14);
+  --section-border: rgba(67, 56, 202, 0.24);
+}
+
+.section-variant-dashboard,
+.section-variant-analytics,
+.section-variant-documents,
+.section-variant-reports {
+  --section-accent: #1d4ed8;
+  --section-soft: rgba(29, 78, 216, 0.14);
+  --section-border: rgba(29, 78, 216, 0.24);
 }

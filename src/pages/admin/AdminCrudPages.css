@@ -1,19 +1,28 @@
 .crud-page {
+  --primary: #2563eb;
+  --primary-light: #dbeafe;
+  --primary-lighter: #eff6ff;
+  --surface: #f8fcff;
+  --text: #1e40af;
+  --text-light: #3b82f6;
+  --border: rgba(37, 99, 235, 0.15);
+
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
+  gap: 1.5rem;
   position: relative;
+  padding: 2rem;
+  border-radius: 16px;
+  background: var(--surface);
 }
 
 .crud-page::before {
   content: "";
-  position: fixed;
+  position: absolute;
   inset: 0;
   pointer-events: none;
-  background:
-    radial-gradient(circle at 8% 12%, rgba(37, 99, 235, 0.08), transparent 22rem),
-    radial-gradient(circle at 92% 6%, rgba(14, 165, 233, 0.08), transparent 18rem);
-  z-index: 0;
+  border-radius: 16px;
+  border: 1px solid var(--primary-light);
 }
 
 .crud-header {
@@ -23,67 +32,68 @@
   gap: 1.2rem;
   position: relative;
   z-index: 1;
-  background: linear-gradient(125deg, rgba(37, 99, 235, 0.16), rgba(14, 165, 233, 0.1) 42%, rgba(255, 255, 255, 0.84) 78%);
-  border: 1px solid rgba(37, 99, 235, 0.18);
-  border-radius: var(--radius-xl);
-  padding: 1.1rem 1.2rem;
-  box-shadow: var(--shadow-md);
-  overflow: hidden;
+  flex-wrap: wrap;
 }
 
 .crud-header::after {
-  content: "";
-  position: absolute;
-  right: -2.1rem;
-  top: -2.8rem;
-  width: 9rem;
-  height: 9rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.55);
+  content: none;
 }
 
 .crud-header h1 {
-  font-size: 1.58rem;
-  line-height: 1.2;
-  letter-spacing: 0.01em;
-  color: var(--gray-900);
-  position: relative;
-  z-index: 1;
+  font-size: clamp(1.5rem, 2.5vw, 2.2rem);
+  color: var(--text);
+  letter-spacing: -0.5px;
+  font-weight: 700;
+  margin: 0;
 }
 
 .crud-header p {
-  margin-top: 0.35rem;
-  color: var(--gray-600);
-  max-width: 58rem;
-  line-height: 1.45;
-  position: relative;
-  z-index: 1;
+  margin: 0.5rem 0 0;
+  color: var(--text-light);
+  max-width: 64ch;
+  font-size: 0.95rem;
 }
 
 .crud-card {
-  padding: 1.1rem;
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
-  background: rgba(255, 255, 255, 0.92);
+  padding: 1.5rem;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
   position: relative;
   z-index: 1;
-  animation: crudFadeIn 0.32s ease both;
+  overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
+.crud-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle, var(--primary-light) 0%, transparent 70%);
+  transform: translate(25%, -25%);
+  pointer-events: none;
+  opacity: 0.4;
+}
+
 .crud-card:hover {
-  transform: translateY(-1px);
-  border-color: rgba(37, 99, 235, 0.25);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  border-color: var(--primary-light);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.12);
 }
 
 .crud-card h2 {
-  margin-bottom: 0.92rem;
+  margin-bottom: 1.2rem;
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  font-size: 1.03rem;
+  font-size: 1.1rem;
+  color: var(--text);
+  font-weight: 700;
+  letter-spacing: -0.3px;
 }
 
 .crud-card h2::before {
@@ -91,38 +101,39 @@
   width: 0.5rem;
   height: 0.5rem;
   border-radius: 999px;
-  background: linear-gradient(145deg, var(--primary-blue), #0ea5e9);
-  box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.12);
+  background: var(--primary);
+  box-shadow: 0 0 0 6px var(--primary-lighter);
 }
 
 .crud-form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-  gap: 0.85rem;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
 }
 
 .crud-form-grid label {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
-  font-size: 0.8rem;
+  gap: 0.5rem;
+  font-size: 0.85rem;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   font-weight: 600;
-  color: var(--gray-700);
+  color: var(--text);
 }
 
 .crud-form-grid textarea,
 .crud-input {
-  border: 1px solid var(--gray-300);
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 0.65rem 0.78rem;
   font-size: 0.9rem;
   text-transform: none;
   letter-spacing: normal;
   font-weight: 500;
-  color: var(--gray-800);
-  background: linear-gradient(180deg, #ffffff, #f8fbff 86%);
+  color: var(--text);
+  background: var(--surface);
   font-family: inherit;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
@@ -133,7 +144,8 @@
 
 .crud-input::placeholder,
 .crud-form-grid textarea::placeholder {
-  color: var(--gray-400);
+  color: var(--text-light);
+  opacity: 0.6;
 }
 
 .crud-form-grid textarea {
@@ -145,8 +157,8 @@
 .crud-input:focus,
 .crud-form-grid textarea:focus {
   outline: none;
-  border-color: var(--primary-blue);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16), 0 8px 20px -12px rgba(37, 99, 235, 0.45);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-lighter), 0 8px 20px -12px rgba(37, 99, 235, 0.45);
   background: #fff;
 }
 
@@ -155,22 +167,52 @@
 }
 
 .crud-actions {
-  margin-top: 0.95rem;
+  margin-top: 1rem;
   display: flex;
-  gap: 0.58rem;
+  gap: 0.75rem;
   flex-wrap: wrap;
 }
 
 .crud-actions .ui-button {
-  box-shadow: 0 8px 16px -14px rgba(15, 23, 42, 0.8);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+  transition: all 0.2s ease;
+}
+
+.crud-status {
+  margin-top: 1rem;
+  color: var(--text-light);
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  background: var(--primary-lighter);
+  border-left: 3px solid var(--primary);
+  border-radius: 8px;
+}
+
+.crud-status::before {
+  content: "ℹ";
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
 .crud-table-wrap {
   width: 100%;
   overflow-x: auto;
   border-radius: 12px;
-  border: 1px solid var(--gray-200);
-  background: #fff;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
 }
 
 .crud-table {
@@ -182,7 +224,7 @@
 
 .crud-table th,
 .crud-table td {
-  border-bottom: 1px solid var(--gray-200);
+  border-bottom: 1px solid var(--border);
   padding: 0.72rem 0.75rem;
   text-align: left;
   font-size: 0.84rem;
@@ -193,73 +235,63 @@
   position: sticky;
   top: 0;
   z-index: 1;
-  background: linear-gradient(180deg, #f8fbff, #edf4ff);
-  color: var(--gray-700);
+  background: linear-gradient(180deg, var(--primary-light) 0%, var(--primary-lighter) 100%);
+  color: var(--text);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   font-size: 0.76rem;
+  font-weight: 700;
 }
 
 .crud-table tbody tr:nth-child(even) {
-  background: rgba(248, 250, 252, 0.62);
+  background: rgba(37, 99, 235, 0.03);
 }
 
 .crud-table tbody tr:hover {
-  background: rgba(219, 234, 254, 0.5);
+  background: var(--primary-lighter);
+  transition: background 0.2s ease;
 }
 
 .crud-response {
-  background: linear-gradient(165deg, #0f172a 0%, #111b31 54%, #152241 100%);
-  color: #f8fafc;
+  background: linear-gradient(165deg, var(--text) 0%, var(--primary) 54%, rgba(37, 99, 235, 0.8) 100%);
+  color: white;
   border-radius: 10px;
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  padding: 0.95rem;
+  border: 1px solid var(--border);
+  padding: 1rem;
   font-size: 0.8rem;
   line-height: 1.48;
   overflow: auto;
   max-height: 320px;
 }
 
-.crud-status {
-  margin-top: 0.8rem;
-  color: var(--gray-600);
-  font-size: 0.85rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-}
-
-.crud-status::before {
-  content: "";
-  width: 0.58rem;
-  height: 0.58rem;
-  border-radius: 999px;
-  background: var(--status-info);
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.17);
-}
-
 .crud-note {
-  color: var(--gray-500);
+  color: var(--text-light);
   font-size: 0.79rem;
   margin-top: 0.15rem;
+  opacity: 0.8;
 }
 
 .crud-table-wrap::-webkit-scrollbar,
 .crud-response::-webkit-scrollbar {
-  height: 9px;
-  width: 9px;
+  height: 8px;
+  width: 8px;
 }
 
 .crud-table-wrap::-webkit-scrollbar-track,
 .crud-response::-webkit-scrollbar-track {
-  background: rgba(203, 213, 225, 0.25);
+  background: var(--primary-lighter);
   border-radius: 999px;
 }
 
 .crud-table-wrap::-webkit-scrollbar-thumb,
 .crud-response::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.45);
+  background: var(--primary-light);
   border-radius: 999px;
+}
+
+.crud-table-wrap::-webkit-scrollbar-thumb:hover,
+.crud-response::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
 }
 
 @keyframes crudFadeIn {
@@ -275,13 +307,13 @@
 
 @media (max-width: 900px) {
   .crud-page {
-    gap: 1rem;
+    gap: 1.2rem;
+    padding: 1.5rem;
   }
 
   .crud-header {
     flex-direction: column;
     align-items: stretch;
-    padding: 1rem;
   }
 
   .crud-header h1 {
@@ -289,7 +321,11 @@
   }
 
   .crud-card {
-    padding: 0.95rem;
+    padding: 1.2rem;
+  }
+
+  .crud-form-grid {
+    grid-template-columns: 1fr;
   }
 
   .crud-actions .ui-button {
@@ -298,11 +334,57 @@
 }
 
 @media (max-width: 560px) {
-  .crud-form-grid {
-    grid-template-columns: 1fr;
+  .crud-page {
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .crud-header {
+    gap: 0.75rem;
+  }
+
+  .crud-header h1 {
+    font-size: 1.1rem;
   }
 
   .crud-header p {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+  }
+
+  .crud-card {
+    padding: 1rem;
+  }
+
+  .crud-card h2 {
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+  }
+
+  .crud-form-grid {
+    gap: 0.75rem;
+  }
+
+  .crud-input {
+    height: 38px;
+    font-size: 0.85rem;
+  }
+
+  .crud-form-grid label {
+    gap: 0.35rem;
+    font-size: 0.75rem;
+  }
+
+  .crud-actions {
+    gap: 0.5rem;
+  }
+
+  .crud-table {
+    min-width: 600px;
+    font-size: 0.75rem;
+  }
+
+  .crud-table th,
+  .crud-table td {
+    padding: 0.5rem 0.5rem;
   }
 }

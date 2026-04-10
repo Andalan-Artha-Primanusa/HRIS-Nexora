@@ -19,6 +19,14 @@ const getErrorMessage = (error: unknown, fallback: string) => {
   const responseData = toRecord(response.data);
   const responseErrors = toRecord(responseData.errors);
 
+  // Log error details for debugging
+  console.error("❌ API Error Details:", {
+    status: response.status,
+    message: responseData.message,
+    errors: responseErrors,
+    fullError: responseData,
+  });
+
   if (typeof responseData.message === "string" && responseData.message.trim()) {
     return responseData.message;
   }

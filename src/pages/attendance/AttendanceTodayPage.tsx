@@ -2,28 +2,28 @@ import { useEffect, useState } from 'react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
-import { Clock } from 'lucide-react';
+import { Clock, AlertCircle } from 'lucide-react';
 import './AttendancePages.css';
 
 const AttendanceTodayPage = () => {
   const [today, setToday] = useState<Record<string, any> | null>(null);
-  const [responseText, setResponseText] = useState('');
   const [status, setStatus] = useState('Memuat data hari ini...');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const loadToday = async () => {
     setLoading(true);
     setStatus('Mengambil data hari ini...');
+    setError('');
 
     try {
       const result = await api.get('/attendance/today');
       const payload = result.data?.data ?? result.data;
       setToday(payload);
-      setResponseText(JSON.stringify(payload, null, 2));
       setStatus('Attendance hari ini berhasil dimuat.');
     } catch (error: any) {
       setStatus('Gagal memuat data hari ini.');
-      setResponseText(JSON.stringify(error.response?.data ?? error.message ?? 'Terjadi kesalahan', null, 2));
+      setError(error.response?.data?.message || error.message || 'Terjadi kesalahan');
     } finally {
       setLoading(false);
     }
@@ -55,10 +55,14 @@ const AttendanceTodayPage = () => {
           <Button variant="primary" size="sm" onClick={() => void loadToday()} disabled={loading}>
             {loading ? 'Memuat...' : 'Refresh Today'}
           </Button>
-          <Button variant="secondary" size="sm" onClick={() => setResponseText('')}>
-            Clear Response
-          </Button>
         </div>
+
+        {error && (
+          <div style={{ padding: '1rem', backgroundColor: '#ffebee', borderRadius: '0.5rem', marginBottom: '1rem', color: '#c41e3a', display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+            <AlertCircle size={20} />
+            {error}
+          </div>
+        )}
 
         {today ? (
           <div className="attendance-today-grid">
@@ -72,11 +76,6 @@ const AttendanceTodayPage = () => {
         ) : (
           <p className="attendance-empty">Tidak ada data untuk hari ini.</p>
         )}
-
-        <div className="attendance-response-panel">
-          <h2>Raw Response</h2>
-          <pre>{responseText || 'Response akan tampil di sini.'}</pre>
-        </div>
       </Card>
     </div>
   );

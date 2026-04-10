@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ChangeEvent } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ChangeEvent } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
@@ -17,7 +17,6 @@ import {
   Network,
   Briefcase,
   FileText,
-  Plus,
   Search,
   MapPin,
   ShieldCheck,
@@ -196,11 +195,68 @@ const sectionDefinitions: Record<string, { title: string; subtitle: string; icon
   },
 };
 
-const defaultStats: SectionStat[] = [
-  { label: 'Total Items', value: '124', description: 'Data aktif saat ini', variant: 'info' },
-  { label: 'Pending', value: '18', description: 'Butuh tindak lanjut', variant: 'warning' },
-  { label: 'Completed', value: '96', description: 'Sudah selesai', variant: 'success' },
-];
+type UnknownRecord = Record<string, unknown>;
+
+const toRecord = (value: unknown): UnknownRecord =>
+  value && typeof value === 'object' ? (value as UnknownRecord) : {};
+
+const unwrapPayload = (raw: unknown) => {
+  const root = toRecord(raw);
+  return root.data ?? raw;
+};
+
+const getNumericValue = (raw: unknown): number | null => {
+  if (typeof raw === 'number' && Number.isFinite(raw)) {
+    return raw;
+  }
+
+  if (typeof raw === 'string') {
+    const parsed = Number(raw);
+    if (Number.isFinite(parsed)) {
+      return parsed;
+    }
+  }
+
+  return null;
+};
+
+const getCountFromPayload = (raw: unknown): number => {
+  const payload = unwrapPayload(raw);
+
+  if (Array.isArray(payload)) {
+    return payload.length;
+  }
+
+  const payloadRecord = toRecord(payload);
+  const arrayCandidates = [payloadRecord.items, payloadRecord.rows, payloadRecord.data, payloadRecord.results];
+
+  for (const candidate of arrayCandidates) {
+    if (Array.isArray(candidate)) {
+      return candidate.length;
+    }
+  }
+
+  const numericCandidates = [
+    payloadRecord.count,
+    payloadRecord.total,
+    payloadRecord.total_count,
+    payloadRecord.totalCount,
+    payloadRecord.present,
+    payloadRecord.present_count,
+    payloadRecord.presentCount,
+    payloadRecord.total_present,
+    payloadRecord.totalPresent,
+  ];
+
+  for (const candidate of numericCandidates) {
+    const numericValue = getNumericValue(candidate);
+    if (numericValue !== null) {
+      return numericValue;
+    }
+  }
+
+  return 0;
+};
 
 const getFormattedTitle = (path: string) => {
   if (path === '/dashboard' || path === '/') return 'Dashboard Overview';
@@ -271,7 +327,7 @@ const getSectionData = (pathname: string) => {
     subtitle,
     icon,
     color,
-    stats: defaultStats,
+    stats: [] as SectionStat[],
     tableColumns: tableColumns[safeRoot],
   };
 };
@@ -295,7 +351,6 @@ const supportsList = (pathname: string) => {
     '/admin/users',
     '/admin/roles',
     '/admin/permissions',
-    '/reports/employee',
     '/kpis',
   ].includes(pathname);
 };
@@ -307,27 +362,27 @@ const getDefaultFormState = (pathname: string) => {
     case '/employees/add':
       return { user_id: '', employee_code: '', position: '', department: '', hire_date: '', salary: '' };
     case '/leave/requests':
-      return { type: 'annual', start_date: '', end_date: '', total_days: '', reason: '' };
+      return { type: '', start_date: '', end_date: '', total_days: '', reason: '' };
     case '/attendance/check-in':
-      return { latitude: '-6.200000', longitude: '106.816666' };
+      return { latitude: '', longitude: '' };
     case '/attendance/check-out':
       return {};
     case '/my/reimbursements':
-      return { title: '', description: '', amount: '', category: 'travel', expense_date: '2026-04-09', receipt_path: '' };
+      return { title: '', description: '', amount: '', category: '', expense_date: '', receipt_path: '' };
     case '/my/kpi':
       return { id: '' };
     case '/my/payroll':
-      return { employee_id: '', period: '2026-04' };
+      return { employee_id: '', period: '' };
     case '/locations':
-      return { name: '', latitude: '-6.200000', longitude: '106.816666', radius: '100' };
+      return { name: '', latitude: '', longitude: '', radius: '' };
     case '/reimbursements':
-      return { title: '', description: '', amount: '', category: 'travel', expense_date: '2026-04-09', receipt_path: '' };
+      return { title: '', description: '', amount: '', category: '', expense_date: '', receipt_path: '' };
     case '/admin/users':
-      return { user_id: '', role_ids: '' };
+      return { id: '', role_ids: '' };
     case '/admin/roles':
-      return { permission_ids: '' };
+      return { id: '', permission_ids: '' };
     case '/admin/permissions':
-      return { name: '' };
+      return {};
     case '/kpis':
       return { employee_id: '', title: '', description: '', target: '' };
     default:
@@ -380,8 +435,10 @@ const parsePayloadToTable = (payload: unknown) => {
 const SectionPage = () => {
   const location = useLocation();
   const path = location.pathname;
+  const sectionKey = useMemo(() => getSectionTableKey(path), [path]);
   const section = useMemo(() => getSectionData(path), [path]);
   const Icon = section.icon;
+  const [summaryStats, setSummaryStats] = useState<SectionStat[]>([]);
   const [tableColumns, setTableColumns] = useState<string[]>(section.tableColumns);
   const [tableRows, setTableRows] = useState<string[][]>([]);
   const [formState, setFormState] = useState<Record<string, string>>(getDefaultFormState(path));
@@ -389,16 +446,80 @@ const SectionPage = () => {
   const [statusMessage, setStatusMessage] = useState('Ready to call API');
   const [loading, setLoading] = useState(false);
 
+  const loadHrSummaryStats = useCallback(async () => {
+    const [employeesResult, attendanceResult, pendingLeavesResult, payrollResult] = await Promise.allSettled([
+      api.get('/employees'),
+      api.get('/attendance/today'),
+      api.get('/leaves/pending'),
+      api.get('/payroll'),
+    ]);
+
+    const employeesCount =
+      employeesResult.status === 'fulfilled' ? getCountFromPayload(employeesResult.value.data) : 0;
+    const presentTodayCount =
+      attendanceResult.status === 'fulfilled' ? getCountFromPayload(attendanceResult.value.data) : 0;
+    const pendingLeavesCount =
+      pendingLeavesResult.status === 'fulfilled' ? getCountFromPayload(pendingLeavesResult.value.data) : 0;
+    const payrollCount =
+      payrollResult.status === 'fulfilled' ? getCountFromPayload(payrollResult.value.data) : 0;
+
+    const attendanceRate = employeesCount > 0 ? Math.round((presentTodayCount / employeesCount) * 100) : 0;
+
+    setSummaryStats([
+      {
+        label: 'Total Employees',
+        value: String(employeesCount),
+        description: 'Data karyawan aktif',
+        variant: 'info',
+      },
+      {
+        label: 'Present Today',
+        value: String(presentTodayCount),
+        description: `${attendanceRate}% attendance`,
+        variant: 'success',
+      },
+      {
+        label: 'Pending Leaves',
+        value: String(pendingLeavesCount),
+        description: 'Menunggu approval',
+        variant: 'warning',
+      },
+      {
+        label: 'Payroll Records',
+        value: String(payrollCount),
+        description: 'Data payroll tersedia',
+        variant: 'default',
+      },
+    ]);
+  }, []);
+
   useEffect(() => {
+    setSummaryStats([]);
     setFormState(getDefaultFormState(path));
     setResponseText('');
     setStatusMessage('Ready to call API');
     setTableColumns(section.tableColumns);
     setTableRows([]);
+    if (path === '/hr-summary') {
+      void loadHrSummaryStats();
+    }
     if (supportsList(path)) {
       void loadList();
     }
-  }, [path, section.tableColumns]);
+  }, [path, section.tableColumns, loadHrSummaryStats]);
+
+  const canRefresh = path === '/hr-summary' || supportsList(path);
+
+  const handleRefresh = () => {
+    if (path === '/hr-summary') {
+      void loadHrSummaryStats();
+      return;
+    }
+
+    if (supportsList(path)) {
+      void loadList();
+    }
+  };
 
   const handleFieldChange = (key: string, value: string) => {
     setFormState((prev) => ({ ...prev, [key]: value }));
@@ -481,9 +602,6 @@ const SectionPage = () => {
           break;
         case '/kpis':
           result = await api.get('/kpis');
-          break;
-        case '/reports/employee':
-          result = await api.get('/reports/employee');
           break;
         default:
           result = null;
@@ -569,15 +687,44 @@ const SectionPage = () => {
         case 'createKpi':
           result = await api.post('/kpis', formState);
           break;
-        case 'createAdminUser':
-          result = await api.post('/admin/users', formState);
+        case 'assignRoleToUser': {
+          const id = formState.id?.trim();
+          if (!id) {
+            throw new Error('User ID wajib diisi.');
+          }
+
+          const roleIds = (formState.role_ids ?? '')
+            .split(',')
+            .map((item) => Number(item.trim()))
+            .filter((item) => Number.isInteger(item) && item > 0);
+
+          if (roleIds.length === 0) {
+            throw new Error('role_ids wajib diisi (pisahkan dengan koma).');
+          }
+
+          result = await api.post(`/admin/users/${id}/assign-role`, { role_ids: roleIds });
           break;
-        case 'createAdminRole':
-          result = await api.post('/admin/roles', formState);
+        }
+        case 'assignPermissionToRole': {
+          const id = formState.id?.trim();
+          if (!id) {
+            throw new Error('Role ID wajib diisi.');
+          }
+
+          const permissionIds = (formState.permission_ids ?? '')
+            .split(',')
+            .map((item) => Number(item.trim()))
+            .filter((item) => Number.isInteger(item) && item > 0);
+
+          if (permissionIds.length === 0) {
+            throw new Error('permission_ids wajib diisi (pisahkan dengan koma).');
+          }
+
+          result = await api.post(`/admin/roles/${id}/assign-permission`, {
+            permission_ids: permissionIds,
+          });
           break;
-        case 'createAdminPermission':
-          result = await api.post('/admin/permissions', formState);
-          break;
+        }
         default:
           result = { data: { message: 'No action configured' } };
       }
@@ -741,8 +888,8 @@ const SectionPage = () => {
       case '/admin/users':
         return (
           <>
-            <Button variant="primary" size="md" onClick={() => void performAction('createAdminUser')} disabled={loading}>
-              Create User
+            <Button variant="primary" size="md" onClick={() => void performAction('assignRoleToUser')} disabled={loading}>
+              Assign Role to User
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
               Refresh Users
@@ -752,8 +899,8 @@ const SectionPage = () => {
       case '/admin/roles':
         return (
           <>
-            <Button variant="primary" size="md" onClick={() => void performAction('createAdminRole')} disabled={loading}>
-              Create Role
+            <Button variant="primary" size="md" onClick={() => void performAction('assignPermissionToRole')} disabled={loading}>
+              Assign Permission to Role
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
               Refresh Roles
@@ -763,9 +910,6 @@ const SectionPage = () => {
       case '/admin/permissions':
         return (
           <>
-            <Button variant="primary" size="md" onClick={() => void performAction('createAdminPermission')} disabled={loading}>
-              Create Permission
-            </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
               Refresh Permissions
             </Button>
@@ -785,7 +929,7 @@ const SectionPage = () => {
   };
 
   return (
-    <div className="section-page">
+    <div className={`section-page section-variant-${sectionKey}`}>
       <div className="section-header">
         <div className="section-header-left">
           <div className="section-icon" style={{ backgroundColor: section.color + '22' }}>
@@ -798,28 +942,26 @@ const SectionPage = () => {
         </div>
 
         <div className="section-actions">
-          <Button variant="outline" size="md" onClick={() => void loadList()} disabled={loading || !supportsList(path)}>
+          <Button variant="outline" size="md" onClick={handleRefresh} disabled={loading || !canRefresh}>
             <Search size={16} />
             Refresh
-          </Button>
-          <Button variant="primary" size="md" disabled>
-            <Plus size={16} />
-            Main Action
           </Button>
         </div>
       </div>
 
-      <div className="section-summary-grid">
-        {section.stats.map((stat) => (
-          <Card key={stat.label} className="summary-card" glass>
-            <div className="summary-card-top">
-              <span className="summary-card-label">{stat.label}</span>
-              <Badge variant={stat.variant}>{stat.description}</Badge>
-            </div>
-            <h3 className="summary-card-value">{stat.value}</h3>
-          </Card>
-        ))}
-      </div>
+      {summaryStats.length > 0 && (
+        <div className="section-summary-grid">
+          {summaryStats.map((stat) => (
+            <Card key={stat.label} className="summary-card" glass>
+              <div className="summary-card-top">
+                <span className="summary-card-label">{stat.label}</span>
+                <Badge variant={stat.variant}>{stat.description}</Badge>
+              </div>
+              <h3 className="summary-card-value">{stat.value}</h3>
+            </Card>
+          ))}
+        </div>
+      )}
 
       <Card className="section-action-card" glass>
         <div className="section-action-header">
@@ -854,7 +996,7 @@ const SectionPage = () => {
             <h2>Data {section.title}</h2>
             <p>{section.subtitle}</p>
           </div>
-          <Button variant="secondary" size="sm" onClick={() => void loadList()} disabled={loading || !supportsList(path)}>
+          <Button variant="secondary" size="sm" onClick={handleRefresh} disabled={loading || !canRefresh}>
             Refresh Data
           </Button>
         </div>

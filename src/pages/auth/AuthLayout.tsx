@@ -110,9 +110,6 @@ const AuthLayout = ({ title, subtitle, children, footer }: AuthLayoutProps) => {
       <section className="auth-form-panel">
         <div className="auth-card">
           <header className="auth-card-header">
-            <div className="auth-card-brand">
-              <img src="/logo-mahya.png" alt="Mahya HRIS" className="auth-card-brand-logo" />
-            </div>
             <h1 className="auth-title">{title}</h1>
             <p className="auth-subtitle">{subtitle}</p>
           </header>

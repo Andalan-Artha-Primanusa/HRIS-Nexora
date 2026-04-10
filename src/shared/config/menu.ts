@@ -31,7 +31,6 @@ export const menuItems: MenuItem[] = [
     subItems: [
       { label: 'Profiles', path: '/profiles' },
       { label: 'Employee List', path: '/employees' },
-      { label: 'Add Employee', path: '/employees/add' },
       { 
         label: 'Organization', 
         icon: Network,
@@ -94,7 +93,6 @@ export const menuItems: MenuItem[] = [
     subItems: [
       { label: 'Overview', path: '/payroll' },
       { label: 'Run Payroll', path: '/payroll/run' },
-      { label: 'Payslip', path: '/payroll/payslip' },
       {
         label: 'Salary Component',
         icon: CreditCard,
@@ -147,7 +145,6 @@ export const menuItems: MenuItem[] = [
     label: 'Reports & Analytics',
     icon: FileBarChart,
     subItems: [
-      { label: 'Employee Report', path: '/reports/employee' },
       { label: 'Attendance Report', path: '/reports/attendance' },
       { label: 'Leave Report', path: '/reports/leave' },
       { label: 'Payroll Report', path: '/reports/payroll' },
