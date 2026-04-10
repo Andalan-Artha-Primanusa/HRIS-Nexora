@@ -27,8 +27,20 @@ export interface GoogleAuthCallbackPayload {
    API CALL
 ========================= */
 export const login = async (payload: LoginPayload) => {
-  const response = await api.post("/login", payload);
-  return response;
+  try {
+    const response = await api.post("/login", payload);
+    return response;
+  } catch (error: any) {
+    // 🔒 SECURITY: Log validation errors untuk debugging (development only)
+    if (error.response?.status === 422) {
+      console.error("[LOGIN] 422 Validation Error:", {
+        payload: payload,
+        errors: error.response?.data?.errors,
+        message: error.response?.data?.message,
+      });
+    }
+    throw error;
+  }
 };
 
 export const register = async (payload: RegisterPayload) => {

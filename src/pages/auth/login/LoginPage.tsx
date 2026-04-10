@@ -94,7 +94,30 @@ const LoginPage = () => {
       const authResult = await handleLogin({ email: email.trim(), password });
       navigate(getRoleBasedDashboardPath(authResult.user));
     } catch (err: unknown) {
-      setFormError(typeof err === "string" ? err : "Login gagal.");
+      // 🔒 SECURITY: Show validation errors if available, else generic message
+      let errorMsg = "Login gagal.";
+      
+      if (err && typeof err === "object") {
+        const errObj = err as any;
+        // Check for API validation errors
+        if (errObj.response?.status === 422) {
+          const errors = errObj.response?.data?.errors;
+          if (errors && typeof errors === "object") {
+            const firstError = Object.values(errors)[0];
+            if (Array.isArray(firstError)) {
+              errorMsg = firstError[0] as string;
+            } else if (typeof firstError === "string") {
+              errorMsg = firstError;
+            }
+          } else if (errObj.response?.data?.message) {
+            errorMsg = errObj.response.data.message;
+          }
+        } else if (typeof errObj === "string") {
+          errorMsg = errObj;
+        }
+      }
+      
+      setFormError(errorMsg);
     } finally {
       setIsSubmitting(false);
     }

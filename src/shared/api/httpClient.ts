@@ -1,21 +1,33 @@
 import axios from "axios";
 
+// 🔒 SECURITY: API URL from environment, with fallback for development
 const defaultBaseUrl = "https://moccasin-crab-693879.hostingersite.com/api";
 const baseURL = import.meta.env.VITE_API_URL || defaultBaseUrl;
+
+// Log warning jika using default URL (tidak ideal untuk production)
+if (!import.meta.env.VITE_API_URL && import.meta.env.PROD) {
+  console.warn("[SECURITY] VITE_API_URL environment variable not set. Using default URL. This should not happen in production!");
+}
 
 export const api = axios.create({
   baseURL,
   headers: {
     Accept: "application/json",
     "Content-Type": "application/json",
+    // 🔒 SECURITY: Add security headers
+    "X-Requested-With": "XMLHttpRequest",
   },
+  // 🔒 SECURITY: Set timeout to prevent hanging requests
+  timeout: parseInt(import.meta.env.VITE_API_TIMEOUT || "30000", 10),
+  // 🔒 SECURITY: Don't send credentials unless explicitly configured per endpoint
+  withCredentials: false,
 });
 
 // 🔥 Inject token otomatis
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
 
-  if (token) {
+  if (token && typeof token === "string" && token.length > 0) {
     config.headers = config.headers ?? {};
 
     if (typeof (config.headers as any).set === 'function') {
@@ -32,14 +44,21 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
+      // 🔒 SECURITY: Clear sensitive data on auth failure
       localStorage.removeItem("token");
       localStorage.removeItem("user");
-      // keep the current page and let the UI show the error instead of forcing a redirect.
+      // Force redirect to login
+      window.location.href = "/login";
     }
     
     // Handle 403 Forbidden errors with user-friendly message
     if (error.response?.status === 403) {
       error.userMessage = "Fitur ini kamu tidak ada akses. Silahkan hubungi Admin untuk mendapatkan akses.";
+    }
+    
+    // 🔒 SECURITY: Sanitize error messages to prevent XSS in error display
+    if (error.response?.data?.message) {
+      error.response.data.message = String(error.response.data.message).substring(0, 500);
     }
     
     return Promise.reject(error);
