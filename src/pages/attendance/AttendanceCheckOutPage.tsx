@@ -45,7 +45,7 @@ const AttendanceCheckOutPage = () => {
 
     setLoading(true);
     setStatus('Mengirim check-out...');
-    setSuccessMessage('');
+    setAlertMessage('');
 
     try {
       const now = new Date();
@@ -54,10 +54,12 @@ const AttendanceCheckOutPage = () => {
         longitude,
       });
       setStatus('Check-out berhasil');
-      setSuccessMessage(`✓ Anda telah berhasil check-out pada ${now.toLocaleTimeString('id-ID')}`);
+      setAlertMessage(`✓ Anda telah berhasil check-out pada ${now.toLocaleTimeString('id-ID')}`);
+      setAlertType('success');
     } catch (error: any) {
       setStatus('Check-out gagal');
-      setSuccessMessage(`✗ ${error.response?.data?.message || error.message || 'Terjadi kesalahan'}`);
+      setAlertMessage(`✗ ${error.response?.data?.message || error.message || 'Terjadi kesalahan'}`);
+      setAlertType('error');
     } finally {
       setLoading(false);
     }

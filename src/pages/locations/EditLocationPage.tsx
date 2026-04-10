@@ -5,7 +5,7 @@ import { Button } from '@/shared/ui/Button';
 import { Alert } from '@/shared/ui/Alert';
 import { getLocationDetail, updateLocation } from '@/features/location/api/location.service';
 import type { LocationUpdatePayload } from '@/features/location/types/location.types';
-import { MapPin, Check, ArrowLeft } from 'lucide-react';
+import { MapPin, ArrowLeft } from 'lucide-react';
 import './LocationForm.css';
 
 const EditLocationPage = () => {
@@ -25,7 +25,8 @@ const EditLocationPage = () => {
   useEffect(() => {
     const loadDetail = async () => {
       if (!id) {
-        setError('Location ID tidak ditemukan');
+        setAlertMessage('Location ID tidak ditemukan');
+        setAlertType('error');
         setLoading(false);
         return;
       }

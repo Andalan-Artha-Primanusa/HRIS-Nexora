@@ -7,6 +7,7 @@ import {
 } from "../api/auth.service";
 import type { RegisterPayload } from "../api/auth.service";
 import { useAuthStore } from "@/app/store/auth.store";
+import type { AuthUser } from "@/shared/types/rbac.types";
 
 const TOKEN_KEYS = ["token", "access_token", "jwt", "bearer_token"];
 const USER_KEYS = ["user", "user_info", "userData", "profile"];
@@ -31,10 +32,80 @@ const extractAuthFromResponse = (response: { data?: unknown }) => {
   const responseData = toRecord(root.data ?? root);
   const nestedData = toRecord(responseData.data);
 
-  const user =
+  let user =
     getFirstExistingValue(responseData, USER_KEYS) ??
     getFirstExistingValue(nestedData, USER_KEYS) ??
     null;
+
+  // 🔒 SECURITY: Normalize user roles and permissions to ensure consistent structure
+  if (user && typeof user === "object") {
+    const userObj = user as any;
+    
+    // Normalize roles - ensure it's always an array of Role objects
+    const normalizedRoles: any[] = [];
+    if (Array.isArray(userObj.roles)) {
+      for (const role of userObj.roles) {
+        if (typeof role === "string") {
+          // If role is a string, wrap it in a Role object
+          normalizedRoles.push({ id: 0, name: role });
+        } else if (typeof role === "object" && role) {
+          // If role is an object, clean up Laravel's pivot data and normalize
+          const cleanedRole = {
+            id: role.id || 0,
+            name: role.name || "",
+            display_name: role.display_name || "",
+            description: role.description,
+            permissions: Array.isArray(role.permissions) 
+              ? role.permissions.map((p: any) => ({
+                  id: p.id,
+                  name: p.name,
+                  display_name: p.display_name || p.name,
+                  description: p.description,
+                  // Remove Laravel pivot data
+                }))
+              : [],
+            created_at: role.created_at,
+            updated_at: role.updated_at,
+          };
+          normalizedRoles.push(cleanedRole);
+        }
+      }
+    }
+    userObj.roles = normalizedRoles;
+    
+    // Extract all permissions from roles and use them as top-level permissions
+    // This ensures hasPermission() works correctly
+    const allPermissions = new Map<string, any>();
+    
+    for (const role of normalizedRoles) {
+      if (Array.isArray(role.permissions)) {
+        for (const permission of role.permissions) {
+          if (permission.name && !allPermissions.has(permission.name)) {
+            allPermissions.set(permission.name, permission);
+          }
+        }
+      }
+    }
+    
+    // Merge with any existing top-level permissions
+    if (Array.isArray(userObj.permissions)) {
+      for (const permission of userObj.permissions) {
+        if (permission.name && !allPermissions.has(permission.name)) {
+          allPermissions.set(permission.name, permission);
+        }
+      }
+    }
+    
+    userObj.permissions = Array.from(allPermissions.values());
+    
+    // Log untuk debugging roles
+    console.log("[Auth] User extracted:", {
+      name: userObj.name,
+      email: userObj.email,
+      roles: userObj.roles.map((r: any) => ({ id: r.id, name: r.name })),
+      permissionCount: userObj.permissions.length,
+    });
+  }
 
   const rawToken =
     getFirstExistingValue(responseData, TOKEN_KEYS) ??
@@ -105,7 +176,11 @@ export const useAuth = () => {
         throw new Error("Token login tidak ditemukan dari response API");
       }
 
-      setAuth(user, token);
+      if (!user) {
+        throw new Error("User data tidak ditemukan dari response API");
+      }
+
+      setAuth(user as AuthUser, token);
 
       return { user, token, response: res };
     } catch (error) {
@@ -122,7 +197,11 @@ export const useAuth = () => {
         throw new Error("Token register tidak ditemukan dari response API");
       }
 
-      setAuth(user, token);
+      if (!user) {
+        throw new Error("User data tidak ditemukan dari response API");
+      }
+
+      setAuth(user as AuthUser, token);
 
       return { user, token, response: res };
     } catch (error) {
@@ -194,7 +273,11 @@ export const useAuth = () => {
         throw new Error("Token login SSO tidak ditemukan dari response API");
       }
 
-      setAuth(user, token);
+      if (!user) {
+        throw new Error("User data tidak ditemukan dari response API");
+      }
+
+      setAuth(user as AuthUser, token);
       return { user, token, response };
     } catch (error) {
       throw normalizeAuthError(error, "Login Google SSO gagal");

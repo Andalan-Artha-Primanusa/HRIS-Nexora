@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Menu, Search, Bell, Sun, LogOut, Settings, UserCircle } from 'lucide-react';
+import { Menu, Search, Bell, Sun, LogOut, Settings, UserCircle, RotateCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/app/store/auth.store';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useRefreshUser } from '@/features/auth/hooks/useRefreshUser';
 import './Header.css';
 
 interface HeaderProps {
@@ -21,6 +22,14 @@ const getDisplayName = (user: any) => {
 };
 
 const getDisplayRole = (user: any) => {
+  // Check for normalized roles array first
+  if (Array.isArray(user?.roles) && user.roles.length > 0) {
+    const primaryRole = user.roles[0];
+    if (typeof primaryRole === "object" && primaryRole?.name) {
+      return primaryRole.name === "employee" ? "Employee" : primaryRole.name;
+    }
+  }
+
   const role =
     user?.role?.name ||
     user?.role_name ||
@@ -44,8 +53,10 @@ const getInitials = (name: string) => {
 
 export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
   const [openDropdown, setOpenDropdown] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const user = useAuthStore((state) => state.user);
   const { handleLogout } = useAuth();
+  const { refreshUserData } = useRefreshUser();
   const navigate = useNavigate();
   const displayName = getDisplayName(user);
   const displayRole = getDisplayRole(user);
@@ -54,6 +65,15 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
   const onLogout = async () => {
     await handleLogout();
     navigate("/login", { replace: true });
+  };
+
+  const onRefreshUser = async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshUserData();
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   return (
@@ -78,6 +98,16 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
       </div>
       
       <div className="header-right">
+        <button 
+          className="icon-button" 
+          onClick={onRefreshUser}
+          disabled={isRefreshing}
+          aria-label="Refresh user data"
+          title="Refresh user data & roles"
+        >
+          <RotateCw size={20} className={isRefreshing ? 'rotating' : ''} />
+        </button>
+
         <button className="icon-button" aria-label="Toggle Dark Mode">
           <Sun size={20} />
         </button>
