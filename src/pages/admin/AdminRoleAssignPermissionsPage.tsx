@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { Alert } from "@/shared/ui/Alert";
 import { assignPermissionsToRole, getAllRoles, getAllPermissions } from "@/features/admin/api/admin.service";
 import { getErrorMessage } from "@/shared/api/errorHandler";
+import { RBACUtils } from "@/shared/hooks/rbac";
 import type { Permission } from "@/shared/types/rbac.types";
 import "./AdminCrudPages.css";
 
@@ -17,6 +19,23 @@ interface RoleData {
 
 const AdminRoleAssignPermissionsPage = () => {
   const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
+  const canManageRoles = RBACUtils.canManageRoles(user);
+  
+  if (!canManageRoles) {
+    return (
+      <div className="crud-page">
+        <div className="crud-header">
+          <h1>🚫 Akses Ditolak</h1>
+          <p>Anda tidak memiliki izin untuk mengakses halaman ini.</p>
+        </div>
+        <Card className="crud-card" glass>
+          <p>Silahkan hubungi Administrator untuk mendapatkan akses.</p>
+        </Card>
+      </div>
+    );
+  }
+  
   const [roles, setRoles] = useState<RoleData[]>([]);
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [selectedRoleId, setSelectedRoleId] = useState("");

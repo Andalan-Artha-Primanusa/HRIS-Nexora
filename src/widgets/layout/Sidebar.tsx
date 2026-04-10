@@ -6,6 +6,8 @@ import './Sidebar.css';
 
 import { menuItems } from '@/shared/config/menu';
 import type { MenuItem } from '@/shared/config/menu';
+import { filterMenuItems } from '@/shared/config/menuFilter';
+import { useAuthStore } from '@/app/store/auth.store';
 
 interface SidebarProps {
   collapsed: boolean;
@@ -128,6 +130,9 @@ const MenuItemComponent: React.FC<{
 };
 
 export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
+  const user = useAuthStore((state) => state.user);
+  const filteredItems = filterMenuItems(user, menuItems);
+
   return (
     <aside className={clsx('dashboard-sidebar', collapsed && 'collapsed')}>
       <div className="sidebar-logo">
@@ -140,7 +145,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
 
       <div className="sidebar-menu-container">
         <ul className="menu-list">
-          {menuItems.map((item, idx) => (
+          {filteredItems.map((item, idx) => (
             <MenuItemComponent
               key={idx}
               item={item}

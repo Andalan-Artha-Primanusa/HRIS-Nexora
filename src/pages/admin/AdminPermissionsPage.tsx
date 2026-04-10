@@ -28,6 +28,22 @@ const getColumns = (items: AdminEntityItem[]) => {
 
 const AdminPermissionsPage = () => {
   const user = useAuthStore((state) => state.user);
+  const canViewPermissions = RBACUtils.canViewPermissions(user);
+  
+  if (!canViewPermissions) {
+    return (
+      <div className="crud-page">
+        <div className="crud-header">
+          <h1>🚫 Akses Ditolak</h1>
+          <p>Anda tidak memiliki izin untuk mengakses halaman ini.</p>
+        </div>
+        <Card className="crud-card" glass>
+          <p>Silahkan hubungi Administrator untuk mendapatkan akses.</p>
+        </Card>
+      </div>
+    );
+  }
+  
   const [items, setItems] = useState<AdminEntityItem[]>([]);
   const [responseText, setResponseText] = useState("");
   const [statusMessage, setStatusMessage] = useState("Ready to call admin permissions API");
@@ -35,7 +51,6 @@ const AdminPermissionsPage = () => {
   const [loading, setLoading] = useState(false);
 
   const columns = useMemo(() => getColumns(items), [items]);
-  const canViewPermissions = RBACUtils.canViewPermissions(user);
 
   const formatResponse = (payload: unknown) => {
     setResponseText(typeof payload === "string" ? payload : JSON.stringify(payload, null, 2));
