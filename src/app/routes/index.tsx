@@ -27,6 +27,8 @@ import AdminUsersPage from "../../pages/admin/AdminUsersPage";
 import AdminRolesPage from "../../pages/admin/AdminRolesPage";
 import AdminPermissionsPage from "../../pages/admin/AdminPermissionsPage";
 import LeaveRequestsPage from "../../pages/leave/LeaveRequestsPage";
+import CreateLeavePage from "../../pages/leave/CreateLeavePage";
+import UpdateLeavePage from "../../pages/leave/UpdateLeavePage";
 import LeaveCalendarPage from "../../pages/leave/LeaveCalendarPage";
 import LeaveApprovalPage from "../../pages/leave/LeaveApprovalPage";
 import PayrollManagementPage from "../../pages/payroll/PayrollManagementPage";
@@ -253,6 +255,36 @@ export const router = createBrowserRouter([
           {
             index: true,
             element: <LeaveRequestsPage />,
+          },
+        ],
+      },
+      {
+        path: "/leave/requests/create",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <CreateLeavePage />,
+          },
+        ],
+      },
+      {
+        path: "/leave/requests/edit/:id",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <UpdateLeavePage />,
+          },
+        ],
+      },
+      {
+        path: "/leave/requests/view/:id",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <UpdateLeavePage />,
           },
         ],
       },

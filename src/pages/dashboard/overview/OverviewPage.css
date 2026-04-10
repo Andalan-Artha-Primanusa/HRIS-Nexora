@@ -1,5 +1,6 @@
 .overview-page {
   --primary: #2563eb;
+  --primary-dark: #1d4ed8;
   --primary-light: #dbeafe;
   --primary-lighter: #eff6ff;
   --surface: #f8fcff;
@@ -14,6 +15,8 @@
   background: var(--surface);
   border-radius: 16px;
 }
+
+@import url('./../../shared/ui/Charts.css');
 
 .page-header {
   display: flex;
@@ -52,7 +55,7 @@
 
 .charts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(520px, 1fr));
   gap: 1.5rem;
 }
 
@@ -63,7 +66,8 @@
   border: 1px solid var(--border);
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
   overflow: hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  position: relative;
 }
 
 .chart-card::before {
@@ -71,17 +75,19 @@
   position: absolute;
   top: 0;
   right: 0;
-  width: 120px;
-  height: 120px;
-  background: radial-gradient(circle, var(--primary-light) 0%, transparent 70%);
-  transform: translate(25%, -25%);
+  width: 140px;
+  height: 140px;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.1) 0%, transparent 70%);
+  transform: translate(30%, -30%);
   pointer-events: none;
-  opacity: 0.3;
+  opacity: 0.4;
+  border-radius: 50%;
 }
 
 .chart-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.12);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.15);
+  border-color: #93c5fd;
 }
 
 .chart-card.full-width {
@@ -89,7 +95,7 @@
 }
 
 .chart-title {
-  font-size: 1.1rem;
+  font-size: 1.125rem;
   color: var(--text);
   font-weight: 700;
   margin: 0 0 1.5rem;
@@ -97,14 +103,119 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  position: relative;
+  z-index: 1;
 }
 
 .chart-title::before {
   content: "";
-  width: 0.4rem;
-  height: 0.4rem;
+  width: 0.5rem;
+  height: 0.5rem;
   border-radius: 50%;
   background: var(--primary);
+  box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.1);
+}
+
+/* Metrics Grid for Summary Cards */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.metric-card {
+  padding: 1.5rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8faff 100%);
+  border: 1px solid rgba(37, 99, 235, 0.15);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.metric-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -40px;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.metric-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.15);
+  border-color: #93c5fd;
+}
+
+.metric-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.metric-label {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.metric-icon {
+  font-size: 1.75rem;
+  opacity: 0.8;
+}
+
+.metric-value {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #2563eb;
+  letter-spacing: -1px;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 0.75rem;
+}
+
+.metric-change {
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  position: relative;
+  z-index: 1;
+}
+
+.metric-change.positive {
+  color: #10b981;
+}
+
+.metric-change.negative {
+  color: #ef4444;
+}
+
+.metric-change.neutral {
+  color: #64748b;
+}
+
+.chart-subtitle {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0.5rem 0 1rem 0;
+  font-weight: 400;
+}
+
+.charts-grid-2col {
+  grid-template-columns: repeat(2, 1fr);
 }
 
 @media (max-width: 1200px) {
@@ -114,6 +225,14 @@
 
   .chart-card.full-width {
     grid-column: 1;
+  }
+
+  .charts-grid-2col {
+    grid-template-columns: 1fr;
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 

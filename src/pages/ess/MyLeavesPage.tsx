@@ -6,21 +6,34 @@ import { getMyLeaveBalance, getMyLeaves } from "@/features/ess/api/ess.service";
 import type { GenericApiItem } from "@/features/ess/types/ess.types";
 import "./EssPages.css";
 
+const formatDate = (dateString: string | undefined | null) => {
+  if (!dateString) return "-";
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  } catch {
+    return dateString;
+  }
+};
+
+const getLeaveTypeLabel = (type: string | undefined) => {
+  const typeMap: Record<string, string> = {
+    annual: "Annual Leave",
+    sick: "Sick Leave",
+    personal: "Personal Leave",
+    unpaid: "Unpaid Leave",
+  };
+  return typeMap[type?.toLowerCase() ?? ""] ?? type ?? "-";
+};
+
 const asDisplay = (value: unknown) => {
   if (value === null || value === undefined) return "-";
   if (typeof value === "object") return JSON.stringify(value);
   return String(value);
-};
-
-const getColumns = (items: GenericApiItem[]) => {
-  if (items.length === 0) {
-    return ["id", "type", "start_date", "end_date", "status"];
-  }
-
-  const keys = Object.keys(items[0]);
-  const preferred = ["id", "type", "start_date", "end_date", "total_days", "status"];
-  const merged = [...preferred, ...keys.filter((key) => !preferred.includes(key))];
-  return merged.filter((key, index) => merged.indexOf(key) === index);
 };
 
 const MyLeavesPage = () => {
@@ -29,30 +42,16 @@ const MyLeavesPage = () => {
 
   const [leaves, setLeaves] = useState<GenericApiItem[]>([]);
   const [leaveBalance, setLeaveBalance] = useState<Record<string, unknown> | null>(null);
-  const [responseText, setResponseText] = useState("");
-  const [statusMessage, setStatusMessage] = useState("Ready to call my leaves API");
   const [loading, setLoading] = useState(false);
-
-  const columns = useMemo(() => getColumns(leaves), [leaves]);
-
-  const formatResponse = (payload: unknown) => {
-    setResponseText(typeof payload === "string" ? payload : JSON.stringify(payload, null, 2));
-  };
 
   const loadLeaves = async () => {
     setLoading(true);
-    setStatusMessage("Memuat data leave saya...");
-    setResponseText("");
 
     try {
       const result = await getMyLeaves();
       setLeaves(result.items);
-      formatResponse(result.raw);
-      setStatusMessage("Data leave saya berhasil dimuat.");
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal memuat leave saya.";
-      formatResponse(message);
-      setStatusMessage("Gagal memuat leave saya.");
+      // Handle error silently
     } finally {
       setLoading(false);
     }
@@ -60,8 +59,6 @@ const MyLeavesPage = () => {
 
   const loadLeaveBalance = async () => {
     setLoading(true);
-    setStatusMessage("Memuat leave balance...");
-    setResponseText("");
 
     try {
       const result = await getMyLeaveBalance();
@@ -71,12 +68,8 @@ const MyLeavesPage = () => {
           : null;
 
       setLeaveBalance(balancePayload);
-      formatResponse(result.raw);
-      setStatusMessage("Leave balance berhasil dimuat.");
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal memuat leave balance.";
-      formatResponse(message);
-      setStatusMessage("Gagal memuat leave balance.");
+      // Handle error silently
     } finally {
       setLoading(false);
     }
@@ -95,47 +88,58 @@ const MyLeavesPage = () => {
     <div className="ess-page">
       <div className="ess-header">
         <div>
-          <h1>{isBalanceRoute ? "My Leave Balance" : "My Leaves"}</h1>
+          <h1>{isBalanceRoute ? "💰 My Leave Balance" : "📋 My Leaves"}</h1>
           <p>
             {isBalanceRoute
-              ? "Endpoint: GET /api/leaves/balance"
-              : "Endpoint: GET /api/leaves/my"}
+              ? "View your available leave balance"
+              : "View your leave history"}
           </p>
         </div>
-        <div className="ess-inline-actions">
-          <Button variant="outline" size="md" onClick={() => void loadLeaves()} disabled={loading}>
-            Refresh Leaves
-          </Button>
-          <Button variant="secondary" size="md" onClick={() => void loadLeaveBalance()} disabled={loading}>
-            Refresh Balance
-          </Button>
-        </div>
+        <Button variant="primary" size="md" onClick={() => void loadLeaves()} disabled={loading}>
+          {loading ? "Loading..." : "Refresh"}
+        </Button>
       </div>
 
       {!isBalanceRoute && (
         <Card className="ess-card" glass>
-          <h2>My Leaves Table</h2>
           <div className="ess-table-wrap">
             <table className="ess-table">
               <thead>
                 <tr>
-                  {columns.map((column) => (
-                    <th key={column}>{column}</th>
-                  ))}
+                  <th>#</th>
+                  <th>Leave Type</th>
+                  <th>From - To</th>
+                  <th>Days</th>
+                  <th>Status</th>
                 </tr>
               </thead>
               <tbody>
                 {leaves.length > 0 ? (
-                  leaves.map((item, index) => (
-                    <tr key={String(item.id ?? index)}>
-                      {columns.map((column) => (
-                        <td key={`${String(item.id ?? index)}-${column}`}>{asDisplay(item[column])}</td>
-                      ))}
-                    </tr>
-                  ))
+                  leaves.map((item, index) => {
+                    const leave = item as any;
+                    const status = leave.status || "pending";
+                    return (
+                      <tr key={String(leave.id ?? index)}>
+                        <td className="ess-table-id">{index + 1}</td>
+                        <td className="ess-table-type">{getLeaveTypeLabel(leave.type)}</td>
+                        <td className="ess-table-dates">
+                          <div>{formatDate(leave.start_date)}</div>
+                          <div className="ess-table-dates-sub">to {formatDate(leave.end_date)}</div>
+                        </td>
+                        <td className="ess-table-days">{leave.total_days || 1} days</td>
+                        <td>
+                          <span className={`leave-status-badge leave-status-${status}`}>
+                            {status.charAt(0).toUpperCase() + status.slice(1)}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })
                 ) : (
                   <tr>
-                    <td colSpan={columns.length}>No leave data.</td>
+                    <td colSpan={5} style={{ textAlign: "center", padding: "2rem", color: "#64748b" }}>
+                      No leave data available
+                    </td>
                   </tr>
                 )}
               </tbody>
@@ -146,27 +150,21 @@ const MyLeavesPage = () => {
 
       {isBalanceRoute && (
         <Card className="ess-card" glass>
-          <h2>Leave Balance</h2>
+          <h2>Your Leave Balance</h2>
           {leaveBalance ? (
             <div className="ess-balance-grid">
               {Object.entries(leaveBalance).map(([key, value]) => (
                 <div className="ess-balance-item" key={key}>
-                  <span>{key}</span>
+                  <span>{key.replace(/_/g, " ").toUpperCase()}</span>
                   <strong>{asDisplay(value)}</strong>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="ess-empty">No leave balance data.</p>
+            <p className="ess-empty">No leave balance data available.</p>
           )}
         </Card>
       )}
-
-      <Card className="ess-card" glass>
-        <h2>Raw Response</h2>
-        <pre className="ess-response">{responseText || "Response API akan tampil di sini."}</pre>
-        <p className="ess-status">{statusMessage}</p>
-      </Card>
     </div>
   );
 };
