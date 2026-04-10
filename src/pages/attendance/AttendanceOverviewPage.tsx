@@ -1,11 +1,17 @@
-import { useNavigate } from 'react-router-dom';
 import { Card } from '@/shared/ui/Card';
-import { Button } from '@/shared/ui/Button';
-import { Clock, MapPin, CalendarDays, ListChecks } from 'lucide-react';
+import { TrendingUp, Calendar, Clock, AlertCircle } from 'lucide-react';
 import './AttendancePages.css';
 
 const AttendanceOverviewPage = () => {
-  const navigate = useNavigate();
+  // Mock data - replace with actual API data
+  const attendanceStats = {
+    present: 18,
+    absent: 2,
+    late: 3,
+    attendanceRate: 85,
+    totalWorkingDays: 23,
+    workHours: 162,
+  };
 
   return (
     <div className="attendance-page">
@@ -14,71 +20,90 @@ const AttendanceOverviewPage = () => {
           <p className="attendance-badge">Attendance Center</p>
           <h1>Attendance Dashboard</h1>
           <p className="attendance-hero-copy">
-            Kelola check-in, check-out, dan lihat riwayat kehadiran secara aman dan cepat.
+            Ringkasan kehadiran dan statistik kehadiran Anda bulan ini.
           </p>
-        </div>
-
-        <div className="attendance-hero-actions">
-          <Button variant="primary" size="md" onClick={() => navigate('/attendance/check-in')}>
-            Check In
-          </Button>
-          <Button variant="secondary" size="md" onClick={() => navigate('/attendance/check-out')}>
-            Check Out
-          </Button>
         </div>
       </div>
 
       <div className="attendance-grid">
+        {/* Attendance Rate */}
         <Card className="attendance-summary-card" glass>
           <div className="summary-card-head">
-            <MapPin size={22} />
+            <TrendingUp size={22} />
             <div>
-              <p className="summary-label">Aktivitas Check In</p>
-              <p className="summary-subtitle">Touchpoint lokasi dan waktu kerja Anda.</p>
+              <p className="summary-label">Tingkat Kehadiran</p>
+              <p className="summary-subtitle">Persentase kehadiran bulan ini</p>
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={() => navigate('/attendance/check-in')}>
-            Buka Check In
-          </Button>
+          <div style={{ marginTop: '1rem' }}>
+            <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#0066cc' }}>
+              {attendanceStats.attendanceRate}%
+            </p>
+          </div>
         </Card>
 
+        {/* Total Present */}
+        <Card className="attendance-summary-card" glass>
+          <div className="summary-card-head">
+            <Calendar size={22} />
+            <div>
+              <p className="summary-label">Hari Hadir</p>
+              <p className="summary-subtitle">Total hari kehadiran</p>
+            </div>
+          </div>
+          <div style={{ marginTop: '1rem' }}>
+            <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#00a86b' }}>
+              {attendanceStats.present}/{attendanceStats.totalWorkingDays}
+            </p>
+          </div>
+        </Card>
+
+        {/* Total Absent */}
+        <Card className="attendance-summary-card" glass>
+          <div className="summary-card-head">
+            <AlertCircle size={22} />
+            <div>
+              <p className="summary-label">Hari Tidak Hadir</p>
+              <p className="summary-subtitle">Total hari tidak hadir</p>
+            </div>
+          </div>
+          <div style={{ marginTop: '1rem' }}>
+            <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#e74c3c' }}>
+              {attendanceStats.absent}
+            </p>
+          </div>
+        </Card>
+
+        {/* Late Count */}
         <Card className="attendance-summary-card" glass>
           <div className="summary-card-head">
             <Clock size={22} />
             <div>
-              <p className="summary-label">Check Out</p>
-              <p className="summary-subtitle">Tutup shift dan catat jam pulang.</p>
+              <p className="summary-label">Keterlambatan</p>
+              <p className="summary-subtitle">Total hari terlambat</p>
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={() => navigate('/attendance/check-out')}>
-            Buka Check Out
-          </Button>
+          <div style={{ marginTop: '1rem' }}>
+            <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#f39c12' }}>
+              {attendanceStats.late}
+            </p>
+          </div>
         </Card>
 
+        {/* Total Work Hours */}
         <Card className="attendance-summary-card" glass>
           <div className="summary-card-head">
-            <CalendarDays size={22} />
+            <Clock size={22} />
             <div>
-              <p className="summary-label">Today</p>
-              <p className="summary-subtitle">Lihat status absen hari ini.</p>
+              <p className="summary-label">Total Jam Kerja</p>
+              <p className="summary-subtitle">Jam kerja bulan ini</p>
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={() => navigate('/attendance/today')}>
-            Lihat Hari Ini
-          </Button>
-        </Card>
-
-        <Card className="attendance-summary-card" glass>
-          <div className="summary-card-head">
-            <ListChecks size={22} />
-            <div>
-              <p className="summary-label">History</p>
-              <p className="summary-subtitle">Riwayat absen lengkap Anda.</p>
-            </div>
+          <div style={{ marginTop: '1rem' }}>
+            <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#8e44ad' }}>
+              {attendanceStats.workHours}h
+            </p>
           </div>
-          <Button variant="outline" size="sm" onClick={() => navigate('/attendance/history')}>
-            Lihat Riwayat
-          </Button>
         </Card>
       </div>
     </div>
