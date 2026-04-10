@@ -2,27 +2,31 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { Alert } from '@/shared/ui/Alert';
 import { getAllLocations, deleteLocation } from '@/features/location/api/location.service';
 import type { LocationItem } from '@/features/location/types/location.types';
-import { MapPin, AlertCircle, Trash2, Edit3, Plus } from 'lucide-react';
+import { MapPin, Trash2, Edit3, Plus } from 'lucide-react';
 import '../admin/AdminCrudPages.css';
 
 const LocationsPage = () => {
   const navigate = useNavigate();
   const [locations, setLocations] = useState<LocationItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('error');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   const loadLocations = async () => {
     setLoading(true);
-    setError('');
+    setAlertMessage('');
 
     try {
       const result = await getAllLocations();
       setLocations(result.items);
     } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Gagal memuat locations');
+      const message = err.response?.data?.message || err.message || 'Gagal memuat locations';
+      setAlertMessage(message);
+      setAlertType('error');
     } finally {
       setLoading(false);
     }
@@ -34,8 +38,12 @@ const LocationsPage = () => {
       await deleteLocation(id);
       await loadLocations();
       setDeleteConfirm(null);
+      setAlertMessage('Location berhasil dihapus.');
+      setAlertType('success');
     } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Gagal menghapus location');
+      const message = err.response?.data?.message || err.message || 'Gagal menghapus location';
+      setAlertMessage(message);
+      setAlertType('error');
     } finally {
       setLoading(false);
     }
@@ -108,22 +116,13 @@ const LocationsPage = () => {
       </div>
 
       {/* Error Message */}
-      {error && (
-        <div
-          style={{
-            padding: '1rem',
-            backgroundColor: '#ffebee',
-            borderRadius: '0.5rem',
-            marginBottom: '1rem',
-            color: '#c41e3a',
-            display: 'flex',
-            gap: '0.75rem',
-            alignItems: 'center',
-          }}
-        >
-          <AlertCircle size={20} />
-          {error}
-        </div>
+      {alertMessage && (
+        <Alert 
+          type={alertType} 
+          message={alertMessage}
+          onClose={() => setAlertMessage('')}
+          dismissible
+        />
       )}
 
       {/* Locations Table */}

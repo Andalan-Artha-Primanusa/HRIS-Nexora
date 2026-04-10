@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { Alert } from '@/shared/ui/Alert';
 import { api } from '@/shared/api/httpClient';
-import { CheckCircle2, MapPin, AlertCircle } from 'lucide-react';
+import { CheckCircle2, MapPin } from 'lucide-react';
 import './AttendancePages.css';
 
 const AttendanceCheckInPage = () => {
@@ -10,8 +11,8 @@ const AttendanceCheckInPage = () => {
   const [longitude, setLongitude] = useState<number | null>(null);
   const [status, setStatus] = useState('Mendeteksi lokasi GPS...');
   const [loading, setLoading] = useState(false);
-  const [locationError, setLocationError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('info');
 
   // Auto-capture GPS location on page load
   useEffect(() => {
@@ -21,15 +22,17 @@ const AttendanceCheckInPage = () => {
           setLatitude(position.coords.latitude);
           setLongitude(position.coords.longitude);
           setStatus('Lokasi GPS terdeteksi. Siap untuk check in.');
-          setLocationError('');
+          setAlertMessage('');
         },
         (error) => {
-          setLocationError(`Error: ${error.message}`);
+          setAlertMessage(error.message);
+          setAlertType('error');
           setStatus('Gagal mendeteksi lokasi GPS');
         }
       );
     } else {
-      setLocationError('Geolocation tidak didukung oleh browser ini');
+      setAlertMessage('Geolocation tidak didukung oleh browser ini');
+      setAlertType('error');
       setStatus('Browser tidak mendukung GPS');
     }
   }, []);
@@ -42,7 +45,7 @@ const AttendanceCheckInPage = () => {
 
     setLoading(true);
     setStatus('Mengirim check-in...');
-    setSuccessMessage('');
+    setAlertMessage('');
 
     try {
       const now = new Date();
@@ -52,10 +55,13 @@ const AttendanceCheckInPage = () => {
       });
 
       setStatus('Check-in berhasil');
-      setSuccessMessage(`✓ Anda telah berhasil check-in pada ${now.toLocaleTimeString('id-ID')}`);
+      setAlertMessage(`Anda telah berhasil check-in pada ${now.toLocaleTimeString('id-ID')}`);
+      setAlertType('success');
     } catch (error: any) {
       setStatus('Check-in gagal');
-      setSuccessMessage(`✗ ${error.response?.data?.message || error.message || 'Terjadi kesalahan'}`);
+      const message = error.response?.data?.message || error.message || 'Terjadi kesalahan';
+      setAlertMessage(message);
+      setAlertType('error');
     } finally {
       setLoading(false);
     }
@@ -79,17 +85,13 @@ const AttendanceCheckInPage = () => {
       </div>
 
       <Card className="attendance-form-card" glass>
-        {locationError && (
-          <div style={{ padding: '1rem', backgroundColor: '#ffe0e0', borderRadius: '0.5rem', marginBottom: '1rem', color: '#c41e3a', display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-            <AlertCircle size={20} />
-            {locationError}
-          </div>
-        )}
-
-        {successMessage && (
-          <div style={{ padding: '1rem', backgroundColor: successMessage.startsWith('✓') ? '#e8f5e9' : '#ffebee', borderRadius: '0.5rem', marginBottom: '1rem', color: successMessage.startsWith('✓') ? '#2e7d32' : '#c41e3a', display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-            {successMessage}
-          </div>
+        {alertMessage && (
+          <Alert 
+            type={alertType} 
+            message={alertMessage}
+            onClose={() => setAlertMessage('')}
+            dismissible
+          />
         )}
 
         <div className="attendance-form-grid">

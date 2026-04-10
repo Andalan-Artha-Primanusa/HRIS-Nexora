@@ -36,6 +36,12 @@ api.interceptors.response.use(
       localStorage.removeItem("user");
       // keep the current page and let the UI show the error instead of forcing a redirect.
     }
+    
+    // Handle 403 Forbidden errors with user-friendly message
+    if (error.response?.status === 403) {
+      error.userMessage = "Fitur ini kamu tidak ada akses. Silahkan hubungi Admin untuk mendapatkan akses.";
+    }
+    
     return Promise.reject(error);
   }
 );

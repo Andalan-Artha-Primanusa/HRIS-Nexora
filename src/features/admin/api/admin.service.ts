@@ -1,5 +1,5 @@
 import { api } from "@/shared/api/httpClient";
-import type { AdminEntityItem, AssignPermissionsPayload, AssignRolesPayload } from "../types/admin.types";
+import type { AdminEntityItem, AssignPermissionsPayload, AssignRolesPayload, AdminUser, AdminRole, AdminPermission } from "../types/admin.types";
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -30,36 +30,139 @@ const extractArrayPayload = (raw: unknown): AdminEntityItem[] => {
   return [];
 };
 
-export const getAllUsers = async () => {
-  const response = await api.get("/admin/users");
+/**
+ * Get all users with pagination support
+ */
+export const getAllUsers = async (page = 1, perPage = 50) => {
+  const response = await api.get("/admin/users", {
+    params: { page, per_page: perPage }
+  });
   return {
-    items: extractArrayPayload(response.data),
+    items: extractArrayPayload(response.data) as AdminUser[],
+    raw: response.data,
+    total: toRecord(response.data).total,
+    page,
+    perPage,
+  };
+};
+
+/**
+ * Get user by ID
+ */
+export const getUserById = async (id: string | number) => {
+  const response = await api.get(`/admin/users/${id}`);
+  return {
+    data: extractPayload(response.data),
     raw: response.data,
   };
 };
 
+/**
+ * Assign roles to a user
+ */
 export const assignRolesToUser = async (id: string, payload: AssignRolesPayload) => {
   const response = await api.post(`/admin/users/${id}/assign-role`, payload);
   return { raw: response.data };
 };
 
-export const getAllRoles = async () => {
-  const response = await api.get("/admin/roles");
+/**
+ * Remove role from a user
+ */
+export const removeRoleFromUser = async (id: string, roleId: number) => {
+  const response = await api.delete(`/admin/users/${id}/remove-role/${roleId}`);
+  return { raw: response.data };
+};
+
+/**
+ * Get all roles with permissions
+ */
+export const getAllRoles = async (page = 1, perPage = 50) => {
+  const response = await api.get("/admin/roles", {
+    params: { page, per_page: perPage }
+  });
   return {
-    items: extractArrayPayload(response.data),
+    items: extractArrayPayload(response.data) as AdminRole[],
+    raw: response.data,
+    total: toRecord(response.data).total,
+    page,
+    perPage,
+  };
+};
+
+/**
+ * Get role by ID
+ */
+export const getRoleById = async (id: string | number) => {
+  const response = await api.get(`/admin/roles/${id}`);
+  return {
+    data: extractPayload(response.data),
     raw: response.data,
   };
 };
 
+/**
+ * Assign permissions to a role
+ */
 export const assignPermissionsToRole = async (id: string, payload: AssignPermissionsPayload) => {
   const response = await api.post(`/admin/roles/${id}/assign-permission`, payload);
   return { raw: response.data };
 };
 
-export const getAllPermissions = async () => {
-  const response = await api.get("/admin/permissions");
+/**
+ * Remove permission from a role
+ */
+export const removePermissionFromRole = async (id: string, permissionId: number) => {
+  const response = await api.delete(`/admin/roles/${id}/remove-permission/${permissionId}`);
+  return { raw: response.data };
+};
+
+/**
+ * Get all permissions
+ */
+export const getAllPermissions = async (page = 1, perPage = 50) => {
+  const response = await api.get("/admin/permissions", {
+    params: { page, per_page: perPage }
+  });
   return {
-    items: extractArrayPayload(response.data),
+    items: extractArrayPayload(response.data) as AdminPermission[],
+    raw: response.data,
+    total: toRecord(response.data).total,
+    page,
+    perPage,
+  };
+};
+
+/**
+ * Get permission by ID
+ */
+export const getPermissionById = async (id: string | number) => {
+  const response = await api.get(`/admin/permissions/${id}`);
+  return {
+    data: extractPayload(response.data),
     raw: response.data,
   };
+};
+
+/**
+ * Check if current user can modify a role
+ */
+export const canModifyRole = async (roleId: number) => {
+  try {
+    const response = await api.get(`/admin/roles/${roleId}/can-modify`);
+    return toRecord(response.data).can_modify ?? false;
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Check if current user can assign a specific role
+ */
+export const canAssignRole = async (roleId: number) => {
+  try {
+    const response = await api.get(`/admin/roles/${roleId}/can-assign`);
+    return toRecord(response.data).can_assign ?? false;
+  } catch {
+    return false;
+  }
 };

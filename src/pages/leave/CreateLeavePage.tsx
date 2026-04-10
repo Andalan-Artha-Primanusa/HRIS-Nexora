@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { Alert } from '@/shared/ui/Alert';
 import { createLeaveRequest } from '@/features/leave/api/leave.service';
 import type { LeaveCreatePayload } from '@/features/leave/types/leave.types';
-import { AlertCircle, Check, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import './LeavePages.css';
 
 const CreateLeavePage = () => {
@@ -17,8 +18,8 @@ const CreateLeavePage = () => {
     reason: '',
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('error');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -30,23 +31,28 @@ const CreateLeavePage = () => {
 
   const validateForm = (): boolean => {
     if (!formData.type.trim()) {
-      setError('Tipe leave wajib dipilih');
+      setAlertMessage('Tipe leave wajib dipilih');
+      setAlertType('error');
       return false;
     }
     if (!formData.start_date) {
-      setError('Tanggal mulai wajib diisi');
+      setAlertMessage('Tanggal mulai wajib diisi');
+      setAlertType('error');
       return false;
     }
     if (!formData.end_date) {
-      setError('Tanggal selesai wajib diisi');
+      setAlertMessage('Tanggal selesai wajib diisi');
+      setAlertType('error');
       return false;
     }
     if (new Date(formData.start_date) > new Date(formData.end_date)) {
-      setError('Tanggal mulai harus sebelum tanggal selesai');
+      setAlertMessage('Tanggal mulai harus sebelum tanggal selesai');
+      setAlertType('error');
       return false;
     }
     if (!formData.reason.trim()) {
-      setError('Alasan wajib diisi');
+      setAlertMessage('Alasan wajib diisi');
+      setAlertType('error');
       return false;
     }
     return true;
@@ -56,8 +62,7 @@ const CreateLeavePage = () => {
     if (!validateForm()) return;
 
     setLoading(true);
-    setError('');
-    setSuccess('');
+    setAlertMessage('');
 
     try {
       const payload: LeaveCreatePayload = {
@@ -69,12 +74,15 @@ const CreateLeavePage = () => {
       };
 
       await createLeaveRequest(payload);
-      setSuccess('✓ Pengajuan cuti berhasil dibuat!');
+      setAlertMessage('Pengajuan cuti berhasil dibuat!');
+      setAlertType('success');
       setTimeout(() => {
         navigate('/leave/requests');
       }, 1500);
     } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Gagal membuat pengajuan cuti');
+      const message = err.response?.data?.message || err.message || 'Gagal membuat pengajuan cuti';
+      setAlertMessage(message);
+      setAlertType('error');
     } finally {
       setLoading(false);
     }
@@ -99,18 +107,13 @@ const CreateLeavePage = () => {
 
       {/* Form Card */}
       <Card className="leave-card" glass>
-        {error && (
-          <div className="leave-alert leave-alert-error">
-            <AlertCircle size={20} />
-            <span>{error}</span>
-          </div>
-        )}
-
-        {success && (
-          <div className="leave-alert leave-alert-success">
-            <Check size={20} />
-            <span>{success}</span>
-          </div>
+        {alertMessage && (
+          <Alert 
+            type={alertType} 
+            message={alertMessage}
+            onClose={() => setAlertMessage('')}
+            dismissible
+          />
         )}
 
         <form className="leave-form" onSubmit={(e) => { e.preventDefault(); void handleCreateLeave(); }}>

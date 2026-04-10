@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { Alert } from '@/shared/ui/Alert';
 import { api } from '@/shared/api/httpClient';
-import { CalendarDays, AlertCircle, CheckCircle2, Clock, XCircle } from 'lucide-react';
+import { CalendarDays, CheckCircle2, Clock, XCircle } from 'lucide-react';
 import './AttendancePages.css';
 
 interface AttendanceRecord {
@@ -17,12 +18,13 @@ const AttendanceHistoryPage = () => {
   const [history, setHistory] = useState<AttendanceRecord[]>([]);
   const [status, setStatus] = useState('Memuat riwayat attendance...');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('error');
 
   const loadHistory = async () => {
     setLoading(true);
     setStatus('Mengambil data history...');
-    setError('');
+    setAlertMessage('');
 
     try {
       const result = await api.get('/attendance/history');
@@ -31,7 +33,9 @@ const AttendanceHistoryPage = () => {
       setStatus('History attendance berhasil dimuat.');
     } catch (error: any) {
       setStatus('Gagal memuat history.');
-      setError(error.response?.data?.message || error.message || 'Terjadi kesalahan');
+      const message = error.response?.data?.message || error.message || 'Terjadi kesalahan';
+      setAlertMessage(message);
+      setAlertType('error');
     } finally {
       setLoading(false);
     }
@@ -111,11 +115,13 @@ const AttendanceHistoryPage = () => {
           </Button>
         </div>
 
-        {error && (
-          <div style={{ padding: '1rem', backgroundColor: '#ffebee', borderRadius: '0.5rem', marginBottom: '1rem', color: '#c41e3a', display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-            <AlertCircle size={20} />
-            {error}
-          </div>
+        {alertMessage && (
+          <Alert 
+            type={alertType} 
+            message={alertMessage}
+            onClose={() => setAlertMessage('')}
+            dismissible
+          />
         )}
 
         {history.length > 0 ? (

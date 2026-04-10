@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
+import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
+import { Alert } from "@/shared/ui/Alert";
+import { RBACUtils } from "@/shared/hooks/rbac";
 import { getAllPermissions } from "@/features/admin/api/admin.service";
+import { getErrorMessage } from "@/shared/api/errorHandler";
 import type { AdminEntityItem } from "@/features/admin/types/admin.types";
 import "./AdminCrudPages.css";
 
@@ -23,31 +27,41 @@ const getColumns = (items: AdminEntityItem[]) => {
 };
 
 const AdminPermissionsPage = () => {
+  const user = useAuthStore((state) => state.user);
   const [items, setItems] = useState<AdminEntityItem[]>([]);
   const [responseText, setResponseText] = useState("");
   const [statusMessage, setStatusMessage] = useState("Ready to call admin permissions API");
+  const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('info');
   const [loading, setLoading] = useState(false);
 
   const columns = useMemo(() => getColumns(items), [items]);
+  const canViewPermissions = RBACUtils.canViewPermissions(user);
 
   const formatResponse = (payload: unknown) => {
     setResponseText(typeof payload === "string" ? payload : JSON.stringify(payload, null, 2));
   };
 
   const loadPermissions = async () => {
+    if (!canViewPermissions) {
+      setStatusMessage("Anda tidak memiliki izin untuk melihat permissions.");
+      return;
+    }
+
     setLoading(true);
     setStatusMessage("Memuat permissions...");
     setResponseText("");
 
     try {
       const result = await getAllPermissions();
-      setItems(result.items);
+      setItems(result.items as unknown as AdminEntityItem[]);
       formatResponse(result.raw);
       setStatusMessage("Data permissions berhasil dimuat.");
+      setAlertType('success');
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal memuat permissions.";
+      const message = getErrorMessage(error as any);
       formatResponse(message);
-      setStatusMessage("Gagal memuat permissions.");
+      setStatusMessage(message);
+      setAlertType('error');
     } finally {
       setLoading(false);
     }
@@ -69,6 +83,16 @@ const AdminPermissionsPage = () => {
           Refresh
         </Button>
       </div>
+
+      {/* Status Alert */}
+      {statusMessage && (
+        <Alert 
+          type={alertType} 
+          message={statusMessage} 
+          onClose={() => setStatusMessage('')}
+          dismissible
+        />
+      )}
 
       <Card className="crud-card" glass>
         <h2>Permissions Table</h2>
@@ -103,7 +127,6 @@ const AdminPermissionsPage = () => {
       <Card className="crud-card" glass>
         <h2>Raw Response</h2>
         <pre className="crud-response">{responseText || "Response API akan tampil di sini."}</pre>
-        <p className="crud-status">{statusMessage}</p>
       </Card>
     </div>
   );

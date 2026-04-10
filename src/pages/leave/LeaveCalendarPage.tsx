@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
+import { Alert } from "@/shared/ui/Alert";
 import { getLeaveCalendar } from "@/features/leave/api/leave.service";
 
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -18,7 +19,8 @@ interface CalendarEvent {
 const LeaveCalendarPage = () => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [currentDate, setCurrentDate] = useState(new Date(2026, 3, 1)); // April 2026
-  const [statusMessage, setStatusMessage] = useState("Ready to load leave calendar");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('info');
   const [loading, setLoading] = useState(false);
 
   // Calculate statistics
@@ -52,7 +54,6 @@ const LeaveCalendarPage = () => {
 
   const loadCalendar = async () => {
     setLoading(true);
-    setStatusMessage("Memuat leave calendar...");
 
     try {
       const result = await getLeaveCalendar();
@@ -67,10 +68,12 @@ const LeaveCalendarPage = () => {
       }));
       
       setEvents(parsedEvents);
-      setStatusMessage("Leave calendar berhasil dimuat");
+      setAlertMessage("Leave calendar berhasil dimuat");
+      setAlertType('info');
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Gagal memuat leave calendar";
-      setStatusMessage(message);
+      setAlertMessage(message);
+      setAlertType('error');
     } finally {
       setLoading(false);
     }
@@ -129,10 +132,13 @@ const LeaveCalendarPage = () => {
         </Button>
       </div>
 
-      {statusMessage && (
-        <div className="leave-alert leave-alert-info" style={{ background: '#dbeafe', borderColor: '#93c5fd', color: '#1e40af' }}>
-          ℹ {statusMessage}
-        </div>
+      {alertMessage && (
+        <Alert 
+          type={alertType} 
+          message={alertMessage}
+          onClose={() => setAlertMessage('')}
+          dismissible
+        />
       )}
 
       {/* Summary Stats */}

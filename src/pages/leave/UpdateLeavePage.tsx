@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { Alert } from '@/shared/ui/Alert';
 import { getLeaveDetail, updateLeaveRequest } from '@/features/leave/api/leave.service';
 import type { LeaveUpdatePayload } from '@/features/leave/types/leave.types';
-import { AlertCircle, Check, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import './LeavePages.css';
 
 const UpdateLeavePage = () => {
@@ -21,13 +22,14 @@ const UpdateLeavePage = () => {
     reason: '',
   });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('error');
 
   useEffect(() => {
     const loadDetail = async () => {
       if (!id) {
-        setError('Leave ID tidak ditemukan');
+        setAlertMessage('Leave ID tidak ditemukan');
+        setAlertType('error');
         setLoading(false);
         return;
       }
@@ -43,9 +45,11 @@ const UpdateLeavePage = () => {
           total_days: payload.total_days || 1,
           reason: payload.reason || '',
         });
-        setError('');
+        setAlertMessage('');
       } catch (err: any) {
-        setError(err.response?.data?.message || err.message || 'Gagal memuat data cuti');
+        const message = err.response?.data?.message || err.message || 'Gagal memuat data cuti';
+        setAlertMessage(message);
+        setAlertType('error');
       } finally {
         setLoading(false);
       }
@@ -64,23 +68,28 @@ const UpdateLeavePage = () => {
 
   const validateForm = (): boolean => {
     if (!formData.type.trim()) {
-      setError('Tipe leave wajib dipilih');
+      setAlertMessage('Tipe leave wajib dipilih');
+      setAlertType('error');
       return false;
     }
     if (!formData.start_date) {
-      setError('Tanggal mulai wajib diisi');
+      setAlertMessage('Tanggal mulai wajib diisi');
+      setAlertType('error');
       return false;
     }
     if (!formData.end_date) {
-      setError('Tanggal selesai wajib diisi');
+      setAlertMessage('Tanggal selesai wajib diisi');
+      setAlertType('error');
       return false;
     }
     if (new Date(formData.start_date) > new Date(formData.end_date)) {
-      setError('Tanggal mulai harus sebelum tanggal selesai');
+      setAlertMessage('Tanggal mulai harus sebelum tanggal selesai');
+      setAlertType('error');
       return false;
     }
     if (!formData.reason.trim()) {
-      setError('Alasan wajib diisi');
+      setAlertMessage('Alasan wajib diisi');
+      setAlertType('error');
       return false;
     }
     return true;
@@ -90,8 +99,7 @@ const UpdateLeavePage = () => {
     if (!validateForm() || !id) return;
 
     setLoading(true);
-    setError('');
-    setSuccess('');
+    setAlertMessage('');
 
     try {
       const payload: LeaveUpdatePayload = {
@@ -102,12 +110,15 @@ const UpdateLeavePage = () => {
       };
 
       await updateLeaveRequest(id, payload);
-      setSuccess('✓ Data cuti berhasil diperbarui!');
+      setAlertMessage('Data cuti berhasil diperbarui!');
+      setAlertType('success');
       setTimeout(() => {
         navigate('/leave/requests');
       }, 1500);
     } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Gagal memperbarui data cuti');
+      const message = err.response?.data?.message || err.message || 'Gagal memperbarui data cuti';
+      setAlertMessage(message);
+      setAlertType('error');
     } finally {
       setLoading(false);
     }
@@ -148,18 +159,13 @@ const UpdateLeavePage = () => {
 
       {/* Form Card */}
       <Card className="leave-card" glass>
-        {error && (
-          <div className="leave-alert leave-alert-error">
-            <AlertCircle size={20} />
-            <span>{error}</span>
-          </div>
-        )}
-
-        {success && (
-          <div className="leave-alert leave-alert-success">
-            <Check size={20} />
-            <span>{success}</span>
-          </div>
+        {alertMessage && (
+          <Alert 
+            type={alertType} 
+            message={alertMessage}
+            onClose={() => setAlertMessage('')}
+            dismissible
+          />
         )}
 
         <form className="leave-form" onSubmit={(e) => { e.preventDefault(); void handleUpdateLeave(); }}>
