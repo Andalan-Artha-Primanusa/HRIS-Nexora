@@ -10,14 +10,12 @@ import {
   User,
   MapPin,
   Heart,
-  Briefcase,
   GraduationCap,
   CreditCard,
   Clock,
   FileText,
   Shield,
   CheckCircle2,
-  Lock,
   Building2,
   Mail,
   Calendar,
@@ -830,9 +828,9 @@ const ProfilesPage = () => {
 
             {/* Old Data Sections */}
             <div className="profile-card-sections" style={{ display: 'grid', gap: '1.5rem', marginTop: '1.5rem' }}>
-              <SectionCard icon={<Heart size={18} />} title="Emergency Contact" items={detailSections?.emergencyInfo} />
-              <SectionCard icon={<CreditCard size={18} />} title="Bank Information" items={detailSections?.bankInfo} />
-              <SectionCard icon={<GraduationCap size={18} />} title="Education Information" items={detailSections?.educationInfo} />
+              <SectionCard icon={<Heart size={18} />} title="Emergency Contact" items={detailSections?.emergencyInfo ?? null} />
+              <SectionCard icon={<CreditCard size={18} />} title="Bank Information" items={detailSections?.bankInfo ?? null} />
+              <SectionCard icon={<GraduationCap size={18} />} title="Education Information" items={detailSections?.educationInfo ?? null} />
 
               {/* Role and Permission */}
               <SectionCard icon={<Shield size={18} />} title="Role and Permission" items={null}>
@@ -852,7 +850,7 @@ const ProfilesPage = () => {
                 </div>
               </SectionCard>
 
-              <SectionCard icon={<FileText size={18} />} title="System Information" items={detailSections?.systemInfo} />
+              <SectionCard icon={<FileText size={18} />} title="System Information" items={detailSections?.systemInfo ?? null} />
 
               {/* Attendances */}
               <SectionCard icon={<Clock size={18} />} title="Attendances" items={null}>

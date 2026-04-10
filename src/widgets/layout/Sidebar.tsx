@@ -133,6 +133,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
   const user = useAuthStore((state) => state.user);
   const filteredItems = filterMenuItems(user, menuItems);
 
+  // Debug logging
+  if (user) {
+    console.log("[Sidebar] User permissions:", user.permissions?.map((p: any) => p.name));
+    console.log("[Sidebar] User roles:", user.roles?.map((r: any) => r.name));
+    console.log("[Sidebar] Filtered menu items count:", filteredItems.length);
+  }
+
   return (
     <aside className={clsx('dashboard-sidebar', collapsed && 'collapsed')}>
       <div className="sidebar-logo">
