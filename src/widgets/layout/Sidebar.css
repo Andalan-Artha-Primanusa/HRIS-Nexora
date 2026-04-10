@@ -2,7 +2,8 @@
   height: var(--header-height);
   display: flex;
   align-items: center;
-  padding: 0 1.25rem;
+  justify-content: center;
+  padding: 0 0.9rem;
   border-bottom: 1px solid rgba(226, 232, 240, 0.8);
 }
 
@@ -19,18 +20,21 @@
 }
 
 .company-logo {
-  height: 54px; /* Force it much bigger to combat internal image padding */
-  width: 100%;
+  height: 52px;
+  width: auto;
+  max-width: 100%;
   object-fit: contain;
-  object-position: left; /* Keep it nicely aligned with text */
+  object-position: center;
+  display: block;
+  margin: 0 auto;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .company-logo.collapsed {
   height: 32px;
   width: 32px;
-  object-fit: cover;
-  object-position: left;
+  object-fit: contain;
+  object-position: center;
 }
 
 .sidebar-menu-container {

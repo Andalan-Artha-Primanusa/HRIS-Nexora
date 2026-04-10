@@ -14,7 +14,6 @@ import AttendanceAdminPage from "../../pages/attendance/AttendanceAdminPage";
 import PayrollPage from "../../pages/dashboard/payroll/PayrollPage";
 import KpiPage from "../../pages/dashboard/kpi/KpiPage";
 import SectionPage from "../../pages/dashboard/SectionPage";
-import PlaceholderPage from "../../pages/dashboard/PlaceholderPage";
 import ProfilesPage from "../../pages/profiles/ProfilesPage";
 import EmployeesPage from "../../pages/employee/EmployeesPage";
 import MyReimbursementsPage from "../../pages/ess/MyReimbursementsPage";
@@ -52,7 +51,6 @@ const sectionRoutes = [
   { path: "/attendance/reports" },
   { path: "/leave/type" },
   { path: "/leave/policy" },
-  { path: "/payroll/payslip" },
   { path: "/payroll/tax" },
   { path: "/payroll/reports" },
   { path: "/expense/categories" },
@@ -67,7 +65,6 @@ const sectionRoutes = [
   { path: "/ess/leave" },
   { path: "/ess/payslip" },
   { path: "/ess/requests" },
-  { path: "/reports/employee" },
   { path: "/reports/attendance" },
   { path: "/reports/leave" },
   { path: "/reports/payroll" },
@@ -298,6 +295,36 @@ export const router = createBrowserRouter([
         ],
       },
       {
+        path: "/profiles/add",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <ProfilesPage />,
+          },
+        ],
+      },
+      {
+        path: "/profiles/view/:id",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <ProfilesPage />,
+          },
+        ],
+      },
+      {
+        path: "/profiles/update/:id",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <ProfilesPage />,
+          },
+        ],
+      },
+      {
         path: "/reimbursements",
         element: <DashboardLayout />,
         children: [
@@ -398,6 +425,16 @@ export const router = createBrowserRouter([
         ],
       },
       {
+        path: "/employees/update/:id",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <EmployeesPage />,
+          },
+        ],
+      },
+      {
         path: "/attendance/daily",
         element: <DashboardLayout />,
         children: [
@@ -453,7 +490,7 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <PlaceholderPage />,
+            element: <SectionPage />,
           },
         ],
       },

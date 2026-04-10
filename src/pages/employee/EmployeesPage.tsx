@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import {
@@ -24,52 +24,83 @@ type EmployeeFormState = {
 
 const DEFAULT_FORM: EmployeeFormState = {
   id: "",
-  user_id: "2",
-  employee_code: "EMP-0002",
-  position: "Manager",
-  department: "IT",
-  hire_date: "2025-01-15",
-  salary: "50000000",
+  user_id: "",
+  employee_code: "",
+  position: "",
+  department: "",
+  hire_date: "",
+  salary: "",
 };
 
-const asDisplay = (value: unknown) => {
+const DATE_TIME_COLUMNS = ["time", "date", "_at", "time_series"];
+
+const shouldFormatAsTime = (column: string) => {
+  const normalized = column.toLowerCase();
+  return DATE_TIME_COLUMNS.some((token) => normalized.includes(token));
+};
+
+const formatDateTime = (input: string) => {
+  const date = new Date(input);
+  if (Number.isNaN(date.getTime())) {
+    return input;
+  }
+
+  const hasTime = /t|\d{2}:\d{2}/i.test(input);
+  return new Intl.DateTimeFormat("id-ID", {
+    dateStyle: "medium",
+    ...(hasTime ? { timeStyle: "short" } : {}),
+  }).format(date);
+};
+
+const asDisplay = (column: string, value: unknown) => {
   if (value === null || value === undefined) return "-";
-  if (typeof value === "object") return JSON.stringify(value);
+  if (Array.isArray(value)) return value.length > 0 ? `${value.length} items` : "-";
+  if (typeof value === "object") {
+    const record = value as Record<string, unknown>;
+    const candidates = [record.name, record.title, record.employee_code, record.status, record.email, record.id];
+    const firstPrimitive = candidates.find(
+      (candidate) => candidate !== null && candidate !== undefined && typeof candidate !== "object"
+    );
+    return firstPrimitive ? String(firstPrimitive) : "-";
+  }
+
+  if (typeof value === "string" && shouldFormatAsTime(column)) {
+    return formatDateTime(value);
+  }
+
   return String(value);
 };
 
 const getColumns = (items: EmployeeItem[]) => {
   if (items.length === 0) {
-    return ["id", "user_id", "employee_code", "position", "department", "hire_date", "salary"];
+    return ["user_id", "user", "employee_code", "position", "department", "hire_date", "salary"];
   }
 
   const keys = Object.keys(items[0]);
-  const preferred = ["id", "user_id", "employee_code", "position", "department", "hire_date", "salary"];
+  const preferred = ["id", "user_id", "user", "employee_code", "position", "department", "hire_date", "salary"];
   const merged = [...preferred, ...keys.filter((key) => !preferred.includes(key))];
-  return merged.filter((key, index) => merged.indexOf(key) === index);
+  return merged.filter((key, index) => merged.indexOf(key) === index && key !== "id");
 };
 
 const EmployeesPage = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { id: routeEmployeeId } = useParams<{ id: string }>();
   const isAddPage = location.pathname === "/employees/add";
+  const isUpdatePage = location.pathname.startsWith("/employees/update/");
 
   const [items, setItems] = useState<EmployeeItem[]>([]);
-  const [selectedDetail, setSelectedDetail] = useState<Record<string, unknown> | null>(null);
-  const [form, setForm] = useState<EmployeeFormState>(DEFAULT_FORM);
-  const [responseText, setResponseText] = useState("");
+  const [createForm, setCreateForm] = useState<EmployeeFormState>(DEFAULT_FORM);
+  const [updateForm, setUpdateForm] = useState<EmployeeFormState>(DEFAULT_FORM);
   const [statusMessage, setStatusMessage] = useState("Ready to call employee API");
   const [loading, setLoading] = useState(false);
 
   const columns = useMemo(() => getColumns(items), [items]);
 
-  const formatResponse = (payload: unknown) => {
-    setResponseText(typeof payload === "string" ? payload : JSON.stringify(payload, null, 2));
-  };
-
-  const requireId = () => {
-    const id = form.id.trim();
+  const requireId = (idValue: string) => {
+    const id = idValue.trim();
     if (!id) {
-      setStatusMessage("Employee ID wajib diisi untuk detail/update/delete.");
+      setStatusMessage("Employee ID wajib diisi.");
       return null;
     }
     return id;
@@ -78,17 +109,14 @@ const EmployeesPage = () => {
   const loadEmployees = async () => {
     setLoading(true);
     setStatusMessage("Memuat semua employees...");
-    setResponseText("");
 
     try {
       const result = await getAllEmployees();
       setItems(result.items);
-      formatResponse(result.raw);
       setStatusMessage("Semua employee berhasil dimuat.");
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Gagal memuat employee.";
-      formatResponse(message);
-      setStatusMessage("Gagal memuat employee.");
+      setStatusMessage(message);
     } finally {
       setLoading(false);
     }
@@ -97,211 +125,287 @@ const EmployeesPage = () => {
   const createNewEmployee = async () => {
     setLoading(true);
     setStatusMessage("Membuat employee...");
-    setResponseText("");
 
     try {
       const payload: EmployeeCreatePayload = {
-        user_id: Number(form.user_id) || 0,
-        employee_code: form.employee_code,
-        position: form.position,
-        department: form.department,
-        hire_date: form.hire_date,
-        salary: Number(form.salary) || 0,
+        user_id: Number(createForm.user_id) || 0,
+        employee_code: createForm.employee_code,
+        position: createForm.position,
+        department: createForm.department,
+        hire_date: createForm.hire_date,
+        salary: Number(createForm.salary) || 0,
       };
 
-      const result = await createEmployee(payload);
-      formatResponse(result.raw);
+      await createEmployee(payload);
       setStatusMessage("Employee berhasil dibuat.");
+      setCreateForm(DEFAULT_FORM);
+      navigate("/employees");
       await loadEmployees();
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Gagal membuat employee.";
-      formatResponse(message);
-      setStatusMessage("Gagal membuat employee.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getDetail = async () => {
-    const id = requireId();
-    if (!id) return;
-
-    setLoading(true);
-    setStatusMessage("Memuat detail employee...");
-    setResponseText("");
-
-    try {
-      const result = await getEmployeeDetail(id);
-      const payload =
-        result.payload && typeof result.payload === "object"
-          ? (result.payload as Record<string, unknown>)
-          : null;
-      setSelectedDetail(payload);
-      formatResponse(result.raw);
-      setStatusMessage("Detail employee berhasil dimuat.");
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal memuat detail employee.";
-      formatResponse(message);
-      setStatusMessage("Gagal memuat detail employee.");
+      setStatusMessage(message);
     } finally {
       setLoading(false);
     }
   };
 
   const updateExistingEmployee = async () => {
-    const id = requireId();
+    const id = requireId(updateForm.id);
     if (!id) return;
 
     setLoading(true);
     setStatusMessage("Mengupdate employee...");
-    setResponseText("");
 
     try {
       const payload: EmployeeUpdatePayload = {
-        position: form.position,
-        department: form.department,
-        salary: Number(form.salary) || 0,
+        position: updateForm.position,
+        department: updateForm.department,
+        salary: Number(updateForm.salary) || 0,
       };
 
-      const result = await updateEmployee(id, payload);
-      formatResponse(result.raw);
+      await updateEmployee(id, payload);
       setStatusMessage("Employee berhasil diupdate.");
+      setUpdateForm(DEFAULT_FORM);
+      navigate("/employees");
       await loadEmployees();
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Gagal update employee.";
-      formatResponse(message);
-      setStatusMessage("Gagal update employee.");
+      setStatusMessage(message);
     } finally {
       setLoading(false);
     }
   };
 
-  const deleteExistingEmployee = async () => {
-    const id = requireId();
+  const deleteExistingEmployee = async (idValue: string) => {
+    const id = requireId(idValue);
     if (!id) return;
 
     setLoading(true);
     setStatusMessage("Menghapus employee...");
-    setResponseText("");
 
     try {
-      const result = await deleteEmployee(id);
-      formatResponse(result.raw);
+      await deleteEmployee(id);
       setStatusMessage("Employee berhasil dihapus.");
       await loadEmployees();
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Gagal menghapus employee.";
-      formatResponse(message);
-      setStatusMessage("Gagal menghapus employee.");
+      setStatusMessage(message);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    if (isAddPage || isUpdatePage) {
+      return;
+    }
+
     void loadEmployees();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isAddPage, isUpdatePage]);
+
+  useEffect(() => {
+    if (!isUpdatePage || !routeEmployeeId) {
+      return;
+    }
+
+    const loadUpdateDetail = async () => {
+      setLoading(true);
+      setStatusMessage("Memuat detail employee untuk update...");
+
+      try {
+        const result = await getEmployeeDetail(routeEmployeeId);
+        const payload = result.payload as Record<string, unknown>;
+
+        setUpdateForm({
+          id: String(payload?.id ?? routeEmployeeId),
+          user_id: String(payload?.user_id ?? ""),
+          employee_code: String(payload?.employee_code ?? ""),
+          position: String(payload?.position ?? ""),
+          department: String(payload?.department ?? ""),
+          hire_date: String(payload?.hire_date ?? ""),
+          salary: String(payload?.salary ?? ""),
+        });
+
+        setStatusMessage("Detail employee berhasil dimuat.");
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "Gagal memuat detail employee.";
+        setStatusMessage(message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void loadUpdateDetail();
+  }, [isUpdatePage, routeEmployeeId]);
+
+  if (isAddPage) {
+    return (
+      <div className="crud-page">
+        <div className="crud-header">
+          <div>
+            <h1>Add Employee</h1>
+            <p>Halaman khusus create employee agar alur lebih rapi.</p>
+          </div>
+          <Button variant="outline" size="md" onClick={() => navigate("/employees")} disabled={loading}>
+            Back to Employees
+          </Button>
+        </div>
+
+        <Card className="crud-card" glass>
+          <h2>Create Employee</h2>
+          <div className="crud-form-grid">
+            <label>
+              User ID
+              <input
+                className="crud-input"
+                value={createForm.user_id}
+                onChange={(event) => setCreateForm((prev) => ({ ...prev, user_id: event.target.value }))}
+                placeholder="user id"
+              />
+            </label>
+            <label>
+              Employee Code
+              <input
+                className="crud-input"
+                value={createForm.employee_code}
+                onChange={(event) => setCreateForm((prev) => ({ ...prev, employee_code: event.target.value }))}
+                placeholder="employee code"
+              />
+            </label>
+            <label>
+              Position
+              <input
+                className="crud-input"
+                value={createForm.position}
+                onChange={(event) => setCreateForm((prev) => ({ ...prev, position: event.target.value }))}
+                placeholder="position"
+              />
+            </label>
+            <label>
+              Department
+              <input
+                className="crud-input"
+                value={createForm.department}
+                onChange={(event) => setCreateForm((prev) => ({ ...prev, department: event.target.value }))}
+                placeholder="department"
+              />
+            </label>
+            <label>
+              Hire Date
+              <input
+                className="crud-input"
+                type="date"
+                value={createForm.hire_date}
+                onChange={(event) => setCreateForm((prev) => ({ ...prev, hire_date: event.target.value }))}
+              />
+            </label>
+            <label>
+              Salary
+              <input
+                className="crud-input"
+                value={createForm.salary}
+                onChange={(event) => setCreateForm((prev) => ({ ...prev, salary: event.target.value }))}
+                placeholder="salary"
+              />
+            </label>
+          </div>
+
+          <div className="crud-actions">
+            <Button variant="primary" size="md" onClick={() => void createNewEmployee()} disabled={loading}>
+              Create Employee
+            </Button>
+            <Button variant="outline" size="md" onClick={() => navigate("/employees")} disabled={loading}>
+              Cancel
+            </Button>
+          </div>
+        </Card>
+
+        <p className="crud-status">{statusMessage}</p>
+      </div>
+    );
+  }
+
+  if (isUpdatePage) {
+    return (
+      <div className="crud-page">
+        <div className="crud-header">
+          <div>
+            <h1>Update Employee</h1>
+            <p>Halaman khusus update employee agar flow lebih rapi.</p>
+          </div>
+          <Button variant="outline" size="md" onClick={() => navigate("/employees")} disabled={loading}>
+            Back to Employees
+          </Button>
+        </div>
+
+        <Card className="crud-card" glass>
+          <h2>Update Employee</h2>
+          <div className="crud-form-grid">
+            <label>
+              Employee ID
+              <input className="crud-input" value={updateForm.id} readOnly />
+            </label>
+            <label>
+              Position
+              <input
+                className="crud-input"
+                value={updateForm.position}
+                onChange={(event) => setUpdateForm((prev) => ({ ...prev, position: event.target.value }))}
+                placeholder="position"
+              />
+            </label>
+            <label>
+              Department
+              <input
+                className="crud-input"
+                value={updateForm.department}
+                onChange={(event) => setUpdateForm((prev) => ({ ...prev, department: event.target.value }))}
+                placeholder="department"
+              />
+            </label>
+            <label>
+              Salary
+              <input
+                className="crud-input"
+                value={updateForm.salary}
+                onChange={(event) => setUpdateForm((prev) => ({ ...prev, salary: event.target.value }))}
+                placeholder="salary"
+              />
+            </label>
+          </div>
+
+          <div className="crud-actions">
+            <Button variant="secondary" size="md" onClick={() => void updateExistingEmployee()} disabled={loading}>
+              Update Employee
+            </Button>
+            <Button variant="outline" size="md" onClick={() => navigate("/employees")} disabled={loading}>
+              Cancel
+            </Button>
+          </div>
+        </Card>
+
+        <p className="crud-status">{statusMessage}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="crud-page">
       <div className="crud-header">
         <div>
-          <h1>{isAddPage ? "Add Employee" : "Employees"}</h1>
-          <p>Endpoint: GET/POST /employees, GET/PUT/DELETE /employees/{"{id}"}</p>
+          <h1>Employees</h1>
+          <p>Employee list khusus table dengan create dan action update/delete per baris.</p>
         </div>
-        <Button variant="outline" size="md" onClick={() => void loadEmployees()} disabled={loading}>
-          Refresh
-        </Button>
-      </div>
-
-      <Card className="crud-card" glass>
-        <h2>Employee Form</h2>
-        <div className="crud-form-grid">
-          <label>
-            Employee ID
-            <input
-              className="crud-input"
-              value={form.id}
-              onChange={(event) => setForm((prev) => ({ ...prev, id: event.target.value }))}
-              placeholder="employee id"
-            />
-          </label>
-          <label>
-            User ID
-            <input
-              className="crud-input"
-              value={form.user_id}
-              onChange={(event) => setForm((prev) => ({ ...prev, user_id: event.target.value }))}
-              placeholder="2"
-            />
-          </label>
-          <label>
-            Employee Code
-            <input
-              className="crud-input"
-              value={form.employee_code}
-              onChange={(event) => setForm((prev) => ({ ...prev, employee_code: event.target.value }))}
-              placeholder="EMP-0002"
-            />
-          </label>
-          <label>
-            Position
-            <input
-              className="crud-input"
-              value={form.position}
-              onChange={(event) => setForm((prev) => ({ ...prev, position: event.target.value }))}
-            />
-          </label>
-          <label>
-            Department
-            <input
-              className="crud-input"
-              value={form.department}
-              onChange={(event) => setForm((prev) => ({ ...prev, department: event.target.value }))}
-            />
-          </label>
-          <label>
-            Hire Date
-            <input
-              className="crud-input"
-              type="date"
-              value={form.hire_date}
-              onChange={(event) => setForm((prev) => ({ ...prev, hire_date: event.target.value }))}
-            />
-          </label>
-          <label>
-            Salary
-            <input
-              className="crud-input"
-              value={form.salary}
-              onChange={(event) => setForm((prev) => ({ ...prev, salary: event.target.value }))}
-            />
-          </label>
-        </div>
-
         <div className="crud-actions">
-          <Button variant="primary" size="md" onClick={() => void createNewEmployee()} disabled={loading}>
+          <Button variant="primary" size="md" onClick={() => navigate("/employees/add")} disabled={loading}>
             Create Employee
           </Button>
-          <Button variant="outline" size="md" onClick={() => void getDetail()} disabled={loading}>
-            Get Detail
-          </Button>
-          <Button variant="secondary" size="md" onClick={() => void updateExistingEmployee()} disabled={loading}>
-            Update Employee
-          </Button>
-          <Button variant="ghost" size="md" onClick={() => void deleteExistingEmployee()} disabled={loading}>
-            Delete Employee
+          <Button variant="outline" size="md" onClick={() => void loadEmployees()} disabled={loading}>
+            Refresh
           </Button>
         </div>
-      </Card>
-
-      <Card className="crud-card" glass>
-        <h2>Employee Detail</h2>
-        <pre className="crud-response">
-          {selectedDetail ? JSON.stringify(selectedDetail, null, 2) : "Belum ada detail employee dipilih."}
-        </pre>
-      </Card>
+      </div>
 
       <Card className="crud-card" glass>
         <h2>Employees Table</h2>
@@ -312,6 +416,7 @@ const EmployeesPage = () => {
                 {columns.map((column) => (
                   <th key={column}>{column}</th>
                 ))}
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -319,13 +424,35 @@ const EmployeesPage = () => {
                 items.map((item, index) => (
                   <tr key={String(item.id ?? index)}>
                     {columns.map((column) => (
-                      <td key={`${String(item.id ?? index)}-${column}`}>{asDisplay(item[column])}</td>
+                      <td key={`${String(item.id ?? index)}-${column}`} title={asDisplay(column, item[column])}>
+                        {asDisplay(column, item[column])}
+                      </td>
                     ))}
+                    <td>
+                      <div className="crud-actions" style={{ marginTop: 0 }}>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => navigate(`/employees/update/${String(item.id ?? "")}`)}
+                          disabled={loading || !item.id}
+                        >
+                          Update
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => void deleteExistingEmployee(String(item.id ?? ""))}
+                          disabled={loading || !item.id}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={columns.length}>No employee data available.</td>
+                  <td colSpan={columns.length + 1}>No employee data available.</td>
                 </tr>
               )}
             </tbody>
@@ -333,11 +460,7 @@ const EmployeesPage = () => {
         </div>
       </Card>
 
-      <Card className="crud-card" glass>
-        <h2>Raw Response</h2>
-        <pre className="crud-response">{responseText || "Response API akan tampil di sini."}</pre>
-        <p className="crud-status">{statusMessage}</p>
-      </Card>
+      <p className="crud-status">{statusMessage}</p>
     </div>
   );
 };
