@@ -12,7 +12,6 @@ const AttendanceCheckOutPage = () => {
   const [loading, setLoading] = useState(false);
   const [locationError, setLocationError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const [checkOutTime, setCheckOutTime] = useState('');
 
   // Auto-capture GPS location on page load
   useEffect(() => {
@@ -47,11 +46,10 @@ const AttendanceCheckOutPage = () => {
 
     try {
       const now = new Date();
-      const result = await api.post('/attendance/check-out', {
+      await api.post('/attendance/check-out', {
         latitude,
         longitude,
       });
-      setCheckOutTime(now.toLocaleString('id-ID'));
       setStatus('Check-out berhasil');
       setSuccessMessage(`✓ Anda telah berhasil check-out pada ${now.toLocaleTimeString('id-ID')}`);
     } catch (error: any) {

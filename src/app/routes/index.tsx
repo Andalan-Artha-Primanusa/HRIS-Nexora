@@ -21,6 +21,8 @@ import MyPayrollPage from "../../pages/ess/MyPayrollPage";
 import MyLeavesPage from "../../pages/ess/MyLeavesPage";
 import ReimbursementsManagementPage from "../../pages/reimbursements/ReimbursementsManagementPage";
 import LocationsPage from "../../pages/locations/LocationsPage";
+import CreateLocationPage from "../../pages/locations/CreateLocationPage";
+import EditLocationPage from "../../pages/locations/EditLocationPage";
 import AdminUsersPage from "../../pages/admin/AdminUsersPage";
 import AdminRolesPage from "../../pages/admin/AdminRolesPage";
 import AdminPermissionsPage from "../../pages/admin/AdminPermissionsPage";
@@ -371,6 +373,26 @@ export const router = createBrowserRouter([
           {
             index: true,
             element: <LocationsPage />,
+          },
+        ],
+      },
+      {
+        path: "/locations/create",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <CreateLocationPage />,
+          },
+        ],
+      },
+      {
+        path: "/locations/edit/:id",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <EditLocationPage />,
           },
         ],
       },

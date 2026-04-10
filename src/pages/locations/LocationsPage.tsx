@@ -1,187 +1,41 @@
-import { useEffect, useMemo, useState } from "react";
-import { Card } from "@/shared/ui/Card";
-import { Button } from "@/shared/ui/Button";
-import {
-  createLocation,
-  deleteLocation,
-  getAllLocations,
-  getLocationDetail,
-  updateLocation,
-} from "@/features/location/api/location.service";
-import type { LocationCreatePayload, LocationItem, LocationUpdatePayload } from "@/features/location/types/location.types";
-import "../admin/AdminCrudPages.css";
-
-type LocationFormState = {
-  id: string;
-  name: string;
-  latitude: string;
-  longitude: string;
-  radius: string;
-};
-
-const DEFAULT_FORM: LocationFormState = {
-  id: "",
-  name: "Jakarta Office",
-  latitude: "-6.200000",
-  longitude: "106.816666",
-  radius: "100",
-};
-
-const asDisplay = (value: unknown) => {
-  if (value === null || value === undefined) return "-";
-  if (typeof value === "object") return JSON.stringify(value);
-  return String(value);
-};
-
-const getColumns = (items: LocationItem[]) => {
-  if (items.length === 0) {
-    return ["id", "name", "latitude", "longitude", "radius"];
-  }
-
-  const keys = Object.keys(items[0]);
-  const preferred = ["id", "name", "latitude", "longitude", "radius"];
-  const merged = [...preferred, ...keys.filter((key) => !preferred.includes(key))];
-  return merged.filter((key, index) => merged.indexOf(key) === index);
-};
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card } from '@/shared/ui/Card';
+import { Button } from '@/shared/ui/Button';
+import { getAllLocations, deleteLocation } from '@/features/location/api/location.service';
+import type { LocationItem } from '@/features/location/types/location.types';
+import { MapPin, AlertCircle, Trash2, Edit3, Plus } from 'lucide-react';
+import '../admin/AdminCrudPages.css';
 
 const LocationsPage = () => {
-  const [items, setItems] = useState<LocationItem[]>([]);
-  const [selectedDetail, setSelectedDetail] = useState<Record<string, unknown> | null>(null);
-  const [form, setForm] = useState<LocationFormState>(DEFAULT_FORM);
-  const [responseText, setResponseText] = useState("");
-  const [statusMessage, setStatusMessage] = useState("Ready to call locations API");
+  const navigate = useNavigate();
+  const [locations, setLocations] = useState<LocationItem[]>([]);
   const [loading, setLoading] = useState(false);
-
-  const columns = useMemo(() => getColumns(items), [items]);
-
-  const formatResponse = (payload: unknown) => {
-    setResponseText(typeof payload === "string" ? payload : JSON.stringify(payload, null, 2));
-  };
-
-  const requireId = () => {
-    const id = form.id.trim();
-    if (!id) {
-      setStatusMessage("Location ID wajib diisi.");
-      return null;
-    }
-    return id;
-  };
+  const [error, setError] = useState('');
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   const loadLocations = async () => {
     setLoading(true);
-    setStatusMessage("Memuat locations...");
-    setResponseText("");
+    setError('');
 
     try {
       const result = await getAllLocations();
-      setItems(result.items);
-      formatResponse(result.raw);
-      setStatusMessage("Data locations berhasil dimuat.");
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal memuat locations.";
-      formatResponse(message);
-      setStatusMessage("Gagal memuat locations.");
+      setLocations(result.items);
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || 'Gagal memuat locations');
     } finally {
       setLoading(false);
     }
   };
 
-  const createItem = async () => {
+  const handleDelete = async (id: string) => {
     setLoading(true);
-    setStatusMessage("Membuat location...");
-    setResponseText("");
-
     try {
-      const payload: LocationCreatePayload = {
-        name: form.name,
-        latitude: Number(form.latitude) || 0,
-        longitude: Number(form.longitude) || 0,
-        radius: Number(form.radius) || 0,
-      };
-
-      const result = await createLocation(payload);
-      formatResponse(result.raw);
-      setStatusMessage("Location berhasil dibuat.");
+      await deleteLocation(id);
       await loadLocations();
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal membuat location.";
-      formatResponse(message);
-      setStatusMessage("Gagal membuat location.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getDetail = async () => {
-    const id = requireId();
-    if (!id) return;
-
-    setLoading(true);
-    setStatusMessage("Memuat detail location...");
-    setResponseText("");
-
-    try {
-      const result = await getLocationDetail(id);
-      const payload =
-        result.payload && typeof result.payload === "object"
-          ? (result.payload as Record<string, unknown>)
-          : null;
-      setSelectedDetail(payload);
-      formatResponse(result.raw);
-      setStatusMessage("Detail location berhasil dimuat.");
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal memuat detail location.";
-      formatResponse(message);
-      setStatusMessage("Gagal memuat detail location.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateItem = async () => {
-    const id = requireId();
-    if (!id) return;
-
-    setLoading(true);
-    setStatusMessage("Mengupdate location...");
-    setResponseText("");
-
-    try {
-      const payload: LocationUpdatePayload = {
-        name: form.name,
-        radius: Number(form.radius) || 0,
-      };
-
-      const result = await updateLocation(id, payload);
-      formatResponse(result.raw);
-      setStatusMessage("Location berhasil diupdate.");
-      await loadLocations();
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal update location.";
-      formatResponse(message);
-      setStatusMessage("Gagal update location.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const deleteItem = async () => {
-    const id = requireId();
-    if (!id) return;
-
-    setLoading(true);
-    setStatusMessage("Menghapus location...");
-    setResponseText("");
-
-    try {
-      const result = await deleteLocation(id);
-      formatResponse(result.raw);
-      setStatusMessage("Location berhasil dihapus.");
-      await loadLocations();
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal menghapus location.";
-      formatResponse(message);
-      setStatusMessage("Gagal menghapus location.");
+      setDeleteConfirm(null);
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || 'Gagal menghapus location');
     } finally {
       setLoading(false);
     }
@@ -189,7 +43,6 @@ const LocationsPage = () => {
 
   useEffect(() => {
     void loadLocations();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -197,116 +50,180 @@ const LocationsPage = () => {
       <div className="crud-header">
         <div>
           <h1>Location Management</h1>
-          <p>Endpoint: GET/POST /locations, GET/PUT/DELETE /locations/{"{id}"}</p>
+          <p>Kelola lokasi absensi dan radius untuk setiap tempat kerja.</p>
         </div>
-        <Button variant="outline" size="md" onClick={() => void loadLocations()} disabled={loading}>
-          Refresh
+      </div>
+
+      {/* Statistics Card */}
+      <Card className="crud-card" glass style={{ marginBottom: '2rem' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '1.5rem',
+          }}
+        >
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#0066cc' }}>
+              {locations.length}
+            </div>
+            <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.5rem' }}>
+              Total Lokasi
+            </div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#2e7d32' }}>
+              {locations.filter((l) => {
+                const lat = parseFloat(String(l.latitude || 0));
+                const lng = parseFloat(String(l.longitude || 0));
+                return lat !== 0 && lng !== 0;
+              }).length}
+            </div>
+            <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.5rem' }}>
+              dengan Koordinat
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      {/* Create Button */}
+      <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '1rem' }}>
+        <Button
+          variant="primary"
+          size="md"
+          onClick={() => navigate('/locations/create')}
+          disabled={loading}
+        >
+          <Plus size={18} style={{ marginRight: '0.5rem' }} />
+          Buat Lokasi Baru
+        </Button>
+        <Button
+          variant="secondary"
+          size="md"
+          onClick={() => void loadLocations()}
+          disabled={loading}
+        >
+          {loading ? 'Memuat...' : 'Refresh'}
         </Button>
       </div>
 
-      <Card className="crud-card" glass>
-        <h2>Location Form</h2>
-        <div className="crud-form-grid">
-          <label>
-            Location ID
-            <input
-              className="crud-input"
-              value={form.id}
-              onChange={(event) => setForm((prev) => ({ ...prev, id: event.target.value }))}
-              placeholder="location id"
-            />
-          </label>
-          <label>
-            Name
-            <input
-              className="crud-input"
-              value={form.name}
-              onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
-            />
-          </label>
-          <label>
-            Latitude
-            <input
-              className="crud-input"
-              value={form.latitude}
-              onChange={(event) => setForm((prev) => ({ ...prev, latitude: event.target.value }))}
-            />
-          </label>
-          <label>
-            Longitude
-            <input
-              className="crud-input"
-              value={form.longitude}
-              onChange={(event) => setForm((prev) => ({ ...prev, longitude: event.target.value }))}
-            />
-          </label>
-          <label>
-            Radius
-            <input
-              className="crud-input"
-              value={form.radius}
-              onChange={(event) => setForm((prev) => ({ ...prev, radius: event.target.value }))}
-            />
-          </label>
+      {/* Error Message */}
+      {error && (
+        <div
+          style={{
+            padding: '1rem',
+            backgroundColor: '#ffebee',
+            borderRadius: '0.5rem',
+            marginBottom: '1rem',
+            color: '#c41e3a',
+            display: 'flex',
+            gap: '0.75rem',
+            alignItems: 'center',
+          }}
+        >
+          <AlertCircle size={20} />
+          {error}
         </div>
+      )}
 
-        <div className="crud-actions">
-          <Button variant="primary" size="md" onClick={() => void createItem()} disabled={loading}>
-            Create Location
-          </Button>
-          <Button variant="outline" size="md" onClick={() => void getDetail()} disabled={loading}>
-            Get Detail
-          </Button>
-          <Button variant="secondary" size="md" onClick={() => void updateItem()} disabled={loading}>
-            Update Location
-          </Button>
-          <Button variant="ghost" size="md" onClick={() => void deleteItem()} disabled={loading}>
-            Delete Location
-          </Button>
-        </div>
-      </Card>
-
+      {/* Locations Table */}
       <Card className="crud-card" glass>
-        <h2>Location Detail</h2>
-        <pre className="crud-response">
-          {selectedDetail ? JSON.stringify(selectedDetail, null, 2) : "Belum ada detail location dipilih."}
-        </pre>
-      </Card>
-
-      <Card className="crud-card" glass>
-        <h2>Locations Table</h2>
-        <div className="crud-table-wrap">
-          <table className="crud-table">
-            <thead>
-              <tr>
-                {columns.map((column) => (
-                  <th key={column}>{column}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {items.length > 0 ? (
-                items.map((item, index) => (
-                  <tr key={String(item.id ?? index)}>
-                    {columns.map((column) => (
-                      <td key={`${String(item.id ?? index)}-${column}`}>{asDisplay(item[column])}</td>
-                    ))}
-                  </tr>
-                ))
-              ) : (
+        {locations.length > 0 ? (
+          <div className="crud-table-wrap">
+            <table className="crud-table">
+              <thead>
                 <tr>
-                  <td colSpan={columns.length}>No location data available.</td>
+                  <th>Nama Lokasi</th>
+                  <th>Latitude</th>
+                  <th>Longitude</th>
+                  <th>Radius</th>
+                  <th>Actions</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </Card>
-
-      <Card className="crud-card" glass>
-        <h2>Raw Response</h2>
-        <pre className="crud-response">{responseText || "Response API akan tampil di sini."}</pre>
-        <p className="crud-status">{statusMessage}</p>
+              </thead>
+              <tbody>
+                {locations.map((location, idx) => {
+                  const loc = location as any;
+                  return (
+                  <tr key={String(loc.id ?? idx)}>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <MapPin size={16} style={{ color: '#0066cc' }} />
+                        <strong>{String(loc.name || '—')}</strong>
+                      </div>
+                    </td>
+                    <td>{parseFloat(String(loc.latitude || 0)).toFixed(6)}</td>
+                    <td>{parseFloat(String(loc.longitude || 0)).toFixed(6)}</td>
+                    <td>{String(loc.radius || 0)}m</td>
+                    <td>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => navigate(`/locations/edit/${loc.id}`)}
+                          disabled={loading || deleteConfirm === String(loc.id)}
+                        >
+                          <Edit3 size={14} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            if (deleteConfirm === String(loc.id)) {
+                              void handleDelete(String(loc.id));
+                            } else {
+                              setDeleteConfirm(String(loc.id));
+                            }
+                          }}
+                          disabled={loading}
+                          style={{
+                            color: deleteConfirm === String(loc.id) ? '#c41e3a' : '#666',
+                          }}
+                        >
+                          <Trash2 size={14} />
+                        </Button>
+                        {deleteConfirm === String(loc.id) && (
+                          <span
+                            style={{
+                              fontSize: '0.8rem',
+                              color: '#c41e3a',
+                              display: 'flex',
+                              alignItems: 'center',
+                            }}
+                          >
+                            Hapus?{' '}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setDeleteConfirm(null)}
+                              disabled={loading}
+                              style={{ padding: '0 0.5rem', color: '#666' }}
+                            >
+                              Batal
+                            </Button>
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '3rem' }}>
+            <MapPin size={48} style={{ opacity: 0.3, marginBottom: '1rem' }} />
+            <p style={{ color: '#999', marginBottom: '1rem' }}>Belum ada lokasi. Buat lokasi baru untuk memulai.</p>
+            <Button
+              variant="primary"
+              size="md"
+              onClick={() => navigate('/locations/create')}
+            >
+              <Plus size={18} style={{ marginRight: '0.5rem' }} />
+              Buat Lokasi Pertama
+            </Button>
+          </div>
+        )}
       </Card>
     </div>
   );
