@@ -158,6 +158,7 @@ export const menuItems: MenuItem[] = [
     label: 'Admin Tools',
     icon: ShieldCheck,
     subItems: [
+      { label: 'Locations', path: '/locations' },
       { label: 'Users', path: '/admin/users' },
       { label: 'Roles', path: '/admin/roles' },
       { label: 'Permissions', path: '/admin/permissions' },

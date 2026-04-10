@@ -1,12 +1,24 @@
 .ui-card {
-  background-color: var(--white);
+  background: linear-gradient(170deg, rgba(255, 255, 255, 0.92), rgba(250, 253, 255, 0.88));
   border-radius: var(--radius-lg);
-  border: var(--border-light);
+  border: 1px solid rgba(198, 211, 227, 0.7);
   box-shadow: var(--shadow-sm);
   padding: 1.5rem;
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.ui-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(125deg, rgba(255, 255, 255, 0.52) 0%, rgba(255, 255, 255, 0) 45%);
 }
 
 .ui-card:hover {
   box-shadow: var(--shadow-md);
+  border-color: rgba(29, 98, 240, 0.24);
+  transform: translateY(-2px);
 }

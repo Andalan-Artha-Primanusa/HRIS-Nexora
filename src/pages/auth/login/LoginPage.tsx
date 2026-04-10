@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { getRoleBasedDashboardPath } from "@/features/auth/utils/roleRedirect";
 import { useNavigate } from "react-router-dom";
 import AuthLayout from "../AuthLayout";
 import GoogleIcon from "../GoogleIcon";
@@ -11,7 +12,7 @@ interface LoginFieldErrors {
 }
 
 const LoginPage = () => {
-  const { handleLogin } = useAuth();
+  const { handleLogin, handleGoogleCallback, handleGoogleLogin } = useAuth();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -20,6 +21,46 @@ const LoginPage = () => {
   const [formError, setFormError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSsoSubmitting, setIsSsoSubmitting] = useState(false);
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const hasSsoParams = ["code", "token", "access_token", "error", "error_description"].some(
+      (key) => searchParams.has(key)
+    );
+
+    if (!hasSsoParams) {
+      return;
+    }
+
+    let isCancelled = false;
+
+    const processGoogleCallback = async () => {
+      setIsSsoSubmitting(true);
+      setFormError(null);
+
+      try {
+        const authResult = await handleGoogleCallback(searchParams);
+        if (!isCancelled) {
+          navigate(getRoleBasedDashboardPath(authResult.user), { replace: true });
+        }
+      } catch (err: unknown) {
+        if (!isCancelled) {
+          setFormError(typeof err === "string" ? err : "Login SSO gagal.");
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsSsoSubmitting(false);
+        }
+      }
+    };
+
+    void processGoogleCallback();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [handleGoogleCallback, navigate]);
 
   const validate = () => {
     const nextErrors: LoginFieldErrors = {};
@@ -50,12 +91,25 @@ const LoginPage = () => {
     setIsSubmitting(true);
 
     try {
-      await handleLogin({ email: email.trim(), password });
-      navigate("/dashboard");
+      const authResult = await handleLogin({ email: email.trim(), password });
+      navigate(getRoleBasedDashboardPath(authResult.user));
     } catch (err: unknown) {
       setFormError(typeof err === "string" ? err : "Login gagal.");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setFormError(null);
+    setIsSsoSubmitting(true);
+
+    try {
+      const redirectUrl = await handleGoogleLogin();
+      window.location.assign(redirectUrl);
+    } catch (err: unknown) {
+      setFormError(typeof err === "string" ? err : "Login with Google gagal.");
+      setIsSsoSubmitting(false);
     }
   };
 
@@ -147,7 +201,11 @@ const LoginPage = () => {
 
         {formError && <p className="auth-form-error">{formError}</p>}
 
-        <button type="submit" className="auth-primary-button" disabled={isSubmitting}>
+        <button
+          type="submit"
+          className="auth-primary-button"
+          disabled={isSubmitting || isSsoSubmitting}
+        >
           {isSubmitting ? <Loader2 size={18} className="auth-button-spinner" /> : null}
           Login
         </button>
@@ -155,10 +213,11 @@ const LoginPage = () => {
         <button
           type="button"
           className="auth-social-button"
-          onClick={() => setFormError("Fitur Login with Google (SSO) belum tersedia.")}
+          onClick={handleGoogleSignIn}
+          disabled={isSubmitting || isSsoSubmitting}
         >
-          <GoogleIcon />
-          Login with Google (SSO)
+          {isSsoSubmitting ? <Loader2 size={18} className="auth-button-spinner" /> : <GoogleIcon />}
+          {isSsoSubmitting ? "Redirecting to Google..." : "Login with Google (SSO)"}
         </button>
       </form>
     </AuthLayout>

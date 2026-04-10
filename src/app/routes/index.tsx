@@ -1,5 +1,7 @@
 import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
+import { getRoleBasedDashboardPathFromStorage } from "@/features/auth/utils/roleRedirect";
 import LoginPage from "../../pages/auth/login/LoginPage";
+import GoogleCallbackPage from "../../pages/auth/login/GoogleCallbackPage";
 import RegisterPage from "../../pages/auth/register/RegisterPage";
 import DashboardLayout from "../layouts/DashboardLayout";
 import OverviewPage from "../../pages/dashboard/overview/OverviewPage";
@@ -8,10 +10,26 @@ import AttendanceCheckInPage from "../../pages/attendance/AttendanceCheckInPage"
 import AttendanceCheckOutPage from "../../pages/attendance/AttendanceCheckOutPage";
 import AttendanceHistoryPage from "../../pages/attendance/AttendanceHistoryPage";
 import AttendanceTodayPage from "../../pages/attendance/AttendanceTodayPage";
+import AttendanceAdminPage from "../../pages/attendance/AttendanceAdminPage";
 import PayrollPage from "../../pages/dashboard/payroll/PayrollPage";
 import KpiPage from "../../pages/dashboard/kpi/KpiPage";
 import SectionPage from "../../pages/dashboard/SectionPage";
 import PlaceholderPage from "../../pages/dashboard/PlaceholderPage";
+import ProfilesPage from "../../pages/profiles/ProfilesPage";
+import EmployeesPage from "../../pages/employee/EmployeesPage";
+import MyReimbursementsPage from "../../pages/ess/MyReimbursementsPage";
+import MyPayrollPage from "../../pages/ess/MyPayrollPage";
+import MyLeavesPage from "../../pages/ess/MyLeavesPage";
+import ReimbursementsManagementPage from "../../pages/reimbursements/ReimbursementsManagementPage";
+import LocationsPage from "../../pages/locations/LocationsPage";
+import AdminUsersPage from "../../pages/admin/AdminUsersPage";
+import AdminRolesPage from "../../pages/admin/AdminRolesPage";
+import AdminPermissionsPage from "../../pages/admin/AdminPermissionsPage";
+import LeaveRequestsPage from "../../pages/leave/LeaveRequestsPage";
+import LeaveCalendarPage from "../../pages/leave/LeaveCalendarPage";
+import LeaveApprovalPage from "../../pages/leave/LeaveApprovalPage";
+import PayrollManagementPage from "../../pages/payroll/PayrollManagementPage";
+import PayrollDetailsPage from "../../pages/payroll/PayrollDetailsPage";
 
 const hasToken = () => {
   const token = localStorage.getItem("token");
@@ -21,8 +39,6 @@ const hasToken = () => {
 const sectionRoutes = [
   { path: "/hr-summary" },
   { path: "/analytics" },
-  { path: "/employees" },
-  { path: "/employees/add" },
   { path: "/organization/department" },
   { path: "/organization/position" },
   { path: "/employment/status" },
@@ -30,35 +46,15 @@ const sectionRoutes = [
   { path: "/documents/ktp" },
   { path: "/documents/contract" },
   { path: "/documents/others" },
-  { path: "/profiles" },
-  { path: "/reimbursements" },
-  { path: "/locations" },
-  { path: "/admin/users" },
-  { path: "/admin/roles" },
-  { path: "/admin/permissions" },
-  { path: "/my/reimbursements" },
-  { path: "/my/payroll" },
-  { path: "/attendance/daily" },
   { path: "/attendance/timesheet" },
   { path: "/attendance/shifts" },
   { path: "/attendance/overtime" },
   { path: "/attendance/reports" },
-  { path: "/leave/requests" },
-  { path: "/leave/my-leave" },
-  { path: "/leave/approval" },
-  { path: "/leave/calendar" },
-  { path: "/leave/balance" },
   { path: "/leave/type" },
   { path: "/leave/policy" },
-  { path: "/payroll/run" },
   { path: "/payroll/payslip" },
-  { path: "/payroll/component/allowance" },
-  { path: "/payroll/component/deduction" },
   { path: "/payroll/tax" },
   { path: "/payroll/reports" },
-  { path: "/expense/submit" },
-  { path: "/expense/list" },
-  { path: "/expense/approval" },
   { path: "/expense/categories" },
   { path: "/expense/reports" },
   { path: "/performance" },
@@ -88,8 +84,10 @@ const sectionRoutes = [
 ];
 
 const RootRedirect = () => {
+  const dashboardPath = getRoleBasedDashboardPathFromStorage();
+
   return hasToken() ? (
-    <Navigate to="/dashboard" replace />
+    <Navigate to={dashboardPath} replace />
   ) : (
     <Navigate to="/login" replace />
   );
@@ -100,7 +98,8 @@ const ProtectedRoute = () => {
 };
 
 const GuestRoute = () => {
-  return hasToken() ? <Navigate to="/dashboard" replace /> : <Outlet />;
+  const dashboardPath = getRoleBasedDashboardPathFromStorage();
+  return hasToken() ? <Navigate to={dashboardPath} replace /> : <Outlet />;
 };
 
 export const router = createBrowserRouter([
@@ -114,6 +113,10 @@ export const router = createBrowserRouter([
       {
         path: "/login",
         element: <LoginPage />,
+      },
+      {
+        path: "/auth/google/callback",
+        element: <GoogleCallbackPage />,
       },
       {
         path: "/register",
@@ -205,12 +208,232 @@ export const router = createBrowserRouter([
         ],
       },
       {
+        path: "/my/reimbursements",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <MyReimbursementsPage />,
+          },
+        ],
+      },
+      {
+        path: "/my/payroll",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <MyPayrollPage />,
+          },
+        ],
+      },
+      {
+        path: "/leave/my-leave",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <MyLeavesPage />,
+          },
+        ],
+      },
+      {
+        path: "/leave/balance",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <MyLeavesPage />,
+          },
+        ],
+      },
+      {
+        path: "/leave/requests",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <LeaveRequestsPage />,
+          },
+        ],
+      },
+      {
+        path: "/leave/calendar",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <LeaveCalendarPage />,
+          },
+        ],
+      },
+      {
+        path: "/leave/approval",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <LeaveApprovalPage />,
+          },
+        ],
+      },
+      {
         path: "/payroll",
         element: <DashboardLayout />,
         children: [
           {
             index: true,
             element: <PayrollPage />,
+          },
+        ],
+      },
+      {
+        path: "/profiles",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <ProfilesPage />,
+          },
+        ],
+      },
+      {
+        path: "/reimbursements",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <ReimbursementsManagementPage />,
+          },
+        ],
+      },
+      {
+        path: "/expense/submit",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <ReimbursementsManagementPage />,
+          },
+        ],
+      },
+      {
+        path: "/expense/list",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <ReimbursementsManagementPage />,
+          },
+        ],
+      },
+      {
+        path: "/expense/approval",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <ReimbursementsManagementPage />,
+          },
+        ],
+      },
+      {
+        path: "/locations",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <LocationsPage />,
+          },
+        ],
+      },
+      {
+        path: "/admin/users",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <AdminUsersPage />,
+          },
+        ],
+      },
+      {
+        path: "/admin/roles",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <AdminRolesPage />,
+          },
+        ],
+      },
+      {
+        path: "/admin/permissions",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <AdminPermissionsPage />,
+          },
+        ],
+      },
+      {
+        path: "/employees",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <EmployeesPage />,
+          },
+        ],
+      },
+      {
+        path: "/employees/add",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <EmployeesPage />,
+          },
+        ],
+      },
+      {
+        path: "/attendance/daily",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <AttendanceAdminPage />,
+          },
+        ],
+      },
+      {
+        path: "/payroll/run",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <PayrollManagementPage />,
+          },
+        ],
+      },
+      {
+        path: "/payroll/component/allowance",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <PayrollDetailsPage />,
+          },
+        ],
+      },
+      {
+        path: "/payroll/component/deduction",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <PayrollDetailsPage />,
           },
         ],
       },

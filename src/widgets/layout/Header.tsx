@@ -1,9 +1,9 @@
-import React from "react";
-import { Menu, Search, Bell, Sun, LogOut } from "lucide-react";
-import { useNavigate } from "react-router-dom"; // ✅ [NEW]
-import { useAuthStore } from "@/app/store/auth.store";
-import type { User } from "@/features/auth/types/auth.types";
-import "./Header.css";
+import React, { useState } from 'react';
+import { Menu, Search, Bell, Sun, LogOut, Settings, UserCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '@/app/store/auth.store';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import './Header.css';
 
 interface HeaderProps {
   toggleSidebar: () => void;
@@ -37,23 +37,17 @@ const getDisplayRole = (user: User | null): string => {
 ========================= */
 
 export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
-  const { user, logout } = useAuthStore();
-
-  const navigate = useNavigate(); // ✅ [NEW]
-
+  const [openDropdown, setOpenDropdown] = useState(false);
+  const user = useAuthStore((state) => state.user);
+  const { handleLogout } = useAuth();
+  const navigate = useNavigate();
   const displayName = getDisplayName(user);
   const displayRole = getDisplayRole(user);
   const initials = getInitials(displayName);
 
-  // ✅ [UPDATED]
-  const handleLogout = async () => {
-
-    const confirmed = window.confirm("Are you sure you want to logout?");
-    if (!confirmed) return;
-
-    await logout();
-
-    navigate("/login"); // ✅ [NEW - FIX UTAMA]
+  const onLogout = async () => {
+    await handleLogout();
+    navigate("/login", { replace: true });
   };
 
   return (
@@ -103,12 +97,21 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
             <span className="user-name">{displayName}</span>
             <span className="user-role">{displayRole}</span>
           </div>
-
-          {/* LOGOUT */}
-          <button className="user-dropdown" onClick={handleLogout}>
-            <LogOut size={16} className="text-gray" />
-            <span>Logout</span>
-          </button>
+          
+          <div className={`user-dropdown ${openDropdown ? 'visible' : ''}`}>
+            <button className="dropdown-item" type="button" onClick={() => navigate('/settings/user-role')}>
+              <UserCircle size={16} />
+              <span>Profile</span>
+            </button>
+            <button className="dropdown-item" type="button" onClick={() => navigate('/settings/company')}>
+              <Settings size={16} />
+              <span>Settings</span>
+            </button>
+            <button className="dropdown-item logout-item" type="button" onClick={() => void onLogout()}>
+              <LogOut size={16} />
+              <span>Logout</span>
+            </button>
+          </div>
         </div>
       </div>
     </header>
