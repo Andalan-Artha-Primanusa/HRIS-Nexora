@@ -4,6 +4,7 @@ import type {
   ReimbursementDecisionPayload,
   ReimbursementFilters,
   ReimbursementItem,
+  ReimbursementRejectPayload,
   ReimbursementUpdatePayload,
 } from "../types/reimbursement.types";
 
@@ -36,22 +37,24 @@ const extractArrayPayload = (raw: unknown): ReimbursementItem[] => {
   return [];
 };
 
-export const getAllReimbursements = async (filters?: ReimbursementFilters) => {
-  const response = await api.get("/reimbursements", {
-    params: filters,
-  });
+// ─── HR / ADMIN / MANAGER endpoints ─────────────────────────────────────────
 
+/** GET /reimbursements → index() */
+export const getAllReimbursements = async (filters?: ReimbursementFilters) => {
+  const response = await api.get("/reimbursements", { params: filters });
   return {
     items: extractArrayPayload(response.data),
     raw: response.data,
   };
 };
 
+/** POST /reimbursements → store() */
 export const createReimbursement = async (payload: ReimbursementCreatePayload) => {
   const response = await api.post("/reimbursements", payload);
   return { raw: response.data };
 };
 
+/** GET /reimbursements/{id} → show() */
 export const getReimbursementDetail = async (id: string) => {
   const response = await api.get(`/reimbursements/${id}`);
   return {
@@ -60,31 +63,37 @@ export const getReimbursementDetail = async (id: string) => {
   };
 };
 
+/** PUT /reimbursements/{id} → update() — hanya bisa jika masih draft */
 export const updateReimbursement = async (id: string, payload: ReimbursementUpdatePayload) => {
   const response = await api.put(`/reimbursements/${id}`, payload);
   return { raw: response.data };
 };
 
+/** DELETE /reimbursements/{id} → destroy() — hanya bisa jika masih draft */
 export const deleteReimbursement = async (id: string) => {
   const response = await api.delete(`/reimbursements/${id}`);
   return { raw: response.data };
 };
 
-export const approveReimbursement = async (id: string, payload: ReimbursementDecisionPayload) => {
-  const response = await api.put(`/reimbursements/${id}/approve`, payload);
+/** POST /reimbursements/{id}/approve → approve() */
+export const approveReimbursement = async (id: string, payload?: ReimbursementDecisionPayload) => {
+  const response = await api.post(`/reimbursements/${id}/approve`, payload ?? {});
   return { raw: response.data };
 };
 
-export const rejectReimbursement = async (id: string, payload: ReimbursementDecisionPayload) => {
-  const response = await api.put(`/reimbursements/${id}/reject`, payload);
+/** POST /reimbursements/{id}/reject → reject() — note wajib */
+export const rejectReimbursement = async (id: string, payload: ReimbursementRejectPayload) => {
+  const response = await api.post(`/reimbursements/${id}/reject`, payload);
   return { raw: response.data };
 };
 
+/** POST /reimbursements/{id}/mark-paid → markAsPaid() — hanya admin/HR */
 export const markReimbursementAsPaid = async (id: string) => {
-  const response = await api.put(`/reimbursements/${id}/mark-paid`);
+  const response = await api.post(`/reimbursements/${id}/mark-paid`);
   return { raw: response.data };
 };
 
+/** GET /reimbursements/pending → pending() */
 export const getPendingReimbursements = async () => {
   const response = await api.get("/reimbursements/pending");
   return {
@@ -93,6 +102,7 @@ export const getPendingReimbursements = async () => {
   };
 };
 
+/** GET /reimbursements/employee/{employee_id} → byEmployee() */
 export const getReimbursementsByEmployee = async (employeeId: string) => {
   const response = await api.get(`/reimbursements/employee/${employeeId}`);
   return {
@@ -101,13 +111,38 @@ export const getReimbursementsByEmployee = async (employeeId: string) => {
   };
 };
 
+/** GET /reimbursements/statistics → statistics() */
 export const getReimbursementStatistics = async (employeeId?: string) => {
   const response = await api.get("/reimbursements/statistics", {
     params: employeeId ? { employee_id: employeeId } : undefined,
   });
-
   return {
     payload: extractPayload(response.data),
     raw: response.data,
   };
+};
+
+// ─── ESS (Employee Self-Service) endpoints ───────────────────────────────────
+
+/** GET /my/reimbursements → myReimbursements() */
+export const getMyReimbursements = async (status?: string) => {
+  const response = await api.get("/my/reimbursements", {
+    params: status ? { status } : undefined,
+  });
+  return {
+    items: extractArrayPayload(response.data),
+    raw: response.data,
+  };
+};
+
+/** POST /my/reimbursements → createMyReimbursement() */
+export const createMyReimbursement = async (payload: Omit<ReimbursementCreatePayload, "employee_id">) => {
+  const response = await api.post("/my/reimbursements", payload);
+  return { raw: response.data };
+};
+
+/** POST /reimbursements/{id}/submit → submit() */
+export const submitMyReimbursement = async (id: string) => {
+  const response = await api.post(`/reimbursements/${id}/submit`);
+  return { raw: response.data };
 };

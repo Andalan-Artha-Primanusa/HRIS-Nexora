@@ -1,51 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet } from "react-router-dom";
+import { useAuthStore } from "@/app/store/auth.store";
 
 /**
  * ProtectedRoute Component
- * 
- * Protects routes by checking if user has valid authentication token.
- * Token is already validated by login API, so we trust it here.
+ *
+ * Protects routes by checking if user has a valid authentication token
+ * from Zustand auth store (synced with localStorage).
  */
-export const ProtectedRoute: React.FC = () => {
-  const [isChecking, setIsChecking] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+export const ProtectedRoute = () => {
+  const token = useAuthStore((state) => state.token);
 
-  useEffect(() => {
-    // Check if token exists in localStorage
-    const token = localStorage.getItem('token');
-    const hasValidToken = !!(token && token !== 'null' && token !== 'undefined');
-    
-    setIsAuthenticated(hasValidToken);
-    setIsChecking(false);
-  }, []);
-
-  // While checking, show loading state
-  if (isChecking) {
-    return (
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '100vh',
-        background: '#f5f5f5'
-      }}>
-        <div style={{
-          textAlign: 'center',
-          fontSize: '1rem',
-          color: '#666'
-        }}>
-          Loading...
-        </div>
-      </div>
-    );
+  if (!token) {
+    return <Navigate to="/login" replace />;
   }
 
-  // Token exists = render protected routes
-  if (isAuthenticated) {
-    return <Outlet />;
-  }
-
-  // No token = redirect to login
-  return <Navigate to="/login" replace />;
+  return <Outlet />;
 };
+
+export default ProtectedRoute;

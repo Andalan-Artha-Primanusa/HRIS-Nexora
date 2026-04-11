@@ -12,7 +12,7 @@ interface LoginFieldErrors {
 }
 
 const LoginPage = () => {
-  const { handleLogin, handleGoogleCallback, handleGoogleLogin } = useAuth();
+  const { handleLogin, handleGoogleLogin } = useAuth();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -23,44 +23,16 @@ const LoginPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSsoSubmitting, setIsSsoSubmitting] = useState(false);
 
+  // 🚨 Tangkap ?error= yang dikirim backend saat SSO Google gagal
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
-    const hasSsoParams = ["code", "token", "access_token", "error", "error_description"].some(
-      (key) => searchParams.has(key)
-    );
-
-    if (!hasSsoParams) {
-      return;
+    const ssoError = searchParams.get("error");
+    if (ssoError) {
+      setFormError(decodeURIComponent(ssoError));
+      // Bersihkan param dari URL tanpa reload halaman
+      window.history.replaceState({}, document.title, "/login");
     }
-
-    let isCancelled = false;
-
-    const processGoogleCallback = async () => {
-      setIsSsoSubmitting(true);
-      setFormError(null);
-
-      try {
-        const authResult = await handleGoogleCallback(searchParams);
-        if (!isCancelled) {
-          navigate(getRoleBasedDashboardPath(authResult.user), { replace: true });
-        }
-      } catch (err: unknown) {
-        if (!isCancelled) {
-          setFormError(typeof err === "string" ? err : "Login SSO gagal.");
-        }
-      } finally {
-        if (!isCancelled) {
-          setIsSsoSubmitting(false);
-        }
-      }
-    };
-
-    void processGoogleCallback();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [handleGoogleCallback, navigate]);
+  }, []);
 
   const validate = () => {
     const nextErrors: LoginFieldErrors = {};
