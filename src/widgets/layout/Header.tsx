@@ -84,11 +84,11 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
           onClick={toggleSidebar}
           aria-label="Toggle Sidebar"
         >
-          <Menu size={20} />
+          <Menu size={40} />
         </button>
         
         <div className="search-bar">
-          <Search size={18} className="search-icon text-gray" />
+          <Search size={32} className="search-icon text-gray" />
           <input 
             type="text" 
             placeholder="Search employee, leave, payroll..." 
@@ -105,16 +105,16 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
           aria-label="Refresh user data"
           title="Refresh user data & roles"
         >
-          <RotateCw size={20} className={isRefreshing ? 'rotating' : ''} />
+          <RotateCw size={32} className={isRefreshing ? 'rotating' : ''} />
         </button>
 
         <button className="icon-button" aria-label="Toggle Dark Mode">
-          <Sun size={20} />
+          <Sun size={32} />
         </button>
         
         <div className="notification-wrapper">
           <button className="icon-button" aria-label="Notifications">
-            <Bell size={20} />
+            <Bell size={32} />
             <span className="notification-badge"></span>
           </button>
         </div>
@@ -140,15 +140,15 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
           
           <div className={`user-dropdown ${openDropdown ? 'visible' : ''}`}>
             <button className="dropdown-item" type="button" onClick={() => navigate('/settings/user-role')}>
-              <UserCircle size={16} />
+              <UserCircle size={24} />
               <span>Profile</span>
             </button>
             <button className="dropdown-item" type="button" onClick={() => navigate('/settings/company')}>
-              <Settings size={16} />
+              <Settings size={24} />
               <span>Settings</span>
             </button>
             <button className="dropdown-item logout-item" type="button" onClick={() => void onLogout()}>
-              <LogOut size={16} />
+              <LogOut size={24} />
               <span>Logout</span>
             </button>
           </div>

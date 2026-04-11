@@ -10,7 +10,7 @@ import {
   getPayrollDetails,
   updatePayrollDetailSingle,
 } from "@/features/payroll/api/payroll.service";
-import type { PayrollItem } from "@/features/payroll/types/payroll.types";
+import type { PayrollDetail } from "@/features/payroll/types/payroll.types";
 import "../admin/AdminCrudPages.css";
 
 const asDisplay = (value: unknown) => {
@@ -19,7 +19,7 @@ const asDisplay = (value: unknown) => {
   return String(value);
 };
 
-const getColumns = (items: PayrollItem[]) => {
+const getColumns = (items: PayrollDetail[]) => {
   if (items.length === 0) {
     return ["id", "payroll_id", "type", "name", "amount"];
   }
@@ -36,7 +36,7 @@ const PayrollDetailsPage = () => {
   const location = useLocation();
   const defaultType = location.pathname.includes("/deduction") ? "deduction" : "allowance";
 
-  const [items, setItems] = useState<PayrollItem[]>([]);
+  const [items, setItems] = useState<PayrollDetail[]>([]);
   const [payrollId, setPayrollId] = useState("1");
   const [detailId, setDetailId] = useState("");
   const [detailType, setDetailType] = useState(defaultType);
@@ -106,7 +106,7 @@ const PayrollDetailsPage = () => {
 
     try {
       const result = await getPayrollDetails(id);
-      setItems(result);
+      setItems(result as PayrollDetail[]);
     } catch (error: unknown) {
       const errorText = error instanceof Error ? error.message : "Gagal memuat detail";
       showErrorModal("❌ Error Muat Detail", errorText);
@@ -246,6 +246,7 @@ const PayrollDetailsPage = () => {
         <div>
           <h1 style={{ color: "#2563eb", marginBottom: "4px" }}>📋 Komponen Payroll</h1>
           <p style={{ color: "var(--color-text-secondary)", fontSize: "0.9rem" }}>Kelola komponen tunjangan dan potongan payroll karyawan</p>
+          <p style={{ color: "#0f766e", fontSize: "0.85rem", marginTop: "8px", marginBottom: 0 }}>{statusMessage}</p>
         </div>
         <Button 
           variant="outline" 
@@ -420,7 +421,7 @@ const PayrollDetailsPage = () => {
                         key={`${String(item.id ?? index)}-${column}`}
                         style={{ padding: "12px", color: "#1f2937" }}
                       >
-                        {asDisplay(item[column])}
+                        {asDisplay((item as Record<string, unknown>)[column])}
                       </td>
                     ))}
                   </tr>
