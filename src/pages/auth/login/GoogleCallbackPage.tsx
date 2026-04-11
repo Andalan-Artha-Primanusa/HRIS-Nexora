@@ -17,13 +17,21 @@ const GoogleCallbackPage = () => {
       const searchParams = new URLSearchParams(window.location.search);
 
       try {
+        console.log("[GoogleCallback] Starting callback process...");
         const authResult = await handleGoogleCallback(searchParams);
+        console.log("[GoogleCallback] Auth successful, navigating...", {
+          userId: (authResult.user as any)?.id,
+          email: (authResult.user as any)?.email,
+        });
         if (!isCancelled) {
           navigate(getRoleBasedDashboardPath(authResult.user), { replace: true });
         }
       } catch (err: unknown) {
+        console.error("[GoogleCallback] Error:", err);
         if (!isCancelled) {
-          setErrorMessage(typeof err === "string" ? err : "Google SSO callback gagal.");
+          const errorMsg = typeof err === "string" ? err : (err as any)?.message || "Google SSO callback gagal.";
+          console.error("[GoogleCallback] Setting error message:", errorMsg);
+          setErrorMessage(errorMsg);
         }
       }
     };

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
+import { Modal } from "@/shared/ui/Modal";
 import {
   addPayrollDetailsBulk,
   bulkUpdatePayrollDetails,
@@ -64,20 +65,23 @@ const PayrollDetailsPage = () => {
       2
     )
   );
-  const [responseText, setResponseText] = useState("");
   const [statusMessage, setStatusMessage] = useState("Ready to call payroll details API");
   const [loading, setLoading] = useState(false);
+  const [errorModal, setErrorModal] = useState<{ isOpen: boolean; title: string; message: string }>({
+    isOpen: false,
+    title: "",
+    message: "",
+  });
+
+  const showErrorModal = (title: string, message: string) => {
+    setErrorModal({ isOpen: true, title, message });
+  };
 
   const columns = useMemo(() => getColumns(items), [items]);
-
-  const formatResponse = (payload: unknown) => {
-    setResponseText(typeof payload === "string" ? payload : JSON.stringify(payload, null, 2));
-  };
 
   const requirePayrollId = () => {
     const id = payrollId.trim();
     if (!id) {
-      setStatusMessage("Payroll ID wajib diisi.");
       return null;
     }
     return id;
@@ -86,7 +90,6 @@ const PayrollDetailsPage = () => {
   const requireDetailId = () => {
     const id = detailId.trim();
     if (!id) {
-      setStatusMessage("Payroll Detail ID wajib diisi.");
       return null;
     }
     return id;
@@ -94,21 +97,19 @@ const PayrollDetailsPage = () => {
 
   const loadPayrollDetails = async () => {
     const id = requirePayrollId();
-    if (!id) return;
+    if (!id) {
+      showErrorModal("Validasi", "Masukkan Payroll ID terlebih dahulu");
+      return;
+    }
 
     setLoading(true);
-    setStatusMessage("Memuat payroll details...");
-    setResponseText("");
 
     try {
       const result = await getPayrollDetails(id);
-      setItems(result.items);
-      formatResponse(result.raw);
-      setStatusMessage("Payroll details berhasil dimuat.");
+      setItems(result);
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal memuat payroll details.";
-      formatResponse(message);
-      setStatusMessage("Gagal memuat payroll details.");
+      const errorText = error instanceof Error ? error.message : "Gagal memuat detail";
+      showErrorModal("❌ Error Muat Detail", errorText);
     } finally {
       setLoading(false);
     }
@@ -116,25 +117,24 @@ const PayrollDetailsPage = () => {
 
   const addBulk = async () => {
     const id = requirePayrollId();
-    if (!id) return;
+    if (!id) {
+      showErrorModal("Validasi", "Masukkan Payroll ID terlebih dahulu");
+      return;
+    }
 
     setLoading(true);
-    setStatusMessage("Menambah payroll details (bulk)...");
-    setResponseText("");
 
     try {
       const details = parseJson<Array<{ type: string; name: string; amount: number }>>(bulkDetailsText);
-      const result = await addPayrollDetailsBulk({
+      await addPayrollDetailsBulk({
         payroll_id: Number(id) || 0,
         details,
       });
-      formatResponse(result.raw);
-      setStatusMessage("Payroll details bulk berhasil ditambahkan.");
+      setStatusMessage("✓ Detail berhasil ditambahkan");
       await loadPayrollDetails();
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal menambah payroll details bulk.";
-      formatResponse(message);
-      setStatusMessage("Gagal menambah payroll details bulk.");
+      const errorText = error instanceof Error ? error.message : "Gagal tambah detail";
+      showErrorModal("❌ Error Tambah Detail", errorText);
     } finally {
       setLoading(false);
     }
@@ -142,25 +142,24 @@ const PayrollDetailsPage = () => {
 
   const updateSingle = async () => {
     const id = requireDetailId();
-    if (!id) return;
+    if (!id) {
+      showErrorModal("Validasi", "Masukkan Detail ID terlebih dahulu");
+      return;
+    }
 
     setLoading(true);
-    setStatusMessage("Mengupdate payroll detail...");
-    setResponseText("");
 
     try {
-      const result = await updatePayrollDetailSingle(id, {
+      await updatePayrollDetailSingle(id, {
         type: detailType,
         name: detailName,
         amount: Number(detailAmount) || 0,
       });
-      formatResponse(result.raw);
-      setStatusMessage("Payroll detail berhasil diupdate.");
+      setStatusMessage("✓ Detail berhasil diupdate");
       await loadPayrollDetails();
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal update payroll detail.";
-      formatResponse(message);
-      setStatusMessage("Gagal update payroll detail.");
+      const errorText = error instanceof Error ? error.message : "Gagal update detail";
+      showErrorModal("❌ Error Update Detail", errorText);
     } finally {
       setLoading(false);
     }
@@ -168,19 +167,15 @@ const PayrollDetailsPage = () => {
 
   const bulkUpdate = async () => {
     setLoading(true);
-    setStatusMessage("Bulk update payroll details...");
-    setResponseText("");
 
     try {
       const details = parseJson<Array<{ id: number; amount: number }>>(bulkUpdateText);
-      const result = await bulkUpdatePayrollDetails({ details });
-      formatResponse(result.raw);
-      setStatusMessage("Bulk update payroll details berhasil.");
+      await bulkUpdatePayrollDetails({ details });
+      setStatusMessage("✓ Detail berhasil di-update");
       await loadPayrollDetails();
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal bulk update payroll details.";
-      formatResponse(message);
-      setStatusMessage("Gagal bulk update payroll details.");
+      const errorText = error instanceof Error ? error.message : "Gagal bulk update";
+      showErrorModal("❌ Error Bulk Update", errorText);
     } finally {
       setLoading(false);
     }
@@ -188,21 +183,20 @@ const PayrollDetailsPage = () => {
 
   const deleteSingle = async () => {
     const id = requireDetailId();
-    if (!id) return;
+    if (!id) {
+      showErrorModal("Validasi", "Masukkan Detail ID terlebih dahulu");
+      return;
+    }
 
     setLoading(true);
-    setStatusMessage("Menghapus payroll detail...");
-    setResponseText("");
 
     try {
-      const result = await deletePayrollDetail(id);
-      formatResponse(result.raw);
-      setStatusMessage("Payroll detail berhasil dihapus.");
+      await deletePayrollDetail(id);
+      setStatusMessage("✓ Detail berhasil dihapus");
       await loadPayrollDetails();
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal menghapus payroll detail.";
-      formatResponse(message);
-      setStatusMessage("Gagal menghapus payroll detail.");
+      const errorText = error instanceof Error ? error.message : "Gagal hapus detail";
+      showErrorModal("❌ Error Hapus Detail", errorText);
     } finally {
       setLoading(false);
     }
@@ -234,6 +228,20 @@ const PayrollDetailsPage = () => {
 
   return (
     <div className="crud-page">
+      {/* Error Modal */}
+      <Modal
+        isOpen={errorModal.isOpen}
+        onClose={() => setErrorModal({ ...errorModal, isOpen: false })}
+        title={errorModal.title}
+        size="md"
+      >
+        <div style={{ padding: "16px 0", whiteSpace: "pre-wrap" }}>
+          <p style={{ margin: 0, lineHeight: "1.6", color: "#374151" }}>
+            {errorModal.message}
+          </p>
+        </div>
+      </Modal>
+
       <div className="crud-header">
         <div>
           <h1>Payroll Details Management</h1>
@@ -364,12 +372,6 @@ const PayrollDetailsPage = () => {
             </tbody>
           </table>
         </div>
-      </Card>
-
-      <Card className="crud-card" glass>
-        <h2>Raw Response</h2>
-        <pre className="crud-response">{responseText || "Response API akan tampil di sini."}</pre>
-        <p className="crud-status">{statusMessage}</p>
       </Card>
     </div>
   );

@@ -1,0 +1,761 @@
+/* ============================================ */
+/* Payroll List Page - Clean, Focused Layout */
+/* ============================================ */
+
+.payroll-list-page {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ============================================ */
+/* Header */
+/* ============================================ */
+
+.payroll-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2.5rem;
+  gap: 2rem;
+}
+
+.payroll-list-title h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary, #1f2937);
+}
+
+.payroll-list-title p {
+  margin: 0.5rem 0 0 0;
+  font-size: 0.95rem;
+  color: var(--text-secondary, #6b7280);
+}
+
+.payroll-list-actions {
+  display: flex;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+/* ============================================ */
+/* Error Alert Card */
+/* ============================================ */
+
+.payroll-error-card {
+  background-color: #fee2e2;
+  border-left: 4px solid #ef4444;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  color: #dc2626;
+  border-radius: 0.5rem;
+}
+
+.payroll-error-card p {
+  margin: 0;
+  font-weight: 500;
+}
+
+/* ============================================ */
+/* Search Card - Control Bar Section */
+/* ============================================ */
+
+.payroll-search-card {
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  background: var(--card-bg, white);
+  border-radius: 0.75rem;
+}
+
+.payroll-control-bar {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.payroll-search-box {
+  flex: 1;
+  min-width: 250px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  background-color: #f9fafb;
+  transition: all 0.3s ease;
+}
+
+.payroll-search-box:focus-within {
+  border-color: #3b82f6;
+  background-color: #fff;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.payroll-search-box svg {
+  color: #9ca3af;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.payroll-search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.9rem;
+  color: var(--text-primary, #1f2937);
+  font-family: inherit;
+}
+
+.payroll-search-input::placeholder {
+  color: #9ca3af;
+}
+
+.payroll-quick-controls {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.payroll-sort-select {
+  padding: 0.625rem 0.875rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  background-color: #f9fafb;
+  font-size: 0.9rem;
+  color: var(--text-primary, #1f2937);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.payroll-sort-select:hover,
+.payroll-sort-select:focus {
+  border-color: #3b82f6;
+  background-color: #fff;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.payroll-sort-order-btn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  background-color: #f9fafb;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--text-primary, #1f2937);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+.payroll-sort-order-btn:hover {
+  background-color: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.payroll-sort-order-btn:active {
+  background-color: #e5e7eb;
+}
+
+.payroll-filter-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  background-color: #f9fafb;
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--text-primary, #1f2937);
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.payroll-filter-btn:hover {
+  background-color: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.payroll-filter-btn.active {
+  background-color: #3b82f6;
+  color: white;
+  border-color: #2563eb;
+}
+
+.payroll-filter-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.payroll-clear-btn {
+  white-space: nowrap;
+}
+
+/* ============================================ */
+/* Filter Panel - Collapsible */
+/* ============================================ */
+
+.payroll-filter-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem 0;
+  border-top: 1px solid #e5e7eb;
+  margin-top: 1.5rem;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.filter-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.filter-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary, #1f2937);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.payroll-filter-select {
+  padding: 0.625rem 0.875rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  background-color: #f9fafb;
+  font-size: 0.9rem;
+  color: var(--text-primary, #1f2937);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.payroll-filter-select:hover,
+.payroll-filter-select:focus {
+  border-color: #3b82f6;
+  background-color: #fff;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* ============================================ */
+/* Results Info */
+/* ============================================ */
+
+.payroll-results-info {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 1.5rem 0;
+  border-top: 1px solid #e5e7eb;
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary, #6b7280);
+}
+
+.payroll-count {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.payroll-count strong {
+  color: var(--text-primary, #1f2937);
+  font-weight: 600;
+}
+
+.payroll-total-items {
+  color: #9ca3af;
+  font-size: 0.85rem;
+}
+
+/* ============================================ */
+/* Table Card - Main Content */
+/* ============================================ */
+
+.payroll-table-card {
+  padding: 1.5rem;
+  background: var(--card-bg, white);
+  border-radius: 0.75rem;
+  min-height: 400px;
+}
+
+.payroll-table-wrap {
+  overflow-x: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.payroll-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+}
+
+.payroll-table thead {
+  background-color: #f9fafb;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.payroll-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-primary, #1f2937);
+  font-size: 0.85rem;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.payroll-table td {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  color: var(--text-secondary, #6b7280);
+  font-size: 0.9rem;
+}
+
+.payroll-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.payroll-table tbody tr:hover {
+  background-color: #fafbfc;
+}
+
+.payroll-id {
+  font-weight: 500;
+  color: #3b82f6;
+  font-family: "Monaco", "Menlo", monospace;
+  font-size: 0.85rem;
+}
+
+.payroll-employee-name {
+  font-weight: 500;
+  color: var(--text-primary, #1f2937);
+}
+
+.payroll-period {
+  color: var(--text-secondary, #6b7280);
+  font-weight: 500;
+}
+
+.payroll-amount {
+  text-align: right;
+  color: var(--text-primary, #1f2937);
+  font-weight: 500;
+  font-family: "Monaco", "Menlo", monospace;
+  font-size: 0.9rem;
+}
+
+.payroll-total {
+  color: #059669;
+  font-weight: 600;
+}
+
+.payroll-status {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-transform: capitalize;
+}
+
+.status-success {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.status-warning {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.status-error {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.status-default {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
+/* ============================================ */
+/* Pagination */
+/* ============================================ */
+
+.payroll-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.payroll-page-info {
+  font-size: 0.9rem;
+  color: var(--text-secondary, #6b7280);
+  font-weight: 500;
+  min-width: 150px;
+  text-align: center;
+}
+
+.payroll-page-info strong {
+  color: var(--text-primary, #1f2937);
+  font-weight: 600;
+}
+
+/* ============================================ */
+/* Loading State */
+/* ============================================ */
+
+.payroll-loading {
+  padding: 4rem 2rem;
+  text-align: center;
+  color: var(--text-secondary, #6b7280);
+  font-size: 1rem;
+}
+
+/* ============================================ */
+/* Empty State */
+/* ============================================ */
+
+.payroll-empty {
+  padding: 4rem 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.payroll-empty-icon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.payroll-empty h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--text-primary, #1f2937);
+  font-weight: 600;
+}
+
+.payroll-empty p {
+  margin: 0.5rem 0 1.5rem 0;
+  color: var(--text-secondary, #6b7280);
+  font-size: 0.95rem;
+}
+
+.payroll-reset-btn {
+  margin-top: 0.5rem;
+}
+
+/* ============================================ */
+/* Responsive Design */
+/* ============================================ */
+
+@media (max-width: 1024px) {
+  .payroll-list-page {
+    padding: 1.5rem;
+  }
+
+  .payroll-list-header {
+    flex-direction: column;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+  }
+
+  .payroll-control-bar {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .payroll-search-box {
+    width: 100%;
+  }
+
+  .payroll-quick-controls {
+    width: 100%;
+  }
+
+  .payroll-filter-btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .filter-row {
+    grid-template-columns: 1fr;
+  }
+
+  .payroll-table th,
+  .payroll-table td {
+    padding: 0.75rem 0.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .payroll-list-page {
+    padding: 1rem;
+  }
+
+  .payroll-list-title h1 {
+    font-size: 1.5rem;
+  }
+
+  .payroll-list-header {
+    margin-bottom: 1rem;
+  }
+
+  .payroll-search-box {
+    min-width: 100%;
+  }
+
+  .payroll-quick-controls {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .payroll-sort-select,
+  .payroll-filter-btn,
+  .payroll-clear-btn {
+    width: 100%;
+  }
+
+  .control-group {
+    width: 100%;
+  }
+
+  .payroll-table-card {
+    padding: 1rem;
+    min-height: auto;
+  }
+
+  .payroll-table {
+    font-size: 0.8rem;
+  }
+
+  .payroll-table th,
+  .payroll-table td {
+    padding: 0.5rem;
+  }
+
+  .payroll-pagination {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .payroll-pagination button,
+  .payroll-page-info {
+    width: 100%;
+  }
+
+  .payroll-amount {
+    text-align: left;
+  }
+
+  .payroll-empty {
+    padding: 2rem 1rem;
+  }
+
+  .payroll-empty-icon {
+    font-size: 2rem;
+  }
+}
+
+/* ============================================ */
+/* Dark Mode Support */
+/* ============================================ */
+
+@media (prefers-color-scheme: dark) {
+  .payroll-list-page {
+    background-color: #111827;
+  }
+
+  .payroll-list-title h1 {
+    color: #f3f4f6;
+  }
+
+  .payroll-list-title p {
+    color: #9ca3af;
+  }
+
+  .payroll-search-card {
+    background-color: #1f2937;
+    border: 1px solid #374151;
+  }
+
+  .payroll-search-box {
+    background-color: #374151;
+    border-color: #4b5563;
+  }
+
+  .payroll-search-box:focus-within {
+    border-color: #60a5fa;
+    background-color: #2d3748;
+  }
+
+  .payroll-search-input {
+    color: #f3f4f6;
+  }
+
+  .payroll-search-input::placeholder {
+    color: #9ca3af;
+  }
+
+  .payroll-search-box svg {
+    color: #9ca3af;
+  }
+
+  .payroll-sort-select,
+  .payroll-sort-order-btn,
+  .payroll-filter-btn {
+    background-color: #374151;
+    border-color: #4b5563;
+    color: #f3f4f6;
+  }
+
+  .payroll-sort-select:hover,
+  .payroll-sort-select:focus,
+  .payroll-sort-order-btn:hover,
+  .payroll-filter-btn:hover {
+    background-color: #4b5563;
+    border-color: #6b7280;
+  }
+
+  .payroll-filter-btn.active {
+    background-color: #3b82f6;
+    border-color: #2563eb;
+    color: white;
+  }
+
+  .payroll-filter-btn svg {
+    color: currentColor;
+  }
+
+  .filter-group label {
+    color: #f3f4f6;
+  }
+
+  .payroll-results-info {
+    border-top-color: #374151;
+    color: #9ca3af;
+  }
+
+  .payroll-count strong,
+  .payroll-page-info strong {
+    color: #f3f4f6;
+  }
+
+  .payroll-filter-panel {
+    border-top-color: #374151;
+  }
+
+  .payroll-table-card {
+    background-color: #1f2937;
+    border: 1px solid #374151;
+  }
+
+  .payroll-table-wrap {
+    border-color: #374151;
+  }
+
+  .payroll-table {
+    background-color: #111827;
+  }
+
+  .payroll-table thead {
+    background-color: #1f2937;
+    border-bottom-color: #374151;
+  }
+
+  .payroll-table th {
+    color: #f3f4f6;
+  }
+
+  .payroll-table td {
+    border-bottom-color: #374151;
+    color: #9ca3af;
+  }
+
+  .payroll-table tbody tr:hover {
+    background-color: #1f2937;
+  }
+
+  .payroll-id {
+    color: #60a5fa;
+  }
+
+  .payroll-employee-name {
+    color: #f3f4f6;
+  }
+
+  .payroll-pagination {
+    border-top-color: #374151;
+  }
+
+  .payroll-page-info {
+    color: #9ca3af;
+  }
+
+  .payroll-empty {
+    color: #9ca3af;
+  }
+
+  .payroll-empty h3 {
+    color: #f3f4f6;
+  }
+
+  .payroll-loading {
+    color: #9ca3af;
+  }
+
+  .payroll-error-card {
+    background-color: #7f1d1d;
+    border-left-color: #ef4444;
+    color: #fca5a5;
+  }
+}

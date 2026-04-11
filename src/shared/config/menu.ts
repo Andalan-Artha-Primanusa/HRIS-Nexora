@@ -96,7 +96,12 @@ export const menuItems: MenuItem[] = [
     icon: Banknote,
     requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
     subItems: [
-      { label: 'Overview', path: '/payroll' },
+      { label: 'Dashboard', path: '/payroll' },
+      { label: 'Daftar Payroll', path: '/payroll/list' },
+      { label: 'Kelola Payroll', path: '/payroll/crud' },
+      { label: 'Generate Payroll', path: '/payroll/generate' },
+      { label: 'Approve Payroll', path: '/payroll/approve' },
+      { label: 'Pembayaran Payroll', path: '/payroll/payment' },
       { label: 'Run Payroll', path: '/payroll/run' },
       {
         label: 'Salary Component',

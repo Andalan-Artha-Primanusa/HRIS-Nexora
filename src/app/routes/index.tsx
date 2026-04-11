@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
 import { getRoleBasedDashboardPathFromStorage } from "@/features/auth/utils/roleRedirect";
+import { ProtectedRoute } from "./ProtectedRoute";
 import LoginPage from "../../pages/auth/login/LoginPage";
 import GoogleCallbackPage from "../../pages/auth/login/GoogleCallbackPage";
 import RegisterPage from "../../pages/auth/register/RegisterPage";
@@ -11,7 +12,6 @@ import AttendanceCheckOutPage from "../../pages/attendance/AttendanceCheckOutPag
 import AttendanceHistoryPage from "../../pages/attendance/AttendanceHistoryPage";
 import AttendanceTodayPage from "../../pages/attendance/AttendanceTodayPage";
 import AttendanceAdminPage from "../../pages/attendance/AttendanceAdminPage";
-import PayrollPage from "../../pages/dashboard/payroll/PayrollPage";
 import KpiPage from "../../pages/dashboard/kpi/KpiPage";
 import SectionPage from "../../pages/dashboard/SectionPage";
 import ProfilesPage from "../../pages/profiles/ProfilesPage";
@@ -35,6 +35,12 @@ import LeaveCalendarPage from "../../pages/leave/LeaveCalendarPage";
 import LeaveApprovalPage from "../../pages/leave/LeaveApprovalPage";
 import PayrollManagementPage from "../../pages/payroll/PayrollManagementPage";
 import PayrollDetailsPage from "../../pages/payroll/PayrollDetailsPage";
+import PayrollListPage from "../../pages/payroll/PayrollListPage";
+import PayrollCrudPage from "../../pages/payroll/PayrollCrudPage";
+import PayrollApprovePage from "../../pages/payroll/PayrollApprovePage";
+import PayrollPaymentPage from "../../pages/payroll/PayrollPaymentPage";
+import PayrollGeneratePage from "../../pages/payroll/PayrollGeneratePage";
+import PayrollDashboard from "../../pages/payroll/PayrollDashboard";
 
 const hasToken = () => {
   const token = localStorage.getItem("token");
@@ -94,10 +100,6 @@ const RootRedirect = () => {
   ) : (
     <Navigate to="/login" replace />
   );
-};
-
-const ProtectedRoute = () => {
-  return hasToken() ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
 const GuestRoute = () => {
@@ -311,16 +313,6 @@ export const router = createBrowserRouter([
         ],
       },
       {
-        path: "/payroll",
-        element: <DashboardLayout />,
-        children: [
-          {
-            index: true,
-            element: <PayrollPage />,
-          },
-        ],
-      },
-      {
         path: "/profiles",
         element: <DashboardLayout />,
         children: [
@@ -521,12 +513,72 @@ export const router = createBrowserRouter([
         ],
       },
       {
+        path: "/payroll",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <PayrollDashboard />,
+          },
+        ],
+      },
+      {
         path: "/payroll/run",
         element: <DashboardLayout />,
         children: [
           {
             index: true,
             element: <PayrollManagementPage />,
+          },
+        ],
+      },
+      {
+        path: "/payroll/list",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <PayrollListPage />,
+          },
+        ],
+      },
+      {
+        path: "/payroll/crud",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <PayrollCrudPage />,
+          },
+        ],
+      },
+      {
+        path: "/payroll/approve",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <PayrollApprovePage />,
+          },
+        ],
+      },
+      {
+        path: "/payroll/payment",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <PayrollPaymentPage />,
+          },
+        ],
+      },
+      {
+        path: "/payroll/generate",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <PayrollGeneratePage />,
           },
         ],
       },

@@ -1,3 +1,5 @@
+@import url('../../../shared/ui/Charts.css');
+
 .overview-page {
   --primary: #2563eb;
   --primary-dark: #1d4ed8;
@@ -15,8 +17,6 @@
   background: var(--surface);
   border-radius: 16px;
 }
-
-@import url('./../../shared/ui/Charts.css');
 
 .page-header {
   display: flex;
