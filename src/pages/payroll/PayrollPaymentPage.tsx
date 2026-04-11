@@ -136,10 +136,10 @@ const PayrollPaymentPage = () => {
         </div>
       </Modal>
 
-      <div className="crud-header">
+      <div className="crud-header" style={{ borderBottom: "2px solid #0284c7", paddingBottom: "20px" }}>
         <div>
-          <h1>Pembayaran Payroll</h1>
-          <p>Tandai payroll yang sudah dibayarkan kepada karyawan</p>
+          <h1 style={{ color: "#0284c7", marginBottom: "4px" }}>💳 Pembayaran Payroll</h1>
+          <p style={{ color: "#666", fontSize: "0.9rem" }}>Tandai payroll yang sudah dibayarkan kepada karyawan</p>
         </div>
       </div>
 
@@ -149,23 +149,24 @@ const PayrollPaymentPage = () => {
           className="crud-card"
           glass
           style={{
-            backgroundColor: "#dbeafe",
-            borderLeft: "4px solid #0284c7",
+            backgroundColor: "#f0f9ff",
+            borderLeft: "4px solid #10b981",
+            marginBottom: "20px",
           }}
         >
-          <p style={{ color: "#0c4a6e", margin: 0 }}>
+          <p style={{ color: "#10b981", margin: 0, fontWeight: "500" }}>
             {message.text}
           </p>
         </Card>
       )}
 
       {/* Input Section */}
-      <Card className="crud-card" glass>
-        <h2>● Pilih Payroll untuk Tandai Dibayar</h2>
+      <Card className="crud-card" glass style={{ borderTop: "4px solid #0284c7" }}>
+        <h2 style={{ color: "#0284c7", marginTop: 0 }}>● Pilih Payroll untuk Tandai Dibayar</h2>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: "20px", alignItems: "start" }}>
           <div>
             <label>
-              <strong>PAYROLL ID *</strong>
+              <strong style={{ color: "#0284c7" }}>PAYROLL ID *</strong>
               <input
                 type="text"
                 className="crud-input"
@@ -182,15 +183,15 @@ const PayrollPaymentPage = () => {
               size="md"
               onClick={() => void handleViewDetail()}
               disabled={loading || !payrollId.trim()}
-              style={{ marginTop: "12px" }}
+              style={{ marginTop: "12px", backgroundColor: "#0284c7" }}
             >
               Lihat Detail
             </Button>
           </div>
 
           {/* Quick List Panel */}
-          <div style={{ backgroundColor: "#f9fafb", padding: "12px", borderRadius: "8px" }}>
-            <p style={{ margin: "0 0 8px 0", fontSize: "0.85rem", fontWeight: "bold", color: "#666" }}>
+          <div style={{ backgroundColor: "#f0f9ff", padding: "12px", borderRadius: "8px", borderTop: "4px solid #0284c7" }}>
+            <p style={{ margin: "0 0 8px 0", fontSize: "0.85rem", fontWeight: "bold", color: "#0284c7" }}>
               📋 Payroll Terbaru
             </p>
             <div style={{ maxHeight: "200px", overflowY: "auto", fontSize: "0.8rem" }}>
@@ -226,8 +227,8 @@ const PayrollPaymentPage = () => {
       {/* Detail Section */}
       {selectedPayroll ? (
         <>
-          <Card className="crud-card" glass>
-            <h2>● Detail Payroll</h2>
+          <Card className="crud-card" glass style={{ borderTop: "4px solid #0284c7" }}>
+            <h2 style={{ color: "#0284c7", marginTop: 0 }}>● Detail Payroll</h2>
 
             {/* Status Badge */}
             <div style={{ marginBottom: "20px" }}>
@@ -249,24 +250,24 @@ const PayrollPaymentPage = () => {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
               {/* Left Column */}
               <div>
-                <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", color: "#666" }}>
+                <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", color: "#0284c7", fontWeight: "600" }}>
                   <strong>Payroll ID</strong>
                 </p>
                 <p style={{ margin: "0 0 16px 0", fontSize: "1rem" }}>{selectedPayroll.id}</p>
 
-                <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", color: "#666" }}>
+                <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", color: "#0284c7", fontWeight: "600" }}>
                   <strong>Karyawan</strong>
                 </p>
                 <p style={{ margin: "0 0 16px 0", fontSize: "1rem" }}>
                   {getEmployeeName(selectedPayroll.employee_id)}
                 </p>
 
-                <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", color: "#666" }}>
+                <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", color: "#0284c7", fontWeight: "600" }}>
                   <strong>Periode</strong>
                 </p>
                 <p style={{ margin: "0 0 16px 0", fontSize: "1rem" }}>{selectedPayroll.period}</p>
 
-                <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", color: "#666" }}>
+                <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", color: "#0284c7", fontWeight: "600" }}>
                   <strong>Gaji Pokok</strong>
                 </p>
                 <p style={{ margin: "0 0 16px 0", fontSize: "1rem", fontWeight: "bold", color: "#059669" }}>
@@ -276,21 +277,21 @@ const PayrollPaymentPage = () => {
 
               {/* Right Column */}
               <div>
-                <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", color: "#666" }}>
+                <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", color: "#0284c7", fontWeight: "600" }}>
                   <strong>Tunjangan</strong>
                 </p>
                 <p style={{ margin: "0 0 16px 0", fontSize: "1rem", fontWeight: "bold", color: "#059669" }}>
                   Rp {Number(selectedPayroll.allowance || 0).toLocaleString("id-ID")}
                 </p>
 
-                <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", color: "#666" }}>
+                <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", color: "#0284c7", fontWeight: "600" }}>
                   <strong>Bonus</strong>
                 </p>
                 <p style={{ margin: "0 0 16px 0", fontSize: "1rem", fontWeight: "bold", color: "#059669" }}>
                   Rp {Number(selectedPayroll.bonus || 0).toLocaleString("id-ID")}
                 </p>
 
-                <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", color: "#666" }}>
+                <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", color: "#0284c7", fontWeight: "600" }}>
                   <strong>Total Potongan</strong>
                 </p>
                 <p style={{ margin: "0 0 16px 0", fontSize: "1rem", fontWeight: "bold", color: "#dc2626" }}>
@@ -310,8 +311,8 @@ const PayrollPaymentPage = () => {
                   marginBottom: "20px",
                 }}
               >
-                <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", color: "#166534" }}>
-                  <strong>Gaji Bersih (Take Home Pay)</strong>
+                <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", color: "#166534", fontWeight: "600" }}>
+                  <strong>💚 Gaji Bersih (Take Home Pay)</strong>
                 </p>
                 <p style={{ margin: 0, fontSize: "1.4rem", fontWeight: "bold", color: "#059669" }}>
                   Rp {Number(selectedPayroll.take_home_pay || selectedPayroll.net_salary || 0).toLocaleString("id-ID")}
@@ -336,7 +337,7 @@ const PayrollPaymentPage = () => {
                   size="lg"
                   onClick={() => void handleMarkAsPaid()}
                   disabled={loading}
-                  style={{ width: "100%" }}
+                  style={{ width: "100%", backgroundColor: "#10b981" }}
                 >
                   ✓ Tandai Sebagai Dibayar
                 </Button>
@@ -348,9 +349,9 @@ const PayrollPaymentPage = () => {
         <Card
           className="crud-card"
           glass
-          style={{ backgroundColor: "#eff6ff", borderLeft: "4px solid #0284c7" }}
+          style={{ backgroundColor: "#f0f9ff", borderLeft: "4px solid #0284c7", borderTop: "4px solid #0284c7" }}
         >
-          <h2>● Detail Payroll</h2>
+          <h2 style={{ color: "#0284c7", marginTop: 0 }}>● Detail Payroll</h2>
           <p style={{ color: "#0c4a6e", margin: 0 }}>
             Masukkan Payroll ID dan klik "Lihat Detail" untuk menampilkan informasi payroll
           </p>

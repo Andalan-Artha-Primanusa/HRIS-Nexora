@@ -243,127 +243,6 @@ const PayrollManagementPage = () => {
 
   return (
     <div className="crud-page">
-      <div className="crud-header">
-        <div>
-          <h1>Payroll Management</h1>
-          <p>
-            Endpoint: /payroll, /payroll/{"{id}"}, /payroll/generate/monthly, /payroll/{"{id}"}
-            /approve, /payroll/{"{id}"}/pay
-          </p>
-        </div>
-        <Button variant="outline" size="md" onClick={() => void loadPayroll()} disabled={loading}>
-          Refresh
-        </Button>
-      </div>
-
-      <Card className="crud-card" glass>
-        <h2>Payroll Form</h2>
-        <div className="crud-form-grid">
-          <label>
-            Payroll ID
-            <input
-              className="crud-input"
-              value={form.id}
-              onChange={(event) => setForm((prev) => ({ ...prev, id: event.target.value }))}
-              placeholder="payroll id"
-            />
-          </label>
-          <label>
-            Employee ID
-            <input
-              className="crud-input"
-              value={form.employee_id}
-              onChange={(event) => setForm((prev) => ({ ...prev, employee_id: event.target.value }))}
-            />
-          </label>
-          <label>
-            Period (YYYY-MM)
-            <input
-              className="crud-input"
-              value={form.period}
-              onChange={(event) => setForm((prev) => ({ ...prev, period: event.target.value }))}
-            />
-          </label>
-          <label>
-            Allowance
-            <input
-              className="crud-input"
-              value={form.allowance}
-              onChange={(event) => setForm((prev) => ({ ...prev, allowance: event.target.value }))}
-            />
-          </label>
-          <label>
-            Bonus
-            <input
-              className="crud-input"
-              value={form.bonus}
-              onChange={(event) => setForm((prev) => ({ ...prev, bonus: event.target.value }))}
-            />
-          </label>
-        </div>
-
-        <div className="crud-actions">
-          <Button variant="primary" size="md" onClick={() => void createPayrollItem()} disabled={loading}>
-            Create Payroll
-          </Button>
-          <Button variant="secondary" size="md" onClick={() => void generateMonthly()} disabled={loading}>
-            Generate Monthly
-          </Button>
-          <Button variant="outline" size="md" onClick={() => void getDetail()} disabled={loading}>
-            Get Detail
-          </Button>
-          <Button variant="secondary" size="md" onClick={() => void updateItem()} disabled={loading}>
-            Update Payroll
-          </Button>
-          <Button variant="secondary" size="md" onClick={() => void approveItem()} disabled={loading}>
-            Approve Payroll
-          </Button>
-          <Button variant="secondary" size="md" onClick={() => void markPaid()} disabled={loading}>
-            Mark as Paid
-          </Button>
-          <Button variant="ghost" size="md" onClick={() => void deleteItem()} disabled={loading}>
-            Delete Payroll
-          </Button>
-        </div>
-      </Card>
-
-      <Card className="crud-card" glass>
-        <h2>Payroll Detail</h2>
-        <pre className="crud-response">
-          {selectedDetail ? JSON.stringify(selectedDetail, null, 2) : "Belum ada detail payroll dipilih."}
-        </pre>
-      </Card>
-
-      <Card className="crud-card" glass>
-        <h2>Payroll Table</h2>
-        <div className="crud-table-wrap">
-          <table className="crud-table">
-            <thead>
-              <tr>
-                {columns.map((column) => (
-                  <th key={column}>{column}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {items.length > 0 ? (
-                items.map((item, index) => (
-                  <tr key={String(item.id ?? index)}>
-                    {columns.map((column) => (
-                      <td key={`${String(item.id ?? index)}-${column}`}>{asDisplay((item as unknown as Record<string, unknown>)[column])}</td>
-                    ))}
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={columns.length}>No payroll data available.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </Card>
-
       {/* Error Modal */}
       <Modal
         isOpen={errorModal.isOpen}
@@ -377,6 +256,200 @@ const PayrollManagementPage = () => {
           </p>
         </div>
       </Modal>
+
+      <div className="crud-header" style={{ borderBottom: "2px solid #0284c7", paddingBottom: "20px" }}>
+        <div>
+          <h1 style={{ color: "#0284c7", marginBottom: "4px" }}>⚙️ Kelola Payroll</h1>
+          <p style={{ color: "#666", fontSize: "0.9rem" }}>Buat, edit, setujui, dan kelola pembayaran gaji karyawan</p>
+        </div>
+        <Button 
+          variant="outline" 
+          size="md" 
+          onClick={() => void loadPayroll()} 
+          disabled={loading}
+          style={{ borderColor: "#0284c7", color: "#0284c7" }}
+        >
+          🔄 Segarkan Data
+        </Button>
+      </div>
+
+      <Card className="crud-card" glass style={{ borderTop: "4px solid #0284c7" }}>
+        <h2 style={{ color: "#0284c7", marginTop: 0 }}>📝 Form Payroll</h2>
+        <div className="crud-form-grid">
+          <label>
+            <strong style={{ color: "#0284c7" }}>ID Payroll</strong>
+            <input
+              className="crud-input"
+              value={form.id}
+              onChange={(event) => setForm((prev) => ({ ...prev, id: event.target.value }))}
+              placeholder="Opsional - otomatis jika kosongan"
+            />
+          </label>
+          <label>
+            <strong style={{ color: "#0284c7" }}>ID Karyawan</strong>
+            <input
+              className="crud-input"
+              value={form.employee_id}
+              onChange={(event) => setForm((prev) => ({ ...prev, employee_id: event.target.value }))}
+            />
+          </label>
+          <label>
+            <strong style={{ color: "#0284c7" }}>Periode (YYYY-MM)</strong>
+            <input
+              className="crud-input"
+              value={form.period}
+              onChange={(event) => setForm((prev) => ({ ...prev, period: event.target.value }))}
+            />
+          </label>
+          <label>
+            <strong style={{ color: "#0284c7" }}>Tunjangan</strong>
+            <input
+              className="crud-input"
+              value={form.allowance}
+              onChange={(event) => setForm((prev) => ({ ...prev, allowance: event.target.value }))}
+            />
+          </label>
+          <label>
+            <strong style={{ color: "#0284c7" }}>Bonus</strong>
+            <input
+              className="crud-input"
+              value={form.bonus}
+              onChange={(event) => setForm((prev) => ({ ...prev, bonus: event.target.value }))}
+            />
+          </label>
+        </div>
+
+        <div className="crud-actions">
+          <Button 
+            variant="primary" 
+            size="md" 
+            onClick={() => void createPayrollItem()} 
+            disabled={loading}
+            style={{ backgroundColor: "#0284c7" }}
+          >
+            ➕ Buat Payroll
+          </Button>
+          <Button 
+            variant="secondary" 
+            size="md" 
+            onClick={() => void generateMonthly()} 
+            disabled={loading}
+            style={{ backgroundColor: "#0ea5e9" }}
+          >
+            🔄 Buat Bulanan
+          </Button>
+          <Button 
+            variant="outline" 
+            size="md" 
+            onClick={() => void getDetail()} 
+            disabled={loading}
+            style={{ borderColor: "#0284c7", color: "#0284c7" }}
+          >
+            👁️ Lihat Detail
+          </Button>
+          <Button 
+            variant="secondary" 
+            size="md" 
+            onClick={() => void updateItem()} 
+            disabled={loading}
+            style={{ backgroundColor: "#0ea5e9" }}
+          >
+            ✏️ Perbarui
+          </Button>
+          <Button 
+            variant="secondary" 
+            size="md" 
+            onClick={() => void approveItem()} 
+            disabled={loading}
+            style={{ backgroundColor: "#10b981" }}
+          >
+            ✅ Setujui
+          </Button>
+          <Button 
+            variant="secondary" 
+            size="md" 
+            onClick={() => void markPaid()} 
+            disabled={loading}
+            style={{ backgroundColor: "#10b981" }}
+          >
+            💳 Tandai Dibayar
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="md" 
+            onClick={() => void deleteItem()} 
+            disabled={loading}
+            style={{ color: "#ef4444" }}
+          >
+            🗑️ Hapus
+          </Button>
+        </div>
+      </Card>
+
+      <Card className="crud-card" glass style={{ borderTop: "4px solid #0284c7" }}>
+        <h2 style={{ color: "#0284c7", marginTop: 0 }}>📋 Detail Payroll</h2>
+        <pre className="crud-response">
+          {selectedDetail ? JSON.stringify(selectedDetail, null, 2) : "Belum ada detail payroll dipilih."}
+        </pre>
+      </Card>
+
+      <Card className="crud-card" glass style={{ borderTop: "4px solid #0284c7" }}>
+        <h2 style={{ color: "#0284c7", marginTop: 0 }}>📊 Daftar Payroll</h2>
+        <div className="crud-table-wrap">
+          <table className="crud-table" style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ backgroundColor: "#f0f9ff" }}>
+                {columns.map((column) => (
+                  <th 
+                    key={column}
+                    style={{ 
+                      padding: "12px", 
+                      backgroundColor: "#e0f2fe",
+                      color: "#0284c7",
+                      fontWeight: "600",
+                      textAlign: "left",
+                      borderBottom: "2px solid #0284c7"
+                    }}
+                  >
+                    {column === "id" && "ID"}
+                    {column === "employee_id" && "ID Karyawan"}
+                    {column === "period" && "Periode"}
+                    {column === "allowance" && "Tunjangan"}
+                    {column === "bonus" && "Bonus"}
+                    {column === "status" && "Status"}
+                    {!["id", "employee_id", "period", "allowance", "bonus", "status"].includes(column) && column}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {items.length > 0 ? (
+                items.map((item, index) => (
+                  <tr 
+                    key={String(item.id ?? index)}
+                    style={{ borderBottom: "1px solid #f0f9ff" }}
+                  >
+                    {columns.map((column) => (
+                      <td 
+                        key={`${String(item.id ?? index)}-${column}`}
+                        style={{ padding: "12px", color: "#1f2937" }}
+                      >
+                        {asDisplay((item as unknown as Record<string, unknown>)[column])}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={columns.length} style={{ padding: "16px", textAlign: "center", color: "#999" }}>
+                    Tidak ada data payroll tersedia.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </Card>
     </div>
   );
 };

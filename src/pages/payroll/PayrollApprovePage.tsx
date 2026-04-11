@@ -145,13 +145,13 @@ const PayrollApprovePage = () => {
         </div>
       </Modal>
 
-      <div className="crud-header">
+      <div className="crud-header" style={{ borderBottom: "2px solid #0284c7", paddingBottom: "20px" }}>
         <div>
-          <h1>Persetujuan Payroll</h1>
-          <p>Setujui payroll karyawan sebelum dibayarkan</p>
+          <h1 style={{ color: "#0284c7", marginBottom: "4px" }}>✓ Persetujuan Payroll</h1>
+          <p style={{ color: "#666", fontSize: "0.9rem" }}>Setujui data payroll karyawan sebelum diproses untuk pembayaran</p>
         </div>
-        <Button variant="outline" size="md" onClick={() => void loadData()} disabled={loading}>
-          Refresh
+        <Button variant="primary" size="md" onClick={() => void loadData()} disabled={loading} style={{ backgroundColor: "#0284c7" }}>
+          🔄 Segarkan Data
         </Button>
       </div>
 
@@ -161,30 +161,31 @@ const PayrollApprovePage = () => {
           className="crud-card"
           glass
           style={{
-            backgroundColor: "#dbeafe",
-            borderLeft: `4px solid #0284c7`,
+            backgroundColor: "#f0f9ff",
+            borderLeft: "4px solid #0284c7",
+            marginBottom: "20px",
           }}
         >
-          <p style={{ color: "#0c4a6e", margin: 0 }}>
+          <p style={{ color: "#0284c7", margin: 0, fontWeight: "500" }}>
             {message.text}
           </p>
         </Card>
       )}
 
       {/* Payroll Yang Perlu Disetujui */}
-      <Card className="crud-card" glass>
-        <h2>📋 Payroll Yang Perlu Disetujui ({pendingPayrolls.length})</h2>
+      <Card className="crud-card" glass style={{ borderTop: "4px solid #0284c7" }}>
+        <h2 style={{ color: "#0284c7", marginTop: 0 }}>📋 Menunggu Persetujuan ({pendingPayrolls.length})</h2>
         {pendingPayrolls.length > 0 ? (
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead style={{ backgroundColor: "#f3f4f6" }}>
+              <thead style={{ backgroundColor: "#f0f9ff" }}>
                 <tr>
-                  <th style={{ padding: "12px", textAlign: "left" }}>Employee</th>
-                  <th style={{ padding: "12px", textAlign: "left" }}>Periode</th>
-                  <th style={{ padding: "12px", textAlign: "right" }}>Gaji Pokok</th>
-                  <th style={{ padding: "12px", textAlign: "right" }}>Gaji Bersih</th>
-                  <th style={{ padding: "12px", textAlign: "center" }}>Status</th>
-                  <th style={{ padding: "12px", textAlign: "center" }}>Aksi</th>
+                  <th style={{ padding: "12px", textAlign: "left", color: "#0284c7", fontWeight: "600" }}>Karyawan</th>
+                  <th style={{ padding: "12px", textAlign: "left", color: "#0284c7", fontWeight: "600" }}>Periode</th>
+                  <th style={{ padding: "12px", textAlign: "right", color: "#0284c7", fontWeight: "600" }}>Gaji Pokok</th>
+                  <th style={{ padding: "12px", textAlign: "right", color: "#0284c7", fontWeight: "600" }}>Gaji Bersih</th>
+                  <th style={{ padding: "12px", textAlign: "center", color: "#0284c7", fontWeight: "600" }}>Status</th>
+                  <th style={{ padding: "12px", textAlign: "center", color: "#0284c7", fontWeight: "600" }}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -226,13 +227,14 @@ const PayrollApprovePage = () => {
                         onClick={() => handleSelectPayroll(p)}
                         style={{
                           padding: "6px 12px",
-                          backgroundColor: selectedPayrollId === String(p.id) ? "#0284c7" : "#3b82f6",
+                          backgroundColor: selectedPayrollId === String(p.id) ? "#0284c7" : "#0ea5e9",
                           color: "white",
                           border: "none",
-                          borderRadius: "4px",
+                          borderRadius: "6px",
                           cursor: "pointer",
                           fontSize: "0.85rem",
                           fontWeight: "bold",
+                          transition: "background-color 0.2s",
                         }}
                         disabled={loading}
                       >
@@ -251,32 +253,32 @@ const PayrollApprovePage = () => {
 
       {/* Approval Form */}
       {selectedPayroll && (
-        <Card className="crud-card" glass>
-          <h2>✅ Persetujuan Payroll ID {selectedPayroll.id}</h2>
+        <Card className="crud-card" glass style={{ borderTop: "4px solid #10b981" }}>
+          <h2 style={{ color: "#0284c7", marginTop: 0 }}>✅ Konfirmasi Persetujuan Payroll ID {selectedPayroll.id}</h2>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
             <div>
-              <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", color: "#666" }}>
-                <strong>Employee ID</strong>
+              <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", fontWeight: "600", color: "#0284c7" }}>
+                ID Karyawan
               </p>
-              <p style={{ margin: "0 0 16px 0", fontSize: "1rem", fontWeight: "bold", color: "#059669" }}>
+              <p style={{ margin: "0 0 16px 0", fontSize: "1rem", fontWeight: "bold", color: "#0284c7" }}>
                 {selectedPayroll.employee_id}
               </p>
 
-              <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", color: "#666" }}>
-                <strong>Karyawan</strong>
+              <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", fontWeight: "600", color: "#0284c7" }}>
+                Nama Karyawan
               </p>
               <p style={{ margin: "0 0 16px 0", fontSize: "1rem" }}>
                 {getEmployeeName(selectedPayroll.employee_id)}
               </p>
 
-              <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", color: "#666" }}>
-                <strong>Periode</strong>
+              <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", fontWeight: "600", color: "#0284c7" }}>
+                Periode Payroll
               </p>
               <p style={{ margin: "0 0 16px 0", fontSize: "1rem" }}>{selectedPayroll.period}</p>
 
-              <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", color: "#666" }}>
-                <strong>Status Saat Ini</strong>
+              <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", fontWeight: "600", color: "#0284c7" }}>
+                Status Saat Ini
               </p>
               <p style={{ margin: 0, fontSize: "1rem" }}>
                 <span
@@ -296,15 +298,15 @@ const PayrollApprovePage = () => {
             </div>
 
             <div>
-              <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", color: "#666" }}>
-                <strong>Gaji Pokok</strong>
+              <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", fontWeight: "600", color: "#0284c7" }}>
+                Gaji Pokok
               </p>
-              <p style={{ margin: "0 0 16px 0", fontSize: "1rem", fontWeight: "bold", color: "#059669" }}>
+              <p style={{ margin: "0 0 16px 0", fontSize: "1rem", fontWeight: "bold", color: "#10b981" }}>
                 Rp {Number(selectedPayroll.basic_salary || 0).toLocaleString("id-ID")}
               </p>
 
-              <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", color: "#666" }}>
-                <strong>Gaji Bersih</strong>
+              <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", fontWeight: "600", color: "#0284c7" }}>
+                Gaji Bersih (Take Home)
               </p>
               <p style={{ margin: "0 0 16px 0", fontSize: "1.2rem", fontWeight: "bold", color: "#10b981" }}>
                 Rp {Number(selectedPayroll.take_home_pay || selectedPayroll.net_salary || 0).toLocaleString("id-ID")}
@@ -313,13 +315,13 @@ const PayrollApprovePage = () => {
           </div>
 
           {/* Approval Button */}
-          <div style={{ display: "flex", gap: "12px" }}>
+          <div style={{ display: "flex", gap: "12px", marginTop: "24px" }}>
             <Button
               variant="primary"
               size="lg"
               onClick={() => void handleApprove()}
               disabled={loading || selectedPayroll.status !== "draft" && selectedPayroll.status !== "pending"}
-              style={{ flex: 1 }}
+              style={{ flex: 1, backgroundColor: "#10b981", border: "none" }}
             >
               ✓ Setujui Payroll
             </Button>
@@ -331,7 +333,7 @@ const PayrollApprovePage = () => {
                 setSelectedPayrollId("");
               }}
               disabled={loading}
-              style={{ flex: 1 }}
+              style={{ flex: 1, color: "#0284c7", borderColor: "#0284c7" }}
             >
               Batal
             </Button>
@@ -341,16 +343,16 @@ const PayrollApprovePage = () => {
 
       {/* Payroll Sudah Disetujui */}
       {otherPayrolls.length > 0 && (
-        <Card className="crud-card" glass style={{ backgroundColor: "#f0fdf4" }}>
-          <h2>✅ Payroll Sudah Disetujui ({otherPayrolls.length})</h2>
+        <Card className="crud-card" glass style={{ backgroundColor: "#f0f9ff", borderTop: "4px solid #10b981" }}>
+          <h2 style={{ color: "#0284c7", marginTop: 0 }}>✅ Telah Disetujui ({otherPayrolls.length})</h2>
           <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", opacity: 0.7 }}>
-              <thead style={{ backgroundColor: "#dbeafe" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", opacity: 0.85 }}>
+              <thead style={{ backgroundColor: "#e0f2fe" }}>
                 <tr>
-                  <th style={{ padding: "8px", textAlign: "left", fontSize: "0.85rem" }}>Employee</th>
-                  <th style={{ padding: "8px", textAlign: "left", fontSize: "0.85rem" }}>Periode</th>
-                  <th style={{ padding: "8px", textAlign: "right", fontSize: "0.85rem" }}>Gaji Bersih</th>
-                  <th style={{ padding: "8px", textAlign: "center", fontSize: "0.85rem" }}>Status</th>
+                  <th style={{ padding: "8px", textAlign: "left", fontSize: "0.85rem", color: "#0284c7", fontWeight: "600" }}>Karyawan</th>
+                  <th style={{ padding: "8px", textAlign: "left", fontSize: "0.85rem", color: "#0284c7", fontWeight: "600" }}>Periode</th>
+                  <th style={{ padding: "8px", textAlign: "right", fontSize: "0.85rem", color: "#0284c7", fontWeight: "600" }}>Gaji Bersih</th>
+                  <th style={{ padding: "8px", textAlign: "center", fontSize: "0.85rem", color: "#0284c7", fontWeight: "600" }}>Status</th>
                 </tr>
               </thead>
               <tbody>

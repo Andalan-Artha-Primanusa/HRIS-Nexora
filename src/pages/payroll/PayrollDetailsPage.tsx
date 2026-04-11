@@ -242,21 +242,27 @@ const PayrollDetailsPage = () => {
         </div>
       </Modal>
 
-      <div className="crud-header">
+      <div className="crud-header" style={{ borderBottom: "2px solid #0284c7", paddingBottom: "20px" }}>
         <div>
-          <h1>Payroll Details Management</h1>
-          <p>Endpoint: /payroll-details/{"{payroll_id}"}, /payroll-details, /payroll-details/bulk-update</p>
+          <h1 style={{ color: "#0284c7", marginBottom: "4px" }}>📋 Komponen Payroll</h1>
+          <p style={{ color: "#666", fontSize: "0.9rem" }}>Kelola komponen tunjangan dan potongan payroll karyawan</p>
         </div>
-        <Button variant="outline" size="md" onClick={() => void loadPayrollDetails()} disabled={loading}>
-          Refresh
+        <Button 
+          variant="outline" 
+          size="md" 
+          onClick={() => void loadPayrollDetails()} 
+          disabled={loading}
+          style={{ borderColor: "#0284c7", color: "#0284c7" }}
+        >
+          🔄 Segarkan
         </Button>
       </div>
 
-      <Card className="crud-card" glass>
-        <h2>Lookup Payroll Details</h2>
+      <Card className="crud-card" glass style={{ borderTop: "4px solid #0284c7" }}>
+        <h2 style={{ color: "#0284c7", marginTop: 0 }}>🔍 Cari Komponen Payroll</h2>
         <div className="crud-form-grid">
           <label>
-            Payroll ID
+            <strong style={{ color: "#0284c7" }}>ID Payroll *</strong>
             <input
               className="crud-input"
               value={payrollId}
@@ -265,42 +271,54 @@ const PayrollDetailsPage = () => {
           </label>
         </div>
         <div className="crud-actions">
-          <Button variant="primary" size="md" onClick={() => void loadPayrollDetails()} disabled={loading}>
-            Get Payroll Details
+          <Button 
+            variant="primary" 
+            size="md" 
+            onClick={() => void loadPayrollDetails()} 
+            disabled={loading}
+            style={{ backgroundColor: "#0284c7" }}
+          >
+            Muat Komponen Payroll
           </Button>
         </div>
       </Card>
 
-      <Card className="crud-card" glass>
-        <h2>Add Payroll Details (Bulk)</h2>
+      <Card className="crud-card" glass style={{ borderTop: "4px solid #0284c7" }}>
+        <h2 style={{ color: "#0284c7", marginTop: 0 }}>➕ Tambah Komponen (Bulk)</h2>
         <div className="crud-form-grid">
           <label className="crud-form-full">
-            Details JSON Array
+            <strong style={{ color: "#0284c7" }}>JSON Array Komponen</strong>
             <textarea value={bulkDetailsText} onChange={(event) => setBulkDetailsText(event.target.value)} />
           </label>
         </div>
         <p className="crud-note">Format: [{"{"} type, name, amount {"}"}]</p>
         <div className="crud-actions">
-          <Button variant="primary" size="md" onClick={() => void addBulk()} disabled={loading}>
-            Add Bulk Details
+          <Button 
+            variant="primary" 
+            size="md" 
+            onClick={() => void addBulk()} 
+            disabled={loading}
+            style={{ backgroundColor: "#0284c7" }}
+          >
+            Tambah Bulk Komponen
           </Button>
         </div>
       </Card>
 
-      <Card className="crud-card" glass>
-        <h2>Update/Delete Payroll Detail</h2>
+      <Card className="crud-card" glass style={{ borderTop: "4px solid #0284c7" }}>
+        <h2 style={{ color: "#0284c7", marginTop: 0 }}>✏️ Ubah/Hapus Komponen</h2>
         <div className="crud-form-grid">
           <label>
-            Detail ID
+            <strong style={{ color: "#0284c7" }}>ID Detail</strong>
             <input
               className="crud-input"
               value={detailId}
               onChange={(event) => setDetailId(event.target.value)}
-              placeholder="detail id"
+              placeholder="ID detail"
             />
           </label>
           <label>
-            Type
+            <strong style={{ color: "#0284c7" }}>Tipe</strong>
             <input
               className="crud-input"
               value={detailType}
@@ -308,7 +326,7 @@ const PayrollDetailsPage = () => {
             />
           </label>
           <label>
-            Name
+            <strong style={{ color: "#0284c7" }}>Nama Komponen</strong>
             <input
               className="crud-input"
               value={detailName}
@@ -316,7 +334,7 @@ const PayrollDetailsPage = () => {
             />
           </label>
           <label>
-            Amount
+            <strong style={{ color: "#0284c7" }}>Jumlah</strong>
             <input
               className="crud-input"
               value={detailAmount}
@@ -324,7 +342,7 @@ const PayrollDetailsPage = () => {
             />
           </label>
           <label className="crud-form-full">
-            Bulk Update JSON Array
+            <strong style={{ color: "#0284c7" }}>JSON Array Bulk Update</strong>
             <textarea value={bulkUpdateText} onChange={(event) => setBulkUpdateText(event.target.value)} />
           </label>
         </div>
@@ -332,41 +350,86 @@ const PayrollDetailsPage = () => {
         <p className="crud-note">Format: [{"{"} id, amount {"}"}]</p>
 
         <div className="crud-actions">
-          <Button variant="secondary" size="md" onClick={() => void updateSingle()} disabled={loading}>
-            Update Detail
+          <Button 
+            variant="secondary" 
+            size="md" 
+            onClick={() => void updateSingle()} 
+            disabled={loading}
+            style={{ backgroundColor: "#0ea5e9" }}
+          >
+            Ubah Detail
           </Button>
-          <Button variant="secondary" size="md" onClick={() => void bulkUpdate()} disabled={loading}>
-            Bulk Update Details
+          <Button 
+            variant="secondary" 
+            size="md" 
+            onClick={() => void bulkUpdate()} 
+            disabled={loading}
+            style={{ backgroundColor: "#0ea5e9" }}
+          >
+            Bulk Update Komponen
           </Button>
-          <Button variant="ghost" size="md" onClick={() => void deleteSingle()} disabled={loading}>
-            Delete Detail
+          <Button 
+            variant="ghost" 
+            size="md" 
+            onClick={() => void deleteSingle()} 
+            disabled={loading}
+            style={{ color: "#ef4444" }}
+          >
+            Hapus Detail
           </Button>
         </div>
       </Card>
 
-      <Card className="crud-card" glass>
-        <h2>Payroll Details Table</h2>
+      <Card className="crud-card" glass style={{ borderTop: "4px solid #0284c7" }}>
+        <h2 style={{ color: "#0284c7", marginTop: 0 }}>📊 Tabel Komponen Payroll</h2>
         <div className="crud-table-wrap">
-          <table className="crud-table">
+          <table className="crud-table" style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr>
+              <tr style={{ backgroundColor: "#f0f9ff" }}>
                 {columns.map((column) => (
-                  <th key={column}>{column}</th>
+                  <th 
+                    key={column}
+                    style={{ 
+                      padding: "12px", 
+                      backgroundColor: "#e0f2fe",
+                      color: "#0284c7",
+                      fontWeight: "600",
+                      textAlign: "left",
+                      borderBottom: "2px solid #0284c7"
+                    }}
+                  >
+                    {column === "id" && "ID"}
+                    {column === "payroll_id" && "ID Payroll"}
+                    {column === "type" && "Tipe"}
+                    {column === "name" && "Nama"}
+                    {column === "amount" && "Jumlah"}
+                    {!["id", "payroll_id", "type", "name", "amount"].includes(column) && column}
+                  </th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {items.length > 0 ? (
                 items.map((item, index) => (
-                  <tr key={String(item.id ?? index)}>
+                  <tr 
+                    key={String(item.id ?? index)}
+                    style={{ borderBottom: "1px solid #f0f9ff" }}
+                  >
                     {columns.map((column) => (
-                      <td key={`${String(item.id ?? index)}-${column}`}>{asDisplay(item[column])}</td>
+                      <td 
+                        key={`${String(item.id ?? index)}-${column}`}
+                        style={{ padding: "12px", color: "#1f2937" }}
+                      >
+                        {asDisplay(item[column])}
+                      </td>
                     ))}
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={columns.length}>No payroll detail data available.</td>
+                  <td colSpan={columns.length} style={{ padding: "16px", textAlign: "center", color: "#999" }}>
+                    Tidak ada data komponen payroll.
+                  </td>
                 </tr>
               )}
             </tbody>
