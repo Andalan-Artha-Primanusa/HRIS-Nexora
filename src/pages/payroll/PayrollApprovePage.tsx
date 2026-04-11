@@ -139,18 +139,18 @@ const PayrollApprovePage = () => {
         size="md"
       >
         <div style={{ padding: "16px 0", whiteSpace: "pre-wrap" }}>
-          <p style={{ margin: 0, lineHeight: "1.6", color: "#374151" }}>
+          <p style={{ margin: 0, lineHeight: "1.6", color: "var(--color-text-primary)" }}>
             {errorModal.message}
           </p>
         </div>
       </Modal>
 
-      <div className="crud-header" style={{ borderBottom: "2px solid #0284c7", paddingBottom: "20px" }}>
+      <div className="crud-header" style={{ borderBottom: "2px solid #2563eb", paddingBottom: "20px" }}>
         <div>
-          <h1 style={{ color: "#0284c7", marginBottom: "4px" }}>✓ Persetujuan Payroll</h1>
-          <p style={{ color: "#666", fontSize: "0.9rem" }}>Setujui data payroll karyawan sebelum diproses untuk pembayaran</p>
+          <h1 style={{ color: "#2563eb", marginBottom: "4px" }}>✓ Persetujuan Payroll</h1>
+          <p style={{ color: "var(--color-text-secondary)", fontSize: "0.9rem" }}>Setujui data payroll karyawan sebelum diproses untuk pembayaran</p>
         </div>
-        <Button variant="primary" size="md" onClick={() => void loadData()} disabled={loading} style={{ backgroundColor: "#0284c7" }}>
+        <Button variant="primary" size="md" onClick={() => void loadData()} disabled={loading} style={{ backgroundColor: "#2563eb" }}>
           🔄 Segarkan Data
         </Button>
       </div>
@@ -161,31 +161,31 @@ const PayrollApprovePage = () => {
           className="crud-card"
           glass
           style={{
-            backgroundColor: "#f0f9ff",
-            borderLeft: "4px solid #0284c7",
+            backgroundColor: "#eff6ff",
+            borderLeft: "4px solid #2563eb",
             marginBottom: "20px",
           }}
         >
-          <p style={{ color: "#0284c7", margin: 0, fontWeight: "500" }}>
+          <p style={{ color: "#2563eb", margin: 0, fontWeight: "500" }}>
             {message.text}
           </p>
         </Card>
       )}
 
       {/* Payroll Yang Perlu Disetujui */}
-      <Card className="crud-card" glass style={{ borderTop: "4px solid #0284c7" }}>
-        <h2 style={{ color: "#0284c7", marginTop: 0 }}>📋 Menunggu Persetujuan ({pendingPayrolls.length})</h2>
+      <Card className="crud-card" glass style={{ borderTop: "4px solid #2563eb" }}>
+        <h2 style={{ color: "#2563eb", marginTop: 0 }}>📋 Menunggu Persetujuan ({pendingPayrolls.length})</h2>
         {pendingPayrolls.length > 0 ? (
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead style={{ backgroundColor: "#f0f9ff" }}>
+              <thead style={{ backgroundColor: "#eff6ff" }}>
                 <tr>
-                  <th style={{ padding: "12px", textAlign: "left", color: "#0284c7", fontWeight: "600" }}>Karyawan</th>
-                  <th style={{ padding: "12px", textAlign: "left", color: "#0284c7", fontWeight: "600" }}>Periode</th>
-                  <th style={{ padding: "12px", textAlign: "right", color: "#0284c7", fontWeight: "600" }}>Gaji Pokok</th>
-                  <th style={{ padding: "12px", textAlign: "right", color: "#0284c7", fontWeight: "600" }}>Gaji Bersih</th>
-                  <th style={{ padding: "12px", textAlign: "center", color: "#0284c7", fontWeight: "600" }}>Status</th>
-                  <th style={{ padding: "12px", textAlign: "center", color: "#0284c7", fontWeight: "600" }}>Aksi</th>
+                  <th style={{ padding: "12px", textAlign: "left", color: "#2563eb", fontWeight: "600" }}>Karyawan</th>
+                  <th style={{ padding: "12px", textAlign: "left", color: "#2563eb", fontWeight: "600" }}>Periode</th>
+                  <th style={{ padding: "12px", textAlign: "right", color: "#2563eb", fontWeight: "600" }}>Gaji Pokok</th>
+                  <th style={{ padding: "12px", textAlign: "right", color: "#2563eb", fontWeight: "600" }}>Gaji Bersih</th>
+                  <th style={{ padding: "12px", textAlign: "center", color: "#2563eb", fontWeight: "600" }}>Status</th>
+                  <th style={{ padding: "12px", textAlign: "center", color: "#2563eb", fontWeight: "600" }}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -227,7 +227,7 @@ const PayrollApprovePage = () => {
                         onClick={() => handleSelectPayroll(p)}
                         style={{
                           padding: "6px 12px",
-                          backgroundColor: selectedPayrollId === String(p.id) ? "#0284c7" : "#0ea5e9",
+                          backgroundColor: selectedPayrollId === String(p.id) ? "#2563eb" : "#0ea5e9",
                           color: "white",
                           border: "none",
                           borderRadius: "6px",
@@ -254,30 +254,30 @@ const PayrollApprovePage = () => {
       {/* Approval Form */}
       {selectedPayroll && (
         <Card className="crud-card" glass style={{ borderTop: "4px solid #10b981" }}>
-          <h2 style={{ color: "#0284c7", marginTop: 0 }}>✅ Konfirmasi Persetujuan Payroll ID {selectedPayroll.id}</h2>
+          <h2 style={{ color: "#2563eb", marginTop: 0 }}>✅ Konfirmasi Persetujuan Payroll ID {selectedPayroll.id}</h2>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
             <div>
-              <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", fontWeight: "600", color: "#0284c7" }}>
+              <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", fontWeight: "600", color: "#2563eb" }}>
                 ID Karyawan
               </p>
-              <p style={{ margin: "0 0 16px 0", fontSize: "1rem", fontWeight: "bold", color: "#0284c7" }}>
+              <p style={{ margin: "0 0 16px 0", fontSize: "1rem", fontWeight: "bold", color: "#2563eb" }}>
                 {selectedPayroll.employee_id}
               </p>
 
-              <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", fontWeight: "600", color: "#0284c7" }}>
+              <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", fontWeight: "600", color: "#2563eb" }}>
                 Nama Karyawan
               </p>
               <p style={{ margin: "0 0 16px 0", fontSize: "1rem" }}>
                 {getEmployeeName(selectedPayroll.employee_id)}
               </p>
 
-              <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", fontWeight: "600", color: "#0284c7" }}>
+              <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", fontWeight: "600", color: "#2563eb" }}>
                 Periode Payroll
               </p>
               <p style={{ margin: "0 0 16px 0", fontSize: "1rem" }}>{selectedPayroll.period}</p>
 
-              <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", fontWeight: "600", color: "#0284c7" }}>
+              <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", fontWeight: "600", color: "#2563eb" }}>
                 Status Saat Ini
               </p>
               <p style={{ margin: 0, fontSize: "1rem" }}>
@@ -298,14 +298,14 @@ const PayrollApprovePage = () => {
             </div>
 
             <div>
-              <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", fontWeight: "600", color: "#0284c7" }}>
+              <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", fontWeight: "600", color: "#2563eb" }}>
                 Gaji Pokok
               </p>
               <p style={{ margin: "0 0 16px 0", fontSize: "1rem", fontWeight: "bold", color: "#10b981" }}>
                 Rp {Number(selectedPayroll.basic_salary || 0).toLocaleString("id-ID")}
               </p>
 
-              <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", fontWeight: "600", color: "#0284c7" }}>
+              <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", fontWeight: "600", color: "#2563eb" }}>
                 Gaji Bersih (Take Home)
               </p>
               <p style={{ margin: "0 0 16px 0", fontSize: "1.2rem", fontWeight: "bold", color: "#10b981" }}>
@@ -333,7 +333,7 @@ const PayrollApprovePage = () => {
                 setSelectedPayrollId("");
               }}
               disabled={loading}
-              style={{ flex: 1, color: "#0284c7", borderColor: "#0284c7" }}
+              style={{ flex: 1, color: "#2563eb", borderColor: "#2563eb" }}
             >
               Batal
             </Button>
@@ -343,16 +343,16 @@ const PayrollApprovePage = () => {
 
       {/* Payroll Sudah Disetujui */}
       {otherPayrolls.length > 0 && (
-        <Card className="crud-card" glass style={{ backgroundColor: "#f0f9ff", borderTop: "4px solid #10b981" }}>
-          <h2 style={{ color: "#0284c7", marginTop: 0 }}>✅ Telah Disetujui ({otherPayrolls.length})</h2>
+        <Card className="crud-card" glass style={{ backgroundColor: "#eff6ff", borderTop: "4px solid #10b981" }}>
+          <h2 style={{ color: "#2563eb", marginTop: 0 }}>✅ Telah Disetujui ({otherPayrolls.length})</h2>
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", opacity: 0.85 }}>
-              <thead style={{ backgroundColor: "#e0f2fe" }}>
+              <thead style={{ backgroundColor: "#dbeafe" }}>
                 <tr>
-                  <th style={{ padding: "8px", textAlign: "left", fontSize: "0.85rem", color: "#0284c7", fontWeight: "600" }}>Karyawan</th>
-                  <th style={{ padding: "8px", textAlign: "left", fontSize: "0.85rem", color: "#0284c7", fontWeight: "600" }}>Periode</th>
-                  <th style={{ padding: "8px", textAlign: "right", fontSize: "0.85rem", color: "#0284c7", fontWeight: "600" }}>Gaji Bersih</th>
-                  <th style={{ padding: "8px", textAlign: "center", fontSize: "0.85rem", color: "#0284c7", fontWeight: "600" }}>Status</th>
+                  <th style={{ padding: "8px", textAlign: "left", fontSize: "0.85rem", color: "#2563eb", fontWeight: "600" }}>Karyawan</th>
+                  <th style={{ padding: "8px", textAlign: "left", fontSize: "0.85rem", color: "#2563eb", fontWeight: "600" }}>Periode</th>
+                  <th style={{ padding: "8px", textAlign: "right", fontSize: "0.85rem", color: "#2563eb", fontWeight: "600" }}>Gaji Bersih</th>
+                  <th style={{ padding: "8px", textAlign: "center", fontSize: "0.85rem", color: "#2563eb", fontWeight: "600" }}>Status</th>
                 </tr>
               </thead>
               <tbody>

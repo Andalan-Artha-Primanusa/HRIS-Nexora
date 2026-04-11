@@ -73,7 +73,7 @@ const AttendanceHistoryPage = () => {
     } else if (statusLower.includes('absent') || statusLower.includes('tidak')) {
       return <XCircle size={18} style={{ color: '#c41e3a' }} />;
     } else if (statusLower.includes('late') || statusLower.includes('terlambat')) {
-      return <Clock size={18} style={{ color: '#f39c12' }} />;
+      return <Clock size={18} style={{ color: '#f59e0b' }} />;
     }
     return null;
   };
@@ -146,7 +146,7 @@ const AttendanceHistoryPage = () => {
                     <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>
                       {formatDate(record.date)}
                     </span>
-                    <span style={{ fontSize: '0.85rem', color: '#666' }}>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
                       {record.status}
                     </span>
                   </div>
@@ -169,7 +169,7 @@ const AttendanceHistoryPage = () => {
             ))}
           </div>
         ) : (
-          <div style={{ textAlign: 'center', padding: '2rem', color: '#999' }}>
+          <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-disabled)' }}>
             <CalendarDays size={32} style={{ marginBottom: '0.5rem', opacity: 0.5 }} />
             <p style={{ margin: 0 }}>Data history belum tersedia.</p>
           </div>

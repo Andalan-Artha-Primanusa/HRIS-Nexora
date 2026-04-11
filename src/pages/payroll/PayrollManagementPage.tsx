@@ -251,33 +251,33 @@ const PayrollManagementPage = () => {
         size="md"
       >
         <div style={{ padding: "16px 0", whiteSpace: "pre-wrap" }}>
-          <p style={{ margin: 0, lineHeight: "1.6", color: "#374151" }}>
+          <p style={{ margin: 0, lineHeight: "1.6", color: "var(--color-text-primary)" }}>
             {errorModal.message}
           </p>
         </div>
       </Modal>
 
-      <div className="crud-header" style={{ borderBottom: "2px solid #0284c7", paddingBottom: "20px" }}>
+      <div className="crud-header" style={{ borderBottom: "2px solid #2563eb", paddingBottom: "20px" }}>
         <div>
-          <h1 style={{ color: "#0284c7", marginBottom: "4px" }}>⚙️ Kelola Payroll</h1>
-          <p style={{ color: "#666", fontSize: "0.9rem" }}>Buat, edit, setujui, dan kelola pembayaran gaji karyawan</p>
+          <h1 style={{ color: "#2563eb", marginBottom: "4px" }}>⚙️ Kelola Payroll</h1>
+          <p style={{ color: "var(--color-text-secondary)", fontSize: "0.9rem" }}>Buat, edit, setujui, dan kelola pembayaran gaji karyawan</p>
         </div>
         <Button 
           variant="outline" 
           size="md" 
           onClick={() => void loadPayroll()} 
           disabled={loading}
-          style={{ borderColor: "#0284c7", color: "#0284c7" }}
+          style={{ borderColor: "#2563eb", color: "#2563eb" }}
         >
           🔄 Segarkan Data
         </Button>
       </div>
 
-      <Card className="crud-card" glass style={{ borderTop: "4px solid #0284c7" }}>
-        <h2 style={{ color: "#0284c7", marginTop: 0 }}>📝 Form Payroll</h2>
+      <Card className="crud-card" glass style={{ borderTop: "4px solid #2563eb" }}>
+        <h2 style={{ color: "#2563eb", marginTop: 0 }}>📝 Form Payroll</h2>
         <div className="crud-form-grid">
           <label>
-            <strong style={{ color: "#0284c7" }}>ID Payroll</strong>
+            <strong style={{ color: "#2563eb" }}>ID Payroll</strong>
             <input
               className="crud-input"
               value={form.id}
@@ -286,7 +286,7 @@ const PayrollManagementPage = () => {
             />
           </label>
           <label>
-            <strong style={{ color: "#0284c7" }}>ID Karyawan</strong>
+            <strong style={{ color: "#2563eb" }}>ID Karyawan</strong>
             <input
               className="crud-input"
               value={form.employee_id}
@@ -294,7 +294,7 @@ const PayrollManagementPage = () => {
             />
           </label>
           <label>
-            <strong style={{ color: "#0284c7" }}>Periode (YYYY-MM)</strong>
+            <strong style={{ color: "#2563eb" }}>Periode (YYYY-MM)</strong>
             <input
               className="crud-input"
               value={form.period}
@@ -302,7 +302,7 @@ const PayrollManagementPage = () => {
             />
           </label>
           <label>
-            <strong style={{ color: "#0284c7" }}>Tunjangan</strong>
+            <strong style={{ color: "#2563eb" }}>Tunjangan</strong>
             <input
               className="crud-input"
               value={form.allowance}
@@ -310,7 +310,7 @@ const PayrollManagementPage = () => {
             />
           </label>
           <label>
-            <strong style={{ color: "#0284c7" }}>Bonus</strong>
+            <strong style={{ color: "#2563eb" }}>Bonus</strong>
             <input
               className="crud-input"
               value={form.bonus}
@@ -325,7 +325,7 @@ const PayrollManagementPage = () => {
             size="md" 
             onClick={() => void createPayrollItem()} 
             disabled={loading}
-            style={{ backgroundColor: "#0284c7" }}
+            style={{ backgroundColor: "#2563eb" }}
           >
             ➕ Buat Payroll
           </Button>
@@ -343,7 +343,7 @@ const PayrollManagementPage = () => {
             size="md" 
             onClick={() => void getDetail()} 
             disabled={loading}
-            style={{ borderColor: "#0284c7", color: "#0284c7" }}
+            style={{ borderColor: "#2563eb", color: "#2563eb" }}
           >
             👁️ Lihat Detail
           </Button>
@@ -386,29 +386,29 @@ const PayrollManagementPage = () => {
         </div>
       </Card>
 
-      <Card className="crud-card" glass style={{ borderTop: "4px solid #0284c7" }}>
-        <h2 style={{ color: "#0284c7", marginTop: 0 }}>📋 Detail Payroll</h2>
+      <Card className="crud-card" glass style={{ borderTop: "4px solid #2563eb" }}>
+        <h2 style={{ color: "#2563eb", marginTop: 0 }}>📋 Detail Payroll</h2>
         <pre className="crud-response">
           {selectedDetail ? JSON.stringify(selectedDetail, null, 2) : "Belum ada detail payroll dipilih."}
         </pre>
       </Card>
 
-      <Card className="crud-card" glass style={{ borderTop: "4px solid #0284c7" }}>
-        <h2 style={{ color: "#0284c7", marginTop: 0 }}>📊 Daftar Payroll</h2>
+      <Card className="crud-card" glass style={{ borderTop: "4px solid #2563eb" }}>
+        <h2 style={{ color: "#2563eb", marginTop: 0 }}>📊 Daftar Payroll</h2>
         <div className="crud-table-wrap">
           <table className="crud-table" style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ backgroundColor: "#f0f9ff" }}>
+              <tr style={{ backgroundColor: "#eff6ff" }}>
                 {columns.map((column) => (
                   <th 
                     key={column}
                     style={{ 
                       padding: "12px", 
-                      backgroundColor: "#e0f2fe",
-                      color: "#0284c7",
+                      backgroundColor: "#dbeafe",
+                      color: "#2563eb",
                       fontWeight: "600",
                       textAlign: "left",
-                      borderBottom: "2px solid #0284c7"
+                      borderBottom: "2px solid #2563eb"
                     }}
                   >
                     {column === "id" && "ID"}
@@ -427,7 +427,7 @@ const PayrollManagementPage = () => {
                 items.map((item, index) => (
                   <tr 
                     key={String(item.id ?? index)}
-                    style={{ borderBottom: "1px solid #f0f9ff" }}
+                    style={{ borderBottom: "1px solid #eff6ff" }}
                   >
                     {columns.map((column) => (
                       <td 

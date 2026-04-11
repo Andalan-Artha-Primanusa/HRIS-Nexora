@@ -1,5 +1,11 @@
 @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@600;700&display=swap");
 
+/* ========================================
+   IMPORT DESIGN SYSTEM
+   ======================================== */
+@import './shared/styles/design-tokens.css';
+@import './shared/styles/global.css';
+
 :root {
   --primary-blue: #1d62f0;
   --primary-blue-hover: #0f4ad2;

@@ -36,7 +36,7 @@ const AttendanceOverviewPage = () => {
             </div>
           </div>
           <div style={{ marginTop: '1rem' }}>
-            <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#0066cc' }}>
+            <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#2563eb' }}>
               {attendanceStats.attendanceRate}%
             </p>
           </div>
@@ -52,7 +52,7 @@ const AttendanceOverviewPage = () => {
             </div>
           </div>
           <div style={{ marginTop: '1rem' }}>
-            <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#00a86b' }}>
+            <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#10b981' }}>
               {attendanceStats.present}/{attendanceStats.totalWorkingDays}
             </p>
           </div>
@@ -68,7 +68,7 @@ const AttendanceOverviewPage = () => {
             </div>
           </div>
           <div style={{ marginTop: '1rem' }}>
-            <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#e74c3c' }}>
+            <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#ef4444' }}>
               {attendanceStats.absent}
             </p>
           </div>
@@ -84,7 +84,7 @@ const AttendanceOverviewPage = () => {
             </div>
           </div>
           <div style={{ marginTop: '1rem' }}>
-            <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#f39c12' }}>
+            <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#f59e0b' }}>
               {attendanceStats.late}
             </p>
           </div>
@@ -100,7 +100,7 @@ const AttendanceOverviewPage = () => {
             </div>
           </div>
           <div style={{ marginTop: '1rem' }}>
-            <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#8e44ad' }}>
+            <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#8b5cf6' }}>
               {attendanceStats.workHours}h
             </p>
           </div>
