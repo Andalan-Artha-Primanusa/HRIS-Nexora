@@ -139,7 +139,9 @@ const PayrollCrudPage = () => {
         allowance: Number(form.allowance) || 0,
         bonus: Number(form.bonus) || 0,
       };
-      await updatePayroll(id, payload);
+      // Extract numeric ID if prefixed (e.g., "P003" -> "3")
+      const payrollId = String(id).replace(/^[A-Z]+/, "").replace(/^0+/, "") || id;
+      await updatePayroll(payrollId, payload);
       setMessage({ type: "success", text: "✓ Payroll berhasil diupdate" });
       setForm(DEFAULT_FORM);
       setSelectedPayrollId("");
@@ -167,7 +169,9 @@ const PayrollCrudPage = () => {
 
     setLoading(true);
     try {
-      await deletePayroll(id);
+      // Extract numeric ID if prefixed (e.g., "P003" -> "3")
+      const payrollId = String(id).replace(/^[A-Z]+/, "").replace(/^0+/, "") || id;
+      await deletePayroll(payrollId);
       setMessage({ type: "success", text: "✓ Payroll berhasil dihapus" });
       setForm(DEFAULT_FORM);
       setSelectedPayrollId("");

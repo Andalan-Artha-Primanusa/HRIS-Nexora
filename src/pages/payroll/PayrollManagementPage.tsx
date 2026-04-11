@@ -131,7 +131,9 @@ const PayrollManagementPage = () => {
     setLoading(true);
 
     try {
-      const result = await getPayrollDetail(id);
+      // Extract numeric ID if prefixed (e.g., "P003" -> "3")
+      const payrollId = String(id).replace(/^[A-Z]+/, "").replace(/^0+/, "") || id;
+      const result = await getPayrollDetail(payrollId);
       setSelectedDetail(result as unknown as Record<string, unknown>);
     } catch (error: unknown) {
       const errorText = error instanceof Error ? error.message : "Gagal muat detail";
@@ -156,7 +158,9 @@ const PayrollManagementPage = () => {
         bonus: Number(form.bonus) || 0,
       };
 
-      await updatePayroll(id, payload);
+      // Extract numeric ID if prefixed (e.g., "P003" -> "3")
+      const payrollId = String(id).replace(/^[A-Z]+/, "").replace(/^0+/, "") || id;
+      await updatePayroll(payrollId, payload);
       await loadPayroll();
     } catch (error: unknown) {
       const errorText = error instanceof Error ? error.message : "Gagal update payroll";
@@ -176,7 +180,9 @@ const PayrollManagementPage = () => {
     setLoading(true);
 
     try {
-      await deletePayroll(id);
+      // Extract numeric ID if prefixed (e.g., "P003" -> "3")
+      const payrollId = String(id).replace(/^[A-Z]+/, "").replace(/^0+/, "") || id;
+      await deletePayroll(payrollId);
       await loadPayroll();
     } catch (error: unknown) {
       const errorText = error instanceof Error ? error.message : "Gagal hapus payroll";
@@ -196,7 +202,9 @@ const PayrollManagementPage = () => {
     setLoading(true);
 
     try {
-      await approvePayroll(id);
+      // Extract numeric ID if prefixed (e.g., "P003" -> "3")
+      const payrollId = String(id).replace(/^[A-Z]+/, "").replace(/^0+/, "") || id;
+      await approvePayroll(payrollId);
       await loadPayroll();
     } catch (error: unknown) {
       const errorText = error instanceof Error ? error.message : "Gagal approve payroll";
@@ -216,7 +224,9 @@ const PayrollManagementPage = () => {
     setLoading(true);
 
     try {
-      await markPayrollAsPaid(id);
+      // Extract numeric ID if prefixed (e.g., "P003" -> "3")
+      const payrollId = String(id).replace(/^[A-Z]+/, "").replace(/^0+/, "") || id;
+      await markPayrollAsPaid(payrollId);
       await loadPayroll();
     } catch (error: unknown) {
       const errorText = error instanceof Error ? error.message : "Gagal mark as paid";

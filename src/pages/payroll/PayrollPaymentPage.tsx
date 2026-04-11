@@ -48,7 +48,9 @@ const PayrollPaymentPage = () => {
 
     setLoading(true);
     try {
-      const payroll = await getPayrollDetail(payrollId);
+      // Extract numeric ID if prefixed (e.g., "P003" -> "3")
+      const cleanId = String(payrollId).replace(/^[A-Z]+/, "").replace(/^0+/, "") || payrollId;
+      const payroll = await getPayrollDetail(cleanId);
       setSelectedPayroll(payroll);
       setMessage(null);
     } catch (error) {
@@ -74,7 +76,9 @@ const PayrollPaymentPage = () => {
 
     setLoading(true);
     try {
-      const updated = await markPayrollAsPaid(selectedPayroll.id);
+      // Extract numeric ID if prefixed (e.g., "P003" -> "3")
+      const payrollId = String(selectedPayroll.id).replace(/^[A-Z]+/, "").replace(/^0+/, "") || selectedPayroll.id;
+      const updated = await markPayrollAsPaid(payrollId);
       setSelectedPayroll(updated);
       setMessage({ type: "success", text: "✓ Payroll berhasil ditandai sebagai dibayar" });
 

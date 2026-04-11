@@ -76,10 +76,15 @@ const PayrollApprovePage = () => {
     setLoading(true);
     try {
       console.log("📋 Approving payroll ID:", selectedPayroll.id);
-      await approvePayroll(selectedPayroll.id);
+      // Extract numeric ID if prefixed (e.g., "P003" -> "3")
+      const payrollId = String(selectedPayroll.id).replace(/^[A-Z]+/, "").replace(/^0+/, "") || selectedPayroll.id;
+      await approvePayroll(payrollId);
+      
       setMessage({ type: "success", text: `✓ Payroll ID ${selectedPayroll.id} berhasil disetujui` });
       setSelectedPayrollId("");
       setSelectedPayroll(null);
+      
+      // Refresh from server - this will update the list in real-time
       await loadData();
     } catch (error) {
       const errorText = error instanceof Error ? error.message : "Gagal menyetujui payroll";
@@ -251,6 +256,13 @@ const PayrollApprovePage = () => {
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
             <div>
+              <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", color: "#666" }}>
+                <strong>Employee ID</strong>
+              </p>
+              <p style={{ margin: "0 0 16px 0", fontSize: "1rem", fontWeight: "bold", color: "#059669" }}>
+                {selectedPayroll.employee_id}
+              </p>
+
               <p style={{ margin: "0 0 4px 0", fontSize: "0.85rem", color: "#666" }}>
                 <strong>Karyawan</strong>
               </p>

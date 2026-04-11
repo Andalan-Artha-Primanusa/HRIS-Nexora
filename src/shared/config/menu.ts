@@ -102,7 +102,6 @@ export const menuItems: MenuItem[] = [
       { label: 'Generate Payroll', path: '/payroll/generate' },
       { label: 'Approve Payroll', path: '/payroll/approve' },
       { label: 'Pembayaran Payroll', path: '/payroll/payment' },
-      { label: 'Run Payroll', path: '/payroll/run' },
       {
         label: 'Salary Component',
         icon: CreditCard,
