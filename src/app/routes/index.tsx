@@ -99,11 +99,6 @@ const RootRedirect = () => {
   );
 };
 
-const ProtectedRoute = () => {
-  const token = useAuthStore((state) => state.token);
-  return token ? <Outlet /> : <Navigate to="/login" replace />;
-};
-
 const GuestRoute = () => {
   const token = useAuthStore((state) => state.token);
   const dashboardPath = getRoleBasedDashboardPathFromStorage();

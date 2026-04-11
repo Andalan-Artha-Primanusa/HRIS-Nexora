@@ -17,6 +17,7 @@ import {
 import type {
   ReimbursementCreatePayload,
   ReimbursementItem,
+  ReimbursementRejectPayload,
   ReimbursementUpdatePayload,
 } from "@/features/reimbursement/types/reimbursement.types";
 import "../admin/AdminCrudPages.css";
@@ -178,9 +179,12 @@ const ReimbursementsManagementPage = () => {
 
     try {
       const payload: ReimbursementUpdatePayload = {
-        title: form.title,
-        amount: Number(form.amount) || 0,
-        category: form.category,
+        title: form.title || undefined,
+        description: form.description || undefined,
+        amount: form.amount ? Number(form.amount) : undefined,
+        category: form.category || undefined,
+        expense_date: form.expense_date || undefined,
+        receipt_path: form.receipt_path || undefined,
       };
       const result = await updateReimbursement(id, payload);
       formatResponse(result.raw);
@@ -248,7 +252,12 @@ const ReimbursementsManagementPage = () => {
     setResponseText("");
 
     try {
-      const result = await rejectReimbursement(id, { note: form.note || "Missing receipt" });
+      if (!form.note.trim()) {
+        setStatusMessage("Note wajib diisi untuk reject.");
+        return;
+      }
+      const payload: ReimbursementRejectPayload = { note: form.note };
+      const result = await rejectReimbursement(id, payload);
       formatResponse(result.raw);
       setStatusMessage("Reimbursement berhasil di-reject.");
       await loadAll();
