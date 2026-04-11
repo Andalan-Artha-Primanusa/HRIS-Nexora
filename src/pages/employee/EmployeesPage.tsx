@@ -112,7 +112,7 @@ const EmployeesPage = () => {
 
     try {
       const result = await getAllEmployees();
-      setItems(result.items);
+      setItems(result);
       setStatusMessage("Semua employee berhasil dimuat.");
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Gagal memuat employee.";
@@ -215,16 +215,15 @@ const EmployeesPage = () => {
 
       try {
         const result = await getEmployeeDetail(routeEmployeeId);
-        const payload = result.payload as Record<string, unknown>;
 
         setUpdateForm({
-          id: String(payload?.id ?? routeEmployeeId),
-          user_id: String(payload?.user_id ?? ""),
-          employee_code: String(payload?.employee_code ?? ""),
-          position: String(payload?.position ?? ""),
-          department: String(payload?.department ?? ""),
-          hire_date: String(payload?.hire_date ?? ""),
-          salary: String(payload?.salary ?? ""),
+          id: String(result?.id ?? routeEmployeeId),
+          user_id: String(result?.user_id ?? ""),
+          employee_code: String(result?.employee_code ?? ""),
+          position: String(result?.position ?? ""),
+          department: String(result?.department ?? ""),
+          hire_date: String(result?.hire_date ?? ""),
+          salary: String(result?.salary ?? ""),
         });
 
         setStatusMessage("Detail employee berhasil dimuat.");
@@ -424,8 +423,8 @@ const EmployeesPage = () => {
                 items.map((item, index) => (
                   <tr key={String(item.id ?? index)}>
                     {columns.map((column) => (
-                      <td key={`${String(item.id ?? index)}-${column}`} title={asDisplay(column, item[column])}>
-                        {asDisplay(column, item[column])}
+                      <td key={`${String(item.id ?? index)}-${column}`} title={asDisplay(column, (item as unknown as Record<string, unknown>)[column])}>
+                        {asDisplay(column, (item as unknown as Record<string, unknown>)[column])}
                       </td>
                     ))}
                     <td>

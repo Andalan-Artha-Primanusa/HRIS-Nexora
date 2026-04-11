@@ -62,3 +62,17 @@ export const logout = async () => {
   const response = await api.post("/logout");
   return response;
 };
+
+export const verifyToken = async () => {
+  try {
+    const response = await api.get("/me");
+    return response;
+  } catch (error: any) {
+    // 🔒 SECURITY: Token verification failed
+    if (error.response?.status === 401) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+    }
+    throw error;
+  }
+};

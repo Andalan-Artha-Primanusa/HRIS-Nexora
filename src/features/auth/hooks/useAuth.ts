@@ -32,6 +32,14 @@ const extractAuthFromResponse = (response: { data?: unknown }) => {
   const responseData = toRecord(root.data ?? root);
   const nestedData = toRecord(responseData.data);
 
+  // 🔒 SECURITY: Debug logging for response structure
+  console.log("[Auth] Response structure:", {
+    hasRootData: !!root.data,
+    rootKeys: Object.keys(root),
+    responseDataKeys: Object.keys(responseData),
+    nestedDataKeys: Object.keys(nestedData),
+  });
+
   let user =
     getFirstExistingValue(responseData, USER_KEYS) ??
     getFirstExistingValue(nestedData, USER_KEYS) ??
@@ -109,9 +117,18 @@ const extractAuthFromResponse = (response: { data?: unknown }) => {
 
   const rawToken =
     getFirstExistingValue(responseData, TOKEN_KEYS) ??
+    getFirstExistingValue(nestedData, TOKEN_KEYS) ??
     getFirstExistingValue(root, TOKEN_KEYS);
 
   const token = typeof rawToken === "string" ? rawToken : null;
+
+  // 🔒 SECURITY: Debug logging for extracted values
+  console.log("[Auth] Extracted auth data:", {
+    foundToken: !!token,
+    foundUser: !!user,
+    userEmail: (user as any)?.email ?? "N/A",
+    tokenLength: token?.length ?? 0,
+  });
 
   return { user, token };
 };
@@ -232,6 +249,7 @@ export const useAuth = () => {
 
   const handleGoogleCallback = async (searchParams: URLSearchParams) => {
     try {
+      console.log("[GoogleCallback] Starting Google callback process");
       const hashText = window.location.hash.startsWith("#")
         ? window.location.hash.slice(1)
         : window.location.hash;
@@ -248,6 +266,7 @@ export const useAuth = () => {
 
       const directToken = getFirstExistingParamValue(allParams, TOKEN_KEYS);
       if (directToken) {
+        console.log("[GoogleCallback] Found direct token in params");
         const directUserRaw = getFirstExistingParamValue(allParams, USER_KEYS);
         const directUser = parsePotentialUserPayload(directUserRaw);
 
@@ -260,6 +279,7 @@ export const useAuth = () => {
         throw new Error("Parameter code OAuth tidak ditemukan");
       }
 
+      console.log("[GoogleCallback] Calling backend with OAuth code");
       const response = await handleGoogleAuthCallback({
         code,
         state: searchParams.get("state") ?? undefined,
@@ -268,18 +288,23 @@ export const useAuth = () => {
         prompt: searchParams.get("prompt") ?? undefined,
       });
 
+      console.log("[GoogleCallback] Backend response received");
       const { user, token } = extractAuthFromResponse(response);
       if (!token) {
+        console.error("[GoogleCallback] Token not found in response", { response });
         throw new Error("Token login SSO tidak ditemukan dari response API");
       }
 
       if (!user) {
+        console.error("[GoogleCallback] User not found in response", { response });
         throw new Error("User data tidak ditemukan dari response API");
       }
 
+      console.log("[GoogleCallback] Setting auth with user and token");
       setAuth(user as AuthUser, token);
       return { user, token, response };
     } catch (error) {
+      console.error("[GoogleCallback] Error in handleGoogleCallback:", error);
       throw normalizeAuthError(error, "Login Google SSO gagal");
     }
   };

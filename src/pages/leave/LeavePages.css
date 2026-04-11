@@ -1,3 +1,5 @@
+@import url('./../../shared/ui/DataTable.css');
+
 .leave-page {
   display: flex;
   flex-direction: column;
@@ -221,9 +223,6 @@
     grid-template-columns: 1fr;
   }
 }
-
-/* Using unified data table styling */
-@import url('./../../shared/ui/DataTable.css');
 
 .leave-table-wrap {
   width: 100%;

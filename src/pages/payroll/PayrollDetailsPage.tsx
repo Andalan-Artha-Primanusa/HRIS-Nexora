@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
+import { Modal } from "@/shared/ui/Modal";
 import {
   addPayrollDetailsBulk,
   bulkUpdatePayrollDetails,
@@ -64,20 +65,23 @@ const PayrollDetailsPage = () => {
       2
     )
   );
-  const [responseText, setResponseText] = useState("");
   const [statusMessage, setStatusMessage] = useState("Ready to call payroll details API");
   const [loading, setLoading] = useState(false);
+  const [errorModal, setErrorModal] = useState<{ isOpen: boolean; title: string; message: string }>({
+    isOpen: false,
+    title: "",
+    message: "",
+  });
+
+  const showErrorModal = (title: string, message: string) => {
+    setErrorModal({ isOpen: true, title, message });
+  };
 
   const columns = useMemo(() => getColumns(items), [items]);
-
-  const formatResponse = (payload: unknown) => {
-    setResponseText(typeof payload === "string" ? payload : JSON.stringify(payload, null, 2));
-  };
 
   const requirePayrollId = () => {
     const id = payrollId.trim();
     if (!id) {
-      setStatusMessage("Payroll ID wajib diisi.");
       return null;
     }
     return id;
@@ -86,7 +90,6 @@ const PayrollDetailsPage = () => {
   const requireDetailId = () => {
     const id = detailId.trim();
     if (!id) {
-      setStatusMessage("Payroll Detail ID wajib diisi.");
       return null;
     }
     return id;
@@ -94,21 +97,19 @@ const PayrollDetailsPage = () => {
 
   const loadPayrollDetails = async () => {
     const id = requirePayrollId();
-    if (!id) return;
+    if (!id) {
+      showErrorModal("Validasi", "Masukkan Payroll ID terlebih dahulu");
+      return;
+    }
 
     setLoading(true);
-    setStatusMessage("Memuat payroll details...");
-    setResponseText("");
 
     try {
       const result = await getPayrollDetails(id);
-      setItems(result.items);
-      formatResponse(result.raw);
-      setStatusMessage("Payroll details berhasil dimuat.");
+      setItems(result);
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal memuat payroll details.";
-      formatResponse(message);
-      setStatusMessage("Gagal memuat payroll details.");
+      const errorText = error instanceof Error ? error.message : "Gagal memuat detail";
+      showErrorModal("❌ Error Muat Detail", errorText);
     } finally {
       setLoading(false);
     }
@@ -116,25 +117,24 @@ const PayrollDetailsPage = () => {
 
   const addBulk = async () => {
     const id = requirePayrollId();
-    if (!id) return;
+    if (!id) {
+      showErrorModal("Validasi", "Masukkan Payroll ID terlebih dahulu");
+      return;
+    }
 
     setLoading(true);
-    setStatusMessage("Menambah payroll details (bulk)...");
-    setResponseText("");
 
     try {
       const details = parseJson<Array<{ type: string; name: string; amount: number }>>(bulkDetailsText);
-      const result = await addPayrollDetailsBulk({
+      await addPayrollDetailsBulk({
         payroll_id: Number(id) || 0,
         details,
       });
-      formatResponse(result.raw);
-      setStatusMessage("Payroll details bulk berhasil ditambahkan.");
+      setStatusMessage("✓ Detail berhasil ditambahkan");
       await loadPayrollDetails();
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal menambah payroll details bulk.";
-      formatResponse(message);
-      setStatusMessage("Gagal menambah payroll details bulk.");
+      const errorText = error instanceof Error ? error.message : "Gagal tambah detail";
+      showErrorModal("❌ Error Tambah Detail", errorText);
     } finally {
       setLoading(false);
     }
@@ -142,25 +142,24 @@ const PayrollDetailsPage = () => {
 
   const updateSingle = async () => {
     const id = requireDetailId();
-    if (!id) return;
+    if (!id) {
+      showErrorModal("Validasi", "Masukkan Detail ID terlebih dahulu");
+      return;
+    }
 
     setLoading(true);
-    setStatusMessage("Mengupdate payroll detail...");
-    setResponseText("");
 
     try {
-      const result = await updatePayrollDetailSingle(id, {
+      await updatePayrollDetailSingle(id, {
         type: detailType,
         name: detailName,
         amount: Number(detailAmount) || 0,
       });
-      formatResponse(result.raw);
-      setStatusMessage("Payroll detail berhasil diupdate.");
+      setStatusMessage("✓ Detail berhasil diupdate");
       await loadPayrollDetails();
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal update payroll detail.";
-      formatResponse(message);
-      setStatusMessage("Gagal update payroll detail.");
+      const errorText = error instanceof Error ? error.message : "Gagal update detail";
+      showErrorModal("❌ Error Update Detail", errorText);
     } finally {
       setLoading(false);
     }
@@ -168,19 +167,15 @@ const PayrollDetailsPage = () => {
 
   const bulkUpdate = async () => {
     setLoading(true);
-    setStatusMessage("Bulk update payroll details...");
-    setResponseText("");
 
     try {
       const details = parseJson<Array<{ id: number; amount: number }>>(bulkUpdateText);
-      const result = await bulkUpdatePayrollDetails({ details });
-      formatResponse(result.raw);
-      setStatusMessage("Bulk update payroll details berhasil.");
+      await bulkUpdatePayrollDetails({ details });
+      setStatusMessage("✓ Detail berhasil di-update");
       await loadPayrollDetails();
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal bulk update payroll details.";
-      formatResponse(message);
-      setStatusMessage("Gagal bulk update payroll details.");
+      const errorText = error instanceof Error ? error.message : "Gagal bulk update";
+      showErrorModal("❌ Error Bulk Update", errorText);
     } finally {
       setLoading(false);
     }
@@ -188,21 +183,20 @@ const PayrollDetailsPage = () => {
 
   const deleteSingle = async () => {
     const id = requireDetailId();
-    if (!id) return;
+    if (!id) {
+      showErrorModal("Validasi", "Masukkan Detail ID terlebih dahulu");
+      return;
+    }
 
     setLoading(true);
-    setStatusMessage("Menghapus payroll detail...");
-    setResponseText("");
 
     try {
-      const result = await deletePayrollDetail(id);
-      formatResponse(result.raw);
-      setStatusMessage("Payroll detail berhasil dihapus.");
+      await deletePayrollDetail(id);
+      setStatusMessage("✓ Detail berhasil dihapus");
       await loadPayrollDetails();
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal menghapus payroll detail.";
-      formatResponse(message);
-      setStatusMessage("Gagal menghapus payroll detail.");
+      const errorText = error instanceof Error ? error.message : "Gagal hapus detail";
+      showErrorModal("❌ Error Hapus Detail", errorText);
     } finally {
       setLoading(false);
     }
@@ -234,21 +228,41 @@ const PayrollDetailsPage = () => {
 
   return (
     <div className="crud-page">
-      <div className="crud-header">
-        <div>
-          <h1>Payroll Details Management</h1>
-          <p>Endpoint: /payroll-details/{"{payroll_id}"}, /payroll-details, /payroll-details/bulk-update</p>
+      {/* Error Modal */}
+      <Modal
+        isOpen={errorModal.isOpen}
+        onClose={() => setErrorModal({ ...errorModal, isOpen: false })}
+        title={errorModal.title}
+        size="md"
+      >
+        <div style={{ padding: "16px 0", whiteSpace: "pre-wrap" }}>
+          <p style={{ margin: 0, lineHeight: "1.6", color: "#374151" }}>
+            {errorModal.message}
+          </p>
         </div>
-        <Button variant="outline" size="md" onClick={() => void loadPayrollDetails()} disabled={loading}>
-          Refresh
+      </Modal>
+
+      <div className="crud-header" style={{ borderBottom: "2px solid #0284c7", paddingBottom: "20px" }}>
+        <div>
+          <h1 style={{ color: "#0284c7", marginBottom: "4px" }}>📋 Komponen Payroll</h1>
+          <p style={{ color: "#666", fontSize: "0.9rem" }}>Kelola komponen tunjangan dan potongan payroll karyawan</p>
+        </div>
+        <Button 
+          variant="outline" 
+          size="md" 
+          onClick={() => void loadPayrollDetails()} 
+          disabled={loading}
+          style={{ borderColor: "#0284c7", color: "#0284c7" }}
+        >
+          🔄 Segarkan
         </Button>
       </div>
 
-      <Card className="crud-card" glass>
-        <h2>Lookup Payroll Details</h2>
+      <Card className="crud-card" glass style={{ borderTop: "4px solid #0284c7" }}>
+        <h2 style={{ color: "#0284c7", marginTop: 0 }}>🔍 Cari Komponen Payroll</h2>
         <div className="crud-form-grid">
           <label>
-            Payroll ID
+            <strong style={{ color: "#0284c7" }}>ID Payroll *</strong>
             <input
               className="crud-input"
               value={payrollId}
@@ -257,42 +271,54 @@ const PayrollDetailsPage = () => {
           </label>
         </div>
         <div className="crud-actions">
-          <Button variant="primary" size="md" onClick={() => void loadPayrollDetails()} disabled={loading}>
-            Get Payroll Details
+          <Button 
+            variant="primary" 
+            size="md" 
+            onClick={() => void loadPayrollDetails()} 
+            disabled={loading}
+            style={{ backgroundColor: "#0284c7" }}
+          >
+            Muat Komponen Payroll
           </Button>
         </div>
       </Card>
 
-      <Card className="crud-card" glass>
-        <h2>Add Payroll Details (Bulk)</h2>
+      <Card className="crud-card" glass style={{ borderTop: "4px solid #0284c7" }}>
+        <h2 style={{ color: "#0284c7", marginTop: 0 }}>➕ Tambah Komponen (Bulk)</h2>
         <div className="crud-form-grid">
           <label className="crud-form-full">
-            Details JSON Array
+            <strong style={{ color: "#0284c7" }}>JSON Array Komponen</strong>
             <textarea value={bulkDetailsText} onChange={(event) => setBulkDetailsText(event.target.value)} />
           </label>
         </div>
         <p className="crud-note">Format: [{"{"} type, name, amount {"}"}]</p>
         <div className="crud-actions">
-          <Button variant="primary" size="md" onClick={() => void addBulk()} disabled={loading}>
-            Add Bulk Details
+          <Button 
+            variant="primary" 
+            size="md" 
+            onClick={() => void addBulk()} 
+            disabled={loading}
+            style={{ backgroundColor: "#0284c7" }}
+          >
+            Tambah Bulk Komponen
           </Button>
         </div>
       </Card>
 
-      <Card className="crud-card" glass>
-        <h2>Update/Delete Payroll Detail</h2>
+      <Card className="crud-card" glass style={{ borderTop: "4px solid #0284c7" }}>
+        <h2 style={{ color: "#0284c7", marginTop: 0 }}>✏️ Ubah/Hapus Komponen</h2>
         <div className="crud-form-grid">
           <label>
-            Detail ID
+            <strong style={{ color: "#0284c7" }}>ID Detail</strong>
             <input
               className="crud-input"
               value={detailId}
               onChange={(event) => setDetailId(event.target.value)}
-              placeholder="detail id"
+              placeholder="ID detail"
             />
           </label>
           <label>
-            Type
+            <strong style={{ color: "#0284c7" }}>Tipe</strong>
             <input
               className="crud-input"
               value={detailType}
@@ -300,7 +326,7 @@ const PayrollDetailsPage = () => {
             />
           </label>
           <label>
-            Name
+            <strong style={{ color: "#0284c7" }}>Nama Komponen</strong>
             <input
               className="crud-input"
               value={detailName}
@@ -308,7 +334,7 @@ const PayrollDetailsPage = () => {
             />
           </label>
           <label>
-            Amount
+            <strong style={{ color: "#0284c7" }}>Jumlah</strong>
             <input
               className="crud-input"
               value={detailAmount}
@@ -316,7 +342,7 @@ const PayrollDetailsPage = () => {
             />
           </label>
           <label className="crud-form-full">
-            Bulk Update JSON Array
+            <strong style={{ color: "#0284c7" }}>JSON Array Bulk Update</strong>
             <textarea value={bulkUpdateText} onChange={(event) => setBulkUpdateText(event.target.value)} />
           </label>
         </div>
@@ -324,52 +350,91 @@ const PayrollDetailsPage = () => {
         <p className="crud-note">Format: [{"{"} id, amount {"}"}]</p>
 
         <div className="crud-actions">
-          <Button variant="secondary" size="md" onClick={() => void updateSingle()} disabled={loading}>
-            Update Detail
+          <Button 
+            variant="secondary" 
+            size="md" 
+            onClick={() => void updateSingle()} 
+            disabled={loading}
+            style={{ backgroundColor: "#0ea5e9" }}
+          >
+            Ubah Detail
           </Button>
-          <Button variant="secondary" size="md" onClick={() => void bulkUpdate()} disabled={loading}>
-            Bulk Update Details
+          <Button 
+            variant="secondary" 
+            size="md" 
+            onClick={() => void bulkUpdate()} 
+            disabled={loading}
+            style={{ backgroundColor: "#0ea5e9" }}
+          >
+            Bulk Update Komponen
           </Button>
-          <Button variant="ghost" size="md" onClick={() => void deleteSingle()} disabled={loading}>
-            Delete Detail
+          <Button 
+            variant="ghost" 
+            size="md" 
+            onClick={() => void deleteSingle()} 
+            disabled={loading}
+            style={{ color: "#ef4444" }}
+          >
+            Hapus Detail
           </Button>
         </div>
       </Card>
 
-      <Card className="crud-card" glass>
-        <h2>Payroll Details Table</h2>
+      <Card className="crud-card" glass style={{ borderTop: "4px solid #0284c7" }}>
+        <h2 style={{ color: "#0284c7", marginTop: 0 }}>📊 Tabel Komponen Payroll</h2>
         <div className="crud-table-wrap">
-          <table className="crud-table">
+          <table className="crud-table" style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr>
+              <tr style={{ backgroundColor: "#f0f9ff" }}>
                 {columns.map((column) => (
-                  <th key={column}>{column}</th>
+                  <th 
+                    key={column}
+                    style={{ 
+                      padding: "12px", 
+                      backgroundColor: "#e0f2fe",
+                      color: "#0284c7",
+                      fontWeight: "600",
+                      textAlign: "left",
+                      borderBottom: "2px solid #0284c7"
+                    }}
+                  >
+                    {column === "id" && "ID"}
+                    {column === "payroll_id" && "ID Payroll"}
+                    {column === "type" && "Tipe"}
+                    {column === "name" && "Nama"}
+                    {column === "amount" && "Jumlah"}
+                    {!["id", "payroll_id", "type", "name", "amount"].includes(column) && column}
+                  </th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {items.length > 0 ? (
                 items.map((item, index) => (
-                  <tr key={String(item.id ?? index)}>
+                  <tr 
+                    key={String(item.id ?? index)}
+                    style={{ borderBottom: "1px solid #f0f9ff" }}
+                  >
                     {columns.map((column) => (
-                      <td key={`${String(item.id ?? index)}-${column}`}>{asDisplay(item[column])}</td>
+                      <td 
+                        key={`${String(item.id ?? index)}-${column}`}
+                        style={{ padding: "12px", color: "#1f2937" }}
+                      >
+                        {asDisplay(item[column])}
+                      </td>
                     ))}
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={columns.length}>No payroll detail data available.</td>
+                  <td colSpan={columns.length} style={{ padding: "16px", textAlign: "center", color: "#999" }}>
+                    Tidak ada data komponen payroll.
+                  </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
-      </Card>
-
-      <Card className="crud-card" glass>
-        <h2>Raw Response</h2>
-        <pre className="crud-response">{responseText || "Response API akan tampil di sini."}</pre>
-        <p className="crud-status">{statusMessage}</p>
       </Card>
     </div>
   );
