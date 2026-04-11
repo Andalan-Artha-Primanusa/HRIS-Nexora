@@ -164,7 +164,7 @@ const LeaveApprovalPage = () => {
                 })
               ) : (
                 <tr>
-                  <td colSpan={7} style={{ textAlign: "center", padding: "2rem", color: "#64748b" }}>
+                  <td colSpan={7} style={{ textAlign: "center", padding: "2rem", color: "var(--color-text-secondary)" }}>
                     No pending leave requests
                   </td>
                 </tr>

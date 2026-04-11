@@ -106,7 +106,7 @@ const LeaveCalendarPage = () => {
       case 'approved': return '#10b981';
       case 'rejected': return '#ef4444';
       case 'pending': return '#f59e0b';
-      default: return '#3b82f6';
+      default: return '#2563eb';
     }
   };
 
@@ -117,7 +117,7 @@ const LeaveCalendarPage = () => {
 
   const monthName = currentDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
 
-  const chartColors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+  const chartColors = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
   return (
     <div className="leave-page">

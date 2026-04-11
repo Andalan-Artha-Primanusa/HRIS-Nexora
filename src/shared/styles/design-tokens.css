@@ -1,0 +1,353 @@
+/* ========================================
+   HRIS DESIGN SYSTEM - DESIGN TOKENS
+   White + Blue Clean Professional Theme
+   Created: April 11, 2026
+   Status: Production Ready
+   ======================================== */
+
+:root {
+  /* ======================================
+     COLOR PALETTE - STRICT
+     ====================================== */
+
+  /* Primary Colors */
+  --color-primary: #2563eb;           /* Main blue - ALL primary actions */
+  --color-primary-hover: #1d4ed8;     /* Darker for hover states */
+  --color-primary-light: #dbeafe;     /* Light blue - borders, light bg */
+  --color-primary-lighter: #eff6ff;   /* Very light - backgrounds */
+
+  /* Semantic Colors */
+  --color-success: #10b981;           /* Green - approvals, positive actions */
+  --color-success-light: #d1fae5;     /* Light green - success backgrounds */
+  --color-error: #ef4444;             /* Red - delete, errors, negative */
+  --color-error-light: #fee2e2;       /* Light red - error backgrounds */
+  --color-warning: #f59e0b;           /* Amber - warnings, caution */
+  --color-warning-light: #fef3c7;     /* Light amber - warning backgrounds */
+  --color-info: #3b82f6;              /* Info - informational messages */
+  --color-info-light: #dbeafe;        /* Light info */
+
+  /* Neutral Colors */
+  --color-white: #ffffff;             /* Pure white - cards, content */
+  --color-background: #f3f4f6;        /* Light gray - page backgrounds */
+  --color-surface: #ffffff;           /* Card surfaces */
+  --color-border: #e5e7eb;            /* Light gray borders */
+  --color-border-light: #f3f4f6;      /* Very light borders */
+  --color-divider: #e5e7eb;           /* Divider lines */
+
+  /* Text Colors */
+  --color-text-primary: #1f2937;      /* Dark gray - body text */
+  --color-text-secondary: #6b7280;    /* Medium gray - secondary text/labels */
+  --color-text-tertiary: #9ca3af;     /* Light gray - hints, placeholders */
+  --color-text-disabled: #d1d5db;     /* Disabled text */
+  --color-text-inverse: #ffffff;      /* White text on dark bg */
+
+  /* ======================================
+     TYPOGRAPHY SYSTEM
+     ====================================== */
+
+  /* Font Families */
+  --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  --font-family-mono: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace;
+
+  /* Font Sizes */
+  --font-size-xs: 12px;
+  --font-size-sm: 13px;
+  --font-size-base: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 30px;
+
+  /* Font Weights */
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Line Heights */
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* Letter Spacing */
+  --letter-spacing-tight: -0.5px;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.5px;
+
+  /* ======================================
+     SPACING SYSTEM (8px Grid)
+     ====================================== */
+
+  --space-0: 0;
+  --space-1: 4px;         /* xs - minimal gaps */
+  --space-2: 8px;         /* sm - standard padding/margin */
+  --space-3: 12px;        /* sm-md - small gaps */
+  --space-4: 16px;        /* md - section padding */
+  --space-5: 20px;        /* md-lg - generous spacing */
+  --space-6: 24px;        /* lg - container padding */
+  --space-8: 32px;        /* xl - major sections */
+  --space-10: 40px;       /* 2xl - large sections */
+  --space-12: 48px;       /* 3xl - page margins */
+
+  /* Named for convenience */
+  --padding-xs: var(--space-1);
+  --padding-sm: var(--space-2);
+  --padding-md: var(--space-4);
+  --padding-lg: var(--space-6);
+  --padding-xl: var(--space-8);
+
+  --margin-xs: var(--space-1);
+  --margin-sm: var(--space-2);
+  --margin-md: var(--space-4);
+  --margin-lg: var(--space-6);
+  --margin-xl: var(--space-8);
+
+  --gap-xs: var(--space-1);
+  --gap-sm: var(--space-2);
+  --gap-md: var(--space-4);
+  --gap-lg: var(--space-6);
+  --gap-xl: var(--space-8);
+
+  /* ======================================
+     BORDER RADIUS
+     ====================================== */
+
+  --radius-none: 0;
+  --radius-sm: 4px;       /* Tight corners */
+  --radius-md: 8px;       /* Standard corners */
+  --radius-lg: 12px;      /* Rounded corners */
+  --radius-xl: 16px;      /* More rounded */
+  --radius-full: 9999px;  /* Pill-shaped */
+
+  /* ======================================
+     SHADOWS
+     ====================================== */
+
+  /* Shadow elevation system */
+  --shadow-none: none;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+  /* Hover shadows */
+  --shadow-hover: var(--shadow-lg);
+
+  /* Blue gradient for headers */
+  --shadow-inner-blue: inset 0 2px 4px rgba(37, 99, 235, 0.06);
+
+  /* ======================================
+     TRANSITIONS & ANIMATIONS
+     ====================================== */
+
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 250ms ease-in-out;
+  --transition-slow: 350ms ease-in-out;
+
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ======================================
+     COMPONENT SPECIFIC TOKENS
+     ====================================== */
+
+  /* Button Tokens */
+  --button-height: 40px;
+  --button-height-sm: 32px;
+  --button-height-lg: 48px;
+  --button-padding-x: 16px;
+  --button-padding-x-sm: 12px;
+  --button-padding-x-lg: 24px;
+  --button-font-size: var(--font-size-base);
+  --button-font-weight: var(--font-weight-medium);
+  --button-border-radius: var(--radius-md);
+  --button-transition: all var(--transition-normal);
+
+  /* Input Tokens */
+  --input-height: 40px;
+  --input-height-sm: 32px;
+  --input-height-lg: 48px;
+  --input-padding: 0 var(--padding-md);
+  --input-border: 1px solid var(--color-border);
+  --input-border-radius: var(--radius-md);
+  --input-font-size: var(--font-size-base);
+  --input-focus-border: 2px solid var(--color-primary);
+  --input-focus-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  --input-transition: all var(--transition-normal);
+
+  /* Table Tokens */
+  --table-header-bg: var(--color-primary);
+  --table-header-color: var(--color-text-inverse);
+  --table-header-height: 48px;
+  --table-row-height: 48px;
+  --table-row-hover-bg: #f0f9ff;
+  --table-border-color: var(--color-border);
+  --table-padding: 12px 16px;
+  --table-font-size: var(--font-size-base);
+
+  /* Modal Tokens */
+  --modal-max-width-sm: 400px;
+  --modal-max-width-md: 600px;
+  --modal-max-width-lg: 900px;
+  --modal-border-radius: var(--radius-lg);
+  --modal-shadow: var(--shadow-2xl);
+  --modal-padding: 24px;
+  --modal-header-bg: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  --modal-header-color: var(--color-text-inverse);
+  --modal-header-padding: 20px 24px;
+
+  /* Card Tokens */
+  --card-bg: var(--color-white);
+  --card-border: 1px solid var(--color-border);
+  --card-border-radius: var(--radius-md);
+  --card-padding: var(--padding-md);
+  --card-shadow: var(--shadow-sm);
+  --card-hover-shadow: var(--shadow-md);
+  --card-transition: all var(--transition-normal);
+
+  /* Sidebar Tokens */
+  --sidebar-width: 250px;
+  --sidebar-width-collapsed: 80px;
+  --sidebar-bg: var(--color-white);
+  --sidebar-border: 1px solid var(--color-border);
+  --sidebar-item-height: 44px;
+  --sidebar-item-padding: 8px 12px;
+  --sidebar-item-hover-bg: var(--color-background);
+  --sidebar-item-active-border: 3px solid var(--color-primary);
+  --sidebar-item-active-bg: #f0f9ff;
+  --sidebar-icon-size: 20px;
+  --sidebar-font-size: var(--font-size-base);
+
+  /* ======================================
+     BREAKPOINTS
+     ====================================== */
+
+  --breakpoint-xs: 320px;   /* Mobile small */
+  --breakpoint-sm: 480px;   /* Mobile */
+  --breakpoint-md: 768px;   /* Tablet */
+  --breakpoint-lg: 1024px;  /* Desktop */
+  --breakpoint-xl: 1280px;  /* Large desktop */
+  --breakpoint-2xl: 1536px; /* Extra large */
+
+  /* ======================================
+     Z-INDEX SCALE
+     ====================================== */
+
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-popover: 300;
+  --z-tooltip: 600;
+  --z-notification: 700;
+
+  /* ======================================
+     CONTAINER QUERIES (Modern CSS)
+     ====================================== */
+
+  --container-max-width: 1280px;
+  --container-padding: var(--padding-lg);
+}
+
+/* ========================================
+   DARK MODE SUPPORT (Future)
+   ======================================== */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Dark mode color overrides would go here */
+    /* TBD based on design requirements */
+  }
+}
+
+/* ========================================
+   ACCESSIBILITY
+   ======================================== */
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-fast: 0ms;
+    --transition-normal: 0ms;
+    --transition-slow: 0ms;
+  }
+
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: more) {
+  :root {
+    --color-text-secondary: #4b5563;
+    --color-border: #999999;
+  }
+}
+
+/* ========================================
+   UTILITY CLASSES (Common patterns)
+   ======================================== */
+
+/* Center content */
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Flex between (space-between) */
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Hide visually but keep for screen readers */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Text truncate */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Line clamp */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}

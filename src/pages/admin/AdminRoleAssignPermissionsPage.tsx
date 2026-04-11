@@ -174,7 +174,7 @@ const AdminRoleAssignPermissionsPage = () => {
           <div className="form-group">
             <label htmlFor="role-select">Pilih Role 👥</label>
             {roles.length === 0 ? (
-              <div style={{ padding: "10px", borderRadius: "8px", backgroundColor: "#f3f4f6", color: "#666", textAlign: "center", fontSize: "14px" }}>
+              <div style={{ padding: "10px", borderRadius: "8px", backgroundColor: "#f3f4f6", color: "var(--color-text-secondary)", textAlign: "center", fontSize: "14px" }}>
                 {loading ? "Loading roles..." : "Tidak ada role tersedia"}
               </div>
             ) : (
@@ -200,7 +200,7 @@ const AdminRoleAssignPermissionsPage = () => {
             <div className="form-group">
               <label>Pilih Permissions 🔐</label>
               {permissions.length === 0 ? (
-                <div style={{ padding: "10px", borderRadius: "8px", backgroundColor: "#f3f4f6", color: "#666", textAlign: "center", fontSize: "14px" }}>
+                <div style={{ padding: "10px", borderRadius: "8px", backgroundColor: "#f3f4f6", color: "var(--color-text-secondary)", textAlign: "center", fontSize: "14px" }}>
                   {loading ? "Loading permissions..." : "Tidak ada permission tersedia"}
                 </div>
               ) : (
@@ -216,7 +216,7 @@ const AdminRoleAssignPermissionsPage = () => {
                       />
                       <span style={{ fontSize: "13px" }}>
                         <div style={{ fontWeight: "500" }}>{perm.display_name || perm.name}</div>
-                        <div style={{ fontSize: "12px", color: "#666" }}>{perm.name}</div>
+                        <div style={{ fontSize: "12px", color: "var(--color-text-secondary)" }}>{perm.name}</div>
                       </span>
                     </label>
                   ))}

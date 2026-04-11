@@ -92,7 +92,7 @@ const PayrollGeneratePage = () => {
         size="md"
       >
         <div style={{ padding: "16px 0", whiteSpace: "pre-wrap" }}>
-          <p style={{ margin: 0, lineHeight: "1.6", color: "#374151" }}>
+          <p style={{ margin: 0, lineHeight: "1.6", color: "var(--color-text-primary)" }}>
             {errorModal.message}
           </p>
         </div>
@@ -115,7 +115,7 @@ const PayrollGeneratePage = () => {
           glass
           style={{
             backgroundColor: "#dbeafe",
-            borderLeft: "4px solid #0284c7",
+            borderLeft: "4px solid #2563eb",
           }}
         >
           <p style={{ color: "#0c4a6e", margin: 0 }}>

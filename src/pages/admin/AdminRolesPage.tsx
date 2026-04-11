@@ -137,7 +137,7 @@ const AdminRolesPage = () => {
                     <td>{r.id}</td>
                     <td>
                       <div style={{ fontWeight: "500" }}>{r.display_name || r.name || `Role ${r.id}`}</div>
-                      <div style={{ fontSize: "13px", color: "#666" }}>{r.name || "—"}</div>
+                      <div style={{ fontSize: "13px", color: "var(--color-text-secondary)" }}>{r.name || "—"}</div>
                     </td>
                     <td style={{ textAlign: "center" }}>
                       <span style={{
@@ -145,7 +145,7 @@ const AdminRolesPage = () => {
                         padding: "6px 12px",
                         borderRadius: "20px",
                         backgroundColor: r.permissions_count === 0 ? "#f3f4f6" : "#dbeafe",
-                        color: r.permissions_count === 0 ? "#999" : "#1e40af",
+                        color: r.permissions_count === 0 ? "var(--color-text-disabled)" : "#1e40af",
                         fontWeight: "500",
                         fontSize: "13px",
                       }}>

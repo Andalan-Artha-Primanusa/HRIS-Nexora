@@ -133,7 +133,7 @@ const AdminUsersPage = () => {
                   <tr key={u.id}>
                     <td>{u.id}</td>
                     <td style={{ fontWeight: "500" }}>{u.name}</td>
-                    <td style={{ color: "#666" }}>{u.email}</td>
+                    <td style={{ color: "var(--color-text-secondary)" }}>{u.email}</td>
                     <td>
                       {u.role_names && u.role_names.length > 0 ? (
                         <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
@@ -154,7 +154,7 @@ const AdminUsersPage = () => {
                           ))}
                         </div>
                       ) : (
-                        <span style={{ color: "#999", fontSize: "14px" }}>-</span>
+                        <span style={{ color: "var(--color-text-disabled)", fontSize: "14px" }}>-</span>
                       )}
                     </td>
                   </tr>

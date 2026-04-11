@@ -128,10 +128,10 @@ const LeaveRequestsPage = () => {
       <Card className="leave-card" glass style={{ marginBottom: '2rem' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1.5rem' }}>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#3b82f6' }}>
+            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#2563eb' }}>
               {items.length}
             </div>
-            <div style={{ fontSize: '0.9rem', color: '#64748b', marginTop: '0.5rem' }}>
+            <div style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', marginTop: '0.5rem' }}>
               Total Pengajuan
             </div>
           </div>
@@ -139,7 +139,7 @@ const LeaveRequestsPage = () => {
             <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#f59e0b' }}>
               {items.filter((i) => (i as any).status === 'pending').length}
             </div>
-            <div style={{ fontSize: '0.9rem', color: '#64748b', marginTop: '0.5rem' }}>
+            <div style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', marginTop: '0.5rem' }}>
               Menunggu Persetujuan
             </div>
           </div>
@@ -147,7 +147,7 @@ const LeaveRequestsPage = () => {
             <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#10b981' }}>
               {items.filter((i) => (i as any).status === 'approved').length}
             </div>
-            <div style={{ fontSize: '0.9rem', color: '#64748b', marginTop: '0.5rem' }}>
+            <div style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', marginTop: '0.5rem' }}>
               Disetujui
             </div>
           </div>
@@ -155,7 +155,7 @@ const LeaveRequestsPage = () => {
             <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#ef4444' }}>
               {items.filter((i) => (i as any).status === 'rejected').length}
             </div>
-            <div style={{ fontSize: '0.9rem', color: '#64748b', marginTop: '0.5rem' }}>
+            <div style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', marginTop: '0.5rem' }}>
               Ditolak
             </div>
           </div>
@@ -271,7 +271,7 @@ const LeaveRequestsPage = () => {
                               }}
                               disabled={loading}
                               style={{
-                                color: deleteConfirm === String(leave.id) ? '#ef4444' : '#666',
+                                color: deleteConfirm === String(leave.id) ? '#ef4444' : 'var(--color-text-secondary)',
                               }}
                               title="Hapus pengajuan"
                             >
@@ -285,7 +285,7 @@ const LeaveRequestsPage = () => {
                                   size="sm"
                                   onClick={() => setDeleteConfirm(null)}
                                   disabled={loading}
-                                  style={{ padding: '0 0.5rem', color: '#666' }}
+                                  style={{ padding: '0 0.5rem', color: 'var(--color-text-secondary)' }}
                                 >
                                   Batal
                                 </Button>
@@ -301,7 +301,7 @@ const LeaveRequestsPage = () => {
             </div>
           ) : (
             <div style={{ textAlign: 'center', padding: '3rem' }}>
-              <p style={{ color: '#999', marginBottom: '1rem' }}>
+              <p style={{ color: 'var(--color-text-disabled)', marginBottom: '1rem' }}>
                 Belum ada pengajuan cuti. Buat pengajuan baru untuk memulai.
               </p>
               <Button

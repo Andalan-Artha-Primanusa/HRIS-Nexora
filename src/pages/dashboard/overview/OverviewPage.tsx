@@ -37,7 +37,7 @@ const OverviewPage: React.FC = () => {
     { month: 'May', processed: 93, pending: 7 },
   ]);
 
-  const chartColors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+  const chartColors = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
   useEffect(() => {
     // Load real data from API if available
