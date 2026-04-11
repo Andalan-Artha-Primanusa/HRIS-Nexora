@@ -171,3 +171,22 @@
 .logout-item:hover {
   background-color: var(--status-danger-bg);
 }
+
+/* 🔄 Refresh animation */
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.icon-button .rotating {
+  animation: rotate 1s linear infinite;
+}
+
+.icon-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

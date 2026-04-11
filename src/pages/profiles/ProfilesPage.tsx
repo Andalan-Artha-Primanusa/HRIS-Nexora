@@ -10,12 +10,18 @@ import {
   User,
   MapPin,
   Heart,
-  Briefcase,
   GraduationCap,
   CreditCard,
   Clock,
   FileText,
   Shield,
+  CheckCircle2,
+  Building2,
+  Mail,
+  Calendar,
+  Phone,
+  Layers,
+  Map,
 } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
@@ -694,173 +700,186 @@ const ProfilesPage = () => {
     return (
       <div className="profiles-page">
         <div className="profile-view-container">
-          {/* Profile Header */}
-          <div className="profile-header-section">
-            <div className="profile-header-bg"></div>
-
-            <div className="profile-top-content">
-              <div className="profile-avatar">
-                <div className="profile-avatar-placeholder">
-                  {selectedProfile?.phone ? selectedProfile.phone.toString().charAt(0).toUpperCase() : "P"}
-                </div>
+          <div className="profile-header-new">
+            <div className="profile-header-gradient"></div>
+            <div className="profile-header-content">
+              <div className="profile-avatar-large">
+                {selectedProfile?.user?.name ? selectedProfile.user.name.charAt(0).toUpperCase() : "P"}
               </div>
-
-              <div className="profile-header-info">
-                <div className="profile-name-row">
-                  <div>
+              <div className="profile-header-row">
+                <div className="profile-header-info-new">
+                  <div className="profile-name-badge">
                     <h1>{selectedProfile?.user?.name ? selectedProfile.user.name : "User Profile"}</h1>
-                    <p className="profile-bio">{selectedProfile?.employee?.position ? selectedProfile.employee.position : "No position data"}</p>
+                    <span className="verified-badge"><CheckCircle2 size={14}/> Verified Profile</span>
                   </div>
-                  <div className="profile-actions-row">
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => navigate(`/profiles/update/${routeProfileId ?? ""}`)}
-                      disabled={loading || !routeProfileId}
-                    >
-                      <Pencil size={14} />
-                      Edit
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => navigate("/profiles")}
-                      disabled={loading}
-                    >
-                      Back
-                    </Button>
-                  </div>
+                  <p className="start-date-text">
+                    <Calendar size={14}/> Start Date: {selectedProfile?.employee?.hire_date ? formatDate(selectedProfile.employee.hire_date) : "N/A"}
+                  </p>
                 </div>
+                <Button
+                  variant="outline"
+                  size="md"
+                  className="edit-profile-btn"
+                  onClick={() => navigate(`/profiles/update/${routeProfileId ?? ""}`)}
+                  disabled={loading || !routeProfileId}
+                >
+                  <Pencil size={14} />
+                  Edit Profile
+                </Button>
               </div>
             </div>
           </div>
 
-          {/* Profile Stats */}
-          <div className="profile-stats-section">
-            <div className="profile-stat">
-              <span className="stat-value">{selectedProfile?.roles?.length ?? 0}</span>
-              <span className="stat-label">Roles</span>
-            </div>
-            <div className="profile-stat">
-              <span className="stat-value">{selectedProfile?.leaves?.length ?? 0}</span>
-              <span className="stat-label">Leaves</span>
-            </div>
-            <div className="profile-stat">
-              <span className="stat-value">{selectedProfile?.reimbursements?.length ?? 0}</span>
-              <span className="stat-label">Reimbursements</span>
-            </div>
-          </div>
-
-          {/* Profile Content */}
-          <div className="profile-content-section">
-            <div className="profile-main-content">
-              <Card className="profile-info-card" glass>
-                <h3>Personal Information</h3>
-                <div className="profile-info-list">
-                  {detailSections?.personalInfo.map((item) => (
-                    <div key={item.label} className="info-item">
-                      <span className="info-label">{item.label}</span>
-                      <span className="info-value">{item.value}</span>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-
-              <Card className="profile-info-card" glass>
-                <h3>Address Information</h3>
-                <div className="profile-info-list">
-                  {detailSections?.addressInfo.map((item) => (
-                    <div key={item.label} className="info-item">
-                      <span className="info-label">{item.label}</span>
-                      <span className="info-value">{item.value}</span>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-
-              <Card className="profile-info-card" glass>
-                <h3>Emergency Contact</h3>
-                <div className="profile-info-list">
-                  {detailSections?.emergencyInfo.map((item) => (
-                    <div key={item.label} className="info-item">
-                      <span className="info-label">{item.label}</span>
-                      <span className="info-value">{item.value}</span>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-
-              <Card className="profile-info-card" glass>
-                <h3>Bank Information</h3>
-                <div className="profile-info-list">
-                  {detailSections?.bankInfo.map((item) => (
-                    <div key={item.label} className="info-item">
-                      <span className="info-label">{item.label}</span>
-                      <span className="info-value">{item.value}</span>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-
-              <Card className="profile-info-card" glass>
-                <h3>Education Information</h3>
-                <div className="profile-info-list">
-                  {detailSections?.educationInfo.map((item) => (
-                    <div key={item.label} className="info-item">
-                      <span className="info-label">{item.label}</span>
-                      <span className="info-value">{item.value}</span>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-
-              <Card className="profile-info-card" glass>
-                <h3>Employee Information</h3>
-                <div className="profile-info-list">
-                  {detailSections?.employeeInfo.map((item) => (
-                    <div key={item.label} className="info-item">
-                      <span className="info-label">{item.label}</span>
-                      <span className="info-value">{item.value}</span>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-
-              <Card className="profile-info-card" glass>
-                <h3>Role and Permission</h3>
-                <div className="profile-info-list">
-                  <div className="info-item info-item--full">
-                    <span className="info-label">Roles</span>
-                    <span className="info-value">{detailSections?.roleNames ?? "-"}</span>
-                  </div>
-                  <div className="info-item info-item--full">
-                    <span className="info-label">User Roles</span>
-                    <span className="info-value">{detailSections?.userRoleNames ?? "-"}</span>
-                  </div>
-                  <div className="info-item info-item--full">
-                    <span className="info-label">Permissions</span>
-                    <span className="info-value">{detailSections?.permissionNames ?? "-"}</span>
+          <div className="profile-new-cards">
+            {/* Profile details */}
+            <Card className="profile-details-card" glass>
+              <div className="card-header-flex">
+                <h3>Profile details</h3>
+                <Button variant="ghost" size="sm" className="edit-btn-small" onClick={() => navigate(`/profiles/update/${routeProfileId ?? ""}`)}>
+                  <Pencil size={14}/> Edit
+                </Button>
+              </div>
+              <div className="profile-details-grid">
+                <div className="detail-item-new">
+                  <div className="detail-icon-wrap"><User size={20}/></div>
+                  <div className="detail-text-wrap">
+                    <span className="detail-label-new">Full Name</span>
+                    <span className="detail-value-new">{asDisplay(selectedProfile?.user?.name)}</span>
                   </div>
                 </div>
-              </Card>
-
-              <Card className="profile-info-card" glass>
-                <h3>System Information</h3>
-                <div className="profile-info-list">
-                  {detailSections?.systemInfo.map((item) => (
-                    <div key={item.label} className="info-item">
-                      <span className="info-label">{item.label}</span>
-                      <span className="info-value">{item.value}</span>
-                    </div>
-                  ))}
+                <div className="detail-item-new">
+                  <div className="detail-icon-wrap"><Mail size={20}/></div>
+                  <div className="detail-text-wrap">
+                    <span className="detail-label-new">Email</span>
+                    <span className="detail-value-new email-with-badge">
+                      {asDisplay(selectedProfile?.user?.email)}
+                      {selectedProfile?.user?.email && <span className="verified-badge-small"><CheckCircle2 size={12}/> Email Verified</span>}
+                    </span>
+                  </div>
                 </div>
-              </Card>
+                <div className="detail-item-new">
+                  <div className="detail-icon-wrap"><Calendar size={20}/></div>
+                  <div className="detail-text-wrap">
+                    <span className="detail-label-new">Date of birth</span>
+                    <span className="detail-value-new">{formatDate(selectedProfile?.birth_date)}</span>
+                  </div>
+                </div>
+                <div className="detail-item-new">
+                  <div className="detail-icon-wrap"><User size={20}/></div>
+                  <div className="detail-text-wrap">
+                    <span className="detail-label-new">Username</span>
+                    <span className="detail-value-new">{asDisplay(selectedProfile?.user?.name?.split(' ')[0])}</span>
+                  </div>
+                </div>
+                <div className="detail-item-new">
+                  <div className="detail-icon-wrap"><Phone size={20}/></div>
+                  <div className="detail-text-wrap">
+                    <span className="detail-label-new">Number</span>
+                    <span className="detail-value-new email-with-badge">
+                      {asDisplay(selectedProfile?.phone)}
+                      {selectedProfile?.phone && <span className="verified-badge-small"><CheckCircle2 size={12}/> Number Verified</span>}
+                    </span>
+                  </div>
+                </div>
+                <div className="detail-item-new">
+                  <div className="detail-icon-wrap"><Layers size={20}/></div>
+                  <div className="detail-text-wrap">
+                    <span className="detail-label-new">Plan</span>
+                    <span className="detail-value-new">Pro Plan</span>
+                  </div>
+                </div>
+                <div className="detail-item-new">
+                  <div className="detail-icon-wrap"><FileText size={20}/></div>
+                  <div className="detail-text-wrap">
+                    <span className="detail-label-new">Employee Code</span>
+                    <span className="detail-value-new">{asDisplay(selectedProfile?.employee?.employee_code)}</span>
+                  </div>
+                </div>
+                <div className="detail-item-new">
+                  <div className="detail-icon-wrap"><Map size={20}/></div>
+                  <div className="detail-text-wrap">
+                    <span className="detail-label-new">Postal Code</span>
+                    <span className="detail-value-new">{asDisplay(selectedProfile?.postal_code)}</span>
+                  </div>
+                </div>
+                <div className="detail-item-new">
+                  <div className="detail-icon-wrap"><CreditCard size={20}/></div>
+                  <div className="detail-text-wrap">
+                    <span className="detail-label-new">ID Number</span>
+                    <span className="detail-value-new">{asDisplay(selectedProfile?.id_number)}</span>
+                  </div>
+                </div>
+                <div className="detail-item-new">
+                  <div className="detail-icon-wrap"><MapPin size={20}/></div>
+                  <div className="detail-text-wrap">
+                    <span className="detail-label-new">Address</span>
+                    <span className="detail-value-new">{asDisplay(selectedProfile?.address)}</span>
+                  </div>
+                </div>
+                <div className="detail-item-new">
+                  <div className="detail-icon-wrap"><Building2 size={20}/></div>
+                  <div className="detail-text-wrap">
+                    <span className="detail-label-new">City</span>
+                    <span className="detail-value-new">{asDisplay(selectedProfile?.city)}</span>
+                  </div>
+                </div>
+              </div>
+            </Card>
 
-              <Card className="profile-info-card" glass>
-                <h3>Leaves</h3>
-                {selectedProfile?.leaves && selectedProfile.leaves.length > 0 ? (
+            {/* Old Data Sections */}
+            <div className="profile-card-sections" style={{ display: 'grid', gap: '1.5rem', marginTop: '1.5rem' }}>
+              <SectionCard icon={<Heart size={18} />} title="Emergency Contact" items={detailSections?.emergencyInfo ?? null} />
+              <SectionCard icon={<CreditCard size={18} />} title="Bank Information" items={detailSections?.bankInfo ?? null} />
+              <SectionCard icon={<GraduationCap size={18} />} title="Education Information" items={detailSections?.educationInfo ?? null} />
+
+              {/* Role and Permission */}
+              <SectionCard icon={<Shield size={18} />} title="Role and Permission" items={null}>
+                <div className="profile-card-grid">
+                  <div className="profile-card-item">
+                    <span className="profile-card-label">Roles</span>
+                    <span className="profile-card-value">{detailSections?.roleNames}</span>
+                  </div>
+                  <div className="profile-card-item">
+                    <span className="profile-card-label">User Roles</span>
+                    <span className="profile-card-value">{detailSections?.userRoleNames}</span>
+                  </div>
+                  <div className="profile-card-item">
+                    <span className="profile-card-label">Permissions</span>
+                    <span className="profile-card-value">{detailSections?.permissionNames}</span>
+                  </div>
+                </div>
+              </SectionCard>
+
+              <SectionCard icon={<FileText size={18} />} title="System Information" items={detailSections?.systemInfo ?? null} />
+
+              {/* Attendances */}
+              <SectionCard icon={<Clock size={18} />} title="Attendances" items={null}>
+                {Array.isArray(selectedProfile?.attendances) && selectedProfile.attendances.length > 0 ? (
                   <div className="profile-collection-list">
-                    {selectedProfile.leaves.slice(0, 5).map((leave, index) => (
+                    {selectedProfile.attendances.slice(0, 5).map((attendance: any, index: number) => (
+                      <div key={`${attendance.id ?? index}-attendance`} className="profile-collection-item">
+                        <span className="info-label">{formatDate(attendance.check_in)}</span>
+                        <span className="info-value">
+                          Check In: {attendance.check_in ? new Date(attendance.check_in).toLocaleTimeString("id-ID") : "-"}
+                        </span>
+                        {attendance.check_out && (
+                          <span className="info-value">
+                            Check Out: {new Date(attendance.check_out).toLocaleTimeString("id-ID")}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="activity-placeholder">Belum ada data attendance.</p>
+                )}
+              </SectionCard>
+
+              {/* Leaves */}
+              <SectionCard icon={<Heart size={18} />} title="Leaves" items={null}>
+                {Array.isArray(selectedProfile?.leaves) && selectedProfile.leaves.length > 0 ? (
+                  <div className="profile-collection-list">
+                    {selectedProfile.leaves.slice(0, 5).map((leave: any, index: number) => (
                       <div key={`${leave.id ?? index}-leave`} className="profile-collection-item">
                         <span className="info-label">{toTitle(leave.type)}</span>
                         <span className="info-value">
@@ -873,13 +892,29 @@ const ProfilesPage = () => {
                 ) : (
                   <p className="activity-placeholder">Belum ada data leave.</p>
                 )}
-              </Card>
+              </SectionCard>
 
-              <Card className="profile-info-card" glass>
-                <h3>Reimbursements</h3>
-                {selectedProfile?.reimbursements && selectedProfile.reimbursements.length > 0 ? (
+              {/* KPIs */}
+              <SectionCard icon={<FileText size={18} />} title="KPIs" items={null}>
+                {Array.isArray(selectedProfile?.kpis) && selectedProfile.kpis.length > 0 ? (
                   <div className="profile-collection-list">
-                    {selectedProfile.reimbursements.slice(0, 5).map((reimbursement, index) => (
+                    {selectedProfile.kpis.slice(0, 5).map((kpi: any, index: number) => (
+                      <div key={`${kpi.id ?? index}-kpi`} className="profile-collection-item">
+                        <span className="info-label">{asDisplay(kpi.name)}</span>
+                        <span className="info-value">{asDisplay(kpi.target)} - {asDisplay(kpi.achievement)}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="activity-placeholder">Belum ada data KPI.</p>
+                )}
+              </SectionCard>
+
+              {/* Reimbursements */}
+              <SectionCard icon={<CreditCard size={18} />} title="Reimbursements" items={null}>
+                {Array.isArray(selectedProfile?.reimbursements) && selectedProfile.reimbursements.length > 0 ? (
+                  <div className="profile-collection-list">
+                    {selectedProfile.reimbursements.slice(0, 5).map((reimbursement: any, index: number) => (
                       <div key={`${reimbursement.id ?? index}-reimbursement`} className="profile-collection-item">
                         <span className="info-label">{asDisplay(reimbursement.title)}</span>
                         <span className="info-value">
@@ -894,8 +929,27 @@ const ProfilesPage = () => {
                 ) : (
                   <p className="activity-placeholder">Belum ada data reimbursement.</p>
                 )}
-              </Card>
+              </SectionCard>
+
+              {/* Payrolls */}
+              <SectionCard icon={<CreditCard size={18} />} title="Payrolls" items={null}>
+                {Array.isArray(selectedProfile?.payrolls) && selectedProfile.payrolls.length > 0 ? (
+                  <div className="profile-collection-list">
+                    {selectedProfile.payrolls.slice(0, 5).map((payroll: any, index: number) => (
+                      <div key={`${payroll.id ?? index}-payroll`} className="profile-collection-item">
+                        <span className="info-label">{formatDate(payroll.period_start)}</span>
+                        <span className="info-value">{formatCurrency(payroll.gross_salary)}</span>
+                        <span className="info-meta">Status: {toTitle(payroll.status)}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="activity-placeholder">Belum ada data payroll.</p>
+                )}
+              </SectionCard>
             </div>
+
+
           </div>
         </div>
       </div>
@@ -997,172 +1051,262 @@ const ProfilesPage = () => {
           <div className="profiles-grid">
             {(() => {
               const profile = profiles[currentProfileIndex];
-              const profileId = getStringValue(profile.id) || `row-${currentProfileIndex}`;
+              const profileId = String(profile.id) || `row-${currentProfileIndex}`;
               const sections = buildDetailSections(profile);
 
               return (
-                <div key={profileId} className="profile-card">
-                  <div className="profile-card-header">
-                    <div className="profile-card-title">
-                      <div className="profile-card-avatar">
-                        {profile.user?.name ? profile.user.name.charAt(0).toUpperCase() : "P"}
+                <div key={profileId} className="profile-view-container" style={{ marginTop: '1rem' }}>
+                  <div className="profile-header-new">
+                    <div className="profile-header-gradient"></div>
+                    <div className="profile-header-content">
+                      <div className="profile-avatar-large">
+                        {profile?.user?.name ? profile.user.name.charAt(0).toUpperCase() : "P"}
                       </div>
-                      <div>
-                        <h3>{profile.user?.name || "Unknown"}</h3>
-                        <p>{profile.employee?.position || "No position"}</p>
+                      <div className="profile-header-row">
+                        <div className="profile-header-info-new">
+                          <div className="profile-name-badge">
+                            <h1>{profile?.user?.name ? profile.user.name : "User Profile"}</h1>
+                            <span className="verified-badge"><CheckCircle2 size={14}/> Verified Profile</span>
+                          </div>
+                          <p className="start-date-text">
+                            <Calendar size={14}/> Start Date: {profile?.employee?.hire_date ? formatDate(profile.employee.hire_date) : "N/A"}
+                          </p>
+                        </div>
+                        <div className="profile-card-actions" style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                          <Button variant="outline" size="md" onClick={() => navigate(`/profiles/view/${profileId}`)} disabled={loading}>
+                            <Eye size={14} /> View
+                          </Button>
+                          <Button variant="outline" size="md" onClick={() => navigate(`/profiles/update/${profileId}`)} disabled={loading} style={{ borderColor: 'var(--border)' }}>
+                            <Pencil size={14} /> Edit
+                          </Button>
+                          <Button variant="ghost" size="md" onClick={() => void handleDelete(profileId)} disabled={loading} style={{ color: '#ef4444' }}>
+                            <Trash2 size={14} /> Delete
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                    <div className="profile-card-actions">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => navigate(`/profiles/view/${profileId}`)}
-                        disabled={loading}
-                      >
-                        <Eye size={14} />
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => navigate(`/profiles/update/${profileId}`)}
-                        disabled={loading}
-                      >
-                        <Pencil size={14} />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => void handleDelete(profileId)}
-                        disabled={loading}
-                      >
-                        <Trash2 size={14} />
-                      </Button>
                     </div>
                   </div>
 
-                  <div className="profile-card-sections">
-                    <SectionCard icon={<User size={18} />} title="Personal Information" items={sections.personalInfo} />
-                    <SectionCard icon={<MapPin size={18} />} title="Address Information" items={sections.addressInfo} />
-                    <SectionCard icon={<Heart size={18} />} title="Emergency Contact" items={sections.emergencyInfo} />
-                    <SectionCard icon={<CreditCard size={18} />} title="Bank Information" items={sections.bankInfo} />
-                    <SectionCard icon={<GraduationCap size={18} />} title="Education Information" items={sections.educationInfo} />
-                    <SectionCard icon={<Briefcase size={18} />} title="Employee Information" items={sections.employeeInfo} />
-
-                    {/* Role and Permission */}
-                    <SectionCard icon={<Shield size={18} />} title="Role and Permission" items={null}>
-                      <div className="profile-card-grid">
-                        <div className="profile-card-item">
-                          <span className="profile-card-label">Roles</span>
-                          <span className="profile-card-value">{sections.roleNames}</span>
+                  <div className="profile-new-cards">
+                    {/* Profile details */}
+                    <Card className="profile-details-card" glass>
+                      <div className="card-header-flex">
+                        <h3>Profile details</h3>
+                        <Button variant="ghost" size="sm" className="edit-btn-small" onClick={() => navigate(`/profiles/update/${profileId}`)}>
+                          <Pencil size={14}/> Edit
+                        </Button>
+                      </div>
+                      <div className="profile-details-grid">
+                        <div className="detail-item-new">
+                          <div className="detail-icon-wrap"><User size={20}/></div>
+                          <div className="detail-text-wrap">
+                            <span className="detail-label-new">Full Name</span>
+                            <span className="detail-value-new">{asDisplay(profile?.user?.name)}</span>
+                          </div>
                         </div>
-                        <div className="profile-card-item">
-                          <span className="profile-card-label">User Roles</span>
-                          <span className="profile-card-value">{sections.userRoleNames}</span>
+                        <div className="detail-item-new">
+                          <div className="detail-icon-wrap"><Mail size={20}/></div>
+                          <div className="detail-text-wrap">
+                            <span className="detail-label-new">Email</span>
+                            <span className="detail-value-new email-with-badge">
+                              {asDisplay(profile?.user?.email)}
+                              {profile?.user?.email && <span className="verified-badge-small"><CheckCircle2 size={12}/> Email Verified</span>}
+                            </span>
+                          </div>
                         </div>
-                        <div className="profile-card-item">
-                          <span className="profile-card-label">Permissions</span>
-                          <span className="profile-card-value">{sections.permissionNames}</span>
+                        <div className="detail-item-new">
+                          <div className="detail-icon-wrap"><Calendar size={20}/></div>
+                          <div className="detail-text-wrap">
+                            <span className="detail-label-new">Date of birth</span>
+                            <span className="detail-value-new">{formatDate(profile?.birth_date)}</span>
+                          </div>
+                        </div>
+                        <div className="detail-item-new">
+                          <div className="detail-icon-wrap"><User size={20}/></div>
+                          <div className="detail-text-wrap">
+                            <span className="detail-label-new">Username</span>
+                            <span className="detail-value-new">{asDisplay(profile?.user?.name?.split(' ')[0])}</span>
+                          </div>
+                        </div>
+                        <div className="detail-item-new">
+                          <div className="detail-icon-wrap"><Phone size={20}/></div>
+                          <div className="detail-text-wrap">
+                            <span className="detail-label-new">Number</span>
+                            <span className="detail-value-new email-with-badge">
+                              {asDisplay(profile?.phone)}
+                              {profile?.phone && <span className="verified-badge-small"><CheckCircle2 size={12}/> Number Verified</span>}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="detail-item-new">
+                          <div className="detail-icon-wrap"><Layers size={20}/></div>
+                          <div className="detail-text-wrap">
+                            <span className="detail-label-new">Plan</span>
+                            <span className="detail-value-new">Pro Plan</span>
+                          </div>
+                        </div>
+                        <div className="detail-item-new">
+                          <div className="detail-icon-wrap"><FileText size={20}/></div>
+                          <div className="detail-text-wrap">
+                            <span className="detail-label-new">Employee Code</span>
+                            <span className="detail-value-new">{asDisplay(profile?.employee?.employee_code)}</span>
+                          </div>
+                        </div>
+                        <div className="detail-item-new">
+                          <div className="detail-icon-wrap"><Map size={20}/></div>
+                          <div className="detail-text-wrap">
+                            <span className="detail-label-new">Postal Code</span>
+                            <span className="detail-value-new">{asDisplay(profile?.postal_code)}</span>
+                          </div>
+                        </div>
+                        <div className="detail-item-new">
+                          <div className="detail-icon-wrap"><CreditCard size={20}/></div>
+                          <div className="detail-text-wrap">
+                            <span className="detail-label-new">ID Number</span>
+                            <span className="detail-value-new">{asDisplay(profile?.id_number)}</span>
+                          </div>
+                        </div>
+                        <div className="detail-item-new">
+                          <div className="detail-icon-wrap"><MapPin size={20}/></div>
+                          <div className="detail-text-wrap">
+                            <span className="detail-label-new">Address</span>
+                            <span className="detail-value-new">{asDisplay(profile?.address)}</span>
+                          </div>
+                        </div>
+                        <div className="detail-item-new">
+                          <div className="detail-icon-wrap"><Building2 size={20}/></div>
+                          <div className="detail-text-wrap">
+                            <span className="detail-label-new">City</span>
+                            <span className="detail-value-new">{asDisplay(profile?.city)}</span>
+                          </div>
                         </div>
                       </div>
-                    </SectionCard>
+                    </Card>
 
-                    <SectionCard icon={<FileText size={18} />} title="System Information" items={sections.systemInfo} />
+                    {/* Old Data Sections */}
+                    <div className="profile-card-sections" style={{ display: 'grid', gap: '1.5rem', marginTop: '1.5rem' }}>
+                      <SectionCard icon={<Heart size={18} />} title="Emergency Contact" items={sections?.emergencyInfo} />
+                      <SectionCard icon={<CreditCard size={18} />} title="Bank Information" items={sections?.bankInfo} />
+                      <SectionCard icon={<GraduationCap size={18} />} title="Education Information" items={sections?.educationInfo} />
 
-                    {/* Attendances */}
-                    <SectionCard icon={<Clock size={18} />} title="Attendances" items={null}>
-                      {Array.isArray(profile.attendances) && profile.attendances.length > 0 ? (
-                        <div className="profile-collection-list">
-                          {profile.attendances.slice(0, 5).map((attendance: any, index: number) => (
-                            <div key={`${attendance.id ?? index}-attendance`} className="profile-collection-item">
-                              <span className="info-label">{formatDate(attendance.check_in)}</span>
-                              <span className="info-value">
-                                Check In: {attendance.check_in ? new Date(attendance.check_in).toLocaleTimeString("id-ID") : "-"}
-                              </span>
-                              {attendance.check_out && (
+                      {/* Role and Permission */}
+                      <SectionCard icon={<Shield size={18} />} title="Role and Permission" items={null}>
+                        <div className="profile-card-grid">
+                          <div className="profile-card-item">
+                            <span className="profile-card-label">Roles</span>
+                            <span className="profile-card-value">{sections?.roleNames}</span>
+                          </div>
+                          <div className="profile-card-item">
+                            <span className="profile-card-label">User Roles</span>
+                            <span className="profile-card-value">{sections?.userRoleNames}</span>
+                          </div>
+                          <div className="profile-card-item">
+                            <span className="profile-card-label">Permissions</span>
+                            <span className="profile-card-value">{sections?.permissionNames}</span>
+                          </div>
+                        </div>
+                      </SectionCard>
+
+                      <SectionCard icon={<FileText size={18} />} title="System Information" items={sections?.systemInfo} />
+
+                      {/* Attendances */}
+                      <SectionCard icon={<Clock size={18} />} title="Attendances" items={null}>
+                        {Array.isArray(profile?.attendances) && profile.attendances.length > 0 ? (
+                          <div className="profile-collection-list">
+                            {profile.attendances.slice(0, 5).map((attendance: any, index: number) => (
+                              <div key={`${attendance.id ?? index}-attendance`} className="profile-collection-item">
+                                <span className="info-label">{formatDate(attendance.check_in)}</span>
                                 <span className="info-value">
-                                  Check Out: {new Date(attendance.check_out).toLocaleTimeString("id-ID")}
+                                  Check In: {attendance.check_in ? new Date(attendance.check_in).toLocaleTimeString("id-ID") : "-"}
                                 </span>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="activity-placeholder">Belum ada data attendance.</p>
-                      )}
-                    </SectionCard>
+                                {attendance.check_out && (
+                                  <span className="info-value">
+                                    Check Out: {new Date(attendance.check_out).toLocaleTimeString("id-ID")}
+                                  </span>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="activity-placeholder">Belum ada data attendance.</p>
+                        )}
+                      </SectionCard>
 
-                    {/* Leaves */}
-                    <SectionCard icon={<Heart size={18} />} title="Leaves" items={null}>
-                      {profile.leaves && profile.leaves.length > 0 ? (
-                        <div className="profile-collection-list">
-                          {profile.leaves.slice(0, 5).map((leave, index) => (
-                            <div key={`${leave.id ?? index}-leave`} className="profile-collection-item">
-                              <span className="info-label">{toTitle(leave.type)}</span>
-                              <span className="info-value">
-                                {formatDate(leave.start_date)} - {formatDate(leave.end_date)} ({asDisplay(leave.total_days)} hari)
-                              </span>
-                              <span className="info-meta">Status: {toTitle(leave.status)}</span>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="activity-placeholder">Belum ada data leave.</p>
-                      )}
-                    </SectionCard>
+                      {/* Leaves */}
+                      <SectionCard icon={<Heart size={18} />} title="Leaves" items={null}>
+                        {Array.isArray(profile?.leaves) && profile.leaves.length > 0 ? (
+                          <div className="profile-collection-list">
+                            {profile.leaves.slice(0, 5).map((leave: any, index: number) => (
+                              <div key={`${leave.id ?? index}-leave`} className="profile-collection-item">
+                                <span className="info-label">{toTitle(leave.type)}</span>
+                                <span className="info-value">
+                                  {formatDate(leave.start_date)} - {formatDate(leave.end_date)} ({asDisplay(leave.total_days)} hari)
+                                </span>
+                                <span className="info-meta">Status: {toTitle(leave.status)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="activity-placeholder">Belum ada data leave.</p>
+                        )}
+                      </SectionCard>
 
-                    {/* KPIs */}
-                    <SectionCard icon={<FileText size={18} />} title="KPIs" items={null}>
-                      {Array.isArray(profile.kpis) && profile.kpis.length > 0 ? (
-                        <div className="profile-collection-list">
-                          {profile.kpis.slice(0, 5).map((kpi: any, index: number) => (
-                            <div key={`${kpi.id ?? index}-kpi`} className="profile-collection-item">
-                              <span className="info-label">{asDisplay(kpi.name)}</span>
-                              <span className="info-value">{asDisplay(kpi.target)} - {asDisplay(kpi.achievement)}</span>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="activity-placeholder">Belum ada data KPI.</p>
-                      )}
-                    </SectionCard>
+                      {/* KPIs */}
+                      <SectionCard icon={<FileText size={18} />} title="KPIs" items={null}>
+                        {Array.isArray(profile?.kpis) && profile.kpis.length > 0 ? (
+                          <div className="profile-collection-list">
+                            {profile.kpis.slice(0, 5).map((kpi: any, index: number) => (
+                              <div key={`${kpi.id ?? index}-kpi`} className="profile-collection-item">
+                                <span className="info-label">{asDisplay(kpi.name)}</span>
+                                <span className="info-value">{asDisplay(kpi.target)} - {asDisplay(kpi.achievement)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="activity-placeholder">Belum ada data KPI.</p>
+                        )}
+                      </SectionCard>
 
-                    {/* Reimbursements */}
-                    <SectionCard icon={<CreditCard size={18} />} title="Reimbursements" items={null}>
-                      {profile.reimbursements && profile.reimbursements.length > 0 ? (
-                        <div className="profile-collection-list">
-                          {profile.reimbursements.slice(0, 5).map((reimbursement, index) => (
-                            <div key={`${reimbursement.id ?? index}-reimbursement`} className="profile-collection-item">
-                              <span className="info-label">{asDisplay(reimbursement.title)}</span>
-                              <span className="info-value">
-                                {formatCurrency(reimbursement.amount)} - {toTitle(reimbursement.category)}
-                              </span>
-                              <span className="info-meta">
-                                {formatDate(reimbursement.expense_date)} | Status: {toTitle(reimbursement.status)}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="activity-placeholder">Belum ada data reimbursement.</p>
-                      )}
-                    </SectionCard>
+                      {/* Reimbursements */}
+                      <SectionCard icon={<CreditCard size={18} />} title="Reimbursements" items={null}>
+                        {Array.isArray(profile?.reimbursements) && profile.reimbursements.length > 0 ? (
+                          <div className="profile-collection-list">
+                            {profile.reimbursements.slice(0, 5).map((reimbursement: any, index: number) => (
+                              <div key={`${reimbursement.id ?? index}-reimbursement`} className="profile-collection-item">
+                                <span className="info-label">{asDisplay(reimbursement.title)}</span>
+                                <span className="info-value">
+                                  {formatCurrency(reimbursement.amount)} - {toTitle(reimbursement.category)}
+                                </span>
+                                <span className="info-meta">
+                                  {formatDate(reimbursement.expense_date)} | Status: {toTitle(reimbursement.status)}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="activity-placeholder">Belum ada data reimbursement.</p>
+                        )}
+                      </SectionCard>
 
-                    {/* Payrolls */}
-                    <SectionCard icon={<CreditCard size={18} />} title="Payrolls" items={null}>
-                      {Array.isArray(profile.payrolls) && profile.payrolls.length > 0 ? (
-                        <div className="profile-collection-list">
-                          {profile.payrolls.slice(0, 5).map((payroll: any, index: number) => (
-                            <div key={`${payroll.id ?? index}-payroll`} className="profile-collection-item">
-                              <span className="info-label">{formatDate(payroll.period_start)}</span>
-                              <span className="info-value">{formatCurrency(payroll.gross_salary)}</span>
-                              <span className="info-meta">Status: {toTitle(payroll.status)}</span>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="activity-placeholder">Belum ada data payroll.</p>
-                      )}
-                    </SectionCard>
+                      {/* Payrolls */}
+                      <SectionCard icon={<CreditCard size={18} />} title="Payrolls" items={null}>
+                        {Array.isArray(profile?.payrolls) && profile.payrolls.length > 0 ? (
+                          <div className="profile-collection-list">
+                            {profile.payrolls.slice(0, 5).map((payroll: any, index: number) => (
+                              <div key={`${payroll.id ?? index}-payroll`} className="profile-collection-item">
+                                <span className="info-label">{formatDate(payroll.period_start)}</span>
+                                <span className="info-value">{formatCurrency(payroll.gross_salary)}</span>
+                                <span className="info-meta">Status: {toTitle(payroll.status)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="activity-placeholder">Belum ada data payroll.</p>
+                        )}
+                      </SectionCard>
+                    </div>
+
+
                   </div>
                 </div>
               );

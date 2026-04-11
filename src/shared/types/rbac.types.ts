@@ -14,6 +14,25 @@ export const ROLES = {
 } as const;
 
 export type PermissionType = 
+  | 'employee.view'
+  | 'employee.create'
+  | 'employee.update'
+  | 'employee.delete'
+  | 'leave.view'
+  | 'leave.create'
+  | 'leave.approve'
+  | 'attendance.view_all'
+  | 'attendance.delete'
+  | 'attendance.check_in'
+  | 'attendance.check_out'
+  | 'attendance.view_own'
+  | 'location.view'
+  | 'location.create'
+  | 'location.update'
+  | 'location.delete'
+  | 'profile.view_all'
+  | 'profile.update'
+  | 'profile.delete'
   | 'user.view'
   | 'user.assign_role'
   | 'role.view'
@@ -21,6 +40,25 @@ export type PermissionType =
   | 'permission.view';
 
 export const PERMISSIONS = {
+  EMPLOYEE_VIEW: 'employee.view',
+  EMPLOYEE_CREATE: 'employee.create',
+  EMPLOYEE_UPDATE: 'employee.update',
+  EMPLOYEE_DELETE: 'employee.delete',
+  LEAVE_VIEW: 'leave.view',
+  LEAVE_CREATE: 'leave.create',
+  LEAVE_APPROVE: 'leave.approve',
+  ATTENDANCE_VIEW_ALL: 'attendance.view_all',
+  ATTENDANCE_DELETE: 'attendance.delete',
+  ATTENDANCE_CHECK_IN: 'attendance.check_in',
+  ATTENDANCE_CHECK_OUT: 'attendance.check_out',
+  ATTENDANCE_VIEW_OWN: 'attendance.view_own',
+  LOCATION_VIEW: 'location.view',
+  LOCATION_CREATE: 'location.create',
+  LOCATION_UPDATE: 'location.update',
+  LOCATION_DELETE: 'location.delete',
+  PROFILE_VIEW_ALL: 'profile.view_all',
+  PROFILE_UPDATE: 'profile.update',
+  PROFILE_DELETE: 'profile.delete',
   USER_VIEW: 'user.view',
   USER_ASSIGN_ROLE: 'user.assign_role',
   ROLE_VIEW: 'role.view',

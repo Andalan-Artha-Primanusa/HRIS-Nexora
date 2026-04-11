@@ -129,12 +129,14 @@ export const stripSensitiveData = (obj: any, sensitiveKeys: string[] = ['passwor
  * Rate limit helper - prevents excessive API calls
  */
 export class RateLimiter {
-  private timestamps: number[] = [];
+  readonly maxRequests: number;
+  readonly windowMs: number;
+  timestamps: number[] = [];
   
-  constructor(
-    private maxRequests: number,
-    private windowMs: number
-  ) {}
+  constructor(maxRequests: number, windowMs: number) {
+    this.maxRequests = maxRequests;
+    this.windowMs = windowMs;
+  }
   
   isAllowed(): boolean {
     const now = Date.now();

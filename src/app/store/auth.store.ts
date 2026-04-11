@@ -17,11 +17,30 @@ const getStoredUser = (): AuthUser | null => {
 
   try {
     const parsed = JSON.parse(rawUser) as AuthUser;
-    // Ensure roles and permissions are arrays
+    
+    // Ensure roles is an array
+    const roles = parsed.roles ?? [];
+    
+    // If permissions are missing or empty, extract from roles
+    let permissions = parsed.permissions ?? [];
+    if (permissions.length === 0 && roles.length > 0) {
+      const permMap = new Map<string, any>();
+      for (const role of roles) {
+        if (Array.isArray(role.permissions)) {
+          for (const perm of role.permissions) {
+            if (perm.name && !permMap.has(perm.name)) {
+              permMap.set(perm.name, perm);
+            }
+          }
+        }
+      }
+      permissions = Array.from(permMap.values());
+    }
+    
     return {
       ...parsed,
-      roles: parsed.roles ?? [],
-      permissions: parsed.permissions ?? [],
+      roles,
+      permissions,
     };
   } catch {
     return null;

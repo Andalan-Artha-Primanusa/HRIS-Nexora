@@ -108,7 +108,7 @@ export const getVisibleMenuItems = (userRole: RoleType | undefined) => {
   );
 
   // HR and above
-  if ([ROLES.HR, ROLES.ADMIN, ROLES.SUPER_ADMIN].includes(userRole)) {
+  if (['hr', 'admin', 'super_admin'].includes(userRole as string)) {
     visiblePaths.push(
       '/attendance/admin',
       '/leave/approval',
@@ -117,7 +117,7 @@ export const getVisibleMenuItems = (userRole: RoleType | undefined) => {
   }
 
   // Admin and Super Admin
-  if ([ROLES.ADMIN, ROLES.SUPER_ADMIN].includes(userRole)) {
+  if (['admin', 'super_admin'].includes(userRole as string)) {
     visiblePaths.push(
       '/admin/users',
       '/admin/roles',

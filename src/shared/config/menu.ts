@@ -162,12 +162,28 @@ export const menuItems: MenuItem[] = [
   {
     label: 'Admin Tools',
     icon: ShieldCheck,
-    requiredChecker: (user) => RBACUtils.isAdmin(user) || RBACUtils.canViewUsers(user) || RBACUtils.canViewRoles(user),
+    requiredChecker: (user) => RBACUtils.isAdmin(user) || RBACUtils.canViewUsers(user) || RBACUtils.canViewRoles(user) || RBACUtils.canViewPermissions(user),
     subItems: [
-      { label: 'Locations', path: '/locations' },
-      { label: 'Users', path: '/admin/users' },
-      { label: 'Roles', path: '/admin/roles' },
-      { label: 'Permissions', path: '/admin/permissions' },
+      { 
+        label: 'Locations', 
+        path: '/locations',
+        requiredChecker: (user) => RBACUtils.hasPermission(user, 'location.view' as any)
+      },
+      { 
+        label: 'Users', 
+        path: '/admin/users',
+        requiredChecker: (user) => RBACUtils.canViewUsers(user)
+      },
+      { 
+        label: 'Roles', 
+        path: '/admin/roles',
+        requiredChecker: (user) => RBACUtils.canViewRoles(user)
+      },
+      { 
+        label: 'Permissions', 
+        path: '/admin/permissions',
+        requiredChecker: (user) => RBACUtils.canViewPermissions(user)
+      },
     ]
   },
   {
