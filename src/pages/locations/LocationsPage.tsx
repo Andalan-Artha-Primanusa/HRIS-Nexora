@@ -75,7 +75,7 @@ const LocationsPage = () => {
             <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#0066cc' }}>
               {locations.length}
             </div>
-            <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.5rem' }}>
+            <div style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', marginTop: '0.5rem' }}>
               Total Lokasi
             </div>
           </div>
@@ -87,7 +87,7 @@ const LocationsPage = () => {
                 return lat !== 0 && lng !== 0;
               }).length}
             </div>
-            <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.5rem' }}>
+            <div style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', marginTop: '0.5rem' }}>
               dengan Koordinat
             </div>
           </div>
@@ -175,7 +175,7 @@ const LocationsPage = () => {
                           }}
                           disabled={loading}
                           style={{
-                            color: deleteConfirm === String(loc.id) ? '#c41e3a' : '#666',
+                            color: deleteConfirm === String(loc.id) ? '#c41e3a' : 'var(--color-text-secondary)',
                           }}
                         >
                           <Trash2 size={14} />
@@ -195,7 +195,7 @@ const LocationsPage = () => {
                               size="sm"
                               onClick={() => setDeleteConfirm(null)}
                               disabled={loading}
-                              style={{ padding: '0 0.5rem', color: '#666' }}
+                              style={{ padding: '0 0.5rem', color: 'var(--color-text-secondary)' }}
                             >
                               Batal
                             </Button>
@@ -212,7 +212,7 @@ const LocationsPage = () => {
         ) : (
           <div style={{ textAlign: 'center', padding: '3rem' }}>
             <MapPin size={48} style={{ opacity: 0.3, marginBottom: '1rem' }} />
-            <p style={{ color: '#999', marginBottom: '1rem' }}>Belum ada lokasi. Buat lokasi baru untuk memulai.</p>
+            <p style={{ color: 'var(--color-text-disabled)', marginBottom: '1rem' }}>Belum ada lokasi. Buat lokasi baru untuk memulai.</p>
             <Button
               variant="primary"
               size="md"
