@@ -16,7 +16,20 @@ const GoogleCallbackPage = () => {
     const processCallback = async () => {
       const searchParams = new URLSearchParams(window.location.search);
 
+      // 🚨 Cek apakah backend mengirimkan ?error= (saat Google Auth gagal di sisi backend)
+      const backendError = searchParams.get("error");
+      if (backendError) {
+        if (!isCancelled) {
+          setErrorMessage(decodeURIComponent(backendError));
+        }
+        return;
+      }
+
       try {
+        // handleGoogleCallback di useAuth.ts sudah menangani:
+        // - ?token=xxx  → langsung disimpan ke store (dari backend redirect)
+        // - ?user=xxx   → di-parse sebagai user object
+        // - ?code=xxx   → dipakai untuk call API callback (alur lama, tidak dipakai lagi)
         const authResult = await handleGoogleCallback(searchParams);
         if (!isCancelled) {
           navigate(getRoleBasedDashboardPath(authResult.user), { replace: true });
@@ -37,7 +50,7 @@ const GoogleCallbackPage = () => {
 
   return (
     <AuthLayout
-      title="Signing you in..."
+      title={errorMessage ? "Login Gagal" : "Signing you in..."}
       subtitle="Google SSO"
       footer={
         <p className="auth-footer">

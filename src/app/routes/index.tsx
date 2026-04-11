@@ -1,4 +1,5 @@
 import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
+import { useAuthStore } from "@/app/store/auth.store";
 import { getRoleBasedDashboardPathFromStorage } from "@/features/auth/utils/roleRedirect";
 import LoginPage from "../../pages/auth/login/LoginPage";
 import GoogleCallbackPage from "../../pages/auth/login/GoogleCallbackPage";
@@ -35,11 +36,6 @@ import LeaveCalendarPage from "../../pages/leave/LeaveCalendarPage";
 import LeaveApprovalPage from "../../pages/leave/LeaveApprovalPage";
 import PayrollManagementPage from "../../pages/payroll/PayrollManagementPage";
 import PayrollDetailsPage from "../../pages/payroll/PayrollDetailsPage";
-
-const hasToken = () => {
-  const token = localStorage.getItem("token");
-  return Boolean(token && token !== "null" && token !== "undefined");
-};
 
 const sectionRoutes = [
   { path: "/hr-summary" },
@@ -87,9 +83,10 @@ const sectionRoutes = [
 ];
 
 const RootRedirect = () => {
+  const token = useAuthStore((state) => state.token);
   const dashboardPath = getRoleBasedDashboardPathFromStorage();
 
-  return hasToken() ? (
+  return token ? (
     <Navigate to={dashboardPath} replace />
   ) : (
     <Navigate to="/login" replace />
@@ -97,12 +94,14 @@ const RootRedirect = () => {
 };
 
 const ProtectedRoute = () => {
-  return hasToken() ? <Outlet /> : <Navigate to="/login" replace />;
+  const token = useAuthStore((state) => state.token);
+  return token ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
 const GuestRoute = () => {
+  const token = useAuthStore((state) => state.token);
   const dashboardPath = getRoleBasedDashboardPathFromStorage();
-  return hasToken() ? <Navigate to={dashboardPath} replace /> : <Outlet />;
+  return token ? <Navigate to={dashboardPath} replace /> : <Outlet />;
 };
 
 export const router = createBrowserRouter([

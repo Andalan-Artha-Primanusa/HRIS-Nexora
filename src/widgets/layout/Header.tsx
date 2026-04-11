@@ -10,9 +10,16 @@ interface HeaderProps {
   toggleSidebar: () => void;
 }
 
-/* =========================
-   HELPERS
-========================= */
+const getDisplayName = (user: any) => {
+  return (
+    user?.name ||
+    user?.full_name ||
+    user?.fullname ||
+    user?.username ||
+    user?.email ||
+    "User"
+  );
+};
 
 const getDisplayRole = (user: any) => {
   // Check for normalized roles array first
@@ -44,18 +51,6 @@ const getInitials = (name: string) => {
     .join("");
 };
 
-const getDisplayName = (user: User | null): string => {
-  return user?.name || user?.email || "User";
-};
-
-const getDisplayRole = (user: User | null): string => {
-  return user?.role?.name || "Employee";
-};
-
-/* =========================
-   COMPONENT
-========================= */
-
 export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
   const [openDropdown, setOpenDropdown] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -83,27 +78,25 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
 
   return (
     <header className="dashboard-header">
-      {/* LEFT */}
       <div className="header-left">
-        <button
-          className="icon-button"
+        <button 
+          className="icon-button" 
           onClick={toggleSidebar}
           aria-label="Toggle Sidebar"
         >
           <Menu size={20} />
         </button>
-
+        
         <div className="search-bar">
           <Search size={18} className="search-icon text-gray" />
-          <input
-            type="text"
-            placeholder="Search employee, leave, payroll..."
+          <input 
+            type="text" 
+            placeholder="Search employee, leave, payroll..." 
             className="search-input"
           />
         </div>
       </div>
-
-      {/* RIGHT */}
+      
       <div className="header-right">
         <button 
           className="icon-button" 
@@ -118,21 +111,28 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
         <button className="icon-button" aria-label="Toggle Dark Mode">
           <Sun size={20} />
         </button>
-
-        {/* NOTIFICATION */}
+        
         <div className="notification-wrapper">
           <button className="icon-button" aria-label="Notifications">
             <Bell size={20} />
             <span className="notification-badge"></span>
           </button>
         </div>
-
-        {/* USER */}
-        <div className="user-profile">
+        
+        <div
+          className="user-profile"
+          onClick={() => setOpenDropdown((prev) => !prev)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              setOpenDropdown((prev) => !prev);
+            }
+          }}
+        >
           <div className="avatar">
             <span>{initials}</span>
           </div>
-
           <div className="user-info">
             <span className="user-name">{displayName}</span>
             <span className="user-role">{displayRole}</span>
