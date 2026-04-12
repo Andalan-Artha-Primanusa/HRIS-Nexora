@@ -3,7 +3,6 @@ import {
   Eye,
   Pencil,
   Plus,
-  RefreshCw,
   Trash2,
   X,
   AlertCircle,
@@ -280,8 +279,58 @@ const validatePostalCode = (postalCode: string): string | null => {
   return null;
 };
 
+const GENDER_ENUMS = ["male", "female", "other"] as const;
+const MARITAL_STATUS_ENUMS = ["single", "married", "divorced", "widowed"] as const;
+
+const normalizeGender = (value: string): string => {
+  const normalized = value.trim().toLowerCase();
+  const map: Record<string, string> = {
+    "laki": "male",
+    "laki-laki": "male",
+    "pria": "male",
+    "perempuan": "female",
+    "wanita": "female",
+  };
+
+  return map[normalized] ?? normalized;
+};
+
+const normalizeMaritalStatus = (value: string): string => {
+  const normalized = value.trim().toLowerCase();
+  const map: Record<string, string> = {
+    "lajang": "single",
+    "belum menikah": "single",
+    "menikah": "married",
+    "cerai": "divorced",
+    "janda": "widowed",
+    "duda": "widowed",
+  };
+
+  return map[normalized] ?? normalized;
+};
+
+const validateEmergencyContactRelation = (relation: string): string | null => {
+  if (!relation.trim()) return null;
+  
+  // Relation should not be a phone number pattern
+  if (/^\+?[0-9][\d\s\-()]+$/.test(relation.replace(/\s/g, ''))) {
+    return "Hubungan tidak boleh berupa nomor telepon. Gunakan format seperti 'Ibu', 'Ayah', 'Saudara', dst.";
+  }
+  
+  return null;
+};
+
 const validateForm = (formState: ProfileFormState): ValidationError[] => {
   const errors: ValidationError[] = [];
+
+  // Required field validations - only phone and address
+  const requiredFields: Array<keyof ProfileFormState> = ["phone", "address"];
+  
+  requiredFields.forEach((field) => {
+    if (!formState[field] || !String(formState[field]).trim()) {
+      errors.push({ field, message: `${toTitle(field)} wajib diisi.` });
+    }
+  });
 
   // Phone validation
   if (formState.phone) {
@@ -293,6 +342,22 @@ const validateForm = (formState: ProfileFormState): ValidationError[] => {
   if (formState.birth_date) {
     const birthDateError = validateBirthDate(formState.birth_date);
     if (birthDateError) errors.push({ field: "birth_date", message: birthDateError });
+  }
+
+  // Gender enum validation
+  if (formState.gender) {
+    const gender = normalizeGender(formState.gender);
+    if (!GENDER_ENUMS.includes(gender as (typeof GENDER_ENUMS)[number])) {
+      errors.push({ field: "gender", message: "Gender harus salah satu dari: male, female, other." });
+    }
+  }
+
+  // Marital status enum validation
+  if (formState.marital_status) {
+    const maritalStatus = normalizeMaritalStatus(formState.marital_status);
+    if (!MARITAL_STATUS_ENUMS.includes(maritalStatus as (typeof MARITAL_STATUS_ENUMS)[number])) {
+      errors.push({ field: "marital_status", message: "Marital status harus salah satu dari: single, married, divorced, widowed." });
+    }
   }
 
   // ID Number validation
@@ -319,7 +384,7 @@ const validateForm = (formState: ProfileFormState): ValidationError[] => {
     if (yearError) errors.push({ field: "graduation_year", message: yearError });
   }
 
-  // Postal Code validation
+  // Postal Code validation (optional field)
   if (formState.postal_code) {
     const postalError = validatePostalCode(formState.postal_code);
     if (postalError) errors.push({ field: "postal_code", message: postalError });
@@ -329,6 +394,12 @@ const validateForm = (formState: ProfileFormState): ValidationError[] => {
   if (formState.emergency_contact_phone) {
     const emgPhoneError = validatePhone(formState.emergency_contact_phone);
     if (emgPhoneError) errors.push({ field: "emergency_contact_phone", message: emgPhoneError });
+  }
+
+  // Emergency Contact Relation
+  if (formState.emergency_contact_relation) {
+    const relationError = validateEmergencyContactRelation(formState.emergency_contact_relation);
+    if (relationError) errors.push({ field: "emergency_contact_relation", message: relationError });
   }
 
   return errors;
@@ -526,7 +597,6 @@ const ProfilesPage = () => {
   const [validationMessage, setValidationMessage] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
-  const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
 
   // Filter & Search states
   const [searchText, setSearchText] = useState("");
@@ -648,11 +718,6 @@ const ProfilesPage = () => {
   }, [isAddPage, isViewPage, isUpdatePage]);
 
   useEffect(() => {
-    // Reset current profile index when profiles load
-    setCurrentProfileIndex(0);
-  }, [profiles.length]);
-
-  useEffect(() => {
     if (!isViewPage && !isUpdatePage) {
       return;
     }
@@ -695,6 +760,16 @@ const ProfilesPage = () => {
     const payload: Record<string, unknown> = {};
     
     (Object.keys(DEFAULT_FORM) as Array<keyof ProfileFormState>).forEach((key) => {
+      // Skip the 'id' field - it should never be sent to the backend
+      if (key === "id") {
+        return;
+      }
+
+      // Skip excluded fields not accepted by backend
+      if (["city", "province", "postal_code"].includes(key)) {
+        return;
+      }
+
       const value = formState[key];
       const trimmedValue = typeof value === "string" ? value.trim() : value;
       
@@ -709,6 +784,10 @@ const ProfilesPage = () => {
         if (!Number.isNaN(parsed)) {
           payload[key] = parsed;
         }
+      } else if (key === "gender") {
+        payload[key] = normalizeGender(String(trimmedValue));
+      } else if (key === "marital_status") {
+        payload[key] = normalizeMaritalStatus(String(trimmedValue));
       } else {
         payload[key] = trimmedValue;
       }
@@ -818,14 +897,41 @@ const ProfilesPage = () => {
               {group.fields.map((field) => (
                 <label key={field} className="profiles-form-group">
                   <span style={{ color: "#2563eb", fontWeight: "700", fontSize: "0.75rem" }}>{field.replace(/_/g, " ").toUpperCase()}</span>
-                  <input
-                    value={createForm[field]}
-                    onChange={(event) => handleCreateChange(field, event.target.value)}
-                    placeholder={`Masukkan ${field.replace(/_/g, " ")}`}
-                    className="profiles-input"
-                    type={field === "birth_date" ? "date" : field.includes("phone") ? "tel" : "text"}
-                    style={{ border: "1px solid rgba(37, 99, 235, 0.2)" }}
-                  />
+                  {field === "gender" ? (
+                    <select
+                      value={createForm[field]}
+                      onChange={(event) => handleCreateChange(field, event.target.value)}
+                      className="profiles-input"
+                      style={{ border: "1px solid rgba(37, 99, 235, 0.2)" }}
+                    >
+                      <option value="">Pilih gender</option>
+                      <option value="male">Laki-laki</option>
+                      <option value="female">Perempuan</option>
+                      <option value="other">Lainnya</option>
+                    </select>
+                  ) : field === "marital_status" ? (
+                    <select
+                      value={createForm[field]}
+                      onChange={(event) => handleCreateChange(field, event.target.value)}
+                      className="profiles-input"
+                      style={{ border: "1px solid rgba(37, 99, 235, 0.2)" }}
+                    >
+                      <option value="">Pilih status pernikahan</option>
+                      <option value="single">Single</option>
+                      <option value="married">Married</option>
+                      <option value="divorced">Divorced</option>
+                      <option value="widowed">Widowed</option>
+                    </select>
+                  ) : (
+                    <input
+                      value={createForm[field]}
+                      onChange={(event) => handleCreateChange(field, event.target.value)}
+                      placeholder={`Masukkan ${field.replace(/_/g, " ")}`}
+                      className="profiles-input"
+                      type={field === "birth_date" ? "date" : field.includes("phone") ? "tel" : "text"}
+                      style={{ border: "1px solid rgba(37, 99, 235, 0.2)" }}
+                    />
+                  )}
                 </label>
               ))}
             </div>
@@ -914,10 +1020,7 @@ const ProfilesPage = () => {
                   <div className="detail-icon-wrap"><Mail size={20}/></div>
                   <div className="detail-text-wrap">
                     <span className="detail-label-new">Email</span>
-                    <span className="detail-value-new email-with-badge">
-                      {asDisplay(selectedProfile?.user?.email)}
-                      {selectedProfile?.user?.email && <span className="verified-badge-small"><CheckCircle2 size={12}/> Email Verified</span>}
-                    </span>
+                    <span className="detail-value-new">{asDisplay(selectedProfile?.user?.email)}</span>
                   </div>
                 </div>
                 <div className="detail-item-new">
@@ -928,41 +1031,38 @@ const ProfilesPage = () => {
                   </div>
                 </div>
                 <div className="detail-item-new">
-                  <div className="detail-icon-wrap"><User size={20}/></div>
+                  <div className="detail-icon-wrap"><Layers size={20}/></div>
                   <div className="detail-text-wrap">
-                    <span className="detail-label-new">Username</span>
-                    <span className="detail-value-new">{asDisplay(selectedProfile?.user?.name?.split(' ')[0])}</span>
+                    <span className="detail-label-new">Profile ID</span>
+                    <span className="detail-value-new">{asDisplay(selectedProfile?.id)}</span>
                   </div>
                 </div>
                 <div className="detail-item-new">
                   <div className="detail-icon-wrap"><Phone size={20}/></div>
                   <div className="detail-text-wrap">
-                    <span className="detail-label-new">Number</span>
-                    <span className="detail-value-new email-with-badge">
-                      {asDisplay(selectedProfile?.phone)}
-                      {selectedProfile?.phone && <span className="verified-badge-small"><CheckCircle2 size={12}/> Number Verified</span>}
-                    </span>
+                    <span className="detail-label-new">Phone</span>
+                    <span className="detail-value-new">{asDisplay(selectedProfile?.phone)}</span>
                   </div>
                 </div>
                 <div className="detail-item-new">
                   <div className="detail-icon-wrap"><Layers size={20}/></div>
                   <div className="detail-text-wrap">
-                    <span className="detail-label-new">Plan</span>
-                    <span className="detail-value-new">Pro Plan</span>
+                    <span className="detail-label-new">User ID</span>
+                    <span className="detail-value-new">{asDisplay(selectedProfile?.user_id)}</span>
                   </div>
                 </div>
                 <div className="detail-item-new">
                   <div className="detail-icon-wrap"><FileText size={20}/></div>
                   <div className="detail-text-wrap">
-                    <span className="detail-label-new">Employee Code</span>
-                    <span className="detail-value-new">{asDisplay(selectedProfile?.employee?.employee_code)}</span>
+                    <span className="detail-label-new">Gender</span>
+                    <span className="detail-value-new">{toTitle(selectedProfile?.gender)}</span>
                   </div>
                 </div>
                 <div className="detail-item-new">
                   <div className="detail-icon-wrap"><Map size={20}/></div>
                   <div className="detail-text-wrap">
-                    <span className="detail-label-new">Postal Code</span>
-                    <span className="detail-value-new">{asDisplay(selectedProfile?.postal_code)}</span>
+                    <span className="detail-label-new">Nationality</span>
+                    <span className="detail-value-new">{asDisplay(selectedProfile?.nationality)}</span>
                   </div>
                 </div>
                 <div className="detail-item-new">
@@ -982,8 +1082,8 @@ const ProfilesPage = () => {
                 <div className="detail-item-new">
                   <div className="detail-icon-wrap"><Building2 size={20}/></div>
                   <div className="detail-text-wrap">
-                    <span className="detail-label-new">City</span>
-                    <span className="detail-value-new">{asDisplay(selectedProfile?.city)}</span>
+                    <span className="detail-label-new">Created At</span>
+                    <span className="detail-value-new">{formatDate(selectedProfile?.created_at)}</span>
                   </div>
                 </div>
               </div>
@@ -991,6 +1091,9 @@ const ProfilesPage = () => {
 
             {/* Old Data Sections */}
             <div className="profile-card-sections profile-card-sections--stack">
+              <SectionCard icon={<User size={18} />} title="Personal Information" items={detailSections?.personalInfo ?? null} />
+              <SectionCard icon={<MapPin size={18} />} title="Address Information" items={detailSections?.addressInfo ?? null} />
+              <SectionCard icon={<Building2 size={18} />} title="Employee Information" items={detailSections?.employeeInfo ?? null} />
               <SectionCard icon={<Heart size={18} />} title="Emergency Contact" items={detailSections?.emergencyInfo ?? null} />
               <SectionCard icon={<CreditCard size={18} />} title="Bank Information" items={detailSections?.bankInfo ?? null} />
               <SectionCard icon={<GraduationCap size={18} />} title="Education Information" items={detailSections?.educationInfo ?? null} />
@@ -1152,15 +1255,41 @@ const ProfilesPage = () => {
               {group.fields.map((field) => (
                 <label key={field} className="profiles-form-group">
                   <span style={{ color: "#2563eb", fontWeight: "700", fontSize: "0.75rem" }}>{field.replace(/_/g, " ").toUpperCase()}</span>
-                  <input
-                    value={updateForm[field]}
-                    onChange={(event) => handleUpdateChange(field, event.target.value)}
-                    placeholder={`Masukkan ${field.replace(/_/g, " ")}`}
-                    className="profiles-input"
-                    readOnly={field === "id"}
-                    type={field === "birth_date" ? "date" : field.includes("phone") ? "tel" : field === "graduation_year" ? "number" : "text"}
-                    style={{ border: "1px solid rgba(37, 99, 235, 0.2)" }}
-                  />
+                  {field === "gender" ? (
+                    <select
+                      value={updateForm[field]}
+                      onChange={(event) => handleUpdateChange(field, event.target.value)}
+                      className="profiles-input"
+                      style={{ border: "1px solid rgba(37, 99, 235, 0.2)" }}
+                    >
+                      <option value="">Pilih gender</option>
+                      <option value="male">Laki-laki</option>
+                      <option value="female">Perempuan</option>
+                      <option value="other">Lainnya</option>
+                    </select>
+                  ) : field === "marital_status" ? (
+                    <select
+                      value={updateForm[field]}
+                      onChange={(event) => handleUpdateChange(field, event.target.value)}
+                      className="profiles-input"
+                      style={{ border: "1px solid rgba(37, 99, 235, 0.2)" }}
+                    >
+                      <option value="">Pilih status pernikahan</option>
+                      <option value="single">Single</option>
+                      <option value="married">Married</option>
+                      <option value="divorced">Divorced</option>
+                      <option value="widowed">Widowed</option>
+                    </select>
+                  ) : (
+                    <input
+                      value={updateForm[field]}
+                      onChange={(event) => handleUpdateChange(field, event.target.value)}
+                      placeholder={`Masukkan ${field.replace(/_/g, " ")}`}
+                      className="profiles-input"
+                      type={field === "birth_date" ? "date" : field.includes("phone") ? "tel" : field === "graduation_year" ? "number" : "text"}
+                      style={{ border: "1px solid rgba(37, 99, 235, 0.2)" }}
+                    />
+                  )}
                 </label>
               ))}
             </div>
