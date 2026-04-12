@@ -34,11 +34,14 @@ export type KpiPayload = {
   title: string;
   description?: string;
   target: number;
+  period: string;
 };
 
 export type KpiUpdatePayload = {
   title?: string;
+  description?: string;
   target?: number;
+  period?: string;
   achievement?: number;
 };
 

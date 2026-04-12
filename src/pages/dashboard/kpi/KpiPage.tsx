@@ -16,6 +16,8 @@ import {
 } from '@/features/dashboard/api/kpi.service';
 import './KpiPage.css';
 
+type KpiStatus = 'draft' | 'submitted' | 'approved';
+
 type KpiRecord = {
   id?: number | string;
   employee_id?: number | string;
@@ -23,9 +25,18 @@ type KpiRecord = {
   description?: string;
   target?: number | string;
   achievement?: number | string;
-  status?: string;
+  period?: string;
+  score?: number | string;
+  status?: KpiStatus | string;
   approved?: boolean;
+  created_at?: string;
+  updated_at?: string;
+  employee?: { id?: number | string; name?: string };
+  user?: { id?: number | string; name?: string };
+  [key: string]: unknown;
 };
+
+const KPI_STATUS_OPTIONS: KpiStatus[] = ['draft', 'submitted', 'approved'];
 
 const KpiPage = () => {
   const location = useLocation();
@@ -40,6 +51,7 @@ const KpiPage = () => {
     description: '',
     target: '',
     achievement: '',
+    period: '',
   });
   const [searchEmployee, setSearchEmployee] = useState('');
   const [responseText, setResponseText] = useState('');
@@ -67,6 +79,59 @@ const KpiPage = () => {
 
   const formatResponse = (payload: unknown) => {
     setResponseText(typeof payload === 'string' ? payload : JSON.stringify(payload, null, 2));
+  };
+
+  const getErrorMessage = (error: any, fallback: string) => {
+    const message = error?.response?.data?.message;
+    const errors = error?.response?.data?.errors;
+    if (typeof message === 'string' && message.trim()) {
+      return message;
+    }
+
+    if (errors && typeof errors === 'object') {
+      const firstError = Object.values(errors).find((value) => Array.isArray(value) && value.length > 0) as string[] | undefined;
+      if (firstError?.[0]) {
+        return firstError[0];
+      }
+    }
+
+    return fallback;
+  };
+
+  const validateAction = (action: string) => {
+    if (['detail', 'update', 'delete', 'approve', 'submit'].includes(action) && !String(formState.id ?? '').trim()) {
+      return 'KPI ID wajib diisi.';
+    }
+
+    if (action === 'create') {
+      if (!String(formState.employee_id ?? '').trim()) return 'Employee ID wajib diisi.';
+      if (!String(formState.title ?? '').trim()) return 'Title wajib diisi.';
+      if (!String(formState.period ?? '').trim()) return 'Period wajib diisi.';
+      const target = Number(formState.target);
+      if (Number.isNaN(target) || target <= 0) return 'Target harus berupa angka lebih dari 0.';
+    }
+
+    return null;
+  };
+
+  const formatCellValue = (value: unknown) => {
+    if (value === null || value === undefined || value === '') return '-';
+    if (typeof value === 'object') {
+      const record = value as Record<string, unknown>;
+      const candidate = record.name ?? record.title ?? record.id;
+      if (candidate !== undefined && candidate !== null && typeof candidate !== 'object') {
+        return String(candidate);
+      }
+      return JSON.stringify(value);
+    }
+    return String(value);
+  };
+
+  const getStatusChipClass = (statusValue: unknown) => {
+    const status = String(statusValue ?? '').toLowerCase();
+    if (status === 'approved') return 'kpi-status-chip kpi-status-chip--approved';
+    if (status === 'submitted') return 'kpi-status-chip kpi-status-chip--submitted';
+    return 'kpi-status-chip kpi-status-chip--draft';
   };
 
   const handleFieldChange = (key: keyof KpiRecord, value: string) => {
@@ -132,6 +197,12 @@ const KpiPage = () => {
   };
 
   const handleSubmit = async (action: string) => {
+    const validationMessage = validateAction(action);
+    if (validationMessage) {
+      setStatusMessage(validationMessage);
+      return;
+    }
+
     setLoading(true);
     setResponseText('');
     setStatusMessage('Mengirim request...');
@@ -145,6 +216,7 @@ const KpiPage = () => {
             title: String(formState.title ?? ''),
             description: formState.description,
             target: Number(formState.target),
+            period: String(formState.period ?? ''),
           });
           break;
         case 'detail':
@@ -153,6 +225,8 @@ const KpiPage = () => {
         case 'update':
           result = await updateKpi(String(formState.id), {
             title: formState.title,
+            description: formState.description,
+            period: formState.period,
             target: Number(formState.target),
             achievement: formState.achievement ? Number(formState.achievement) : undefined,
           });
@@ -178,7 +252,7 @@ const KpiPage = () => {
         void loadKpis();
       }
     } catch (error: any) {
-      setStatusMessage('Request gagal.');
+      setStatusMessage(getErrorMessage(error, 'Request gagal.'));
       formatResponse(error.response?.data ?? error.message ?? 'Unexpected error');
     } finally {
       setLoading(false);
@@ -236,6 +310,12 @@ const KpiPage = () => {
             <span>{isMyKpi ? 'Submit KPI for Review' : 'KPI Detail / Actions'}</span>
           </div>
 
+          {!isMyKpi && (
+            <p className="kpi-hint">
+              Status flow: {KPI_STATUS_OPTIONS.join(' -> ')}. Score dihitung otomatis oleh backend: (achievement / target) * 100.
+            </p>
+          )}
+
           <div className="kpi-form-grid">
             <label>
               KPI ID
@@ -262,6 +342,14 @@ const KpiPage = () => {
                     value={String(formState.target ?? '')}
                     onChange={(e) => handleFieldChange('target', e.target.value)}
                     placeholder="target"
+                  />
+                </label>
+                <label>
+                  Period
+                  <input
+                    value={String(formState.period ?? '')}
+                    onChange={(e) => handleFieldChange('period', e.target.value)}
+                    placeholder="Q1 2026"
                   />
                 </label>
                 <label className="kpi-full-width">
@@ -354,7 +442,11 @@ const KpiPage = () => {
                 <tr key={`${item.id ?? index}`}>
                   {tableColumns.map((column) => (
                     <td key={`${item.id ?? index}-${column}`}>
-                      {String((item as any)[column] ?? '-')}
+                      {column.toLowerCase() === 'status' ? (
+                        <span className={getStatusChipClass((item as any)[column])}>{formatCellValue((item as any)[column])}</span>
+                      ) : (
+                        formatCellValue((item as any)[column])
+                      )}
                     </td>
                   ))}
                 </tr>

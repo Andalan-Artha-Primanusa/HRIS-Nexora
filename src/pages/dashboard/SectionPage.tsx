@@ -99,7 +99,7 @@ const sectionDefinitions: Record<string, { title: string; subtitle: string; icon
   },
   performance: {
     title: 'Performance',
-    subtitle: 'Kelola KPI, tujuan, review, dan umpan balik karyawan.',
+    subtitle: 'Tujuan, review, dan umpan balik karyawan. Kelola KPI di menu terpisah.',
     icon: Target,
     color: '#2563EB',
   },
@@ -308,7 +308,6 @@ const getSectionData = (pathname: string) => {
     leave: ['Employee', 'Leave Type', 'Start', 'End', 'Status'],
     payroll: ['Payroll Period', 'Employees', 'Total', 'Status', 'Actions'],
     expense: ['Title', 'Category', 'Amount', 'Status', 'Date'],
-    performance: ['Goal', 'Owner', 'Progress', 'Status', 'Review'],
     ess: ['Feature', 'Status', 'Last Updated'],
     reports: ['Report Name', 'Category', 'Updated', 'Status'],
     settings: ['Setting', 'Module', 'Updated', 'Status'],
@@ -333,7 +332,8 @@ const getSectionData = (pathname: string) => {
 };
 
 const supportsList = (pathname: string) => {
-  return [
+  return (
+    [
     '/profiles',
     '/employees',
     '/leave/requests',
@@ -351,8 +351,8 @@ const supportsList = (pathname: string) => {
     '/admin/users',
     '/admin/roles',
     '/admin/permissions',
-    '/kpis',
-  ].includes(pathname);
+    ].includes(pathname)
+  );
 };
 
 const getDefaultFormState = (pathname: string) => {
@@ -383,8 +383,6 @@ const getDefaultFormState = (pathname: string) => {
       return { id: '', permission_ids: '' };
     case '/admin/permissions':
       return {};
-    case '/kpis':
-      return { employee_id: '', title: '', description: '', target: '' };
     default:
       return {} as Record<string, string>;
   }
@@ -600,9 +598,6 @@ const SectionPage = () => {
         case '/my/payroll':
           result = await api.get('/my/payroll');
           break;
-        case '/kpis':
-          result = await api.get('/kpis');
-          break;
         default:
           result = null;
       }
@@ -683,9 +678,6 @@ const SectionPage = () => {
           break;
         case 'submitMyPayroll':
           result = await api.get('/my/payroll');
-          break;
-        case 'createKpi':
-          result = await api.post('/kpis', formState);
           break;
         case 'assignRoleToUser': {
           const id = formState.id?.trim();
@@ -871,17 +863,6 @@ const SectionPage = () => {
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('submitMyPayroll')} disabled={loading}>
               Refresh My Payroll
-            </Button>
-          </>
-        );
-      case '/kpis':
-        return (
-          <>
-            <Button variant="primary" size="md" onClick={() => void performAction('createKpi')} disabled={loading}>
-              Create KPI
-            </Button>
-            <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Refresh KPI
             </Button>
           </>
         );

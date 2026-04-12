@@ -129,13 +129,10 @@ export const menuItems: MenuItem[] = [
   {
     label: 'KPI & Performance',
     icon: Target,
-    requiredChecker: (user) => RBACUtils.isManager(user) || RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
+    requiredChecker: (user) => RBACUtils.isManager(user) || RBACUtils.isHR(user) || RBACUtils.isAdmin(user) || RBACUtils.isSuperAdmin(user),
     subItems: [
-      { label: 'Overview', path: '/performance' },
-      { label: 'Goals / Target', path: '/performance/goals' },
-      { label: 'Performance Review', path: '/performance/review' },
-      { label: 'Appraisal', path: '/performance/appraisal' },
-      { label: 'Feedback', path: '/performance/feedback' },
+      { label: 'KPI List', path: '/kpis' },
+      { label: 'Create KPI', path: '/kpis/add' },
     ]
   },
   {

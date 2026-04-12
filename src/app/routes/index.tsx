@@ -13,7 +13,12 @@ import AttendanceCheckOutPage from "../../pages/attendance/AttendanceCheckOutPag
 import AttendanceHistoryPage from "../../pages/attendance/AttendanceHistoryPage";
 import AttendanceTodayPage from "../../pages/attendance/AttendanceTodayPage";
 import AttendanceAdminPage from "../../pages/attendance/AttendanceAdminPage";
-import KpiPage from "../../pages/dashboard/kpi/KpiPage";
+import KpiListPage from "../../pages/dashboard/kpi/KpiListPage";
+import KpiCreatePage from "../../pages/dashboard/kpi/KpiCreatePage";
+import KpiDetailPage from "../../pages/dashboard/kpi/KpiDetailPage";
+import KpiUpdatePage from "../../pages/dashboard/kpi/KpiUpdatePage";
+import KpiApprovePage from "../../pages/dashboard/kpi/KpiApprovePage";
+import MyKpiPage from "../../pages/dashboard/kpi/MyKpiPage";
 import SectionPage from "../../pages/dashboard/SectionPage";
 import ProfilesPage from "../../pages/profiles/ProfilesPage";
 import EmployeesPage from "../../pages/employee/EmployeesPage";
@@ -191,12 +196,72 @@ export const router = createBrowserRouter([
         ],
       },
       {
+        path: "/performance",
+        element: <Navigate to="/kpis" replace />,
+      },
+      {
+        path: "/performance/goals",
+        element: <Navigate to="/kpis" replace />,
+      },
+      {
+        path: "/performance/review",
+        element: <Navigate to="/kpis" replace />,
+      },
+      {
+        path: "/performance/appraisal",
+        element: <Navigate to="/kpis" replace />,
+      },
+      {
+        path: "/performance/feedback",
+        element: <Navigate to="/kpis" replace />,
+      },
+      {
         path: "/kpis",
         element: <DashboardLayout />,
         children: [
           {
             index: true,
-            element: <KpiPage />,
+            element: <KpiListPage />,
+          },
+        ],
+      },
+      {
+        path: "/kpis/add",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <KpiCreatePage />,
+          },
+        ],
+      },
+      {
+        path: "/kpi/view/:id",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <KpiDetailPage />,
+          },
+        ],
+      },
+      {
+        path: "/kpi/update/:id",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <KpiUpdatePage />,
+          },
+        ],
+      },
+      {
+        path: "/kpi/approve/:id",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <KpiApprovePage />,
           },
         ],
       },
@@ -206,7 +271,7 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <KpiPage />,
+            element: <MyKpiPage />,
           },
         ],
       },
