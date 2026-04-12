@@ -10,7 +10,23 @@ import {
   updateEmployee,
 } from "@/features/employee/api/employee.service";
 import type { EmployeeCreatePayload, EmployeeItem, EmployeeUpdatePayload } from "@/features/employee/types/employee.types";
-import "../admin/AdminCrudPages.css";
+import {
+  Search,
+  Filter,
+  Plus,
+  RefreshCw,
+  Eye,
+  Pencil,
+  Trash2,
+  ChevronDown,
+  User,
+  Briefcase,
+  MapPin,
+  Calendar,
+  DollarSign,
+  Building2,
+} from "lucide-react";
+import "./EmployeesPage.css";
 
 type EmployeeFormState = {
   id: string;
@@ -94,6 +110,89 @@ const EmployeesPage = () => {
   const [updateForm, setUpdateForm] = useState<EmployeeFormState>(DEFAULT_FORM);
   const [statusMessage, setStatusMessage] = useState("Ready to call employee API");
   const [loading, setLoading] = useState(false);
+
+  // Search & Filter State
+  const [searchText, setSearchText] = useState("");
+  const [sortBy, setSortBy] = useState<"id" | "name" | "code" | "department" | "position">("name");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [selectedPosition, setSelectedPosition] = useState("");
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
+
+  // Extract unique values for filters
+  const uniqueDepartments = useMemo(() => {
+    return Array.from(new Set(items.map((i) => i.department).filter(Boolean))).sort();
+  }, [items]);
+
+  const uniquePositions = useMemo(() => {
+    return Array.from(new Set(items.map((i) => i.position).filter(Boolean))).sort();
+  }, [items]);
+
+  // Combined Business Logic: Filter -> Sort -> Paginate
+  const filteredEmployees = useMemo(() => {
+    return items.filter((item) => {
+      const searchStr = searchText.toLowerCase();
+      const nameMatch = item.user?.name?.toLowerCase().includes(searchStr);
+      const codeMatch = item.employee_code?.toLowerCase().includes(searchStr);
+      const idMatch = String(item.id).includes(searchStr);
+      const deptMatch = !selectedDepartment || item.department === selectedDepartment;
+      const posMatch = !selectedPosition || item.position === selectedPosition;
+
+      return (nameMatch || codeMatch || idMatch) && deptMatch && posMatch;
+    });
+  }, [items, searchText, selectedDepartment, selectedPosition]);
+
+  const sortedEmployees = useMemo(() => {
+    return [...filteredEmployees].sort((a, b) => {
+      let valA: string | number = "";
+      let valB: string | number = "";
+
+      switch (sortBy) {
+        case "name":
+          valA = a.user?.name?.toLowerCase() || "";
+          valB = b.user?.name?.toLowerCase() || "";
+          break;
+        case "id":
+          valA = a.id || 0;
+          valB = b.id || 0;
+          break;
+        case "code":
+          valA = a.employee_code?.toLowerCase() || "";
+          valB = b.employee_code?.toLowerCase() || "";
+          break;
+        case "department":
+          valA = a.department?.toLowerCase() || "";
+          valB = b.department?.toLowerCase() || "";
+          break;
+        case "position":
+          valA = a.position?.toLowerCase() || "";
+          valB = b.position?.toLowerCase() || "";
+          break;
+      }
+
+      if (valA < valB) return sortOrder === "asc" ? -1 : 1;
+      if (valA > valB) return sortOrder === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [filteredEmployees, sortBy, sortOrder]);
+
+  const paginatedEmployees = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return sortedEmployees.slice(startIndex, startIndex + pageSize);
+  }, [sortedEmployees, currentPage, pageSize]);
+
+  const totalPages = Math.ceil(sortedEmployees.length / pageSize);
+
+  const clearFilters = () => {
+    setSearchText("");
+    setSelectedDepartment("");
+    setSelectedPosition("");
+    setCurrentPage(1);
+  };
 
   const columns = useMemo(() => getColumns(items), [items]);
 
@@ -201,7 +300,6 @@ const EmployeesPage = () => {
     }
 
     void loadEmployees();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAddPage, isUpdatePage]);
 
   useEffect(() => {
@@ -240,210 +338,356 @@ const EmployeesPage = () => {
 
   if (isAddPage) {
     return (
-      <div className="crud-page">
-        <div className="crud-header">
-          <div>
-            <h1>Add Employee</h1>
-            <p>Halaman khusus create employee agar alur lebih rapi.</p>
+      <div className="employees-page crud-page">
+        <div className="employees-list-header" style={{ borderBottom: "2px solid #2563eb", paddingBottom: "20px" }}>
+          <div className="employees-list-title">
+            <h1 style={{ color: "#2563eb", marginBottom: "4px" }}>👤 Tambah Karyawan</h1>
+            <p style={{ color: "var(--color-text-secondary)", fontSize: "0.9rem" }}>Input data jabatan dan penempatan karyawan baru</p>
           </div>
-          <Button variant="outline" size="md" onClick={() => navigate("/employees")} disabled={loading}>
-            Back to Employees
+          <Button variant="outline" size="md" onClick={() => navigate("/employees")} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
+            Kembali ke Daftar
           </Button>
         </div>
 
-        <Card className="crud-card" glass>
-          <h2>Create Employee</h2>
-          <div className="crud-form-grid">
-            <label>
-              User ID
+        <Card className="employees-panel" glass style={{ borderTop: "4px solid #2563eb", marginTop: "1rem" }}>
+          <div className="profiles-panel-header" style={{ marginBottom: "20px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <div style={{ color: "#2563eb" }}><Briefcase size={18} /></div>
+              <h2 style={{ color: "#2563eb", margin: 0 }}>Form Data Karyawan</h2>
+            </div>
+          </div>
+
+          <div className="employee-form-grid">
+            <label className="profiles-form-group">
+              <span style={{ color: "#2563eb", fontWeight: "700", fontSize: "0.75rem" }}>USER ID</span>
               <input
-                className="crud-input"
+                className="profiles-input"
                 value={createForm.user_id}
                 onChange={(event) => setCreateForm((prev) => ({ ...prev, user_id: event.target.value }))}
-                placeholder="user id"
+                placeholder="Masukkan User ID"
+                style={{ border: "1px solid rgba(37, 99, 235, 0.2)" }}
               />
             </label>
-            <label>
-              Employee Code
+            <label className="profiles-form-group">
+              <span style={{ color: "#2563eb", fontWeight: "700", fontSize: "0.75rem" }}>KODE KARYAWAN</span>
               <input
-                className="crud-input"
+                className="profiles-input"
                 value={createForm.employee_code}
                 onChange={(event) => setCreateForm((prev) => ({ ...prev, employee_code: event.target.value }))}
-                placeholder="employee code"
+                placeholder="Contoh: EMP-001"
+                style={{ border: "1px solid rgba(37, 99, 235, 0.2)" }}
               />
             </label>
-            <label>
-              Position
+            <label className="profiles-form-group">
+              <span style={{ color: "#2563eb", fontWeight: "700", fontSize: "0.75rem" }}>JABATAN</span>
               <input
-                className="crud-input"
+                className="profiles-input"
                 value={createForm.position}
                 onChange={(event) => setCreateForm((prev) => ({ ...prev, position: event.target.value }))}
-                placeholder="position"
+                placeholder="Contoh: Manager"
+                style={{ border: "1px solid rgba(37, 99, 235, 0.2)" }}
               />
             </label>
-            <label>
-              Department
+            <label className="profiles-form-group">
+              <span style={{ color: "#2563eb", fontWeight: "700", fontSize: "0.75rem" }}>DEPARTEMEN</span>
               <input
-                className="crud-input"
+                className="profiles-input"
                 value={createForm.department}
                 onChange={(event) => setCreateForm((prev) => ({ ...prev, department: event.target.value }))}
-                placeholder="department"
+                placeholder="Contoh: IT Support"
+                style={{ border: "1px solid rgba(37, 99, 235, 0.2)" }}
               />
             </label>
-            <label>
-              Hire Date
+            <label className="profiles-form-group">
+              <span style={{ color: "#2563eb", fontWeight: "700", fontSize: "0.75rem" }}>TANGGAL BERGABUNG</span>
               <input
-                className="crud-input"
+                className="profiles-input"
                 type="date"
                 value={createForm.hire_date}
                 onChange={(event) => setCreateForm((prev) => ({ ...prev, hire_date: event.target.value }))}
+                style={{ border: "1px solid rgba(37, 99, 235, 0.2)" }}
               />
             </label>
-            <label>
-              Salary
+            <label className="profiles-form-group">
+              <span style={{ color: "#2563eb", fontWeight: "700", fontSize: "0.75rem" }}>GAJI POKOK</span>
               <input
-                className="crud-input"
+                className="profiles-input"
                 value={createForm.salary}
                 onChange={(event) => setCreateForm((prev) => ({ ...prev, salary: event.target.value }))}
-                placeholder="salary"
+                placeholder="Masukkan nominal gaji"
+                style={{ border: "1px solid rgba(37, 99, 235, 0.2)" }}
               />
             </label>
           </div>
 
-          <div className="crud-actions">
-            <Button variant="primary" size="md" onClick={() => void createNewEmployee()} disabled={loading}>
-              Create Employee
-            </Button>
+          <div className="profiles-actions" style={{ justifyContent: "flex-end", marginTop: "2rem" }}>
             <Button variant="outline" size="md" onClick={() => navigate("/employees")} disabled={loading}>
-              Cancel
+              Batal
+            </Button>
+            <Button variant="primary" size="md" onClick={() => void createNewEmployee()} disabled={loading} style={{ backgroundColor: "#2563eb" }}>
+              <Plus size={16} />
+              Simpan Karyawan
             </Button>
           </div>
         </Card>
-
-        <p className="crud-status">{statusMessage}</p>
       </div>
     );
   }
 
   if (isUpdatePage) {
     return (
-      <div className="crud-page">
-        <div className="crud-header">
-          <div>
-            <h1>Update Employee</h1>
-            <p>Halaman khusus update employee agar flow lebih rapi.</p>
+      <div className="employees-page crud-page">
+        <div className="employees-list-header" style={{ borderBottom: "2px solid #2563eb", paddingBottom: "20px" }}>
+          <div className="employees-list-title">
+            <h1 style={{ color: "#2563eb", marginBottom: "4px" }}>✏️ Update Data Karyawan</h1>
+            <p style={{ color: "var(--color-text-secondary)", fontSize: "0.9rem" }}>Perbarui informasi posisi dan gaji karyawan</p>
           </div>
-          <Button variant="outline" size="md" onClick={() => navigate("/employees")} disabled={loading}>
-            Back to Employees
+          <Button variant="outline" size="md" onClick={() => navigate("/employees")} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
+            Kembali ke Daftar
           </Button>
         </div>
 
-        <Card className="crud-card" glass>
-          <h2>Update Employee</h2>
-          <div className="crud-form-grid">
-            <label>
-              Employee ID
-              <input className="crud-input" value={updateForm.id} readOnly />
+        <Card className="employees-panel" glass style={{ borderTop: "4px solid #2563eb", marginTop: "1rem" }}>
+          <div className="profiles-panel-header" style={{ marginBottom: "20px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <div style={{ color: "#2563eb" }}><Pencil size={18} /></div>
+              <h2 style={{ color: "#2563eb", margin: 0 }}>Form Update Karyawan</h2>
+            </div>
+          </div>
+
+          <div className="employee-form-grid">
+            <label className="profiles-form-group">
+              <span style={{ color: "#2563eb", fontWeight: "700", fontSize: "0.75rem" }}>EMPLOYEE ID</span>
+              <input className="profiles-input" value={updateForm.id} readOnly style={{ backgroundColor: "#f3f4f6" }} />
             </label>
-            <label>
-              Position
+            <label className="profiles-form-group">
+              <span style={{ color: "#2563eb", fontWeight: "700", fontSize: "0.75rem" }}>JABATAN</span>
               <input
-                className="crud-input"
+                className="profiles-input"
                 value={updateForm.position}
                 onChange={(event) => setUpdateForm((prev) => ({ ...prev, position: event.target.value }))}
-                placeholder="position"
+                placeholder="Masukkan Jabatan"
+                style={{ border: "1px solid rgba(37, 99, 235, 0.2)" }}
               />
             </label>
-            <label>
-              Department
+            <label className="profiles-form-group">
+              <span style={{ color: "#2563eb", fontWeight: "700", fontSize: "0.75rem" }}>DEPARTEMEN</span>
               <input
-                className="crud-input"
+                className="profiles-input"
                 value={updateForm.department}
                 onChange={(event) => setUpdateForm((prev) => ({ ...prev, department: event.target.value }))}
-                placeholder="department"
+                placeholder="Masukkan Departemen"
+                style={{ border: "1px solid rgba(37, 99, 235, 0.2)" }}
               />
             </label>
-            <label>
-              Salary
+            <label className="profiles-form-group">
+              <span style={{ color: "#2563eb", fontWeight: "700", fontSize: "0.75rem" }}>GAJI POKOK</span>
               <input
-                className="crud-input"
+                className="profiles-input"
                 value={updateForm.salary}
                 onChange={(event) => setUpdateForm((prev) => ({ ...prev, salary: event.target.value }))}
-                placeholder="salary"
+                placeholder="Masukkan Gaji"
+                style={{ border: "1px solid rgba(37, 99, 235, 0.2)" }}
               />
             </label>
           </div>
 
-          <div className="crud-actions">
-            <Button variant="secondary" size="md" onClick={() => void updateExistingEmployee()} disabled={loading}>
-              Update Employee
-            </Button>
+          <div className="profiles-actions" style={{ justifyContent: "flex-end", marginTop: "2rem" }}>
             <Button variant="outline" size="md" onClick={() => navigate("/employees")} disabled={loading}>
-              Cancel
+              Batal
+            </Button>
+            <Button variant="secondary" size="md" onClick={() => void updateExistingEmployee()} disabled={loading} style={{ backgroundColor: "#2563eb" }}>
+              <Pencil size={16} />
+              Update Data
             </Button>
           </div>
         </Card>
-
-        <p className="crud-status">{statusMessage}</p>
       </div>
     );
   }
 
   return (
-    <div className="crud-page">
-      <div className="crud-header">
-        <div>
-          <h1>Employees</h1>
-          <p>Employee list khusus table dengan create dan action update/delete per baris.</p>
+    <div className="employees-page crud-page">
+      {/* Header - Title Section */}
+      <div className="profiles-list-header" style={{ borderBottom: "2px solid #2563eb", paddingBottom: "20px" }}>
+        <div className="profiles-list-title">
+          <h1 style={{ color: "#2563eb", marginBottom: "4px" }}>👨‍💼 Daftar Karyawan</h1>
+          <p style={{ color: "var(--color-text-secondary)", fontSize: "0.9rem" }}>Kelola jabatan, departemen, dan gaji karyawan</p>
         </div>
-        <div className="crud-actions">
-          <Button variant="primary" size="md" onClick={() => navigate("/employees/add")} disabled={loading}>
-            Create Employee
+        <div className="profiles-list-actions">
+          <Button
+            variant="primary"
+            size="md"
+            onClick={() => navigate("/employees/add")}
+            disabled={loading}
+          >
+            <Plus size={16} />
+            Tambah Karyawan
           </Button>
-          <Button variant="outline" size="md" onClick={() => void loadEmployees()} disabled={loading}>
-            Refresh
+          <Button
+            variant="outline"
+            size="md"
+            onClick={() => void loadEmployees()}
+            disabled={loading}
+            style={{ borderColor: "#2563eb", color: "#2563eb" }}
+          >
+            <RefreshCw size={16} />
+            Segarkan
           </Button>
         </div>
       </div>
 
-      <Card className="crud-card" glass>
-        <h2>Employees Table</h2>
-        <div className="crud-table-wrap">
-          <table className="crud-table">
+      {/* Control Bar - Search & Filter */}
+      <Card className="profiles-search-card" glass style={{ borderTop: "4px solid #2563eb", marginBottom: "1.5rem" }}>
+        <div className="profiles-control-bar">
+          <div className="profiles-search-box">
+            <Search size={18} />
+            <input
+              type="text"
+              placeholder="Cari nama, ID, atau kode karyawan..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              className="profiles-search-input"
+            />
+          </div>
+
+          <div className="profiles-quick-controls">
+            <div className="control-group">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+                className="profiles-sort-select"
+              >
+                <option value="name">Urutkan: Nama</option>
+                <option value="id">Urutkan: ID</option>
+                <option value="code">Urutkan: Kode</option>
+                <option value="department">Urutkan: Departemen</option>
+                <option value="position">Urutkan: Jabatan</option>
+              </select>
+              <button
+                className="profiles-sort-order-btn"
+                onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+              >
+                {sortOrder === "asc" ? "↑" : "↓"}
+              </button>
+            </div>
+
+            <button
+              className={`profiles-filter-btn ${showFilters ? "active" : ""}`}
+              onClick={() => setShowFilters(!showFilters)}
+              style={{ borderColor: "#2563eb", color: "#2563eb" }}
+            >
+              <Filter size={18} />
+              <span>Filter</span>
+              <ChevronDown
+                size={14}
+                style={{ transform: showFilters ? "rotate(180deg)" : "", transition: "transform 0.3s ease" }}
+              />
+            </button>
+
+            {(searchText || selectedDepartment || selectedPosition) && (
+              <Button variant="outline" size="sm" onClick={clearFilters} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
+                Bersihkan
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {showFilters && (
+          <div className="profiles-filter-panel">
+            <div className="filter-row">
+              <div className="filter-group">
+                <label style={{ color: "#2563eb", fontWeight: "600" }}>Departemen</label>
+                <select
+                  value={selectedDepartment}
+                  onChange={(e) => setSelectedDepartment(e.target.value)}
+                  className="profiles-filter-select"
+                >
+                  <option value="">Semua Departemen</option>
+                  {uniqueDepartments.map((dept) => (
+                    <option key={dept} value={dept}>{dept}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="filter-group">
+                <label style={{ color: "#2563eb", fontWeight: "600" }}>Jabatan</label>
+                <select
+                  value={selectedPosition}
+                  onChange={(e) => setSelectedPosition(e.target.value)}
+                  className="profiles-filter-select"
+                >
+                  <option value="">Semua Jabatan</option>
+                  {uniquePositions.map((pos) => (
+                    <option key={pos} value={pos}>{pos}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="profiles-results-info" style={{ color: "#2563eb", fontWeight: "600" }}>
+          Menampilkan <strong>{paginatedEmployees.length}</strong> dari <strong>{sortedEmployees.length}</strong> data
+        </div>
+      </Card>
+
+      {/* Table Section */}
+      <Card className="profiles-table-card" glass style={{ borderTop: "4px solid #2563eb" }}>
+        <div className="profiles-table-wrap">
+          <table className="profiles-table" style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr>
-                {columns.map((column) => (
-                  <th key={column}>{column}</th>
-                ))}
-                <th>Actions</th>
+              <tr style={{ backgroundColor: "#dbeafe" }}>
+                <th style={{ padding: "12px", textAlign: "left", color: "#2563eb", fontWeight: "600", borderBottom: "2px solid #2563eb" }}>Kode / ID</th>
+                <th style={{ padding: "12px", textAlign: "left", color: "#2563eb", fontWeight: "600", borderBottom: "2px solid #2563eb" }}>Nama Karyawan</th>
+                <th style={{ padding: "12px", textAlign: "left", color: "#2563eb", fontWeight: "600", borderBottom: "2px solid #2563eb" }}>Departemen</th>
+                <th style={{ padding: "12px", textAlign: "left", color: "#2563eb", fontWeight: "600", borderBottom: "2px solid #2563eb" }}>Jabatan</th>
+                <th style={{ padding: "12px", textAlign: "left", color: "#2563eb", fontWeight: "600", borderBottom: "2px solid #2563eb" }}>Tgl Bergabung</th>
+                <th style={{ padding: "12px", textAlign: "right", color: "#2563eb", fontWeight: "600", borderBottom: "2px solid #2563eb" }}>Gaji Pokok</th>
+                <th style={{ padding: "12px", textAlign: "center", color: "#2563eb", fontWeight: "600", borderBottom: "2px solid #2563eb" }}>Aksi</th>
               </tr>
             </thead>
             <tbody>
-              {items.length > 0 ? (
-                items.map((item, index) => (
-                  <tr key={String(item.id ?? index)}>
-                    {columns.map((column) => (
-                      <td key={`${String(item.id ?? index)}-${column}`} title={asDisplay(column, (item as unknown as Record<string, unknown>)[column])}>
-                        {asDisplay(column, (item as unknown as Record<string, unknown>)[column])}
-                      </td>
-                    ))}
-                    <td>
-                      <div className="crud-actions" style={{ marginTop: 0 }}>
+              {paginatedEmployees.length > 0 ? (
+                paginatedEmployees.map((item) => (
+                  <tr key={item.id} style={{ borderBottom: "1px solid #eff6ff" }}>
+                    <td style={{ padding: "12px" }}>
+                      <div style={{ display: "flex", flexDirection: "column" }}>
+                        <span style={{ fontWeight: "600", fontSize: "0.85rem" }}>{item.employee_code || "N/A"}</span>
+                        <span style={{ fontSize: "0.75rem", color: "var(--gray-500)" }}>ID: {item.id}</span>
+                      </div>
+                    </td>
+                    <td style={{ padding: "12px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#dbeafe", color: "#2563eb", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "700", fontSize: "0.8rem" }}>
+                          {item.user?.name?.charAt(0).toUpperCase() || "E"}
+                        </div>
+                        <span style={{ fontWeight: "600" }}>{item.user?.name || "Unknown"}</span>
+                      </div>
+                    </td>
+                    <td style={{ padding: "12px" }}>{item.department || "-"}</td>
+                    <td style={{ padding: "12px" }}>{item.position || "-"}</td>
+                    <td style={{ padding: "12px" }}>{item.hire_date ? formatDateTime(item.hire_date) : "-"}</td>
+                    <td style={{ padding: "12px", textAlign: "right", fontFamily: "monospace", fontWeight: "600" }}>
+                      {item.salary ? Number(item.salary).toLocaleString("id-ID") : "-"}
+                    </td>
+                    <td style={{ padding: "12px", textAlign: "center" }}>
+                      <div style={{ display: "flex", justifyContent: "center", gap: "8px" }}>
                         <Button
-                          variant="secondary"
+                          variant="ghost"
                           size="sm"
-                          onClick={() => navigate(`/employees/update/${String(item.id ?? "")}`)}
-                          disabled={loading || !item.id}
+                          onClick={() => navigate(`/employees/update/${item.id}`)}
+                          title="Edit"
                         >
-                          Update
+                          <Pencil size={16} />
                         </Button>
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => void deleteExistingEmployee(String(item.id ?? ""))}
-                          disabled={loading || !item.id}
+                          onClick={() => void deleteExistingEmployee(String(item.id))}
+                          title="Delete"
+                          style={{ color: "var(--status-danger)" }}
                         >
-                          Delete
+                          <Trash2 size={16} />
                         </Button>
                       </div>
                     </td>
@@ -451,15 +695,42 @@ const EmployeesPage = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={columns.length + 1}>No employee data available.</td>
+                  <td colSpan={7} style={{ padding: "40px", textAlign: "center", color: "var(--gray-500)" }}>
+                    Tidak ada data karyawan ditemukan.
+                  </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
-      </Card>
 
-      <p className="crud-status">{statusMessage}</p>
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="profiles-pagination">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+              style={{ borderColor: "#2563eb", color: "#2563eb" }}
+            >
+              ← Prev
+            </Button>
+            <div className="profiles-page-info">
+              Halaman <strong>{currentPage}</strong> dari <strong>{totalPages}</strong>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              disabled={currentPage === totalPages}
+              style={{ borderColor: "#2563eb", color: "#2563eb" }}
+            >
+              Next →
+            </Button>
+          </div>
+        )}
+      </Card>
     </div>
   );
 };

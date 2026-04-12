@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Eye,
   Pencil,
@@ -22,6 +22,9 @@ import {
   Phone,
   Layers,
   Map,
+  Search,
+  Filter,
+  ChevronDown,
 } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
@@ -60,6 +63,34 @@ const DEFAULT_FORM: ProfileFormState = {
   graduation_year: "",
   profile_photo_path: "",
 };
+
+const FIELD_GROUPS = [
+  {
+    title: "Informasi Pribadi",
+    icon: <User size={18} />,
+    fields: ["gender", "marital_status", "birth_date", "religion", "nationality", "id_number"] as const,
+  },
+  {
+    title: "Alamat & Kontak",
+    icon: <MapPin size={18} />,
+    fields: ["phone", "city", "province", "postal_code", "address", "current_address", "permanent_address"] as const,
+  },
+  {
+    title: "Kontak Darurat",
+    icon: <Heart size={18} />,
+    fields: ["emergency_contact_name", "emergency_contact_phone", "emergency_contact_relation"] as const,
+  },
+  {
+    title: "Informasi Finansial",
+    icon: <CreditCard size={18} />,
+    fields: ["bank_name", "bank_account_number", "bank_account_name", "tax_number"] as const,
+  },
+  {
+    title: "Latar Belakang Pendidikan",
+    icon: <GraduationCap size={18} />,
+    fields: ["last_education", "institution_name", "graduation_year"] as const,
+  },
+];
 
 const getStringValue = (value: unknown) => {
   if (typeof value === "string") return value;
@@ -497,6 +528,116 @@ const ProfilesPage = () => {
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
 
+  // Filter & Search states
+  const [searchText, setSearchText] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [selectedPosition, setSelectedPosition] = useState("");
+
+  // Sorting
+  const [sortBy, setSortBy] = useState<"id" | "name" | "hire_date">("name");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Filter and Search Logic
+  const filteredProfiles = useMemo(() => {
+    let filtered = [...profiles];
+
+    // Search filter
+    if (searchText.trim()) {
+      const search = searchText.toLowerCase();
+      filtered = filtered.filter((p) => 
+        (p.user?.name?.toLowerCase().includes(search)) ||
+        (String(p.id).toLowerCase().includes(search)) ||
+        (p.employee?.employee_code?.toLowerCase().includes(search))
+      );
+    }
+
+    // Department filter
+    if (selectedDepartment) {
+      filtered = filtered.filter((p) => p.employee?.department === selectedDepartment);
+    }
+
+    // Position filter
+    if (selectedPosition) {
+      filtered = filtered.filter((p) => p.employee?.position === selectedPosition);
+    }
+
+    return filtered;
+  }, [profiles, searchText, selectedDepartment, selectedPosition]);
+
+  // Sorting Logic
+  const sortedProfiles = useMemo(() => {
+    const sorted = [...filteredProfiles];
+
+    sorted.sort((a, b) => {
+      let compareA: any;
+      let compareB: any;
+
+      switch (sortBy) {
+        case "name":
+          compareA = a.user?.name?.toLowerCase() || "";
+          compareB = b.user?.name?.toLowerCase() || "";
+          break;
+        case "hire_date":
+          compareA = a.employee?.hire_date || "";
+          compareB = b.employee?.hire_date || "";
+          break;
+        case "id":
+        default:
+          compareA = String(a.id || "");
+          compareB = String(b.id || "");
+      }
+
+      if (compareA < compareB) return sortOrder === "asc" ? -1 : 1;
+      if (compareA > compareB) return sortOrder === "asc" ? 1 : -1;
+      return 0;
+    });
+
+    return sorted;
+  }, [filteredProfiles, sortBy, sortOrder]);
+
+  // Pagination Logic
+  const paginatedProfiles = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return sortedProfiles.slice(startIndex, startIndex + itemsPerPage);
+  }, [sortedProfiles, currentPage]);
+
+  const totalPages = Math.ceil(sortedProfiles.length / itemsPerPage);
+
+  // Get unique departments/positions for filters
+  const uniqueDepartments = useMemo(() => {
+    const depts = new Set<string>();
+    profiles.forEach(p => {
+      if (p.employee?.department) depts.add(p.employee.department);
+    });
+    return Array.from(depts).sort();
+  }, [profiles]);
+
+  const uniquePositions = useMemo(() => {
+    const positions = new Set<string>();
+    profiles.forEach(p => {
+      if (p.employee?.position) positions.add(p.employee.position);
+    });
+    return Array.from(positions).sort();
+  }, [profiles]);
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText, selectedDepartment, selectedPosition, sortBy, sortOrder]);
+
+  const clearFilters = () => {
+    setSearchText("");
+    setSelectedDepartment("");
+    setSelectedPosition("");
+    setSortBy("name");
+    setSortOrder("asc");
+  };
+
   useEffect(() => {
     if (isAddPage || isViewPage || isUpdatePage) {
       return;
@@ -646,18 +787,18 @@ const ProfilesPage = () => {
 
   if (isAddPage) {
     return (
-      <div className="profiles-page">
-        <div className="profiles-page-header">
-          <div>
-            <h1>Create Profile</h1>
-            <p>Halaman khusus create profile agar alur lebih rapi.</p>
+      <div className="profiles-page crud-page">
+        <div className="profiles-list-header" style={{ borderBottom: "2px solid #2563eb", paddingBottom: "20px" }}>
+          <div className="profiles-list-title">
+            <h1 style={{ color: "#2563eb", marginBottom: "4px" }}>👤 Tambah Profil Baru</h1>
+            <p style={{ color: "var(--color-text-secondary)", fontSize: "0.9rem" }}>Lengkapi informasi profil karyawan secara detail</p>
           </div>
-          <Button variant="outline" size="md" onClick={() => navigate("/profiles")} disabled={loading}>
-            Back to Profiles
+          <Button variant="outline" size="md" onClick={() => navigate("/profiles")} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
+            Kembali ke Daftar
           </Button>
         </div>
 
-        <Card className="profiles-status-card" glass>
+        <Card className="profiles-status-card" glass style={{ borderTop: "4px solid #2563eb" }}>
           <div className="profiles-status-row">
             <Badge variant={errorMessage ? "danger" : "info"}>{statusMessage}</Badge>
           </div>
@@ -665,32 +806,41 @@ const ProfilesPage = () => {
           {errorMessage && <p className="profiles-message profiles-message--error">{errorMessage}</p>}
         </Card>
 
-        <Card className="profiles-panel" glass>
-          <h2>Profile Form</h2>
-          <div className="profiles-form-grid">
-            {(Object.keys(DEFAULT_FORM).filter(f => f !== "id") as Array<keyof ProfileFormState>).map((field) => (
-              <label key={field} className="profiles-form-group">
-                <span>{field.replace(/_/g, " ").toUpperCase()}</span>
-                <input
-                  value={createForm[field]}
-                  onChange={(event) => handleCreateChange(field, event.target.value)}
-                  placeholder={field}
-                  className="profiles-input"
-                  type={field === "birth_date" ? "date" : field.includes("phone") ? "tel" : "text"}
-                />
-              </label>
-            ))}
-          </div>
-          <div className="profiles-actions">
-            <Button variant="primary" size="md" onClick={() => void handleCreate()} disabled={loading}>
-              <Plus size={16} />
-              Create
-            </Button>
-            <Button variant="outline" size="md" onClick={() => navigate("/profiles")} disabled={loading}>
-              Cancel
-            </Button>
-          </div>
-        </Card>
+        {FIELD_GROUPS.map((group) => (
+          <Card key={group.title} className="profiles-panel" glass style={{ borderTop: "4px solid #2563eb", marginBottom: "1.5rem" }}>
+            <div className="profiles-panel-header" style={{ marginBottom: "20px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <div style={{ color: "#2563eb" }}>{group.icon}</div>
+                <h2 style={{ color: "#2563eb", margin: 0 }}>{group.title}</h2>
+              </div>
+            </div>
+            <div className="profiles-form-grid">
+              {group.fields.map((field) => (
+                <label key={field} className="profiles-form-group">
+                  <span style={{ color: "#2563eb", fontWeight: "700", fontSize: "0.75rem" }}>{field.replace(/_/g, " ").toUpperCase()}</span>
+                  <input
+                    value={createForm[field]}
+                    onChange={(event) => handleCreateChange(field, event.target.value)}
+                    placeholder={`Masukkan ${field.replace(/_/g, " ")}`}
+                    className="profiles-input"
+                    type={field === "birth_date" ? "date" : field.includes("phone") ? "tel" : "text"}
+                    style={{ border: "1px solid rgba(37, 99, 235, 0.2)" }}
+                  />
+                </label>
+              ))}
+            </div>
+          </Card>
+        ))}
+
+        <div className="profiles-actions" style={{ justifyContent: "flex-end", marginTop: "1rem" }}>
+          <Button variant="outline" size="md" onClick={() => navigate("/profiles")} disabled={loading}>
+            Batal
+          </Button>
+          <Button variant="primary" size="md" onClick={() => void handleCreate()} disabled={loading} style={{ backgroundColor: "#2563eb" }}>
+            <Plus size={16} />
+            Simpan Profil
+          </Button>
+        </div>
         <ErrorModal errors={validationErrors} isOpen={isErrorModalOpen} onClose={() => setIsErrorModalOpen(false)} />
       </div>
     );
@@ -698,9 +848,32 @@ const ProfilesPage = () => {
 
   if (isViewPage) {
     return (
-      <div className="profiles-page">
+      <div className="profiles-page crud-page">
+        <div className="profiles-list-header" style={{ borderBottom: "2px solid #2563eb", paddingBottom: "20px" }}>
+          <div className="profiles-list-title">
+            <h1 style={{ color: "#2563eb", marginBottom: "4px" }}>📋 Detail Profil</h1>
+            <p style={{ color: "var(--color-text-secondary)", fontSize: "0.9rem" }}>Melihat informasi lengkap karyawan</p>
+          </div>
+          <div className="profiles-list-actions">
+            <Button
+              variant="outline"
+              size="md"
+              className="edit-profile-btn"
+              onClick={() => navigate(`/profiles/update/${routeProfileId ?? ""}`)}
+              disabled={loading || !routeProfileId}
+              style={{ borderColor: "#2563eb", color: "#2563eb" }}
+            >
+              <Pencil size={14} />
+              Edit Profil
+            </Button>
+            <Button variant="outline" size="md" onClick={() => navigate("/profiles")} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
+              Kembali
+            </Button>
+          </div>
+        </div>
+
         <div className="profile-view-container">
-          <div className="profile-header-new">
+          <div className="profile-header-new" style={{ borderTop: "4px solid #2563eb" }}>
             <div className="profile-header-gradient"></div>
             <div className="profile-header-content">
               <div className="profile-avatar-large">
@@ -716,16 +889,6 @@ const ProfilesPage = () => {
                     <Calendar size={14}/> Start Date: {selectedProfile?.employee?.hire_date ? formatDate(selectedProfile.employee.hire_date) : "N/A"}
                   </p>
                 </div>
-                <Button
-                  variant="outline"
-                  size="md"
-                  className="edit-profile-btn"
-                  onClick={() => navigate(`/profiles/update/${routeProfileId ?? ""}`)}
-                  disabled={loading || !routeProfileId}
-                >
-                  <Pencil size={14} />
-                  Edit Profile
-                </Button>
               </div>
             </div>
           </div>
@@ -827,7 +990,7 @@ const ProfilesPage = () => {
             </Card>
 
             {/* Old Data Sections */}
-            <div className="profile-card-sections" style={{ display: 'grid', gap: '1.5rem', marginTop: '1.5rem' }}>
+            <div className="profile-card-sections profile-card-sections--stack">
               <SectionCard icon={<Heart size={18} />} title="Emergency Contact" items={detailSections?.emergencyInfo ?? null} />
               <SectionCard icon={<CreditCard size={18} />} title="Bank Information" items={detailSections?.bankInfo ?? null} />
               <SectionCard icon={<GraduationCap size={18} />} title="Education Information" items={detailSections?.educationInfo ?? null} />
@@ -958,18 +1121,18 @@ const ProfilesPage = () => {
 
   if (isUpdatePage) {
     return (
-      <div className="profiles-page">
-        <div className="profiles-page-header">
-          <div>
-            <h1>Update Profile</h1>
-            <p>Halaman khusus update profile agar flow lebih rapi.</p>
+      <div className="profiles-page crud-page">
+        <div className="profiles-list-header" style={{ borderBottom: "2px solid #2563eb", paddingBottom: "20px" }}>
+          <div className="profiles-list-title">
+            <h1 style={{ color: "#2563eb", marginBottom: "4px" }}>✏️ Perbarui Profil</h1>
+            <p style={{ color: "var(--color-text-secondary)", fontSize: "0.9rem" }}>Perbarui informasi profil karyawan yang sudah ada</p>
           </div>
-          <Button variant="outline" size="md" onClick={() => navigate("/profiles")} disabled={loading}>
-            Back to Profiles
+          <Button variant="outline" size="md" onClick={() => navigate("/profiles")} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
+            Kembali ke Daftar
           </Button>
         </div>
 
-        <Card className="profiles-status-card" glass>
+        <Card className="profiles-status-card" glass style={{ borderTop: "4px solid #2563eb" }}>
           <div className="profiles-status-row">
             <Badge variant={errorMessage ? "danger" : "info"}>{statusMessage}</Badge>
           </div>
@@ -977,33 +1140,42 @@ const ProfilesPage = () => {
           {errorMessage && <p className="profiles-message profiles-message--error">{errorMessage}</p>}
         </Card>
 
-        <Card className="profiles-panel" glass>
-          <h2>Update Form</h2>
-          <div className="profiles-form-grid">
-            {(Object.keys(DEFAULT_FORM) as Array<keyof ProfileFormState>).map((field) => (
-              <label key={field} className="profiles-form-group">
-                <span>{field.replace(/_/g, " ").toUpperCase()}</span>
-                <input
-                  value={updateForm[field]}
-                  onChange={(event) => handleUpdateChange(field, event.target.value)}
-                  placeholder={field}
-                  className="profiles-input"
-                  readOnly={field === "id"}
-                  type={field === "birth_date" ? "date" : field.includes("phone") ? "tel" : field === "graduation_year" ? "number" : "text"}
-                />
-              </label>
-            ))}
-          </div>
-          <div className="profiles-actions">
-            <Button variant="secondary" size="md" onClick={() => void handleUpdate()} disabled={loading}>
-              <Pencil size={16} />
-              Update
-            </Button>
-            <Button variant="outline" size="md" onClick={() => navigate("/profiles")} disabled={loading}>
-              Cancel
-            </Button>
-          </div>
-        </Card>
+        {FIELD_GROUPS.map((group) => (
+          <Card key={group.title} className="profiles-panel" glass style={{ borderTop: "4px solid #2563eb", marginBottom: "1.5rem" }}>
+            <div className="profiles-panel-header" style={{ marginBottom: "20px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <div style={{ color: "#2563eb" }}>{group.icon}</div>
+                <h2 style={{ color: "#2563eb", margin: 0 }}>{group.title}</h2>
+              </div>
+            </div>
+            <div className="profiles-form-grid">
+              {group.fields.map((field) => (
+                <label key={field} className="profiles-form-group">
+                  <span style={{ color: "#2563eb", fontWeight: "700", fontSize: "0.75rem" }}>{field.replace(/_/g, " ").toUpperCase()}</span>
+                  <input
+                    value={updateForm[field]}
+                    onChange={(event) => handleUpdateChange(field, event.target.value)}
+                    placeholder={`Masukkan ${field.replace(/_/g, " ")}`}
+                    className="profiles-input"
+                    readOnly={field === "id"}
+                    type={field === "birth_date" ? "date" : field.includes("phone") ? "tel" : field === "graduation_year" ? "number" : "text"}
+                    style={{ border: "1px solid rgba(37, 99, 235, 0.2)" }}
+                  />
+                </label>
+              ))}
+            </div>
+          </Card>
+        ))}
+
+        <div className="profiles-actions" style={{ justifyContent: "flex-end", marginTop: "1rem" }}>
+          <Button variant="outline" size="md" onClick={() => navigate("/profiles")} disabled={loading}>
+            Batal
+          </Button>
+          <Button variant="secondary" size="md" onClick={() => void handleUpdate()} disabled={loading} style={{ backgroundColor: "#2563eb" }}>
+            <Pencil size={16} />
+            Perbarui Profil
+          </Button>
+        </div>
         <ErrorModal errors={validationErrors} isOpen={isErrorModalOpen} onClose={() => setIsErrorModalOpen(false)} />
       </div>
     );
@@ -1011,331 +1183,244 @@ const ProfilesPage = () => {
 
   return (
     <div className="profiles-page">
-      <div className="profiles-page-header">
-        <div>
-          <h1>Profiles</h1>
-          <p>List profile khusus tabel dengan action detail, update, dan delete per baris.</p>
+      {/* Header - Title Section */}
+      <div className="profiles-list-header" style={{ borderBottom: "2px solid #2563eb", paddingBottom: "20px" }}>
+        <div className="profiles-list-title">
+          <h1 style={{ color: "#2563eb", marginBottom: "4px" }}>👥 Daftar Karyawan</h1>
+          <p style={{ color: "var(--color-text-secondary)", fontSize: "0.9rem" }}>Kelola data profil dan informasi kepegawaian</p>
         </div>
-        <div className="profiles-actions" style={{ marginTop: 0 }}>
-          <Button variant="primary" size="md" onClick={() => navigate("/profiles/add")} disabled={loading}>
+        <div className="profiles-list-actions">
+          <Button
+            variant="primary"
+            size="md"
+            onClick={() => navigate("/profiles/add")}
+            disabled={loading}
+          >
             <Plus size={16} />
-            Create Profile
+            Tambah Karyawan
           </Button>
-          <Button variant="outline" size="md" onClick={() => void loadProfiles()} disabled={loading}>
-            <RefreshCw size={16} />
-            Refresh
+          <Button
+            variant="outline"
+            size="md"
+            onClick={() => void loadProfiles()}
+            disabled={loading}
+            style={{ borderColor: "#2563eb", color: "#2563eb" }}
+          >
+            🔄 Segarkan
           </Button>
         </div>
       </div>
 
-      <Card className="profiles-status-card" glass>
-        <div className="profiles-status-row">
-          <Badge variant={errorMessage ? "danger" : "info"}>{statusMessage}</Badge>
-          <span className="profiles-status-count">Total profiles: {profiles.length}</span>
-        </div>
-        {validationMessage && <p className="profiles-message profiles-message--error">{validationMessage}</p>}
-        {errorMessage && <p className="profiles-message profiles-message--error">{errorMessage}</p>}
-      </Card>
-
-      <Card className="profiles-panel" glass>
-        <div className="profiles-panel-header">
-          <h2>Profiles List</h2>
-          {profiles.length > 0 && (
-            <div className="profiles-pagination-info">
-              Profile {currentProfileIndex + 1} of {profiles.length}
-            </div>
-          )}
-        </div>
-
-        {profiles.length > 0 ? (
-          <div className="profiles-grid">
-            {(() => {
-              const profile = profiles[currentProfileIndex];
-              const profileId = String(profile.id) || `row-${currentProfileIndex}`;
-              const sections = buildDetailSections(profile);
-
-              return (
-                <div key={profileId} className="profile-view-container" style={{ marginTop: '1rem' }}>
-                  <div className="profile-header-new">
-                    <div className="profile-header-gradient"></div>
-                    <div className="profile-header-content">
-                      <div className="profile-avatar-large">
-                        {profile?.user?.name ? profile.user.name.charAt(0).toUpperCase() : "P"}
-                      </div>
-                      <div className="profile-header-row">
-                        <div className="profile-header-info-new">
-                          <div className="profile-name-badge">
-                            <h1>{profile?.user?.name ? profile.user.name : "User Profile"}</h1>
-                            <span className="verified-badge"><CheckCircle2 size={14}/> Verified Profile</span>
-                          </div>
-                          <p className="start-date-text">
-                            <Calendar size={14}/> Start Date: {profile?.employee?.hire_date ? formatDate(profile.employee.hire_date) : "N/A"}
-                          </p>
-                        </div>
-                        <div className="profile-card-actions" style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-                          <Button variant="outline" size="md" onClick={() => navigate(`/profiles/view/${profileId}`)} disabled={loading}>
-                            <Eye size={14} /> View
-                          </Button>
-                          <Button variant="outline" size="md" onClick={() => navigate(`/profiles/update/${profileId}`)} disabled={loading} style={{ borderColor: 'var(--border)' }}>
-                            <Pencil size={14} /> Edit
-                          </Button>
-                          <Button variant="ghost" size="md" onClick={() => void handleDelete(profileId)} disabled={loading} style={{ color: '#ef4444' }}>
-                            <Trash2 size={14} /> Delete
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="profile-new-cards">
-                    {/* Profile details */}
-                    <Card className="profile-details-card" glass>
-                      <div className="card-header-flex">
-                        <h3>Profile details</h3>
-                        <Button variant="ghost" size="sm" className="edit-btn-small" onClick={() => navigate(`/profiles/update/${profileId}`)}>
-                          <Pencil size={14}/> Edit
-                        </Button>
-                      </div>
-                      <div className="profile-details-grid">
-                        <div className="detail-item-new">
-                          <div className="detail-icon-wrap"><User size={20}/></div>
-                          <div className="detail-text-wrap">
-                            <span className="detail-label-new">Full Name</span>
-                            <span className="detail-value-new">{asDisplay(profile?.user?.name)}</span>
-                          </div>
-                        </div>
-                        <div className="detail-item-new">
-                          <div className="detail-icon-wrap"><Mail size={20}/></div>
-                          <div className="detail-text-wrap">
-                            <span className="detail-label-new">Email</span>
-                            <span className="detail-value-new email-with-badge">
-                              {asDisplay(profile?.user?.email)}
-                              {profile?.user?.email && <span className="verified-badge-small"><CheckCircle2 size={12}/> Email Verified</span>}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="detail-item-new">
-                          <div className="detail-icon-wrap"><Calendar size={20}/></div>
-                          <div className="detail-text-wrap">
-                            <span className="detail-label-new">Date of birth</span>
-                            <span className="detail-value-new">{formatDate(profile?.birth_date)}</span>
-                          </div>
-                        </div>
-                        <div className="detail-item-new">
-                          <div className="detail-icon-wrap"><User size={20}/></div>
-                          <div className="detail-text-wrap">
-                            <span className="detail-label-new">Username</span>
-                            <span className="detail-value-new">{asDisplay(profile?.user?.name?.split(' ')[0])}</span>
-                          </div>
-                        </div>
-                        <div className="detail-item-new">
-                          <div className="detail-icon-wrap"><Phone size={20}/></div>
-                          <div className="detail-text-wrap">
-                            <span className="detail-label-new">Number</span>
-                            <span className="detail-value-new email-with-badge">
-                              {asDisplay(profile?.phone)}
-                              {profile?.phone && <span className="verified-badge-small"><CheckCircle2 size={12}/> Number Verified</span>}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="detail-item-new">
-                          <div className="detail-icon-wrap"><Layers size={20}/></div>
-                          <div className="detail-text-wrap">
-                            <span className="detail-label-new">Plan</span>
-                            <span className="detail-value-new">Pro Plan</span>
-                          </div>
-                        </div>
-                        <div className="detail-item-new">
-                          <div className="detail-icon-wrap"><FileText size={20}/></div>
-                          <div className="detail-text-wrap">
-                            <span className="detail-label-new">Employee Code</span>
-                            <span className="detail-value-new">{asDisplay(profile?.employee?.employee_code)}</span>
-                          </div>
-                        </div>
-                        <div className="detail-item-new">
-                          <div className="detail-icon-wrap"><Map size={20}/></div>
-                          <div className="detail-text-wrap">
-                            <span className="detail-label-new">Postal Code</span>
-                            <span className="detail-value-new">{asDisplay(profile?.postal_code)}</span>
-                          </div>
-                        </div>
-                        <div className="detail-item-new">
-                          <div className="detail-icon-wrap"><CreditCard size={20}/></div>
-                          <div className="detail-text-wrap">
-                            <span className="detail-label-new">ID Number</span>
-                            <span className="detail-value-new">{asDisplay(profile?.id_number)}</span>
-                          </div>
-                        </div>
-                        <div className="detail-item-new">
-                          <div className="detail-icon-wrap"><MapPin size={20}/></div>
-                          <div className="detail-text-wrap">
-                            <span className="detail-label-new">Address</span>
-                            <span className="detail-value-new">{asDisplay(profile?.address)}</span>
-                          </div>
-                        </div>
-                        <div className="detail-item-new">
-                          <div className="detail-icon-wrap"><Building2 size={20}/></div>
-                          <div className="detail-text-wrap">
-                            <span className="detail-label-new">City</span>
-                            <span className="detail-value-new">{asDisplay(profile?.city)}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </Card>
-
-                    {/* Old Data Sections */}
-                    <div className="profile-card-sections" style={{ display: 'grid', gap: '1.5rem', marginTop: '1.5rem' }}>
-                      <SectionCard icon={<Heart size={18} />} title="Emergency Contact" items={sections?.emergencyInfo} />
-                      <SectionCard icon={<CreditCard size={18} />} title="Bank Information" items={sections?.bankInfo} />
-                      <SectionCard icon={<GraduationCap size={18} />} title="Education Information" items={sections?.educationInfo} />
-
-                      {/* Role and Permission */}
-                      <SectionCard icon={<Shield size={18} />} title="Role and Permission" items={null}>
-                        <div className="profile-card-grid">
-                          <div className="profile-card-item">
-                            <span className="profile-card-label">Roles</span>
-                            <span className="profile-card-value">{sections?.roleNames}</span>
-                          </div>
-                          <div className="profile-card-item">
-                            <span className="profile-card-label">User Roles</span>
-                            <span className="profile-card-value">{sections?.userRoleNames}</span>
-                          </div>
-                          <div className="profile-card-item">
-                            <span className="profile-card-label">Permissions</span>
-                            <span className="profile-card-value">{sections?.permissionNames}</span>
-                          </div>
-                        </div>
-                      </SectionCard>
-
-                      <SectionCard icon={<FileText size={18} />} title="System Information" items={sections?.systemInfo} />
-
-                      {/* Attendances */}
-                      <SectionCard icon={<Clock size={18} />} title="Attendances" items={null}>
-                        {Array.isArray(profile?.attendances) && profile.attendances.length > 0 ? (
-                          <div className="profile-collection-list">
-                            {profile.attendances.slice(0, 5).map((attendance: any, index: number) => (
-                              <div key={`${attendance.id ?? index}-attendance`} className="profile-collection-item">
-                                <span className="info-label">{formatDate(attendance.check_in)}</span>
-                                <span className="info-value">
-                                  Check In: {attendance.check_in ? new Date(attendance.check_in).toLocaleTimeString("id-ID") : "-"}
-                                </span>
-                                {attendance.check_out && (
-                                  <span className="info-value">
-                                    Check Out: {new Date(attendance.check_out).toLocaleTimeString("id-ID")}
-                                  </span>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="activity-placeholder">Belum ada data attendance.</p>
-                        )}
-                      </SectionCard>
-
-                      {/* Leaves */}
-                      <SectionCard icon={<Heart size={18} />} title="Leaves" items={null}>
-                        {Array.isArray(profile?.leaves) && profile.leaves.length > 0 ? (
-                          <div className="profile-collection-list">
-                            {profile.leaves.slice(0, 5).map((leave: any, index: number) => (
-                              <div key={`${leave.id ?? index}-leave`} className="profile-collection-item">
-                                <span className="info-label">{toTitle(leave.type)}</span>
-                                <span className="info-value">
-                                  {formatDate(leave.start_date)} - {formatDate(leave.end_date)} ({asDisplay(leave.total_days)} hari)
-                                </span>
-                                <span className="info-meta">Status: {toTitle(leave.status)}</span>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="activity-placeholder">Belum ada data leave.</p>
-                        )}
-                      </SectionCard>
-
-                      {/* KPIs */}
-                      <SectionCard icon={<FileText size={18} />} title="KPIs" items={null}>
-                        {Array.isArray(profile?.kpis) && profile.kpis.length > 0 ? (
-                          <div className="profile-collection-list">
-                            {profile.kpis.slice(0, 5).map((kpi: any, index: number) => (
-                              <div key={`${kpi.id ?? index}-kpi`} className="profile-collection-item">
-                                <span className="info-label">{asDisplay(kpi.name)}</span>
-                                <span className="info-value">{asDisplay(kpi.target)} - {asDisplay(kpi.achievement)}</span>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="activity-placeholder">Belum ada data KPI.</p>
-                        )}
-                      </SectionCard>
-
-                      {/* Reimbursements */}
-                      <SectionCard icon={<CreditCard size={18} />} title="Reimbursements" items={null}>
-                        {Array.isArray(profile?.reimbursements) && profile.reimbursements.length > 0 ? (
-                          <div className="profile-collection-list">
-                            {profile.reimbursements.slice(0, 5).map((reimbursement: any, index: number) => (
-                              <div key={`${reimbursement.id ?? index}-reimbursement`} className="profile-collection-item">
-                                <span className="info-label">{asDisplay(reimbursement.title)}</span>
-                                <span className="info-value">
-                                  {formatCurrency(reimbursement.amount)} - {toTitle(reimbursement.category)}
-                                </span>
-                                <span className="info-meta">
-                                  {formatDate(reimbursement.expense_date)} | Status: {toTitle(reimbursement.status)}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="activity-placeholder">Belum ada data reimbursement.</p>
-                        )}
-                      </SectionCard>
-
-                      {/* Payrolls */}
-                      <SectionCard icon={<CreditCard size={18} />} title="Payrolls" items={null}>
-                        {Array.isArray(profile?.payrolls) && profile.payrolls.length > 0 ? (
-                          <div className="profile-collection-list">
-                            {profile.payrolls.slice(0, 5).map((payroll: any, index: number) => (
-                              <div key={`${payroll.id ?? index}-payroll`} className="profile-collection-item">
-                                <span className="info-label">{formatDate(payroll.period_start)}</span>
-                                <span className="info-value">{formatCurrency(payroll.gross_salary)}</span>
-                                <span className="info-meta">Status: {toTitle(payroll.status)}</span>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="activity-placeholder">Belum ada data payroll.</p>
-                        )}
-                      </SectionCard>
-                    </div>
-
-
-                  </div>
-                </div>
-              );
-            })()}
+      {/* Search Bar - Compact Header */}
+      <Card className="profiles-search-card" glass style={{ borderTop: "4px solid #2563eb" }}>
+        <div className="profiles-control-bar">
+          {/* Search Box */}
+          <div className="profiles-search-box">
+            <Search size={18} />
+            <input
+              type="text"
+              placeholder="Cari nama, ID, atau kode karyawan..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              className="profiles-search-input"
+            />
           </div>
-        ) : (
-          <div className="activity-placeholder">No profile data available.</div>
+
+          {/* Quick Controls */}
+          <div className="profiles-quick-controls">
+            {/* Sort Dropdown */}
+            <div className="control-group">
+              <select
+                value={sortBy}
+                onChange={(e) =>
+                  setSortBy(e.target.value as "id" | "name" | "hire_date")
+                }
+                className="profiles-sort-select"
+              >
+                <option value="name">Urutkan: Nama</option>
+                <option value="id">Urutkan: ID</option>
+                <option value="hire_date">Urutkan: Tanggal Bergabung</option>
+              </select>
+              <button
+                className="profiles-sort-order-btn"
+                onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+                title={sortOrder === "asc" ? "Naik" : "Turun"}
+              >
+                {sortOrder === "asc" ? "↑" : "↓"}
+              </button>
+            </div>
+
+            {/* Filter Button */}
+            <button
+              className={`profiles-filter-btn ${showFilters ? "active" : ""}`}
+              onClick={() => setShowFilters(!showFilters)}
+              style={{ borderColor: "#2563eb", color: "#2563eb" }}
+            >
+              <Filter size={18} />
+              <span>Filter</span>
+              <ChevronDown
+                size={14}
+                style={{
+                  transform: showFilters ? "rotate(180deg)" : "",
+                  transition: "transform 0.3s ease",
+                }}
+              />
+            </button>
+
+            {/* Clear Filters Button */}
+            {(searchText || selectedDepartment || selectedPosition) && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={clearFilters}
+                className="profiles-clear-btn"
+                style={{ borderColor: "#2563eb", color: "#2563eb" }}
+              >
+                Bersihkan
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Filter Panel - Collapsible */}
+        {showFilters && (
+          <div className="profiles-filter-panel">
+            <div className="filter-row">
+              {/* Department Filter */}
+              <div className="filter-group">
+                <label style={{ color: "#2563eb", fontWeight: "600" }}>Departemen</label>
+                <select
+                  value={selectedDepartment}
+                  onChange={(e) => setSelectedDepartment(e.target.value)}
+                  className="profiles-filter-select"
+                >
+                  <option value="">Semua Departemen</option>
+                  {uniqueDepartments.map((dept) => (
+                    <option key={dept} value={dept}>
+                      {dept}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Position Filter */}
+              <div className="filter-group">
+                <label style={{ color: "#2563eb", fontWeight: "600" }}>Jabatan</label>
+                <select
+                  value={selectedPosition}
+                  onChange={(e) => setSelectedPosition(e.target.value)}
+                  className="profiles-filter-select"
+                >
+                  <option value="">Semua Jabatan</option>
+                  {uniquePositions.map((pos) => (
+                    <option key={pos} value={pos}>
+                      {pos}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
         )}
 
-        {profiles.length > 1 && (
-          <div className="profiles-pagination">
+        {/* Results Info */}
+        <div className="profiles-results-info" style={{ color: "#2563eb", fontWeight: "600" }}>
+          <span className="profiles-count">
+            Menampilkan <strong>{paginatedProfiles.length}</strong> dari{" "}
+            <strong>{sortedProfiles.length}</strong> data
+            {profiles.length > 0 && (
+              <span className="profiles-total-items"> (Total: {profiles.length})</span>
+            )}
+          </span>
+        </div>
+      </Card>
+
+      {/* Table - Main Content */}
+      <Card className="profiles-table-card" glass style={{ borderTop: "4px solid #2563eb" }}>
+        <div className="profiles-table-wrap">
+          <table className="profiles-table" style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ backgroundColor: "#dbeafe" }}>
+                <th style={{ padding: "12px", textAlign: "left", color: "#2563eb", fontWeight: "600", borderBottom: "2px solid #2563eb" }}>ID / Kode</th>
+                <th style={{ padding: "12px", textAlign: "left", color: "#2563eb", fontWeight: "600", borderBottom: "2px solid #2563eb" }}>Nama Karyawan</th>
+                <th style={{ padding: "12px", textAlign: "left", color: "#2563eb", fontWeight: "600", borderBottom: "2px solid #2563eb" }}>Departemen</th>
+                <th style={{ padding: "12px", textAlign: "left", color: "#2563eb", fontWeight: "600", borderBottom: "2px solid #2563eb" }}>Jabatan</th>
+                <th style={{ padding: "12px", textAlign: "left", color: "#2563eb", fontWeight: "600", borderBottom: "2px solid #2563eb" }}>Tanggal Bergabung</th>
+                <th style={{ padding: "12px", textAlign: "center", color: "#2563eb", fontWeight: "600", borderBottom: "2px solid #2563eb" }}>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedProfiles.length > 0 ? (
+                paginatedProfiles.map((p) => (
+                  <tr key={p.id} style={{ borderBottom: "1px solid #eff6ff" }}>
+                    <td style={{ padding: "12px" }}>
+                      <div style={{ display: "flex", flexDirection: "column" }}>
+                        <span style={{ fontWeight: "600", fontSize: "0.85rem" }}>{p.employee?.employee_code || "N/A"}</span>
+                        <span style={{ fontSize: "0.75rem", color: "var(--gray-500)" }}>#{p.id}</span>
+                      </div>
+                    </td>
+                    <td style={{ padding: "12px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#dbeafe", color: "#2563eb", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "700", fontSize: "0.8rem" }}>
+                          {p.user?.name?.charAt(0).toUpperCase() || "P"}
+                        </div>
+                        <span style={{ fontWeight: "600" }}>{p.user?.name || "Unknown"}</span>
+                      </div>
+                    </td>
+                    <td style={{ padding: "12px" }}>{p.employee?.department || "-"}</td>
+                    <td style={{ padding: "12px" }}>{p.employee?.position || "-"}</td>
+                    <td style={{ padding: "12px" }}>{p.employee?.hire_date ? formatDate(p.employee.hire_date) : "-"}</td>
+                    <td style={{ padding: "12px", textAlign: "center" }}>
+                      <div style={{ display: "flex", justifyContent: "center", gap: "8px" }}>
+                        <Button variant="ghost" size="sm" onClick={() => navigate(`/profiles/view/${p.id}`)} title="View Details">
+                          <Eye size={16} />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => navigate(`/profiles/update/${p.id}`)} title="Edit Profile">
+                          <Pencil size={16} />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => void handleDelete(String(p.id))} title="Delete Profile" style={{ color: "var(--status-danger)" }}>
+                          <Trash2 size={16} />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} style={{ padding: "40px", textAlign: "center", color: "var(--gray-500)" }}>
+                    Tidak ada data karyawan yang ditemukan.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="profiles-pagination" style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "16px", marginTop: "20px", paddingTop: "20px", borderTop: "1px solid #e5e7eb" }}>
             <Button
               variant="outline"
-              size="md"
-              onClick={() => setCurrentProfileIndex(Math.max(0, currentProfileIndex - 1))}
-              disabled={currentProfileIndex === 0 || loading}
+              size="sm"
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+              style={{ borderColor: "#2563eb", color: "#2563eb" }}
             >
-              ← Previous
+              ← Sebelumnya
             </Button>
-            <span className="profiles-page-indicator">
-              {currentProfileIndex + 1} / {profiles.length}
-            </span>
+
+            <div className="profiles-page-info" style={{ color: "#2563eb", fontWeight: "600" }}>
+              Halaman <strong>{currentPage}</strong> dari <strong>{totalPages}</strong>
+            </div>
+
             <Button
               variant="outline"
-              size="md"
-              onClick={() => setCurrentProfileIndex(Math.min(profiles.length - 1, currentProfileIndex + 1))}
-              disabled={currentProfileIndex === profiles.length - 1 || loading}
+              size="sm"
+              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              disabled={currentPage === totalPages}
+              style={{ borderColor: "#2563eb", color: "#2563eb" }}
             >
-              Next →
+              Selanjutnya →
             </Button>
           </div>
         )}
