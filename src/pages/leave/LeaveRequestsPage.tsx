@@ -4,7 +4,7 @@ import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { getAllLeaves, deleteLeaveRequest, approveLeave, rejectLeave } from '@/features/leave/api/leave.service';
 import type { LeaveItem } from '@/features/leave/types/leave.types';
-import { AlertCircle, Trash2, Edit3, Plus, Eye, Check, X } from 'lucide-react';
+import { AlertCircle, Trash2, Edit3, Plus, Eye, Check, X, BarChart3, Clock3, CircleCheckBig, CircleX } from 'lucide-react';
 import './LeavePages.css';
 
 const LeaveRequestsPage = () => {
@@ -95,13 +95,40 @@ const LeaveRequestsPage = () => {
     }
   };
 
+  const leaveStats = [
+    {
+      label: 'Total Pengajuan',
+      value: items.length,
+      tone: 'blue',
+      icon: BarChart3,
+    },
+    {
+      label: 'Menunggu Persetujuan',
+      value: items.filter((i) => (i as any).status === 'pending').length,
+      tone: 'orange',
+      icon: Clock3,
+    },
+    {
+      label: 'Disetujui',
+      value: items.filter((i) => (i as any).status === 'approved').length,
+      tone: 'green',
+      icon: CircleCheckBig,
+    },
+    {
+      label: 'Ditolak',
+      value: items.filter((i) => (i as any).status === 'rejected').length,
+      tone: 'red',
+      icon: CircleX,
+    },
+  ];
+
   return (
     <div className="leave-page">
-      {/* Header */}
-      <div className="leave-header">
-        <div>
-          <h1>Pengajuan Cuti</h1>
-          <p>Kelola pengajuan cuti Anda dengan mudah</p>
+      <Card className="leave-hero-card" glass>
+        <div className="leave-hero-copy">
+          <p className="leave-badge">Leave Center</p>
+          <h1 className="leave-title">Pengajuan Cuti</h1>
+          <p className="leave-subtitle">Kelola pengajuan cuti Anda dengan mudah</p>
         </div>
         <Button
           variant="primary"
@@ -112,11 +139,11 @@ const LeaveRequestsPage = () => {
           <Plus size={18} />
           Buat Pengajuan
         </Button>
-      </div>
+      </Card>
 
       {/* Error Alert */}
       {error && (
-        <Card className="leave-card" glass style={{ marginBottom: '1.5rem' }}>
+        <Card className="leave-card leave-alert-card" glass>
           <div className="leave-alert leave-alert-error">
             <AlertCircle size={20} />
             <span>{error}</span>
@@ -125,47 +152,33 @@ const LeaveRequestsPage = () => {
       )}
 
       {/* Statistics Card */}
-      <Card className="leave-card" glass style={{ marginBottom: '2rem' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1.5rem' }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#2563eb' }}>
-              {items.length}
-            </div>
-            <div style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', marginTop: '0.5rem' }}>
-              Total Pengajuan
-            </div>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#f59e0b' }}>
-              {items.filter((i) => (i as any).status === 'pending').length}
-            </div>
-            <div style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', marginTop: '0.5rem' }}>
-              Menunggu Persetujuan
-            </div>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#10b981' }}>
-              {items.filter((i) => (i as any).status === 'approved').length}
-            </div>
-            <div style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', marginTop: '0.5rem' }}>
-              Disetujui
-            </div>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#ef4444' }}>
-              {items.filter((i) => (i as any).status === 'rejected').length}
-            </div>
-            <div style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', marginTop: '0.5rem' }}>
-              Ditolak
-            </div>
-          </div>
+      <Card className="leave-card" glass>
+        <div className="leave-stats-grid">
+          {leaveStats.map((stat) => {
+            const Icon = stat.icon;
+
+            return (
+              <div key={stat.label} className="leave-stat-card">
+                <div className="leave-stat-head">
+                  <div>
+                    <p className="leave-stat-value leave-stat-value--label">{stat.label}</p>
+                    <p className="leave-stat-subtitle">Ringkasan status pengajuan</p>
+                  </div>
+                  <span className={`leave-stat-icon leave-stat-icon--${stat.tone}`}>
+                    <Icon size={18} />
+                  </span>
+                </div>
+                <p className={`leave-stat-value leave-stat-value--${stat.tone}`}>{stat.value}</p>
+              </div>
+            );
+          })}
         </div>
       </Card>
 
       {/* Leaves Table */}
       <Card className="leave-card" glass>
         <>
-          <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '1rem' }}>
+          <div className="leave-toolbar">
             <Button
               variant="outline"
               size="md"
@@ -300,8 +313,8 @@ const LeaveRequestsPage = () => {
               </table>
             </div>
           ) : (
-            <div style={{ textAlign: 'center', padding: '3rem' }}>
-              <p style={{ color: 'var(--color-text-disabled)', marginBottom: '1rem' }}>
+            <div className="leave-empty-state">
+              <p className="leave-empty-copy">
                 Belum ada pengajuan cuti. Buat pengajuan baru untuk memulai.
               </p>
               <Button
