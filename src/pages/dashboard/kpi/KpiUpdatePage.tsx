@@ -6,8 +6,6 @@ import { FileText, ArrowLeft } from 'lucide-react';
 import { getKpiDetail, updateKpi } from '@/features/dashboard/api/kpi.service';
 import './KpiPage.css';
 
-type KpiStatus = 'draft' | 'submitted' | 'approved';
-
 type KpiFormState = {
   id: string;
   title: string;
@@ -19,18 +17,11 @@ type KpiFormState = {
 
 type KpiRecord = {
   id?: number | string;
-  employee_id?: number | string;
   title?: string;
   description?: string;
   target?: number | string;
   achievement?: number | string;
   period?: string;
-  score?: number | string;
-  status?: KpiStatus | string;
-  created_at?: string;
-  updated_at?: string;
-  employee?: { id?: number | string; name?: string };
-  [key: string]: unknown;
 };
 
 const KpiUpdatePage = () => {
@@ -61,7 +52,7 @@ const KpiUpdatePage = () => {
 
     try {
       const result = await getKpiDetail(id!);
-      const kpi = result.payload ?? result;
+      const kpi = (result.payload ?? result) as KpiRecord;
       setFormState({
         id: String(kpi.id || ''),
         title: String(kpi.title || ''),

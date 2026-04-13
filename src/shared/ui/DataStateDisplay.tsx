@@ -144,8 +144,8 @@ export const DataStateDisplay: React.FC<DataStateDisplayProps> = ({
 
     case "error":
       const errorMessage = typeof error === "string" ? error : undefined;
-      return error instanceof React.ReactNode ? (
-        (error as React.ReactElement)
+      return React.isValidElement(error) ? (
+        error
       ) : (
         <ErrorState
           message={errorMessage || "Failed to load data"}
@@ -156,8 +156,8 @@ export const DataStateDisplay: React.FC<DataStateDisplayProps> = ({
 
     case "empty":
       const emptyMessage = typeof empty === "string" ? empty : undefined;
-      return empty instanceof React.ReactNode ? (
-        (empty as React.ReactElement)
+      return React.isValidElement(empty) ? (
+        empty
       ) : (
         <EmptyState message={emptyMessage} onBack={onBack} />
       );

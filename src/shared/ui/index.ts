@@ -59,7 +59,7 @@ export {
   TableEmpty,
   TableAction,
   TableActions,
-} from './Table';
+} from './Table/Table';
 
 /* ========================================
    CARD COMPONENTS (NEW DESIGN SYSTEM)
@@ -72,7 +72,7 @@ export {
   CardStat,
   CardHorizontal,
   CardGrid,
-} from './Card';
+} from './Card/Card';
 
 /* ========================================
    BADGE COMPONENTS (NEW DESIGN SYSTEM)
@@ -82,7 +82,7 @@ export {
   BadgeGroup,
   StatusBadge,
   LabelBadge,
-} from './Badge';
+} from './Badge/Badge';
 
 /* ========================================
    PAGINATION COMPONENTS (NEW DESIGN SYSTEM)
@@ -104,7 +104,7 @@ export {
   WarningAlert,
   InfoAlert,
   AlertContainer,
-} from './Alert';
+} from './Alert/Alert';
 
 /* ========================================
    SKELETON COMPONENTS (NEW DESIGN SYSTEM)
@@ -124,19 +124,21 @@ export {
    ======================================== */
 
 // Modal Components
-export { Modal, ConfirmDialog, useConfirmDialog } from './Modal';
+export { Modal } from './Modal';
 
 // Tabs Component
-export { Tabs, TabItem } from './Tabs';
+export { Tabs } from './Tabs';
 
 // Breadcrumbs Component
 export { Breadcrumbs } from './Breadcrumbs';
 
 // Data Display
 export { DataStateDisplay } from './DataStateDisplay';
+export { RouteSuspenseFallback, type RouteSuspenseFallbackProps } from './RouteSuspenseFallback';
 
 // Protected Components
-export { ProtectedComponent, ProtectedRoute } from './ProtectedRoute';
+export { CanAccess as ProtectedComponent } from './ProtectedComponent';
+export { ProtectedRoute } from './ProtectedRoute';
 
 /* ========================================
    UTILITY & HELPER EXPORTS

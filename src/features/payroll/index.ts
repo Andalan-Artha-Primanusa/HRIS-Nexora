@@ -10,7 +10,7 @@ export type {
   PayrollUpdatePayload,
   PayrollGenerateMonthlyPayload,
   PayrollWithEmployee,
-  PayrollDetailItem,
+  PayrollDetail,
   PayrollDetailUpdatePayload,
   PayrollDetailsBulkCreatePayload,
   PayrollDetailBulkUpdatePayload,
@@ -41,8 +41,8 @@ export { PayrollFilters } from "./components/PayrollFilters";
 export { default as PayrollStatusBadge } from "@/shared/ui/PayrollStatusBadge";
 
 // Hooks
-export { useDataState, useAsync } from "@/shared/hooks/usePayrollState";
-export type { DataState, StateConfig } from "@/shared/hooks/usePayrollState";
+export { useDataState, useAsync } from "./hooks/usePayrollState";
+export type { DataState, StateConfig } from "./hooks/usePayrollState";
 
 // Mock data
 export { MOCK_PAYROLL, USE_MOCK_PAYROLL_DATA } from "./api/payroll.mock";

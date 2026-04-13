@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import type { DependencyList } from "react";
 
 export type DataState = "idle" | "loading" | "success" | "error" | "empty";
 
@@ -79,7 +80,7 @@ export function useDataState<T>(
  */
 export function useAsync<T, R = T>(
   asyncFunction: () => Promise<R>,
-  dependencies: React.DependencyList = [],
+  dependencies: DependencyList = [],
   onSuccess?: (data: R) => void,
   onError?: (error: Error) => void
 ) {

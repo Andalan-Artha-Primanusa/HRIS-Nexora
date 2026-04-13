@@ -57,7 +57,7 @@ export interface FormRadioGroupProps {
   onChange?: (value: string) => void;
 }
 
-export interface FormInputAddonProps extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface FormInputAddonProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'prefix'> {
   prefix?: React.ReactNode;
   suffix?: React.ReactNode;
   error?: string;

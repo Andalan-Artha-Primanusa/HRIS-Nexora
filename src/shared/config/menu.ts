@@ -55,6 +55,9 @@ export const menuItems: MenuItem[] = [
         label: 'Documents',
         icon: FileText,
         subItems: [
+          { label: 'My Documents', path: '/my/documents' },
+          { label: 'Review Queue', path: '/documents/review' },
+          { label: 'Expiring Documents', path: '/documents/expiring' },
           { label: 'KTP', path: '/documents/ktp' },
           { label: 'Contract', path: '/documents/contract' },
           { label: 'Other Files', path: '/documents/others' },
@@ -115,6 +118,16 @@ export const menuItems: MenuItem[] = [
     ]
   },
   {
+    label: 'Assets & Inventory',
+    icon: Briefcase,
+    requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
+    subItems: [
+      { label: 'Assets Registry', path: '/assets' },
+      { label: 'Assignments', path: '/assets/assignments' },
+      { label: 'My Assets', path: '/my/assets' },
+    ]
+  },
+  {
     label: 'Reimbursement & Expense',
     icon: Receipt,
     requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
@@ -124,6 +137,28 @@ export const menuItems: MenuItem[] = [
       { label: 'Approval', path: '/expense/approval' },
       { label: 'Categories', path: '/expense/categories' },
       { label: 'Reports', path: '/expense/reports' },
+    ]
+  },
+  {
+    label: 'Training & Competency',
+    icon: Target,
+    requiredChecker: (user) => RBACUtils.isManager(user) || RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
+    subItems: [
+      { label: 'Training Programs', path: '/training/programs' },
+      { label: 'Training Enrollments', path: '/training/enrollments' },
+      { label: 'Competencies', path: '/competencies' },
+      { label: 'My Trainings', path: '/my/trainings' },
+      { label: 'My Competencies', path: '/my/competencies' },
+    ]
+  },
+  {
+    label: 'HR Service Requests',
+    icon: FileText,
+    subItems: [
+      { label: 'My Requests', path: '/my/requests' },
+      { label: 'Requests Queue', path: '/requests' },
+      { label: 'Request Assignment', path: '/requests/assign' },
+      { label: 'Request Status Update', path: '/requests/status' },
     ]
   },
   {
@@ -154,11 +189,17 @@ export const menuItems: MenuItem[] = [
     icon: FileBarChart,
     requiredChecker: (user) => RBACUtils.isManager(user) || RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
     subItems: [
+      { label: 'People Insights', path: '/insights/people/detailed' },
       { label: 'Attendance Report', path: '/reports/attendance' },
       { label: 'Leave Report', path: '/reports/leave' },
       { label: 'Payroll Report', path: '/reports/payroll' },
       { label: 'Custom Report', path: '/reports/custom' },
     ]
+  },
+  {
+    label: 'Notifications',
+    icon: Settings,
+    subItems: [{ label: 'Notification Center', path: '/notifications' }],
   },
   {
     label: 'Admin Tools',

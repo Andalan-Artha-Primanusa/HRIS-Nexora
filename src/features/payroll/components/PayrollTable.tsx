@@ -8,7 +8,7 @@ import "./PayrollTable.css";
  * Displays payroll data in a structured table format with status badges
  */
 
-interface PayrollTableProps {
+export interface PayrollTableProps {
   /** Array of payroll items to display */
   items: PayrollItem[];
   /** Optional additional columns to display */

@@ -45,7 +45,8 @@ const KpiDetailPage = () => {
 
     try {
       const result = await getKpiDetail(id!);
-      setKpi(result.payload ?? result);
+      const payload = (result.payload ?? result) as KpiRecord;
+      setKpi(payload);
       setStatusMessage('Detail KPI berhasil dimuat.');
     } catch (error: any) {
       setStatusMessage('Gagal memuat detail KPI.');

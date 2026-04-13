@@ -160,9 +160,10 @@ const PayrollGeneratePage = () => {
               {items.length > 0 ? (
                 items.map((item, index) => (
                   <tr key={String(item.id ?? index)}>
-                    {columns.map((column) => (
-                      <td key={`${String(item.id ?? index)}-${column}`}>{asDisplay(item[column])}</td>
-                    ))}
+                    {columns.map((column) => {
+                      const record = item as unknown as Record<string, unknown>;
+                      return <td key={`${String(item.id ?? index)}-${column}`}>{asDisplay(record[column])}</td>;
+                    })}
                   </tr>
                 ))
               ) : (

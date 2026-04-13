@@ -15,16 +15,10 @@ import {
   Filter,
   Plus,
   RefreshCw,
-  Eye,
   Pencil,
   Trash2,
   ChevronDown,
-  User,
   Briefcase,
-  MapPin,
-  Calendar,
-  DollarSign,
-  Building2,
 } from "lucide-react";
 import "./EmployeesPage.css";
 
@@ -48,13 +42,6 @@ const DEFAULT_FORM: EmployeeFormState = {
   salary: "",
 };
 
-const DATE_TIME_COLUMNS = ["time", "date", "_at", "time_series"];
-
-const shouldFormatAsTime = (column: string) => {
-  const normalized = column.toLowerCase();
-  return DATE_TIME_COLUMNS.some((token) => normalized.includes(token));
-};
-
 const formatDateTime = (input: string) => {
   const date = new Date(input);
   if (Number.isNaN(date.getTime())) {
@@ -68,36 +55,6 @@ const formatDateTime = (input: string) => {
   }).format(date);
 };
 
-const asDisplay = (column: string, value: unknown) => {
-  if (value === null || value === undefined) return "-";
-  if (Array.isArray(value)) return value.length > 0 ? `${value.length} items` : "-";
-  if (typeof value === "object") {
-    const record = value as Record<string, unknown>;
-    const candidates = [record.name, record.title, record.employee_code, record.status, record.email, record.id];
-    const firstPrimitive = candidates.find(
-      (candidate) => candidate !== null && candidate !== undefined && typeof candidate !== "object"
-    );
-    return firstPrimitive ? String(firstPrimitive) : "-";
-  }
-
-  if (typeof value === "string" && shouldFormatAsTime(column)) {
-    return formatDateTime(value);
-  }
-
-  return String(value);
-};
-
-const getColumns = (items: EmployeeItem[]) => {
-  if (items.length === 0) {
-    return ["user_id", "user", "employee_code", "position", "department", "hire_date", "salary"];
-  }
-
-  const keys = Object.keys(items[0]);
-  const preferred = ["id", "user_id", "user", "employee_code", "position", "department", "hire_date", "salary"];
-  const merged = [...preferred, ...keys.filter((key) => !preferred.includes(key))];
-  return merged.filter((key, index) => merged.indexOf(key) === index && key !== "id");
-};
-
 const EmployeesPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -108,7 +65,7 @@ const EmployeesPage = () => {
   const [items, setItems] = useState<EmployeeItem[]>([]);
   const [createForm, setCreateForm] = useState<EmployeeFormState>(DEFAULT_FORM);
   const [updateForm, setUpdateForm] = useState<EmployeeFormState>(DEFAULT_FORM);
-  const [statusMessage, setStatusMessage] = useState("Ready to call employee API");
+  const [, setStatusMessage] = useState("Ready to call employee API");
   const [loading, setLoading] = useState(false);
 
   // Search & Filter State
@@ -193,8 +150,6 @@ const EmployeesPage = () => {
     setSelectedPosition("");
     setCurrentPage(1);
   };
-
-  const columns = useMemo(() => getColumns(items), [items]);
 
   const requireId = (idValue: string) => {
     const id = idValue.trim();

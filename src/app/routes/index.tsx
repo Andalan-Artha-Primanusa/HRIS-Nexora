@@ -1,4 +1,5 @@
 import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
+import { lazy } from "react";
 import { useAuthStore } from "@/app/store/auth.store";
 import { getRoleBasedDashboardPathFromStorage } from "@/features/auth/utils/roleRedirect";
 import { ProtectedRoute } from "./ProtectedRoute";
@@ -6,51 +7,52 @@ import LoginPage from "../../pages/auth/login/LoginPage";
 import GoogleCallbackPage from "../../pages/auth/login/GoogleCallbackPage";
 import RegisterPage from "../../pages/auth/register/RegisterPage";
 import DashboardLayout from "../layouts/DashboardLayout";
-import OverviewPage from "../../pages/dashboard/overview/OverviewPage";
-import AttendanceOverviewPage from "../../pages/attendance/AttendanceOverviewPage";
-import AttendanceCheckInPage from "../../pages/attendance/AttendanceCheckInPage";
-import AttendanceCheckOutPage from "../../pages/attendance/AttendanceCheckOutPage";
-import AttendanceHistoryPage from "../../pages/attendance/AttendanceHistoryPage";
-import AttendanceTodayPage from "../../pages/attendance/AttendanceTodayPage";
-import AttendanceAdminPage from "../../pages/attendance/AttendanceAdminPage";
-import KpiListPage from "../../pages/dashboard/kpi/KpiListPage";
-import KpiCreatePage from "../../pages/dashboard/kpi/KpiCreatePage";
-import KpiDetailPage from "../../pages/dashboard/kpi/KpiDetailPage";
-import KpiUpdatePage from "../../pages/dashboard/kpi/KpiUpdatePage";
-import KpiApprovePage from "../../pages/dashboard/kpi/KpiApprovePage";
-import MyKpiPage from "../../pages/dashboard/kpi/MyKpiPage";
-import SectionPage from "../../pages/dashboard/SectionPage";
-import ProfilesPage from "../../pages/profiles/ProfilesPage";
-import EmployeesPage from "../../pages/employee/EmployeesPage";
-import MyReimbursementsPage from "../../pages/ess/MyReimbursementsPage";
-import MyPayrollPage from "../../pages/ess/MyPayrollPage";
-import MyLeavesPage from "../../pages/ess/MyLeavesPage";
-import ReimbursementsManagementPage from "../../pages/reimbursements/ReimbursementsManagementPage";
-import LocationsPage from "../../pages/locations/LocationsPage";
-import CreateLocationPage from "../../pages/locations/CreateLocationPage";
-import EditLocationPage from "../../pages/locations/EditLocationPage";
-import AdminUsersPage from "../../pages/admin/AdminUsersPage";
-import AdminRolesPage from "../../pages/admin/AdminRolesPage";
-import AdminPermissionsPage from "../../pages/admin/AdminPermissionsPage";
-import AdminUserAssignRolesPage from "../../pages/admin/AdminUserAssignRolesPage";
-import AdminRoleAssignPermissionsPage from "../../pages/admin/AdminRoleAssignPermissionsPage";
-import LeaveRequestsPage from "../../pages/leave/LeaveRequestsPage";
-import CreateLeavePage from "../../pages/leave/CreateLeavePage";
-import UpdateLeavePage from "../../pages/leave/UpdateLeavePage";
-import LeaveCalendarPage from "../../pages/leave/LeaveCalendarPage";
-import LeaveApprovalPage from "../../pages/leave/LeaveApprovalPage";
-import PayrollManagementPage from "../../pages/payroll/PayrollManagementPage";
-import PayrollDetailsPage from "../../pages/payroll/PayrollDetailsPage";
-import PayrollListPage from "../../pages/payroll/PayrollListPage";
-import PayrollCrudPage from "../../pages/payroll/PayrollCrudPage";
-import PayrollApprovePage from "../../pages/payroll/PayrollApprovePage";
-import PayrollPaymentPage from "../../pages/payroll/PayrollPaymentPage";
-import PayrollGeneratePage from "../../pages/payroll/PayrollGeneratePage";
-import PayrollDashboard from "../../pages/payroll/PayrollDashboard";
+const OverviewPage = lazy(() => import("../../pages/dashboard/overview/OverviewPage"));
+const AttendanceOverviewPage = lazy(() => import("../../pages/attendance/AttendanceOverviewPage"));
+const AttendanceCheckInPage = lazy(() => import("../../pages/attendance/AttendanceCheckInPage"));
+const AttendanceCheckOutPage = lazy(() => import("../../pages/attendance/AttendanceCheckOutPage"));
+const AttendanceHistoryPage = lazy(() => import("../../pages/attendance/AttendanceHistoryPage"));
+const AttendanceTodayPage = lazy(() => import("../../pages/attendance/AttendanceTodayPage"));
+const AttendanceAdminPage = lazy(() => import("../../pages/attendance/AttendanceAdminPage"));
+const KpiListPage = lazy(() => import("../../pages/dashboard/kpi/KpiListPage"));
+const KpiCreatePage = lazy(() => import("../../pages/dashboard/kpi/KpiCreatePage"));
+const KpiDetailPage = lazy(() => import("../../pages/dashboard/kpi/KpiDetailPage"));
+const KpiUpdatePage = lazy(() => import("../../pages/dashboard/kpi/KpiUpdatePage"));
+const KpiApprovePage = lazy(() => import("../../pages/dashboard/kpi/KpiApprovePage"));
+const MyKpiPage = lazy(() => import("../../pages/dashboard/kpi/MyKpiPage"));
+const SectionPage = lazy(() => import("../../pages/dashboard/SectionPage"));
+const ProfilesPage = lazy(() => import("../../pages/profiles/ProfilesPage"));
+const EmployeesPage = lazy(() => import("../../pages/employee/EmployeesPage"));
+const MyReimbursementsPage = lazy(() => import("../../pages/ess/MyReimbursementsPage"));
+const MyPayrollPage = lazy(() => import("../../pages/ess/MyPayrollPage"));
+const MyLeavesPage = lazy(() => import("../../pages/ess/MyLeavesPage"));
+const ReimbursementsManagementPage = lazy(() => import("../../pages/reimbursements/ReimbursementsManagementPage"));
+const LocationsPage = lazy(() => import("../../pages/locations/LocationsPage"));
+const CreateLocationPage = lazy(() => import("../../pages/locations/CreateLocationPage"));
+const EditLocationPage = lazy(() => import("../../pages/locations/EditLocationPage"));
+const AdminUsersPage = lazy(() => import("../../pages/admin/AdminUsersPage"));
+const AdminRolesPage = lazy(() => import("../../pages/admin/AdminRolesPage"));
+const AdminPermissionsPage = lazy(() => import("../../pages/admin/AdminPermissionsPage"));
+const AdminUserAssignRolesPage = lazy(() => import("../../pages/admin/AdminUserAssignRolesPage"));
+const AdminRoleAssignPermissionsPage = lazy(() => import("../../pages/admin/AdminRoleAssignPermissionsPage"));
+const LeaveRequestsPage = lazy(() => import("../../pages/leave/LeaveRequestsPage"));
+const CreateLeavePage = lazy(() => import("../../pages/leave/CreateLeavePage"));
+const UpdateLeavePage = lazy(() => import("../../pages/leave/UpdateLeavePage"));
+const LeaveCalendarPage = lazy(() => import("../../pages/leave/LeaveCalendarPage"));
+const LeaveApprovalPage = lazy(() => import("../../pages/leave/LeaveApprovalPage"));
+const PayrollManagementPage = lazy(() => import("../../pages/payroll/PayrollManagementPage"));
+const PayrollDetailsPage = lazy(() => import("../../pages/payroll/PayrollDetailsPage"));
+const PayrollListPage = lazy(() => import("../../pages/payroll/PayrollListPage"));
+const PayrollCrudPage = lazy(() => import("../../pages/payroll/PayrollCrudPage"));
+const PayrollApprovePage = lazy(() => import("../../pages/payroll/PayrollApprovePage"));
+const PayrollPaymentPage = lazy(() => import("../../pages/payroll/PayrollPaymentPage"));
+const PayrollGeneratePage = lazy(() => import("../../pages/payroll/PayrollGeneratePage"));
+const PayrollDashboard = lazy(() => import("../../pages/payroll/PayrollDashboard"));
 
 const sectionRoutes = [
   { path: "/hr-summary" },
   { path: "/analytics" },
+  { path: "/insights/people/detailed" },
   { path: "/organization/department" },
   { path: "/organization/position" },
   { path: "/employment/status" },
@@ -58,12 +60,28 @@ const sectionRoutes = [
   { path: "/documents/ktp" },
   { path: "/documents/contract" },
   { path: "/documents/others" },
+  { path: "/documents/review" },
+  { path: "/documents/expiring" },
+  { path: "/my/documents" },
+  { path: "/notifications" },
   { path: "/attendance/timesheet" },
   { path: "/attendance/shifts" },
   { path: "/attendance/overtime" },
   { path: "/attendance/reports" },
   { path: "/leave/type" },
   { path: "/leave/policy" },
+  { path: "/assets" },
+  { path: "/assets/assignments" },
+  { path: "/my/assets" },
+  { path: "/training/programs" },
+  { path: "/training/enrollments" },
+  { path: "/competencies" },
+  { path: "/my/trainings" },
+  { path: "/my/competencies" },
+  { path: "/my/requests" },
+  { path: "/requests" },
+  { path: "/requests/assign" },
+  { path: "/requests/status" },
   { path: "/payroll/tax" },
   { path: "/payroll/reports" },
   { path: "/expense/categories" },

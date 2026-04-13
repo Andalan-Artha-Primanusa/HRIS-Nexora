@@ -1,0 +1,248 @@
+import { api } from '@/shared/api/httpClient';
+
+type SectionActionContext = {
+  path: string;
+  formState: Record<string, string>;
+  selectedDocumentFile: File | null;
+  buildPayloadByKeys: (keys: string[]) => Record<string, string>;
+  buildProfilePayload: () => Record<string, string>;
+  getRequiredId: (label: string, field?: string) => string;
+  getRequiredProfileId: () => string;
+};
+
+const parseNumericIds = (value: string | undefined, fieldName: string) => {
+  const ids = (value ?? '')
+    .split(',')
+    .map((item) => Number(item.trim()))
+    .filter((item) => Number.isInteger(item) && item > 0);
+
+  if (ids.length === 0) {
+    throw new Error(`${fieldName} wajib diisi (pisahkan dengan koma).`);
+  }
+
+  return ids;
+};
+
+const getCreateActions = (ctx: SectionActionContext) => ({
+  createProfile: () => api.post('/profiles', ctx.buildProfilePayload()),
+  createEmployee: () =>
+    api.post('/employees', ctx.buildPayloadByKeys(['user_id', 'employee_code', 'position', 'department', 'hire_date', 'salary'])),
+  createLeave: () => api.post('/leaves', ctx.buildPayloadByKeys(['leave_type', 'start_date', 'end_date', 'total_days', 'reason'])),
+  createLeavePolicy: () => {
+    const { id: _id, ...payload } = ctx.formState;
+    return api.post('/leave-policies', payload);
+  },
+  createReimbursement: () =>
+    api.post('/my/reimbursements', ctx.buildPayloadByKeys(['title', 'description', 'amount', 'category', 'expense_date', 'receipt_path'])),
+  createAsset: () => api.post('/assets', ctx.buildPayloadByKeys(['asset_code', 'name', 'category', 'cost', 'purchase_date', 'location_id'])),
+  createMyRequest: () => api.post('/my/requests', ctx.buildPayloadByKeys(['request_type', 'description', 'priority'])),
+  createTrainingProgram: () =>
+    api.post('/training/programs', ctx.buildPayloadByKeys(['name', 'code', 'category', 'duration_hours', 'start_date', 'end_date'])),
+  createCompetency: () => api.post('/competencies', ctx.buildPayloadByKeys(['name', 'code', 'category', 'level'])),
+  createLocation: () => api.post('/locations', ctx.buildPayloadByKeys(['name', 'latitude', 'longitude', 'radius'])),
+  createReimbursementAdmin: () =>
+    api.post('/reimbursements', ctx.buildPayloadByKeys(['title', 'description', 'amount', 'category', 'expense_date', 'receipt_path'])),
+});
+
+const getUpdateActions = (ctx: SectionActionContext) => ({
+  updateProfile: () => {
+    const id = ctx.getRequiredProfileId();
+    return api.put(`/profiles/${id}`, ctx.buildProfilePayload());
+  },
+  updateLeaveRequest: () => {
+    const id = ctx.getRequiredId('Leave ID');
+    return api.put(`/leaves/${id}`, ctx.buildPayloadByKeys(['leave_type', 'start_date', 'end_date', 'total_days', 'reason']));
+  },
+  updateLeavePolicy: () => {
+    const id = ctx.getRequiredId('Policy ID');
+    const { id: _id, ...payload } = ctx.formState;
+    return api.put(`/leave-policies/${id}`, payload);
+  },
+  updateRequestStatus: () => {
+    const id = ctx.getRequiredId('Request ID');
+    return api.put(`/requests/${id}/status`, {
+      status: ctx.formState.status,
+      completion_notes: ctx.formState.completion_notes,
+    });
+  },
+});
+
+const getDeleteActions = (ctx: SectionActionContext) => ({
+  deleteProfile: () => {
+    const id = ctx.getRequiredProfileId();
+    return api.delete(`/profiles/${id}`);
+  },
+  deleteLeavePolicy: () => {
+    const id = ctx.getRequiredId('Policy ID');
+    return api.delete(`/leave-policies/${id}`);
+  },
+  cancelLeaveRequest: () => {
+    const id = ctx.getRequiredId('Leave ID');
+    return api.delete(`/leaves/${id}`);
+  },
+});
+
+const getReadActions = (ctx: SectionActionContext) => ({
+  getProfileDetail: () => {
+    const id = ctx.getRequiredProfileId();
+    return api.get(`/profiles/${id}`);
+  },
+  submitMyPayroll: () => api.get('/my/payroll'),
+  getMyPayrollSlip: () => {
+    const id = ctx.getRequiredId('Payroll ID');
+    return api.get(`/my/payroll/${id}/slip`);
+  },
+  exportMyPayrollCsv: () => {
+    const id = ctx.getRequiredId('Payroll ID');
+    return api.get(`/my/payroll/${id}/export`);
+  },
+  exportMyPayrollPdf: () => {
+    const id = ctx.getRequiredId('Payroll ID');
+    return api.get(`/my/payroll/${id}/export-pdf`);
+  },
+  viewRequestDetail: () => {
+    const id = ctx.getRequiredId('Request ID');
+    const detailEndpoint = ctx.path === '/requests' ? `/requests/${id}` : `/my/requests/${id}`;
+    return api.get(detailEndpoint);
+  },
+  getNotificationUnreadCount: () => api.get('/notifications/unread-count'),
+});
+
+const getWorkflowActions = (ctx: SectionActionContext) => ({
+  startOnboarding: () => {
+    const id = ctx.getRequiredId('Employee ID');
+    return api.put(`/employees/${id}/onboarding/start`, { notes: ctx.formState.lifecycle_notes });
+  },
+  completeOnboarding: () => {
+    const id = ctx.getRequiredId('Employee ID');
+    return api.put(`/employees/${id}/onboarding/complete`, { notes: ctx.formState.lifecycle_notes });
+  },
+  startOffboarding: () => {
+    const id = ctx.getRequiredId('Employee ID');
+    return api.put(`/employees/${id}/offboarding/start`, { notes: ctx.formState.lifecycle_notes });
+  },
+  completeOffboarding: () => {
+    const id = ctx.getRequiredId('Employee ID');
+    return api.put(`/employees/${id}/offboarding/complete`, { notes: ctx.formState.lifecycle_notes });
+  },
+  approveLeave: () => {
+    const id = ctx.getRequiredId('Leave ID');
+    return api.put(`/leaves/${id}/approve`, { approval_note: ctx.formState.approval_notes });
+  },
+  rejectLeave: () => {
+    const id = ctx.getRequiredId('Leave ID');
+    return api.put(`/leaves/${id}/reject`, { rejection_note: ctx.formState.approval_notes });
+  },
+  checkIn: () => api.post('/attendance/check-in', ctx.buildPayloadByKeys(['latitude', 'longitude'])),
+  checkOut: () => api.post('/attendance/check-out'),
+  submitMyReimbursement: () => {
+    const id = ctx.getRequiredId('Reimbursement ID');
+    return api.post(`/my/reimbursements/${id}/submit`, {});
+  },
+  approveReimbursement: () => {
+    const id = ctx.getRequiredId('Reimbursement ID');
+    return api.put(`/reimbursements/${id}/approve`, { approval_note: ctx.formState.approval_note });
+  },
+  rejectReimbursement: () => {
+    const id = ctx.getRequiredId('Reimbursement ID');
+    return api.put(`/reimbursements/${id}/reject`, { rejection_note: ctx.formState.rejection_note });
+  },
+  markReimbursementPaid: () => {
+    const id = ctx.getRequiredId('Reimbursement ID');
+    return api.put(`/reimbursements/${id}/mark-paid`);
+  },
+  assignAsset: () => {
+    const id = ctx.getRequiredId('Asset ID');
+    return api.post(`/assets/${id}/assign`, {
+      employee_id: ctx.formState.employee_id,
+      assigned_at: ctx.formState.assigned_at,
+      expected_return_date: ctx.formState.expected_return_date,
+    });
+  },
+  returnAsset: () => {
+    const assignmentId = ctx.getRequiredId('Assignment ID', 'assignment_id');
+    return api.put(`/assets/assignments/${assignmentId}/return`, {});
+  },
+  uploadMyDocument: () => {
+    if (!ctx.selectedDocumentFile) {
+      throw new Error('File dokumen wajib dipilih.');
+    }
+
+    const formData = new FormData();
+    Object.entries(ctx.formState).forEach(([key, value]) => {
+      if (key !== 'file' && value !== '') {
+        formData.append(key, value);
+      }
+    });
+    formData.append('file', ctx.selectedDocumentFile);
+
+    return api.post('/my/documents', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+  reviewDocument: () => {
+    const id = ctx.getRequiredId('Document ID');
+    return api.put(`/documents/${id}/review`, {
+      status: ctx.formState.status,
+      remarks: ctx.formState.remarks,
+    });
+  },
+  addRequestComment: () => {
+    const id = ctx.getRequiredId('Request ID');
+    return api.post(`/my/requests/${id}/comments`, { comment_text: ctx.formState.comment_text });
+  },
+  assignRequest: () => {
+    const id = ctx.getRequiredId('Request ID');
+    return api.put(`/requests/${id}/assign`, { assigned_to_user_id: ctx.formState.assigned_to_user_id });
+  },
+  enrollTrainingProgram: () => {
+    const id = ctx.getRequiredId('Training Program ID');
+    return api.post(`/training/programs/${id}/enroll`, { employee_ids: parseNumericIds(ctx.formState.employee_ids, 'employee_ids') });
+  },
+  completeTrainingEnrollment: () => {
+    const id = ctx.getRequiredId('Enrollment ID');
+    return api.put(`/training/enrollments/${id}/complete`, {
+      attendance_percentage: ctx.formState.attendance_percentage,
+      assessment_score: ctx.formState.assessment_score,
+    });
+  },
+  assignCompetency: () => {
+    const id = ctx.getRequiredId('Competency ID');
+    return api.post(`/competencies/${id}/assign`, { employee_ids: parseNumericIds(ctx.formState.employee_ids, 'employee_ids') });
+  },
+  submitKpi: () => api.post(`/my/kpi/${ctx.formState.id}/submit`),
+  generatePayroll: () => api.post('/payroll/generate/monthly', { period: ctx.formState.period }),
+  approvePayroll: () => {
+    const id = ctx.getRequiredId('Payroll ID');
+    return api.post(`/payroll/${id}/approve`);
+  },
+  markPayrollPaid: () => {
+    const id = ctx.getRequiredId('Payroll ID');
+    return api.post(`/payroll/${id}/pay`);
+  },
+  assignRoleToUser: () => {
+    const id = ctx.getRequiredId('User ID');
+    return api.post(`/admin/users/${id}/assign-role`, {
+      role_ids: parseNumericIds(ctx.formState.role_ids, 'role_ids'),
+    });
+  },
+  assignPermissionToRole: () => {
+    const id = ctx.getRequiredId('Role ID');
+    return api.post(`/admin/roles/${id}/assign-permission`, {
+      permission_ids: parseNumericIds(ctx.formState.permission_ids, 'permission_ids'),
+    });
+  },
+  markNotificationRead: () => {
+    const id = ctx.getRequiredId('Notification ID');
+    return api.put(`/notifications/${id}/read`, {});
+  },
+  markAllNotificationsRead: () => api.put('/notifications/read-all', {}),
+});
+
+export const createSectionActionExecutor = (ctx: SectionActionContext): Record<string, () => Promise<any>> => ({
+  ...getCreateActions(ctx),
+  ...getUpdateActions(ctx),
+  ...getDeleteActions(ctx),
+  ...getReadActions(ctx),
+  ...getWorkflowActions(ctx),
+});

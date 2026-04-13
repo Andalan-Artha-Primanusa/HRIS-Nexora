@@ -57,7 +57,7 @@ function extractItemFromResponse(response: unknown): EmployeeItem | null {
 
   // Try direct item if already correct structure
   if ("id" in resp && "employee_code" in resp) {
-    return resp as EmployeeItem;
+    return resp as unknown as EmployeeItem;
   }
 
   // Try common API response paths
