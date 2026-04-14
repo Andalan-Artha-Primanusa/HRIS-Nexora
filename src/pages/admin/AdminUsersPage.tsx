@@ -7,7 +7,9 @@ import { Alert } from "@/shared/ui/Alert";
 import { getAllUsers } from "@/features/admin/api/admin.service";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { RBACUtils } from "@/shared/hooks/rbac";
+import { RefreshCw, ShieldAlert, UserPlus, Users } from "lucide-react";
 import "./AdminCrudPages.css";
+import "./AdminUsersPage.css";
 
 interface UserData {
   id: number;
@@ -20,16 +22,29 @@ const AdminUsersPage = () => {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const canViewUsers = RBACUtils.canViewUsers(user);
+  const roleToneClass = (roleName: string) => {
+    if (roleName === "Super Administrator") return "admin-users-role-chip admin-users-role-chip--super";
+    if (roleName === "Administrator") return "admin-users-role-chip admin-users-role-chip--admin";
+    return "admin-users-role-chip admin-users-role-chip--default";
+  };
   
   if (!canViewUsers) {
     return (
       <div className="crud-page">
-        <div className="crud-header">
-          <h1>🚫 Akses Ditolak</h1>
-          <p>Anda tidak memiliki izin untuk mengakses halaman ini.</p>
-        </div>
-        <Card className="crud-card" glass>
-          <p>Silahkan hubungi Administrator untuk mendapatkan akses.</p>
+        <Card className="admin-users-hero" glass>
+          <div className="crud-header admin-users-header">
+            <div className="crud-header-copy">
+              <p className="crud-page-badge">Admin Center</p>
+              <div className="crud-header-title-row">
+                <span className="crud-header-icon"><ShieldAlert size={18} /></span>
+                <h1>Akses Ditolak</h1>
+              </div>
+              <p>Anda tidak memiliki izin untuk mengakses halaman ini.</p>
+            </div>
+          </div>
+        </Card>
+        <Card className="crud-card admin-users-card" glass>
+          <p>Silakan hubungi Administrator untuk mendapatkan akses.</p>
         </Card>
       </div>
     );
@@ -74,55 +89,60 @@ const AdminUsersPage = () => {
 
   return (
     <div className="crud-page">
-      {/* Header */}
-      <div className="crud-header">
-        <div>
-          <h1>👥 User Management</h1>
-          <p>Kelola dan tampilkan daftar users</p>
+      <Card className="admin-users-hero" glass>
+        <div className="crud-header admin-users-header">
+          <div className="crud-header-copy">
+            <p className="crud-page-badge">Admin Center</p>
+            <div className="crud-header-title-row">
+              <span className="crud-header-icon"><Users size={18} /></span>
+              <h1>User Management</h1>
+            </div>
+            <p>Kelola dan tampilkan daftar pengguna beserta role mereka.</p>
+          </div>
+          <div className="admin-users-toolbar">
+            <Button
+              variant="primary"
+              size="md"
+              onClick={() => navigate("/admin/users/assign-roles")}
+            >
+              <UserPlus size={16} />
+              Assign Role
+            </Button>
+            <Button
+              variant="outline"
+              size="md"
+              onClick={() => void loadUsers()}
+              disabled={loading}
+            >
+              <RefreshCw size={16} />
+              {loading ? "Memuat..." : "Segarkan"}
+            </Button>
+          </div>
         </div>
-        <div style={{ display: "flex", gap: "10px" }}>
-          <Button 
-            variant="primary" 
-            size="md" 
-            onClick={() => navigate("/admin/users/assign-roles")}
-          >
-            ➕ Assign Role
-          </Button>
-          <Button 
-            variant="outline" 
-            size="md" 
-            onClick={() => void loadUsers()} 
-            disabled={loading}
-          >
-            {loading ? "Loading..." : "🔄 Refresh"}
-          </Button>
-        </div>
-      </div>
+      </Card>
 
-      {/* Status Message */}
       {statusMessage && (
-        <Alert 
-          type={alertType} 
-          message={statusMessage} 
+        <Alert
+          type={alertType}
+          message={statusMessage}
           onClose={() => setStatusMessage('')}
           dismissible
         />
       )}
 
-      {/* Users Table */}
-      <Card className="crud-card" glass>
-        <h2>👤 Daftar Users</h2>
+      <Card className="crud-card admin-users-card" glass>
+        <h2>Daftar Pengguna</h2>
         
         {users.length === 0 ? (
-          <div style={{ padding: "40px 20px", textAlign: "center", color: "#888" }}>
+          <div className="admin-users-empty-state">
             Tidak ada data user
           </div>
         ) : (
           <div className="crud-table-wrap">
-            <table className="crud-table">
+            <table className="crud-table admin-users-table">
               <thead>
                 <tr>
-                  <th style={{ width: "60px" }}>ID</th>
+                  <th className="admin-users-col-id">ID</th>
                   <th>Nama</th>
                   <th>Email</th>
                   <th>Roles</th>
@@ -132,29 +152,22 @@ const AdminUsersPage = () => {
                 {users.map((u) => (
                   <tr key={u.id}>
                     <td>{u.id}</td>
-                    <td style={{ fontWeight: "500" }}>{u.name}</td>
-                    <td style={{ color: "var(--color-text-secondary)" }}>{u.email}</td>
+                    <td className="admin-users-name">{u.name}</td>
+                    <td className="admin-users-email">{u.email}</td>
                     <td>
                       {u.role_names && u.role_names.length > 0 ? (
-                        <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                        <div className="admin-users-role-list">
                           {u.role_names.map((role, idx) => (
                             <span
                               key={idx}
-                              style={{
-                                padding: "4px 10px",
-                                borderRadius: "6px",
-                                fontSize: "12px",
-                                fontWeight: "500",
-                                backgroundColor: role === "Super Administrator" ? "#fee2e2" : role === "Administrator" ? "#dbeafe" : "#f0fdf4",
-                                color: role === "Super Administrator" ? "#7f1d1d" : role === "Administrator" ? "#1e40af" : "#15803d",
-                              }}
+                              className={roleToneClass(role)}
                             >
                               {role}
                             </span>
                           ))}
                         </div>
                       ) : (
-                        <span style={{ color: "var(--color-text-disabled)", fontSize: "14px" }}>-</span>
+                        <span className="admin-users-role-empty">-</span>
                       )}
                     </td>
                   </tr>

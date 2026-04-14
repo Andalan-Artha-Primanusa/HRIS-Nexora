@@ -7,7 +7,9 @@ import { RBACUtils } from "@/shared/hooks/rbac";
 import { getAllPermissions } from "@/features/admin/api/admin.service";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import type { AdminEntityItem } from "@/features/admin/types/admin.types";
+import { KeyRound, RefreshCw, ShieldAlert } from "lucide-react";
 import "./AdminCrudPages.css";
+import "./AdminPermissionsPage.css";
 
 const asDisplay = (value: unknown) => {
   if (value === null || value === undefined) return "-";
@@ -33,12 +35,20 @@ const AdminPermissionsPage = () => {
   if (!canViewPermissions) {
     return (
       <div className="crud-page">
-        <div className="crud-header">
-          <h1>🚫 Akses Ditolak</h1>
-          <p>Anda tidak memiliki izin untuk mengakses halaman ini.</p>
-        </div>
-        <Card className="crud-card" glass>
-          <p>Silahkan hubungi Administrator untuk mendapatkan akses.</p>
+        <Card className="admin-permissions-hero" glass>
+          <div className="crud-header admin-permissions-header">
+            <div className="crud-header-copy">
+              <p className="crud-page-badge">Admin Center</p>
+              <div className="crud-header-title-row">
+                <span className="crud-header-icon"><ShieldAlert size={18} /></span>
+                <h1>Akses Ditolak</h1>
+              </div>
+              <p>Anda tidak memiliki izin untuk mengakses halaman ini.</p>
+            </div>
+          </div>
+        </Card>
+        <Card className="crud-card admin-permissions-card" glass>
+          <p>Silakan hubungi Administrator untuk mendapatkan akses.</p>
         </Card>
       </div>
     );
@@ -89,15 +99,22 @@ const AdminPermissionsPage = () => {
 
   return (
     <div className="crud-page">
-      <div className="crud-header">
-        <div>
-          <h1>Permission Management (Admin)</h1>
-          <p>Endpoint: GET /admin/permissions</p>
+      <Card className="admin-permissions-hero" glass>
+        <div className="crud-header admin-permissions-header">
+          <div className="crud-header-copy">
+            <p className="crud-page-badge">Admin Center</p>
+            <div className="crud-header-title-row">
+              <span className="crud-header-icon"><KeyRound size={18} /></span>
+              <h1>Permission Management</h1>
+            </div>
+            <p>Kelola dan tampilkan daftar permission yang tersedia untuk pengaturan akses sistem.</p>
+          </div>
+          <Button variant="outline" size="md" onClick={() => void loadPermissions()} disabled={loading}>
+            <RefreshCw size={16} />
+            {loading ? "Memuat..." : "Segarkan"}
+          </Button>
         </div>
-        <Button variant="outline" size="md" onClick={() => void loadPermissions()} disabled={loading}>
-          Refresh
-        </Button>
-      </div>
+      </Card>
 
       {/* Status Alert */}
       {statusMessage && (
@@ -109,14 +126,19 @@ const AdminPermissionsPage = () => {
         />
       )}
 
-      <Card className="crud-card" glass>
-        <h2>Permissions Table</h2>
+      <Card className="crud-card admin-permissions-card" glass>
+        <h2>Tabel Permissions</h2>
         <div className="crud-table-wrap">
-          <table className="crud-table">
+          <table className="crud-table admin-permissions-table">
             <thead>
               <tr>
                 {columns.map((column) => (
-                  <th key={column}>{column}</th>
+                  <th key={column}>
+                    {column === "id" && "ID"}
+                    {column === "name" && "Permission"}
+                    {column === "guard_name" && "Guard"}
+                    {!['id', 'name', 'guard_name'].includes(column) && column}
+                  </th>
                 ))}
               </tr>
             </thead>
@@ -131,7 +153,7 @@ const AdminPermissionsPage = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={columns.length}>No permission data available.</td>
+                  <td colSpan={columns.length}>Tidak ada data permission.</td>
                 </tr>
               )}
             </tbody>
@@ -139,7 +161,7 @@ const AdminPermissionsPage = () => {
         </div>
       </Card>
 
-      <Card className="crud-card" glass>
+      <Card className="crud-card admin-permissions-card" glass>
         <h2>Raw Response</h2>
         <pre className="crud-response">{responseText || "Response API akan tampil di sini."}</pre>
       </Card>

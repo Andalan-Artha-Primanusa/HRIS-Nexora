@@ -117,8 +117,9 @@ const CreateLocationPage = () => {
           <ArrowLeft size={20} />
         </button>
         <div>
+          <p className="location-page-badge">Location Center</p>
           <h1>Buat Lokasi Baru</h1>
-          <p>Tambahkan lokasi absensi dengan koordinat GPS dan radius</p>
+          <p>Tambahkan lokasi absensi dengan koordinat GPS dan radius secara rapi dan konsisten.</p>
         </div>
       </div>
 
@@ -174,7 +175,7 @@ const CreateLocationPage = () => {
                 />
                 {locationDetected && (
                   <span className="location-badge location-badge-success">
-                    ✓ Terdeteksi
+                    Terdeteksi
                   </span>
                 )}
               </div>
@@ -199,7 +200,7 @@ const CreateLocationPage = () => {
                 />
                 {locationDetected && (
                   <span className="location-badge location-badge-success">
-                    ✓ Terdeteksi
+                    Terdeteksi
                   </span>
                 )}
               </div>

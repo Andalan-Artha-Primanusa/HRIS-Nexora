@@ -3,7 +3,7 @@ import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { approveLeave, getPendingLeaves, rejectLeave } from "@/features/leave/api/leave.service";
 import type { LeaveItem } from "@/features/leave/types/leave.types";
-import { Check, X } from "lucide-react";
+import { BarChart3, Check, CircleCheckBig, CircleX, Clock3, X } from "lucide-react";
 import "./LeavePages.css";
 
 const formatDate = (dateString: string | undefined) => {
@@ -53,6 +53,41 @@ const LeaveApprovalPage = () => {
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
+  const leaveSummaryCards = [
+    {
+      label: "Pending Requests",
+      subtitle: "Pengajuan yang menunggu aksi",
+      value: String(items.length),
+      change: "Prioritas review hari ini",
+      tone: "blue" as const,
+      icon: BarChart3,
+    },
+    {
+      label: "Ready to Review",
+      subtitle: "Daftar yang dapat diproses",
+      value: String(items.length > 0 ? items.length : 0),
+      change: "Approve atau reject dengan cepat",
+      tone: "orange" as const,
+      icon: Clock3,
+    },
+    {
+      label: "Approved Today",
+      subtitle: "Aksi yang selesai hari ini",
+      value: "0",
+      change: "Update mengikuti aksi terbaru",
+      tone: "green" as const,
+      icon: CircleCheckBig,
+    },
+    {
+      label: "Rejected Today",
+      subtitle: "Aksi penolakan hari ini",
+      value: "0",
+      change: "Status final penolakan",
+      tone: "red" as const,
+      icon: CircleX,
+    },
+  ];
+
   const loadPending = async () => {
     setLoading(true);
 
@@ -98,14 +133,37 @@ const LeaveApprovalPage = () => {
 
   return (
     <div className="leave-page">
-      <div className="leave-header">
-        <div>
-          <h1>✅ Leave Approval</h1>
-          <p>Review and approve/reject pending leave requests</p>
+      <Card className="leave-hero-card" glass>
+        <div className="leave-hero-copy">
+          <p className="leave-badge">Leave Center</p>
+          <h1 className="leave-title">Leave Approval</h1>
+          <p className="leave-subtitle">Review and approve/reject pending leave requests in a clean, consistent layout.</p>
         </div>
         <Button variant="primary" size="md" onClick={() => void loadPending()} disabled={loading}>
           {loading ? "Loading..." : "Refresh"}
         </Button>
+      </Card>
+
+      <div className="leave-summary-grid">
+        {leaveSummaryCards.map((card) => {
+          const Icon = card.icon;
+
+          return (
+            <Card key={card.label} className="leave-summary-card" glass>
+              <div className="leave-summary-header">
+                <div>
+                  <span className="leave-summary-label">{card.label}</span>
+                  <p className="leave-summary-subtitle">{card.subtitle}</p>
+                </div>
+                <span className={`leave-summary-icon leave-summary-icon--${card.tone}`}>
+                  <Icon size={18} />
+                </span>
+              </div>
+              <div className={`leave-summary-value leave-summary-value--${card.tone}`}>{card.value}</div>
+              <div className="leave-summary-change">{card.change}</div>
+            </Card>
+          );
+        })}
       </div>
 
       <Card className="leave-card" glass>

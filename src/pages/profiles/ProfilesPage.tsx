@@ -695,6 +695,44 @@ const ProfilesPage = () => {
     return Array.from(positions).sort();
   }, [profiles]);
 
+  const profileSummaryCards = useMemo(
+    () => [
+      {
+        label: "Total Profiles",
+        subtitle: "Semua data profil karyawan",
+        value: String(profiles.length),
+        change: "Seluruh data yang tersimpan",
+        tone: "blue" as const,
+        icon: User,
+      },
+      {
+        label: "Filtered Results",
+        subtitle: "Hasil pencarian saat ini",
+        value: String(sortedProfiles.length),
+        change: `${paginatedProfiles.length} data di halaman ini`,
+        tone: "green" as const,
+        icon: Search,
+      },
+      {
+        label: "Departments",
+        subtitle: "Departemen unik yang aktif",
+        value: String(uniqueDepartments.length),
+        change: "Distribusi struktur kerja",
+        tone: "orange" as const,
+        icon: Building2,
+      },
+      {
+        label: "Positions",
+        subtitle: "Jabatan unik yang tersedia",
+        value: String(uniquePositions.length),
+        change: "Lapisan peran organisasi",
+        tone: "purple" as const,
+        icon: Shield,
+      },
+    ],
+    [paginatedProfiles.length, profiles.length, sortedProfiles.length, uniqueDepartments.length, uniquePositions.length]
+  );
+
   // Reset pagination when filters change
   useEffect(() => {
     setCurrentPage(1);
@@ -1313,10 +1351,11 @@ const ProfilesPage = () => {
   return (
     <div className="profiles-page">
       {/* Header - Title Section */}
-      <div className="profiles-list-header" style={{ borderBottom: "2px solid #2563eb", paddingBottom: "20px" }}>
+      <div className="profiles-list-header">
         <div className="profiles-list-title">
-          <h1 style={{ color: "#2563eb", marginBottom: "4px" }}>👥 Daftar Karyawan</h1>
-          <p style={{ color: "var(--color-text-secondary)", fontSize: "0.9rem" }}>Kelola data profil dan informasi kepegawaian</p>
+          <span className="profiles-page-badge">People Center</span>
+          <h1>Profiles Overview</h1>
+          <p>Kelola data profil dan informasi kepegawaian dengan tampilan yang rapi, konsisten, dan mudah dibaca.</p>
         </div>
         <div className="profiles-list-actions">
           <Button
@@ -1335,9 +1374,31 @@ const ProfilesPage = () => {
             disabled={loading}
             style={{ borderColor: "#2563eb", color: "#2563eb" }}
           >
-            🔄 Segarkan
+            Segarkan
           </Button>
         </div>
+      </div>
+
+      <div className="profiles-summary-grid">
+        {profileSummaryCards.map((card) => {
+          const Icon = card.icon;
+
+          return (
+            <Card key={card.label} className="profiles-summary-card" glass>
+              <div className="profiles-summary-header">
+                <div>
+                  <span className="profiles-summary-label">{card.label}</span>
+                  <p className="profiles-summary-subtitle">{card.subtitle}</p>
+                </div>
+                <span className={`profiles-summary-icon profiles-summary-icon--${card.tone}`}>
+                  <Icon size={20} />
+                </span>
+              </div>
+              <div className="profiles-summary-value">{card.value}</div>
+              <div className="profiles-summary-change">{card.change}</div>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Search Bar - Compact Header */}

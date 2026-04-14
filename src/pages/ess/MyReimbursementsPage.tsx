@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
+import { BarChart3, FileText, Receipt, Send } from "lucide-react";
 import {
   createMyReimbursement,
   getMyReimbursements,
@@ -46,6 +47,47 @@ const MyReimbursementsPage = () => {
   const [form, setForm] = useState<MyReimbursementPayload>(DEFAULT_FORM);
 
   const columns = useMemo(() => getColumns(items), [items]);
+  const summaryCards = useMemo(() => {
+    const draftCount = items.filter((item) => String(item.status ?? "").toLowerCase() === "draft").length;
+    const submittedCount = items.filter((item) => String(item.status ?? "").toLowerCase() === "submitted").length;
+    const approvedCount = items.filter((item) => String(item.status ?? "").toLowerCase() === "approved").length;
+    const totalAmount = items.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+
+    return [
+      {
+        label: "Total Reimbursement",
+        subtitle: "Semua reimbursement pribadi",
+        value: String(items.length),
+        change: "Data reimbursement aktif",
+        tone: "blue" as const,
+        icon: BarChart3,
+      },
+      {
+        label: "Draft",
+        subtitle: "Belum disubmit",
+        value: String(draftCount),
+        change: "Siap diajukan",
+        tone: "orange" as const,
+        icon: FileText,
+      },
+      {
+        label: "Submitted + Approved",
+        subtitle: "Sedang diproses / selesai",
+        value: String(submittedCount + approvedCount),
+        change: "Progress reimbursement",
+        tone: "green" as const,
+        icon: Send,
+      },
+      {
+        label: "Total Nominal",
+        subtitle: "Akumulasi amount",
+        value: `Rp ${totalAmount.toLocaleString("id-ID")}`,
+        change: statusMessage,
+        tone: "red" as const,
+        icon: Receipt,
+      },
+    ];
+  }, [items, statusMessage]);
 
   const formatResponse = (payload: unknown) => {
     setResponseText(typeof payload === "string" ? payload : JSON.stringify(payload, null, 2));
@@ -121,13 +163,36 @@ const MyReimbursementsPage = () => {
   return (
     <div className="ess-page">
       <div className="ess-header">
-        <div>
+        <div className="ess-header-copy">
+          <p className="ess-badge">ESS Reimbursement</p>
           <h1>My Reimbursements</h1>
-          <p>Endpoint: list, filter status, create, dan submit reimbursement pribadi.</p>
+          <p>Kelola reimbursement pribadi: list, filter status, create, dan submit dengan tampilan yang konsisten.</p>
         </div>
         <Button variant="outline" size="md" onClick={() => void loadItems(filterStatus || undefined)} disabled={loading}>
-          Refresh
+          Segarkan
         </Button>
+      </div>
+
+      <div className="ess-summary-grid">
+        {summaryCards.map((card) => {
+          const Icon = card.icon;
+
+          return (
+            <Card key={card.label} className="ess-summary-card" glass>
+              <div className="ess-summary-header">
+                <div>
+                  <span className="ess-summary-label">{card.label}</span>
+                  <p className="ess-summary-subtitle">{card.subtitle}</p>
+                </div>
+                <span className={`ess-summary-icon ess-summary-icon--${card.tone}`}>
+                  <Icon size={18} />
+                </span>
+              </div>
+              <div className="ess-summary-value">{card.value}</div>
+              <div className="ess-summary-change">{card.change}</div>
+            </Card>
+          );
+        })}
       </div>
 
       <Card className="ess-card" glass>
@@ -140,19 +205,19 @@ const MyReimbursementsPage = () => {
             className="ess-input"
           />
           <Button variant="secondary" size="md" onClick={() => void loadItems(filterStatus || undefined)} disabled={loading}>
-            Filter Status
+            Terapkan Filter
           </Button>
           <Button variant="ghost" size="md" onClick={() => void loadItems()} disabled={loading}>
-            Clear Filter
+            Bersihkan Filter
           </Button>
         </div>
       </Card>
 
       <Card className="ess-card" glass>
-        <h2>Create My Reimbursement</h2>
+        <h2>Buat Reimbursement</h2>
         <div className="ess-form-grid">
           <label>
-            Title
+            Judul
             <input
               className="ess-input"
               value={form.title}
@@ -160,7 +225,7 @@ const MyReimbursementsPage = () => {
             />
           </label>
           <label>
-            Description
+            Deskripsi
             <input
               className="ess-input"
               value={form.description}
@@ -168,7 +233,7 @@ const MyReimbursementsPage = () => {
             />
           </label>
           <label>
-            Amount
+            Jumlah
             <input
               className="ess-input"
               value={String(form.amount)}
@@ -178,7 +243,7 @@ const MyReimbursementsPage = () => {
             />
           </label>
           <label>
-            Category
+            Kategori
             <input
               className="ess-input"
               value={form.category}
@@ -186,7 +251,7 @@ const MyReimbursementsPage = () => {
             />
           </label>
           <label>
-            Expense Date
+            Tanggal Pengeluaran
             <input
               className="ess-input"
               type="date"
@@ -195,7 +260,7 @@ const MyReimbursementsPage = () => {
             />
           </label>
           <label>
-            Receipt Path
+            Path Bukti
             <input
               className="ess-input"
               value={form.receipt_path}
@@ -205,13 +270,13 @@ const MyReimbursementsPage = () => {
         </div>
         <div className="ess-inline-actions">
           <Button variant="primary" size="md" onClick={() => void createItem()} disabled={loading}>
-            Create Reimbursement
+            Buat Reimbursement
           </Button>
         </div>
       </Card>
 
       <Card className="ess-card" glass>
-        <h2>Submit My Reimbursement</h2>
+        <h2>Submit Reimbursement</h2>
         <div className="ess-inline-actions">
           <input
             value={submitId}
@@ -220,19 +285,36 @@ const MyReimbursementsPage = () => {
             className="ess-input"
           />
           <Button variant="primary" size="md" onClick={() => void submitItem()} disabled={loading}>
-            Submit Reimbursement
+            Submit
           </Button>
         </div>
       </Card>
 
       <Card className="ess-card" glass>
-        <h2>Reimbursements Table</h2>
+        <h2>Tabel Reimbursement</h2>
         <div className="ess-table-wrap">
           <table className="ess-table">
             <thead>
               <tr>
                 {columns.map((column) => (
-                  <th key={column}>{column}</th>
+                  <th key={column}>
+                    {column === "id" && "ID"}
+                    {column === "title" && "Judul"}
+                    {column === "description" && "Deskripsi"}
+                    {column === "amount" && "Jumlah"}
+                    {column === "category" && "Kategori"}
+                    {column === "expense_date" && "Tanggal Pengeluaran"}
+                    {column === "status" && "Status"}
+                    {![
+                      "id",
+                      "title",
+                      "description",
+                      "amount",
+                      "category",
+                      "expense_date",
+                      "status",
+                    ].includes(column) && column}
+                  </th>
                 ))}
               </tr>
             </thead>
@@ -247,7 +329,7 @@ const MyReimbursementsPage = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={columns.length}>No reimbursement data.</td>
+                  <td colSpan={columns.length}>Tidak ada data reimbursement.</td>
                 </tr>
               )}
             </tbody>

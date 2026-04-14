@@ -131,8 +131,9 @@ const EditLocationPage = () => {
           <ArrowLeft size={20} />
         </button>
         <div>
+          <p className="location-page-badge">Location Center</p>
           <h1>Edit Lokasi</h1>
-          <p>Perbarui informasi lokasi absensi</p>
+          <p>Perbarui informasi lokasi absensi dengan struktur yang rapi dan konsisten.</p>
         </div>
       </div>
 
@@ -185,7 +186,7 @@ const EditLocationPage = () => {
                   disabled
                 />
                 <span className="location-badge location-badge-success">
-                  ✓ Tetap
+                  Tetap
                 </span>
               </div>
               <p className="location-hint">Tidak dapat dirubah setelah pembuatan</p>
@@ -207,7 +208,7 @@ const EditLocationPage = () => {
                   disabled
                 />
                 <span className="location-badge location-badge-success">
-                  ✓ Tetap
+                  Tetap
                 </span>
               </div>
               <p className="location-hint">Tidak dapat dirubah setelah pembuatan</p>

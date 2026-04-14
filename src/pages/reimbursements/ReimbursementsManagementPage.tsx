@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { BarChart3, FileText, ReceiptText, Settings2 } from "lucide-react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import {
@@ -21,6 +22,7 @@ import type {
   ReimbursementUpdatePayload,
 } from "@/features/reimbursement/types/reimbursement.types";
 import "../admin/AdminCrudPages.css";
+import "./ReimbursementsManagementPage.css";
 
 type ReimbursementFormState = {
   id: string;
@@ -77,6 +79,47 @@ const ReimbursementsManagementPage = () => {
   const [loading, setLoading] = useState(false);
 
   const columns = useMemo(() => getColumns(items), [items]);
+  const summaryCards = useMemo(() => {
+    const pendingCount = items.filter((item) => String(item.status).toLowerCase() === "pending").length;
+    const approvedCount = items.filter((item) => String(item.status).toLowerCase() === "approved").length;
+    const paidCount = items.filter((item) => String(item.status).toLowerCase() === "paid").length;
+    const totalAmount = items.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+
+    return [
+      {
+        label: "Total Reimbursement",
+        subtitle: "Semua data reimbursement",
+        value: String(items.length),
+        change: "Data aktif saat ini",
+        tone: "blue" as const,
+        icon: ReceiptText,
+      },
+      {
+        label: "Pending",
+        subtitle: "Menunggu approval",
+        value: String(pendingCount),
+        change: "Perlu tindak lanjut",
+        tone: "orange" as const,
+        icon: Settings2,
+      },
+      {
+        label: "Approved + Paid",
+        subtitle: "Sudah disetujui/proses akhir",
+        value: String(approvedCount + paidCount),
+        change: "Siap dibayarkan atau selesai",
+        tone: "green" as const,
+        icon: BarChart3,
+      },
+      {
+        label: "Total Nominal",
+        subtitle: "Akumulasi amount",
+        value: `Rp ${totalAmount.toLocaleString("id-ID")}`,
+        change: statusMessage,
+        tone: "purple" as const,
+        icon: FileText,
+      },
+    ];
+  }, [items, statusMessage]);
 
   const formatResponse = (payload: unknown) => {
     setResponseText(typeof payload === "string" ? payload : JSON.stringify(payload, null, 2));
@@ -366,29 +409,58 @@ const ReimbursementsManagementPage = () => {
 
   return (
     <div className="crud-page">
-      <div className="crud-header">
-        <div>
-          <h1>Reimbursement Management</h1>
-          <p>Get/filter/create/detail/update/delete/approve/reject/mark-paid/pending/statistics reimbursements.</p>
+      <Card className="reimbursement-hero" glass>
+        <div className="crud-header reimbursement-header">
+          <div className="crud-header-copy">
+            <p className="crud-page-badge">Reimbursement Center</p>
+            <div className="crud-header-title-row">
+              <span className="crud-header-icon"><ReceiptText size={18} /></span>
+              <h1>Reimbursement Management</h1>
+            </div>
+            <p>Kelola reimbursement karyawan mulai dari filtering, approval, hingga status paid dalam satu alur yang konsisten.</p>
+            <p className="reimbursement-status">{statusMessage}</p>
+          </div>
+          <Button variant="outline" size="md" onClick={() => void loadAll()} disabled={loading}>
+            Segarkan
+          </Button>
         </div>
-        <Button variant="outline" size="md" onClick={() => void loadAll()} disabled={loading}>
-          Refresh
-        </Button>
+      </Card>
+
+      <div className="reimbursement-summary-grid">
+        {summaryCards.map((card) => {
+          const Icon = card.icon;
+
+          return (
+            <Card key={card.label} className="reimbursement-summary-card" glass>
+              <div className="reimbursement-summary-header">
+                <div>
+                  <span className="reimbursement-summary-label">{card.label}</span>
+                  <p className="reimbursement-summary-subtitle">{card.subtitle}</p>
+                </div>
+                <span className={`reimbursement-summary-icon reimbursement-summary-icon--${card.tone}`}>
+                  <Icon size={18} />
+                </span>
+              </div>
+              <div className="reimbursement-summary-value">{card.value}</div>
+              <div className="reimbursement-summary-change">{card.change}</div>
+            </Card>
+          );
+        })}
       </div>
 
-      <Card className="crud-card" glass>
-        <h2>Filters</h2>
+      <Card className="crud-card reimbursement-card" glass>
+        <h2>Filter Reimbursement</h2>
         <div className="crud-form-grid">
           <label>
-            Status
+            <strong>Status</strong>
             <input className="crud-input" value={filterStatus} onChange={(event) => setFilterStatus(event.target.value)} />
           </label>
           <label>
-            Category
+            <strong>Kategori</strong>
             <input className="crud-input" value={filterCategory} onChange={(event) => setFilterCategory(event.target.value)} />
           </label>
           <label>
-            Employee ID
+            <strong>ID Karyawan</strong>
             <input
               className="crud-input"
               value={filterEmployeeId}
@@ -396,7 +468,7 @@ const ReimbursementsManagementPage = () => {
             />
           </label>
           <label>
-            Statistics Employee ID
+            <strong>ID Karyawan untuk Statistik</strong>
             <input
               className="crud-input"
               value={statsEmployeeId}
@@ -406,25 +478,25 @@ const ReimbursementsManagementPage = () => {
         </div>
         <div className="crud-actions">
           <Button variant="primary" size="md" onClick={() => void loadAll()} disabled={loading}>
-            Apply Filters
+            Terapkan Filter
           </Button>
           <Button variant="secondary" size="md" onClick={() => void loadPending()} disabled={loading}>
-            Get Pending
+            Ambil Pending
           </Button>
           <Button variant="secondary" size="md" onClick={() => void loadByEmployee()} disabled={loading}>
-            Get by Employee
+            Ambil per Karyawan
           </Button>
           <Button variant="secondary" size="md" onClick={() => void loadStatistics()} disabled={loading}>
-            Get Statistics
+            Ambil Statistik
           </Button>
         </div>
       </Card>
 
-      <Card className="crud-card" glass>
-        <h2>Reimbursement Form</h2>
+      <Card className="crud-card reimbursement-card" glass>
+        <h2>Form Reimbursement</h2>
         <div className="crud-form-grid">
           <label>
-            Reimbursement ID
+            <strong>ID Reimbursement</strong>
             <input
               className="crud-input"
               value={form.id}
@@ -433,7 +505,7 @@ const ReimbursementsManagementPage = () => {
             />
           </label>
           <label>
-            Employee ID
+            <strong>ID Karyawan</strong>
             <input
               className="crud-input"
               value={form.employee_id}
@@ -441,7 +513,7 @@ const ReimbursementsManagementPage = () => {
             />
           </label>
           <label>
-            Title
+            <strong>Judul</strong>
             <input
               className="crud-input"
               value={form.title}
@@ -449,7 +521,7 @@ const ReimbursementsManagementPage = () => {
             />
           </label>
           <label>
-            Amount
+            <strong>Jumlah</strong>
             <input
               className="crud-input"
               value={form.amount}
@@ -457,7 +529,7 @@ const ReimbursementsManagementPage = () => {
             />
           </label>
           <label>
-            Category
+            <strong>Kategori</strong>
             <input
               className="crud-input"
               value={form.category}
@@ -465,7 +537,7 @@ const ReimbursementsManagementPage = () => {
             />
           </label>
           <label>
-            Expense Date
+            <strong>Tanggal Pengeluaran</strong>
             <input
               className="crud-input"
               type="date"
@@ -474,7 +546,7 @@ const ReimbursementsManagementPage = () => {
             />
           </label>
           <label className="crud-form-full">
-            Description
+            <strong>Deskripsi</strong>
             <input
               className="crud-input"
               value={form.description}
@@ -482,7 +554,7 @@ const ReimbursementsManagementPage = () => {
             />
           </label>
           <label className="crud-form-full">
-            Receipt Path
+            <strong>Path Bukti</strong>
             <input
               className="crud-input"
               value={form.receipt_path}
@@ -490,7 +562,7 @@ const ReimbursementsManagementPage = () => {
             />
           </label>
           <label className="crud-form-full">
-            Approval/Reject Note
+            <strong>Catatan Approve/Reject</strong>
             <input
               className="crud-input"
               value={form.note}
@@ -501,13 +573,13 @@ const ReimbursementsManagementPage = () => {
 
         <div className="crud-actions">
           <Button variant="primary" size="md" onClick={() => void createItem()} disabled={loading}>
-            Create Reimbursement
+            Buat Reimbursement
           </Button>
           <Button variant="outline" size="md" onClick={() => void getDetail()} disabled={loading}>
-            Get Detail
+            Lihat Detail
           </Button>
           <Button variant="secondary" size="md" onClick={() => void updateItem()} disabled={loading}>
-            Update Reimbursement
+            Ubah Reimbursement
           </Button>
           <Button variant="secondary" size="md" onClick={() => void approveItem()} disabled={loading}>
             Approve
@@ -516,34 +588,51 @@ const ReimbursementsManagementPage = () => {
             Reject
           </Button>
           <Button variant="secondary" size="md" onClick={() => void markPaid()} disabled={loading}>
-            Mark Paid
+            Tandai Paid
           </Button>
           <Button variant="ghost" size="md" onClick={() => void deleteItem()} disabled={loading}>
-            Delete Reimbursement
+            Hapus Reimbursement
           </Button>
         </div>
       </Card>
 
-      <Card className="crud-card" glass>
-        <h2>Reimbursement Detail</h2>
+      <Card className="crud-card reimbursement-card" glass>
+        <h2>Detail Reimbursement</h2>
         <pre className="crud-response">
           {selectedDetail ? JSON.stringify(selectedDetail, null, 2) : "Belum ada detail reimbursement dipilih."}
         </pre>
       </Card>
 
-      <Card className="crud-card" glass>
-        <h2>Reimbursement Statistics</h2>
+      <Card className="crud-card reimbursement-card" glass>
+        <h2>Statistik Reimbursement</h2>
         <pre className="crud-response">{statistics ? JSON.stringify(statistics, null, 2) : "Belum ada statistik."}</pre>
       </Card>
 
-      <Card className="crud-card" glass>
-        <h2>Reimbursements Table</h2>
+      <Card className="crud-card reimbursement-card" glass>
+        <h2>Tabel Reimbursement</h2>
         <div className="crud-table-wrap">
-          <table className="crud-table">
+          <table className="crud-table reimbursement-table">
             <thead>
               <tr>
                 {columns.map((column) => (
-                  <th key={column}>{column}</th>
+                  <th key={column}>
+                    {column === "id" && "ID"}
+                    {column === "employee_id" && "ID Karyawan"}
+                    {column === "title" && "Judul"}
+                    {column === "amount" && "Jumlah"}
+                    {column === "category" && "Kategori"}
+                    {column === "status" && "Status"}
+                    {column === "expense_date" && "Tanggal Pengeluaran"}
+                    {![
+                      "id",
+                      "employee_id",
+                      "title",
+                      "amount",
+                      "category",
+                      "status",
+                      "expense_date",
+                    ].includes(column) && column}
+                  </th>
                 ))}
               </tr>
             </thead>
@@ -558,7 +647,7 @@ const ReimbursementsManagementPage = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={columns.length}>No reimbursement data available.</td>
+                  <td colSpan={columns.length} className="reimbursement-empty-row">Tidak ada data reimbursement.</td>
                 </tr>
               )}
             </tbody>
@@ -566,7 +655,7 @@ const ReimbursementsManagementPage = () => {
         </div>
       </Card>
 
-      <Card className="crud-card" glass>
+      <Card className="crud-card reimbursement-card" glass>
         <h2>Raw Response</h2>
         <pre className="crud-response">{responseText || "Response API akan tampil di sini."}</pre>
         <p className="crud-status">{statusMessage}</p>

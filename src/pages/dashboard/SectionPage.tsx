@@ -31,6 +31,26 @@ type SectionStat = {
   variant: 'warning' | 'success' | 'info' | 'default' | 'danger';
 };
 
+type CrudMode = 'create' | 'manage';
+
+const splitCrudPaths = new Set(['/profiles', '/leave/requests', '/leave/type', '/leave/policy', '/reimbursements']);
+
+const getCrudRouteBase = (pathname: string) => {
+  for (const basePath of splitCrudPaths) {
+    if (pathname === `${basePath}/create` || pathname === `${basePath}/manage`) {
+      return basePath;
+    }
+  }
+
+  return pathname;
+};
+
+const getCrudModeFromPath = (pathname: string): CrudMode | null => {
+  if (pathname.endsWith('/create')) return 'create';
+  if (pathname.endsWith('/manage')) return 'manage';
+  return null;
+};
+
 const sectionDefinitions: Record<string, { title: string; subtitle: string; icon: any; color: string }> = {
   dashboard: {
     title: 'Dashboard Overview',
@@ -381,6 +401,8 @@ const getSectionData = (pathname: string) => {
 };
 
 const supportsList = (pathname: string) => {
+  const basePath = getCrudRouteBase(pathname);
+
   return (
     [
       '/profiles',
@@ -444,7 +466,7 @@ const supportsList = (pathname: string) => {
       '/admin/users',
       '/admin/roles',
       '/admin/permissions',
-    ].includes(pathname)
+    ].includes(basePath)
   );
 };
 
@@ -629,6 +651,41 @@ const routeActionMatrix: Record<string, string[]> = {
   '/admin/roles': ['assignPermissionToRole'],
 };
 
+const supportsCrudModeSplit = (pathname: string) => splitCrudPaths.has(getCrudRouteBase(pathname));
+
+const getFormStateByMode = (pathname: string, mode: CrudMode) => {
+  const basePath = getCrudRouteBase(pathname);
+
+  if (!supportsCrudModeSplit(basePath)) {
+    return getDefaultFormState(basePath);
+  }
+
+  if (mode === 'manage') {
+    return getDefaultFormState(basePath);
+  }
+
+  switch (basePath) {
+    case '/profiles':
+      return { phone: '', address: '', city: '', province: '', postal_code: '' };
+    case '/leave/requests':
+      return { leave_type: '', start_date: '', end_date: '', total_days: '', reason: '' };
+    case '/leave/type':
+    case '/leave/policy':
+      return {
+        name: '',
+        policy_code: '',
+        entitlement_type: 'fixed',
+        entitlement_value: '',
+        max_carryover_days: '',
+        is_paid: 'true',
+      };
+    case '/reimbursements':
+      return { title: '', description: '', amount: '', category: '', expense_date: '', receipt_path: '' };
+    default:
+      return getDefaultFormState(basePath);
+  }
+};
+
 const actionRequiredFields: Record<string, string[]> = {
   getProfileDetail: ['id'],
   updateProfile: ['id'],
@@ -671,22 +728,25 @@ const actionRequiredFields: Record<string, string[]> = {
 const SectionPage = () => {
   const location = useLocation();
   const path = location.pathname;
+  const basePath = useMemo(() => getCrudRouteBase(path), [path]);
+  const routeCrudMode = useMemo(() => getCrudModeFromPath(path), [path]);
+  const activeCrudMode: CrudMode = routeCrudMode ?? 'manage';
   const sectionKey = useMemo(() => getSectionTableKey(path), [path]);
   const section = useMemo(() => getSectionData(path), [path]);
   const Icon = section.icon;
   const [summaryStats, setSummaryStats] = useState<SectionStat[]>([]);
   const [tableColumns, setTableColumns] = useState<string[]>(section.tableColumns);
   const [tableRows, setTableRows] = useState<string[][]>([]);
-  const [formState, setFormState] = useState<Record<string, string>>(getDefaultFormState(path));
+  const [formState, setFormState] = useState<Record<string, string>>(getFormStateByMode(path, activeCrudMode));
   const [selectedDocumentFile, setSelectedDocumentFile] = useState<File | null>(null);
   const [responseText, setResponseText] = useState('');
   const [statusMessage, setStatusMessage] = useState('Ready to call API');
   const [loading, setLoading] = useState(false);
 
   const validateActionRequest = (action: string) => {
-    const allowedActions = routeActionMatrix[path] ?? [];
+    const allowedActions = routeActionMatrix[basePath] ?? [];
     if (!allowedActions.includes(action)) {
-      throw new Error(`Action ${action} tidak diizinkan untuk path ${path}.`);
+      throw new Error(`Action ${action} tidak diizinkan untuk path ${basePath}.`);
     }
 
     const requiredFields = actionRequiredFields[action] ?? [];
@@ -760,7 +820,7 @@ const SectionPage = () => {
 
   useEffect(() => {
     setSummaryStats([]);
-    setFormState(getDefaultFormState(path));
+    setFormState(getFormStateByMode(path, activeCrudMode));
     setSelectedDocumentFile(null);
     setResponseText('');
     setStatusMessage('Ready to call API');
@@ -772,7 +832,7 @@ const SectionPage = () => {
     if (supportsList(path)) {
       void loadList();
     }
-  }, [path, section.tableColumns, loadHrSummaryStats]);
+  }, [path, activeCrudMode, section.tableColumns, loadHrSummaryStats]);
 
   const canRefresh = path === '/hr-summary' || supportsList(path);
 
@@ -841,7 +901,7 @@ const SectionPage = () => {
 
     try {
       let result;
-      switch (path) {
+      switch (basePath) {
         case '/profiles':
           result = await api.get('/profiles');
           break;
@@ -1068,7 +1128,7 @@ const SectionPage = () => {
     try {
       validateActionRequest(action);
       const actionExecutor = createSectionActionExecutor({
-        path,
+        path: basePath,
         formState,
         selectedDocumentFile,
         buildPayloadByKeys,
@@ -1155,22 +1215,29 @@ const SectionPage = () => {
   };
 
   const renderActionButtons = () => {
-    switch (path) {
+    const isCreateMode = activeCrudMode === 'create';
+
+    switch (basePath) {
       case '/profiles':
         return (
           <>
-            <Button variant="primary" size="md" onClick={() => void performAction('createProfile')} disabled={loading}>
-              Create Profile
-            </Button>
-            <Button variant="outline" size="md" onClick={() => void performAction('getProfileDetail')} disabled={loading}>
-              Get Profile Detail
-            </Button>
-            <Button variant="secondary" size="md" onClick={() => void performAction('updateProfile')} disabled={loading}>
-              Update Profile
-            </Button>
-            <Button variant="outline" size="md" onClick={() => void performAction('deleteProfile')} disabled={loading}>
-              Delete Profile
-            </Button>
+            {isCreateMode ? (
+              <Button variant="primary" size="md" onClick={() => void performAction('createProfile')} disabled={loading}>
+                Create Profile
+              </Button>
+            ) : (
+              <>
+                <Button variant="outline" size="md" onClick={() => void performAction('getProfileDetail')} disabled={loading}>
+                  Get Profile Detail
+                </Button>
+                <Button variant="secondary" size="md" onClick={() => void performAction('updateProfile')} disabled={loading}>
+                  Update Profile
+                </Button>
+                <Button variant="outline" size="md" onClick={() => void performAction('deleteProfile')} disabled={loading}>
+                  Delete Profile
+                </Button>
+              </>
+            )}
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
               Refresh Profiles
             </Button>
@@ -1205,15 +1272,20 @@ const SectionPage = () => {
       case '/leave/requests':
         return (
           <>
-            <Button variant="primary" size="md" onClick={() => void performAction('createLeave')} disabled={loading}>
-              Submit Leave Request
-            </Button>
-            <Button variant="outline" size="md" onClick={() => void performAction('updateLeaveRequest')} disabled={loading}>
-              Update Leave Request
-            </Button>
-            <Button variant="outline" size="md" onClick={() => void performAction('cancelLeaveRequest')} disabled={loading}>
-              Cancel Leave Request
-            </Button>
+            {isCreateMode ? (
+              <Button variant="primary" size="md" onClick={() => void performAction('createLeave')} disabled={loading}>
+                Submit Leave Request
+              </Button>
+            ) : (
+              <>
+                <Button variant="outline" size="md" onClick={() => void performAction('updateLeaveRequest')} disabled={loading}>
+                  Update Leave Request
+                </Button>
+                <Button variant="outline" size="md" onClick={() => void performAction('cancelLeaveRequest')} disabled={loading}>
+                  Cancel Leave Request
+                </Button>
+              </>
+            )}
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
               Refresh Leave Data
             </Button>
@@ -1223,15 +1295,20 @@ const SectionPage = () => {
       case '/leave/policy':
         return (
           <>
-            <Button variant="primary" size="md" onClick={() => void performAction('createLeavePolicy')} disabled={loading}>
-              Create Policy
-            </Button>
-            <Button variant="outline" size="md" onClick={() => void performAction('updateLeavePolicy')} disabled={loading}>
-              Update Policy
-            </Button>
-            <Button variant="outline" size="md" onClick={() => void performAction('deleteLeavePolicy')} disabled={loading}>
-              Delete Policy
-            </Button>
+            {isCreateMode ? (
+              <Button variant="primary" size="md" onClick={() => void performAction('createLeavePolicy')} disabled={loading}>
+                Create Policy
+              </Button>
+            ) : (
+              <>
+                <Button variant="outline" size="md" onClick={() => void performAction('updateLeavePolicy')} disabled={loading}>
+                  Update Policy
+                </Button>
+                <Button variant="outline" size="md" onClick={() => void performAction('deleteLeavePolicy')} disabled={loading}>
+                  Delete Policy
+                </Button>
+              </>
+            )}
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
               Refresh Policies
             </Button>
@@ -1510,18 +1587,23 @@ const SectionPage = () => {
       case '/reimbursements':
         return (
           <>
-            <Button variant="primary" size="md" onClick={() => void performAction('createReimbursementAdmin')} disabled={loading}>
-              Create Reimbursement
-            </Button>
-            <Button variant="outline" size="md" onClick={() => void performAction('approveReimbursement')} disabled={loading}>
-              Approve Reimbursement
-            </Button>
-            <Button variant="outline" size="md" onClick={() => void performAction('rejectReimbursement')} disabled={loading}>
-              Reject Reimbursement
-            </Button>
-            <Button variant="outline" size="md" onClick={() => void performAction('markReimbursementPaid')} disabled={loading}>
-              Mark as Paid
-            </Button>
+            {isCreateMode ? (
+              <Button variant="primary" size="md" onClick={() => void performAction('createReimbursementAdmin')} disabled={loading}>
+                Create Reimbursement
+              </Button>
+            ) : (
+              <>
+                <Button variant="outline" size="md" onClick={() => void performAction('approveReimbursement')} disabled={loading}>
+                  Approve Reimbursement
+                </Button>
+                <Button variant="outline" size="md" onClick={() => void performAction('rejectReimbursement')} disabled={loading}>
+                  Reject Reimbursement
+                </Button>
+                <Button variant="outline" size="md" onClick={() => void performAction('markReimbursementPaid')} disabled={loading}>
+                  Mark as Paid
+                </Button>
+              </>
+            )}
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
               Refresh Reimbursements
             </Button>
@@ -1639,7 +1721,11 @@ const SectionPage = () => {
         <div className="section-action-header">
           <div>
             <h2>Control Panel</h2>
-            <p>Gunakan panel ini untuk memanggil endpoint sesuai Postman API.</p>
+            <p>
+              {supportsCrudModeSplit(path)
+                ? `Route aktif: ${activeCrudMode === 'create' ? 'Create Page' : 'Manage Page'} (dipisah per halaman).`
+                : 'Gunakan panel ini untuk memanggil endpoint sesuai Postman API.'}
+            </p>
           </div>
           <div className="action-status-wrap">
             <span className="action-status">{statusMessage}</span>

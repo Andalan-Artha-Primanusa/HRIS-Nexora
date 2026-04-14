@@ -1,10 +1,12 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { useAuthStore } from "@/store/auth.store";
+import { useAuthSession } from "./useAuthSession";
 
 const GuestRoute = () => {
-  const token = useAuthStore((state) => state.token);
+  const authStatus = useAuthSession();
 
-  if (token) return <Navigate to="/dashboard" replace />;
+  if (authStatus === "checking") return null;
+
+  if (authStatus === "authenticated") return <Navigate to="/dashboard" replace />;
 
   return <Outlet />;
 };

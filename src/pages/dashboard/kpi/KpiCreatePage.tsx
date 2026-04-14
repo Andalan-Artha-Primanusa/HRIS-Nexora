@@ -87,27 +87,29 @@ const KpiCreatePage = () => {
 
   return (
     <div className="kpi-page">
-      <div className="kpi-header">
-        <div>
-          <div className="kpi-badge">
-            <FileText size={18} />
-            <span>Create New KPI</span>
+      <Card className="kpi-hero" glass>
+        <div className="kpi-header">
+          <div className="kpi-header-copy">
+            <p className="kpi-page-badge">Performance Center</p>
+            <div className="kpi-title-row">
+              <span className="kpi-header-icon"><FileText size={18} /></span>
+              <h1>Create New KPI</h1>
+            </div>
+            <p>Buat KPI baru untuk karyawan. Semua field bertanda * wajib diisi.</p>
           </div>
-          <h1>Create New KPI</h1>
-          <p>Buat KPI baru untuk karyawan. Semua field ditandai * wajib diisi.</p>
+          <div className="kpi-header-actions">
+            <Button
+              variant="outline"
+              size="md"
+              onClick={() => navigate('/kpis')}
+              disabled={loading}
+            >
+              <ArrowLeft size={16} />
+              Back to List
+            </Button>
+          </div>
         </div>
-        <div className="kpi-header-actions">
-          <Button 
-            variant="outline" 
-            size="md" 
-            onClick={() => navigate('/kpis')}
-            disabled={loading}
-          >
-            <ArrowLeft size={16} />
-            Back to List
-          </Button>
-        </div>
-      </div>
+      </Card>
 
       <Card className="kpi-card" glass>
         <div className="kpi-card-title">
@@ -169,13 +171,7 @@ const KpiCreatePage = () => {
         </div>
 
         {errorMessage && (
-          <div style={{ 
-            color: '#d32f2f', 
-            padding: '12px', 
-            background: '#ffebee', 
-            borderRadius: '4px',
-            marginTop: '12px'
-          }}>
+          <div className="kpi-error-message">
             {errorMessage}
           </div>
         )}
@@ -200,7 +196,7 @@ const KpiCreatePage = () => {
         </div>
       </Card>
 
-      <div style={{ marginTop: '16px', padding: '12px', background: '#f0f0f0', borderRadius: '4px', fontSize: '14px' }}>
+      <div className="kpi-status-bar">
         <strong>Status:</strong> {statusMessage}
       </div>
     </div>

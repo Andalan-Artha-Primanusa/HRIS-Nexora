@@ -1,8 +1,8 @@
 import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
 import { lazy } from "react";
-import { useAuthStore } from "@/app/store/auth.store";
 import { getRoleBasedDashboardPathFromStorage } from "@/features/auth/utils/roleRedirect";
 import { ProtectedRoute } from "./ProtectedRoute";
+import { useAuthSession } from "./useAuthSession";
 import LoginPage from "../../pages/auth/login/LoginPage";
 import GoogleCallbackPage from "../../pages/auth/login/GoogleCallbackPage";
 import RegisterPage from "../../pages/auth/register/RegisterPage";
@@ -68,8 +68,10 @@ const sectionRoutes = [
   { path: "/attendance/shifts" },
   { path: "/attendance/overtime" },
   { path: "/attendance/reports" },
-  { path: "/leave/type" },
-  { path: "/leave/policy" },
+  { path: "/leave/type/create" },
+  { path: "/leave/type/manage" },
+  { path: "/leave/policy/create" },
+  { path: "/leave/policy/manage" },
   { path: "/assets" },
   { path: "/assets/assignments" },
   { path: "/my/assets" },
@@ -112,10 +114,14 @@ const sectionRoutes = [
 ];
 
 const RootRedirect = () => {
-  const token = useAuthStore((state) => state.token);
+  const authStatus = useAuthSession();
   const dashboardPath = getRoleBasedDashboardPathFromStorage();
 
-  return token ? (
+  if (authStatus === "checking") {
+    return null;
+  }
+
+  return authStatus === "authenticated" ? (
     <Navigate to={dashboardPath} replace />
   ) : (
     <Navigate to="/login" replace />
@@ -123,9 +129,14 @@ const RootRedirect = () => {
 };
 
 const GuestRoute = () => {
-  const token = useAuthStore((state) => state.token);
+  const authStatus = useAuthSession();
   const dashboardPath = getRoleBasedDashboardPathFromStorage();
-  return token ? <Navigate to={dashboardPath} replace /> : <Outlet />;
+
+  if (authStatus === "checking") {
+    return null;
+  }
+
+  return authStatus === "authenticated" ? <Navigate to={dashboardPath} replace /> : <Outlet />;
 };
 
 export const router = createBrowserRouter([
@@ -392,6 +403,14 @@ export const router = createBrowserRouter([
             element: <LeaveApprovalPage />,
           },
         ],
+      },
+      {
+        path: "/leave/type",
+        element: <Navigate to="/leave/type/manage" replace />,
+      },
+      {
+        path: "/leave/policy",
+        element: <Navigate to="/leave/policy/manage" replace />,
       },
       {
         path: "/profiles",

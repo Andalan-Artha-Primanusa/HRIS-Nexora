@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { BarChart3 } from "lucide-react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
@@ -12,6 +13,7 @@ import { getAllEmployees } from "@/features/employee/api/employee.service";
 import type { PayrollCreatePayload, PayrollUpdatePayload, PayrollItem } from "@/features/payroll/types/payroll.types";
 import type { EmployeeItem } from "@/features/employee/types/employee.types";
 import "../admin/AdminCrudPages.css";
+import "./PayrollCrudPage.css";
 
 type PayrollFormState = {
   id: string;
@@ -24,13 +26,12 @@ type PayrollFormState = {
 const DEFAULT_FORM: PayrollFormState = {
   id: "",
   employee_id: "",
-  period: new Date().toISOString().slice(0, 7), // YYYY-MM format
+  period: new Date().toISOString().slice(0, 7),
   allowance: "",
   bonus: "",
 };
 
 const PayrollCrudPage = () => {
-  // States
   const [employees, setEmployees] = useState<EmployeeItem[]>([]);
   const [payrolls, setPayrolls] = useState<PayrollItem[]>([]);
   const [form, setForm] = useState<PayrollFormState>(DEFAULT_FORM);
@@ -44,7 +45,6 @@ const PayrollCrudPage = () => {
     message: "",
   });
 
-  // Load employees and payrolls
   const loadData = async () => {
     setLoading(true);
     try {
@@ -60,7 +60,6 @@ const PayrollCrudPage = () => {
     }
   };
 
-  // Select payroll for edit/delete
   const selectPayroll = (payroll: PayrollItem, action: "edit" | "delete") => {
     setSelectedPayrollId(String(payroll.id));
     setForm({
@@ -73,11 +72,10 @@ const PayrollCrudPage = () => {
     setMode(action);
   };
 
-  const showErrorModal = (title: string, message: string) => {
-    setErrorModal({ isOpen: true, title, message });
+  const showErrorModal = (title: string, messageText: string) => {
+    setErrorModal({ isOpen: true, title, message: messageText });
   };
 
-  // Create payroll
   const handleCreate = async () => {
     if (!form.employee_id) {
       showErrorModal("Validasi", "Pilih karyawan terlebih dahulu");
@@ -89,13 +87,13 @@ const PayrollCrudPage = () => {
       return;
     }
 
-    // Check if payroll for this period already exists
     const existingPayroll = payrolls.find(
-      (p: PayrollItem) => String(p.employee_id) === String(form.employee_id) && p.period === form.period
+      (payroll: PayrollItem) => String(payroll.employee_id) === String(form.employee_id) && payroll.period === form.period
     );
+
     if (existingPayroll) {
       showErrorModal(
-        "⚠️ Payroll Sudah Ada",
+        "Payroll Sudah Ada",
         `Payroll untuk periode ${existingPayroll.period} karyawan ini sudah ada (ID: ${existingPayroll.id}).\n\nGaji Pokok: Rp ${Number(
           existingPayroll.basic_salary || 0
         ).toLocaleString("id-ID")}\nStatus: ${existingPayroll.status}\n\nSilakan gunakan Edit di tabel atau pilih periode berbeda.`
@@ -111,21 +109,20 @@ const PayrollCrudPage = () => {
         allowance: Number(form.allowance) || 0,
         bonus: Number(form.bonus) || 0,
       };
-      console.log("📝 Form data sebelum create:", { form, payload });
+
       await createPayroll(payload);
-      setMessage({ type: "success", text: "✓ Payroll berhasil dibuat" });
+      setMessage({ type: "success", text: "Payroll berhasil dibuat" });
       setForm(DEFAULT_FORM);
       setMode("create");
       await loadData();
     } catch (error) {
       const errorText = error instanceof Error ? error.message : "Gagal membuat payroll";
-      showErrorModal("❌ Error Membuat Payroll", errorText);
+      showErrorModal("Error Membuat Payroll", errorText);
     } finally {
       setLoading(false);
     }
   };
 
-  // Update payroll
   const handleUpdate = async () => {
     const id = form.id.trim();
     if (!id) {
@@ -139,23 +136,21 @@ const PayrollCrudPage = () => {
         allowance: Number(form.allowance) || 0,
         bonus: Number(form.bonus) || 0,
       };
-      // Extract numeric ID if prefixed (e.g., "P003" -> "3")
       const payrollId = String(id).replace(/^[A-Z]+/, "").replace(/^0+/, "") || id;
       await updatePayroll(payrollId, payload);
-      setMessage({ type: "success", text: "✓ Payroll berhasil diupdate" });
+      setMessage({ type: "success", text: "Payroll berhasil diupdate" });
       setForm(DEFAULT_FORM);
       setSelectedPayrollId("");
       setMode("create");
       await loadData();
     } catch (error) {
       const errorText = error instanceof Error ? error.message : "Gagal update payroll";
-      showErrorModal("❌ Error Update Payroll", errorText);
+      showErrorModal("Error Update Payroll", errorText);
     } finally {
       setLoading(false);
     }
   };
 
-  // Delete payroll
   const handleDelete = async () => {
     const id = form.id.trim();
     if (!id) {
@@ -169,17 +164,16 @@ const PayrollCrudPage = () => {
 
     setLoading(true);
     try {
-      // Extract numeric ID if prefixed (e.g., "P003" -> "3")
       const payrollId = String(id).replace(/^[A-Z]+/, "").replace(/^0+/, "") || id;
       await deletePayroll(payrollId);
-      setMessage({ type: "success", text: "✓ Payroll berhasil dihapus" });
+      setMessage({ type: "success", text: "Payroll berhasil dihapus" });
       setForm(DEFAULT_FORM);
       setSelectedPayrollId("");
       setMode("create");
       await loadData();
     } catch (error) {
       const errorText = error instanceof Error ? error.message : "Gagal hapus payroll";
-      showErrorModal("❌ Error Hapus Payroll", errorText);
+      showErrorModal("Error Hapus Payroll", errorText);
     } finally {
       setLoading(false);
     }
@@ -197,13 +191,12 @@ const PayrollCrudPage = () => {
   }, []);
 
   const getEmployeeName = (empId: string) => {
-    const emp = employees.find((e) => String(e.id) === empId);
-    return emp ? `${emp.employee_code} - ${emp.user?.name || "Unknown"}` : "N/A";
+    const employee = employees.find((entry) => String(entry.id) === empId);
+    return employee ? `${employee.employee_code} - ${employee.user?.name || "Unknown"}` : "N/A";
   };
 
   return (
     <div className="crud-page">
-      {/* Error Modal */}
       <Modal
         isOpen={errorModal.isOpen}
         onClose={() => setErrorModal({ ...errorModal, isOpen: false })}
@@ -217,113 +210,89 @@ const PayrollCrudPage = () => {
         </div>
       </Modal>
 
-      <div className="crud-header" style={{ borderBottom: "2px solid #2563eb", paddingBottom: "20px" }}>
-        <div>
-          <h1 style={{ color: "#2563eb", marginBottom: "4px" }}>⚙️ Kelola Payroll</h1>
-          <p style={{ color: "var(--color-text-secondary)", fontSize: "0.9rem" }}>Buat, edit, dan hapus data payroll karyawan</p>
+      <Card className="crud-header-card" glass>
+        <div className="crud-header">
+          <div className="crud-header-copy">
+            <p className="crud-page-badge">Payroll Center</p>
+            <div className="crud-header-title-row">
+              <span className="crud-header-icon">
+                <BarChart3 size={18} />
+              </span>
+              <h1>Kelola Payroll</h1>
+            </div>
+            <p>
+              Buat, edit, dan hapus data payroll karyawan dengan tampilan yang rapi, konsisten, dan mudah dipindai.
+            </p>
+          </div>
+          <Button variant="outline" size="md" onClick={() => void loadData()} disabled={loading}>
+            Segarkan
+          </Button>
         </div>
-        <Button 
-          variant="outline" 
-          size="md" 
-          onClick={() => void loadData()} 
-          disabled={loading}
-          style={{ borderColor: "#2563eb", color: "#2563eb" }}
-        >
-          🔄 Segarkan
-        </Button>
-      </div>
+      </Card>
 
-      {/* Success Message Alert */}
       {message && message.type === "success" && (
         <Card
           className="crud-card"
           glass
           style={{
             backgroundColor: "#f0fdf4",
-            borderLeft: `4px solid #10b981`,
+            borderLeft: "4px solid #10b981",
             marginBottom: "20px",
           }}
         >
-          <p style={{ color: "#065f46", margin: 0, fontWeight: "500" }}>
-            ✓ {message.text}
-          </p>
+          <p style={{ color: "#065f46", margin: 0, fontWeight: "500" }}>{message.text}</p>
         </Card>
       )}
 
-      {/* Daftar Payroll Existing */}
-      <Card className="crud-card" glass style={{ borderTop: "4px solid #2563eb" }}>
-        <h2 style={{ color: "#2563eb", marginTop: 0 }}>📋 Daftar Payroll</h2>
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead style={{ backgroundColor: "#dbeafe" }}>
+      <Card className="crud-card" glass>
+        <h2>Daftar Payroll</h2>
+        <div className="crud-table-wrap">
+          <table className="crud-table">
+            <thead>
               <tr>
-                <th style={{ padding: "12px", textAlign: "left", fontSize: "0.85rem", fontWeight: "600", color: "#2563eb", borderBottom: "2px solid #2563eb" }}>Karyawan</th>
-                <th style={{ padding: "12px", textAlign: "left", fontSize: "0.85rem", fontWeight: "600", color: "#2563eb", borderBottom: "2px solid #2563eb" }}>Periode</th>
-                <th style={{ padding: "12px", textAlign: "right", fontSize: "0.85rem", fontWeight: "600", color: "#2563eb", borderBottom: "2px solid #2563eb" }}>Tunjangan</th>
-                <th style={{ padding: "12px", textAlign: "right", fontSize: "0.85rem", fontWeight: "600", color: "#2563eb", borderBottom: "2px solid #2563eb" }}>Bonus</th>
-                <th style={{ padding: "12px", textAlign: "center", fontSize: "0.85rem", fontWeight: "600", color: "#2563eb", borderBottom: "2px solid #2563eb" }}>Aksi</th>
+                <th>Karyawan</th>
+                <th>Periode</th>
+                <th className="text-right">Tunjangan</th>
+                <th className="text-right">Bonus</th>
+                <th className="text-center">Aksi</th>
               </tr>
             </thead>
             <tbody>
               {payrolls.length > 0 ? (
-                payrolls.slice(0, 10).map((p) => (
+                payrolls.slice(0, 10).map((payroll) => (
                   <tr
-                    key={p.id}
-                    style={{
-                      borderBottom: "1px solid #eff6ff",
-                      backgroundColor: selectedPayrollId === String(p.id) ? "#dbeafe" : "transparent",
-                    }}
+                    key={payroll.id}
+                    className={selectedPayrollId === String(payroll.id) ? "is-selected" : ""}
                   >
-                    <td style={{ padding: "12px" }}>
-                      <strong>{getEmployeeName(String(p.employee_id))}</strong>
+                    <td>
+                      <strong>{getEmployeeName(String(payroll.employee_id))}</strong>
                     </td>
-                    <td style={{ padding: "12px" }}>{p.period}</td>
-                    <td style={{ padding: "12px", textAlign: "right" }}>
-                      Rp {Number(p.allowance || 0).toLocaleString("id-ID")}
-                    </td>
-                    <td style={{ padding: "12px", textAlign: "right" }}>
-                      Rp {Number(p.bonus || 0).toLocaleString("id-ID")}
-                    </td>
-                    <td style={{ padding: "12px", textAlign: "center" }}>
+                    <td>{payroll.period}</td>
+                    <td className="text-right">Rp {Number(payroll.allowance || 0).toLocaleString("id-ID")}</td>
+                    <td className="text-right">Rp {Number(payroll.bonus || 0).toLocaleString("id-ID")}</td>
+                    <td className="text-center">
                       <button
-                        onClick={() => selectPayroll(p, "edit")}
-                        style={{
-                          padding: "6px 10px",
-                          marginRight: "6px",
-                          backgroundColor: "#2563eb",
-                          color: "white",
-                          border: "none",
-                          borderRadius: "4px",
-                          cursor: "pointer",
-                          fontSize: "0.8rem",
-                          fontWeight: "500",
-                        }}
+                        type="button"
+                        onClick={() => selectPayroll(payroll, "edit")}
+                        className="crud-inline-button crud-inline-button--primary"
                         disabled={loading}
                       >
-                        ✏️ Ubah
+                        Ubah
                       </button>
                       <button
-                        onClick={() => selectPayroll(p, "delete")}
-                        style={{
-                          padding: "6px 10px",
-                          backgroundColor: "#ef4444",
-                          color: "white",
-                          border: "none",
-                          borderRadius: "4px",
-                          cursor: "pointer",
-                          fontSize: "0.8rem",
-                          fontWeight: "500",
-                        }}
+                        type="button"
+                        onClick={() => selectPayroll(payroll, "delete")}
+                        className="crud-inline-button crud-inline-button--danger"
                         disabled={loading}
                       >
-                        🗑️ Hapus
+                        Hapus
                       </button>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} style={{ padding: "16px", textAlign: "center", color: "#999" }}>
+                  <td colSpan={5} className="crud-empty-row">
                     Belum ada payroll
                   </td>
                 </tr>
@@ -333,35 +302,33 @@ const PayrollCrudPage = () => {
         </div>
       </Card>
 
-      {/* Form */}
-      <Card className="crud-card" glass style={{ borderTop: "4px solid #2563eb" }}>
-        <h2 style={{ color: "#2563eb", marginTop: 0 }}>
-          {mode === "create" && "➕ Tambah Payroll Baru"}
-          {mode === "edit" && "✏️ Edit Payroll"}
-          {mode === "delete" && "🗑️ Hapus Payroll"}
+      <Card className="crud-card" glass>
+        <h2>
+          {mode === "create" && "Tambah Payroll Baru"}
+          {mode === "edit" && "Edit Payroll"}
+          {mode === "delete" && "Hapus Payroll"}
         </h2>
 
         {mode === "create" && (
           <div className="crud-form-grid">
             <label>
-              <strong style={{ color: "#2563eb" }}>Pilih Karyawan *</strong>
+              <strong>Pilih Karyawan *</strong>
               <select
                 className="crud-input"
                 value={form.employee_id}
                 onChange={(e) => setForm((prev) => ({ ...prev, employee_id: e.target.value }))}
-                style={{ cursor: "pointer" }}
               >
                 <option value="">-- Pilih Karyawan --</option>
-                {employees.map((emp) => (
-                  <option key={emp.id} value={String(emp.id)}>
-                    {emp.employee_code} - {emp.user?.name || "Unknown"}
+                {employees.map((employee) => (
+                  <option key={employee.id} value={String(employee.id)}>
+                    {employee.employee_code} - {employee.user?.name || "Unknown"}
                   </option>
                 ))}
               </select>
             </label>
 
             <label>
-              <strong style={{ color: "#2563eb" }}>Periode (YYYY-MM) *</strong>
+              <strong>Periode (YYYY-MM) *</strong>
               <input
                 type="month"
                 className="crud-input"
@@ -371,7 +338,7 @@ const PayrollCrudPage = () => {
             </label>
 
             <label>
-              <strong style={{ color: "#2563eb" }}>Tunjangan</strong>
+              <strong>Tunjangan</strong>
               <input
                 type="number"
                 className="crud-input"
@@ -382,7 +349,7 @@ const PayrollCrudPage = () => {
             </label>
 
             <label>
-              <strong style={{ color: "#2563eb" }}>Bonus</strong>
+              <strong>Bonus</strong>
               <input
                 type="number"
                 className="crud-input"
@@ -392,58 +359,43 @@ const PayrollCrudPage = () => {
               />
             </label>
 
-            {/* Show existing payroll for selected employee & period */}
-            {form.employee_id && form.period && (
-              <div style={{ gridColumn: "1 / -1" }}>
-                {(() => {
-                  const existingPayroll = payrolls.find(
-                    (p: PayrollItem) =>
-                      String(p.employee_id) === String(form.employee_id) &&
-                      p.period === form.period
-                  );
-                  if (existingPayroll) {
-                    return (
-                      <Card
-                        glass
-                        style={{
-                          backgroundColor: "#fef3c7",
-                          borderLeft: "4px solid #f59e0b",
-                          padding: "12px",
-                        }}
-                      >
-                        <p style={{ margin: "0 0 8px 0", fontSize: "0.85rem", color: "#92400e", fontWeight: "600" }}>
-                          <strong>⚠️ Payroll sudah ada untuk periode ini!</strong>
-                        </p>
-                        <p style={{ margin: "0 0 4px 0", fontSize: "0.8rem", color: "#92400e" }}>
-                          ID: {existingPayroll.id} | Periode: {existingPayroll.period}
-                        </p>
-                        <p style={{ margin: "0 0 4px 0", fontSize: "0.8rem", color: "#92400e" }}>
-                          Gaji Pokok: Rp {Number(existingPayroll.basic_salary || 0).toLocaleString("id-ID")}
-                        </p>
-                        <p style={{ margin: "0 0 4px 0", fontSize: "0.8rem", color: "#92400e" }}>
-                          Status: {existingPayroll.status}
-                        </p>
-                        <p style={{ margin: "8px 0 0 0", fontSize: "0.75rem", color: "#92400e", fontStyle: "italic" }}>
-                          Klik Ubah di tabel di atas jika ingin mengubah, atau pilih periode lain.
-                        </p>
-                      </Card>
-                    );
-                  }
-                  return null;
-                })()}
-              </div>
-            )}
+            {form.employee_id && form.period && (() => {
+              const existingPayroll = payrolls.find(
+                (payroll: PayrollItem) =>
+                  String(payroll.employee_id) === String(form.employee_id) && payroll.period === form.period
+              );
+
+              if (!existingPayroll) {
+                return null;
+              }
+
+              return (
+                <Card glass className="crud-warning-card crud-form-full">
+                  <p className="crud-warning-title">Payroll sudah ada untuk periode ini!</p>
+                  <p className="crud-warning-text">
+                    ID: {existingPayroll.id} | Periode: {existingPayroll.period}
+                  </p>
+                  <p className="crud-warning-text">
+                    Gaji Pokok: Rp {Number(existingPayroll.basic_salary || 0).toLocaleString("id-ID")}
+                  </p>
+                  <p className="crud-warning-text">Status: {existingPayroll.status}</p>
+                  <p className="crud-warning-note">
+                    Klik Ubah di tabel di atas jika ingin mengubah, atau pilih periode lain.
+                  </p>
+                </Card>
+              );
+            })()}
           </div>
         )}
 
         {mode === "edit" && (
           <div className="crud-form-grid">
-            <div style={{ gridColumn: "1 / -1", padding: "12px", backgroundColor: "#eff6ff", borderLeft: "4px solid #2563eb", borderRadius: "6px", marginBottom: "16px" }}>
-              <strong style={{ color: "#2563eb" }}>ID Payroll:</strong> {form.id} | <strong style={{ color: "#2563eb", marginLeft: "16px" }}>Karyawan:</strong> {getEmployeeName(form.employee_id)}
+            <div className="crud-info-card crud-form-full">
+              <strong>ID Payroll:</strong> {form.id} | <strong>Karyawan:</strong> {getEmployeeName(form.employee_id)}
             </div>
 
             <label>
-              <strong style={{ color: "#2563eb" }}>Periode</strong>
+              <strong>Periode</strong>
               <input
                 type="month"
                 className="crud-input"
@@ -454,7 +406,7 @@ const PayrollCrudPage = () => {
             </label>
 
             <label>
-              <strong style={{ color: "#2563eb" }}>Tunjangan</strong>
+              <strong>Tunjangan</strong>
               <input
                 type="number"
                 className="crud-input"
@@ -464,7 +416,7 @@ const PayrollCrudPage = () => {
             </label>
 
             <label>
-              <strong style={{ color: "#2563eb" }}>Bonus</strong>
+              <strong>Bonus</strong>
               <input
                 type="number"
                 className="crud-input"
@@ -476,61 +428,33 @@ const PayrollCrudPage = () => {
         )}
 
         {mode === "delete" && (
-          <div style={{ padding: "16px", backgroundColor: "#fef3c7", borderLeft: "4px solid #f59e0b", borderRadius: "6px", marginBottom: "20px" }}>
-            <p style={{ margin: "0 0 8px 0", color: "#7c2d12", fontWeight: "600" }}>
-              <strong>⚠️ Anda akan menghapus payroll ini:</strong>
-            </p>
-            <p style={{ margin: "4px 0", color: "#7c2d12", fontSize: "0.9rem" }}>
+          <div className="crud-warning-card crud-warning-card--danger">
+            <p className="crud-warning-title">Anda akan menghapus payroll ini:</p>
+            <p className="crud-warning-text">
               ID: {form.id} | Karyawan: {getEmployeeName(form.employee_id)} | Periode: {form.period}
             </p>
-            <p style={{ margin: "4px 0 0 0", color: "#7c2d12", fontSize: "0.9rem", fontWeight: "600" }}>
-              ⚠️ Tindakan ini tidak bisa dibatalkan!
-            </p>
+            <p className="crud-warning-note">Tindakan ini tidak bisa dibatalkan!</p>
           </div>
         )}
 
         <div className="crud-actions">
           {mode === "create" && (
-            <Button 
-              variant="primary" 
-              size="md" 
-              onClick={() => void handleCreate()} 
-              disabled={loading}
-              style={{ backgroundColor: "#2563eb" }}
-            >
-              ➕ Buat Payroll
+            <Button variant="primary" size="md" onClick={() => void handleCreate()} disabled={loading}>
+              Buat Payroll
             </Button>
           )}
           {mode === "edit" && (
-            <Button 
-              variant="secondary" 
-              size="md" 
-              onClick={() => void handleUpdate()} 
-              disabled={loading}
-              style={{ backgroundColor: "#10b981" }}
-            >
-              ✓ Simpan Perubahan
+            <Button variant="secondary" size="md" onClick={() => void handleUpdate()} disabled={loading}>
+              Simpan Perubahan
             </Button>
           )}
           {mode === "delete" && (
-            <Button
-              variant="ghost"
-              size="md"
-              onClick={() => void handleDelete()}
-              disabled={loading}
-              style={{ backgroundColor: "#ef4444", color: "white" }}
-            >
-              ✓ Hapus Permanen
+            <Button variant="ghost" size="md" onClick={() => void handleDelete()} disabled={loading}>
+              Hapus Permanen
             </Button>
           )}
 
-          <Button 
-            variant="outline" 
-            size="md" 
-            onClick={handleReset} 
-            disabled={loading}
-              style={{ borderColor: "#2563eb", color: "#2563eb" }}
-          >
+          <Button variant="outline" size="md" onClick={handleReset} disabled={loading}>
             Reset / Batal
           </Button>
         </div>

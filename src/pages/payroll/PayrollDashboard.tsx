@@ -25,6 +25,18 @@ import {
 import { getAllEmployees } from "@/features/employee/api/employee.service";
 import type { PayrollItem } from "@/features/payroll/types/payroll.types";
 import type { EmployeeItem } from "@/features/employee/types/employee.types";
+import {
+  CheckCircle2,
+  BarChart3,
+  Clock3,
+  CreditCard,
+  FileText,
+  LayoutDashboard,
+  PencilLine,
+  ReceiptText,
+  ShieldCheck,
+  TrendingUp,
+} from "lucide-react";
 import "./PayrollDashboard.css";
 
 const PayrollDashboard: React.FC = () => {
@@ -267,7 +279,7 @@ const PayrollDashboard: React.FC = () => {
         <div className="payroll-hero-copy">
           <p className="payroll-badge">Payroll Center</p>
           <h1 className="payroll-title">Dashboard Payroll</h1>
-          <p className="payroll-subtitle">Kelola payroll, generate payroll bulanan, dan review payslip karyawan</p>
+          <p className="payroll-subtitle">Kelola payroll, generate payroll bulanan, dan review payslip karyawan dengan tampilan yang rapi, konsisten, dan mudah dipindai.</p>
         </div>
         <div className="payroll-actions">
           <Button
@@ -304,7 +316,7 @@ const PayrollDashboard: React.FC = () => {
               <span className="metric-label kpi-label">Total Payroll</span>
               <p className="metric-subtitle">Jumlah record payroll di sistem</p>
             </div>
-            <span className="metric-icon kpi-icon">📋</span>
+            <span className="metric-icon kpi-icon"><FileText size={18} /></span>
           </div>
           <div className="metric-value kpi-value">{totalPayroll}</div>
           <div className="metric-change neutral kpi-subtext">
@@ -318,7 +330,7 @@ const PayrollDashboard: React.FC = () => {
               <span className="metric-label kpi-label">Telah Diproses</span>
               <p className="metric-subtitle">Payroll dengan status paid/approved</p>
             </div>
-            <span className="metric-icon kpi-icon">✅</span>
+            <span className="metric-icon kpi-icon"><CheckCircle2 size={18} /></span>
           </div>
           <div className="metric-value kpi-value">{totalProcessed}</div>
           <div className="metric-change positive kpi-subtext">
@@ -337,7 +349,7 @@ const PayrollDashboard: React.FC = () => {
               <span className="metric-label kpi-label">Menunggu</span>
               <p className="metric-subtitle">Payroll yang masih pending</p>
             </div>
-            <span className="metric-icon kpi-icon">⏳</span>
+            <span className="metric-icon kpi-icon"><Clock3 size={18} /></span>
           </div>
           <div className="metric-value kpi-value">{totalPending}</div>
           <div className="metric-change neutral kpi-subtext">
@@ -351,7 +363,7 @@ const PayrollDashboard: React.FC = () => {
               <span className="metric-label kpi-label">Rata-rata Bulanan</span>
               <p className="metric-subtitle">Estimasi volume payroll per bulan</p>
             </div>
-            <span className="metric-icon kpi-icon">📊</span>
+            <span className="metric-icon kpi-icon"><TrendingUp size={18} /></span>
           </div>
           <div className="metric-value kpi-value">{averagePayroll}</div>
           <div className="metric-change neutral kpi-subtext">
@@ -364,7 +376,7 @@ const PayrollDashboard: React.FC = () => {
       <div className="payroll-charts-grid">
         {/* Monthly Trend Chart */}
         <Card className="chart-card payroll-chart-card payroll-accent-blue" glass>
-          <h2 className="chart-title payroll-section-title">📈 Tren Pemprosesan Payroll</h2>
+          <h2 className="chart-title payroll-section-title">Tren Pemprosesan Payroll</h2>
           <p className="chart-subtitle">Perbandingan payroll diproses vs menunggu tiap periode</p>
           {monthlyTrendData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
@@ -399,7 +411,7 @@ const PayrollDashboard: React.FC = () => {
 
         {/* Payroll Status Breakdown */}
         <Card className="chart-card payroll-chart-card payroll-accent-blue" glass>
-          <h2 className="chart-title payroll-section-title">📊 Ringkasan Status Payroll</h2>
+          <h2 className="chart-title payroll-section-title">Ringkasan Status Payroll</h2>
           <p className="chart-subtitle">Distribusi status payroll saat ini</p>
           {payrollStatusData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
@@ -432,7 +444,7 @@ const PayrollDashboard: React.FC = () => {
 
       {/* Department Payroll Comparison */}
       <Card className="chart-card payroll-full-width-chart payroll-accent-blue" glass>
-        <h2 className="chart-title payroll-section-title">🏢 Payroll berdasarkan Departemen</h2>
+        <h2 className="chart-title payroll-section-title">Payroll berdasarkan Departemen</h2>
         <p className="chart-subtitle">Akumulasi nilai payroll per kelompok departemen</p>
         {departmentPayrollData.length > 0 ? (
           <ResponsiveContainer width="100%" height={300}>
@@ -453,7 +465,7 @@ const PayrollDashboard: React.FC = () => {
 
       {/* Top Employees by Compensation */}
       <Card className="chart-card payroll-full-width-chart payroll-accent-blue" glass>
-        <h2 className="chart-title payroll-section-title">🏆 Top 10 Karyawan dengan Kompensasi Terbesar</h2>
+        <h2 className="chart-title payroll-section-title">Top 10 Karyawan dengan Kompensasi Terbesar</h2>
         <p className="chart-subtitle">Ranking kompensasi berdasarkan tunjangan dan bonus</p>
         {employeePayrollData.length > 0 ? (
           <ResponsiveContainer width="100%" height={300}>
@@ -476,14 +488,14 @@ const PayrollDashboard: React.FC = () => {
 
       {/* Action Links */}
       <Card className="chart-card payroll-quick-actions payroll-accent-blue" glass>
-        <h2 className="chart-title payroll-section-title">⚡ Aksi Cepat</h2>
+        <h2 className="chart-title payroll-section-title">Aksi Cepat</h2>
         <p className="chart-subtitle">Navigasi cepat ke modul payroll yang paling sering digunakan</p>
         <div className="payroll-action-links">
           <Link 
             to="/payroll/list" 
             className="action-link payroll-action-link payroll-accent-blue"
           >
-            <span className="action-icon">📊</span>
+            <span className="action-icon"><BarChart3 size={24} /></span>
             <div className="action-content">
               <h4>Daftar Payroll</h4>
               <p>Lihat semua data payroll</p>
@@ -494,7 +506,7 @@ const PayrollDashboard: React.FC = () => {
             to="/payroll/crud" 
             className="action-link payroll-action-link payroll-accent-green"
           >
-            <span className="action-icon">✏️</span>
+            <span className="action-icon"><PencilLine size={24} /></span>
             <div className="action-content">
               <h4>Kelola Payroll</h4>
               <p>Buat, ubah, atau hapus payroll</p>
@@ -505,7 +517,7 @@ const PayrollDashboard: React.FC = () => {
             to="/payroll/approve" 
             className="action-link payroll-action-link payroll-accent-sky"
           >
-            <span className="action-icon">✅</span>
+            <span className="action-icon"><ShieldCheck size={24} /></span>
             <div className="action-content">
               <h4>Setujui Payroll</h4>
               <p>Review dan setujui payroll</p>
@@ -516,7 +528,7 @@ const PayrollDashboard: React.FC = () => {
             to="/payroll/payment" 
             className="action-link payroll-action-link payroll-accent-green"
           >
-            <span className="action-icon">💳</span>
+            <span className="action-icon"><CreditCard size={24} /></span>
             <div className="action-content">
               <h4>Pembayaran</h4>
               <p>Tandai payroll sebagai dibayar</p>
@@ -527,7 +539,7 @@ const PayrollDashboard: React.FC = () => {
             to="/payroll/component/allowance" 
             className="action-link payroll-action-link payroll-accent-orange"
           >
-            <span className="action-icon">📋</span>
+            <span className="action-icon"><ReceiptText size={24} /></span>
             <div className="action-content">
               <h4>Komponen Payroll</h4>
               <p>Kelola komponen gaji</p>
@@ -538,7 +550,7 @@ const PayrollDashboard: React.FC = () => {
             to="/payroll/details" 
             className="action-link payroll-action-link payroll-accent-purple"
           >
-            <span className="action-icon">📊</span>
+            <span className="action-icon"><LayoutDashboard size={24} /></span>
             <div className="action-content">
               <h4>Detail Komponen</h4>
               <p>Lihat detail komponen payroll</p>
@@ -552,7 +564,7 @@ const PayrollDashboard: React.FC = () => {
         <Card className="chart-card payroll-table-preview payroll-accent-blue" glass>
           <div className="payroll-table-header">
             <div className="payroll-table-head-copy">
-              <h2 className="chart-title payroll-section-title">📋 Catatan Payroll Terbaru</h2>
+              <h2 className="chart-title payroll-section-title">Catatan Payroll Terbaru</h2>
               <p className="chart-subtitle">Ringkasan 5 payroll terakhir yang masuk ke sistem</p>
             </div>
             <Link 
@@ -605,7 +617,7 @@ const PayrollDashboard: React.FC = () => {
 
       {loading && (
         <Card className="payroll-loading payroll-accent-blue" glass>
-          <p>⏳ Memuat data payroll...</p>
+          <p>Memuat data payroll...</p>
         </Card>
       )}
     </div>

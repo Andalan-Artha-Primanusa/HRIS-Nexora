@@ -95,28 +95,36 @@ const LeaveRequestsPage = () => {
     }
   };
 
-  const leaveStats = [
+  const leaveSummaryCards = [
     {
       label: 'Total Pengajuan',
+      subtitle: 'Semua request cuti yang tercatat',
       value: items.length,
+      change: 'Seluruh data yang tersedia',
       tone: 'blue',
       icon: BarChart3,
     },
     {
       label: 'Menunggu Persetujuan',
+      subtitle: 'Request yang perlu ditinjau',
       value: items.filter((i) => (i as any).status === 'pending').length,
+      change: 'Prioritas approval hari ini',
       tone: 'orange',
       icon: Clock3,
     },
     {
       label: 'Disetujui',
+      subtitle: 'Pengajuan yang sudah lolos',
       value: items.filter((i) => (i as any).status === 'approved').length,
+      change: 'Status final yang selesai',
       tone: 'green',
       icon: CircleCheckBig,
     },
     {
       label: 'Ditolak',
+      subtitle: 'Request yang tidak disetujui',
       value: items.filter((i) => (i as any).status === 'rejected').length,
+      change: 'Perlu revisi atau tindak lanjut',
       tone: 'red',
       icon: CircleX,
     },
@@ -128,7 +136,7 @@ const LeaveRequestsPage = () => {
         <div className="leave-hero-copy">
           <p className="leave-badge">Leave Center</p>
           <h1 className="leave-title">Pengajuan Cuti</h1>
-          <p className="leave-subtitle">Kelola pengajuan cuti Anda dengan mudah</p>
+          <p className="leave-subtitle">Kelola pengajuan cuti dengan tampilan yang rapi, konsisten, dan mudah dipindai.</p>
         </div>
         <Button
           variant="primary"
@@ -141,6 +149,28 @@ const LeaveRequestsPage = () => {
         </Button>
       </Card>
 
+      <div className="leave-summary-grid">
+        {leaveSummaryCards.map((card) => {
+          const Icon = card.icon;
+
+          return (
+            <Card key={card.label} className="leave-summary-card" glass>
+              <div className="leave-summary-header">
+                <div>
+                  <span className="leave-summary-label">{card.label}</span>
+                  <p className="leave-summary-subtitle">{card.subtitle}</p>
+                </div>
+                <span className={`leave-summary-icon leave-summary-icon--${card.tone}`}>
+                  <Icon size={18} />
+                </span>
+              </div>
+              <div className={`leave-summary-value leave-summary-value--${card.tone}`}>{card.value}</div>
+              <div className="leave-summary-change">{card.change}</div>
+            </Card>
+          );
+        })}
+      </div>
+
       {/* Error Alert */}
       {error && (
         <Card className="leave-card leave-alert-card" glass>
@@ -150,30 +180,6 @@ const LeaveRequestsPage = () => {
           </div>
         </Card>
       )}
-
-      {/* Statistics Card */}
-      <Card className="leave-card" glass>
-        <div className="leave-stats-grid">
-          {leaveStats.map((stat) => {
-            const Icon = stat.icon;
-
-            return (
-              <div key={stat.label} className="leave-stat-card">
-                <div className="leave-stat-head">
-                  <div>
-                    <p className="leave-stat-value leave-stat-value--label">{stat.label}</p>
-                    <p className="leave-stat-subtitle">Ringkasan status pengajuan</p>
-                  </div>
-                  <span className={`leave-stat-icon leave-stat-icon--${stat.tone}`}>
-                    <Icon size={18} />
-                  </span>
-                </div>
-                <p className={`leave-stat-value leave-stat-value--${stat.tone}`}>{stat.value}</p>
-              </div>
-            );
-          })}
-        </div>
-      </Card>
 
       {/* Leaves Table */}
       <Card className="leave-card" glass>

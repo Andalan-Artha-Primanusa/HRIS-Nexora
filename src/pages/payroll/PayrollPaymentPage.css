@@ -1,0 +1,359 @@
+@import url('../admin/AdminCrudPages.css');
+
+.crud-page {
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --primary-light: #dbeafe;
+  --primary-lighter: #eff6ff;
+  --surface: linear-gradient(180deg, rgba(247, 250, 255, 0.94) 0%, rgba(239, 245, 255, 0.88) 100%);
+  --text: #1e3a8a;
+  --text-light: #4f8cf5;
+  --border: rgba(37, 99, 235, 0.14);
+
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: var(--surface);
+  border-radius: 24px;
+}
+
+.crud-page::before {
+  border-color: rgba(37, 99, 235, 0.12);
+  border-radius: inherit;
+}
+
+.payroll-payment-hero,
+.payroll-payment-summary-card,
+.payroll-payment-card,
+.payroll-payment-detail-card,
+.payroll-payment-empty-card {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.08);
+}
+
+.payroll-payment-hero {
+  padding: 1.5rem;
+}
+
+.payroll-payment-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.payroll-payment-summary-card {
+  padding: 1.35rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.payroll-payment-summary-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -40px;
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.payroll-payment-summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.payroll-payment-summary-label {
+  display: inline-block;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.payroll-payment-summary-subtitle {
+  margin: 0.3rem 0 0;
+  font-size: 0.86rem;
+  color: #94a3b8;
+}
+
+.payroll-payment-summary-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  flex-shrink: 0;
+}
+
+.payroll-payment-summary-icon--blue {
+  background: rgba(37, 99, 235, 0.12);
+  color: #2563eb;
+  border-color: rgba(37, 99, 235, 0.14);
+}
+
+.payroll-payment-summary-icon--green {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border-color: rgba(16, 185, 129, 0.14);
+}
+
+.payroll-payment-summary-icon--orange {
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+  border-color: rgba(245, 158, 11, 0.14);
+}
+
+.payroll-payment-summary-icon--purple {
+  background: rgba(139, 92, 246, 0.12);
+  color: #8b5cf6;
+  border-color: rgba(139, 92, 246, 0.14);
+}
+
+.payroll-payment-summary-value {
+  margin-top: 0.55rem;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #2563eb;
+  letter-spacing: -1px;
+}
+
+.payroll-payment-summary-change {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.payroll-payment-message {
+  border-left: 4px solid #10b981;
+}
+
+.payroll-payment-message p {
+  margin: 0;
+  color: #065f46;
+  font-weight: 500;
+}
+
+.payroll-payment-card h2,
+.payroll-payment-detail-card h2,
+.payroll-payment-empty-card h2 {
+  margin-top: 0;
+  color: var(--text);
+}
+
+.payroll-payment-input-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.payroll-payment-input-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.payroll-payment-input-panel label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.payroll-payment-input-panel strong {
+  color: #64748b;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.payroll-payment-quick-panel {
+  background: rgba(239, 246, 255, 0.72);
+  border: 1px solid rgba(37, 99, 235, 0.14);
+  border-radius: 16px;
+  padding: 1rem;
+}
+
+.payroll-payment-quick-title {
+  margin: 0 0 0.75rem;
+  color: #1e40af;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.payroll-payment-quick-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 220px;
+  overflow: auto;
+}
+
+.payroll-payment-quick-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  width: 100%;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid rgba(37, 99, 235, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.95);
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.payroll-payment-quick-item:hover {
+  transform: translateY(-1px);
+  border-color: #93c5fd;
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.08);
+}
+
+.payroll-payment-quick-item.is-selected {
+  background: rgba(219, 234, 254, 0.8);
+  border-color: #2563eb;
+}
+
+.payroll-payment-quick-item-id {
+  color: #1e40af;
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+
+.payroll-payment-quick-item-name {
+  color: #475569;
+  font-size: 0.8rem;
+}
+
+.payroll-payment-status-wrap {
+  margin-bottom: 1rem;
+}
+
+.payroll-status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.payroll-payment-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.payroll-payment-detail-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.payroll-payment-detail-label {
+  margin: 0 0 0.25rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.payroll-payment-detail-label--success {
+  color: #065f46;
+}
+
+.payroll-payment-detail-value {
+  margin: 0 0 0.9rem;
+  font-size: 1rem;
+  color: #1e293b;
+}
+
+.payroll-payment-detail-value--success {
+  color: #10b981;
+  font-weight: 700;
+}
+
+.payroll-payment-detail-value--danger {
+  color: #ef4444;
+  font-weight: 700;
+}
+
+.payroll-payment-total-box {
+  padding: 1rem;
+  border-radius: 16px;
+  border: 1px solid rgba(16, 185, 129, 0.18);
+  background: linear-gradient(135deg, rgba(240, 253, 244, 0.95), rgba(220, 252, 231, 0.95));
+  margin-top: 0.25rem;
+}
+
+.payroll-payment-total-value {
+  margin: 0;
+  font-size: 1.35rem;
+  color: #059669;
+  font-weight: 800;
+}
+
+.payroll-payment-actions {
+  margin-top: 1.25rem;
+  display: flex;
+  gap: 0.75rem;
+}
+
+.payroll-payment-primary {
+  background: #10b981;
+  border: none;
+}
+
+.payroll-payment-paid-note {
+  padding: 0.95rem 1rem;
+  border-radius: 14px;
+  background: #d1fae5;
+  color: #065f46;
+  font-weight: 600;
+}
+
+.payroll-payment-empty-card p {
+  margin: 0;
+  color: #0c4a6e;
+}
+
+@media (max-width: 900px) {
+  .crud-page {
+    padding: 1rem;
+    border-radius: 20px;
+  }
+
+  .payroll-payment-input-grid,
+  .payroll-payment-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .crud-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .payroll-payment-actions {
+    flex-direction: column;
+  }
+
+  .payroll-payment-actions .ui-button {
+    width: 100%;
+  }
+}

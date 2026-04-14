@@ -140,15 +140,19 @@ export const menuItems: MenuItem[] = [
     ]
   },
   {
-    label: 'Training & Competency',
+    label: 'Pelatihan & Kompetensi',
     icon: Target,
-    requiredChecker: (user) => RBACUtils.isManager(user) || RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
+    requiredChecker: (user) =>
+      RBACUtils.isManager(user) ||
+      RBACUtils.isHR(user) ||
+      RBACUtils.isAdmin(user) ||
+      RBACUtils.isSuperAdmin(user),
     subItems: [
-      { label: 'Training Programs', path: '/training/programs' },
-      { label: 'Training Enrollments', path: '/training/enrollments' },
-      { label: 'Competencies', path: '/competencies' },
-      { label: 'My Trainings', path: '/my/trainings' },
-      { label: 'My Competencies', path: '/my/competencies' },
+      { label: 'Program Pelatihan', path: '/training/programs' },
+      { label: 'Pendaftaran Pelatihan', path: '/training/enrollments' },
+      { label: 'Kompetensi', path: '/competencies' },
+      { label: 'Pelatihan Saya', path: '/my/trainings' },
+      { label: 'Kompetensi Saya', path: '/my/competencies' },
     ]
   },
   {

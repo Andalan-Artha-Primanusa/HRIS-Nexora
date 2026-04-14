@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { BarChart3, CreditCard, FileText, PlusCircle, Settings2 } from "lucide-react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
@@ -12,6 +13,7 @@ import {
 } from "@/features/payroll/api/payroll.service";
 import type { PayrollDetail } from "@/features/payroll/types/payroll.types";
 import "../admin/AdminCrudPages.css";
+import "./PayrollDetailsPage.css";
 
 const asDisplay = (value: unknown) => {
   if (value === null || value === undefined) return "-";
@@ -78,6 +80,45 @@ const PayrollDetailsPage = () => {
   };
 
   const columns = useMemo(() => getColumns(items), [items]);
+  const componentSummaryCards = useMemo(() => {
+    const allowanceCount = items.filter((item) => String(item.type).toLowerCase() === "allowance").length;
+    const deductionCount = items.filter((item) => String(item.type).toLowerCase() === "deduction").length;
+
+    return [
+      {
+        label: "Total Components",
+        subtitle: "Semua detail komponen payroll",
+        value: String(items.length),
+        change: "Data yang sedang dimuat",
+        tone: "blue" as const,
+        icon: BarChart3,
+      },
+      {
+        label: "Allowances",
+        subtitle: "Komponen tunjangan",
+        value: String(allowanceCount),
+        change: "Penguat take home pay",
+        tone: "green" as const,
+        icon: PlusCircle,
+      },
+      {
+        label: "Deductions",
+        subtitle: "Komponen potongan",
+        value: String(deductionCount),
+        change: "Pengurang take home pay",
+        tone: "orange" as const,
+        icon: CreditCard,
+      },
+      {
+        label: "Current Type",
+        subtitle: "Mode komponen aktif",
+        value: defaultType === "deduction" ? "Deduction" : "Allowance",
+        change: statusMessage,
+        tone: "purple" as const,
+        icon: Settings2,
+      },
+    ];
+  }, [defaultType, items, statusMessage]);
 
   const requirePayrollId = () => {
     const id = payrollId.trim();
@@ -109,7 +150,7 @@ const PayrollDetailsPage = () => {
       setItems(result as PayrollDetail[]);
     } catch (error: unknown) {
       const errorText = error instanceof Error ? error.message : "Gagal memuat detail";
-      showErrorModal("❌ Error Muat Detail", errorText);
+      showErrorModal("Error Muat Detail", errorText);
     } finally {
       setLoading(false);
     }
@@ -130,11 +171,11 @@ const PayrollDetailsPage = () => {
         payroll_id: Number(id) || 0,
         details,
       });
-      setStatusMessage("✓ Detail berhasil ditambahkan");
+      setStatusMessage("Detail berhasil ditambahkan");
       await loadPayrollDetails();
     } catch (error: unknown) {
       const errorText = error instanceof Error ? error.message : "Gagal tambah detail";
-      showErrorModal("❌ Error Tambah Detail", errorText);
+      showErrorModal("Error Tambah Detail", errorText);
     } finally {
       setLoading(false);
     }
@@ -155,11 +196,11 @@ const PayrollDetailsPage = () => {
         name: detailName,
         amount: Number(detailAmount) || 0,
       });
-      setStatusMessage("✓ Detail berhasil diupdate");
+      setStatusMessage("Detail berhasil diupdate");
       await loadPayrollDetails();
     } catch (error: unknown) {
       const errorText = error instanceof Error ? error.message : "Gagal update detail";
-      showErrorModal("❌ Error Update Detail", errorText);
+      showErrorModal("Error Update Detail", errorText);
     } finally {
       setLoading(false);
     }
@@ -171,11 +212,11 @@ const PayrollDetailsPage = () => {
     try {
       const details = parseJson<Array<{ id: number; amount: number }>>(bulkUpdateText);
       await bulkUpdatePayrollDetails({ details });
-      setStatusMessage("✓ Detail berhasil di-update");
+      setStatusMessage("Detail berhasil di-update");
       await loadPayrollDetails();
     } catch (error: unknown) {
       const errorText = error instanceof Error ? error.message : "Gagal bulk update";
-      showErrorModal("❌ Error Bulk Update", errorText);
+      showErrorModal("Error Bulk Update", errorText);
     } finally {
       setLoading(false);
     }
@@ -192,11 +233,11 @@ const PayrollDetailsPage = () => {
 
     try {
       await deletePayrollDetail(id);
-      setStatusMessage("✓ Detail berhasil dihapus");
+      setStatusMessage("Detail berhasil dihapus");
       await loadPayrollDetails();
     } catch (error: unknown) {
       const errorText = error instanceof Error ? error.message : "Gagal hapus detail";
-      showErrorModal("❌ Error Hapus Detail", errorText);
+      showErrorModal("Error Hapus Detail", errorText);
     } finally {
       setLoading(false);
     }
@@ -235,35 +276,55 @@ const PayrollDetailsPage = () => {
         title={errorModal.title}
         size="md"
       >
-        <div style={{ padding: "16px 0", whiteSpace: "pre-wrap" }}>
-          <p style={{ margin: 0, lineHeight: "1.6", color: "var(--color-text-primary)" }}>
-            {errorModal.message}
-          </p>
+        <div className="payroll-details-modal-content">
+          <p>{errorModal.message}</p>
         </div>
       </Modal>
 
-      <div className="crud-header" style={{ borderBottom: "2px solid #2563eb", paddingBottom: "20px" }}>
-        <div>
-          <h1 style={{ color: "#2563eb", marginBottom: "4px" }}>📋 Komponen Payroll</h1>
-          <p style={{ color: "var(--color-text-secondary)", fontSize: "0.9rem" }}>Kelola komponen tunjangan dan potongan payroll karyawan</p>
-          <p style={{ color: "#0f766e", fontSize: "0.85rem", marginTop: "8px", marginBottom: 0 }}>{statusMessage}</p>
+      <Card className="payroll-details-hero" glass>
+        <div className="crud-header payroll-details-header">
+          <div className="crud-header-copy">
+            <p className="crud-page-badge">Payroll Center</p>
+            <div className="crud-header-title-row">
+              <span className="crud-header-icon"><FileText size={18} /></span>
+              <h1>Komponen Payroll</h1>
+            </div>
+            <p>Kelola komponen tunjangan dan potongan payroll karyawan dengan tampilan yang rapi, konsisten, dan mudah dipindai.</p>
+            <p className="payroll-details-status">{statusMessage}</p>
+          </div>
+          <Button variant="outline" size="md" onClick={() => void loadPayrollDetails()} disabled={loading}>
+            Segarkan
+          </Button>
         </div>
-        <Button 
-          variant="outline" 
-          size="md" 
-          onClick={() => void loadPayrollDetails()} 
-          disabled={loading}
-          style={{ borderColor: "#2563eb", color: "#2563eb" }}
-        >
-          🔄 Segarkan
-        </Button>
+      </Card>
+
+      <div className="payroll-details-summary-grid">
+        {componentSummaryCards.map((card) => {
+          const Icon = card.icon;
+
+          return (
+            <Card key={card.label} className="payroll-details-summary-card" glass>
+              <div className="payroll-details-summary-header">
+                <div>
+                  <span className="payroll-details-summary-label">{card.label}</span>
+                  <p className="payroll-details-summary-subtitle">{card.subtitle}</p>
+                </div>
+                <span className={`payroll-details-summary-icon payroll-details-summary-icon--${card.tone}`}>
+                  <Icon size={18} />
+                </span>
+              </div>
+              <div className="payroll-details-summary-value">{card.value}</div>
+              <div className="payroll-details-summary-change">{card.change}</div>
+            </Card>
+          );
+        })}
       </div>
 
-      <Card className="crud-card" glass style={{ borderTop: "4px solid #2563eb" }}>
-        <h2 style={{ color: "#2563eb", marginTop: 0 }}>🔍 Cari Komponen Payroll</h2>
+      <Card className="crud-card payroll-details-card" glass>
+        <h2>Cari Komponen Payroll</h2>
         <div className="crud-form-grid">
           <label>
-            <strong style={{ color: "#2563eb" }}>ID Payroll *</strong>
+            <strong>ID Payroll *</strong>
             <input
               className="crud-input"
               value={payrollId}
@@ -272,45 +333,33 @@ const PayrollDetailsPage = () => {
           </label>
         </div>
         <div className="crud-actions">
-          <Button 
-            variant="primary" 
-            size="md" 
-            onClick={() => void loadPayrollDetails()} 
-            disabled={loading}
-            style={{ backgroundColor: "#2563eb" }}
-          >
+          <Button variant="primary" size="md" onClick={() => void loadPayrollDetails()} disabled={loading}>
             Muat Komponen Payroll
           </Button>
         </div>
       </Card>
 
-      <Card className="crud-card" glass style={{ borderTop: "4px solid #2563eb" }}>
-        <h2 style={{ color: "#2563eb", marginTop: 0 }}>➕ Tambah Komponen (Bulk)</h2>
+      <Card className="crud-card payroll-details-card" glass>
+        <h2>Tambah Komponen (Bulk)</h2>
         <div className="crud-form-grid">
           <label className="crud-form-full">
-            <strong style={{ color: "#2563eb" }}>JSON Array Komponen</strong>
+            <strong>JSON Array Komponen</strong>
             <textarea value={bulkDetailsText} onChange={(event) => setBulkDetailsText(event.target.value)} />
           </label>
         </div>
         <p className="crud-note">Format: [{"{"} type, name, amount {"}"}]</p>
         <div className="crud-actions">
-          <Button 
-            variant="primary" 
-            size="md" 
-            onClick={() => void addBulk()} 
-            disabled={loading}
-            style={{ backgroundColor: "#2563eb" }}
-          >
+          <Button variant="primary" size="md" onClick={() => void addBulk()} disabled={loading}>
             Tambah Bulk Komponen
           </Button>
         </div>
       </Card>
 
-      <Card className="crud-card" glass style={{ borderTop: "4px solid #2563eb" }}>
-        <h2 style={{ color: "#2563eb", marginTop: 0 }}>✏️ Ubah/Hapus Komponen</h2>
+      <Card className="crud-card payroll-details-card" glass>
+        <h2>Ubah/Hapus Komponen</h2>
         <div className="crud-form-grid">
           <label>
-            <strong style={{ color: "#2563eb" }}>ID Detail</strong>
+            <strong>ID Detail</strong>
             <input
               className="crud-input"
               value={detailId}
@@ -319,7 +368,7 @@ const PayrollDetailsPage = () => {
             />
           </label>
           <label>
-            <strong style={{ color: "#2563eb" }}>Tipe</strong>
+            <strong>Tipe</strong>
             <input
               className="crud-input"
               value={detailType}
@@ -327,7 +376,7 @@ const PayrollDetailsPage = () => {
             />
           </label>
           <label>
-            <strong style={{ color: "#2563eb" }}>Nama Komponen</strong>
+            <strong>Nama Komponen</strong>
             <input
               className="crud-input"
               value={detailName}
@@ -335,7 +384,7 @@ const PayrollDetailsPage = () => {
             />
           </label>
           <label>
-            <strong style={{ color: "#2563eb" }}>Jumlah</strong>
+            <strong>Jumlah</strong>
             <input
               className="crud-input"
               value={detailAmount}
@@ -343,7 +392,7 @@ const PayrollDetailsPage = () => {
             />
           </label>
           <label className="crud-form-full">
-            <strong style={{ color: "#2563eb" }}>JSON Array Bulk Update</strong>
+            <strong>JSON Array Bulk Update</strong>
             <textarea value={bulkUpdateText} onChange={(event) => setBulkUpdateText(event.target.value)} />
           </label>
         </div>
@@ -351,54 +400,26 @@ const PayrollDetailsPage = () => {
         <p className="crud-note">Format: [{"{"} id, amount {"}"}]</p>
 
         <div className="crud-actions">
-          <Button 
-            variant="secondary" 
-            size="md" 
-            onClick={() => void updateSingle()} 
-            disabled={loading}
-            style={{ backgroundColor: "#0ea5e9" }}
-          >
+          <Button variant="secondary" size="md" onClick={() => void updateSingle()} disabled={loading}>
             Ubah Detail
           </Button>
-          <Button 
-            variant="secondary" 
-            size="md" 
-            onClick={() => void bulkUpdate()} 
-            disabled={loading}
-            style={{ backgroundColor: "#0ea5e9" }}
-          >
+          <Button variant="secondary" size="md" onClick={() => void bulkUpdate()} disabled={loading}>
             Bulk Update Komponen
           </Button>
-          <Button 
-            variant="ghost" 
-            size="md" 
-            onClick={() => void deleteSingle()} 
-            disabled={loading}
-            style={{ color: "#ef4444" }}
-          >
+          <Button variant="ghost" size="md" onClick={() => void deleteSingle()} disabled={loading}>
             Hapus Detail
           </Button>
         </div>
       </Card>
 
-      <Card className="crud-card" glass style={{ borderTop: "4px solid #2563eb" }}>
-        <h2 style={{ color: "#2563eb", marginTop: 0 }}>📊 Tabel Komponen Payroll</h2>
+      <Card className="crud-card payroll-details-card" glass>
+        <h2>Tabel Komponen Payroll</h2>
         <div className="crud-table-wrap">
-          <table className="crud-table" style={{ width: "100%", borderCollapse: "collapse" }}>
+          <table className="crud-table payroll-details-table">
             <thead>
-              <tr style={{ backgroundColor: "#eff6ff" }}>
+              <tr>
                 {columns.map((column) => (
-                  <th 
-                    key={column}
-                    style={{ 
-                      padding: "12px", 
-                      backgroundColor: "#dbeafe",
-                      color: "#2563eb",
-                      fontWeight: "600",
-                      textAlign: "left",
-                      borderBottom: "2px solid #2563eb"
-                    }}
-                  >
+                  <th key={column}>
                     {column === "id" && "ID"}
                     {column === "payroll_id" && "ID Payroll"}
                     {column === "type" && "Tipe"}
@@ -414,13 +435,9 @@ const PayrollDetailsPage = () => {
                 items.map((item, index) => (
                   <tr 
                     key={String(item.id ?? index)}
-                    style={{ borderBottom: "1px solid #eff6ff" }}
                   >
                     {columns.map((column) => (
-                      <td 
-                        key={`${String(item.id ?? index)}-${column}`}
-                        style={{ padding: "12px", color: "#1f2937" }}
-                      >
+                      <td key={`${String(item.id ?? index)}-${column}`}>
                         {asDisplay((item as Record<string, unknown>)[column])}
                       </td>
                     ))}
@@ -428,7 +445,7 @@ const PayrollDetailsPage = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={columns.length} style={{ padding: "16px", textAlign: "center", color: "#999" }}>
+                  <td colSpan={columns.length} className="payroll-details-empty-row">
                     Tidak ada data komponen payroll.
                   </td>
                 </tr>

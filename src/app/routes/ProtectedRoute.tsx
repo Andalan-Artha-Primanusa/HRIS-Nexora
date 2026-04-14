@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { useAuthStore } from "@/app/store/auth.store";
+import { useAuthSession } from "./useAuthSession";
 
 /**
  * ProtectedRoute Component
@@ -8,9 +8,13 @@ import { useAuthStore } from "@/app/store/auth.store";
  * from Zustand auth store (synced with localStorage).
  */
 export const ProtectedRoute = () => {
-  const token = useAuthStore((state) => state.token);
+  const authStatus = useAuthSession();
 
-  if (!token) {
+  if (authStatus === "checking") {
+    return null;
+  }
+
+  if (authStatus !== "authenticated") {
     return <Navigate to="/login" replace />;
   }
 

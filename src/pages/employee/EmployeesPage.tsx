@@ -144,6 +144,44 @@ const EmployeesPage = () => {
 
   const totalPages = Math.ceil(sortedEmployees.length / pageSize);
 
+  const employeeSummaryCards = useMemo(
+    () => [
+      {
+        label: "Total Employees",
+        subtitle: "Semua data karyawan",
+        value: String(items.length),
+        change: "Seluruh data yang tersimpan",
+        tone: "blue" as const,
+        icon: Briefcase,
+      },
+      {
+        label: "Filtered Results",
+        subtitle: "Hasil pencarian saat ini",
+        value: String(sortedEmployees.length),
+        change: `${paginatedEmployees.length} data di halaman ini`,
+        tone: "green" as const,
+        icon: Search,
+      },
+      {
+        label: "Departments",
+        subtitle: "Departemen unik yang aktif",
+        value: String(uniqueDepartments.length),
+        change: "Distribusi struktur kerja",
+        tone: "orange" as const,
+        icon: Briefcase,
+      },
+      {
+        label: "Positions",
+        subtitle: "Jabatan unik yang tersedia",
+        value: String(uniquePositions.length),
+        change: "Lapisan peran organisasi",
+        tone: "purple" as const,
+        icon: Briefcase,
+      },
+    ],
+    [items.length, paginatedEmployees.length, sortedEmployees.length, uniqueDepartments.length, uniquePositions.length]
+  );
+
   const clearFilters = () => {
     setSearchText("");
     setSelectedDepartment("");
@@ -464,10 +502,11 @@ const EmployeesPage = () => {
   return (
     <div className="employees-page crud-page">
       {/* Header - Title Section */}
-      <div className="profiles-list-header" style={{ borderBottom: "2px solid #2563eb", paddingBottom: "20px" }}>
+      <div className="employees-list-header">
         <div className="profiles-list-title">
-          <h1 style={{ color: "#2563eb", marginBottom: "4px" }}>👨‍💼 Daftar Karyawan</h1>
-          <p style={{ color: "var(--color-text-secondary)", fontSize: "0.9rem" }}>Kelola jabatan, departemen, dan gaji karyawan</p>
+          <span className="employees-page-badge">People Center</span>
+          <h1>Daftar Karyawan</h1>
+          <p>Kelola jabatan, departemen, dan gaji karyawan dalam tampilan yang lebih rapi dan konsisten.</p>
         </div>
         <div className="profiles-list-actions">
           <Button
@@ -492,8 +531,30 @@ const EmployeesPage = () => {
         </div>
       </div>
 
+      <div className="employees-summary-grid">
+        {employeeSummaryCards.map((card) => {
+          const Icon = card.icon;
+
+          return (
+            <Card key={card.label} className="employees-summary-card" glass>
+              <div className="employees-summary-header">
+                <div>
+                  <span className="employees-summary-label">{card.label}</span>
+                  <p className="employees-summary-subtitle">{card.subtitle}</p>
+                </div>
+                <span className={`employees-summary-icon employees-summary-icon--${card.tone}`}>
+                  <Icon size={20} />
+                </span>
+              </div>
+              <div className="employees-summary-value">{card.value}</div>
+              <div className="employees-summary-change">{card.change}</div>
+            </Card>
+          );
+        })}
+      </div>
+
       {/* Control Bar - Search & Filter */}
-      <Card className="profiles-search-card" glass style={{ borderTop: "4px solid #2563eb", marginBottom: "1.5rem" }}>
+      <Card className="profiles-search-card" glass>
         <div className="profiles-control-bar">
           <div className="profiles-search-box">
             <Search size={18} />

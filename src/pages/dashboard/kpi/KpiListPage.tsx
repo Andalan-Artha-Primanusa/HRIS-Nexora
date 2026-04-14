@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
-import { Target, RefreshCw, Plus } from 'lucide-react';
+import { BarChart3, CheckCircle2, Plus, RefreshCw, Send, Target } from 'lucide-react';
 import {
   deleteKpi,
   getAllKpis,
@@ -37,6 +37,46 @@ const KpiListPage = () => {
   const [searchEmployee, setSearchEmployee] = useState('');
 
   const tableColumns = kpis.length > 0 ? Object.keys(kpis[0]) : ['id', 'employee_id', 'title', 'target', 'period', 'status'];
+  const summaryCards = useMemo(() => {
+    const draftCount = kpis.filter((item) => String(item.status ?? '').toLowerCase() === 'draft').length;
+    const submittedCount = kpis.filter((item) => String(item.status ?? '').toLowerCase() === 'submitted').length;
+    const approvedCount = kpis.filter((item) => String(item.status ?? '').toLowerCase() === 'approved').length;
+
+    return [
+      {
+        label: 'Total KPI',
+        subtitle: 'Semua data KPI',
+        value: String(kpis.length),
+        change: 'Data KPI aktif',
+        tone: 'blue' as const,
+        icon: BarChart3,
+      },
+      {
+        label: 'Draft',
+        subtitle: 'Belum dikirim',
+        value: String(draftCount),
+        change: 'Perlu dipersiapkan',
+        tone: 'orange' as const,
+        icon: Target,
+      },
+      {
+        label: 'Submitted',
+        subtitle: 'Menunggu approval',
+        value: String(submittedCount),
+        change: 'Menunggu review',
+        tone: 'purple' as const,
+        icon: Send,
+      },
+      {
+        label: 'Approved',
+        subtitle: 'Sudah disetujui',
+        value: String(approvedCount),
+        change: statusMessage,
+        tone: 'green' as const,
+        icon: CheckCircle2,
+      },
+    ];
+  }, [kpis, statusMessage]);
 
   useEffect(() => {
     void loadKpis();
@@ -123,53 +163,77 @@ const KpiListPage = () => {
 
   return (
     <div className="kpi-page">
-      <div className="kpi-header">
-        <div>
-          <div className="kpi-badge">
-            <Target size={18} />
-            <span>KPI Management</span>
+      <Card className="kpi-hero" glass>
+        <div className="kpi-header">
+          <div className="kpi-header-copy">
+            <p className="kpi-page-badge">Performance Center</p>
+            <div className="kpi-title-row">
+              <span className="kpi-header-icon"><Target size={18} /></span>
+              <h1>KPI Management</h1>
+            </div>
+            <p>Kelola KPI perusahaan: lihat, tambah, update, dan approve dengan tampilan yang rapi dan konsisten.</p>
           </div>
-          <h1>KPI Management</h1>
-          <p>Kelola KPI perusahaan: lihat, tambah, update, dan approve.</p>
+          <div className="kpi-header-actions">
+            <Button
+              variant="outline"
+              size="md"
+              onClick={loadKpis}
+              disabled={loading}
+            >
+              <RefreshCw size={16} />
+              Refresh
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
+              onClick={() => navigate('/kpis/add')}
+              disabled={loading}
+            >
+              <Plus size={16} />
+              Create KPI
+            </Button>
+          </div>
         </div>
-        <div className="kpi-header-actions">
-          <Button 
-            variant="outline" 
-            size="md" 
-            onClick={loadKpis} 
-            disabled={loading}
-          >
-            <RefreshCw size={16} />
-            Refresh
-          </Button>
-          <Button 
-            variant="primary" 
-            size="md" 
-            onClick={() => navigate('/kpis/add')}
-            disabled={loading}
-          >
-            <Plus size={16} />
-            Create KPI
-          </Button>
-        </div>
+      </Card>
+
+      <div className="kpi-summary-grid">
+        {summaryCards.map((card) => {
+          const Icon = card.icon;
+
+          return (
+            <Card key={card.label} className="kpi-summary-card" glass>
+              <div className="kpi-summary-header">
+                <div>
+                  <span className="kpi-summary-label">{card.label}</span>
+                  <p className="kpi-summary-subtitle">{card.subtitle}</p>
+                </div>
+                <span className={`kpi-summary-icon kpi-summary-icon--${card.tone}`}>
+                  <Icon size={18} />
+                </span>
+              </div>
+              <div className="kpi-summary-value">{card.value}</div>
+              <div className="kpi-summary-change">{card.change}</div>
+            </Card>
+          );
+        })}
       </div>
 
       <Card className="kpi-card" glass>
         <div className="kpi-card-title">
           <Target size={18} />
-          <span>Search KPI by Employee (Manager/HR/Admin/Super Admin)</span>
+          <span>Cari KPI berdasarkan ID karyawan</span>
         </div>
         <p className="kpi-hint">
-          Endpoints: GET /kpis, POST /kpis, GET /kpis/employee/{'{employee_id}'}, GET /kpis/{'{id}'}, PUT /kpis/{'{id}'}, DELETE /kpis/{'{id}'}, PUT /kpis/{'{id}'}/approve.
+          Endpoint utama: GET /kpis, POST /kpis, GET /kpis/employee/{'{employee_id}'}, GET /kpis/{'{id}'}, PUT /kpis/{'{id}'}, DELETE /kpis/{'{id}'}, PUT /kpis/{'{id}'}/approve.
         </p>
         <p className="kpi-hint">
-          Status enum: draft -&gt; submitted -&gt; approved.
+          Alur status: draft -&gt; submitted -&gt; approved.
         </p>
         <div className="kpi-form-row">
           <input
             value={searchEmployee}
             onChange={(e) => setSearchEmployee(e.target.value)}
-            placeholder="Enter employee_id"
+            placeholder="Masukkan employee_id"
           />
           <Button 
             variant="secondary" 
@@ -224,7 +288,7 @@ const KpiListPage = () => {
                       </td>
                     ))}
                     <td>
-                      <div style={{ display: 'flex', gap: '8px' }}>
+                      <div className="kpi-row-actions">
                         {(() => {
                           const id = String(item.id ?? '');
                           const status = String(item.status ?? '').toLowerCase();
@@ -278,13 +342,13 @@ const KpiListPage = () => {
             </table>
           </div>
         ) : (
-          <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+          <div className="kpi-empty-state">
             No KPI records found. {searchEmployee ? 'Try a different employee ID.' : 'Click "Create KPI" to add one.'}
           </div>
         )}
       </Card>
 
-      <div style={{ marginTop: '16px', padding: '12px', background: '#f0f0f0', borderRadius: '4px', fontSize: '14px' }}>
+      <div className="kpi-status-bar">
         <strong>Status:</strong> {statusMessage}
       </div>
     </div>

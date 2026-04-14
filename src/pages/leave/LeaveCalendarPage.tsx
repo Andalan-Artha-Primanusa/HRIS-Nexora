@@ -5,7 +5,7 @@ import { Alert } from "@/shared/ui/Alert";
 import { getLeaveCalendar } from "@/features/leave/api/leave.service";
 
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { BarChart3, ChevronLeft, ChevronRight, CircleCheckBig, CircleX, Clock3 } from "lucide-react";
 import "./LeavePages.css";
 
 interface CalendarEvent {
@@ -119,18 +119,53 @@ const LeaveCalendarPage = () => {
 
   const chartColors = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
+  const leaveSummaryCards = [
+    {
+      label: 'Total Requests',
+      subtitle: 'Semua data pengajuan cuti',
+      value: String(stats.total),
+      change: 'Ringkasan keseluruhan',
+      tone: 'blue' as const,
+      icon: BarChart3,
+    },
+    {
+      label: 'Pending',
+      subtitle: 'Menunggu persetujuan',
+      value: String(stats.pending),
+      change: 'Perlu tindakan approval',
+      tone: 'orange' as const,
+      icon: Clock3,
+    },
+    {
+      label: 'Approved',
+      subtitle: 'Pengajuan disetujui',
+      value: String(stats.approved),
+      change: 'Status final berhasil',
+      tone: 'green' as const,
+      icon: CircleCheckBig,
+    },
+    {
+      label: 'Rejected',
+      subtitle: 'Pengajuan ditolak',
+      value: String(stats.rejected),
+      change: 'Perlu revisi atau tindak lanjut',
+      tone: 'red' as const,
+      icon: CircleX,
+    },
+  ];
+
   return (
     <div className="leave-page">
-      {/* Header */}
-      <div className="leave-header">
-        <div>
-          <h1>📅 Leave Calendar & Analytics</h1>
-          <p>Visual calendar view of all leave requests with detailed analytics</p>
+      <Card className="leave-hero-card" glass>
+        <div className="leave-hero-copy">
+          <p className="leave-badge">Leave Center</p>
+          <h1 className="leave-title">Leave Calendar & Analytics</h1>
+          <p className="leave-subtitle">Visual calendar view of leave requests with consistent analytics and cleaner readability.</p>
         </div>
         <Button variant="primary" size="md" onClick={() => void loadCalendar()} disabled={loading}>
           {loading ? 'Loading...' : 'Refresh Calendar'}
         </Button>
-      </div>
+      </Card>
 
       {alertMessage && (
         <Alert 
@@ -141,39 +176,26 @@ const LeaveCalendarPage = () => {
         />
       )}
 
-      {/* Summary Stats */}
-      <div className="calendar-stats-grid">
-        <div className="stat-card stat-total">
-          <div className="stat-icon">📊</div>
-          <div className="stat-content">
-            <span className="stat-label">Total Requests</span>
-            <span className="stat-value">{stats.total}</span>
-          </div>
-        </div>
+      <div className="leave-summary-grid">
+        {leaveSummaryCards.map((card) => {
+          const Icon = card.icon;
 
-        <div className="stat-card stat-approved">
-          <div className="stat-icon">✓</div>
-          <div className="stat-content">
-            <span className="stat-label">Approved</span>
-            <span className="stat-value">{stats.approved}</span>
-          </div>
-        </div>
-
-        <div className="stat-card stat-pending">
-          <div className="stat-icon">⏱</div>
-          <div className="stat-content">
-            <span className="stat-label">Pending</span>
-            <span className="stat-value">{stats.pending}</span>
-          </div>
-        </div>
-
-        <div className="stat-card stat-rejected">
-          <div className="stat-icon">✕</div>
-          <div className="stat-content">
-            <span className="stat-label">Rejected</span>
-            <span className="stat-value">{stats.rejected}</span>
-          </div>
-        </div>
+          return (
+            <Card key={card.label} className="leave-summary-card" glass>
+              <div className="leave-summary-header">
+                <div>
+                  <span className="leave-summary-label">{card.label}</span>
+                  <p className="leave-summary-subtitle">{card.subtitle}</p>
+                </div>
+                <span className={`leave-summary-icon leave-summary-icon--${card.tone}`}>
+                  <Icon size={18} />
+                </span>
+              </div>
+              <div className={`leave-summary-value leave-summary-value--${card.tone}`}>{card.value}</div>
+              <div className="leave-summary-change">{card.change}</div>
+            </Card>
+          );
+        })}
       </div>
 
       <div className="calendar-section">
@@ -257,7 +279,7 @@ const LeaveCalendarPage = () => {
         <div className="calendar-charts-grid">
           {/* Leave Types Pie Chart */}
           <Card className="chart-card" glass>
-            <h3 className="chart-title">📋 Leave Types Distribution</h3>
+            <h3 className="chart-title">Leave Types Distribution</h3>
             <ResponsiveContainer width="100%" height={280}>
               <PieChart>
                 <Tooltip 
@@ -287,9 +309,9 @@ const LeaveCalendarPage = () => {
 
           {/* Status Overview Bar Chart */}
           <Card className="chart-card" glass>
-            <h3 className="chart-title">📊 Status Overview</h3>
+            <h3 className="chart-title">Status Overview</h3>
             <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={[{ approved: stats.approved, pending: stats.pending, rejected: stats.rejected }]}>
+              <BarChart data={[{ name: 'Requests', approved: stats.approved, pending: stats.pending, rejected: stats.rejected }]}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(37, 99, 235, 0.1)" />
                 <XAxis dataKey="name" />
                 <YAxis />
@@ -309,7 +331,7 @@ const LeaveCalendarPage = () => {
 
           {/* Status by Type */}
           <Card className="chart-card full-width" glass>
-            <h3 className="chart-title">📈 Status Breakdown by Leave Type</h3>
+            <h3 className="chart-title">Status Breakdown by Leave Type</h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={stats.statusByType}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(37, 99, 235, 0.1)" />

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
-import { Search, Filter, ChevronDown } from "lucide-react";
+import { BarChart3, ChevronDown, Filter, Search } from "lucide-react";
 import { getAllPayroll } from "@/features/payroll/api/payroll.service";
 import { getAllEmployees } from "@/features/employee/api/employee.service";
 import { PayrollStatusBadge } from "@/shared/ui/PayrollStatusBadge";
@@ -238,36 +238,32 @@ const PayrollListPage: React.FC = () => {
         title={errorModal.title}
         size="md"
       >
-        <div style={{ padding: "16px 0", whiteSpace: "pre-wrap" }}>
-          <p style={{ margin: 0, lineHeight: "1.6", color: "var(--color-text-primary)" }}>
-            {errorModal.message}
-          </p>
+        <div className="payroll-list-modal-content">
+          <p>{errorModal.message}</p>
         </div>
       </Modal>
 
       {/* Header - Title Section */}
-      <div className="payroll-list-header" style={{ borderBottom: "2px solid #2563eb", paddingBottom: "20px" }}>
-        <div className="payroll-list-title">
-          <h1 style={{ color: "#2563eb", marginBottom: "4px" }}>📊 Daftar Payroll</h1>
-          <p style={{ color: "var(--color-text-secondary)", fontSize: "0.9rem" }}>Lihat dan kelola semua data payroll karyawan</p>
+      <Card className="payroll-list-hero" glass>
+        <div className="payroll-list-header">
+          <div className="payroll-list-title">
+            <span className="payroll-list-icon"><BarChart3 size={18} /></span>
+            <p className="payroll-list-badge">Payroll Center</p>
+            <h1>Daftar Payroll</h1>
+            <p>Kelola data payroll karyawan dengan tampilan yang rapi, konsisten, dan mudah dipindai.</p>
+          </div>
+          <div className="payroll-list-actions">
+            <Button variant="outline" size="md" onClick={() => void loadData()} disabled={payrollState.isLoading}>
+              Segarkan
+            </Button>
+          </div>
         </div>
-        <div className="payroll-list-actions">
-          <Button
-            variant="outline"
-            size="md"
-            onClick={() => void loadData()}
-            disabled={payrollState.isLoading}
-            style={{ borderColor: "#2563eb", color: "#2563eb" }}
-          >
-            🔄 Segarkan
-          </Button>
-        </div>
-      </div>
+      </Card>
 
 
 
       {/* Search Bar - Compact Header */}
-      <Card className="payroll-search-card" glass style={{ borderTop: "4px solid #2563eb" }}>
+      <Card className="payroll-search-card" glass>
         <div className="payroll-control-bar">
           {/* Search Box */}
           <div className="payroll-search-box">
@@ -310,16 +306,12 @@ const PayrollListPage: React.FC = () => {
             <button
               className={`payroll-filter-btn ${showFilters ? "active" : ""}`}
               onClick={() => setShowFilters(!showFilters)}
-              style={{ borderColor: "#2563eb", color: "#2563eb" }}
             >
               <Filter size={18} />
               <span>Filter</span>
               <ChevronDown
                 size={14}
-                style={{
-                  transform: showFilters ? "rotate(180deg)" : "",
-                  transition: "transform 0.3s ease",
-                }}
+                className={showFilters ? "payroll-chevron payroll-chevron--open" : "payroll-chevron"}
               />
             </button>
 
@@ -330,7 +322,6 @@ const PayrollListPage: React.FC = () => {
                 size="sm"
                 onClick={clearFilters}
                 className="payroll-clear-btn"
-                style={{ borderColor: "#2563eb", color: "#2563eb" }}
               >
                 Bersihkan
               </Button>
@@ -344,7 +335,7 @@ const PayrollListPage: React.FC = () => {
             <div className="filter-row">
               {/* Employee Filter */}
               <div className="filter-group">
-                <label style={{ color: "#2563eb", fontWeight: "600" }}>Karyawan</label>
+                <label>Karyawan</label>
                 <select
                   value={selectedEmployeeId}
                   onChange={(e) => setSelectedEmployeeId(e.target.value)}
@@ -361,7 +352,7 @@ const PayrollListPage: React.FC = () => {
 
               {/* Period Filter */}
               <div className="filter-group">
-                <label style={{ color: "#2563eb", fontWeight: "600" }}>Periode</label>
+                <label>Periode</label>
                 <select
                   value={selectedPeriod}
                   onChange={(e) => setSelectedPeriod(e.target.value)}
@@ -378,7 +369,7 @@ const PayrollListPage: React.FC = () => {
 
               {/* Status Filter */}
               <div className="filter-group">
-                <label style={{ color: "#2563eb", fontWeight: "600" }}>Status</label>
+                <label>Status</label>
                 <select
                   value={selectedStatus}
                   onChange={(e) => setSelectedStatus(e.target.value)}
@@ -403,7 +394,7 @@ const PayrollListPage: React.FC = () => {
         )}
 
         {/* Results Info */}
-        <div className="payroll-results-info" style={{ color: "#2563eb", fontWeight: "600" }}>
+        <div className="payroll-results-info">
           <span className="payroll-count">
             Menampilkan <strong>{paginatedItems.length}</strong> dari{" "}
             <strong>{sortedItems.length}</strong> data
@@ -415,10 +406,10 @@ const PayrollListPage: React.FC = () => {
       </Card>
 
       {/* Table - Main Content */}
-      <Card className="payroll-table-card" glass style={{ borderTop: "4px solid #2563eb" }}>
+      <Card className="payroll-table-card" glass>
         {/* Loading State */}
         {payrollState.isLoading && (
-          <LoadingState message="⏳ Memuat data payroll..." />
+          <LoadingState message="Memuat data payroll..." />
         )}
 
         {/* Error State */}
@@ -433,12 +424,12 @@ const PayrollListPage: React.FC = () => {
         {/* Empty State */}
         {payrollState.isEmpty && (
           <EmptyState
-            icon="📭"
+            icon=""
             title="Tidak ada data"
             message="Tidak ada payroll yang sesuai dengan filter yang dipilih"
             actionLabel={
               searchText || selectedEmployeeId || selectedPeriod || selectedStatus
-                ? "🔄 Bersihkan Filter"
+                ? "Bersihkan Filter"
                 : undefined
             }
             onAction={
@@ -453,38 +444,38 @@ const PayrollListPage: React.FC = () => {
         {payrollState.isSuccess && paginatedItems.length > 0 && (
           <>
             <div className="payroll-table-wrap">
-              <table className="payroll-table" style={{ width: "100%", borderCollapse: "collapse" }}>
+              <table className="payroll-table">
                 <thead>
-                  <tr style={{ backgroundColor: "#dbeafe" }}>
-                    <th style={{ padding: "12px", backgroundColor: "#dbeafe", color: "#2563eb", fontWeight: "600", textAlign: "left", borderBottom: "2px solid #2563eb" }}>ID Payroll</th>
-                    <th style={{ padding: "12px", backgroundColor: "#dbeafe", color: "#2563eb", fontWeight: "600", textAlign: "left", borderBottom: "2px solid #2563eb" }}>Nama Karyawan</th>
-                    <th style={{ padding: "12px", backgroundColor: "#dbeafe", color: "#2563eb", fontWeight: "600", textAlign: "left", borderBottom: "2px solid #2563eb" }}>Periode</th>
-                    <th style={{ padding: "12px", backgroundColor: "#dbeafe", color: "#2563eb", fontWeight: "600", textAlign: "left", borderBottom: "2px solid #2563eb" }}>Gaji Pokok</th>
-                    <th style={{ padding: "12px", backgroundColor: "#dbeafe", color: "#2563eb", fontWeight: "600", textAlign: "left", borderBottom: "2px solid #2563eb" }}>Gaji Bersih</th>
-                    <th style={{ padding: "12px", backgroundColor: "#dbeafe", color: "#2563eb", fontWeight: "600", textAlign: "left", borderBottom: "2px solid #2563eb" }}>Status</th>
+                  <tr>
+                    <th>ID Payroll</th>
+                    <th>Nama Karyawan</th>
+                    <th>Periode</th>
+                    <th>Gaji Pokok</th>
+                    <th>Gaji Bersih</th>
+                    <th>Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {paginatedItems.map((item: any, index) => (
-                    <tr key={`${item.id}-${index}`} style={{ borderBottom: "1px solid #eff6ff" }}>
-                      <td style={{ padding: "12px" }}>
+                    <tr key={`${item.id}-${index}`}>
+                      <td>
                         <span className="payroll-id">{item.id || "-"}</span>
                       </td>
-                      <td style={{ padding: "12px" }}>
+                      <td>
                         <span className="payroll-employee-name">
                           {item.employeeName || "-"}
                         </span>
                       </td>
-                      <td style={{ padding: "12px" }}>
+                      <td>
                         <span className="payroll-period">{item.period || "-"}</span>
                       </td>
-                      <td className="payroll-amount" style={{ padding: "12px" }}>
+                      <td className="payroll-amount">
                         {formatCurrency(item.basic_salary || 0)}
                       </td>
-                      <td className="payroll-amount payroll-total" style={{ padding: "12px", fontWeight: "600", color: "#10b981" }}>
+                      <td className="payroll-amount payroll-total">
                         {formatCurrency(item.take_home_pay || item.net_salary || 0)}
                       </td>
-                      <td style={{ padding: "12px" }}>
+                      <td>
                         <PayrollStatusBadge status={item.status} size="md" />
                       </td>
                     </tr>
@@ -495,18 +486,17 @@ const PayrollListPage: React.FC = () => {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="payroll-pagination" style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "16px", marginTop: "20px", paddingTop: "20px", borderTop: "1px solid #e5e7eb" }}>
+              <div className="payroll-pagination">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                   disabled={currentPage === 1}
-                  style={{ borderColor: "#2563eb", color: "#2563eb" }}
                 >
-                  ← Sebelumnya
+                  Sebelumnya
                 </Button>
 
-                <div className="payroll-page-info" style={{ color: "#2563eb", fontWeight: "600" }}>
+                <div className="payroll-page-info">
                   Halaman <strong>{currentPage}</strong> dari <strong>{totalPages}</strong>
                 </div>
 
@@ -515,9 +505,8 @@ const PayrollListPage: React.FC = () => {
                   size="sm"
                   onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                   disabled={currentPage === totalPages}
-                  style={{ borderColor: "#2563eb", color: "#2563eb" }}
                 >
-                  Selanjutnya →
+                  Selanjutnya
                 </Button>
               </div>
             )}

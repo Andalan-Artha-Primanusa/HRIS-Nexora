@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { BarChart3, CalendarDays, CheckCircle2, RefreshCw } from "lucide-react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
@@ -8,6 +9,7 @@ import {
 } from "@/features/payroll/api/payroll.service";
 import type { PayrollItem } from "@/features/payroll/types/payroll.types";
 import "../admin/AdminCrudPages.css";
+import "./PayrollGeneratePage.css";
 
 const asDisplay = (value: unknown) => {
   if (value === null || value === undefined) return "-";
@@ -42,6 +44,45 @@ const PayrollGeneratePage = () => {
   };
 
   const columns = useMemo(() => getColumns(items), [items]);
+  const summaryCards = useMemo(() => {
+    const paidCount = items.filter((item) => String(item.status).toLowerCase() === "paid").length;
+    const pendingCount = items.filter((item) => String(item.status).toLowerCase() === "pending").length;
+
+    return [
+      {
+        label: "Total Payroll",
+        subtitle: "Semua data payroll tersedia",
+        value: String(items.length),
+        change: "Data payroll saat ini",
+        tone: "blue" as const,
+        icon: BarChart3,
+      },
+      {
+        label: "Pending",
+        subtitle: "Belum selesai diproses",
+        value: String(pendingCount),
+        change: "Butuh tindak lanjut",
+        tone: "orange" as const,
+        icon: RefreshCw,
+      },
+      {
+        label: "Paid",
+        subtitle: "Payroll sudah dibayar",
+        value: String(paidCount),
+        change: "Status selesai",
+        tone: "green" as const,
+        icon: CheckCircle2,
+      },
+      {
+        label: "Periode Aktif",
+        subtitle: "Periode generate saat ini",
+        value: period,
+        change: "Target batch bulanan",
+        tone: "purple" as const,
+        icon: CalendarDays,
+      },
+    ];
+  }, [items, period]);
 
   const loadPayroll = async () => {
     setLoading(true);
@@ -51,7 +92,7 @@ const PayrollGeneratePage = () => {
       setItems(result);
     } catch (error: unknown) {
       const errorText = error instanceof Error ? error.message : "Gagal memuat payroll";
-      showErrorModal("❌ Error Load Data", errorText);
+      showErrorModal("Error Muat Data", errorText);
     } finally {
       setLoading(false);
     }
@@ -67,11 +108,11 @@ const PayrollGeneratePage = () => {
 
     try {
       await generateMonthlyPayroll({ period });
-      setMessage({ type: "success", text: `✓ Payroll berhasil di-generate untuk periode ${period}` });
+      setMessage({ type: "success", text: `Payroll berhasil di-generate untuk periode ${period}` });
       await loadPayroll();
     } catch (error: unknown) {
       const errorText = error instanceof Error ? error.message : "Gagal generate payroll";
-      showErrorModal("❌ Error Generate", errorText);
+      showErrorModal("Error Generate", errorText);
     } finally {
       setLoading(false);
     }
@@ -91,44 +132,61 @@ const PayrollGeneratePage = () => {
         title={errorModal.title}
         size="md"
       >
-        <div style={{ padding: "16px 0", whiteSpace: "pre-wrap" }}>
-          <p style={{ margin: 0, lineHeight: "1.6", color: "var(--color-text-primary)" }}>
-            {errorModal.message}
-          </p>
+        <div className="payroll-generate-modal-content">
+          <p>{errorModal.message}</p>
         </div>
       </Modal>
 
-      <div className="crud-header">
-        <div>
-          <h1>Generate Payroll Bulanan</h1>
-          <p>Buat payroll otomatis untuk semua karyawan dalam satu periode</p>
+      <Card className="payroll-generate-hero" glass>
+        <div className="crud-header payroll-generate-header">
+          <div className="crud-header-copy">
+            <p className="crud-page-badge">Payroll Center</p>
+            <div className="crud-header-title-row">
+              <span className="crud-header-icon"><CalendarDays size={18} /></span>
+              <h1>Generate Payroll Bulanan</h1>
+            </div>
+            <p>Buat payroll otomatis untuk semua karyawan dalam satu periode.</p>
+          </div>
+          <Button variant="outline" size="md" onClick={() => void loadPayroll()} disabled={loading}>
+            Refresh
+          </Button>
         </div>
-        <Button variant="outline" size="md" onClick={() => void loadPayroll()} disabled={loading}>
-          Refresh
-        </Button>
+      </Card>
+
+      <div className="payroll-generate-summary-grid">
+        {summaryCards.map((card) => {
+          const Icon = card.icon;
+
+          return (
+            <Card key={card.label} className="payroll-generate-summary-card" glass>
+              <div className="payroll-generate-summary-header">
+                <div>
+                  <span className="payroll-generate-summary-label">{card.label}</span>
+                  <p className="payroll-generate-summary-subtitle">{card.subtitle}</p>
+                </div>
+                <span className={`payroll-generate-summary-icon payroll-generate-summary-icon--${card.tone}`}>
+                  <Icon size={18} />
+                </span>
+              </div>
+              <div className="payroll-generate-summary-value">{card.value}</div>
+              <div className="payroll-generate-summary-change">{card.change}</div>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Success Message - Inline Banner */}
       {message && message.type === "success" && (
-        <Card
-          className="crud-card"
-          glass
-          style={{
-            backgroundColor: "#dbeafe",
-            borderLeft: "4px solid #2563eb",
-          }}
-        >
-          <p style={{ color: "#0c4a6e", margin: 0 }}>
-            {message.text}
-          </p>
+        <Card className="crud-card payroll-generate-message" glass>
+          <p>{message.text}</p>
         </Card>
       )}
 
-      <Card className="crud-card" glass>
+      <Card className="crud-card payroll-generate-card" glass>
         <h2>Generate Payroll Bulanan</h2>
         <div className="crud-form-grid">
           <label>
-            Periode (YYYY-MM)
+            <strong>Periode (YYYY-MM)</strong>
             <input
               className="crud-input"
               value={period}
@@ -145,14 +203,22 @@ const PayrollGeneratePage = () => {
         </div>
       </Card>
 
-      <Card className="crud-card" glass>
+      <Card className="crud-card payroll-generate-card" glass>
         <h2>Daftar Payroll</h2>
         <div className="crud-table-wrap">
-          <table className="crud-table">
+          <table className="crud-table payroll-generate-table">
             <thead>
               <tr>
                 {columns.map((column) => (
-                  <th key={column}>{column}</th>
+                  <th key={column}>
+                    {column === "id" && "ID"}
+                    {column === "employee_id" && "ID Karyawan"}
+                    {column === "period" && "Periode"}
+                    {column === "allowance" && "Tunjangan"}
+                    {column === "bonus" && "Bonus"}
+                    {column === "status" && "Status"}
+                    {!["id", "employee_id", "period", "allowance", "bonus", "status"].includes(column) && column}
+                  </th>
                 ))}
               </tr>
             </thead>
@@ -168,7 +234,7 @@ const PayrollGeneratePage = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={columns.length}>No payroll data available.</td>
+                  <td colSpan={columns.length} className="payroll-generate-empty-row">Belum ada data payroll.</td>
                 </tr>
               )}
             </tbody>
