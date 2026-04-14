@@ -43,9 +43,9 @@ const LeaveApprovalPage = lazy(() => import("../../pages/leave/LeaveApprovalPage
 const PayrollManagementPage = lazy(() => import("../../pages/payroll/PayrollManagementPage"));
 const PayrollDetailsPage = lazy(() => import("../../pages/payroll/PayrollDetailsPage"));
 const PayrollListPage = lazy(() => import("../../pages/payroll/PayrollListPage"));
-const PayrollCrudPage = lazy(() => import("../../pages/payroll/PayrollCrudPage"));
+const PayrollCrudPage = lazy(() => import("../../pages/payroll/PayrollCrudPage.tsx"));
 const PayrollApprovePage = lazy(() => import("../../pages/payroll/PayrollApprovePage"));
-const PayrollPaymentPage = lazy(() => import("../../pages/payroll/PayrollPaymentPage"));
+const PayrollPaymentPage = lazy(() => import("../../pages/payroll/PayrollPaymentPage.tsx"));
 const PayrollGeneratePage = lazy(() => import("../../pages/payroll/PayrollGeneratePage"));
 const PayrollDashboard = lazy(() => import("../../pages/payroll/PayrollDashboard"));
 
