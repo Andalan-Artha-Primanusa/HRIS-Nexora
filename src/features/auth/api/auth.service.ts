@@ -1,4 +1,6 @@
 import { api } from "@/shared/api/httpClient";
+import { useAuthStore } from "@/app/store/auth.store";
+import { forceLogout } from "@/shared/utils/auth";
 
 /* =========================
    TYPES
@@ -59,8 +61,11 @@ export const handleGoogleAuthCallback = async (payload: GoogleAuthCallbackPayloa
 };
 
 export const logout = async () => {
-  const response = await api.post("/logout");
-  return response;
+  try {
+    await api.post("/logout");
+  } finally {
+    forceLogout(); 
+  }
 };
 
 export const verifyToken = async () => {
@@ -68,10 +73,8 @@ export const verifyToken = async () => {
     const response = await api.get("/me");
     return response;
   } catch (error: any) {
-    // 🔒 SECURITY: Token verification failed
     if (error.response?.status === 401) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
+      forceLogout(); 
     }
     throw error;
   }

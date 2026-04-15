@@ -45,10 +45,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // 🔒 SECURITY: Clear sensitive data on auth failure
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      // Force redirect to login
-      window.location.href = "/login";
+      console.warn("401 Unauthorized:", error.config?.url);
     }
     
     // Handle 403 Forbidden errors with user-friendly message

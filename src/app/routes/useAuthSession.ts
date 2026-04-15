@@ -18,7 +18,6 @@ const resetVerificationCache = (token: string | null) => {
 
 export const useAuthSession = () => {
   const token = useAuthStore((state) => state.token);
-  const clearAuth = useAuthStore((state) => state.logout);
   const [status, setStatus] = useState<AuthSessionStatus>(
     token ? "checking" : "unauthenticated"
   );
@@ -60,16 +59,10 @@ export const useAuthSession = () => {
         }
 
         if (isActive) {
-          if (isTokenValid) {
-            setStatus("authenticated");
-          } else {
-            clearAuth();
-            setStatus("unauthenticated");
-          }
+          setStatus(isTokenValid ? "authenticated" : "unauthenticated");
         }
       } catch {
         if (isActive) {
-          clearAuth();
           setStatus("unauthenticated");
         }
       } finally {
@@ -80,7 +73,7 @@ export const useAuthSession = () => {
     return () => {
       isActive = false;
     };
-  }, [clearAuth, token]);
+  }, [token]);
 
   return status;
 };
