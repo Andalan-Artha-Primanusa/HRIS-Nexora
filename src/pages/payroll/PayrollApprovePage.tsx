@@ -286,84 +286,78 @@ const PayrollApprovePage = () => {
         )}
       </Card>
 
-      {/* Approval Form */}
-      {selectedPayroll && (
-          <Card className="crud-card payroll-approve-form-card" glass>
-            <h2>Konfirmasi Persetujuan Payroll ID {selectedPayroll.id}</h2>
-
+      {/* Approval Modal */}
+      <Modal
+        isOpen={!!selectedPayroll}
+        onClose={() => {
+          setSelectedPayroll(null);
+          setSelectedPayrollId("");
+        }}
+        title={`Konfirmasi Persetujuan Payroll ID ${selectedPayroll?.id}`}
+        size="lg"
+      >
+        {selectedPayroll && (
+          <div className="payroll-approve-modal-container">
             <div className="payroll-approve-detail-grid">
               <div className="payroll-approve-detail-column">
-                <p className="payroll-approve-detail-label">
-                ID Karyawan
-              </p>
+                <p className="payroll-approve-detail-label">ID Karyawan</p>
                 <p className="payroll-approve-detail-value payroll-approve-detail-value--accent">
-                {selectedPayroll.employee_id}
-              </p>
+                  {selectedPayroll.employee_id}
+                </p>
 
-                <p className="payroll-approve-detail-label">
-                Nama Karyawan
-              </p>
+                <p className="payroll-approve-detail-label">Nama Karyawan</p>
                 <p className="payroll-approve-detail-value">
-                {getEmployeeName(selectedPayroll.employee_id)}
-              </p>
+                  {getEmployeeName(selectedPayroll.employee_id)}
+                </p>
 
-                <p className="payroll-approve-detail-label">
-                Periode Payroll
-              </p>
+                <p className="payroll-approve-detail-label">Periode Payroll</p>
                 <p className="payroll-approve-detail-value">{selectedPayroll.period}</p>
 
-                <p className="payroll-approve-detail-label">
-                Status Saat Ini
-              </p>
+                <p className="payroll-approve-detail-label">Status Saat Ini</p>
                 <p className="payroll-approve-detail-value">
                   <span className="payroll-status-pill" style={{ backgroundColor: getStatusColor(selectedPayroll.status) }}>
-                  {getStatusLabel(selectedPayroll.status)}
-                </span>
-              </p>
-            </div>
+                    {getStatusLabel(selectedPayroll.status)}
+                  </span>
+                </p>
+              </div>
 
               <div className="payroll-approve-detail-column">
-                <p className="payroll-approve-detail-label">
-                Gaji Pokok
-              </p>
+                <p className="payroll-approve-detail-label">Gaji Pokok</p>
                 <p className="payroll-approve-detail-value payroll-approve-detail-value--success">
-                Rp {Number(selectedPayroll.basic_salary || 0).toLocaleString("id-ID")}
-              </p>
+                  Rp {Number(selectedPayroll.basic_salary || 0).toLocaleString("id-ID")}
+                </p>
 
-                <p className="payroll-approve-detail-label">
-                Gaji Bersih (Take Home)
-              </p>
+                <p className="payroll-approve-detail-label">Gaji Bersih (Take Home)</p>
                 <p className="payroll-approve-detail-value payroll-approve-detail-value--success payroll-approve-detail-value--large">
-                Rp {Number(selectedPayroll.take_home_pay || selectedPayroll.net_salary || 0).toLocaleString("id-ID")}
-              </p>
+                  Rp {Number(selectedPayroll.take_home_pay || selectedPayroll.net_salary || 0).toLocaleString("id-ID")}
+                </p>
+              </div>
+            </div>
+
+            <div className="payroll-approve-actions" style={{ marginTop: '2rem', display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <Button
+                variant="outline"
+                size="md"
+                onClick={() => {
+                  setSelectedPayroll(null);
+                  setSelectedPayrollId("");
+                }}
+                disabled={loading}
+              >
+                Batal
+              </Button>
+              <Button
+                variant="primary"
+                size="md"
+                onClick={() => void handleApprove()}
+                disabled={loading || (selectedPayroll.status !== "draft" && selectedPayroll.status !== "pending")}
+              >
+                Setujui Payroll
+              </Button>
             </div>
           </div>
-
-          {/* Approval Button */}
-            <div className="payroll-approve-actions">
-            <Button
-              variant="primary"
-              size="lg"
-              onClick={() => void handleApprove()}
-              disabled={loading || selectedPayroll.status !== "draft" && selectedPayroll.status !== "pending"}
-                className="payroll-approve-primary"
-            >
-                Setujui Payroll
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => {
-                setSelectedPayroll(null);
-                setSelectedPayrollId("");
-              }}
-              disabled={loading}
-            >
-              Batal
-            </Button>
-          </div>
-        </Card>
-      )}
+        )}
+      </Modal>
 
       {/* Payroll Sudah Disetujui */}
       {otherPayrolls.length > 0 && (

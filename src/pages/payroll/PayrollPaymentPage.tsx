@@ -264,87 +264,94 @@ const PayrollPaymentPage = () => {
         </div>
       </Card>
 
-      {selectedPayroll ? (
-        <Card className="crud-card payroll-payment-detail-card" glass>
-          <h2>Detail Payroll</h2>
-
-          <div className="payroll-payment-status-wrap">
-            <span className="payroll-status-pill" style={{ backgroundColor: getStatusColor(selectedPayroll.status) }}>
-              {getStatusLabel(selectedPayroll.status)}
-            </span>
-          </div>
-
-          <div className="payroll-payment-detail-grid">
-            <div className="payroll-payment-detail-column">
-              <p className="payroll-payment-detail-label"><strong>Payroll ID</strong></p>
-              <p className="payroll-payment-detail-value">{selectedPayroll.id}</p>
-
-              <p className="payroll-payment-detail-label"><strong>Karyawan</strong></p>
-              <p className="payroll-payment-detail-value">{getEmployeeName(selectedPayroll.employee_id)}</p>
-
-              <p className="payroll-payment-detail-label"><strong>Periode</strong></p>
-              <p className="payroll-payment-detail-value">{selectedPayroll.period}</p>
-
-              <p className="payroll-payment-detail-label"><strong>Gaji Pokok</strong></p>
-              <p className="payroll-payment-detail-value payroll-payment-detail-value--success">
-                Rp {Number(selectedPayroll.basic_salary || 0).toLocaleString("id-ID")}
-              </p>
+      {/* Payment Confirmation Modal */}
+      <Modal
+        isOpen={!!selectedPayroll}
+        onClose={() => setSelectedPayroll(null)}
+        title={`Konfirmasi Pembayaran Payroll ID ${selectedPayroll?.id}`}
+        size="lg"
+      >
+        {selectedPayroll && (
+          <div className="payroll-payment-modal-container">
+            <div className="payroll-payment-status-wrap" style={{ marginBottom: '1.5rem' }}>
+              <span className="payroll-status-pill" style={{ backgroundColor: getStatusColor(selectedPayroll.status) }}>
+                {getStatusLabel(selectedPayroll.status)}
+              </span>
             </div>
 
-            <div className="payroll-payment-detail-column">
-              <p className="payroll-payment-detail-label"><strong>Tunjangan</strong></p>
-              <p className="payroll-payment-detail-value payroll-payment-detail-value--success">
-                Rp {Number(selectedPayroll.allowance || 0).toLocaleString("id-ID")}
-              </p>
+            <div className="payroll-payment-detail-grid">
+              <div className="payroll-payment-detail-column">
+                <p className="payroll-payment-detail-label"><strong>Payroll ID</strong></p>
+                <p className="payroll-payment-detail-value">{selectedPayroll.id}</p>
 
-              <p className="payroll-payment-detail-label"><strong>Bonus</strong></p>
-              <p className="payroll-payment-detail-value payroll-payment-detail-value--success">
-                Rp {Number(selectedPayroll.bonus || 0).toLocaleString("id-ID")}
-              </p>
+                <p className="payroll-payment-detail-label"><strong>Karyawan</strong></p>
+                <p className="payroll-payment-detail-value">{getEmployeeName(selectedPayroll.employee_id)}</p>
 
-              <p className="payroll-payment-detail-label"><strong>Total Potongan</strong></p>
-              <p className="payroll-payment-detail-value payroll-payment-detail-value--danger">
-                Rp {Number(selectedPayroll.total_deduction || 0).toLocaleString("id-ID")}
-              </p>
-            </div>
-          </div>
+                <p className="payroll-payment-detail-label"><strong>Periode</strong></p>
+                <p className="payroll-payment-detail-value">{selectedPayroll.period}</p>
 
-          {(selectedPayroll.take_home_pay || selectedPayroll.net_salary) && (
-            <div className="payroll-payment-total-box">
-              <p className="payroll-payment-detail-label payroll-payment-detail-label--success">
-                <strong>Gaji Bersih (Take Home Pay)</strong>
-              </p>
-              <p className="payroll-payment-total-value">
-                Rp {Number(selectedPayroll.take_home_pay || selectedPayroll.net_salary || 0).toLocaleString("id-ID")}
-              </p>
-            </div>
-          )}
-
-          <div className="payroll-payment-actions">
-            {selectedPayroll.status === "paid" ? (
-              <div className="payroll-payment-paid-note">
-                Payroll ini sudah ditandai sebagai dibayar pada{' '}
-                {selectedPayroll.paid_at ? new Date(selectedPayroll.paid_at).toLocaleDateString("id-ID") : "tanggal tidak tersedia"}.
+                <p className="payroll-payment-detail-label"><strong>Gaji Pokok</strong></p>
+                <p className="payroll-payment-detail-value payroll-payment-detail-value--success">
+                  Rp {Number(selectedPayroll.basic_salary || 0).toLocaleString("id-ID")}
+                </p>
               </div>
-            ) : (
-              <Button
-                variant="primary"
-                size="lg"
-                onClick={() => void handleMarkAsPaid()}
-                disabled={loading}
-                className="payroll-payment-primary"
-              >
-                Tandai Sebagai Dibayar
-              </Button>
+
+              <div className="payroll-payment-detail-column">
+                <p className="payroll-payment-detail-label"><strong>Tunjangan</strong></p>
+                <p className="payroll-payment-detail-value payroll-payment-detail-value--success">
+                  Rp {Number(selectedPayroll.allowance || 0).toLocaleString("id-ID")}
+                </p>
+
+                <p className="payroll-payment-detail-label"><strong>Bonus</strong></p>
+                <p className="payroll-payment-detail-value payroll-payment-detail-value--success">
+                  Rp {Number(selectedPayroll.bonus || 0).toLocaleString("id-ID")}
+                </p>
+
+                <p className="payroll-payment-detail-label"><strong>Total Potongan</strong></p>
+                <p className="payroll-payment-detail-value payroll-payment-detail-value--danger">
+                  Rp {Number(selectedPayroll.total_deduction || 0).toLocaleString("id-ID")}
+                </p>
+              </div>
+            </div>
+
+            {(selectedPayroll.take_home_pay || selectedPayroll.net_salary) && (
+              <div className="payroll-payment-total-box" style={{ marginTop: '1.5rem', padding: '1rem', background: 'rgba(16, 185, 129, 0.05)', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.1)' }}>
+                <p className="payroll-payment-detail-label payroll-payment-detail-label--success" style={{ margin: 0 }}>
+                  <strong>Gaji Bersih (Take Home Pay)</strong>
+                </p>
+                <p className="payroll-payment-total-value" style={{ fontSize: '1.5rem', fontWeight: 700, color: '#10b981', margin: '4px 0 0 0' }}>
+                  Rp {Number(selectedPayroll.take_home_pay || selectedPayroll.net_salary || 0).toLocaleString("id-ID")}
+                </p>
+              </div>
             )}
+
+            <div className="payroll-payment-actions" style={{ marginTop: '2rem', display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <Button
+                variant="outline"
+                size="md"
+                onClick={() => setSelectedPayroll(null)}
+                disabled={loading}
+              >
+                Batal
+              </Button>
+              {selectedPayroll.status === "paid" ? (
+                <div className="payroll-payment-paid-note" style={{ color: '#10b981', fontWeight: 500 }}>
+                  Payroll ini sudah dibayar
+                </div>
+              ) : (
+                <Button
+                  variant="primary"
+                  size="md"
+                  onClick={() => void handleMarkAsPaid()}
+                  disabled={loading}
+                >
+                  Tandai Sebagai Dibayar
+                </Button>
+              )}
+            </div>
           </div>
-        </Card>
-      ) : (
-        <Card className="crud-card payroll-payment-empty-card" glass>
-          <h2>Detail Payroll</h2>
-          <p>Masukkan Payroll ID dan klik Lihat Detail untuk menampilkan informasi payroll.</p>
-        </Card>
-      )}
+        )}
+      </Modal>
     </div>
   );
 };

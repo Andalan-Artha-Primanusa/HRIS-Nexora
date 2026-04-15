@@ -401,15 +401,77 @@ const PayrollManagementPage = () => {
         </div>
       </Card>
 
-      <Card className="crud-card" glass style={{ borderTop: "4px solid #2563eb" }}>
-        <h2 style={{ color: "#2563eb", marginTop: 0, display: "inline-flex", alignItems: "center", gap: "8px" }}>
-          <FileText size={18} />
-          Detail Payroll
-        </h2>
-        <pre className="crud-response">
-          {selectedDetail ? JSON.stringify(selectedDetail, null, 2) : "Belum ada detail payroll dipilih."}
-        </pre>
-      </Card>
+      {/* Detail Modal */}
+      <Modal
+        isOpen={!!selectedDetail}
+        onClose={() => setSelectedDetail(null)}
+        title="Detail Payroll"
+        size="lg"
+      >
+        {selectedDetail && (
+          <div className="payroll-management-detail-modal">
+            <div className="payroll-detail-header" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <p style={{ margin: 0, color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>ID Payroll</p>
+                <p style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600, color: '#2563eb' }}>{String(selectedDetail.id)}</p>
+              </div>
+              <span className="payroll-status-pill" style={{ 
+                backgroundColor: 
+                  selectedDetail.status === 'paid' ? '#10b981' : 
+                  selectedDetail.status === 'approved' ? '#3b82f6' : 
+                  selectedDetail.status === 'pending' ? '#f59e0b' : '#999',
+                color: 'white',
+                padding: '4px 12px',
+                borderRadius: '99px',
+                fontSize: '0.75rem',
+                fontWeight: 600
+              }}>
+                {String(selectedDetail.status || 'Draft').toUpperCase()}
+              </span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', background: 'rgba(0,0,0,0.02)', padding: '1rem', borderRadius: '8px' }}>
+              <div>
+                <p style={{ margin: '0 0 4px 0', fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Karyawan ID</p>
+                <p style={{ margin: 0, fontWeight: 500 }}>{String(selectedDetail.employee_id)}</p>
+              </div>
+              <div>
+                <p style={{ margin: '0 0 4px 0', fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Periode</p>
+                <p style={{ margin: 0, fontWeight: 500 }}>{String(selectedDetail.period)}</p>
+              </div>
+              <div>
+                <p style={{ margin: '0 0 4px 0', fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Gaji Pokok</p>
+                <p style={{ margin: 0, fontWeight: 500 }}>Rp {Number(selectedDetail.basic_salary || 0).toLocaleString("id-ID")}</p>
+              </div>
+              <div>
+                <p style={{ margin: '0 0 4px 0', fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Tunjangan</p>
+                <p style={{ margin: 0, fontWeight: 500, color: '#10b981' }}>+ Rp {Number(selectedDetail.allowance || 0).toLocaleString("id-ID")}</p>
+              </div>
+              <div>
+                <p style={{ margin: '0 0 4px 0', fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Bonus</p>
+                <p style={{ margin: 0, fontWeight: 500, color: '#10b981' }}>+ Rp {Number(selectedDetail.bonus || 0).toLocaleString("id-ID")}</p>
+              </div>
+              <div>
+                <p style={{ margin: '0 0 4px 0', fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Potongan</p>
+                <p style={{ margin: 0, fontWeight: 500, color: '#ef4444' }}>- Rp {Number(selectedDetail.total_deduction || 0).toLocaleString("id-ID")}</p>
+              </div>
+            </div>
+
+            <div style={{ marginTop: '1.5rem', padding: '1rem', background: '#2563eb', borderRadius: '8px', color: 'white' }}>
+              <p style={{ margin: 0, fontSize: '0.875rem', opacity: 0.9 }}>Total Gaji Bersih (Take Home Pay)</p>
+              <p style={{ margin: '4px 0 0 0', fontSize: '1.5rem', fontWeight: 700 }}>
+                Rp {Number(selectedDetail.take_home_pay || selectedDetail.net_salary || 0).toLocaleString("id-ID")}
+              </p>
+            </div>
+
+            <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end' }}>
+              <Button variant="outline" size="md" onClick={() => setSelectedDetail(null)}>
+                Tutup
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
 
       <Card className="crud-card" glass style={{ borderTop: "4px solid #2563eb" }}>
         <h2 style={{ color: "#2563eb", marginTop: 0, display: "inline-flex", alignItems: "center", gap: "8px" }}>
