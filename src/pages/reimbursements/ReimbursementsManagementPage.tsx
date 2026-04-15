@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { BarChart3, FileText, ReceiptText, Settings2 } from "lucide-react";
+import { BarChart3, FileText, ReceiptText, RefreshCw, Settings2 } from "lucide-react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import {
@@ -21,8 +21,7 @@ import type {
   ReimbursementRejectPayload,
   ReimbursementUpdatePayload,
 } from "@/features/reimbursement/types/reimbursement.types";
-import "../admin/AdminCrudPages.css";
-import "./ReimbursementsManagementPage.css";
+import "@/shared/styles/CrudPage.css";
 
 type ReimbursementFormState = {
   id: string;
@@ -409,209 +408,205 @@ const ReimbursementsManagementPage = () => {
 
   return (
     <div className="crud-page">
-      <Card className="reimbursement-hero" glass>
-        <div className="crud-header reimbursement-header">
-          <div className="crud-header-copy">
-            <p className="crud-page-badge">Reimbursement Center</p>
-            <div className="crud-header-title-row">
-              <span className="crud-header-icon"><ReceiptText size={18} /></span>
-              <h1>Reimbursement Management</h1>
-            </div>
-            <p>Kelola reimbursement karyawan mulai dari filtering, approval, hingga status paid dalam satu alur yang konsisten.</p>
-            <p className="reimbursement-status">{statusMessage}</p>
-          </div>
-          <Button variant="outline" size="md" onClick={() => void loadAll()} disabled={loading}>
+      {/* Header */}
+      <div className="page-header">
+        <div className="page-header-title">
+          <span className="page-badge">Reimbursement Center</span>
+          <h1>Reimbursement Management</h1>
+          <p>Kelola reimbursement karyawan mulai dari filtering, approval, hingga status paid dalam satu alur yang konsisten.</p>
+        </div>
+        <div className="page-header-actions">
+          <Button variant="outline" size="md" onClick={() => void loadAll()} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
+            <RefreshCw size={16} />
             Segarkan
           </Button>
         </div>
-      </Card>
+      </div>
 
-      <div className="reimbursement-summary-grid">
+      {/* Summary Cards */}
+      <div className="summary-grid">
         {summaryCards.map((card) => {
           const Icon = card.icon;
 
           return (
-            <Card key={card.label} className="reimbursement-summary-card" glass>
-              <div className="reimbursement-summary-header">
+            <Card key={card.label} className="summary-card" glass>
+              <div className="summary-card__header">
                 <div>
-                  <span className="reimbursement-summary-label">{card.label}</span>
-                  <p className="reimbursement-summary-subtitle">{card.subtitle}</p>
+                  <span className="summary-card__label">{card.label}</span>
+                  <p className="summary-card__subtitle">{card.subtitle}</p>
                 </div>
-                <span className={`reimbursement-summary-icon reimbursement-summary-icon--${card.tone}`}>
-                  <Icon size={18} />
+                <span className={`summary-card__icon summary-card__icon--${card.tone}`}>
+                  <Icon size={20} />
                 </span>
               </div>
-              <div className="reimbursement-summary-value">{card.value}</div>
-              <div className="reimbursement-summary-change">{card.change}</div>
+              <div className={`summary-card__value summary-card__value--${card.tone}`}>{card.value}</div>
+              <div className="summary-card__change">{card.change}</div>
             </Card>
           );
         })}
       </div>
 
-      <Card className="crud-card reimbursement-card" glass>
-        <h2>Filter Reimbursement</h2>
-        <div className="crud-form-grid">
-          <label>
-            <strong>Status</strong>
-            <input className="crud-input" value={filterStatus} onChange={(event) => setFilterStatus(event.target.value)} />
-          </label>
-          <label>
-            <strong>Kategori</strong>
-            <input className="crud-input" value={filterCategory} onChange={(event) => setFilterCategory(event.target.value)} />
-          </label>
-          <label>
-            <strong>ID Karyawan</strong>
-            <input
-              className="crud-input"
-              value={filterEmployeeId}
-              onChange={(event) => setFilterEmployeeId(event.target.value)}
-            />
-          </label>
-          <label>
-            <strong>ID Karyawan untuk Statistik</strong>
-            <input
-              className="crud-input"
-              value={statsEmployeeId}
-              onChange={(event) => setStatsEmployeeId(event.target.value)}
-            />
-          </label>
-        </div>
-        <div className="crud-actions">
-          <Button variant="primary" size="md" onClick={() => void loadAll()} disabled={loading}>
-            Terapkan Filter
-          </Button>
-          <Button variant="secondary" size="md" onClick={() => void loadPending()} disabled={loading}>
-            Ambil Pending
-          </Button>
-          <Button variant="secondary" size="md" onClick={() => void loadByEmployee()} disabled={loading}>
-            Ambil per Karyawan
-          </Button>
-          <Button variant="secondary" size="md" onClick={() => void loadStatistics()} disabled={loading}>
-            Ambil Statistik
-          </Button>
-        </div>
-      </Card>
 
-      <Card className="crud-card reimbursement-card" glass>
-        <h2>Form Reimbursement</h2>
-        <div className="crud-form-grid">
-          <label>
-            <strong>ID Reimbursement</strong>
-            <input
-              className="crud-input"
-              value={form.id}
-              onChange={(event) => setForm((prev) => ({ ...prev, id: event.target.value }))}
-              placeholder="reimbursement id"
-            />
-          </label>
-          <label>
-            <strong>ID Karyawan</strong>
-            <input
-              className="crud-input"
-              value={form.employee_id}
-              onChange={(event) => setForm((prev) => ({ ...prev, employee_id: event.target.value }))}
-            />
-          </label>
-          <label>
-            <strong>Judul</strong>
-            <input
-              className="crud-input"
-              value={form.title}
-              onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
-            />
-          </label>
-          <label>
-            <strong>Jumlah</strong>
-            <input
-              className="crud-input"
-              value={form.amount}
-              onChange={(event) => setForm((prev) => ({ ...prev, amount: event.target.value }))}
-            />
-          </label>
-          <label>
-            <strong>Kategori</strong>
-            <input
-              className="crud-input"
-              value={form.category}
-              onChange={(event) => setForm((prev) => ({ ...prev, category: event.target.value }))}
-            />
-          </label>
-          <label>
-            <strong>Tanggal Pengeluaran</strong>
-            <input
-              className="crud-input"
-              type="date"
-              value={form.expense_date}
-              onChange={(event) => setForm((prev) => ({ ...prev, expense_date: event.target.value }))}
-            />
-          </label>
-          <label className="crud-form-full">
-            <strong>Deskripsi</strong>
-            <input
-              className="crud-input"
-              value={form.description}
-              onChange={(event) => setForm((prev) => ({ ...prev, description: event.target.value }))}
-            />
-          </label>
-          <label className="crud-form-full">
-            <strong>Path Bukti</strong>
-            <input
-              className="crud-input"
-              value={form.receipt_path}
-              onChange={(event) => setForm((prev) => ({ ...prev, receipt_path: event.target.value }))}
-            />
-          </label>
-          <label className="crud-form-full">
-            <strong>Catatan Approve/Reject</strong>
-            <input
-              className="crud-input"
-              value={form.note}
-              onChange={(event) => setForm((prev) => ({ ...prev, note: event.target.value }))}
-            />
-          </label>
+      {/* Form Card */}
+      <Card className="control-card" glass>
+        <div style={{ marginBottom: '0.75rem' }}>
+          <h3 style={{ margin: 0, color: '#1e3a8a', fontWeight: 700, fontSize: '1rem' }}>Form Reimbursement</h3>
+        </div>
+        <div className="filter-panel" style={{ marginTop: 0, paddingTop: 0, borderTop: 'none' }}>
+          <div className="filter-row">
+            <div className="filter-group">
+              <label>ID Reimbursement</label>
+              <input className="form-input" value={form.id} onChange={(event) => setForm((prev) => ({ ...prev, id: event.target.value }))} placeholder="reimbursement id" />
+            </div>
+            <div className="filter-group">
+              <label>ID Karyawan</label>
+              <input className="form-input" value={form.employee_id} onChange={(event) => setForm((prev) => ({ ...prev, employee_id: event.target.value }))} />
+            </div>
+            <div className="filter-group">
+              <label>Judul</label>
+              <input className="form-input" value={form.title} onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))} />
+            </div>
+            <div className="filter-group">
+              <label>Jumlah</label>
+              <input className="form-input" value={form.amount} onChange={(event) => setForm((prev) => ({ ...prev, amount: event.target.value }))} />
+            </div>
+            <div className="filter-group">
+              <label>Kategori</label>
+              <input className="form-input" value={form.category} onChange={(event) => setForm((prev) => ({ ...prev, category: event.target.value }))} />
+            </div>
+            <div className="filter-group">
+              <label>Tanggal Pengeluaran</label>
+              <input className="form-input" type="date" value={form.expense_date} onChange={(event) => setForm((prev) => ({ ...prev, expense_date: event.target.value }))} />
+            </div>
+          </div>
+          <div className="filter-row">
+            <div className="filter-group">
+              <label>Deskripsi</label>
+              <input className="form-input" value={form.description} onChange={(event) => setForm((prev) => ({ ...prev, description: event.target.value }))} />
+            </div>
+            <div className="filter-group">
+              <label>Path Bukti</label>
+              <input className="form-input" value={form.receipt_path} onChange={(event) => setForm((prev) => ({ ...prev, receipt_path: event.target.value }))} />
+            </div>
+            <div className="filter-group">
+              <label>Catatan Approve/Reject</label>
+              <input className="form-input" value={form.note} onChange={(event) => setForm((prev) => ({ ...prev, note: event.target.value }))} />
+            </div>
+          </div>
         </div>
 
-        <div className="crud-actions">
+        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1rem' }}>
           <Button variant="primary" size="md" onClick={() => void createItem()} disabled={loading}>
             Buat Reimbursement
           </Button>
-          <Button variant="outline" size="md" onClick={() => void getDetail()} disabled={loading}>
+          <Button variant="outline" size="md" onClick={() => void getDetail()} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
             Lihat Detail
           </Button>
-          <Button variant="secondary" size="md" onClick={() => void updateItem()} disabled={loading}>
+          <Button variant="outline" size="md" onClick={() => void updateItem()} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
             Ubah Reimbursement
           </Button>
-          <Button variant="secondary" size="md" onClick={() => void approveItem()} disabled={loading}>
+          <Button variant="outline" size="md" onClick={() => void approveItem()} disabled={loading} style={{ borderColor: '#10b981', color: '#10b981' }}>
             Approve
           </Button>
-          <Button variant="secondary" size="md" onClick={() => void rejectItem()} disabled={loading}>
+          <Button variant="outline" size="md" onClick={() => void rejectItem()} disabled={loading} style={{ borderColor: '#ef4444', color: '#ef4444' }}>
             Reject
           </Button>
-          <Button variant="secondary" size="md" onClick={() => void markPaid()} disabled={loading}>
+          <Button variant="outline" size="md" onClick={() => void markPaid()} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
             Tandai Paid
           </Button>
-          <Button variant="ghost" size="md" onClick={() => void deleteItem()} disabled={loading}>
+          <Button variant="ghost" size="md" onClick={() => void deleteItem()} disabled={loading} style={{ color: '#ef4444' }}>
             Hapus Reimbursement
           </Button>
         </div>
       </Card>
 
-      <Card className="crud-card reimbursement-card" glass>
-        <h2>Detail Reimbursement</h2>
-        <pre className="crud-response">
-          {selectedDetail ? JSON.stringify(selectedDetail, null, 2) : "Belum ada detail reimbursement dipilih."}
-        </pre>
-      </Card>
+      {/* Detail Panel */}
+      {selectedDetail && (
+        <Card className="control-card" glass>
+          <h3 style={{ margin: "0 0 1rem", color: "#1e3a8a", fontWeight: 700 }}>Detail Reimbursement</h3>
+          <pre style={{
+            margin: 0,
+            padding: "1rem",
+            background: "#eff6ff",
+            borderRadius: "12px",
+            border: "1px solid rgba(37, 99, 235, 0.14)",
+            overflow: "auto",
+            fontSize: "0.9rem",
+            lineHeight: 1.5,
+          }}>
+            {JSON.stringify(selectedDetail, null, 2)}
+          </pre>
+        </Card>
+      )}
 
-      <Card className="crud-card reimbursement-card" glass>
-        <h2>Statistik Reimbursement</h2>
-        <pre className="crud-response">{statistics ? JSON.stringify(statistics, null, 2) : "Belum ada statistik."}</pre>
-      </Card>
+      {/* Statistics Panel */}
+      {statistics && (
+        <Card className="control-card" glass>
+          <h3 style={{ margin: "0 0 1rem", color: "#1e3a8a", fontWeight: 700 }}>Statistik Reimbursement</h3>
+          <pre style={{
+            margin: 0,
+            padding: "1rem",
+            background: "#eff6ff",
+            borderRadius: "12px",
+            border: "1px solid rgba(37, 99, 235, 0.14)",
+            overflow: "auto",
+            fontSize: "0.9rem",
+            lineHeight: 1.5,
+          }}>
+            {JSON.stringify(statistics, null, 2)}
+          </pre>
+        </Card>
+      )}
 
-      <Card className="crud-card reimbursement-card" glass>
-        <h2>Tabel Reimbursement</h2>
-        <div className="crud-table-wrap">
-          <table className="crud-table reimbursement-table">
+      {/* Table */}
+      <Card className="table-card" glass>
+        <div className="table-header-bar">
+          <h3>Tabel Reimbursement</h3>
+          <span className="table-count">{items.length} data</span>
+        </div>
+
+        <div className="table-card-inner" style={{ paddingBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h3 style={{ margin: 0, color: '#1e3a8a', fontWeight: 600, fontSize: '0.95rem' }}>Filter Data</h3>
+          </div>
+          <div className="filter-panel" style={{ marginTop: 0, paddingTop: 0, borderTop: 'none', background: 'transparent' }}>
+            <div className="filter-row">
+              <div className="filter-group">
+                <label>Status</label>
+                <input className="form-input" value={filterStatus} onChange={(event) => setFilterStatus(event.target.value)} placeholder="pending, approved, paid..." />
+              </div>
+              <div className="filter-group">
+                <label>Kategori</label>
+                <input className="form-input" value={filterCategory} onChange={(event) => setFilterCategory(event.target.value)} placeholder="office_supplies..." />
+              </div>
+              <div className="filter-group">
+                <label>ID Karyawan</label>
+                <input className="form-input" value={filterEmployeeId} onChange={(event) => setFilterEmployeeId(event.target.value)} placeholder="Employee ID" />
+              </div>
+              <div className="filter-group">
+                <label>ID Karyawan untuk Statistik</label>
+                <input className="form-input" value={statsEmployeeId} onChange={(event) => setStatsEmployeeId(event.target.value)} placeholder="Employee ID" />
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1rem' }}>
+              <Button variant="primary" size="md" onClick={() => void loadAll()} disabled={loading}>
+                Terapkan Filter
+              </Button>
+              <Button variant="outline" size="md" onClick={() => void loadPending()} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
+                Ambil Pending
+              </Button>
+              <Button variant="outline" size="md" onClick={() => void loadByEmployee()} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
+                Ambil per Karyawan
+              </Button>
+              <Button variant="outline" size="md" onClick={() => void loadStatistics()} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
+                Ambil Statistik
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="table-wrap">
+          <table className="data-table">
             <thead>
               <tr>
                 {columns.map((column) => (
@@ -622,7 +617,7 @@ const ReimbursementsManagementPage = () => {
                     {column === "amount" && "Jumlah"}
                     {column === "category" && "Kategori"}
                     {column === "status" && "Status"}
-                    {column === "expense_date" && "Tanggal Pengeluaran"}
+                    {column === "expense_date" && "Tanggal"}
                     {![
                       "id",
                       "employee_id",
@@ -641,13 +636,29 @@ const ReimbursementsManagementPage = () => {
                 items.map((item, index) => (
                   <tr key={String(item.id ?? index)}>
                     {columns.map((column) => (
-                      <td key={`${String(item.id ?? index)}-${column}`}>{asDisplay(item[column])}</td>
+                      <td key={`${String(item.id ?? index)}-${column}`}>
+                        {column === 'id' ? (
+                          <span className="cell-id">{asDisplay(item[column])}</span>
+                        ) : column === 'status' ? (
+                          <span className={`status-badge status-badge--${String(item[column] || 'draft').toLowerCase()}`}>
+                            {asDisplay(item[column])}
+                          </span>
+                        ) : column === 'amount' ? (
+                          <span className="cell-amount">Rp {Number(item[column] || 0).toLocaleString('id-ID')}</span>
+                        ) : column === 'category' ? (
+                          <span className="cell-tag">{asDisplay(item[column])}</span>
+                        ) : (
+                          asDisplay(item[column])
+                        )}
+                      </td>
                     ))}
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={columns.length} className="reimbursement-empty-row">Tidak ada data reimbursement.</td>
+                  <td colSpan={columns.length} className="cell-empty">
+                    Tidak ada data reimbursement.
+                  </td>
                 </tr>
               )}
             </tbody>
@@ -655,11 +666,40 @@ const ReimbursementsManagementPage = () => {
         </div>
       </Card>
 
-      <Card className="crud-card reimbursement-card" glass>
-        <h2>Raw Response</h2>
-        <pre className="crud-response">{responseText || "Response API akan tampil di sini."}</pre>
-        <p className="crud-status">{statusMessage}</p>
-      </Card>
+      {/* Raw Response */}
+      {responseText && (
+        <Card className="control-card" glass>
+          <h3 style={{ margin: "0 0 1rem", color: "#1e3a8a", fontWeight: 700 }}>Raw Response</h3>
+          <pre style={{
+            margin: 0,
+            padding: "1rem",
+            background: "linear-gradient(165deg, #1e3a8a 0%, #2563eb 54%, rgba(37, 99, 235, 0.8) 100%)",
+            color: "white",
+            borderRadius: "12px",
+            border: "1px solid rgba(37, 99, 235, 0.14)",
+            overflow: "auto",
+            fontSize: "0.8rem",
+            lineHeight: 1.48,
+            maxHeight: "320px",
+          }}>
+            {responseText}
+          </pre>
+          <div style={{
+            marginTop: '1rem',
+            color: '#64748b',
+            fontSize: '0.85rem',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '0.5rem 0.75rem',
+            background: '#eff6ff',
+            borderLeft: '3px solid #2563eb',
+            borderRadius: '8px',
+          }}>
+            {statusMessage}
+          </div>
+        </Card>
+      )}
     </div>
   );
 };

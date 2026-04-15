@@ -8,8 +8,7 @@ import { getAllPermissions } from "@/features/admin/api/admin.service";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import type { AdminEntityItem } from "@/features/admin/types/admin.types";
 import { KeyRound, RefreshCw, ShieldAlert } from "lucide-react";
-import "./AdminCrudPages.css";
-import "./AdminPermissionsPage.css";
+import "@/shared/styles/CrudPage.css";
 
 const asDisplay = (value: unknown) => {
   if (value === null || value === undefined) return "-";
@@ -35,36 +34,28 @@ const AdminPermissionsPage = () => {
   if (!canViewPermissions) {
     return (
       <div className="crud-page">
-        <Card className="admin-permissions-hero" glass>
-          <div className="crud-header admin-permissions-header">
-            <div className="crud-header-copy">
-              <p className="crud-page-badge">Admin Center</p>
-              <div className="crud-header-title-row">
-                <span className="crud-header-icon"><ShieldAlert size={18} /></span>
-                <h1>Akses Ditolak</h1>
-              </div>
-              <p>Anda tidak memiliki izin untuk mengakses halaman ini.</p>
-            </div>
+        <div className="page-header">
+          <div className="page-header-title">
+            <span className="page-badge">Admin Center</span>
+            <h1><ShieldAlert size={22} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 8 }} />Akses Ditolak</h1>
+            <p>Anda tidak memiliki izin untuk mengakses halaman ini.</p>
           </div>
-        </Card>
-        <Card className="crud-card admin-permissions-card" glass>
-          <p>Silakan hubungi Administrator untuk mendapatkan akses.</p>
+        </div>
+        <Card className="table-card" glass>
+          <div className="table-card-inner">
+            <p>Silakan hubungi Administrator untuk mendapatkan akses.</p>
+          </div>
         </Card>
       </div>
     );
   }
   
   const [items, setItems] = useState<AdminEntityItem[]>([]);
-  const [responseText, setResponseText] = useState("");
   const [statusMessage, setStatusMessage] = useState("Ready to call admin permissions API");
   const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('info');
   const [loading, setLoading] = useState(false);
 
   const columns = useMemo(() => getColumns(items), [items]);
-
-  const formatResponse = (payload: unknown) => {
-    setResponseText(typeof payload === "string" ? payload : JSON.stringify(payload, null, 2));
-  };
 
   const loadPermissions = async () => {
     if (!canViewPermissions) {
@@ -74,17 +65,14 @@ const AdminPermissionsPage = () => {
 
     setLoading(true);
     setStatusMessage("Memuat permissions...");
-    setResponseText("");
 
     try {
       const result = await getAllPermissions();
       setItems(result.items as unknown as AdminEntityItem[]);
-      formatResponse(result.raw);
       setStatusMessage("Data permissions berhasil dimuat.");
       setAlertType('success');
     } catch (error: unknown) {
       const message = getErrorMessage(error as any);
-      formatResponse(message);
       setStatusMessage(message);
       setAlertType('error');
     } finally {
@@ -99,22 +87,20 @@ const AdminPermissionsPage = () => {
 
   return (
     <div className="crud-page">
-      <Card className="admin-permissions-hero" glass>
-        <div className="crud-header admin-permissions-header">
-          <div className="crud-header-copy">
-            <p className="crud-page-badge">Admin Center</p>
-            <div className="crud-header-title-row">
-              <span className="crud-header-icon"><KeyRound size={18} /></span>
-              <h1>Permission Management</h1>
-            </div>
-            <p>Kelola dan tampilkan daftar permission yang tersedia untuk pengaturan akses sistem.</p>
-          </div>
-          <Button variant="outline" size="md" onClick={() => void loadPermissions()} disabled={loading}>
+      {/* Header */}
+      <div className="page-header">
+        <div className="page-header-title">
+          <span className="page-badge">Admin Center</span>
+          <h1>Permission Management</h1>
+          <p>Kelola dan tampilkan daftar permission yang tersedia untuk pengaturan akses sistem.</p>
+        </div>
+        <div className="page-header-actions">
+          <Button variant="outline" size="md" onClick={() => void loadPermissions()} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
             <RefreshCw size={16} />
             {loading ? "Memuat..." : "Segarkan"}
           </Button>
         </div>
-      </Card>
+      </div>
 
       {/* Status Alert */}
       {statusMessage && (
@@ -126,10 +112,14 @@ const AdminPermissionsPage = () => {
         />
       )}
 
-      <Card className="crud-card admin-permissions-card" glass>
-        <h2>Tabel Permissions</h2>
-        <div className="crud-table-wrap">
-          <table className="crud-table admin-permissions-table">
+      {/* Table */}
+      <Card className="table-card" glass>
+        <div className="table-header-bar">
+          <h3>Tabel Permissions</h3>
+          <span className="table-count">{items.length} permissions</span>
+        </div>
+        <div className="table-wrap">
+          <table className="data-table">
             <thead>
               <tr>
                 {columns.map((column) => (
@@ -147,23 +137,29 @@ const AdminPermissionsPage = () => {
                 items.map((item, index) => (
                   <tr key={String(item.id ?? index)}>
                     {columns.map((column) => (
-                      <td key={`${String(item.id ?? index)}-${column}`}>{asDisplay(item[column])}</td>
+                      <td key={`${String(item.id ?? index)}-${column}`}>
+                        {column === 'id' ? (
+                          <span className="cell-id">{asDisplay(item[column])}</span>
+                        ) : column === 'name' ? (
+                          <span className="cell-tag">{asDisplay(item[column])}</span>
+                        ) : (
+                          asDisplay(item[column])
+                        )}
+                      </td>
                     ))}
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={columns.length}>Tidak ada data permission.</td>
+                  <td colSpan={columns.length} className="cell-empty">
+                    <KeyRound size={32} style={{ opacity: 0.4, display: 'block', margin: '0 auto 0.75rem' }} />
+                    Tidak ada data permission.
+                  </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
-      </Card>
-
-      <Card className="crud-card admin-permissions-card" glass>
-        <h2>Raw Response</h2>
-        <pre className="crud-response">{responseText || "Response API akan tampil di sini."}</pre>
       </Card>
     </div>
   );

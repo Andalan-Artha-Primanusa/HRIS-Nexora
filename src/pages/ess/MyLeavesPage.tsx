@@ -261,7 +261,7 @@ const MyLeavesPage = () => {
                   })
                 ) : (
                   <tr>
-                    <td colSpan={5} style={{ textAlign: "center", padding: "2rem", color: "var(--color-text-secondary)" }}>
+                    <td colSpan={5} className="submenu-table-empty">
                       No leave data available
                     </td>
                   </tr>

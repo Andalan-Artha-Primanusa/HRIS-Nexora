@@ -126,7 +126,7 @@ const PayrollDashboard: React.FC = () => {
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to load payroll data";
       setError(message);
-      showErrorModal("❌ Error Load Dashboard", message);
+      showErrorModal("Error Load Dashboard", message);
       console.error("Error loading payroll:", err);
     } finally {
       setLoading(false);
@@ -246,7 +246,7 @@ const PayrollDashboard: React.FC = () => {
     } catch (err) {
       const errorText = err instanceof Error ? err.message : "Failed to generate monthly payroll";
       console.error("Error generating payroll:", err);
-      showErrorModal("❌ Error Generate", errorText);
+      showErrorModal("Error Generate", errorText);
     }
   };
 

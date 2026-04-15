@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { Alert } from '@/shared/ui/Alert';
+import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
 import { CalendarDays, CheckCircle2, Clock, RefreshCw, XCircle } from 'lucide-react';
 import '@/shared/styles/CrudPage.css';
@@ -110,18 +111,35 @@ const AttendanceHistoryPage = () => {
 
       {/* Table */}
       <Card className="table-card" glass>
-        {history.length > 0 ? (
-          <div className="table-wrap">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Tanggal</th>
-                  <th>Check In</th>
-                  <th>Check Out</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
+        <div className="table-header-bar">
+          <h3>Riwayat Kehadiran</h3>
+          <span className="table-count">{history.length} records</span>
+        </div>
+
+        {loading && <div className="table-card-inner"><LoadingState message="Memuat riwayat kehadiran..." /></div>}
+        {!loading && history.length === 0 && (
+          <div className="table-card-inner">
+            <EmptyState
+              icon={<CalendarDays size={34} />}
+              title="Tidak ada data"
+              message="Data history belum tersedia."
+            />
+          </div>
+        )}
+
+        {!loading && history.length > 0 && (
+          <div className="table-card-inner">
+            <div className="table-wrap">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Tanggal</th>
+                    <th>Check In</th>
+                    <th>Check Out</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
               <tbody>
                 {history.map((record, idx) => (
                   <tr key={idx}>
@@ -153,10 +171,6 @@ const AttendanceHistoryPage = () => {
               </tbody>
             </table>
           </div>
-        ) : (
-          <div className="empty-state">
-            <CalendarDays size={32} style={{ opacity: 0.5 }} />
-            <p>Data history belum tersedia.</p>
           </div>
         )}
       </Card>

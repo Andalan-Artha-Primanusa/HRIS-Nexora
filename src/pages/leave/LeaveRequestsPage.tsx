@@ -185,7 +185,7 @@ const LeaveRequestsPage = () => {
                         <div className="cell-date-sub">hingga {formatDate(leave.end_date)}</div>
                       </td>
                       <td><strong>{leave.total_days}</strong> hari</td>
-                      <td title={leave.reason} style={{ maxWidth: "200px" }}>
+                      <td className="leave-table-reason" title={leave.reason}>
                         {leave.reason ? leave.reason.substring(0, 40) + (leave.reason.length > 40 ? '...' : '') : '-'}
                       </td>
                       <td>

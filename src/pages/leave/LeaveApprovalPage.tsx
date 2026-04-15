@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
+import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { approveLeave, getPendingLeaves, rejectLeave } from "@/features/leave/api/leave.service";
 import type { LeaveItem } from "@/features/leave/types/leave.types";
-import { BarChart3, Check, CircleCheckBig, CircleX, Clock3, X } from "lucide-react";
-import "./LeavePages.css";
+import { BarChart3, Check, CircleCheckBig, CircleX, Clock3, RefreshCw, X } from "lucide-react";
+import "@/shared/styles/CrudPage.css";
 
 const formatDate = (dateString: string | undefined) => {
   if (!dateString) return "-";
@@ -22,10 +23,10 @@ const formatDate = (dateString: string | undefined) => {
 
 const getLeaveTypeLabel = (type: string | undefined) => {
   const typeMap: Record<string, string> = {
-    annual: "Annual Leave",
-    sick: "Sick Leave",
-    personal: "Personal Leave",
-    unpaid: "Unpaid Leave",
+    annual: "Cuti Tahunan",
+    sick: "Cuti Sakit",
+    personal: "Cuti Pribadi",
+    unpaid: "Cuti Tanpa Gaji",
   };
   return typeMap[type?.toLowerCase() ?? ""] ?? type ?? "-";
 };
@@ -132,104 +133,136 @@ const LeaveApprovalPage = () => {
   }, []);
 
   return (
-    <div className="leave-page">
-      <Card className="leave-hero-card" glass>
-        <div className="leave-hero-copy">
-          <p className="leave-badge">Leave Center</p>
-          <h1 className="leave-title">Leave Approval</h1>
-          <p className="leave-subtitle">Review and approve/reject pending leave requests in a clean, consistent layout.</p>
+    <div className="crud-page">
+      {/* Header */}
+      <div className="page-header">
+        <div className="page-header-title">
+          <span className="page-badge">Leave Center</span>
+          <h1>Leave Approval</h1>
+          <p>Review and approve/reject pending leave requests in a clean, consistent layout.</p>
         </div>
-        <Button variant="primary" size="md" onClick={() => void loadPending()} disabled={loading}>
-          {loading ? "Loading..." : "Refresh"}
-        </Button>
-      </Card>
+        <div className="page-header-actions">
+          <Button variant="outline" size="md" onClick={() => void loadPending()} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
+            <RefreshCw size={16} />
+            {loading ? "Memuat..." : "Segarkan"}
+          </Button>
+        </div>
+      </div>
 
-      <div className="leave-summary-grid">
+      {/* Summary Cards */}
+      <div className="summary-grid">
         {leaveSummaryCards.map((card) => {
           const Icon = card.icon;
 
           return (
-            <Card key={card.label} className="leave-summary-card" glass>
-              <div className="leave-summary-header">
+            <Card key={card.label} className="summary-card" glass>
+              <div className="summary-card__header">
                 <div>
-                  <span className="leave-summary-label">{card.label}</span>
-                  <p className="leave-summary-subtitle">{card.subtitle}</p>
+                  <span className="summary-card__label">{card.label}</span>
+                  <p className="summary-card__subtitle">{card.subtitle}</p>
                 </div>
-                <span className={`leave-summary-icon leave-summary-icon--${card.tone}`}>
-                  <Icon size={18} />
+                <span className={`summary-card__icon summary-card__icon--${card.tone}`}>
+                  <Icon size={20} />
                 </span>
               </div>
-              <div className={`leave-summary-value leave-summary-value--${card.tone}`}>{card.value}</div>
-              <div className="leave-summary-change">{card.change}</div>
+              <div className={`summary-card__value summary-card__value--${card.tone}`}>{card.value}</div>
+              <div className="summary-card__change">{card.change}</div>
             </Card>
           );
         })}
       </div>
 
-      <Card className="leave-card" glass>
-        <div className="leave-table-wrap">
-          <table className="leave-table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Employee</th>
-                <th>Leave Type</th>
-                <th>Dates</th>
-                <th>Days</th>
-                <th>Reason</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.length > 0 ? (
-                items.map((item, index) => {
-                  const leave = item as any;
-                  return (
-                    <tr key={String(leave.id ?? index)}>
-                      <td className="leave-table-id">{index + 1}</td>
-                      <td className="leave-table-employee">
-                        <strong>{getEmployeeName(leave)}</strong>
-                      </td>
-                      <td className="leave-table-type">{getLeaveTypeLabel(leave.type)}</td>
-                      <td className="leave-table-dates">
-                        <div>{formatDate(leave.start_date)}</div>
-                        <div className="leave-table-dates-sub">to {formatDate(leave.end_date)}</div>
-                      </td>
-                      <td className="leave-table-days">{getSafeString(leave.total_days) || "1"} days</td>
-                      <td className="leave-table-reason" title={getSafeString(leave.reason)}>
-                        {leave.reason ? String(leave.reason).substring(0, 35) + (String(leave.reason).length > 35 ? "..." : "") : "-"}
-                      </td>
-                      <td className="leave-table-actions">
-                        <button
-                          className="action-btn action-approve"
-                          onClick={() => void handleApprove(leave.id)}
-                          disabled={actionLoading === String(leave.id)}
-                          title="Approve"
-                        >
-                          <Check size={18} />
-                        </button>
-                        <button
-                          className="action-btn action-reject"
-                          onClick={() => void handleReject(leave.id)}
-                          disabled={actionLoading === String(leave.id)}
-                          title="Reject"
-                        >
-                          <X size={18} />
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })
-              ) : (
-                <tr>
-                  <td colSpan={7} style={{ textAlign: "center", padding: "2rem", color: "var(--color-text-secondary)" }}>
-                    No pending leave requests
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+      {/* Table */}
+      <Card className="table-card" glass>
+        <div className="table-header-bar">
+          <h3>Pending Leave Requests</h3>
+          <span className="table-count">{items.length} pengajuan</span>
         </div>
+
+        {loading && <div className="table-card-inner"><LoadingState message="Memuat data pengajuan cuti..." /></div>}
+        {!loading && items.length === 0 && (
+          <div className="table-card-inner">
+            <EmptyState
+              icon=""
+              title="Tidak ada pengajuan"
+              message="Tidak ada pengajuan cuti yang menunggu persetujuan."
+            />
+          </div>
+        )}
+
+        {!loading && items.length > 0 && (
+          <div className="table-card-inner">
+            <div className="table-wrap">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Employee</th>
+                    <th>Tipe Cuti</th>
+                    <th>Tanggal</th>
+                    <th>Hari</th>
+                    <th>Alasan</th>
+                    <th className="th-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map((item, index) => {
+                    const leave = item as any;
+                    return (
+                      <tr key={String(leave.id ?? index)}>
+                        <td>
+                          <div className="cell-id">{index + 1}</div>
+                          <div className="cell-sub">ID: {leave.id}</div>
+                        </td>
+                        <td>
+                          <div className="cell-name">
+                            <div className="cell-avatar">
+                              {getEmployeeName(leave).charAt(0).toUpperCase()}
+                            </div>
+                            <span className="cell-name-text">{getEmployeeName(leave)}</span>
+                          </div>
+                        </td>
+                        <td><span className="cell-tag">{getLeaveTypeLabel(leave.type)}</span></td>
+                        <td>
+                          <div className="cell-date">{formatDate(leave.start_date)}</div>
+                          <div className="cell-date-sub">hingga {formatDate(leave.end_date)}</div>
+                        </td>
+                        <td><strong>{getSafeString(leave.total_days) || "1"}</strong> hari</td>
+                        <td className="leave-table-reason" title={getSafeString(leave.reason)}>
+                          {leave.reason ? String(leave.reason).substring(0, 35) + (String(leave.reason).length > 35 ? "..." : "") : "-"}
+                        </td>
+                        <td>
+                          <div className="cell-actions">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => void handleApprove(leave.id)}
+                              disabled={actionLoading === String(leave.id)}
+                              title="Approve"
+                              style={{ color: '#10b981', borderColor: '#10b981' }}
+                            >
+                              <Check size={15} />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => void handleReject(leave.id)}
+                              disabled={actionLoading === String(leave.id)}
+                              title="Reject"
+                              style={{ color: '#ef4444', borderColor: '#ef4444' }}
+                            >
+                              <X size={15} />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </Card>
     </div>
   );

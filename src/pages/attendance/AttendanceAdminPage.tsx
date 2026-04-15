@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
+import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import {
   deleteAttendanceRecord,
   getAllAttendanceRecords,
@@ -117,31 +118,6 @@ const AttendanceAdminPage = () => {
         </div>
       </div>
 
-      {/* Actions Card */}
-      <Card className="control-card" glass>
-        <div className="control-bar">
-          <div className="search-box">
-            <Search size={18} />
-            <input
-              className="search-input"
-              value={recordId}
-              onChange={(event) => setRecordId(event.target.value)}
-              placeholder="Masukkan Attendance ID..."
-            />
-          </div>
-          <div className="quick-controls">
-            <Button variant="primary" size="md" onClick={() => void loadDetail()} disabled={loading}>
-              <Eye size={16} />
-              Get Detail
-            </Button>
-            <Button variant="ghost" size="md" onClick={() => void deleteRecord()} disabled={loading} style={{ color: "#ef4444" }}>
-              <Trash2 size={16} />
-              Delete Record
-            </Button>
-          </div>
-        </div>
-      </Card>
-
       {/* Detail Panel */}
       {selectedDetail && (
         <Card className="control-card" glass>
@@ -167,18 +143,54 @@ const AttendanceAdminPage = () => {
           <h3>Attendance Records</h3>
           <span className="table-count">{items.length} records</span>
         </div>
-        <div className="table-wrap">
-          <table className="data-table">
-            <thead>
-              <tr>
-                {columns.map((column) => (
-                  <th key={column}>{column.replace(/_/g, ' ')}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {items.length > 0 ? (
-                items.map((item, index) => (
+
+        <div className="table-card-inner" style={{ paddingBottom: '1.5rem' }}>
+          <div className="control-bar">
+            <div className="search-box">
+              <Search size={18} />
+              <input
+                className="search-input"
+                value={recordId}
+                onChange={(event) => setRecordId(event.target.value)}
+                placeholder="Masukkan Attendance ID..."
+              />
+            </div>
+            <div className="quick-controls">
+              <Button variant="primary" size="md" onClick={() => void loadDetail()} disabled={loading}>
+                <Eye size={16} />
+                Get Detail
+              </Button>
+              <Button variant="ghost" size="md" onClick={() => void deleteRecord()} disabled={loading} style={{ color: "#ef4444" }}>
+                <Trash2 size={16} />
+                Delete Record
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {loading && <div className="table-card-inner"><LoadingState message="Memuat data attendance..." /></div>}
+        {!loading && items.length === 0 && (
+          <div className="table-card-inner">
+            <EmptyState
+              icon=""
+              title="Tidak ada data"
+              message="Tidak ada data attendance tersedia."
+            />
+          </div>
+        )}
+
+        {!loading && items.length > 0 && (
+          <div className="table-wrap">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  {columns.map((column) => (
+                    <th key={column}>{column.replace(/_/g, ' ')}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((item, index) => (
                   <tr key={String(item.id ?? index)}>
                     {columns.map((column) => (
                       <td key={`${String(item.id ?? index)}-${column}`}>
@@ -190,17 +202,11 @@ const AttendanceAdminPage = () => {
                       </td>
                     ))}
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={columns.length} className="cell-empty">
-                    Tidak ada data attendance tersedia.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </Card>
     </div>
   );

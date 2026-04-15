@@ -58,7 +58,10 @@
 }
 
 .error-icon {
-  font-size: 3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #b91c1c;
   line-height: 1;
 }
 
@@ -82,7 +85,10 @@
 }
 
 .empty-icon {
-  font-size: 3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
   line-height: 1;
   margin-bottom: 0.5rem;
 }

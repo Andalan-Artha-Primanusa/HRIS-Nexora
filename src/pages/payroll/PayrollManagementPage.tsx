@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
+import { CheckCircle2, CreditCard, Eye, FileText, Pencil, Plus, RefreshCw, Settings2, Trash2 } from "lucide-react";
 import {
   approvePayroll,
   createPayroll,
@@ -81,7 +82,7 @@ const PayrollManagementPage = () => {
       setItems(result);
     } catch (error: unknown) {
       const errorText = error instanceof Error ? error.message : "Gagal muat payroll";
-      showErrorModal("❌ Error Load Data", errorText);
+      showErrorModal("Error Load Data", errorText);
     } finally {
       setLoading(false);
     }
@@ -101,7 +102,7 @@ const PayrollManagementPage = () => {
       await loadPayroll();
     } catch (error: unknown) {
       const errorText = error instanceof Error ? error.message : "Gagal buat payroll";
-      showErrorModal("❌ Error Buat Payroll", errorText);
+      showErrorModal("Error Buat Payroll", errorText);
     } finally {
       setLoading(false);
     }
@@ -115,7 +116,7 @@ const PayrollManagementPage = () => {
       await loadPayroll();
     } catch (error: unknown) {
       const errorText = error instanceof Error ? error.message : "Gagal generate payroll";
-      showErrorModal("❌ Error Generate", errorText);
+      showErrorModal("Error Generate", errorText);
     } finally {
       setLoading(false);
     }
@@ -137,7 +138,7 @@ const PayrollManagementPage = () => {
       setSelectedDetail(result as unknown as Record<string, unknown>);
     } catch (error: unknown) {
       const errorText = error instanceof Error ? error.message : "Gagal muat detail";
-      showErrorModal("❌ Error Muat Detail", errorText);
+      showErrorModal("Error Muat Detail", errorText);
     } finally {
       setLoading(false);
     }
@@ -164,7 +165,7 @@ const PayrollManagementPage = () => {
       await loadPayroll();
     } catch (error: unknown) {
       const errorText = error instanceof Error ? error.message : "Gagal update payroll";
-      showErrorModal("❌ Error Update", errorText);
+      showErrorModal("Error Update", errorText);
     } finally {
       setLoading(false);
     }
@@ -186,7 +187,7 @@ const PayrollManagementPage = () => {
       await loadPayroll();
     } catch (error: unknown) {
       const errorText = error instanceof Error ? error.message : "Gagal hapus payroll";
-      showErrorModal("❌ Error Hapus", errorText);
+      showErrorModal("Error Hapus", errorText);
     } finally {
       setLoading(false);
     }
@@ -208,7 +209,7 @@ const PayrollManagementPage = () => {
       await loadPayroll();
     } catch (error: unknown) {
       const errorText = error instanceof Error ? error.message : "Gagal approve payroll";
-      showErrorModal("❌ Error Approve", errorText);
+      showErrorModal("Error Approve", errorText);
     } finally {
       setLoading(false);
     }
@@ -230,7 +231,7 @@ const PayrollManagementPage = () => {
       await loadPayroll();
     } catch (error: unknown) {
       const errorText = error instanceof Error ? error.message : "Gagal mark as paid";
-      showErrorModal("❌ Error Mark Paid", errorText);
+      showErrorModal("Error Mark Paid", errorText);
     } finally {
       setLoading(false);
     }
@@ -259,7 +260,10 @@ const PayrollManagementPage = () => {
 
       <div className="crud-header" style={{ borderBottom: "2px solid #2563eb", paddingBottom: "20px" }}>
         <div>
-          <h1 style={{ color: "#2563eb", marginBottom: "4px" }}>⚙️ Kelola Payroll</h1>
+          <h1 style={{ color: "#2563eb", marginBottom: "4px", display: "inline-flex", alignItems: "center", gap: "8px" }}>
+            <Settings2 size={20} />
+            Kelola Payroll
+          </h1>
           <p style={{ color: "var(--color-text-secondary)", fontSize: "0.9rem" }}>Buat, edit, setujui, dan kelola pembayaran gaji karyawan</p>
         </div>
         <Button 
@@ -269,12 +273,16 @@ const PayrollManagementPage = () => {
           disabled={loading}
           style={{ borderColor: "#2563eb", color: "#2563eb" }}
         >
-          🔄 Segarkan Data
+          <RefreshCw size={16} />
+          Segarkan Data
         </Button>
       </div>
 
       <Card className="crud-card" glass style={{ borderTop: "4px solid #2563eb" }}>
-        <h2 style={{ color: "#2563eb", marginTop: 0 }}>📝 Form Payroll</h2>
+        <h2 style={{ color: "#2563eb", marginTop: 0, display: "inline-flex", alignItems: "center", gap: "8px" }}>
+          <FileText size={18} />
+          Form Payroll
+        </h2>
         <div className="crud-form-grid">
           <label>
             <strong style={{ color: "#2563eb" }}>ID Payroll</strong>
@@ -327,7 +335,8 @@ const PayrollManagementPage = () => {
             disabled={loading}
             style={{ backgroundColor: "#2563eb" }}
           >
-            ➕ Buat Payroll
+            <Plus size={16} />
+            Buat Payroll
           </Button>
           <Button 
             variant="secondary" 
@@ -336,7 +345,8 @@ const PayrollManagementPage = () => {
             disabled={loading}
             style={{ backgroundColor: "#0ea5e9" }}
           >
-            🔄 Buat Bulanan
+            <RefreshCw size={16} />
+            Buat Bulanan
           </Button>
           <Button 
             variant="outline" 
@@ -345,7 +355,8 @@ const PayrollManagementPage = () => {
             disabled={loading}
             style={{ borderColor: "#2563eb", color: "#2563eb" }}
           >
-            👁️ Lihat Detail
+            <Eye size={16} />
+            Lihat Detail
           </Button>
           <Button 
             variant="secondary" 
@@ -354,7 +365,8 @@ const PayrollManagementPage = () => {
             disabled={loading}
             style={{ backgroundColor: "#0ea5e9" }}
           >
-            ✏️ Perbarui
+            <Pencil size={16} />
+            Perbarui
           </Button>
           <Button 
             variant="secondary" 
@@ -363,7 +375,8 @@ const PayrollManagementPage = () => {
             disabled={loading}
             style={{ backgroundColor: "#10b981" }}
           >
-            ✅ Setujui
+            <CheckCircle2 size={16} />
+            Setujui
           </Button>
           <Button 
             variant="secondary" 
@@ -372,7 +385,8 @@ const PayrollManagementPage = () => {
             disabled={loading}
             style={{ backgroundColor: "#10b981" }}
           >
-            💳 Tandai Dibayar
+            <CreditCard size={16} />
+            Tandai Dibayar
           </Button>
           <Button 
             variant="ghost" 
@@ -381,36 +395,33 @@ const PayrollManagementPage = () => {
             disabled={loading}
             style={{ color: "#ef4444" }}
           >
-            🗑️ Hapus
+            <Trash2 size={16} />
+            Hapus
           </Button>
         </div>
       </Card>
 
       <Card className="crud-card" glass style={{ borderTop: "4px solid #2563eb" }}>
-        <h2 style={{ color: "#2563eb", marginTop: 0 }}>📋 Detail Payroll</h2>
+        <h2 style={{ color: "#2563eb", marginTop: 0, display: "inline-flex", alignItems: "center", gap: "8px" }}>
+          <FileText size={18} />
+          Detail Payroll
+        </h2>
         <pre className="crud-response">
           {selectedDetail ? JSON.stringify(selectedDetail, null, 2) : "Belum ada detail payroll dipilih."}
         </pre>
       </Card>
 
       <Card className="crud-card" glass style={{ borderTop: "4px solid #2563eb" }}>
-        <h2 style={{ color: "#2563eb", marginTop: 0 }}>📊 Daftar Payroll</h2>
+        <h2 style={{ color: "#2563eb", marginTop: 0, display: "inline-flex", alignItems: "center", gap: "8px" }}>
+          <FileText size={18} />
+          Daftar Payroll
+        </h2>
         <div className="crud-table-wrap">
-          <table className="crud-table" style={{ width: "100%", borderCollapse: "collapse" }}>
+          <table className="crud-table">
             <thead>
-              <tr style={{ backgroundColor: "#eff6ff" }}>
+              <tr>
                 {columns.map((column) => (
-                  <th 
-                    key={column}
-                    style={{ 
-                      padding: "12px", 
-                      backgroundColor: "#dbeafe",
-                      color: "#2563eb",
-                      fontWeight: "600",
-                      textAlign: "left",
-                      borderBottom: "2px solid #2563eb"
-                    }}
-                  >
+                  <th key={column}>
                     {column === "id" && "ID"}
                     {column === "employee_id" && "ID Karyawan"}
                     {column === "period" && "Periode"}
@@ -425,15 +436,9 @@ const PayrollManagementPage = () => {
             <tbody>
               {items.length > 0 ? (
                 items.map((item, index) => (
-                  <tr 
-                    key={String(item.id ?? index)}
-                    style={{ borderBottom: "1px solid #eff6ff" }}
-                  >
+                  <tr key={String(item.id ?? index)}>
                     {columns.map((column) => (
-                      <td 
-                        key={`${String(item.id ?? index)}-${column}`}
-                        style={{ padding: "12px", color: "#1f2937" }}
-                      >
+                      <td key={`${String(item.id ?? index)}-${column}`}>
                         {asDisplay((item as unknown as Record<string, unknown>)[column])}
                       </td>
                     ))}
@@ -441,7 +446,7 @@ const PayrollManagementPage = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={columns.length} style={{ padding: "16px", textAlign: "center", color: "#999" }}>
+                  <td colSpan={columns.length} className="submenu-table-empty">
                     Tidak ada data payroll tersedia.
                   </td>
                 </tr>

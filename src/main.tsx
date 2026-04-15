@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
 import { router } from "@/app/routes";
 import "./index.css";
+import "./shared/styles/submenu-table.css";
 
 class ErrorBoundary extends React.Component<{children: any}, {hasError: boolean, error: any}> {
   constructor(props: any) {

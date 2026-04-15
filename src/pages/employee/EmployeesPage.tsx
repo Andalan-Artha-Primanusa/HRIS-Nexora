@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
+import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import {
   createEmployee,
   deleteEmployee,
@@ -18,6 +19,8 @@ import {
   Pencil,
   Trash2,
   ChevronDown,
+  ArrowUp,
+  ArrowDown,
   Briefcase,
 } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
@@ -68,6 +71,8 @@ const EmployeesPage = () => {
   const [updateForm, setUpdateForm] = useState<EmployeeFormState>(DEFAULT_FORM);
   const [, setStatusMessage] = useState("Ready to call employee API");
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   // Search & Filter State
   const [searchText, setSearchText] = useState("");
@@ -202,6 +207,7 @@ const EmployeesPage = () => {
   const loadEmployees = async () => {
     setLoading(true);
     setStatusMessage("Memuat semua employees...");
+    setErrorMessage(null);
 
     try {
       const result = await getAllEmployees();
@@ -210,8 +216,10 @@ const EmployeesPage = () => {
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Gagal memuat employee.";
       setStatusMessage(message);
+      setErrorMessage(message);
     } finally {
       setLoading(false);
+      setHasLoaded(true);
     }
   };
 
@@ -296,6 +304,11 @@ const EmployeesPage = () => {
     void loadEmployees();
   }, [isAddPage, isUpdatePage]);
 
+  // Reset page on filter changes (like PayrollListPage)
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText, selectedDepartment, selectedPosition, sortBy, sortOrder]);
+
   useEffect(() => {
     if (!isUpdatePage || !routeEmployeeId) {
       return;
@@ -332,93 +345,90 @@ const EmployeesPage = () => {
 
   if (isAddPage) {
     return (
-      <div className="employees-page crud-page">
-        <div className="employees-list-header" style={{ borderBottom: "2px solid #2563eb", paddingBottom: "20px" }}>
-          <div className="employees-list-title">
-            <h1 style={{ color: "#2563eb", marginBottom: "4px" }}>👤 Tambah Karyawan</h1>
-            <p style={{ color: "var(--color-text-secondary)", fontSize: "0.9rem" }}>Input data jabatan dan penempatan karyawan baru</p>
+      <div className="crud-page">
+        <div className="page-header">
+          <div className="page-header-title">
+            <span className="page-badge">People Center</span>
+            <h1>Tambah Karyawan</h1>
+            <p>Input data jabatan dan penempatan karyawan baru</p>
           </div>
-          <Button variant="outline" size="md" onClick={() => navigate("/employees")} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
-            Kembali ke Daftar
-          </Button>
+          <div className="page-header-actions">
+            <Button variant="outline" size="md" onClick={() => navigate("/employees")} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
+              Kembali ke Daftar
+            </Button>
+          </div>
         </div>
 
-        <Card className="employees-panel" glass style={{ borderTop: "4px solid #2563eb", marginTop: "1rem" }}>
-          <div className="profiles-panel-header" style={{ marginBottom: "20px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <div style={{ color: "#2563eb" }}><Briefcase size={18} /></div>
-              <h2 style={{ color: "#2563eb", margin: 0 }}>Form Data Karyawan</h2>
-            </div>
+        <Card className="control-card" glass>
+          <div style={{ marginBottom: '1rem' }}>
+            <h3 style={{ margin: 0, color: '#1e3a8a', fontWeight: 700, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Briefcase size={18} style={{ color: '#2563eb' }} />
+              Form Data Karyawan
+            </h3>
           </div>
 
-          <div className="employee-form-grid">
-            <label className="profiles-form-group">
-              <span style={{ color: "#2563eb", fontWeight: "700", fontSize: "0.75rem" }}>USER ID</span>
+          <div className="form-grid">
+            <div className="form-group">
+              <span>USER ID</span>
               <input
-                className="profiles-input"
+                className="form-input"
                 value={createForm.user_id}
                 onChange={(event) => setCreateForm((prev) => ({ ...prev, user_id: event.target.value }))}
                 placeholder="Masukkan User ID"
-                style={{ border: "1px solid rgba(37, 99, 235, 0.2)" }}
               />
-            </label>
-            <label className="profiles-form-group">
-              <span style={{ color: "#2563eb", fontWeight: "700", fontSize: "0.75rem" }}>KODE KARYAWAN</span>
+            </div>
+            <div className="form-group">
+              <span>KODE KARYAWAN</span>
               <input
-                className="profiles-input"
+                className="form-input"
                 value={createForm.employee_code}
                 onChange={(event) => setCreateForm((prev) => ({ ...prev, employee_code: event.target.value }))}
                 placeholder="Contoh: EMP-001"
-                style={{ border: "1px solid rgba(37, 99, 235, 0.2)" }}
               />
-            </label>
-            <label className="profiles-form-group">
-              <span style={{ color: "#2563eb", fontWeight: "700", fontSize: "0.75rem" }}>JABATAN</span>
+            </div>
+            <div className="form-group">
+              <span>JABATAN</span>
               <input
-                className="profiles-input"
+                className="form-input"
                 value={createForm.position}
                 onChange={(event) => setCreateForm((prev) => ({ ...prev, position: event.target.value }))}
                 placeholder="Contoh: Manager"
-                style={{ border: "1px solid rgba(37, 99, 235, 0.2)" }}
               />
-            </label>
-            <label className="profiles-form-group">
-              <span style={{ color: "#2563eb", fontWeight: "700", fontSize: "0.75rem" }}>DEPARTEMEN</span>
+            </div>
+            <div className="form-group">
+              <span>DEPARTEMEN</span>
               <input
-                className="profiles-input"
+                className="form-input"
                 value={createForm.department}
                 onChange={(event) => setCreateForm((prev) => ({ ...prev, department: event.target.value }))}
                 placeholder="Contoh: IT Support"
-                style={{ border: "1px solid rgba(37, 99, 235, 0.2)" }}
               />
-            </label>
-            <label className="profiles-form-group">
-              <span style={{ color: "#2563eb", fontWeight: "700", fontSize: "0.75rem" }}>TANGGAL BERGABUNG</span>
+            </div>
+            <div className="form-group">
+              <span>TANGGAL BERGABUNG</span>
               <input
-                className="profiles-input"
+                className="form-input"
                 type="date"
                 value={createForm.hire_date}
                 onChange={(event) => setCreateForm((prev) => ({ ...prev, hire_date: event.target.value }))}
-                style={{ border: "1px solid rgba(37, 99, 235, 0.2)" }}
               />
-            </label>
-            <label className="profiles-form-group">
-              <span style={{ color: "#2563eb", fontWeight: "700", fontSize: "0.75rem" }}>GAJI POKOK</span>
+            </div>
+            <div className="form-group">
+              <span>GAJI POKOK</span>
               <input
-                className="profiles-input"
+                className="form-input"
                 value={createForm.salary}
                 onChange={(event) => setCreateForm((prev) => ({ ...prev, salary: event.target.value }))}
                 placeholder="Masukkan nominal gaji"
-                style={{ border: "1px solid rgba(37, 99, 235, 0.2)" }}
               />
-            </label>
+            </div>
           </div>
 
-          <div className="profiles-actions" style={{ justifyContent: "flex-end", marginTop: "2rem" }}>
+          <div className="form-actions">
             <Button variant="outline" size="md" onClick={() => navigate("/employees")} disabled={loading}>
               Batal
             </Button>
-            <Button variant="primary" size="md" onClick={() => void createNewEmployee()} disabled={loading} style={{ backgroundColor: "#2563eb" }}>
+            <Button variant="primary" size="md" onClick={() => void createNewEmployee()} disabled={loading}>
               <Plus size={16} />
               Simpan Karyawan
             </Button>
@@ -430,67 +440,67 @@ const EmployeesPage = () => {
 
   if (isUpdatePage) {
     return (
-      <div className="employees-page crud-page">
-        <div className="employees-list-header" style={{ borderBottom: "2px solid #2563eb", paddingBottom: "20px" }}>
-          <div className="employees-list-title">
-            <h1 style={{ color: "#2563eb", marginBottom: "4px" }}>✏️ Update Data Karyawan</h1>
-            <p style={{ color: "var(--color-text-secondary)", fontSize: "0.9rem" }}>Perbarui informasi posisi dan gaji karyawan</p>
+      <div className="crud-page">
+        <div className="page-header">
+          <div className="page-header-title">
+            <span className="page-badge">People Center</span>
+            <h1>Update Data Karyawan</h1>
+            <p>Perbarui informasi posisi dan gaji karyawan</p>
           </div>
-          <Button variant="outline" size="md" onClick={() => navigate("/employees")} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
-            Kembali ke Daftar
-          </Button>
+          <div className="page-header-actions">
+            <Button variant="outline" size="md" onClick={() => navigate("/employees")} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
+              Kembali ke Daftar
+            </Button>
+          </div>
         </div>
 
-        <Card className="employees-panel" glass style={{ borderTop: "4px solid #2563eb", marginTop: "1rem" }}>
-          <div className="profiles-panel-header" style={{ marginBottom: "20px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <div style={{ color: "#2563eb" }}><Pencil size={18} /></div>
-              <h2 style={{ color: "#2563eb", margin: 0 }}>Form Update Karyawan</h2>
-            </div>
+        <Card className="control-card" glass>
+          <div style={{ marginBottom: '1rem' }}>
+            <h3 style={{ margin: 0, color: '#1e3a8a', fontWeight: 700, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Pencil size={18} style={{ color: '#2563eb' }} />
+              Form Update Karyawan
+            </h3>
           </div>
 
-          <div className="employee-form-grid">
-            <label className="profiles-form-group">
-              <span style={{ color: "#2563eb", fontWeight: "700", fontSize: "0.75rem" }}>EMPLOYEE ID</span>
-              <input className="profiles-input" value={updateForm.id} readOnly style={{ backgroundColor: "#f3f4f6" }} />
-            </label>
-            <label className="profiles-form-group">
-              <span style={{ color: "#2563eb", fontWeight: "700", fontSize: "0.75rem" }}>JABATAN</span>
+          <div className="form-grid">
+            <div className="form-group">
+              <span>EMPLOYEE ID</span>
+              <input className="form-input" value={updateForm.id} readOnly style={{ backgroundColor: "#f3f4f6" }} />
+            </div>
+            <div className="form-group">
+              <span>JABATAN</span>
               <input
-                className="profiles-input"
+                className="form-input"
                 value={updateForm.position}
                 onChange={(event) => setUpdateForm((prev) => ({ ...prev, position: event.target.value }))}
                 placeholder="Masukkan Jabatan"
-                style={{ border: "1px solid rgba(37, 99, 235, 0.2)" }}
               />
-            </label>
-            <label className="profiles-form-group">
-              <span style={{ color: "#2563eb", fontWeight: "700", fontSize: "0.75rem" }}>DEPARTEMEN</span>
+            </div>
+            <div className="form-group">
+              <span>DEPARTEMEN</span>
               <input
-                className="profiles-input"
+                className="form-input"
                 value={updateForm.department}
                 onChange={(event) => setUpdateForm((prev) => ({ ...prev, department: event.target.value }))}
                 placeholder="Masukkan Departemen"
-                style={{ border: "1px solid rgba(37, 99, 235, 0.2)" }}
               />
-            </label>
-            <label className="profiles-form-group">
-              <span style={{ color: "#2563eb", fontWeight: "700", fontSize: "0.75rem" }}>GAJI POKOK</span>
+            </div>
+            <div className="form-group">
+              <span>GAJI POKOK</span>
               <input
-                className="profiles-input"
+                className="form-input"
                 value={updateForm.salary}
                 onChange={(event) => setUpdateForm((prev) => ({ ...prev, salary: event.target.value }))}
                 placeholder="Masukkan Gaji"
-                style={{ border: "1px solid rgba(37, 99, 235, 0.2)" }}
               />
-            </label>
+            </div>
           </div>
 
-          <div className="profiles-actions" style={{ justifyContent: "flex-end", marginTop: "2rem" }}>
+          <div className="form-actions">
             <Button variant="outline" size="md" onClick={() => navigate("/employees")} disabled={loading}>
               Batal
             </Button>
-            <Button variant="secondary" size="md" onClick={() => void updateExistingEmployee()} disabled={loading} style={{ backgroundColor: "#2563eb" }}>
+            <Button variant="primary" size="md" onClick={() => void updateExistingEmployee()} disabled={loading}>
               <Pencil size={16} />
               Update Data
             </Button>
@@ -501,15 +511,15 @@ const EmployeesPage = () => {
   }
 
   return (
-    <div className="employees-page crud-page">
-      {/* Header - Title Section */}
-      <div className="employees-list-header">
-        <div className="profiles-list-title">
-          <span className="employees-page-badge">People Center</span>
+    <div className="crud-page">
+      {/* Header */}
+      <div className="page-header">
+        <div className="page-header-title">
+          <span className="page-badge">People Center</span>
           <h1>Daftar Karyawan</h1>
           <p>Kelola jabatan, departemen, dan gaji karyawan dalam tampilan yang lebih rapi dan konsisten.</p>
         </div>
-        <div className="profiles-list-actions">
+        <div className="page-header-actions">
           <Button
             variant="primary"
             size="md"
@@ -532,226 +542,236 @@ const EmployeesPage = () => {
         </div>
       </div>
 
-      <div className="employees-summary-grid">
+      {/* Summary Cards */}
+      <div className="summary-grid">
         {employeeSummaryCards.map((card) => {
           const Icon = card.icon;
 
           return (
-            <Card key={card.label} className="employees-summary-card" glass>
-              <div className="employees-summary-header">
+            <Card key={card.label} className="summary-card" glass>
+              <div className="summary-card__header">
                 <div>
-                  <span className="employees-summary-label">{card.label}</span>
-                  <p className="employees-summary-subtitle">{card.subtitle}</p>
+                  <span className="summary-card__label">{card.label}</span>
+                  <p className="summary-card__subtitle">{card.subtitle}</p>
                 </div>
-                <span className={`employees-summary-icon employees-summary-icon--${card.tone}`}>
+                <span className={`summary-card__icon summary-card__icon--${card.tone}`}>
                   <Icon size={20} />
                 </span>
               </div>
-              <div className="employees-summary-value">{card.value}</div>
-              <div className="employees-summary-change">{card.change}</div>
+              <div className={`summary-card__value summary-card__value--${card.tone}`}>{card.value}</div>
+              <div className="summary-card__change">{card.change}</div>
             </Card>
           );
         })}
       </div>
 
-      {/* Control Bar - Search & Filter */}
-      <Card className="profiles-search-card" glass>
-        <div className="profiles-control-bar">
-          <div className="profiles-search-box">
-            <Search size={18} />
-            <input
-              type="text"
-              placeholder="Cari nama, ID, atau kode karyawan..."
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              className="profiles-search-input"
-            />
-          </div>
-
-          <div className="profiles-quick-controls">
-            <div className="control-group">
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="profiles-sort-select"
-              >
-                <option value="name">Urutkan: Nama</option>
-                <option value="id">Urutkan: ID</option>
-                <option value="code">Urutkan: Kode</option>
-                <option value="department">Urutkan: Departemen</option>
-                <option value="position">Urutkan: Jabatan</option>
-              </select>
-              <button
-                className="profiles-sort-order-btn"
-                onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-              >
-                {sortOrder === "asc" ? "↑" : "↓"}
-              </button>
-            </div>
-
-            <button
-              className={`profiles-filter-btn ${showFilters ? "active" : ""}`}
-              onClick={() => setShowFilters(!showFilters)}
-              style={{ borderColor: "#2563eb", color: "#2563eb" }}
-            >
-              <Filter size={18} />
-              <span>Filter</span>
-              <ChevronDown
-                size={14}
-                style={{ transform: showFilters ? "rotate(180deg)" : "", transition: "transform 0.3s ease" }}
-              />
-            </button>
-
-            {(searchText || selectedDepartment || selectedPosition) && (
-              <Button variant="outline" size="sm" onClick={clearFilters} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
-                Bersihkan
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {showFilters && (
-          <div className="profiles-filter-panel">
-            <div className="filter-row">
-              <div className="filter-group">
-                <label style={{ color: "#2563eb", fontWeight: "600" }}>Departemen</label>
-                <select
-                  value={selectedDepartment}
-                  onChange={(e) => setSelectedDepartment(e.target.value)}
-                  className="profiles-filter-select"
-                >
-                  <option value="">Semua Departemen</option>
-                  {uniqueDepartments.map((dept) => (
-                    <option key={dept} value={dept}>{dept}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="filter-group">
-                <label style={{ color: "#2563eb", fontWeight: "600" }}>Jabatan</label>
-                <select
-                  value={selectedPosition}
-                  onChange={(e) => setSelectedPosition(e.target.value)}
-                  className="profiles-filter-select"
-                >
-                  <option value="">Semua Jabatan</option>
-                  {uniquePositions.map((pos) => (
-                    <option key={pos} value={pos}>{pos}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="profiles-results-info" style={{ color: "#2563eb", fontWeight: "600" }}>
-          Menampilkan <strong>{paginatedEmployees.length}</strong> dari <strong>{sortedEmployees.length}</strong> data
-        </div>
-      </Card>
-
-      {/* Table Section */}
+      {/* Combined Table & Control Section */}
       <Card className="table-card" glass>
         <div className="table-header-bar">
           <h3>Data Karyawan</h3>
           <span className="table-count">{paginatedEmployees.length} dari {sortedEmployees.length} data</span>
         </div>
-        <div className="table-wrap">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Kode / ID</th>
-                <th>Nama Karyawan</th>
-                <th>Departemen</th>
-                <th>Jabatan</th>
-                <th>Tgl Bergabung</th>
-                <th className="th-right">Gaji Pokok</th>
-                <th className="th-center">Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedEmployees.length > 0 ? (
-                paginatedEmployees.map((item) => (
-                  <tr key={item.id}>
-                    <td>
-                      <div className="cell-id">{item.employee_code || "N/A"}</div>
-                      <div className="cell-sub">ID: {item.id}</div>
-                    </td>
-                    <td>
-                      <div className="cell-name">
-                        <div className="cell-avatar">
-                          {item.user?.name?.charAt(0).toUpperCase() || "E"}
-                        </div>
-                        <span className="cell-name-text">{item.user?.name || "Unknown"}</span>
-                      </div>
-                    </td>
-                    <td><span className="cell-tag">{item.department || "-"}</span></td>
-                    <td>{item.position || "-"}</td>
-                    <td>
-                      <span className="cell-date">{item.hire_date ? formatDateTime(item.hire_date) : "-"}</span>
-                    </td>
-                    <td className="cell-amount">
-                      {item.salary ? Number(item.salary).toLocaleString("id-ID") : "-"}
-                    </td>
-                    <td>
-                      <div className="cell-actions">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => navigate(`/employees/update/${item.id}`)}
-                          title="Edit"
-                        >
-                          <Pencil size={16} />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => void deleteExistingEmployee(String(item.id))}
-                          title="Delete"
-                          style={{ color: "var(--status-danger)" }}
-                        >
-                          <Trash2 size={16} />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={7} className="cell-empty">
-                    Tidak ada data karyawan ditemukan.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
 
-        {/* Pagination Controls */}
-        {totalPages > 1 && (
-          <div className="pagination">
-            <div className="pagination__info">
-              Halaman <strong>{currentPage}</strong> dari <strong>{totalPages}</strong>
+        <div className="table-card-inner" style={{ paddingBottom: '1.5rem' }}>
+          <div className="control-bar">
+            <div className="search-box">
+              <Search size={18} />
+              <input
+                type="text"
+                placeholder="Cari nama, ID, atau kode karyawan..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="search-input"
+              />
             </div>
-            <div className="pagination__controls">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                disabled={currentPage === 1}
-                style={{ borderColor: "#2563eb", color: "#2563eb" }}
+
+            <div className="quick-controls">
+              <div className="control-group">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="sort-select"
+                >
+                  <option value="name">Urutkan: Nama</option>
+                  <option value="id">Urutkan: ID</option>
+                  <option value="code">Urutkan: Kode</option>
+                  <option value="department">Urutkan: Departemen</option>
+                  <option value="position">Urutkan: Jabatan</option>
+                </select>
+                <button
+                  className="sort-order-btn"
+                  onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+                >
+                  {sortOrder === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />}
+                </button>
+              </div>
+
+              <button
+                className={`filter-btn ${showFilters ? "active" : ""}`}
+                onClick={() => setShowFilters(!showFilters)}
               >
-                ← Prev
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                disabled={currentPage === totalPages}
-                style={{ borderColor: "#2563eb", color: "#2563eb" }}
-              >
-                Next →
-              </Button>
+                <Filter size={18} />
+                <span>Filter</span>
+                <ChevronDown
+                  size={14}
+                  style={{ transform: showFilters ? "rotate(180deg)" : "", transition: "transform 0.3s ease" }}
+                />
+              </button>
+
+              {(searchText || selectedDepartment || selectedPosition) && (
+                <Button variant="outline" size="sm" onClick={clearFilters} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
+                  Bersihkan
+                </Button>
+              )}
             </div>
           </div>
+
+          {showFilters && (
+            <div className="filter-panel" style={{ marginTop: '1rem' }}>
+              <div className="filter-row">
+                <div className="filter-group">
+                  <label>Departemen</label>
+                  <select
+                    value={selectedDepartment}
+                    onChange={(e) => setSelectedDepartment(e.target.value)}
+                    className="filter-select"
+                  >
+                    <option value="">Semua Departemen</option>
+                    {uniqueDepartments.map((dept) => (
+                      <option key={dept} value={dept}>{dept}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="filter-group">
+                  <label>Jabatan</label>
+                  <select
+                    value={selectedPosition}
+                    onChange={(e) => setSelectedPosition(e.target.value)}
+                    className="filter-select"
+                  >
+                    <option value="">Semua Jabatan</option>
+                    {uniquePositions.map((pos) => (
+                      <option key={pos} value={pos}>{pos}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {loading && <div className="table-card-inner"><LoadingState message="Memuat data karyawan..." /></div>}
+        {!loading && errorMessage && (
+          <div className="table-card-inner">
+            <ErrorState message="Gagal memuat data karyawan" error={errorMessage} onRetry={() => void loadEmployees()} />
+          </div>
+        )}
+        {!loading && !errorMessage && hasLoaded && paginatedEmployees.length === 0 && (
+          <div className="table-card-inner">
+            <EmptyState
+              icon=""
+              title="Tidak ada data"
+              message="Tidak ada karyawan yang sesuai dengan filter yang dipilih"
+              actionLabel={searchText || selectedDepartment || selectedPosition ? "Bersihkan Filter" : undefined}
+              onAction={searchText || selectedDepartment || selectedPosition ? clearFilters : undefined}
+            />
+          </div>
+        )}
+
+        {!loading && !errorMessage && paginatedEmployees.length > 0 && (
+          <>
+            <div className="table-wrap">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Kode / ID</th>
+                    <th>Nama Karyawan</th>
+                    <th>Departemen</th>
+                    <th>Jabatan</th>
+                    <th>Tgl Bergabung</th>
+                    <th className="th-right">Gaji Pokok</th>
+                    <th className="th-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedEmployees.map((item) => (
+                    <tr key={item.id}>
+                      <td>
+                        <div className="cell-id">{item.employee_code || "N/A"}</div>
+                        <div className="cell-sub">ID: {item.id}</div>
+                      </td>
+                      <td>
+                        <div className="cell-name">
+                          <div className="cell-avatar">
+                            {item.user?.name?.charAt(0).toUpperCase() || "E"}
+                          </div>
+                          <span className="cell-name-text">{item.user?.name || "Unknown"}</span>
+                        </div>
+                      </td>
+                      <td><span className="cell-tag">{item.department || "-"}</span></td>
+                      <td>{item.position || "-"}</td>
+                      <td>
+                        <span className="cell-date">{item.hire_date ? formatDateTime(item.hire_date) : "-"}</span>
+                      </td>
+                      <td className="cell-amount">
+                        {item.salary ? `Rp ${Number(item.salary).toLocaleString("id-ID")}` : "-"}
+                      </td>
+                      <td>
+                        <div className="cell-actions">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => navigate(`/employees/update/${item.id}`)}
+                            title="Edit"
+                          >
+                            <Pencil size={15} />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => void deleteExistingEmployee(String(item.id))}
+                            title="Delete"
+                            style={{ color: "var(--status-danger)" }}
+                          >
+                            <Trash2 size={15} />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="pagination">
+                <div className="pagination__info">
+                  Halaman <strong>{currentPage}</strong> dari <strong>{totalPages}</strong>
+                </div>
+                <div className="pagination__controls">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                    style={{ borderColor: "#2563eb", color: "#2563eb" }}
+                  >
+                    ← Prev
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                    style={{ borderColor: "#2563eb", color: "#2563eb" }}
+                  >
+                    Next →
+                  </Button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </Card>
     </div>

@@ -1,4 +1,5 @@
 import React from "react";
+import { AlertTriangle, Inbox, RefreshCw, ArrowLeft } from "lucide-react";
 import { Button } from "./Button";
 import "./DataStateDisplay.css";
 
@@ -42,18 +43,22 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
 }) => {
   return (
     <div className="data-state-container error-state">
-      <div className="error-icon">⚠️</div>
+      <div className="error-icon" aria-hidden="true">
+        <AlertTriangle size={34} />
+      </div>
       <h3 className="state-title">{message}</h3>
       {error && <p className="error-details">{error}</p>}
       <div className="state-actions">
         {onRetry && (
           <Button variant="primary" size="md" onClick={onRetry}>
-            🔄 Retry
+            <RefreshCw size={16} />
+            Retry
           </Button>
         )}
         {onBack && (
           <Button variant="outline" size="md" onClick={onBack}>
-            ← Go Back
+            <ArrowLeft size={16} />
+            Go Back
           </Button>
         )}
       </div>
@@ -66,7 +71,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
 /* ============================================ */
 
 interface EmptyStateProps {
-  icon?: string;
+  icon?: React.ReactNode;
   title?: string;
   message?: string;
   actionLabel?: string;
@@ -75,7 +80,7 @@ interface EmptyStateProps {
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
-  icon = "📭",
+  icon = <Inbox size={34} />,
   title = "No data found",
   message = "There's nothing here yet",
   actionLabel,
@@ -84,7 +89,9 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 }) => {
   return (
     <div className="data-state-container empty-state">
-      <div className="empty-icon">{icon}</div>
+      <div className="empty-icon" aria-hidden="true">
+        {icon}
+      </div>
       <h3 className="state-title">{title}</h3>
       <p className="state-message">{message}</p>
       <div className="state-actions">
@@ -95,7 +102,8 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         )}
         {onBack && (
           <Button variant="outline" size="md" onClick={onBack}>
-            ← Go Back
+            <ArrowLeft size={16} />
+            Go Back
           </Button>
         )}
       </div>
@@ -142,7 +150,7 @@ export const DataStateDisplay: React.FC<DataStateDisplayProps> = ({
     case "loading":
       return loading || <LoadingState />;
 
-    case "error":
+    case "error": {
       const errorMessage = typeof error === "string" ? error : undefined;
       return React.isValidElement(error) ? (
         error
@@ -153,14 +161,16 @@ export const DataStateDisplay: React.FC<DataStateDisplayProps> = ({
           onBack={onBack}
         />
       );
+    }
 
-    case "empty":
+    case "empty": {
       const emptyMessage = typeof empty === "string" ? empty : undefined;
       return React.isValidElement(empty) ? (
         empty
       ) : (
         <EmptyState message={emptyMessage} onBack={onBack} />
       );
+    }
 
     case "success":
     case "idle":
@@ -178,3 +188,4 @@ export default {
   SuccessState,
   DataStateDisplay,
 };
+

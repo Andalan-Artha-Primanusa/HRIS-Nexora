@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
-import { Briefcase, ChevronDown, Filter, RefreshCw, Search } from "lucide-react";
+import { ArrowDown, ArrowUp, Briefcase, ChevronDown, Filter, RefreshCw, Search } from "lucide-react";
 import { getAllPayroll } from "@/features/payroll/api/payroll.service";
 import { getAllEmployees } from "@/features/employee/api/employee.service";
 import { PayrollStatusBadge } from "@/shared/ui/PayrollStatusBadge";
@@ -238,99 +238,94 @@ const PayrollListPage: React.FC = () => {
         })}
       </div>
 
-      {/* Control Bar */}
-      <Card className="control-card" glass>
-        <div className="control-bar">
-          <div className="search-box">
-            <Search size={18} />
-            <input
-              type="text"
-              placeholder="Cari nama karyawan, ID payroll, atau ID karyawan..."
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              className="search-input"
-            />
-          </div>
-
-          <div className="quick-controls">
-            <div className="control-group">
-              <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} className="sort-select">
-                <option value="period">Urutkan: Periode</option>
-                <option value="employee">Urutkan: Karyawan</option>
-                <option value="total">Urutkan: Total</option>
-                <option value="id">Urutkan: ID</option>
-              </select>
-              <button className="sort-order-btn" onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}>
-                {sortOrder === "asc" ? "↑" : "↓"}
-              </button>
-            </div>
-
-            <button className={`filter-btn ${showFilters ? "active" : ""}`} onClick={() => setShowFilters(!showFilters)}>
-              <Filter size={18} />
-              <span>Filter</span>
-              <ChevronDown size={14} style={{ transform: showFilters ? "rotate(180deg)" : "", transition: "transform 0.3s ease" }} />
-            </button>
-
-            {(searchText || selectedEmployeeId || selectedPeriod || selectedStatus) && (
-              <Button variant="outline" size="sm" onClick={clearFilters} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
-                Bersihkan
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {showFilters && (
-          <div className="filter-panel">
-            <div className="filter-row">
-              <div className="filter-group">
-                <label>Karyawan</label>
-                <select value={selectedEmployeeId} onChange={(e) => setSelectedEmployeeId(e.target.value)} className="filter-select">
-                  <option value="">Semua Karyawan ({employeesWithNames.length})</option>
-                  {employeesWithNames.map((emp: any) => (
-                    <option key={emp.id} value={String(emp.id)}>{emp.name}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="filter-group">
-                <label>Periode</label>
-                <select value={selectedPeriod} onChange={(e) => setSelectedPeriod(e.target.value)} className="filter-select">
-                  <option value="">Semua Periode</option>
-                  {uniquePeriods.map((period: string) => (
-                    <option key={period} value={period}>{period}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="filter-group">
-                <label>Status</label>
-                <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)} className="filter-select">
-                  <option value="">Semua Status</option>
-                  {uniqueStatuses.map((status: string) => (
-                    <option key={status} value={status}>
-                      {status === "draft" && "Draft"}
-                      {status === "pending" && "Menunggu"}
-                      {status === "approved" && "Disetujui"}
-                      {status === "paid" && "Sudah Dibayar"}
-                      {status === "rejected" && "Ditolak"}
-                      {!["draft", "pending", "approved", "paid", "rejected"].includes(status) &&
-                        status.charAt(0).toUpperCase() + status.slice(1)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="results-info">
-          Menampilkan <strong>{paginatedItems.length}</strong> dari <strong>{sortedItems.length}</strong> data
-        </div>
-      </Card>
-
-      {/* Table */}
+      {/* Combined Table & Control Section */}
       <Card className="table-card" glass>
         <div className="table-header-bar">
           <h3>Data Payroll</h3>
           <span className="table-count">{paginatedItems.length} dari {sortedItems.length} data</span>
+        </div>
+
+        <div className="table-card-inner" style={{ paddingBottom: '1.5rem' }}>
+          <div className="control-bar">
+            <div className="search-box">
+              <Search size={18} />
+              <input
+                type="text"
+                placeholder="Cari nama karyawan, ID payroll, atau ID karyawan..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="search-input"
+              />
+            </div>
+
+            <div className="quick-controls">
+              <div className="control-group">
+                <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} className="sort-select">
+                  <option value="period">Urutkan: Periode</option>
+                  <option value="employee">Urutkan: Karyawan</option>
+                  <option value="total">Urutkan: Total</option>
+                  <option value="id">Urutkan: ID</option>
+                </select>
+                <button className="sort-order-btn" onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}>
+                  {sortOrder === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />}
+                </button>
+              </div>
+
+              <button className={`filter-btn ${showFilters ? "active" : ""}`} onClick={() => setShowFilters(!showFilters)}>
+                <Filter size={18} />
+                <span>Filter</span>
+                <ChevronDown size={14} style={{ transform: showFilters ? "rotate(180deg)" : "", transition: "transform 0.3s ease" }} />
+              </button>
+
+              {(searchText || selectedEmployeeId || selectedPeriod || selectedStatus) && (
+                <Button variant="outline" size="sm" onClick={clearFilters} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
+                  Bersihkan
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {showFilters && (
+            <div className="filter-panel" style={{ marginTop: '1rem' }}>
+              <div className="filter-row">
+                <div className="filter-group">
+                  <label>Karyawan</label>
+                  <select value={selectedEmployeeId} onChange={(e) => setSelectedEmployeeId(e.target.value)} className="filter-select">
+                    <option value="">Semua Karyawan ({employeesWithNames.length})</option>
+                    {employeesWithNames.map((emp: any) => (
+                      <option key={emp.id} value={String(emp.id)}>{emp.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="filter-group">
+                  <label>Periode</label>
+                  <select value={selectedPeriod} onChange={(e) => setSelectedPeriod(e.target.value)} className="filter-select">
+                    <option value="">Semua Periode</option>
+                    {uniquePeriods.map((period: string) => (
+                      <option key={period} value={period}>{period}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="filter-group">
+                  <label>Status</label>
+                  <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)} className="filter-select">
+                    <option value="">Semua Status</option>
+                    {uniqueStatuses.map((status: string) => (
+                      <option key={status} value={status}>
+                        {status === "draft" && "Draft"}
+                        {status === "pending" && "Menunggu"}
+                        {status === "approved" && "Disetujui"}
+                        {status === "paid" && "Sudah Dibayar"}
+                        {status === "rejected" && "Ditolak"}
+                        {!["draft", "pending", "approved", "paid", "rejected"].includes(status) &&
+                          status.charAt(0).toUpperCase() + status.slice(1)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {payrollState.isLoading && <div className="table-card-inner"><LoadingState message="Memuat data payroll..." /></div>}
