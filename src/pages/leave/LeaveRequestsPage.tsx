@@ -4,8 +4,8 @@ import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { getAllLeaves, deleteLeaveRequest, approveLeave, rejectLeave } from '@/features/leave/api/leave.service';
 import type { LeaveItem } from '@/features/leave/types/leave.types';
-import { AlertCircle, Trash2, Edit3, Plus, Eye, Check, X, BarChart3, Clock3, CircleCheckBig, CircleX } from 'lucide-react';
-import './LeavePages.css';
+import { AlertCircle, Trash2, Edit3, Plus, Eye, Check, X, BarChart3, Clock3, CircleCheckBig, CircleX, RefreshCw } from 'lucide-react';
+import '@/shared/styles/CrudPage.css';
 
 const LeaveRequestsPage = () => {
   const navigate = useNavigate();
@@ -17,7 +17,6 @@ const LeaveRequestsPage = () => {
   const loadLeaves = async () => {
     setLoading(true);
     setError('');
-
     try {
       const result = await getAllLeaves();
       setItems(result.items);
@@ -85,87 +84,57 @@ const LeaveRequestsPage = () => {
     if (!dateString) return '-';
     try {
       const date = new Date(dateString);
-      return date.toLocaleDateString('id-ID', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-      });
+      return date.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' });
     } catch {
       return dateString;
     }
   };
 
   const leaveSummaryCards = [
-    {
-      label: 'Total Pengajuan',
-      subtitle: 'Semua request cuti yang tercatat',
-      value: items.length,
-      change: 'Seluruh data yang tersedia',
-      tone: 'blue',
-      icon: BarChart3,
-    },
-    {
-      label: 'Menunggu Persetujuan',
-      subtitle: 'Request yang perlu ditinjau',
-      value: items.filter((i) => (i as any).status === 'pending').length,
-      change: 'Prioritas approval hari ini',
-      tone: 'orange',
-      icon: Clock3,
-    },
-    {
-      label: 'Disetujui',
-      subtitle: 'Pengajuan yang sudah lolos',
-      value: items.filter((i) => (i as any).status === 'approved').length,
-      change: 'Status final yang selesai',
-      tone: 'green',
-      icon: CircleCheckBig,
-    },
-    {
-      label: 'Ditolak',
-      subtitle: 'Request yang tidak disetujui',
-      value: items.filter((i) => (i as any).status === 'rejected').length,
-      change: 'Perlu revisi atau tindak lanjut',
-      tone: 'red',
-      icon: CircleX,
-    },
+    { label: 'Total Pengajuan', subtitle: 'Semua request cuti yang tercatat', value: items.length, change: 'Seluruh data yang tersedia', tone: 'blue', icon: BarChart3 },
+    { label: 'Menunggu Persetujuan', subtitle: 'Request yang perlu ditinjau', value: items.filter((i) => (i as any).status === 'pending').length, change: 'Prioritas approval hari ini', tone: 'orange', icon: Clock3 },
+    { label: 'Disetujui', subtitle: 'Pengajuan yang sudah lolos', value: items.filter((i) => (i as any).status === 'approved').length, change: 'Status final yang selesai', tone: 'green', icon: CircleCheckBig },
+    { label: 'Ditolak', subtitle: 'Request yang tidak disetujui', value: items.filter((i) => (i as any).status === 'rejected').length, change: 'Perlu revisi atau tindak lanjut', tone: 'red', icon: CircleX },
   ];
 
   return (
-    <div className="leave-page">
-      <Card className="leave-hero-card" glass>
-        <div className="leave-hero-copy">
-          <p className="leave-badge">Leave Center</p>
-          <h1 className="leave-title">Pengajuan Cuti</h1>
-          <p className="leave-subtitle">Kelola pengajuan cuti dengan tampilan yang rapi, konsisten, dan mudah dipindai.</p>
+    <div className="crud-page">
+      {/* Header */}
+      <div className="page-header">
+        <div className="page-header-title">
+          <span className="page-badge">Leave Center</span>
+          <h1>Pengajuan Cuti</h1>
+          <p>Kelola pengajuan cuti dengan tampilan yang rapi, konsisten, dan mudah dipindai.</p>
         </div>
-        <Button
-          variant="primary"
-          size="md"
-          onClick={() => navigate('/leave/requests/create')}
-          disabled={loading}
-        >
-          <Plus size={18} />
-          Buat Pengajuan
-        </Button>
-      </Card>
+        <div className="page-header-actions">
+          <Button variant="primary" size="md" onClick={() => navigate('/leave/requests/create')} disabled={loading}>
+            <Plus size={16} />
+            Buat Pengajuan
+          </Button>
+          <Button variant="outline" size="md" onClick={() => void loadLeaves()} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
+            <RefreshCw size={16} />
+            Segarkan
+          </Button>
+        </div>
+      </div>
 
-      <div className="leave-summary-grid">
+      {/* Summary Cards */}
+      <div className="summary-grid">
         {leaveSummaryCards.map((card) => {
           const Icon = card.icon;
-
           return (
-            <Card key={card.label} className="leave-summary-card" glass>
-              <div className="leave-summary-header">
+            <Card key={card.label} className="summary-card" glass>
+              <div className="summary-card__header">
                 <div>
-                  <span className="leave-summary-label">{card.label}</span>
-                  <p className="leave-summary-subtitle">{card.subtitle}</p>
+                  <span className="summary-card__label">{card.label}</span>
+                  <p className="summary-card__subtitle">{card.subtitle}</p>
                 </div>
-                <span className={`leave-summary-icon leave-summary-icon--${card.tone}`}>
-                  <Icon size={18} />
+                <span className={`summary-card__icon summary-card__icon--${card.tone}`}>
+                  <Icon size={20} />
                 </span>
               </div>
-              <div className={`leave-summary-value leave-summary-value--${card.tone}`}>{card.value}</div>
-              <div className="leave-summary-change">{card.change}</div>
+              <div className={`summary-card__value summary-card__value--${card.tone}`}>{card.value}</div>
+              <div className="summary-card__change">{card.change}</div>
             </Card>
           );
         })}
@@ -173,167 +142,118 @@ const LeaveRequestsPage = () => {
 
       {/* Error Alert */}
       {error && (
-        <Card className="leave-card leave-alert-card" glass>
-          <div className="leave-alert leave-alert-error">
-            <AlertCircle size={20} />
-            <span>{error}</span>
-          </div>
-        </Card>
+        <div className="page-alert page-alert--error">
+          <AlertCircle size={20} />
+          <span>{error}</span>
+        </div>
       )}
 
-      {/* Leaves Table */}
-      <Card className="leave-card" glass>
-        <>
-          <div className="leave-toolbar">
-            <Button
-              variant="outline"
-              size="md"
-              onClick={() => void loadLeaves()}
-              disabled={loading}
-            >
-              Refresh
-            </Button>
-          </div>
+      {/* Table */}
+      <Card className="table-card" glass>
+        <div className="table-header-bar">
+          <h3>Data Pengajuan Cuti</h3>
+          <span className="table-count">{items.length} pengajuan</span>
+        </div>
 
-          {items.length > 0 ? (
-            <div className="leave-table-wrap">
-              <table className="leave-table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Tipe Cuti</th>
-                    <th>Dari - Ke</th>
-                    <th>Hari</th>
-                    <th>Alasan</th>
-                    <th>Status</th>
-                    <th>Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {items.map((item, idx) => {
-                    const leave = item as any;
-                    const status = leave.status || 'pending';
-                    return (
-                      <tr key={String(leave.id ?? idx)}>
-                        <td className="leave-table-id">{idx + 1}</td>
-                        <td className="leave-table-type">{getLeaveTypeLabel(leave.type)}</td>
-                        <td className="leave-table-dates">
-                          <div>{formatDate(leave.start_date)}</div>
-                          <div className="leave-table-dates-sub">hingga {formatDate(leave.end_date)}</div>
-                        </td>
-                        <td className="leave-table-days">{leave.total_days} hari</td>
-                        <td className="leave-table-reason" title={leave.reason}>
-                          {leave.reason ? leave.reason.substring(0, 40) + (leave.reason.length > 40 ? '...' : '') : '-'}
-                        </td>
-                        <td>
-                          <span
-                            className={`leave-status-badge leave-status-${status}`}
-                          >
-                            {status.charAt(0).toUpperCase() + status.slice(1)}
-                          </span>
-                        </td>
-                        <td>
-                          <div style={{ display: 'flex', gap: '0.5rem' }}>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => navigate(`/leave/requests/view/${leave.id}`)}
-                              disabled={loading}
-                              title="Lihat detail"
-                            >
-                              <Eye size={14} />
-                            </Button>
-                            {status === 'pending' && (
-                              <>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleApprove(String(leave.id))}
-                                  disabled={loading}
-                                  title="Setujui pengajuan"
-                                  style={{ color: '#10b981', borderColor: '#10b981' }}
-                                >
-                                  <Check size={14} />
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleReject(String(leave.id))}
-                                  disabled={loading}
-                                  title="Tolak pengajuan"
-                                  style={{ color: '#ef4444', borderColor: '#ef4444' }}
-                                >
-                                  <X size={14} />
-                                </Button>
-                              </>
-                            )}
-                            {status === 'pending' && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => navigate(`/leave/requests/edit/${leave.id}`)}
-                                disabled={loading}
-                                title="Edit pengajuan"
-                              >
+        {items.length > 0 ? (
+          <div className="table-wrap">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Tipe Cuti</th>
+                  <th>Dari - Ke</th>
+                  <th>Hari</th>
+                  <th>Alasan</th>
+                  <th>Status</th>
+                  <th className="th-center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((item, idx) => {
+                  const leave = item as any;
+                  const status = leave.status || 'pending';
+                  return (
+                    <tr key={String(leave.id ?? idx)}>
+                      <td>
+                        <div className="cell-id">{idx + 1}</div>
+                        <div className="cell-sub">ID: {leave.id}</div>
+                      </td>
+                      <td><span className="cell-tag">{getLeaveTypeLabel(leave.type)}</span></td>
+                      <td>
+                        <div className="cell-date">{formatDate(leave.start_date)}</div>
+                        <div className="cell-date-sub">hingga {formatDate(leave.end_date)}</div>
+                      </td>
+                      <td><strong>{leave.total_days}</strong> hari</td>
+                      <td title={leave.reason} style={{ maxWidth: "200px" }}>
+                        {leave.reason ? leave.reason.substring(0, 40) + (leave.reason.length > 40 ? '...' : '') : '-'}
+                      </td>
+                      <td>
+                        <span className={`status-badge status-badge--${status}`}>
+                          {status.charAt(0).toUpperCase() + status.slice(1)}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="cell-actions">
+                          <Button variant="outline" size="sm" onClick={() => navigate(`/leave/requests/view/${leave.id}`)} disabled={loading} title="Lihat detail">
+                            <Eye size={14} />
+                          </Button>
+                          {status === 'pending' && (
+                            <>
+                              <Button variant="outline" size="sm" onClick={() => handleApprove(String(leave.id))} disabled={loading} title="Setujui" style={{ color: '#10b981', borderColor: '#10b981' }}>
+                                <Check size={14} />
+                              </Button>
+                              <Button variant="outline" size="sm" onClick={() => handleReject(String(leave.id))} disabled={loading} title="Tolak" style={{ color: '#ef4444', borderColor: '#ef4444' }}>
+                                <X size={14} />
+                              </Button>
+                              <Button variant="outline" size="sm" onClick={() => navigate(`/leave/requests/edit/${leave.id}`)} disabled={loading} title="Edit">
                                 <Edit3 size={14} />
                               </Button>
-                            )}
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                if (deleteConfirm === String(leave.id)) {
-                                  void handleDelete(String(leave.id));
-                                } else {
-                                  setDeleteConfirm(String(leave.id));
-                                }
-                              }}
-                              disabled={loading}
-                              style={{
-                                color: deleteConfirm === String(leave.id) ? '#ef4444' : 'var(--color-text-secondary)',
-                              }}
-                              title="Hapus pengajuan"
-                            >
-                              <Trash2 size={14} />
-                            </Button>
-                            {deleteConfirm === String(leave.id) && (
-                              <span style={{ fontSize: '0.8rem', color: '#ef4444', display: 'flex', alignItems: 'center' }}>
-                                Hapus?{' '}
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => setDeleteConfirm(null)}
-                                  disabled={loading}
-                                  style={{ padding: '0 0.5rem', color: 'var(--color-text-secondary)' }}
-                                >
-                                  Batal
-                                </Button>
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="leave-empty-state">
-              <p className="leave-empty-copy">
-                Belum ada pengajuan cuti. Buat pengajuan baru untuk memulai.
-              </p>
-              <Button
-                variant="primary"
-                size="md"
-                onClick={() => navigate('/leave/requests/create')}
-              >
+                            </>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              if (deleteConfirm === String(leave.id)) {
+                                void handleDelete(String(leave.id));
+                              } else {
+                                setDeleteConfirm(String(leave.id));
+                              }
+                            }}
+                            disabled={loading}
+                            style={{ color: deleteConfirm === String(leave.id) ? '#ef4444' : undefined }}
+                            title="Hapus"
+                          >
+                            <Trash2 size={14} />
+                          </Button>
+                          {deleteConfirm === String(leave.id) && (
+                            <span style={{ fontSize: '0.8rem', color: '#ef4444', display: 'flex', alignItems: 'center' }}>
+                              Hapus?{' '}
+                              <Button variant="ghost" size="sm" onClick={() => setDeleteConfirm(null)} disabled={loading} style={{ padding: '0 0.5rem' }}>
+                                Batal
+                              </Button>
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="table-card-inner">
+            <div className="empty-state">
+              <p>Belum ada pengajuan cuti. Buat pengajuan baru untuk memulai.</p>
+              <Button variant="primary" size="md" onClick={() => navigate('/leave/requests/create')}>
                 <Plus size={18} />
                 Buat Pengajuan Pertama
               </Button>
             </div>
-          )}
-        </>
+          </div>
+        )}
       </Card>
     </div>
   );

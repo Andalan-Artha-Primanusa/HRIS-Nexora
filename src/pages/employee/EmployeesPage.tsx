@@ -20,6 +20,7 @@ import {
   ChevronDown,
   Briefcase,
 } from "lucide-react";
+import "@/shared/styles/CrudPage.css";
 import "./EmployeesPage.css";
 
 type EmployeeFormState = {
@@ -648,46 +649,50 @@ const EmployeesPage = () => {
       </Card>
 
       {/* Table Section */}
-      <Card className="profiles-table-card" glass style={{ borderTop: "4px solid #2563eb" }}>
-        <div className="profiles-table-wrap">
-          <table className="profiles-table" style={{ width: "100%", borderCollapse: "collapse" }}>
+      <Card className="table-card" glass>
+        <div className="table-header-bar">
+          <h3>Data Karyawan</h3>
+          <span className="table-count">{paginatedEmployees.length} dari {sortedEmployees.length} data</span>
+        </div>
+        <div className="table-wrap">
+          <table className="data-table">
             <thead>
-              <tr style={{ backgroundColor: "#dbeafe" }}>
-                <th style={{ padding: "12px", textAlign: "left", color: "#2563eb", fontWeight: "600", borderBottom: "2px solid #2563eb" }}>Kode / ID</th>
-                <th style={{ padding: "12px", textAlign: "left", color: "#2563eb", fontWeight: "600", borderBottom: "2px solid #2563eb" }}>Nama Karyawan</th>
-                <th style={{ padding: "12px", textAlign: "left", color: "#2563eb", fontWeight: "600", borderBottom: "2px solid #2563eb" }}>Departemen</th>
-                <th style={{ padding: "12px", textAlign: "left", color: "#2563eb", fontWeight: "600", borderBottom: "2px solid #2563eb" }}>Jabatan</th>
-                <th style={{ padding: "12px", textAlign: "left", color: "#2563eb", fontWeight: "600", borderBottom: "2px solid #2563eb" }}>Tgl Bergabung</th>
-                <th style={{ padding: "12px", textAlign: "right", color: "#2563eb", fontWeight: "600", borderBottom: "2px solid #2563eb" }}>Gaji Pokok</th>
-                <th style={{ padding: "12px", textAlign: "center", color: "#2563eb", fontWeight: "600", borderBottom: "2px solid #2563eb" }}>Aksi</th>
+              <tr>
+                <th>Kode / ID</th>
+                <th>Nama Karyawan</th>
+                <th>Departemen</th>
+                <th>Jabatan</th>
+                <th>Tgl Bergabung</th>
+                <th className="th-right">Gaji Pokok</th>
+                <th className="th-center">Aksi</th>
               </tr>
             </thead>
             <tbody>
               {paginatedEmployees.length > 0 ? (
                 paginatedEmployees.map((item) => (
-                  <tr key={item.id} style={{ borderBottom: "1px solid #eff6ff" }}>
-                    <td style={{ padding: "12px" }}>
-                      <div style={{ display: "flex", flexDirection: "column" }}>
-                        <span style={{ fontWeight: "600", fontSize: "0.85rem" }}>{item.employee_code || "N/A"}</span>
-                        <span style={{ fontSize: "0.75rem", color: "var(--gray-500)" }}>ID: {item.id}</span>
-                      </div>
+                  <tr key={item.id}>
+                    <td>
+                      <div className="cell-id">{item.employee_code || "N/A"}</div>
+                      <div className="cell-sub">ID: {item.id}</div>
                     </td>
-                    <td style={{ padding: "12px" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                        <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#dbeafe", color: "#2563eb", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "700", fontSize: "0.8rem" }}>
+                    <td>
+                      <div className="cell-name">
+                        <div className="cell-avatar">
                           {item.user?.name?.charAt(0).toUpperCase() || "E"}
                         </div>
-                        <span style={{ fontWeight: "600" }}>{item.user?.name || "Unknown"}</span>
+                        <span className="cell-name-text">{item.user?.name || "Unknown"}</span>
                       </div>
                     </td>
-                    <td style={{ padding: "12px" }}>{item.department || "-"}</td>
-                    <td style={{ padding: "12px" }}>{item.position || "-"}</td>
-                    <td style={{ padding: "12px" }}>{item.hire_date ? formatDateTime(item.hire_date) : "-"}</td>
-                    <td style={{ padding: "12px", textAlign: "right", fontFamily: "monospace", fontWeight: "600" }}>
+                    <td><span className="cell-tag">{item.department || "-"}</span></td>
+                    <td>{item.position || "-"}</td>
+                    <td>
+                      <span className="cell-date">{item.hire_date ? formatDateTime(item.hire_date) : "-"}</span>
+                    </td>
+                    <td className="cell-amount">
                       {item.salary ? Number(item.salary).toLocaleString("id-ID") : "-"}
                     </td>
-                    <td style={{ padding: "12px", textAlign: "center" }}>
-                      <div style={{ display: "flex", justifyContent: "center", gap: "8px" }}>
+                    <td>
+                      <div className="cell-actions">
                         <Button
                           variant="ghost"
                           size="sm"
@@ -711,7 +716,7 @@ const EmployeesPage = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} style={{ padding: "40px", textAlign: "center", color: "var(--gray-500)" }}>
+                  <td colSpan={7} className="cell-empty">
                     Tidak ada data karyawan ditemukan.
                   </td>
                 </tr>
@@ -722,28 +727,30 @@ const EmployeesPage = () => {
 
         {/* Pagination Controls */}
         {totalPages > 1 && (
-          <div className="profiles-pagination">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1}
-              style={{ borderColor: "#2563eb", color: "#2563eb" }}
-            >
-              ← Prev
-            </Button>
-            <div className="profiles-page-info">
+          <div className="pagination">
+            <div className="pagination__info">
               Halaman <strong>{currentPage}</strong> dari <strong>{totalPages}</strong>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-              disabled={currentPage === totalPages}
-              style={{ borderColor: "#2563eb", color: "#2563eb" }}
-            >
-              Next →
-            </Button>
+            <div className="pagination__controls">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+                style={{ borderColor: "#2563eb", color: "#2563eb" }}
+              >
+                ← Prev
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                disabled={currentPage === totalPages}
+                style={{ borderColor: "#2563eb", color: "#2563eb" }}
+              >
+                Next →
+              </Button>
+            </div>
           </div>
         )}
       </Card>

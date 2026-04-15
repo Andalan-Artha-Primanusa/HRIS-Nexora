@@ -7,7 +7,8 @@ import {
   getAttendanceDetail,
   type AttendanceItem,
 } from "@/features/attendance/api/attendance-admin.service";
-import "../admin/AdminCrudPages.css";
+import { RefreshCw, Trash2, Eye, Search } from "lucide-react";
+import "@/shared/styles/CrudPage.css";
 
 const asDisplay = (value: unknown) => {
   if (value === null || value === undefined) return "-";
@@ -19,7 +20,6 @@ const getColumns = (items: AttendanceItem[]) => {
   if (items.length === 0) {
     return ["id", "employee_id", "date", "check_in", "check_out", "status"];
   }
-
   const keys = Object.keys(items[0]);
   const preferred = ["id", "employee_id", "date", "check_in", "check_out", "status"];
   const merged = [...preferred, ...keys.filter((key) => !preferred.includes(key))];
@@ -30,15 +30,10 @@ const AttendanceAdminPage = () => {
   const [items, setItems] = useState<AttendanceItem[]>([]);
   const [recordId, setRecordId] = useState("");
   const [selectedDetail, setSelectedDetail] = useState<Record<string, unknown> | null>(null);
-  const [responseText, setResponseText] = useState("");
-  const [statusMessage, setStatusMessage] = useState("Ready to call attendance admin API");
+  const [, setStatusMessage] = useState("Ready to call attendance admin API");
   const [loading, setLoading] = useState(false);
 
   const columns = useMemo(() => getColumns(items), [items]);
-
-  const formatResponse = (payload: unknown) => {
-    setResponseText(typeof payload === "string" ? payload : JSON.stringify(payload, null, 2));
-  };
 
   const requireId = () => {
     const id = recordId.trim();
@@ -52,17 +47,13 @@ const AttendanceAdminPage = () => {
   const loadAttendanceRecords = async () => {
     setLoading(true);
     setStatusMessage("Memuat semua attendance records...");
-    setResponseText("");
-
     try {
       const result = await getAllAttendanceRecords();
       setItems(result.items);
-      formatResponse(result.raw);
       setStatusMessage("Semua attendance records berhasil dimuat.");
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Gagal memuat attendance records.";
-      formatResponse(message);
-      setStatusMessage("Gagal memuat attendance records.");
+      setStatusMessage(message);
     } finally {
       setLoading(false);
     }
@@ -71,24 +62,18 @@ const AttendanceAdminPage = () => {
   const loadDetail = async () => {
     const id = requireId();
     if (!id) return;
-
     setLoading(true);
     setStatusMessage("Memuat detail attendance...");
-    setResponseText("");
-
     try {
       const result = await getAttendanceDetail(id);
-      const payload =
-        result.payload && typeof result.payload === "object"
-          ? (result.payload as Record<string, unknown>)
-          : null;
+      const payload = result.payload && typeof result.payload === "object"
+        ? (result.payload as Record<string, unknown>)
+        : null;
       setSelectedDetail(payload);
-      formatResponse(result.raw);
       setStatusMessage("Detail attendance berhasil dimuat.");
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Gagal memuat detail attendance.";
-      formatResponse(message);
-      setStatusMessage("Gagal memuat detail attendance.");
+      setStatusMessage(message);
     } finally {
       setLoading(false);
     }
@@ -97,20 +82,15 @@ const AttendanceAdminPage = () => {
   const deleteRecord = async () => {
     const id = requireId();
     if (!id) return;
-
     setLoading(true);
     setStatusMessage("Menghapus attendance record...");
-    setResponseText("");
-
     try {
-      const result = await deleteAttendanceRecord(id);
-      formatResponse(result.raw);
+      await deleteAttendanceRecord(id);
       setStatusMessage("Attendance record berhasil dihapus.");
       await loadAttendanceRecords();
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Gagal menghapus attendance record.";
-      formatResponse(message);
-      setStatusMessage("Gagal menghapus attendance record.");
+      setStatusMessage(message);
     } finally {
       setLoading(false);
     }
@@ -118,60 +98,81 @@ const AttendanceAdminPage = () => {
 
   useEffect(() => {
     void loadAttendanceRecords();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <div className="crud-page">
-      <div className="crud-header">
-        <div>
+      {/* Header */}
+      <div className="page-header">
+        <div className="page-header-title">
+          <span className="page-badge">Admin Panel</span>
           <h1>Attendance Management</h1>
-          <p>Endpoint: GET /attendance/all, GET /attendance/{"{id}"}, DELETE /attendance/{"{id}"}</p>
+          <p>Kelola semua data kehadiran karyawan, termasuk detail dan penghapusan record.</p>
         </div>
-        <Button variant="outline" size="md" onClick={() => void loadAttendanceRecords()} disabled={loading}>
-          Refresh
-        </Button>
+        <div className="page-header-actions">
+          <Button variant="outline" size="md" onClick={() => void loadAttendanceRecords()} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
+            <RefreshCw size={16} />
+            Segarkan
+          </Button>
+        </div>
       </div>
 
-      <Card className="crud-card" glass>
-        <h2>Attendance Actions</h2>
-        <div className="crud-form-grid">
-          <label>
-            Attendance ID
+      {/* Actions Card */}
+      <Card className="control-card" glass>
+        <div className="control-bar">
+          <div className="search-box">
+            <Search size={18} />
             <input
-              className="crud-input"
+              className="search-input"
               value={recordId}
               onChange={(event) => setRecordId(event.target.value)}
-              placeholder="attendance id"
+              placeholder="Masukkan Attendance ID..."
             />
-          </label>
-        </div>
-
-        <div className="crud-actions">
-          <Button variant="primary" size="md" onClick={() => void loadDetail()} disabled={loading}>
-            Get Detail
-          </Button>
-          <Button variant="ghost" size="md" onClick={() => void deleteRecord()} disabled={loading}>
-            Delete Record
-          </Button>
+          </div>
+          <div className="quick-controls">
+            <Button variant="primary" size="md" onClick={() => void loadDetail()} disabled={loading}>
+              <Eye size={16} />
+              Get Detail
+            </Button>
+            <Button variant="ghost" size="md" onClick={() => void deleteRecord()} disabled={loading} style={{ color: "#ef4444" }}>
+              <Trash2 size={16} />
+              Delete Record
+            </Button>
+          </div>
         </div>
       </Card>
 
-      <Card className="crud-card" glass>
-        <h2>Attendance Detail</h2>
-        <pre className="crud-response">
-          {selectedDetail ? JSON.stringify(selectedDetail, null, 2) : "Belum ada detail attendance dipilih."}
-        </pre>
-      </Card>
+      {/* Detail Panel */}
+      {selectedDetail && (
+        <Card className="control-card" glass>
+          <h3 style={{ margin: "0 0 1rem", color: "#1e3a8a", fontWeight: 700 }}>Attendance Detail</h3>
+          <pre style={{
+            margin: 0,
+            padding: "1rem",
+            background: "#eff6ff",
+            borderRadius: "12px",
+            border: "1px solid rgba(37, 99, 235, 0.14)",
+            overflow: "auto",
+            fontSize: "0.9rem",
+            lineHeight: 1.5,
+          }}>
+            {JSON.stringify(selectedDetail, null, 2)}
+          </pre>
+        </Card>
+      )}
 
-      <Card className="crud-card" glass>
-        <h2>Attendance Table</h2>
-        <div className="crud-table-wrap">
-          <table className="crud-table">
+      {/* Table */}
+      <Card className="table-card" glass>
+        <div className="table-header-bar">
+          <h3>Attendance Records</h3>
+          <span className="table-count">{items.length} records</span>
+        </div>
+        <div className="table-wrap">
+          <table className="data-table">
             <thead>
               <tr>
                 {columns.map((column) => (
-                  <th key={column}>{column}</th>
+                  <th key={column}>{column.replace(/_/g, ' ')}</th>
                 ))}
               </tr>
             </thead>
@@ -180,24 +181,26 @@ const AttendanceAdminPage = () => {
                 items.map((item, index) => (
                   <tr key={String(item.id ?? index)}>
                     {columns.map((column) => (
-                      <td key={`${String(item.id ?? index)}-${column}`}>{asDisplay(item[column])}</td>
+                      <td key={`${String(item.id ?? index)}-${column}`}>
+                        {column === 'id' ? (
+                          <span className="cell-id">{asDisplay(item[column])}</span>
+                        ) : (
+                          asDisplay(item[column])
+                        )}
+                      </td>
                     ))}
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={columns.length}>No attendance data available.</td>
+                  <td colSpan={columns.length} className="cell-empty">
+                    Tidak ada data attendance tersedia.
+                  </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
-      </Card>
-
-      <Card className="crud-card" glass>
-        <h2>Raw Response</h2>
-        <pre className="crud-response">{responseText || "Response API akan tampil di sini."}</pre>
-        <p className="crud-status">{statusMessage}</p>
       </Card>
     </div>
   );

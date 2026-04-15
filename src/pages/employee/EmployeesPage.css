@@ -260,23 +260,21 @@
   overflow: hidden;
 }
 
+.profiles-sort-select {
   border: 1px solid rgba(37, 99, 235, 0.14);
   border-radius: 14px;
   padding: 0.65rem 0.9rem;
   font-size: 0.9rem;
-  font-size: 0.9rem;
   background: rgba(239, 245, 255, 0.7);
-  background: transparent;
-  color: #475569;
   color: #475569;
 }
 
+.profiles-sort-order-btn {
   width: 42px;
   height: 42px;
   background: rgba(239, 245, 255, 0.7);
   border: 1px solid rgba(37, 99, 235, 0.14);
   border-radius: 14px;
-  color: var(--primary);
   color: var(--primary);
   font-weight: 700;
   cursor: pointer;
@@ -289,24 +287,23 @@
   background: rgba(239, 245, 255, 0.7);
   border: 1px solid rgba(37, 99, 235, 0.14);
   padding: 0.65rem 1rem;
-  border-radius: 14px;
   border-radius: 12px;
   font-weight: 600;
   font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.2s ease;
+}
 
 .profiles-filter-btn:hover,
 .profiles-sort-order-btn:hover {
   background: #fff;
   border-color: #93c5fd;
 }
-}
 
+.profiles-filter-btn.active {
   background: var(--primary);
   border-color: var(--primary-dark);
   color: #fff;
-  color: var(--primary);
 }
 
 /* Filter Panel */

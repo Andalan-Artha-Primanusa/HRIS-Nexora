@@ -3,8 +3,8 @@ import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { Alert } from '@/shared/ui/Alert';
 import { api } from '@/shared/api/httpClient';
-import { CalendarDays, CheckCircle2, Clock, XCircle } from 'lucide-react';
-import './AttendancePages.css';
+import { CalendarDays, CheckCircle2, Clock, RefreshCw, XCircle } from 'lucide-react';
+import '@/shared/styles/CrudPage.css';
 
 interface AttendanceRecord {
   date?: string;
@@ -16,23 +16,18 @@ interface AttendanceRecord {
 
 const AttendanceHistoryPage = () => {
   const [history, setHistory] = useState<AttendanceRecord[]>([]);
-  const [status, setStatus] = useState('Memuat riwayat attendance...');
   const [loading, setLoading] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('error');
 
   const loadHistory = async () => {
     setLoading(true);
-    setStatus('Mengambil data history...');
     setAlertMessage('');
-
     try {
       const result = await api.get('/attendance/history');
       const payload = result.data?.data ?? result.data;
       setHistory(Array.isArray(payload) ? payload : [payload]);
-      setStatus('History attendance berhasil dimuat.');
     } catch (error: any) {
-      setStatus('Gagal memuat history.');
       const message = error.response?.data?.message || error.message || 'Terjadi kesalahan';
       setAlertMessage(message);
       setAlertType('error');
@@ -69,109 +64,99 @@ const AttendanceHistoryPage = () => {
     if (!status) return null;
     const statusLower = String(status).toLowerCase();
     if (statusLower.includes('present') || statusLower.includes('hadir')) {
-      return <CheckCircle2 size={18} style={{ color: '#2e7d32' }} />;
+      return <CheckCircle2 size={18} style={{ color: '#10b981' }} />;
     } else if (statusLower.includes('absent') || statusLower.includes('tidak')) {
-      return <XCircle size={18} style={{ color: '#c41e3a' }} />;
+      return <XCircle size={18} style={{ color: '#ef4444' }} />;
     } else if (statusLower.includes('late') || statusLower.includes('terlambat')) {
       return <Clock size={18} style={{ color: '#f59e0b' }} />;
     }
     return null;
   };
 
-  const getStatusBadgeColor = (status: string | undefined) => {
-    if (!status) return '#f5f5f5';
+  const getStatusClass = (status: string | undefined) => {
+    if (!status) return 'draft';
     const statusLower = String(status).toLowerCase();
-    if (statusLower.includes('present') || statusLower.includes('hadir')) {
-      return '#e8f5e9';
-    } else if (statusLower.includes('absent') || statusLower.includes('tidak')) {
-      return '#ffebee';
-    } else if (statusLower.includes('late') || statusLower.includes('terlambat')) {
-      return '#fff3e0';
-    }
-    return '#f5f5f5';
+    if (statusLower.includes('present') || statusLower.includes('hadir')) return 'approved';
+    if (statusLower.includes('absent') || statusLower.includes('tidak')) return 'rejected';
+    if (statusLower.includes('late') || statusLower.includes('terlambat')) return 'pending';
+    return 'draft';
   };
 
   return (
-    <div className="attendance-page">
-      <div className="attendance-page-header">
-        <div>
-          <span className="attendance-badge">History</span>
+    <div className="crud-page">
+      {/* Header */}
+      <div className="page-header">
+        <div className="page-header-title">
+          <span className="page-badge">History</span>
           <h1>Attendance History</h1>
           <p>Riwayat kehadiran Anda, termasuk check-in dan check-out setiap hari.</p>
         </div>
-        <div className="attendance-status-card">
-          <CalendarDays size={22} />
-          <div>
-            <p>Status</p>
-            <strong>{status}</strong>
-          </div>
+        <div className="page-header-actions">
+          <Button variant="outline" size="md" onClick={() => void loadHistory()} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
+            <RefreshCw size={16} />
+            {loading ? 'Memuat...' : 'Segarkan'}
+          </Button>
         </div>
       </div>
 
-      <Card className="attendance-history-card" glass>
-        <div className="attendance-action-row">
-          <Button variant="primary" size="sm" onClick={() => void loadHistory()} disabled={loading}>
-            {loading ? 'Memuat...' : 'Refresh History'}
-          </Button>
-        </div>
+      {alertMessage && (
+        <Alert
+          type={alertType}
+          message={alertMessage}
+          onClose={() => setAlertMessage('')}
+          dismissible
+        />
+      )}
 
-        {alertMessage && (
-          <Alert 
-            type={alertType} 
-            message={alertMessage}
-            onClose={() => setAlertMessage('')}
-            dismissible
-          />
-        )}
-
+      {/* Table */}
+      <Card className="table-card" glass>
         {history.length > 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {history.map((record, idx) => (
-              <div
-                key={idx}
-                style={{
-                  padding: '1rem',
-                  backgroundColor: getStatusBadgeColor(record.status),
-                  borderRadius: '0.75rem',
-                  border: '1px solid rgba(0, 0, 0, 0.05)',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  gap: '1rem',
-                }}
-              >
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                    {getStatusIcon(record.status)}
-                    <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>
-                      {formatDate(record.date)}
-                    </span>
-                    <span style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
-                      {record.status}
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', gap: '2rem', fontSize: '0.9rem', color: '#555' }}>
-                    <div>
-                      <span style={{ fontWeight: 500 }}>Check In:</span>{' '}
-                      <span style={{ color: '#2e7d32', fontWeight: 600 }}>
-                        {formatTime(record.check_in)}
+          <div className="table-wrap">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Tanggal</th>
+                  <th>Check In</th>
+                  <th>Check Out</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {history.map((record, idx) => (
+                  <tr key={idx}>
+                    <td>
+                      <span style={{ fontWeight: 600, fontSize: "0.85rem" }}>{idx + 1}</span>
+                    </td>
+                    <td>
+                      <div className="cell-name">
+                        <div className="cell-avatar">
+                          <CalendarDays size={14} />
+                        </div>
+                        <span style={{ fontWeight: 600 }}>{formatDate(record.date)}</span>
+                      </div>
+                    </td>
+                    <td style={{ color: '#10b981', fontWeight: 600 }}>
+                      {formatTime(record.check_in)}
+                    </td>
+                    <td style={{ color: '#2563eb', fontWeight: 600 }}>
+                      {formatTime(record.check_out)}
+                    </td>
+                    <td>
+                      <span className={`status-badge status-badge--${getStatusClass(record.status)}`}>
+                        {getStatusIcon(record.status)}
+                        <span style={{ marginLeft: '0.35rem' }}>{record.status || '-'}</span>
                       </span>
-                    </div>
-                    <div>
-                      <span style={{ fontWeight: 500 }}>Check Out:</span>{' '}
-                      <span style={{ color: '#1565c0', fontWeight: 600 }}>
-                        {formatTime(record.check_out)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         ) : (
-          <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-disabled)' }}>
-            <CalendarDays size={32} style={{ marginBottom: '0.5rem', opacity: 0.5 }} />
-            <p style={{ margin: 0 }}>Data history belum tersedia.</p>
+          <div className="empty-state">
+            <CalendarDays size={32} style={{ opacity: 0.5 }} />
+            <p>Data history belum tersedia.</p>
           </div>
         )}
       </Card>
