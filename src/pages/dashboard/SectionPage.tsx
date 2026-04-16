@@ -654,7 +654,24 @@ const parsePayloadToTable = (payload: unknown) => {
       const rows = payload.map((item) =>
         columns.map((column) => {
           const value = (item as Record<string, unknown>)[column];
-          return value === undefined || value === null ? '-' : String(value);
+          if (value === undefined || value === null) return '-';
+          if (typeof value === 'object') {
+            if (Array.isArray(value)) {
+              if (value.length === 0) return '[empty array]';
+              if (typeof value[0] === 'object') {
+                // Show preview: count and first item keys
+                const preview = JSON.stringify(value[0]);
+                return `[${value.length} items] Preview: ${preview}`;
+              }
+              return value.join(', ');
+            }
+            try {
+              return JSON.stringify(value);
+            } catch {
+              return '[object]';
+            }
+          }
+          return String(value);
         })
       );
 
@@ -1071,36 +1088,173 @@ const SectionPage = () => {
           break;
         case '/assets':
           result = await api.get('/assets');
+          if (result && result.data && result.data.data) {
+            // Cek jika data paginasi (ada .data di dalam .data)
+            const paged = result.data.data;
+            const assets = Array.isArray(paged.data) ? paged.data : [];
+            formatResponse(paged);
+            const parsed = parsePayloadToTable(assets);
+            setTableColumns(parsed.columns);
+            setTableRows(parsed.rows);
+            setStatusMessage(assets.length === 0 ? 'Belum ada aset.' : 'Data aset berhasil dimuat.');
+            setLoading(false);
+            return;
+          }
           break;
         case '/assets/assignments':
           result = await api.get('/assets');
           break;
         case '/my/assets':
           result = await api.get('/my/assets');
+          if (result && result.data && Array.isArray(result.data.data)) {
+            const assets = result.data.data;
+            formatResponse(assets);
+            const parsed = parsePayloadToTable(assets);
+            setTableColumns(parsed.columns);
+            setTableRows(parsed.rows);
+            setStatusMessage(assets.length === 0 ? 'Belum ada aset.' : 'Data aset berhasil dimuat.');
+            setLoading(false);
+            return;
+          }
           break;
         case '/my/documents':
           result = await api.get('/my/documents');
+          if (result && result.data && result.data.data) {
+            // Cek jika data paginasi (ada .data di dalam .data)
+            const paged = result.data.data;
+            const docs = Array.isArray(paged.data) ? paged.data : [];
+            formatResponse(paged);
+            const parsed = parsePayloadToTable(docs);
+            setTableColumns(parsed.columns);
+            setTableRows(parsed.rows);
+            setStatusMessage(docs.length === 0 ? 'Belum ada dokumen.' : 'Data dokumen berhasil dimuat.');
+            setLoading(false);
+            return;
+          }
           break;
         case '/documents/review':
           result = await api.get('/documents', { params: { status: 'pending', per_page: 15 } });
+          if (result && result.data && result.data.data) {
+            // Cek jika data paginasi (ada .data di dalam .data)
+            const paged = result.data.data;
+            const docs = Array.isArray(paged.data) ? paged.data : [];
+            formatResponse(paged);
+            const parsed = parsePayloadToTable(docs);
+            setTableColumns(parsed.columns);
+            setTableRows(parsed.rows);
+            setStatusMessage(docs.length === 0 ? 'Belum ada dokumen.' : 'Data dokumen berhasil dimuat.');
+            setLoading(false);
+            return;
+          }
           break;
         case '/documents/expiring':
           result = await api.get('/documents/expiring', { params: { days: 30 } });
           break;
         case '/organization/directory':
           result = await api.get('/organization/directory');
+          // Ambil langsung array employee dari response
+          if (result && result.data && result.data.data && Array.isArray(result.data.data.data)) {
+            const payload = result.data.data.data;
+            formatResponse(payload);
+            const parsed = parsePayloadToTable(payload);
+            setTableColumns(parsed.columns);
+            setTableRows(parsed.rows);
+            setStatusMessage('Data berhasil dimuat.');
+            setLoading(false);
+            return;
+          }
           break;
         case '/organization/summary':
           result = await api.get('/organization/summary');
+          if (result && result.data && result.data.data) {
+            const payload = result.data.data;
+            // Tampilkan summary utama sebagai statistik
+            if (payload.summary) {
+              setSummaryStats([
+                { label: 'Total Employees', value: String(payload.summary.total_employees), description: '', variant: 'info' },
+                { label: 'Active', value: String(payload.summary.active_employees), description: '', variant: 'success' },
+                { label: 'Inactive', value: String(payload.summary.inactive_employees), description: '', variant: 'default' },
+                { label: 'Onboarding', value: String(payload.summary.onboarding_employees), description: '', variant: 'info' },
+                { label: 'Probation', value: String(payload.summary.probation_employees), description: '', variant: 'warning' },
+                { label: 'Offboarding', value: String(payload.summary.offboarding_employees), description: '', variant: 'warning' },
+                { label: 'Terminated', value: String(payload.summary.terminated_employees), description: '', variant: 'danger' },
+              ]);
+            }
+            // Tampilkan by_department sebagai tabel utama
+            if (Array.isArray(payload.by_department)) {
+              const parsed = parsePayloadToTable(payload.by_department);
+              setTableColumns(parsed.columns);
+              setTableRows(parsed.rows);
+            } else {
+              setTableColumns([]);
+              setTableRows([]);
+            }
+            setStatusMessage('Data summary berhasil dimuat.');
+            setLoading(false);
+            return;
+          }
           break;
         case '/organization/chart':
           result = await api.get('/organization/chart');
+          if (result && result.data && result.data.data && Array.isArray(result.data.data.nodes)) {
+            const payload = result.data.data.nodes;
+            formatResponse(payload);
+            const parsed = parsePayloadToTable(payload);
+            setTableColumns(parsed.columns);
+            setTableRows(parsed.rows);
+            setStatusMessage('Data struktur organisasi berhasil dimuat.');
+            setLoading(false);
+            return;
+          }
           break;
         case '/organization/team':
           result = await api.get(`/organization/team/${formState.manager_user_id || '1'}`);
           break;
         case '/organization/master-data':
           result = await api.get('/organization/master-data');
+          if (result && result.data && result.data.data) {
+            const payload = result.data.data;
+            // Gabungkan semua kategori ke satu tabel rapi
+            const departments = Array.isArray(payload.departments) ? payload.departments : [];
+            const positions = Array.isArray(payload.positions) ? payload.positions : [];
+            const statuses = Array.isArray(payload.statuses) ? payload.statuses : [];
+            const locations = Array.isArray(payload.locations) ? payload.locations : [];
+            const workSchedules = Array.isArray(payload.work_schedules) ? payload.work_schedules : [];
+
+            // Cari panjang maksimum
+            const maxLength = Math.max(
+              departments.length,
+              positions.length,
+              statuses.length,
+              locations.length,
+              workSchedules.length
+            );
+
+            // Buat baris-baris tabel, setiap baris berisi satu data dari tiap kategori (atau kosong jika tidak ada)
+            const rows: string[][] = [];
+            for (let i = 0; i < maxLength; i++) {
+              rows.push([
+                departments[i] || '',
+                positions[i] || '',
+                statuses[i] || '',
+                locations[i] || '',
+                workSchedules[i] || '',
+              ]);
+            }
+
+            setTableColumns([
+              'Department',
+              'Position',
+              'Status',
+              'Location',
+              'Work Schedule',
+            ]);
+            setTableRows(rows);
+            formatResponse(payload);
+            setStatusMessage('Data master berhasil dimuat.');
+            setLoading(false);
+            return;
+          }
           break;
         case '/approval-flows':
           result = await api.get('/approval-flows');
@@ -1136,6 +1290,18 @@ const SectionPage = () => {
           break;
         case '/training/programs':
           result = await api.get('/training/programs');
+          if (result && result.data && result.data.data) {
+            // Cek jika data paginasi (ada .data di dalam .data)
+            const paged = result.data.data;
+            const programs = Array.isArray(paged.data) ? paged.data : [];
+            formatResponse(paged);
+            const parsed = parsePayloadToTable(programs);
+            setTableColumns(parsed.columns);
+            setTableRows(parsed.rows);
+            setStatusMessage(programs.length === 0 ? 'Belum ada program pelatihan.' : 'Data program pelatihan berhasil dimuat.');
+            setLoading(false);
+            return;
+          }
           break;
         case '/training/enrollments':
           result = await api.get('/training/programs');
@@ -1145,6 +1311,18 @@ const SectionPage = () => {
           break;
         case '/competencies':
           result = await api.get('/competencies');
+          if (result && result.data && result.data.data) {
+            // Cek jika data paginasi (ada .data di dalam .data)
+            const paged = result.data.data;
+            const competencies = Array.isArray(paged.data) ? paged.data : [];
+            formatResponse(paged);
+            const parsed = parsePayloadToTable(competencies);
+            setTableColumns(parsed.columns);
+            setTableRows(parsed.rows);
+            setStatusMessage(competencies.length === 0 ? 'Belum ada kompetensi.' : 'Data kompetensi berhasil dimuat.');
+            setLoading(false);
+            return;
+          }
           break;
         case '/my/competencies':
           result = await api.get('/my/competencies');
@@ -1154,45 +1332,277 @@ const SectionPage = () => {
           break;
         case '/insights/people/detailed':
           result = await api.get('/insights/people/detailed', { params: { window_days: 30, expiring_days: 30 } });
+          if (result && result.data && result.data.data) {
+            const payload = result.data.data;
+            formatResponse(payload);
+            // Kumpulkan statistik utama
+            const stats = [];
+            if (payload.headcount) {
+              stats.push({ label: 'Total Employees', value: String(payload.headcount.total), description: '', variant: 'info' });
+            }
+            if (payload.payroll) {
+              stats.push({ label: 'Payroll Records', value: String(payload.payroll.records_count), description: '', variant: 'default' });
+              stats.push({ label: 'Total Take Home Pay', value: `Rp${Number(payload.payroll.total_take_home_pay).toLocaleString('id-ID')}`, description: '', variant: 'success' });
+              stats.push({ label: 'Total Deduction', value: `Rp${Number(payload.payroll.total_deduction).toLocaleString('id-ID')}`, description: '', variant: 'danger' });
+            }
+            if (payload.reimbursement) {
+              stats.push({ label: 'Reimbursements', value: String(payload.reimbursement.records_count), description: '', variant: 'default' });
+              stats.push({ label: 'Pending Reimbursements', value: String(payload.reimbursement.pending_count), description: '', variant: 'warning' });
+              stats.push({ label: 'Total Reimburse Amount', value: `Rp${Number(payload.reimbursement.total_amount).toLocaleString('id-ID')}`, description: '', variant: 'success' });
+              stats.push({ label: 'Pending Amount', value: `Rp${Number(payload.reimbursement.pending_amount).toLocaleString('id-ID')}`, description: '', variant: 'warning' });
+            }
+            if (payload.leave) {
+              stats.push({ label: 'Total Leave Pending', value: String(payload.leave.by_status?.pending ?? 0), description: '', variant: 'warning' });
+              stats.push({ label: 'Total Leave Approved', value: String(payload.leave.by_status?.approved ?? 0), description: '', variant: 'success' });
+              stats.push({ label: 'Total Leave Rejected', value: String(payload.leave.by_status?.rejected ?? 0), description: '', variant: 'danger' });
+            }
+            if (payload.attendance) {
+              stats.push({ label: 'Total Attendance Records', value: String(payload.attendance.total_records), description: '', variant: 'default' });
+              stats.push({ label: 'Late Count', value: String(payload.attendance.late_count), description: '', variant: 'warning' });
+              stats.push({ label: 'Absent Count', value: String(payload.attendance.absent_count), description: '', variant: 'danger' });
+              stats.push({ label: 'Overtime Minutes', value: String(payload.attendance.overtime_minutes), description: '', variant: 'info' });
+            }
+            if (payload.training) {
+              stats.push({ label: 'Training Enrollments', value: String(payload.training.enrollment_count), description: '', variant: 'default' });
+              stats.push({ label: 'Training Completed', value: String(payload.training.completed_count), description: '', variant: 'success' });
+              stats.push({ label: 'Completion Rate (%)', value: String(payload.training.completion_rate_percent), description: '', variant: 'info' });
+            }
+            if (payload.helpdesk) {
+              stats.push({ label: 'Helpdesk Tickets', value: String(payload.helpdesk.ticket_count), description: '', variant: 'default' });
+              stats.push({ label: 'Open Tickets', value: String(payload.helpdesk.open_ticket_count), description: '', variant: 'warning' });
+              stats.push({ label: 'Avg Resolution (hrs)', value: String(payload.helpdesk.avg_resolution_hours), description: '', variant: 'info' });
+            }
+            if (payload.documents) {
+              stats.push({ label: 'Total Documents', value: String(payload.documents.total_documents), description: '', variant: 'default' });
+              stats.push({ label: 'Expiring Soon', value: String(payload.documents.expiring_soon_count), description: '', variant: 'warning' });
+            }
+            setSummaryStats(stats);
+
+            // Tampilkan breakdown by_department, by_status, by_type, dsb, sebagai tabel utama jika ada
+            // Prioritas: headcount.by_department, leave.by_type, payroll.by_status, helpdesk.by_status, helpdesk.by_priority
+            let mainTable: { columns: string[]; rows: string[][] } | null = null;
+            if (payload.headcount && payload.headcount.by_department) {
+              const byDept = payload.headcount.by_department;
+              mainTable = {
+                columns: ['Department', 'Employee Count'],
+                rows: Object.entries(byDept).map(([dept, count]) => [dept, String(count)]),
+              };
+            } else if (payload.leave && payload.leave.by_type) {
+              const byType = payload.leave.by_type;
+              mainTable = {
+                columns: ['Leave Type', 'Count'],
+                rows: Object.entries(byType).map(([type, count]) => [type, String(count)]),
+              };
+            } else if (payload.payroll && payload.payroll.by_status) {
+              const byStatus = payload.payroll.by_status;
+              mainTable = {
+                columns: ['Payroll Status', 'Count'],
+                rows: Object.entries(byStatus).map(([status, count]) => [status, String(count)]),
+              };
+            } else if (payload.helpdesk && Array.isArray(payload.helpdesk.by_status)) {
+              mainTable = {
+                columns: ['Helpdesk Status', 'Count'],
+                rows: payload.helpdesk.by_status.map((item: any) => [item.status, String(item.count)]),
+              };
+            } else if (payload.helpdesk && Array.isArray(payload.helpdesk.by_priority)) {
+              mainTable = {
+                columns: ['Helpdesk Priority', 'Count'],
+                rows: payload.helpdesk.by_priority.map((item: any) => [item.priority, String(item.count)]),
+              };
+            }
+            if (mainTable) {
+              setTableColumns(mainTable.columns);
+              setTableRows(mainTable.rows);
+            } else {
+              setTableColumns([]);
+              setTableRows([]);
+            }
+            setStatusMessage('Data insight berhasil dimuat.');
+            setLoading(false);
+            return;
+          }
           break;
         case '/performance/summary':
           result = await api.get('/performance/summary');
+          if (result && result.data && result.data.data) {
+            const paged = result.data.data;
+            const rows = Array.isArray(paged.data) ? paged.data : [];
+            formatResponse(paged);
+            const parsed = parsePayloadToTable(rows);
+            setTableColumns(parsed.columns);
+            setTableRows(parsed.rows);
+            setStatusMessage(rows.length === 0 ? 'Belum ada ringkasan performa.' : 'Data ringkasan performa berhasil dimuat.');
+            setLoading(false);
+            return;
+          }
           break;
         case '/performance/cycles':
           result = await api.get('/performance/cycles');
+          if (result && result.data && result.data.data) {
+            const paged = result.data.data;
+            const rows = Array.isArray(paged.data) ? paged.data : [];
+            formatResponse(paged);
+            const parsed = parsePayloadToTable(rows);
+            setTableColumns(parsed.columns);
+            setTableRows(parsed.rows);
+            setStatusMessage(rows.length === 0 ? 'Belum ada siklus performa.' : 'Data siklus performa berhasil dimuat.');
+            setLoading(false);
+            return;
+          }
           break;
         case '/performance/reviews':
           result = await api.get('/performance/reviews');
+          if (result && result.data && result.data.data) {
+            const paged = result.data.data;
+            const rows = Array.isArray(paged.data) ? paged.data : [];
+            formatResponse(paged);
+            const parsed = parsePayloadToTable(rows);
+            setTableColumns(parsed.columns);
+            setTableRows(parsed.rows);
+            setStatusMessage(rows.length === 0 ? 'Belum ada review performa.' : 'Data review performa berhasil dimuat.');
+            setLoading(false);
+            return;
+          }
           break;
         case '/performance/okrs':
           result = await api.get('/performance/okrs');
+          if (result && result.data && result.data.data) {
+            const paged = result.data.data;
+            const rows = Array.isArray(paged.data) ? paged.data : [];
+            formatResponse(paged);
+            const parsed = parsePayloadToTable(rows);
+            setTableColumns(parsed.columns);
+            setTableRows(parsed.rows);
+            setStatusMessage(rows.length === 0 ? 'Belum ada OKR.' : 'Data OKR berhasil dimuat.');
+            setLoading(false);
+            return;
+          }
           break;
         case '/performance/360-reviews':
           result = await api.get('/performance/360-reviews');
+          if (result && result.data && result.data.data) {
+            const paged = result.data.data;
+            const rows = Array.isArray(paged.data) ? paged.data : [];
+            formatResponse(paged);
+            const parsed = parsePayloadToTable(rows);
+            setTableColumns(parsed.columns);
+            setTableRows(parsed.rows);
+            setStatusMessage(rows.length === 0 ? 'Belum ada 360 review.' : 'Data 360 review berhasil dimuat.');
+            setLoading(false);
+            return;
+          }
           break;
         case '/performance/calibration':
           result = await api.get('/performance/calibration');
+          if (result && result.data && result.data.data) {
+            const paged = result.data.data;
+            const rows = Array.isArray(paged.data) ? paged.data : [];
+            formatResponse(paged);
+            const parsed = parsePayloadToTable(rows);
+            setTableColumns(parsed.columns);
+            setTableRows(parsed.rows);
+            setStatusMessage(rows.length === 0 ? 'Belum ada kalibrasi performa.' : 'Data kalibrasi performa berhasil dimuat.');
+            setLoading(false);
+            return;
+          }
           break;
         case '/career/idps':
           result = await api.get('/career/idps');
+          if (result && result.data && result.data.data) {
+            const paged = result.data.data;
+            const rows = Array.isArray(paged.data) ? paged.data : [];
+            formatResponse(paged);
+            const parsed = parsePayloadToTable(rows);
+            setTableColumns(parsed.columns);
+            setTableRows(parsed.rows);
+            setStatusMessage(rows.length === 0 ? 'Belum ada IDP.' : 'Data IDP berhasil dimuat.');
+            setLoading(false);
+            return;
+          }
           break;
         case '/career/succession':
           result = await api.get('/career/succession');
+          if (result && result.data && result.data.data) {
+            const paged = result.data.data;
+            const rows = Array.isArray(paged.data) ? paged.data : [];
+            formatResponse(paged);
+            const parsed = parsePayloadToTable(rows);
+            setTableColumns(parsed.columns);
+            setTableRows(parsed.rows);
+            setStatusMessage(rows.length === 0 ? 'Belum ada succession plan.' : 'Data succession plan berhasil dimuat.');
+            setLoading(false);
+            return;
+          }
           break;
         case '/engagement/surveys':
           result = await api.get('/engagement/surveys');
+          if (result && result.data && result.data.data) {
+            const paged = result.data.data;
+            const rows = Array.isArray(paged.data) ? paged.data : [];
+            formatResponse(paged);
+            const parsed = parsePayloadToTable(rows);
+            setTableColumns(parsed.columns);
+            setTableRows(parsed.rows);
+            setStatusMessage(rows.length === 0 ? 'Belum ada survei engagement.' : 'Data survei engagement berhasil dimuat.');
+            setLoading(false);
+            return;
+          }
           break;
         case '/recruitment/openings':
           result = await api.get('/recruitment/openings');
+          if (result && result.data && result.data.data) {
+            const paged = result.data.data;
+            const rows = Array.isArray(paged.data) ? paged.data : [];
+            formatResponse(paged);
+            const parsed = parsePayloadToTable(rows);
+            setTableColumns(parsed.columns);
+            setTableRows(parsed.rows);
+            setStatusMessage(rows.length === 0 ? 'Belum ada lowongan.' : 'Data lowongan berhasil dimuat.');
+            setLoading(false);
+            return;
+          }
           break;
         case '/workforce/holidays':
           result = await api.get('/workforce/holidays');
+          if (result && result.data && result.data.data) {
+            const paged = result.data.data;
+            const rows = Array.isArray(paged.data) ? paged.data : [];
+            formatResponse(paged);
+            const parsed = parsePayloadToTable(rows);
+            setTableColumns(parsed.columns);
+            setTableRows(parsed.rows);
+            setStatusMessage(rows.length === 0 ? 'Belum ada hari libur.' : 'Data hari libur berhasil dimuat.');
+            setLoading(false);
+            return;
+          }
           break;
         case '/workforce/shift-swaps':
           result = await api.get('/workforce/shift-swaps');
+          if (result && result.data && result.data.data) {
+            const paged = result.data.data;
+            const rows = Array.isArray(paged.data) ? paged.data : [];
+            formatResponse(paged);
+            const parsed = parsePayloadToTable(rows);
+            setTableColumns(parsed.columns);
+            setTableRows(parsed.rows);
+            setStatusMessage(rows.length === 0 ? 'Belum ada shift swap.' : 'Data shift swap berhasil dimuat.');
+            setLoading(false);
+            return;
+          }
           break;
         case '/workforce/overtime-rules':
           result = await api.get('/workforce/overtime-rules');
+          if (result && result.data && result.data.data) {
+            const paged = result.data.data;
+            const rows = Array.isArray(paged.data) ? paged.data : [];
+            formatResponse(paged);
+            const parsed = parsePayloadToTable(rows);
+            setTableColumns(parsed.columns);
+            setTableRows(parsed.rows);
+            setStatusMessage(rows.length === 0 ? 'Belum ada aturan lembur.' : 'Data aturan lembur berhasil dimuat.');
+            setLoading(false);
+            return;
+          }
           break;
         case '/reports/dashboard-summary':
           result = await api.get('/reports/dashboard-summary');
