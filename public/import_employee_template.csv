@@ -1,2 +1,3 @@
-Nama Lengkap;NIK;Email;Nomor HP;Tanggal Lahir;Alamat;Posisi;Departemen;Tanggal Masuk;Status
-Siti Aminah;9876543210;siti@email.com;08987654321;1990-05-12;Jl. Merdeka No.1;Staff Finance;Keuangan;2022-01-10;Aktif
+email,position,department,hire_date,salary,manager_email,status
+john@example.com,Software Engineer,IT,2023-01-15,10000000,manager@example.com,active
+jane@example.com,HR Specialist,HR,2023-02-20,8000000,manager@example.com,active

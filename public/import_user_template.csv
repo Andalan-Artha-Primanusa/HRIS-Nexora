@@ -1,2 +1,3 @@
-Nama Lengkap;Email;Nomor HP;NIK;Posisi;Departemen;Role;Status
-Budi Santoso;budi@email.com;08123456789;1234567890;Staff HR;HRD;User;Aktif
+name,email,phone,password
+John Doe,john@example.com,08123456789,Password123!
+Jane Smith,jane@example.com,08987654321,Password123!
