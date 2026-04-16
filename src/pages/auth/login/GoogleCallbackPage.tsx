@@ -37,12 +37,19 @@ const GoogleCallbackPage = () => {
           email: (authResult.user as any)?.email,
         });
         if (!isCancelled) {
-          navigate(getRoleBasedDashboardPath(authResult.user), { replace: true });
+          const target = getRoleBasedDashboardPath(authResult.user);
+
+          console.log("Redirect target:", target);
+
+          navigate(target || "/dashboard", { replace: true });
         }
       } catch (err: unknown) {
         console.error("[GoogleCallback] Error:", err);
         if (!isCancelled) {
-          const errorMsg = typeof err === "string" ? err : (err as any)?.message || "Google SSO callback gagal.";
+          const errorMsg =
+            typeof err === "string"
+              ? err
+              : (err as any)?.message || "Google SSO callback gagal.";
           console.error("[GoogleCallback] Setting error message:", errorMsg);
           setErrorMessage(errorMsg);
         }

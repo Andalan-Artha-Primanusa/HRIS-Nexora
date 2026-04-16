@@ -48,7 +48,7 @@ const extractAuthFromResponse = (response: { data?: unknown }) => {
   // 🔒 SECURITY: Normalize user roles and permissions to ensure consistent structure
   if (user && typeof user === "object") {
     const userObj = user as any;
-    
+
     // Normalize roles - ensure it's always an array of Role objects
     const normalizedRoles: any[] = [];
     if (Array.isArray(userObj.roles)) {
@@ -63,7 +63,7 @@ const extractAuthFromResponse = (response: { data?: unknown }) => {
             name: role.name || "",
             display_name: role.display_name || "",
             description: role.description,
-            permissions: Array.isArray(role.permissions) 
+            permissions: Array.isArray(role.permissions)
               ? role.permissions.map((p: any) => ({
                   id: p.id,
                   name: p.name,
@@ -80,11 +80,11 @@ const extractAuthFromResponse = (response: { data?: unknown }) => {
       }
     }
     userObj.roles = normalizedRoles;
-    
+
     // Extract all permissions from roles and use them as top-level permissions
     // This ensures hasPermission() works correctly
     const allPermissions = new Map<string, any>();
-    
+
     for (const role of normalizedRoles) {
       if (Array.isArray(role.permissions)) {
         for (const permission of role.permissions) {
@@ -94,7 +94,7 @@ const extractAuthFromResponse = (response: { data?: unknown }) => {
         }
       }
     }
-    
+
     // Merge with any existing top-level permissions
     if (Array.isArray(userObj.permissions)) {
       for (const permission of userObj.permissions) {
@@ -103,9 +103,9 @@ const extractAuthFromResponse = (response: { data?: unknown }) => {
         }
       }
     }
-    
+
     userObj.permissions = Array.from(allPermissions.values());
-    
+
     // Log untuk debugging roles
     console.log("[Auth] User extracted:", {
       name: userObj.name,
@@ -133,7 +133,10 @@ const extractAuthFromResponse = (response: { data?: unknown }) => {
   return { user, token };
 };
 
-const getFirstExistingParamValue = (params: URLSearchParams[], keys: string[]) => {
+const getFirstExistingParamValue = (
+  params: URLSearchParams[],
+  keys: string[],
+) => {
   for (const key of keys) {
     for (const paramSet of params) {
       const value = paramSet.get(key);
@@ -238,7 +241,9 @@ export const useAuth = () => {
         null;
 
       if (!redirectUrl) {
-        throw new Error("URL redirect Google tidak ditemukan dari response API");
+        throw new Error(
+          "URL redirect Google tidak ditemukan dari response API",
+        );
       }
 
       return redirectUrl as string;
@@ -266,12 +271,33 @@ export const useAuth = () => {
 
       const directToken = getFirstExistingParamValue(allParams, TOKEN_KEYS);
       if (directToken) {
-        console.log("[GoogleCallback] Found direct token in params");
-        const directUserRaw = getFirstExistingParamValue(allParams, USER_KEYS);
-        const directUser = parsePotentialUserPayload(directUserRaw);
+        console.log("[GoogleCallback] Found direct token");
 
-        setAuth(directUser, directToken);
-        return { user: directUser, token: directToken };
+        const directUserRaw = getFirstExistingParamValue(allParams, USER_KEYS);
+        const parsedUser = parsePotentialUserPayload(directUserRaw);
+
+        if (!parsedUser) {
+          throw new Error("User Google tidak ditemukan");
+        }
+
+        // Bungkus seperti response API normal
+        const normalized = extractAuthFromResponse({
+          data: {
+            user: parsedUser,
+            token: directToken,
+          },
+        });
+
+        if (!normalized.user || !normalized.token) {
+          throw new Error("Gagal normalisasi data Google login");
+        }
+
+        setAuth(normalized.user as AuthUser, normalized.token);
+
+        return {
+          user: normalized.user,
+          token: normalized.token,
+        };
       }
 
       const code = searchParams.get("code");
@@ -291,12 +317,16 @@ export const useAuth = () => {
       console.log("[GoogleCallback] Backend response received");
       const { user, token } = extractAuthFromResponse(response);
       if (!token) {
-        console.error("[GoogleCallback] Token not found in response", { response });
+        console.error("[GoogleCallback] Token not found in response", {
+          response,
+        });
         throw new Error("Token login SSO tidak ditemukan dari response API");
       }
 
       if (!user) {
-        console.error("[GoogleCallback] User not found in response", { response });
+        console.error("[GoogleCallback] User not found in response", {
+          response,
+        });
         throw new Error("User data tidak ditemukan dari response API");
       }
 
@@ -319,5 +349,11 @@ export const useAuth = () => {
     }
   };
 
-  return { handleLogin, handleRegister, handleGoogleLogin, handleGoogleCallback, handleLogout };
+  return {
+    handleLogin,
+    handleRegister,
+    handleGoogleLogin,
+    handleGoogleCallback,
+    handleLogout,
+  };
 };
