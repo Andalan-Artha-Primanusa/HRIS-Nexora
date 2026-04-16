@@ -16,17 +16,11 @@ import "./AdminCrudPages.css";
 
 type AlertType = "success" | "error" | "info";
 
-const hasAdminAccess = (user: any) => {
-  const roles = Array.isArray(user?.roles) ? user.roles : [];
-  return roles.some((role: any) => {
-    const roleName = String(role?.name || role || "").toLowerCase();
-    return roleName === ROLES.ADMIN || roleName === ROLES.SUPER_ADMIN;
-  });
-};
+const canAccessPage = (user: any) => RBACUtils.isAdmin(user);
 
 const AdminAuditLogsPage = () => {
   const user = useAuthStore((state) => state.user);
-  const canAccess = hasAdminAccess(user);
+  const canAccess = canAccessPage(user);
 
   if (!canAccess) {
     return (

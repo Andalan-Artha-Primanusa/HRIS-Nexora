@@ -66,35 +66,35 @@ export class RBACUtils {
    * Check if user has admin access (can manage users and roles)
    */
   static canManageUsers(user: AuthUser | null): boolean {
-    return RBACUtils.hasPermission(user, PERMISSIONS.USER_ASSIGN_ROLE);
+    return RBACUtils.isSuperAdmin(user) || RBACUtils.hasPermission(user, PERMISSIONS.USER_ASSIGN_ROLE);
   }
 
   /**
    * Check if user can manage roles
    */
   static canManageRoles(user: AuthUser | null): boolean {
-    return RBACUtils.hasPermission(user, PERMISSIONS.ROLE_ASSIGN_PERMISSION);
+    return RBACUtils.isSuperAdmin(user) || RBACUtils.hasPermission(user, PERMISSIONS.ROLE_ASSIGN_PERMISSION);
   }
 
   /**
    * Check if user can view permissions
    */
   static canViewPermissions(user: AuthUser | null): boolean {
-    return RBACUtils.hasPermission(user, PERMISSIONS.PERMISSION_VIEW);
+    return RBACUtils.isSuperAdmin(user) || RBACUtils.hasPermission(user, PERMISSIONS.PERMISSION_VIEW);
   }
 
   /**
    * Check if user can view roles
    */
   static canViewRoles(user: AuthUser | null): boolean {
-    return RBACUtils.hasPermission(user, PERMISSIONS.ROLE_VIEW);
+    return RBACUtils.isSuperAdmin(user) || RBACUtils.hasPermission(user, PERMISSIONS.ROLE_VIEW);
   }
 
   /**
    * Check if user can view users
    */
   static canViewUsers(user: AuthUser | null): boolean {
-    return RBACUtils.hasPermission(user, PERMISSIONS.USER_VIEW);
+    return RBACUtils.isSuperAdmin(user) || RBACUtils.hasPermission(user, PERMISSIONS.USER_VIEW);
   }
 
   /**

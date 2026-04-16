@@ -14,8 +14,10 @@ const AttendanceCheckOutPage = () => {
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('info');
 
-  // Auto-capture GPS location on page load
-  useEffect(() => {
+  const detectGPS = () => {
+    setStatus('Mendeteksi lokasi GPS...');
+    setAlertMessage('');
+    
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -25,16 +27,26 @@ const AttendanceCheckOutPage = () => {
           setAlertMessage('');
         },
         (error) => {
-          setAlertMessage(error.message);
+          let msg = 'Gagal mendeteksi lokasi GPS';
+          if (error.code === 1) msg = 'Akses lokasi ditolak oleh browser. Silakan izinkan akses lokasi.';
+          if (error.code === 2) msg = 'Lokasi tidak tersedia.';
+          if (error.code === 3) msg = 'Waktu deteksi lokasi habis.';
+          
+          setAlertMessage(msg);
           setAlertType('error');
           setStatus('Gagal mendeteksi lokasi GPS');
-        }
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     } else {
       setAlertMessage('Geolocation tidak didukung oleh browser ini');
       setAlertType('error');
       setStatus('Browser tidak mendukung GPS');
     }
+  };
+
+  useEffect(() => {
+    detectGPS();
   }, []);
 
   const handleCheckOut = async () => {
@@ -106,6 +118,14 @@ const AttendanceCheckOutPage = () => {
         </div>
 
         <div className="attendance-action-row">
+          <Button 
+            variant="outline" 
+            size="md" 
+            onClick={detectGPS} 
+            disabled={loading}
+          >
+            Refresh GPS
+          </Button>
           <Button 
             variant="primary" 
             size="md" 
