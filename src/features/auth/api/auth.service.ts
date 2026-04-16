@@ -1,5 +1,4 @@
 import { api } from "@/shared/api/httpClient";
-import { useAuthStore } from "@/app/store/auth.store";
 import { forceLogout } from "@/shared/utils/auth";
 
 /* =========================

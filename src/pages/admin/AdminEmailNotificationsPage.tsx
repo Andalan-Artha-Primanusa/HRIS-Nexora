@@ -96,8 +96,8 @@ const AdminEmailNotificationsPage = () => {
         getAdminEmailNotificationLogs(),
       ]);
 
-      setItems(Array.isArray(notificationResult) ? notificationResult : (notificationResult?.items ?? []));
-      setLogs(Array.isArray(logResult) ? logResult : (logResult?.items ?? []));
+      setItems(Array.isArray(notificationResult) ? notificationResult : (notificationResult && Array.isArray((notificationResult as any).items) ? (notificationResult as any).items : []));
+      setLogs(Array.isArray(logResult) ? logResult : (logResult && Array.isArray((logResult as any).items) ? (logResult as any).items : []));
       setStatusMessage("Data email notification berhasil dimuat.");
       setAlertType("success");
     } catch (error: unknown) {

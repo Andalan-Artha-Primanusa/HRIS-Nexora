@@ -7,7 +7,6 @@ import { getErrorMessage } from "@/shared/api/errorHandler";
 import { ROLES } from "@/shared/types/rbac.types";
 import { Download, FileSpreadsheet, RefreshCw, ShieldAlert, Upload, Users } from "lucide-react";
 import {
-  downloadImportTemplate,
   importEmployees,
   importUsers,
 } from "@/features/admin/api/admin-batch1.service";
@@ -39,7 +38,7 @@ const AdminImportPage = () => {
             <p>Anda tidak memiliki izin untuk mengakses halaman ini.</p>
           </div>
           <a
-            href={process.env.BASE_URL ? process.env.BASE_URL + "/import_user_employee_template.txt" : "/import_user_employee_template.txt"}
+            href={(import.meta.env.VITE_BASE_URL ? import.meta.env.VITE_BASE_URL : "") + "/import_user_employee_template.txt"}
             download
             style={{ marginLeft: 8, color: '#6366f1', textDecoration: 'underline', fontSize: 14 }}
           >
