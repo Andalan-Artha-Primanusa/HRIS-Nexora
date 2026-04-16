@@ -147,7 +147,10 @@ export const downloadImportTemplate = async () => {
 	return response.data as Blob;
 };
 
-export const importUsers = async (formData: FormData) => {
+export const importUsers = async (file: File, role: string = "employee") => {
+	const formData = new FormData();
+	formData.append("file", file);
+	formData.append("role", role);
 	const response = await api.post("/admin/import/users", formData, {
 		headers: { "Content-Type": "multipart/form-data" },
 	});

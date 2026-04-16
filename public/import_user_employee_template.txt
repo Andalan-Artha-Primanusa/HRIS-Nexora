@@ -1,0 +1,13 @@
+// Template Import Pengguna (User)
+// Format: Nama kolom harus sesuai urutan dan penamaan di bawah ini
+// File: import_user_template.csv
+Nama Lengkap,Email,Nomor HP,NIK,Posisi,Departemen,Role,Status
+Contoh:
+Budi Santoso,budi.santoso@email.com,08123456789,1234567890,Staff HR,HRD,User,Aktif
+
+// Template Import Karyawan (Employee)
+// Format: Nama kolom harus sesuai urutan dan penamaan di bawah ini
+// File: import_employee_template.csv
+Nama Lengkap,NIK,Email,Nomor HP,Tanggal Lahir,Alamat,Posisi,Departemen,Tanggal Masuk,Status
+Contoh:
+Siti Aminah,9876543210,siti.aminah@email.com,08987654321,1990-05-12,Jl. Merdeka No.1,Staff Finance,Keuangan,2022-01-10,Aktif

@@ -11,6 +11,7 @@ import {
   importEmployees,
   importUsers,
 } from "@/features/admin/api/admin-batch1.service";
+
 import "@/shared/styles/CrudPage.css";
 import "./AdminCrudPages.css";
 
@@ -37,6 +38,13 @@ const AdminImportPage = () => {
             <h1><ShieldAlert size={22} style={{ display: "inline", verticalAlign: "middle", marginRight: 8 }} />Akses Ditolak</h1>
             <p>Anda tidak memiliki izin untuk mengakses halaman ini.</p>
           </div>
+          <a
+            href={process.env.BASE_URL ? process.env.BASE_URL + "/import_user_employee_template.txt" : "/import_user_employee_template.txt"}
+            download
+            style={{ marginLeft: 8, color: '#6366f1', textDecoration: 'underline', fontSize: 14 }}
+          >
+            Download Template Gabungan (TXT)
+          </a>
         </div>
         <Card className="table-card" glass>
           <div className="table-card-inner">
@@ -48,6 +56,7 @@ const AdminImportPage = () => {
   }
 
   const [userFile, setUserFile] = useState<File | null>(null);
+  const [userRole, setUserRole] = useState<string>("employee");
   const [employeeFile, setEmployeeFile] = useState<File | null>(null);
   const [downloadingTemplate, setDownloadingTemplate] = useState(false);
   const [submittingUsers, setSubmittingUsers] = useState(false);
@@ -87,30 +96,45 @@ const AdminImportPage = () => {
     ];
   }, [downloadingTemplate, userFile, employeeFile]);
 
-  const handleDownloadTemplate = async () => {
+  // Download new combined TXT template
+  const handleDownloadTemplate = () => {
     setDownloadingTemplate(true);
     setAlertMessage("");
-
     try {
-      const result = await downloadImportTemplate();
-      const blobSource = result instanceof Blob ? result : new Blob([result as any]);
-      const url = window.URL.createObjectURL(blobSource);
       const link = document.createElement("a");
-      link.href = url;
-      link.download = "import-template.xlsx";
+      link.href = "/import_user_employee_template.txt";
+      link.download = "import_user_employee_template.txt";
       document.body.appendChild(link);
       link.click();
       link.remove();
-      window.URL.revokeObjectURL(url);
-
-      setAlertMessage("Template import berhasil diunduh.");
+      setAlertMessage("Template gabungan (TXT) berhasil diunduh.");
       setAlertType("success");
     } catch (error: unknown) {
-      setAlertMessage(getErrorMessage(error as any));
+      setAlertMessage("Gagal mengunduh template gabungan (TXT).");
       setAlertType("error");
     } finally {
       setDownloadingTemplate(false);
     }
+  };
+
+  // Download template User CSV
+  const handleDownloadUserTemplate = () => {
+    const link = document.createElement("a");
+    link.href = "/import_user_template.csv";
+    link.download = "import_user_template.csv";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
+
+  // Download template Employee CSV
+  const handleDownloadEmployeeTemplate = () => {
+    const link = document.createElement("a");
+    link.href = "/import_employee_template.csv";
+    link.download = "import_employee_template.csv";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
   };
 
   const handleImportUsers = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -126,15 +150,12 @@ const AdminImportPage = () => {
     setAlertMessage("");
 
     try {
-      const formData = new FormData();
-      formData.append("file", userFile);
-
-      const result = await importUsers(formData);
+      const result = await importUsers(userFile, userRole);
       setUserImportResult(JSON.stringify(result, null, 2));
       setAlertMessage("Import users berhasil diproses.");
       setAlertType("success");
       setUserFile(null);
-      event.currentTarget.reset();
+      setUserRole("employee");
     } catch (error: unknown) {
       setAlertMessage(getErrorMessage(error as any));
       setAlertType("error");
@@ -164,7 +185,6 @@ const AdminImportPage = () => {
       setAlertMessage("Import employees berhasil diproses.");
       setAlertType("success");
       setEmployeeFile(null);
-      event.currentTarget.reset();
     } catch (error: unknown) {
       setAlertMessage(getErrorMessage(error as any));
       setAlertType("error");
@@ -181,16 +201,36 @@ const AdminImportPage = () => {
           <h1>Import Center</h1>
           <p>Unduh template, unggah file users maupun employees, dan tinjau hasil proses import langsung dari halaman admin.</p>
         </div>
-        <div className="page-header-actions">
+        <div className="page-header-actions" style={{ display: "flex", gap: 8 }}>
+
+                {/* Contoh CURL upload file, tampil di bawah halaman dengan UI lebih profesional */}
+
           <Button
             variant="outline"
             size="md"
-            onClick={() => void handleDownloadTemplate()}
-            disabled={downloadingTemplate}
+            onClick={handleDownloadTemplate}
+            style={{ borderColor: "#6366f1", color: "#6366f1" }}
+          >
+            <Download size={16} />
+            Download Template Gabungan (TXT)
+          </Button>
+          <Button
+            variant="outline"
+            size="md"
+            onClick={handleDownloadUserTemplate}
             style={{ borderColor: "#2563eb", color: "#2563eb" }}
           >
             <Download size={16} />
-            {downloadingTemplate ? "Mengunduh..." : "Unduh Template"}
+            Download Template User
+          </Button>
+          <Button
+            variant="outline"
+            size="md"
+            onClick={handleDownloadEmployeeTemplate}
+            style={{ borderColor: "#059669", color: "#059669" }}
+          >
+            <Download size={16} />
+            Download Template Employee
           </Button>
         </div>
       </div>
@@ -232,6 +272,7 @@ const AdminImportPage = () => {
         </div>
         <div className="table-card-inner">
           <form className="crud-form" onSubmit={handleImportUsers}>
+
             <div className="crud-form-grid">
               <label className="crud-form-full">
                 File Users
@@ -242,6 +283,19 @@ const AdminImportPage = () => {
                   onChange={(event) => setUserFile(event.target.files?.[0] || null)}
                 />
                 <span className="crud-note">Gunakan template resmi agar struktur kolom sesuai dengan backend.</span>
+              </label>
+              <label className="crud-form-full">
+                Role Users
+                <select
+                  className="crud-input"
+                  value={userRole}
+                  onChange={e => setUserRole(e.target.value)}
+                >
+                  <option value="employee">employee</option>
+                  <option value="admin">admin</option>
+                  <option value="super_admin">super_admin</option>
+                </select>
+                <span className="crud-note">Pilih role user yang akan diimport.</span>
               </label>
             </div>
 
