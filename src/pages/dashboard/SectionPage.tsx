@@ -1336,7 +1336,7 @@ const SectionPage = () => {
             const payload = result.data.data;
             formatResponse(payload);
             // Kumpulkan statistik utama
-            const stats = [];
+            const stats: SectionStat[] = [];
             if (payload.headcount) {
               stats.push({ label: 'Total Employees', value: String(payload.headcount.total), description: '', variant: 'info' });
             }
