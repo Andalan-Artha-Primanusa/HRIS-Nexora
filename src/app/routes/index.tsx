@@ -35,6 +35,11 @@ const AdminRolesPage = lazy(() => import("../../pages/admin/AdminRolesPage"));
 const AdminPermissionsPage = lazy(() => import("../../pages/admin/AdminPermissionsPage"));
 const AdminUserAssignRolesPage = lazy(() => import("../../pages/admin/AdminUserAssignRolesPage"));
 const AdminRoleAssignPermissionsPage = lazy(() => import("../../pages/admin/AdminRoleAssignPermissionsPage"));
+const AdminNotificationsPage = lazy(() => import("../../pages/admin/AdminNotificationsPage"));
+const AdminEmailNotificationsPage = lazy(() => import("../../pages/admin/AdminEmailNotificationsPage"));
+const AdminAuditLogsPage = lazy(() => import("../../pages/admin/AdminAuditLogsPage"));
+const AdminImportPage = lazy(() => import("../../pages/admin/AdminImportPage"));
+const AdminBiometricDevicesPage = lazy(() => import("../../pages/admin/AdminBiometricDevicesPage"));
 const LeaveRequestsPage = lazy(() => import("../../pages/leave/LeaveRequestsPage"));
 const CreateLeavePage = lazy(() => import("../../pages/leave/CreateLeavePage"));
 const UpdateLeavePage = lazy(() => import("../../pages/leave/UpdateLeavePage"));
@@ -48,24 +53,22 @@ const PayrollApprovePage = lazy(() => import("../../pages/payroll/PayrollApprove
 const PayrollPaymentPage = lazy(() => import("../../pages/payroll/PayrollPaymentPage.tsx"));
 const PayrollGeneratePage = lazy(() => import("../../pages/payroll/PayrollGeneratePage"));
 const PayrollDashboard = lazy(() => import("../../pages/payroll/PayrollDashboard"));
+const NotificationsPage = lazy(() => import("../../pages/notifications/NotificationsPage"));
 
 const sectionRoutes = [
   { path: "/hr-summary" },
   { path: "/analytics" },
   { path: "/insights/people/detailed" },
-  { path: "/organization/department" },
-  { path: "/organization/position" },
-  { path: "/employment/status" },
-  { path: "/employment/salary-history" },
-  { path: "/documents/ktp" },
-  { path: "/documents/contract" },
-  { path: "/documents/others" },
+  { path: "/organization/directory" },
+  { path: "/organization/summary" },
+  { path: "/organization/chart" },
+  { path: "/organization/team" },
+  { path: "/organization/master-data" },
   { path: "/documents/review" },
   { path: "/documents/expiring" },
   { path: "/my/documents" },
   { path: "/notifications" },
   { path: "/attendance/timesheet" },
-  { path: "/attendance/shifts" },
   { path: "/attendance/overtime" },
   { path: "/attendance/reports" },
   { path: "/leave/type/create" },
@@ -84,33 +87,42 @@ const sectionRoutes = [
   { path: "/requests" },
   { path: "/requests/assign" },
   { path: "/requests/status" },
+  { path: "/approval-flows" },
+  { path: "/compliance/overview" },
+  { path: "/compliance/audit-summary" },
+  { path: "/compliance/expiring-documents" },
   { path: "/payroll/tax" },
   { path: "/payroll/reports" },
   { path: "/expense/categories" },
   { path: "/expense/reports" },
   { path: "/performance" },
-  { path: "/performance/goals" },
-  { path: "/performance/review" },
-  { path: "/performance/appraisal" },
-  { path: "/performance/feedback" },
-  { path: "/ess/profile" },
-  { path: "/ess/attendance" },
-  { path: "/ess/leave" },
-  { path: "/ess/payslip" },
-  { path: "/ess/requests" },
+  { path: "/performance/summary" },
+  { path: "/performance/cycles" },
+  { path: "/performance/reviews" },
+  { path: "/performance/okrs" },
+  { path: "/performance/360-reviews" },
+  { path: "/performance/calibration" },
+  { path: "/career/idps" },
+  { path: "/career/succession" },
+  { path: "/engagement/surveys" },
+  { path: "/recruitment/openings" },
+  { path: "/workforce/holidays" },
+  { path: "/workforce/shift-swaps" },
+  { path: "/workforce/overtime-rules" },
+  { path: "/reports/dashboard-summary" },
   { path: "/reports/attendance" },
   { path: "/reports/leave" },
   { path: "/reports/payroll" },
+  { path: "/reports/competency" },
+  { path: "/reports/employee-lifecycle" },
+  { path: "/reports/assets" },
   { path: "/reports/custom" },
   { path: "/settings/company" },
   { path: "/settings/user-role" },
   { path: "/settings/permissions" },
-  { path: "/settings/master-data/department" },
-  { path: "/settings/master-data/position" },
   { path: "/settings/master-data/leave-type" },
   { path: "/settings/master-data/expense-category" },
   { path: "/settings/notification" },
-  { path: "/settings/logs" },
 ];
 
 const RootRedirect = () => {
@@ -223,26 +235,6 @@ export const router = createBrowserRouter([
             element: <AttendanceTodayPage />,
           },
         ],
-      },
-      {
-        path: "/performance",
-        element: <Navigate to="/kpis" replace />,
-      },
-      {
-        path: "/performance/goals",
-        element: <Navigate to="/kpis" replace />,
-      },
-      {
-        path: "/performance/review",
-        element: <Navigate to="/kpis" replace />,
-      },
-      {
-        path: "/performance/appraisal",
-        element: <Navigate to="/kpis" replace />,
-      },
-      {
-        path: "/performance/feedback",
-        element: <Navigate to="/kpis" replace />,
       },
       {
         path: "/kpis",
@@ -569,6 +561,66 @@ export const router = createBrowserRouter([
           {
             index: true,
             element: <AdminPermissionsPage />,
+          },
+        ],
+      },
+      {
+        path: "/admin/notifications",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <AdminNotificationsPage />,
+          },
+        ],
+      },
+      {
+        path: "/admin/email-notifications",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <AdminEmailNotificationsPage />,
+          },
+        ],
+      },
+      {
+        path: "/admin/audit-logs",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <AdminAuditLogsPage />,
+          },
+        ],
+      },
+      {
+        path: "/admin/import",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <AdminImportPage />,
+          },
+        ],
+      },
+      {
+        path: "/admin/biometric-devices",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <AdminBiometricDevicesPage />,
+          },
+        ],
+      },
+      {
+        path: "/notifications",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <NotificationsPage />,
           },
         ],
       },

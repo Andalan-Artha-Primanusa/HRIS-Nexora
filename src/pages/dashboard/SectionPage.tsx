@@ -343,6 +343,12 @@ const getSectionTableKey = (pathname: string) => {
   if (pathname.startsWith('/payroll/')) return 'payroll';
   if (pathname.startsWith('/expense/')) return 'expense';
   if (pathname.startsWith('/performance/')) return 'performance';
+  if (pathname.startsWith('/career/')) return 'career';
+  if (pathname.startsWith('/engagement/')) return 'engagement';
+  if (pathname.startsWith('/workforce/')) return 'workforce';
+  if (pathname.startsWith('/recruitment/')) return 'recruitment';
+  if (pathname.startsWith('/compliance/')) return 'compliance';
+  if (pathname.startsWith('/approval-flows')) return 'approval_flows';
   if (pathname.startsWith('/ess/')) return 'ess';
   if (pathname.startsWith('/reports/')) return 'reports';
   if (pathname.startsWith('/settings/')) return 'settings';
@@ -380,6 +386,12 @@ const getSectionData = (pathname: string) => {
     ess: ['Feature', 'Status', 'Last Updated'],
     reports: ['Report Name', 'Category', 'Updated', 'Status'],
     settings: ['Setting', 'Module', 'Updated', 'Status'],
+    career: ['Plan', 'Employee', 'Target Date', 'Status', 'Updated'],
+    engagement: ['Survey', 'Type', 'Start', 'End', 'Status'],
+    workforce: ['Policy', 'Department', 'Schedule', 'Status', 'Updated'],
+    recruitment: ['Opening', 'Department', 'Type', 'Status', 'Updated'],
+    compliance: ['Metric', 'Value', 'Window', 'Status', 'Updated'],
+    approval_flows: ['Flow', 'Module', 'Steps', 'Status', 'Updated'],
     profiles: ['Name', 'Email', 'Phone', 'City', 'Status'],
     locations: ['Location', 'Latitude', 'Longitude', 'Radius', 'Status'],
     kpis: ['Title', 'Employee', 'Target', 'Progress', 'Status'],
@@ -449,6 +461,32 @@ const supportsList = (pathname: string) => {
       '/my/competencies',
       '/notifications',
       '/insights/people/detailed',
+      '/organization/directory',
+      '/organization/summary',
+      '/organization/chart',
+      '/organization/team',
+      '/organization/master-data',
+      '/approval-flows',
+      '/compliance/overview',
+      '/compliance/audit-summary',
+      '/compliance/expiring-documents',
+      '/reports/dashboard-summary',
+      '/reports/competency',
+      '/reports/employee-lifecycle',
+      '/reports/assets',
+      '/performance/summary',
+      '/performance/cycles',
+      '/performance/reviews',
+      '/performance/okrs',
+      '/performance/360-reviews',
+      '/performance/calibration',
+      '/career/idps',
+      '/career/succession',
+      '/engagement/surveys',
+      '/recruitment/openings',
+      '/workforce/holidays',
+      '/workforce/shift-swaps',
+      '/workforce/overtime-rules',
       '/reports/attendance',
       '/reports/leave',
       '/reports/payroll',
@@ -523,7 +561,7 @@ const getDefaultFormState = (pathname: string) => {
     case '/requests/status':
       return { id: '', status: '', completion_notes: '' };
     case '/training/programs':
-      return { name: '', code: '', category: '', duration_hours: '', start_date: '', end_date: '' };
+      return { title: '', name: '', code: '', category: '', description: '', provider: '', mode: '', duration_hours: '', start_date: '', end_date: '', budget: '', status: '' };
     case '/training/enrollments':
       return { id: '', employee_ids: '', attendance_percentage: '', assessment_score: '' };
     case '/competencies':
@@ -547,11 +585,47 @@ const getDefaultFormState = (pathname: string) => {
     case '/reports/attendance':
       return { window_days: '30', start_date: '', end_date: '' };
     case '/reports/leave':
-      return { status: '', start_date: '', end_date: '' };
+      return { year: '', status: '', start_date: '', end_date: '' };
     case '/reports/payroll':
-      return { period: '', status: '' };
+      return { period: '', status: '', start_date: '', end_date: '' };
     case '/reports/custom':
       return { window_days: '30', expiring_days: '30' };
+    case '/reports/dashboard-summary':
+      return {};
+    case '/reports/competency':
+      return {};
+    case '/reports/employee-lifecycle':
+      return { year: '' };
+    case '/reports/assets':
+      return {};
+    case '/approval-flows':
+      return { name: '', module: '', role_ids: '' };
+    case '/performance/cycles':
+      return { name: '', period_type: 'quarterly', year: '', quarter: '', start_date: '', end_date: '', status: 'open', description: '' };
+    case '/performance/reviews':
+      return { review_cycle_id: '', employee_id: '', reviewer_user_id: '', kpi_id: '', score: '', strengths: '', improvements: '', feedback: '', reviewer_comment: '' };
+    case '/performance/okrs':
+      return { employee_id: '', period_id: '', objective: '', description: '', weight: '', target_value: '', unit: '', start_date: '', end_date: '' };
+    case '/performance/360-reviews':
+      return { cycle_id: '', employee_id: '', manager_id: '', feeders_required: '', start_date: '', end_date: '' };
+    case '/performance/calibration':
+      return { cycle_id: '', name: '', description: '', scheduled_at: '' };
+    case '/career/idps':
+      return { employee_id: '', review_cycle_id: '', goal_title: '', goal_description: '', status: 'draft', target_date: '', mentor_user_id: '' };
+    case '/career/succession':
+      return { position_key: '', employee_id: '', readiness: 'ready_1_2_years', talent_score: '', notes: '' };
+    case '/engagement/surveys':
+      return { title: '', survey_type: 'pulse', start_date: '', end_date: '', anonymous: 'true', status: 'draft', questions_json: '[{"question_type":"rating","question_text":"How satisfied are you?","required":true}]' };
+    case '/workforce/holidays':
+      return { name: '', year: '', active: 'true', dates_json: '[{"holiday_date":"2026-05-01","name":"Labour Day","is_national":true}]' };
+    case '/workforce/shift-swaps':
+      return { id: '', requester_employee_id: '', target_employee_id: '', swap_date: '', reason: '', status: 'approved' };
+    case '/workforce/overtime-rules':
+      return { name: '', department: '', location_id: '', min_minutes: '', multiplier: '', requires_approval: 'true', active: 'true' };
+    case '/organization/team':
+      return { manager_user_id: '' };
+    case '/compliance/expiring-documents':
+      return { days: '30' };
     case '/admin/users':
       return { id: '', role_ids: '' };
     case '/admin/roles':
@@ -609,13 +683,20 @@ const selectOptionsByField: Record<string, string[]> = {
   status: ['open', 'assigned', 'in_progress', 'completed', 'closed', 'pending', 'approved', 'rejected', 'submitted', 'paid'],
   priority: ['low', 'medium', 'high', 'urgent'],
   entitlement_type: ['fixed', 'accrual', 'unlimited'],
+  period_type: ['monthly', 'quarterly', 'yearly'],
+  survey_type: ['pulse', 'annual', 'ad_hoc'],
+  readiness: ['ready_now', 'ready_1_2_years', 'ready_3_5_years'],
+  mode: ['online', 'offline', 'hybrid'],
   category: ['travel', 'meals', 'office_supplies', 'client_entertainment', 'other'],
+  anonymous: ['true', 'false'],
+  active: ['true', 'false'],
+  requires_approval: ['true', 'false'],
   is_paid: ['true', 'false'],
 };
 
-const dateFields = new Set(['start_date', 'end_date', 'hire_date', 'expense_date', 'issue_date', 'expiry_date', 'assigned_at', 'expected_return_date', 'period']);
-const numberFields = new Set(['amount', 'salary', 'duration_hours', 'level', 'radius', 'latitude', 'longitude', 'entitlement_value', 'max_carryover_days', 'per_page', 'window_days', 'expiring_days']);
-const textareaFields = new Set(['description', 'reason', 'remarks', 'approval_notes', 'approval_note', 'rejection_note', 'completion_notes', 'comment_text', 'lifecycle_notes']);
+const dateFields = new Set(['start_date', 'end_date', 'hire_date', 'expense_date', 'issue_date', 'expiry_date', 'assigned_at', 'expected_return_date', 'period', 'target_date', 'swap_date']);
+const numberFields = new Set(['amount', 'salary', 'duration_hours', 'level', 'radius', 'latitude', 'longitude', 'entitlement_value', 'max_carryover_days', 'per_page', 'window_days', 'expiring_days', 'year', 'quarter', 'score', 'weight', 'target_value', 'feeders_required', 'talent_score', 'budget', 'min_minutes', 'multiplier', 'days']);
+const textareaFields = new Set(['description', 'reason', 'remarks', 'approval_notes', 'approval_note', 'rejection_note', 'completion_notes', 'comment_text', 'lifecycle_notes', 'strengths', 'improvements', 'feedback', 'reviewer_comment', 'goal_description', 'notes', 'questions_json', 'dates_json']);
 
 const routeActionMatrix: Record<string, string[]> = {
   '/profiles': ['createProfile', 'getProfileDetail', 'updateProfile', 'deleteProfile'],
@@ -640,6 +721,18 @@ const routeActionMatrix: Record<string, string[]> = {
   '/training/enrollments': ['enrollTrainingProgram', 'completeTrainingEnrollment'],
   '/competencies': ['createCompetency', 'assignCompetency'],
   '/my/competencies': ['createCompetency', 'assignCompetency'],
+  '/approval-flows': ['createApprovalFlow'],
+  '/performance/cycles': ['createPerformanceCycle'],
+  '/performance/reviews': ['createPerformanceReview'],
+  '/performance/okrs': ['createPerformanceOkr'],
+  '/performance/360-reviews': ['createPerformance360Review'],
+  '/performance/calibration': ['createPerformanceCalibration'],
+  '/career/idps': ['createCareerIdp'],
+  '/career/succession': ['createCareerSuccession'],
+  '/engagement/surveys': ['createEngagementSurvey'],
+  '/workforce/holidays': ['createWorkforceHolidayCalendar'],
+  '/workforce/shift-swaps': ['createWorkforceShiftSwap', 'updateWorkforceShiftSwap'],
+  '/workforce/overtime-rules': ['createWorkforceOvertimeRule'],
   '/notifications': ['markNotificationRead', 'markAllNotificationsRead', 'getNotificationUnreadCount'],
   '/my/kpi': ['submitKpi'],
   '/payroll': ['generatePayroll', 'approvePayroll', 'markPayrollPaid'],
@@ -712,6 +805,19 @@ const actionRequiredFields: Record<string, string[]> = {
   enrollTrainingProgram: ['id', 'employee_ids'],
   completeTrainingEnrollment: ['id'],
   assignCompetency: ['id', 'employee_ids'],
+  createApprovalFlow: ['name', 'module', 'role_ids'],
+  createPerformanceCycle: ['name', 'period_type', 'year', 'start_date', 'end_date'],
+  createPerformanceReview: ['review_cycle_id', 'employee_id', 'reviewer_user_id'],
+  createPerformanceOkr: ['employee_id', 'period_id', 'objective', 'start_date', 'end_date'],
+  createPerformance360Review: ['cycle_id', 'employee_id', 'manager_id', 'start_date', 'end_date'],
+  createPerformanceCalibration: ['cycle_id', 'name', 'scheduled_at'],
+  createCareerIdp: ['employee_id', 'review_cycle_id', 'goal_title', 'target_date'],
+  createCareerSuccession: ['position_key', 'employee_id', 'readiness'],
+  createEngagementSurvey: ['title', 'survey_type', 'start_date', 'end_date', 'questions_json'],
+  createWorkforceHolidayCalendar: ['name', 'year', 'dates_json'],
+  createWorkforceShiftSwap: ['requester_employee_id', 'target_employee_id', 'swap_date'],
+  updateWorkforceShiftSwap: ['id', 'status'],
+  createWorkforceOvertimeRule: ['name', 'department', 'location_id', 'min_minutes', 'multiplier'],
   submitKpi: ['id'],
   approvePayroll: ['id'],
   markPayrollPaid: ['id'],
@@ -739,7 +845,7 @@ const SectionPage = () => {
   const [tableRows, setTableRows] = useState<string[][]>([]);
   const [formState, setFormState] = useState<Record<string, string>>(getFormStateByMode(path, activeCrudMode));
   const [selectedDocumentFile, setSelectedDocumentFile] = useState<File | null>(null);
-  const [responseText, setResponseText] = useState('');
+  const [, setResponseText] = useState('');
   const [statusMessage, setStatusMessage] = useState('Ready to call API');
   const [loading, setLoading] = useState(false);
 
@@ -981,6 +1087,35 @@ const SectionPage = () => {
         case '/documents/expiring':
           result = await api.get('/documents/expiring', { params: { days: 30 } });
           break;
+        case '/organization/directory':
+          result = await api.get('/organization/directory');
+          break;
+        case '/organization/summary':
+          result = await api.get('/organization/summary');
+          break;
+        case '/organization/chart':
+          result = await api.get('/organization/chart');
+          break;
+        case '/organization/team':
+          result = await api.get(`/organization/team/${formState.manager_user_id || '1'}`);
+          break;
+        case '/organization/master-data':
+          result = await api.get('/organization/master-data');
+          break;
+        case '/approval-flows':
+          result = await api.get('/approval-flows');
+          break;
+        case '/compliance/overview':
+          result = await api.get('/compliance/overview');
+          break;
+        case '/compliance/audit-summary':
+          result = await api.get('/compliance/audit-summary');
+          break;
+        case '/compliance/expiring-documents':
+          result = await api.get('/compliance/expiring-documents', {
+            params: { days: formState.days || 30 },
+          });
+          break;
         case '/my/requests':
           result = await api.get('/my/requests', {
             params: {
@@ -1020,29 +1155,81 @@ const SectionPage = () => {
         case '/insights/people/detailed':
           result = await api.get('/insights/people/detailed', { params: { window_days: 30, expiring_days: 30 } });
           break;
+        case '/performance/summary':
+          result = await api.get('/performance/summary');
+          break;
+        case '/performance/cycles':
+          result = await api.get('/performance/cycles');
+          break;
+        case '/performance/reviews':
+          result = await api.get('/performance/reviews');
+          break;
+        case '/performance/okrs':
+          result = await api.get('/performance/okrs');
+          break;
+        case '/performance/360-reviews':
+          result = await api.get('/performance/360-reviews');
+          break;
+        case '/performance/calibration':
+          result = await api.get('/performance/calibration');
+          break;
+        case '/career/idps':
+          result = await api.get('/career/idps');
+          break;
+        case '/career/succession':
+          result = await api.get('/career/succession');
+          break;
+        case '/engagement/surveys':
+          result = await api.get('/engagement/surveys');
+          break;
+        case '/recruitment/openings':
+          result = await api.get('/recruitment/openings');
+          break;
+        case '/workforce/holidays':
+          result = await api.get('/workforce/holidays');
+          break;
+        case '/workforce/shift-swaps':
+          result = await api.get('/workforce/shift-swaps');
+          break;
+        case '/workforce/overtime-rules':
+          result = await api.get('/workforce/overtime-rules');
+          break;
+        case '/reports/dashboard-summary':
+          result = await api.get('/reports/dashboard-summary');
+          break;
         case '/reports/attendance':
-          result = await api.get('/attendance/intelligence', {
+          result = await api.get('/reports/attendance', {
             params: {
-              days: formState.window_days || 30,
               start_date: formState.start_date || undefined,
               end_date: formState.end_date || undefined,
             },
           });
           break;
-        case '/reports/leave':
-          result = await api.get('/leaves', {
+        case '/reports/competency':
+          result = await api.get('/reports/competency');
+          break;
+        case '/reports/employee-lifecycle':
+          result = await api.get('/reports/employee-lifecycle', {
             params: {
-              status: formState.status || undefined,
-              start_date: formState.start_date || undefined,
-              end_date: formState.end_date || undefined,
+              year: formState.year || undefined,
+            },
+          });
+          break;
+        case '/reports/assets':
+          result = await api.get('/reports/assets');
+          break;
+        case '/reports/leave':
+          result = await api.get('/reports/leave', {
+            params: {
+              year: formState.year || undefined,
             },
           });
           break;
         case '/reports/payroll':
-          result = await api.get('/payroll', {
+          result = await api.get('/reports/payroll', {
             params: {
-              period: formState.period || undefined,
-              status: formState.status || undefined,
+              start_date: formState.start_date || undefined,
+              end_date: formState.end_date || undefined,
             },
           });
           break;
@@ -1491,6 +1678,141 @@ const SectionPage = () => {
             </Button>
           </>
         );
+      case '/approval-flows':
+        return (
+          <>
+            <Button variant="primary" size="md" onClick={() => void performAction('createApprovalFlow')} disabled={loading}>
+              Create Approval Flow
+            </Button>
+            <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
+              Refresh Approval Flows
+            </Button>
+          </>
+        );
+      case '/performance/cycles':
+        return (
+          <>
+            <Button variant="primary" size="md" onClick={() => void performAction('createPerformanceCycle')} disabled={loading}>
+              Create Cycle
+            </Button>
+            <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
+              Refresh Cycles
+            </Button>
+          </>
+        );
+      case '/performance/reviews':
+        return (
+          <>
+            <Button variant="primary" size="md" onClick={() => void performAction('createPerformanceReview')} disabled={loading}>
+              Create Review
+            </Button>
+            <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
+              Refresh Reviews
+            </Button>
+          </>
+        );
+      case '/performance/okrs':
+        return (
+          <>
+            <Button variant="primary" size="md" onClick={() => void performAction('createPerformanceOkr')} disabled={loading}>
+              Create OKR
+            </Button>
+            <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
+              Refresh OKRs
+            </Button>
+          </>
+        );
+      case '/performance/360-reviews':
+        return (
+          <>
+            <Button variant="primary" size="md" onClick={() => void performAction('createPerformance360Review')} disabled={loading}>
+              Create 360 Review
+            </Button>
+            <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
+              Refresh 360 Reviews
+            </Button>
+          </>
+        );
+      case '/performance/calibration':
+        return (
+          <>
+            <Button variant="primary" size="md" onClick={() => void performAction('createPerformanceCalibration')} disabled={loading}>
+              Create Calibration Session
+            </Button>
+            <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
+              Refresh Calibration
+            </Button>
+          </>
+        );
+      case '/career/idps':
+        return (
+          <>
+            <Button variant="primary" size="md" onClick={() => void performAction('createCareerIdp')} disabled={loading}>
+              Create IDP
+            </Button>
+            <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
+              Refresh IDPs
+            </Button>
+          </>
+        );
+      case '/career/succession':
+        return (
+          <>
+            <Button variant="primary" size="md" onClick={() => void performAction('createCareerSuccession')} disabled={loading}>
+              Create Succession Candidate
+            </Button>
+            <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
+              Refresh Succession Matrix
+            </Button>
+          </>
+        );
+      case '/engagement/surveys':
+        return (
+          <>
+            <Button variant="primary" size="md" onClick={() => void performAction('createEngagementSurvey')} disabled={loading}>
+              Create Survey
+            </Button>
+            <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
+              Refresh Surveys
+            </Button>
+          </>
+        );
+      case '/workforce/holidays':
+        return (
+          <>
+            <Button variant="primary" size="md" onClick={() => void performAction('createWorkforceHolidayCalendar')} disabled={loading}>
+              Create Holiday Calendar
+            </Button>
+            <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
+              Refresh Holidays
+            </Button>
+          </>
+        );
+      case '/workforce/shift-swaps':
+        return (
+          <>
+            <Button variant="primary" size="md" onClick={() => void performAction('createWorkforceShiftSwap')} disabled={loading}>
+              Create Shift Swap
+            </Button>
+            <Button variant="outline" size="md" onClick={() => void performAction('updateWorkforceShiftSwap')} disabled={loading}>
+              Update Shift Swap Status
+            </Button>
+            <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
+              Refresh Shift Swaps
+            </Button>
+          </>
+        );
+      case '/workforce/overtime-rules':
+        return (
+          <>
+            <Button variant="primary" size="md" onClick={() => void performAction('createWorkforceOvertimeRule')} disabled={loading}>
+              Create Overtime Rule
+            </Button>
+            <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
+              Refresh Overtime Rules
+            </Button>
+          </>
+        );
       case '/notifications':
         return (
           <>
@@ -1509,6 +1831,16 @@ const SectionPage = () => {
           </>
         );
       case '/insights/people/detailed':
+      case '/organization/directory':
+      case '/organization/summary':
+      case '/organization/chart':
+      case '/organization/team':
+      case '/organization/master-data':
+      case '/compliance/overview':
+      case '/compliance/audit-summary':
+      case '/compliance/expiring-documents':
+      case '/performance/summary':
+      case '/recruitment/openings':
       case '/documents/expiring':
       case '/my/assets':
       case '/my/trainings':
@@ -1542,6 +1874,10 @@ const SectionPage = () => {
       case '/reports/attendance':
       case '/reports/leave':
       case '/reports/payroll':
+      case '/reports/dashboard-summary':
+      case '/reports/competency':
+      case '/reports/employee-lifecycle':
+      case '/reports/assets':
       case '/reports/custom':
         return (
           <>
@@ -1737,13 +2073,6 @@ const SectionPage = () => {
           <div className="section-action-form">
             {renderFormFields()}
             <div className="section-action-buttons">{renderActionButtons()}</div>
-          </div>
-          <div className="section-action-response">
-            <div className="response-header">
-              <ShieldCheck size={18} />
-              <span>Response</span>
-            </div>
-            <pre className="action-response">{responseText || 'Hasil response akan tampil di sini.'}</pre>
           </div>
         </div>
       </Card>

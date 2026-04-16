@@ -67,7 +67,12 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
     navigate("/login", { replace: true });
   };
 
-  const onRefreshUser = async () => {
+  const onRefreshUser = async (event?: React.MouseEvent<HTMLButtonElement>) => {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
     setIsRefreshing(true);
     try {
       await refreshUserData();
@@ -98,25 +103,28 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
       </div>
       
       <div className="header-right">
-        <button 
-          className="icon-button" 
-          onClick={onRefreshUser}
-          disabled={isRefreshing}
-          aria-label="Refresh user data"
-          title="Refresh user data & roles"
-        >
-          <RotateCw size={32} className={isRefreshing ? 'rotating' : ''} />
-        </button>
-
-        <button className="icon-button" aria-label="Toggle Dark Mode">
-          <Sun size={32} />
-        </button>
-        
-        <div className="notification-wrapper">
-          <button className="icon-button" aria-label="Notifications">
-            <Bell size={32} />
-            <span className="notification-badge"></span>
+        <div className="header-actions" role="group" aria-label="Header actions">
+          <button 
+            type="button"
+            className="icon-button" 
+            onClick={(event) => void onRefreshUser(event)}
+            disabled={isRefreshing}
+            aria-label="Refresh user data"
+            title="Refresh user data & roles"
+          >
+            <RotateCw size={24} className={isRefreshing ? 'rotating header-action-icon' : 'header-action-icon'} />
           </button>
+
+          <button className="icon-button" aria-label="Toggle Dark Mode">
+            <Sun size={24} className="header-action-icon" />
+          </button>
+          
+          <div className="notification-wrapper">
+            <button className="icon-button" aria-label="Notifications">
+              <Bell size={24} className="header-action-icon" />
+              <span className="notification-badge"></span>
+            </button>
+          </div>
         </div>
         
         <div

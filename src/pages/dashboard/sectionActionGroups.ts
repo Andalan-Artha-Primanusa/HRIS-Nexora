@@ -23,11 +23,33 @@ const parseNumericIds = (value: string | undefined, fieldName: string) => {
   return ids;
 };
 
+const parseJsonArray = (value: string | undefined, fieldName: string) => {
+  if (!value?.trim()) {
+    throw new Error(`${fieldName} wajib berupa JSON array.`);
+  }
+
+  try {
+    const parsed = JSON.parse(value);
+    if (!Array.isArray(parsed)) {
+      throw new Error('invalid');
+    }
+    return parsed;
+  } catch {
+    throw new Error(`${fieldName} harus valid JSON array.`);
+  }
+};
+
 const getCreateActions = (ctx: SectionActionContext) => ({
   createProfile: () => api.post('/profiles', ctx.buildProfilePayload()),
   createEmployee: () =>
-    api.post('/employees', ctx.buildPayloadByKeys(['user_id', 'employee_code', 'position', 'department', 'hire_date', 'salary'])),
-  createLeave: () => api.post('/leaves', ctx.buildPayloadByKeys(['leave_type', 'start_date', 'end_date', 'total_days', 'reason'])),
+    api.post('/employees', ctx.buildPayloadByKeys(['user_id', 'manager_id', 'employee_code', 'position', 'department', 'hire_date', 'salary', 'status', 'location_id', 'work_schedule_id'])),
+  createLeave: () => {
+    const payload = ctx.buildPayloadByKeys(['type', 'leave_type', 'start_date', 'end_date', 'total_days', 'reason']);
+    return api.post('/leaves', {
+      ...payload,
+      type: payload.type || payload.leave_type,
+    });
+  },
   createLeavePolicy: () => {
     const { id: _id, ...payload } = ctx.formState;
     return api.post('/leave-policies', payload);
@@ -36,12 +58,61 @@ const getCreateActions = (ctx: SectionActionContext) => ({
     api.post('/my/reimbursements', ctx.buildPayloadByKeys(['title', 'description', 'amount', 'category', 'expense_date', 'receipt_path'])),
   createAsset: () => api.post('/assets', ctx.buildPayloadByKeys(['asset_code', 'name', 'category', 'cost', 'purchase_date', 'location_id'])),
   createMyRequest: () => api.post('/my/requests', ctx.buildPayloadByKeys(['request_type', 'description', 'priority'])),
-  createTrainingProgram: () =>
-    api.post('/training/programs', ctx.buildPayloadByKeys(['name', 'code', 'category', 'duration_hours', 'start_date', 'end_date'])),
+  createTrainingProgram: () => {
+    const payload = ctx.buildPayloadByKeys(['name', 'title', 'code', 'category', 'description', 'provider', 'mode', 'duration_hours', 'start_date', 'end_date', 'budget', 'status']);
+    return api.post('/training/programs', {
+      ...payload,
+      title: payload.title || payload.name,
+    });
+  },
   createCompetency: () => api.post('/competencies', ctx.buildPayloadByKeys(['name', 'code', 'category', 'level'])),
   createLocation: () => api.post('/locations', ctx.buildPayloadByKeys(['name', 'latitude', 'longitude', 'radius'])),
   createReimbursementAdmin: () =>
     api.post('/reimbursements', ctx.buildPayloadByKeys(['title', 'description', 'amount', 'category', 'expense_date', 'receipt_path'])),
+  createApprovalFlow: () => {
+    const roleIds = parseNumericIds(ctx.formState.role_ids, 'role_ids');
+    const steps = roleIds.map((roleId, index) => ({ step_order: index + 1, role_id: roleId }));
+
+    return api.post('/approval-flows', {
+      name: ctx.formState.name,
+      module: ctx.formState.module,
+      steps,
+    });
+  },
+  createPerformanceCycle: () =>
+    api.post('/performance/cycles', ctx.buildPayloadByKeys(['name', 'period_type', 'year', 'quarter', 'start_date', 'end_date', 'status', 'description'])),
+  createPerformanceReview: () =>
+    api.post('/performance/reviews', ctx.buildPayloadByKeys(['review_cycle_id', 'employee_id', 'reviewer_user_id', 'kpi_id', 'score', 'strengths', 'improvements', 'feedback', 'reviewer_comment'])),
+  createPerformanceOkr: () =>
+    api.post('/performance/okrs', ctx.buildPayloadByKeys(['employee_id', 'period_id', 'objective', 'description', 'weight', 'target_value', 'unit', 'start_date', 'end_date'])),
+  createPerformance360Review: () =>
+    api.post('/performance/360-reviews', ctx.buildPayloadByKeys(['cycle_id', 'employee_id', 'manager_id', 'feeders_required', 'start_date', 'end_date'])),
+  createPerformanceCalibration: () =>
+    api.post('/performance/calibration', ctx.buildPayloadByKeys(['cycle_id', 'name', 'description', 'scheduled_at'])),
+  createCareerIdp: () =>
+    api.post('/career/idps', ctx.buildPayloadByKeys(['employee_id', 'review_cycle_id', 'goal_title', 'goal_description', 'status', 'target_date', 'mentor_user_id'])),
+  createCareerSuccession: () =>
+    api.post('/career/succession', ctx.buildPayloadByKeys(['position_key', 'employee_id', 'readiness', 'talent_score', 'notes'])),
+  createEngagementSurvey: () =>
+    api.post('/engagement/surveys', {
+      ...ctx.buildPayloadByKeys(['title', 'survey_type', 'start_date', 'end_date', 'anonymous', 'status']),
+      anonymous: ctx.formState.anonymous === 'true',
+      questions: parseJsonArray(ctx.formState.questions_json, 'questions_json'),
+    }),
+  createWorkforceHolidayCalendar: () =>
+    api.post('/workforce/holidays', {
+      ...ctx.buildPayloadByKeys(['name', 'year', 'active']),
+      active: ctx.formState.active !== 'false',
+      dates: parseJsonArray(ctx.formState.dates_json, 'dates_json'),
+    }),
+  createWorkforceShiftSwap: () =>
+    api.post('/workforce/shift-swaps', ctx.buildPayloadByKeys(['requester_employee_id', 'target_employee_id', 'swap_date', 'reason'])),
+  createWorkforceOvertimeRule: () =>
+    api.post('/workforce/overtime-rules', {
+      ...ctx.buildPayloadByKeys(['name', 'department', 'location_id', 'min_minutes', 'multiplier', 'requires_approval', 'active']),
+      requires_approval: ctx.formState.requires_approval !== 'false',
+      active: ctx.formState.active !== 'false',
+    }),
 });
 
 const getUpdateActions = (ctx: SectionActionContext) => ({
@@ -63,6 +134,12 @@ const getUpdateActions = (ctx: SectionActionContext) => ({
     return api.put(`/requests/${id}/status`, {
       status: ctx.formState.status,
       completion_notes: ctx.formState.completion_notes,
+    });
+  },
+  updateWorkforceShiftSwap: () => {
+    const id = ctx.getRequiredId('Shift Swap ID');
+    return api.put(`/workforce/shift-swaps/${id}`, {
+      status: ctx.formState.status,
     });
   },
 });

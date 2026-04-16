@@ -39,16 +39,11 @@ export const menuItems: MenuItem[] = [
         label: 'Organization', 
         icon: Network,
         subItems: [
-          { label: 'Department', path: '/organization/department' },
-          { label: 'Position', path: '/organization/position' },
-        ]
-      },
-      {
-        label: 'Employment',
-        icon: Briefcase,
-        subItems: [
-          { label: 'Status', path: '/employment/status' },
-          { label: 'Salary History', path: '/employment/salary-history' },
+          { label: 'Directory', path: '/organization/directory' },
+          { label: 'Summary', path: '/organization/summary' },
+          { label: 'Org Chart', path: '/organization/chart' },
+          { label: 'Team Members', path: '/organization/team' },
+          { label: 'Master Data', path: '/organization/master-data' },
         ]
       },
       {
@@ -58,9 +53,6 @@ export const menuItems: MenuItem[] = [
           { label: 'My Documents', path: '/my/documents' },
           { label: 'Review Queue', path: '/documents/review' },
           { label: 'Expiring Documents', path: '/documents/expiring' },
-          { label: 'KTP', path: '/documents/ktp' },
-          { label: 'Contract', path: '/documents/contract' },
-          { label: 'Other Files', path: '/documents/others' },
         ]
       }
     ]
@@ -69,14 +61,11 @@ export const menuItems: MenuItem[] = [
     label: 'Attendance & Time Tracking',
     icon: Clock,
     subItems: [
-      { label: 'Overview', path: '/attendance' },
       { label: 'Check In', path: '/attendance/check-in' },
       { label: 'Check Out', path: '/attendance/check-out' },
       { label: 'Today', path: '/attendance/today' },
       { label: 'History', path: '/attendance/history' },
-      { label: 'Daily Attendance', path: '/attendance/daily' },
       { label: 'Timesheet', path: '/attendance/timesheet' },
-      { label: 'Shift Management', path: '/attendance/shifts' },
       { label: 'Overtime', path: '/attendance/overtime' },
       { label: 'Reports', path: '/attendance/reports' },
     ]
@@ -172,20 +161,35 @@ export const menuItems: MenuItem[] = [
     subItems: [
       { label: 'KPI List', path: '/kpis' },
       { label: 'Create KPI', path: '/kpis/add' },
+      { label: 'Performance Summary', path: '/performance/summary' },
+      { label: 'Performance Cycles', path: '/performance/cycles' },
+      { label: 'Performance Reviews', path: '/performance/reviews' },
+      { label: 'OKRs', path: '/performance/okrs' },
+      { label: '360 Reviews', path: '/performance/360-reviews' },
+      { label: 'Calibration', path: '/performance/calibration' },
+      { label: 'Career IDP', path: '/career/idps' },
+      { label: 'Succession Matrix', path: '/career/succession' },
+      { label: 'Engagement Surveys', path: '/engagement/surveys' },
+      { label: 'Recruitment Openings', path: '/recruitment/openings' },
+      { label: 'Workforce Holidays', path: '/workforce/holidays' },
+      { label: 'Workforce Shift Swaps', path: '/workforce/shift-swaps' },
+      { label: 'Workforce Overtime Rules', path: '/workforce/overtime-rules' },
+      { label: 'Approval Flows', path: '/approval-flows' },
     ]
   },
   {
     label: 'Employee Self Service (ESS)',
     icon: UserCircle,
     subItems: [
-      { label: 'My Profile', path: '/ess/profile' },
-      { label: 'My Attendance', path: '/ess/attendance' },
-      { label: 'My Leave', path: '/ess/leave' },
-      { label: 'My Payslip', path: '/ess/payslip' },
-      { label: 'My Requests', path: '/ess/requests' },
       { label: 'My KPI', path: '/my/kpi' },
       { label: 'My Reimbursements', path: '/my/reimbursements' },
       { label: 'My Payroll', path: '/my/payroll' },
+      { label: 'My Leaves', path: '/leave/my-leave' },
+      { label: 'My Documents', path: '/my/documents' },
+      { label: 'My Trainings', path: '/my/trainings' },
+      { label: 'My Competencies', path: '/my/competencies' },
+      { label: 'My Assets', path: '/my/assets' },
+      { label: 'My Requests', path: '/my/requests' },
     ]
   },
   {
@@ -194,10 +198,17 @@ export const menuItems: MenuItem[] = [
     requiredChecker: (user) => RBACUtils.isManager(user) || RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
     subItems: [
       { label: 'People Insights', path: '/insights/people/detailed' },
+      { label: 'Dashboard Summary', path: '/reports/dashboard-summary' },
       { label: 'Attendance Report', path: '/reports/attendance' },
       { label: 'Leave Report', path: '/reports/leave' },
       { label: 'Payroll Report', path: '/reports/payroll' },
+      { label: 'Competency Report', path: '/reports/competency' },
+      { label: 'Employee Lifecycle', path: '/reports/employee-lifecycle' },
+      { label: 'Asset Report', path: '/reports/assets' },
       { label: 'Custom Report', path: '/reports/custom' },
+      { label: 'Compliance Overview', path: '/compliance/overview' },
+      { label: 'Compliance Audit', path: '/compliance/audit-summary' },
+      { label: 'Expiring Compliance Docs', path: '/compliance/expiring-documents' },
     ]
   },
   {
@@ -230,6 +241,31 @@ export const menuItems: MenuItem[] = [
         path: '/admin/permissions',
         requiredChecker: (user) => RBACUtils.canViewPermissions(user)
       },
+      {
+        label: 'Admin Notifications',
+        path: '/admin/notifications',
+        requiredChecker: (user) => RBACUtils.isAdmin(user) || RBACUtils.isSuperAdmin(user),
+      },
+      {
+        label: 'Email Notifications',
+        path: '/admin/email-notifications',
+        requiredChecker: (user) => RBACUtils.isAdmin(user) || RBACUtils.isSuperAdmin(user),
+      },
+      {
+        label: 'Audit Logs',
+        path: '/admin/audit-logs',
+        requiredChecker: (user) => RBACUtils.isAdmin(user) || RBACUtils.isSuperAdmin(user),
+      },
+      {
+        label: 'Import Center',
+        path: '/admin/import',
+        requiredChecker: (user) => RBACUtils.isAdmin(user) || RBACUtils.isSuperAdmin(user),
+      },
+      {
+        label: 'Biometric Devices',
+        path: '/admin/biometric-devices',
+        requiredChecker: (user) => RBACUtils.isAdmin(user) || RBACUtils.isSuperAdmin(user),
+      },
     ]
   },
   {
@@ -244,14 +280,11 @@ export const menuItems: MenuItem[] = [
         label: 'Master Data',
         icon: Database,
         subItems: [
-          { label: 'Department', path: '/settings/master-data/department' },
-          { label: 'Position', path: '/settings/master-data/position' },
           { label: 'Leave Type', path: '/settings/master-data/leave-type' },
           { label: 'Expense Category', path: '/settings/master-data/expense-category' },
         ]
       },
-      { label: 'Notification Settings', path: '/settings/notification' },
-      { label: 'System Logs', path: '/settings/logs' }
+      { label: 'Notification Settings', path: '/settings/notification' }
     ]
   }
 ];

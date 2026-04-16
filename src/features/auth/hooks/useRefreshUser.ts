@@ -9,6 +9,9 @@ export const useRefreshUser = () => {
   const updateUser = useAuthStore((state) => state.updateUser);
   const user = useAuthStore((state) => state.user);
 
+  const normalizeRoles = (roles: any[] | undefined) =>
+    (roles || []).map((r: any) => (typeof r === "string" ? { name: r } : r));
+
   const refreshUserData = async () => {
     try {
       // Try multiple endpoints for getting user data
@@ -33,13 +36,22 @@ export const useRefreshUser = () => {
       const userData = response.data?.data ?? response.data;
       
       if (userData && typeof userData === "object") {
-        // Ensure roles structure
+        const incomingRoles = Array.isArray((userData as any).roles)
+          ? normalizeRoles((userData as any).roles)
+          : [];
+        const incomingPermissions = Array.isArray((userData as any).permissions)
+          ? (userData as any).permissions
+          : [];
+
+        // Keep previous auth fields when refresh endpoint returns partial profile data.
+        const fallbackRoles = Array.isArray(user?.roles) ? user.roles : [];
+        const fallbackPermissions = Array.isArray(user?.permissions) ? user.permissions : [];
+
         const updatedUser = {
+          ...(user || {}),
           ...userData,
-          roles: (userData.roles || []).map((r: any) => 
-            typeof r === "string" ? { name: r } : r
-          ),
-          permissions: userData.permissions || [],
+          roles: incomingRoles.length > 0 ? incomingRoles : fallbackRoles,
+          permissions: incomingPermissions.length > 0 ? incomingPermissions : fallbackPermissions,
         };
         
         // Update stored user dengan data terbaru

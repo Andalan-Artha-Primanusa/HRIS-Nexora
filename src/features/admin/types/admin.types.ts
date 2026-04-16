@@ -41,3 +41,25 @@ export interface AdminListResponse<T> {
   per_page?: number;
 }
 
+export interface AuditLogItem extends Record<string, unknown> {
+  id?: number | string;
+  action?: string;
+  event?: string;
+  description?: string;
+  user_name?: string;
+  causer_name?: string;
+  module?: string;
+  ip_address?: string;
+  created_at?: string;
+}
+
+export interface BiometricDeviceItem extends Record<string, unknown> {
+  id?: number | string;
+  name?: string;
+  ip_address?: string;
+  location?: string;
+  port?: number;
+  is_online?: boolean | number | string;
+  status?: string;
+}
+
