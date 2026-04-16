@@ -20,112 +20,112 @@ export type MenuItem = {
 // 🔥 MENU FINAL (rapi + scalable)
 export const menuItems: MenuItem[] = [
   {
-    label: 'Dashboard',
+    label: 'Beranda',
     icon: LayoutDashboard,
     subItems: [
-      { label: 'Overview', path: '/dashboard' },
-      { label: 'HR Summary', path: '/hr-summary' },
-      { label: 'Analytics', path: '/analytics' },
+      { label: 'Ringkasan', path: '/dashboard' },
+      { label: 'Ringkasan HR', path: '/hr-summary' },
+      { label: 'Analitik', path: '/analytics' },
     ]
   },
   {
-    label: 'Employee Management',
+    label: 'Manajemen Karyawan',
     icon: Users,
     requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
     subItems: [
-      { label: 'Profiles', path: '/profiles' },
-      { label: 'Employee List', path: '/employees' },
+      { label: 'Profil', path: '/profiles' },
+      { label: 'Daftar Karyawan', path: '/employees' },
       { 
-        label: 'Organization', 
+        label: 'Organisasi', 
         icon: Network,
         subItems: [
-          { label: 'Directory', path: '/organization/directory' },
-          { label: 'Summary', path: '/organization/summary' },
-          { label: 'Org Chart', path: '/organization/chart' },
-          { label: 'Team Members', path: '/organization/team' },
+          { label: 'Direktori', path: '/organization/directory' },
+          { label: 'Ringkasan', path: '/organization/summary' },
+          { label: 'Struktur Organisasi', path: '/organization/chart' },
+          { label: 'Tim', path: '/organization/team' },
           { label: 'Master Data', path: '/organization/master-data' },
         ]
       },
       {
-        label: 'Documents',
+        label: 'Dokumen',
         icon: FileText,
         subItems: [
-          { label: 'My Documents', path: '/my/documents' },
-          { label: 'Review Queue', path: '/documents/review' },
-          { label: 'Expiring Documents', path: '/documents/expiring' },
+          { label: 'Dokumen Saya', path: '/my/documents' },
+          { label: 'Antrian Review', path: '/documents/review' },
+          { label: 'Dokumen Kedaluwarsa', path: '/documents/expiring' },
         ]
       }
     ]
   },
   {
-    label: 'Attendance & Time Tracking',
+    label: 'Absensi & Waktu',
     icon: Clock,
     subItems: [
-      { label: 'Check In', path: '/attendance/check-in' },
-      { label: 'Check Out', path: '/attendance/check-out' },
-      { label: 'Today', path: '/attendance/today' },
-      { label: 'History', path: '/attendance/history' },
+      { label: 'Absen Masuk', path: '/attendance/check-in' },
+      { label: 'Absen Pulang', path: '/attendance/check-out' },
+      { label: 'Hari Ini', path: '/attendance/today' },
+      { label: 'Riwayat', path: '/attendance/history' },
       { label: 'Timesheet', path: '/attendance/timesheet' },
-      { label: 'Overtime', path: '/attendance/overtime' },
-      { label: 'Reports', path: '/attendance/reports' },
+      { label: 'Lembur', path: '/attendance/overtime' },
+      { label: 'Laporan', path: '/attendance/reports' },
     ]
   },
   {
-    label: 'Leave Management',
+    label: 'Manajemen Cuti',
     icon: CalendarDays,
     subItems: [
-      { label: 'Leave Requests', path: '/leave/requests' },
-      { label: 'My Leave', path: '/leave/my-leave' },
-      { label: 'Approval', path: '/leave/approval' },
-      { label: 'Leave Calendar', path: '/leave/calendar' },
-      { label: 'Leave Balance', path: '/leave/balance' },
-      { label: 'Leave Type', path: '/leave/type' },
-      { label: 'Leave Policy', path: '/leave/policy' },
+      { label: 'Permohonan Cuti', path: '/leave/requests' },
+      { label: 'Cuti Saya', path: '/leave/my-leave' },
+      { label: 'Persetujuan', path: '/leave/approval' },
+      { label: 'Kalender Cuti', path: '/leave/calendar' },
+      { label: 'Saldo Cuti', path: '/leave/balance' },
+      { label: 'Jenis Cuti', path: '/leave/type' },
+      { label: 'Kebijakan Cuti', path: '/leave/policy' },
     ]
   },
   {
-    label: 'Payroll & Payslip',
+    label: 'Penggajian & Slip Gaji',
     icon: Banknote,
     requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
     subItems: [
-      { label: 'Dashboard', path: '/payroll' },
+      { label: 'Ringkasan', path: '/payroll' },
       { label: 'Daftar Payroll', path: '/payroll/list' },
       { label: 'Kelola Payroll', path: '/payroll/crud' },
       { label: 'Generate Payroll', path: '/payroll/generate' },
       { label: 'Approve Payroll', path: '/payroll/approve' },
       { label: 'Pembayaran Payroll', path: '/payroll/payment' },
       {
-        label: 'Salary Component',
+        label: 'Komponen Gaji',
         icon: CreditCard,
         subItems: [
-          { label: 'Allowance', path: '/payroll/component/allowance' },
-          { label: 'Deduction', path: '/payroll/component/deduction' },
+          { label: 'Tunjangan', path: '/payroll/component/allowance' },
+          { label: 'Potongan', path: '/payroll/component/deduction' },
         ]
       },
-      { label: 'Tax & BPJS', path: '/payroll/tax' },
-      { label: 'Reports', path: '/payroll/reports' },
+      { label: 'Pajak & BPJS', path: '/payroll/tax' },
+      { label: 'Laporan', path: '/payroll/reports' },
     ]
   },
   {
-    label: 'Assets & Inventory',
+    label: 'Aset & Inventaris',
     icon: Briefcase,
     requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
     subItems: [
-      { label: 'Assets Registry', path: '/assets' },
-      { label: 'Assignments', path: '/assets/assignments' },
-      { label: 'My Assets', path: '/my/assets' },
+      { label: 'Daftar Aset', path: '/assets' },
+      { label: 'Penugasan', path: '/assets/assignments' },
+      { label: 'Aset Saya', path: '/my/assets' },
     ]
   },
   {
-    label: 'Reimbursement & Expense',
+    label: 'Reimburse & Pengeluaran',
     icon: Receipt,
     requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
     subItems: [
-      { label: 'Submit Expense', path: '/expense/submit' },
-      { label: 'Expense List', path: '/expense/list' },
-      { label: 'Approval', path: '/expense/approval' },
-      { label: 'Categories', path: '/expense/categories' },
-      { label: 'Reports', path: '/expense/reports' },
+      { label: 'Ajukan Pengeluaran', path: '/expense/submit' },
+      { label: 'Daftar Pengeluaran', path: '/expense/list' },
+      { label: 'Persetujuan', path: '/expense/approval' },
+      { label: 'Kategori', path: '/expense/categories' },
+      { label: 'Laporan', path: '/expense/reports' },
     ]
   },
   {
@@ -145,7 +145,7 @@ export const menuItems: MenuItem[] = [
     ]
   },
   {
-    label: 'HR Service Requests',
+    label: 'Permintaan Layanan HR',
     icon: FileText,
     subItems: [
       { label: 'My Requests', path: '/my/requests' },
@@ -155,7 +155,7 @@ export const menuItems: MenuItem[] = [
     ]
   },
   {
-    label: 'KPI & Performance',
+    label: 'KPI & Kinerja',
     icon: Target,
     requiredChecker: (user) => RBACUtils.isManager(user) || RBACUtils.isHR(user) || RBACUtils.isAdmin(user) || RBACUtils.isSuperAdmin(user),
     subItems: [
@@ -178,7 +178,7 @@ export const menuItems: MenuItem[] = [
     ]
   },
   {
-    label: 'Employee Self Service (ESS)',
+    label: 'Layanan Mandiri Karyawan (ESS)',
     icon: UserCircle,
     subItems: [
       { label: 'My KPI', path: '/my/kpi' },
@@ -193,7 +193,7 @@ export const menuItems: MenuItem[] = [
     ]
   },
   {
-    label: 'Reports & Analytics',
+    label: 'Laporan & Analitik',
     icon: FileBarChart,
     requiredChecker: (user) => RBACUtils.isManager(user) || RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
     subItems: [
@@ -212,64 +212,64 @@ export const menuItems: MenuItem[] = [
     ]
   },
   {
-    label: 'Notifications',
+    label: 'Notifikasi',
     icon: Settings,
     subItems: [{ label: 'Notification Center', path: '/notifications' }],
   },
   {
-    label: 'Admin Tools',
+    label: 'Alat Admin',
     icon: ShieldCheck,
     requiredChecker: (user) => RBACUtils.isAdmin(user) || RBACUtils.canViewUsers(user) || RBACUtils.canViewRoles(user) || RBACUtils.canViewPermissions(user),
     subItems: [
       { 
-        label: 'Locations', 
+        label: 'Lokasi', 
         path: '/locations',
         requiredChecker: (user) => RBACUtils.hasPermission(user, 'location.view' as any)
       },
       { 
-        label: 'Users', 
+        label: 'Pengguna', 
         path: '/admin/users',
         requiredChecker: (user) => RBACUtils.canViewUsers(user)
       },
       { 
-        label: 'Roles', 
+        label: 'Peran', 
         path: '/admin/roles',
         requiredChecker: (user) => RBACUtils.canViewRoles(user)
       },
       { 
-        label: 'Permissions', 
+        label: 'Izin', 
         path: '/admin/permissions',
         requiredChecker: (user) => RBACUtils.canViewPermissions(user)
       },
       {
-        label: 'Admin Notifications',
+        label: 'Notifikasi Admin',
         path: '/admin/notifications',
         requiredChecker: (user) => RBACUtils.isAdmin(user) || RBACUtils.isSuperAdmin(user),
       },
       {
-        label: 'Email Notifications',
+        label: 'Notifikasi Email',
         path: '/admin/email-notifications',
         requiredChecker: (user) => RBACUtils.isAdmin(user) || RBACUtils.isSuperAdmin(user),
       },
       {
-        label: 'Audit Logs',
+        label: 'Log Audit',
         path: '/admin/audit-logs',
         requiredChecker: (user) => RBACUtils.isAdmin(user) || RBACUtils.isSuperAdmin(user),
       },
       {
-        label: 'Import Center',
+        label: 'Pusat Impor',
         path: '/admin/import',
         requiredChecker: (user) => RBACUtils.isAdmin(user) || RBACUtils.isSuperAdmin(user),
       },
       {
-        label: 'Biometric Devices',
+        label: 'Perangkat Biometrik',
         path: '/admin/biometric-devices',
         requiredChecker: (user) => RBACUtils.isAdmin(user) || RBACUtils.isSuperAdmin(user),
       },
     ]
   },
   {
-    label: 'Settings',
+    label: 'Pengaturan',
     icon: Settings,
     requiredChecker: (user) => RBACUtils.isAdmin(user),
     subItems: [
@@ -284,7 +284,7 @@ export const menuItems: MenuItem[] = [
           { label: 'Expense Category', path: '/settings/master-data/expense-category' },
         ]
       },
-      { label: 'Notification Settings', path: '/settings/notification' }
+      { label: 'Pengaturan Notifikasi', path: '/settings/notification' }
     ]
   }
 ];

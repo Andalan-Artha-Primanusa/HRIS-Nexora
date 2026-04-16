@@ -53,200 +53,200 @@ const getCrudModeFromPath = (pathname: string): CrudMode | null => {
 
 const sectionDefinitions: Record<string, { title: string; subtitle: string; icon: any; color: string }> = {
   dashboard: {
-    title: 'Dashboard Overview',
-    subtitle: 'Ringkasan HRIS utama dengan KPI, aktivitas, dan tren yang paling penting.',
+     title: 'Ringkasan Dashboard',
+     subtitle: 'Ringkasan HRIS utama dengan KPI, aktivitas, dan tren terpenting.',
     icon: BarChart3,
     color: '#2563EB',
   },
   'hr-summary': {
-    title: 'HR Summary',
-    subtitle: 'Intisari data SDM, headcount, turnover, dan absensi.',
+     title: 'Ringkasan HR',
+     subtitle: 'Intisari data SDM, jumlah karyawan, turnover, dan absensi.',
     icon: Users,
     color: '#2563EB',
   },
   analytics: {
-    title: 'Analytics',
-    subtitle: 'Analisa performa tim, ketidakhadiran, dan produktivitas secara realtime.',
+     title: 'Analitik',
+     subtitle: 'Analisa performa tim, ketidakhadiran, dan produktivitas secara real-time.',
     icon: BarChart3,
     color: '#2563EB',
   },
   employees: {
-    title: 'Employee Management',
-    subtitle: 'Kelola data karyawan, posisi, dan struktur organisasi.',
+     title: 'Manajemen Karyawan',
+     subtitle: 'Kelola data karyawan, posisi, dan struktur organisasi.',
     icon: Users,
     color: '#2563EB',
   },
   organization: {
-    title: 'Organization Structure',
-    subtitle: 'Atur departemen dan posisi yang ada di perusahaan.',
+     title: 'Struktur Organisasi',
+     subtitle: 'Atur departemen dan posisi di perusahaan.',
     icon: Network,
     color: '#2563EB',
   },
   employment: {
-    title: 'Employment Management',
-    subtitle: 'Status kerja, riwayat gaji, dan data karir karyawan.',
+     title: 'Manajemen Kepegawaian',
+     subtitle: 'Status kerja, riwayat gaji, dan data karir karyawan.',
     icon: Briefcase,
     color: '#2563EB',
   },
   documents: {
-    title: 'Documents',
-    subtitle: 'Dokumentasi karyawan yang tersimpan, seperti KTP dan kontrak.',
+     title: 'Dokumen',
+     subtitle: 'Dokumen karyawan seperti KTP, kontrak, dan lainnya.',
     icon: FileText,
     color: '#2563EB',
   },
   attendance: {
-    title: 'Attendance',
-    subtitle: 'Lihat kehadiran harian, timesheet, shift, dan lembur.',
+     title: 'Absensi',
+     subtitle: 'Lihat kehadiran harian, timesheet, shift, dan lembur.',
     icon: Clock,
     color: '#2563EB',
   },
   leave: {
-    title: 'Leave Management',
-    subtitle: 'Kelola izin, saldo cuti, dan kalender cuti karyawan.',
+     title: 'Manajemen Cuti',
+     subtitle: 'Kelola izin, saldo cuti, dan kalender cuti karyawan.',
     icon: CalendarDays,
     color: '#2563EB',
   },
   payroll: {
-    title: 'Payroll',
-    subtitle: 'Proses gaji, slip, komponen upah, dan laporan payroll.',
+     title: 'Penggajian',
+     subtitle: 'Proses gaji, slip, komponen upah, dan laporan payroll.',
     icon: CreditCard,
     color: '#2563EB',
   },
   expense: {
-    title: 'Reimbursement',
-    subtitle: 'Klaim biaya operasional dan persetujuan reimburse.',
+     title: 'Reimburse',
+     subtitle: 'Klaim biaya operasional dan persetujuan reimburse.',
     icon: Receipt,
     color: '#2563EB',
   },
   performance: {
-    title: 'Performance',
-    subtitle: 'Tujuan, review, dan umpan balik karyawan. Kelola KPI di menu terpisah.',
+     title: 'Performa',
+     subtitle: 'Tujuan, review, dan feedback karyawan. Kelola KPI di menu terpisah.',
     icon: Target,
     color: '#2563EB',
   },
   ess: {
-    title: 'Employee Self Service',
-    subtitle: 'Akses mandiri karyawan untuk profil, absen, dan slip gaji.',
+     title: 'Layanan Mandiri Karyawan',
+     subtitle: 'Akses mandiri karyawan untuk profil, absen, dan slip gaji.',
     icon: UserCircle,
     color: '#2563EB',
   },
   reports: {
-    title: 'Reports & Analytics',
-    subtitle: 'Laporan SDM, absensi, cuti, payroll, dan analitik khusus.',
+     title: 'Laporan & Analitik',
+     subtitle: 'Laporan SDM, absensi, cuti, payroll, dan analitik.',
     icon: FileText,
     color: '#2563EB',
   },
   assets: {
-    title: 'Assets & Inventory',
-    subtitle: 'Kelola aset perusahaan, assignment, dan pengembalian aset karyawan.',
+     title: 'Aset & Inventaris',
+     subtitle: 'Kelola aset perusahaan, penugasan, dan pengembalian aset.',
     icon: Briefcase,
     color: '#2563EB',
   },
   training: {
-    title: 'Training Programs',
-    subtitle: 'Rancang program training dan pantau enrollment sampai completion.',
+     title: 'Program Pelatihan',
+     subtitle: 'Rancang program pelatihan dan pantau kepesertaan.',
     icon: Target,
     color: '#2563EB',
   },
   competencies: {
-    title: 'Competency Management',
-    subtitle: 'Kelola competency matrix dan assignment kompetensi ke karyawan.',
+     title: 'Manajemen Kompetensi',
+     subtitle: 'Kelola matriks kompetensi dan penugasan ke karyawan.',
     icon: Target,
     color: '#2563EB',
   },
   requests: {
-    title: 'HR Service Requests',
-    subtitle: 'Pantau ticket HR, assignment PIC, dan update status request.',
+     title: 'Permintaan Layanan HR',
+     subtitle: 'Pantau tiket HR, penugasan PIC, dan update status request.',
     icon: FileText,
     color: '#2563EB',
   },
   notifications: {
-    title: 'Notification Center',
-    subtitle: 'Notifikasi approval, reminder, dan pembaruan status lintas modul.',
+     title: 'Pusat Notifikasi',
+     subtitle: 'Notifikasi approval, pengingat, dan update status lintas modul.',
     icon: Settings,
     color: '#2563EB',
   },
   insights: {
-    title: 'People Insights',
-    subtitle: 'Dashboard insight lintas attendance, leave, payroll, reimbursement, dan training.',
+     title: 'Insight SDM',
+     subtitle: 'Dashboard insight lintas absensi, cuti, payroll, reimburse, dan pelatihan.',
     icon: BarChart3,
     color: '#2563EB',
   },
   settings: {
-    title: 'System Settings',
-    subtitle: 'Pengaturan perusahaan, pengguna, peran, dan master data.',
+     title: 'Pengaturan Sistem',
+     subtitle: 'Pengaturan perusahaan, pengguna, peran, dan master data.',
     icon: Settings,
     color: '#2563EB',
   },
   '/my/kpi': {
-    title: 'My KPI',
-    subtitle: 'Cek KPI pribadi dan submit target yang sudah selesai.',
+     title: 'KPI Saya',
+     subtitle: 'Cek KPI pribadi dan submit target yang sudah selesai.',
     icon: Target,
     color: '#2563EB',
   },
   '/my/reimbursements': {
-    title: 'My Reimbursements',
-    subtitle: 'Lihat klaim Anda dan ajukan reimbursement baru.',
+     title: 'Reimburse Saya',
+     subtitle: 'Lihat klaim Anda dan ajukan reimburse baru.',
     icon: Receipt,
     color: '#2563EB',
   },
   '/attendance/check-in': {
-    title: 'Attendance Check-in',
-    subtitle: 'Hit API check-in untuk mencatat kehadiran lokasi.',
+     title: 'Absen Masuk',
+     subtitle: 'Pencatatan kehadiran (check-in) lokasi.',
     icon: MapPin,
     color: '#2563EB',
   },
   '/attendance/check-out': {
-    title: 'Attendance Check-out',
-    subtitle: 'Hit API check-out setelah selesai bekerja.',
+     title: 'Absen Pulang',
+     subtitle: 'Pencatatan pulang kerja (check-out).',
     icon: MapPin,
     color: '#2563EB',
   },
   '/attendance/history': {
-    title: 'Attendance History',
-    subtitle: 'Lihat riwayat absensi harian dan jam kerja Anda.',
+     title: 'Riwayat Absensi',
+     subtitle: 'Lihat riwayat absensi harian dan jam kerja Anda.',
     icon: CalendarDays,
     color: '#2563EB',
   },
   '/attendance/today': {
-    title: "Today's Attendance",
-    subtitle: 'Lihat status kehadiran hari ini dan jam masuk/pulang terbaru.',
+     title: 'Absensi Hari Ini',
+     subtitle: 'Lihat status kehadiran hari ini dan jam masuk/pulang terbaru.',
     icon: CalendarDays,
     color: '#2563EB',
   },
   '/profiles': {
-    title: 'Profiles',
-    subtitle: 'Kelola profil karyawan dan informasi kontak.',
+     title: 'Profil',
+     subtitle: 'Kelola profil karyawan dan informasi kontak.',
     icon: UserCircle,
     color: '#2563EB',
   },
   '/my/payroll': {
-    title: 'My Payroll',
-    subtitle: 'Lihat ringkasan payroll pribadi Anda.',
+     title: 'Payroll Saya',
+     subtitle: 'Lihat ringkasan payroll pribadi Anda.',
     icon: CreditCard,
     color: '#2563EB',
   },
   '/locations': {
-    title: 'Locations',
-    subtitle: 'Kelola wilayah dan radius lokasi absensi.',
+     title: 'Lokasi',
+     subtitle: 'Kelola wilayah dan radius lokasi absensi.',
     icon: MapPin,
     color: '#2563EB',
   },
   '/admin/users': {
-    title: 'User Management',
-    subtitle: 'Kelola akun administrator dan karyawan.',
+     title: 'Manajemen Pengguna',
+     subtitle: 'Kelola akun administrator dan karyawan.',
     icon: UserCircle,
     color: '#2563EB',
   },
   '/admin/roles': {
-    title: 'Role Management',
-    subtitle: 'Tetapkan peran dan level akses pengguna.',
+     title: 'Manajemen Peran',
+     subtitle: 'Tetapkan peran dan level akses pengguna.',
     icon: ShieldCheck,
     color: '#2563EB',
   },
   '/admin/permissions': {
-    title: 'Permissions',
-    subtitle: 'Kelola izin pada setiap fitur sistem.',
+     title: 'Izin Akses',
+     subtitle: 'Kelola izin pada setiap fitur sistem.',
     icon: ShieldCheck,
     color: '#2563EB',
   },
@@ -1598,10 +1598,10 @@ const SectionPage = () => {
               View Request Detail
             </Button>
             <Button variant="outline" size="md" onClick={() => void performAction('addRequestComment')} disabled={loading}>
-              Add Comment
+              Tambah Komentar
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Refresh Requests
+              Muat Ulang Permintaan
             </Button>
           </>
         );
@@ -1609,10 +1609,10 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('assignRequest')} disabled={loading}>
-              Assign Request
+              Tugaskan Permintaan
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Refresh Queue
+              Muat Ulang Antrian
             </Button>
           </>
         );
@@ -1620,7 +1620,7 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="outline" size="md" onClick={() => void performAction('viewRequestDetail')} disabled={loading}>
-              View Request Detail
+              Lihat Detail Permintaan
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
               Refresh Queue
@@ -1631,7 +1631,7 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('updateRequestStatus')} disabled={loading}>
-              Update Request Status
+              Perbarui Status Permintaan
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
               Refresh Queue
@@ -1642,10 +1642,10 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('createTrainingProgram')} disabled={loading}>
-              Create Program
+              Buat Program
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Refresh Programs
+              Muat Ulang Program
             </Button>
           </>
         );
@@ -1653,13 +1653,13 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('enrollTrainingProgram')} disabled={loading}>
-              Enroll Employees
+              Daftarkan Karyawan
             </Button>
             <Button variant="outline" size="md" onClick={() => void performAction('completeTrainingEnrollment')} disabled={loading}>
-              Complete Enrollment
+              Selesaikan Pendaftaran
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Refresh Enrollments
+              Muat Ulang Pendaftaran
             </Button>
           </>
         );
@@ -1668,13 +1668,13 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('createCompetency')} disabled={loading}>
-              Create Competency
+              Buat Kompetensi
             </Button>
             <Button variant="outline" size="md" onClick={() => void performAction('assignCompetency')} disabled={loading}>
-              Assign Competency
+              Tugaskan Kompetensi
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Refresh Competencies
+              Muat Ulang Kompetensi
             </Button>
           </>
         );
@@ -1682,10 +1682,10 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('createApprovalFlow')} disabled={loading}>
-              Create Approval Flow
+              Buat Alur Persetujuan
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Refresh Approval Flows
+              Muat Ulang Alur Persetujuan
             </Button>
           </>
         );
@@ -1693,10 +1693,10 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('createPerformanceCycle')} disabled={loading}>
-              Create Cycle
+              Buat Siklus
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Refresh Cycles
+              Muat Ulang Siklus
             </Button>
           </>
         );
@@ -1704,10 +1704,10 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('createPerformanceReview')} disabled={loading}>
-              Create Review
+              Buat Review
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Refresh Reviews
+              Muat Ulang Review
             </Button>
           </>
         );
@@ -1715,10 +1715,10 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('createPerformanceOkr')} disabled={loading}>
-              Create OKR
+              Buat OKR
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Refresh OKRs
+              Muat Ulang OKR
             </Button>
           </>
         );
@@ -1726,10 +1726,10 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('createPerformance360Review')} disabled={loading}>
-              Create 360 Review
+              Buat 360 Review
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Refresh 360 Reviews
+              Muat Ulang 360 Review
             </Button>
           </>
         );
@@ -1737,10 +1737,10 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('createPerformanceCalibration')} disabled={loading}>
-              Create Calibration Session
+              Buat Sesi Kalibrasi
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Refresh Calibration
+              Muat Ulang Kalibrasi
             </Button>
           </>
         );
@@ -1748,10 +1748,10 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('createCareerIdp')} disabled={loading}>
-              Create IDP
+              Buat IDP
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Refresh IDPs
+              Muat Ulang IDP
             </Button>
           </>
         );
@@ -1759,10 +1759,10 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('createCareerSuccession')} disabled={loading}>
-              Create Succession Candidate
+              Buat Kandidat Suksesi
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Refresh Succession Matrix
+              Muat Ulang Matriks Suksesi
             </Button>
           </>
         );
@@ -1770,10 +1770,10 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('createEngagementSurvey')} disabled={loading}>
-              Create Survey
+              Buat Survei
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Refresh Surveys
+              Muat Ulang Survei
             </Button>
           </>
         );
@@ -1781,10 +1781,10 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('createWorkforceHolidayCalendar')} disabled={loading}>
-              Create Holiday Calendar
+              Buat Kalender Libur
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Refresh Holidays
+              Muat Ulang Hari Libur
             </Button>
           </>
         );
@@ -1792,13 +1792,13 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('createWorkforceShiftSwap')} disabled={loading}>
-              Create Shift Swap
+              Buat Tukar Shift
             </Button>
             <Button variant="outline" size="md" onClick={() => void performAction('updateWorkforceShiftSwap')} disabled={loading}>
-              Update Shift Swap Status
+              Perbarui Status Tukar Shift
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Refresh Shift Swaps
+              Muat Ulang Tukar Shift
             </Button>
           </>
         );
@@ -1806,10 +1806,10 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('createWorkforceOvertimeRule')} disabled={loading}>
-              Create Overtime Rule
+              Buat Aturan Lembur
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Refresh Overtime Rules
+              Muat Ulang Aturan Lembur
             </Button>
           </>
         );
@@ -1817,16 +1817,16 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('markNotificationRead')} disabled={loading}>
-              Mark One as Read
+              Tandai Satu Sudah Dibaca
             </Button>
             <Button variant="outline" size="md" onClick={() => void performAction('markAllNotificationsRead')} disabled={loading}>
-              Mark All as Read
+              Tandai Semua Sudah Dibaca
             </Button>
             <Button variant="outline" size="md" onClick={() => void performAction('getNotificationUnreadCount')} disabled={loading}>
-              Get Unread Count
+              Hitung Notifikasi Belum Dibaca
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Refresh Notifications
+              Muat Ulang Notifikasi
             </Button>
           </>
         );
@@ -1867,7 +1867,7 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Refresh Data
+              Muat Ulang Data
             </Button>
           </>
         );
@@ -1882,7 +1882,7 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Apply Report Filters
+              Terapkan Filter Laporan
             </Button>
           </>
         );
@@ -1896,16 +1896,16 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('generatePayroll')} disabled={loading}>
-              Generate Monthly Payroll
+              Proses Payroll Bulanan
             </Button>
             <Button variant="outline" size="md" onClick={() => void performAction('approvePayroll')} disabled={loading}>
-              Approve Payroll
+              Setujui Payroll
             </Button>
             <Button variant="outline" size="md" onClick={() => void performAction('markPayrollPaid')} disabled={loading}>
-              Mark Payroll as Paid
+              Tandai Payroll Sudah Dibayar
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Refresh Payroll
+              Muat Ulang Payroll
             </Button>
           </>
         );
@@ -1913,10 +1913,10 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('createLocation')} disabled={loading}>
-              Create Location
+              Tambah Lokasi
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Refresh Locations
+              Muat Ulang Lokasi
             </Button>
           </>
         );
@@ -1924,24 +1924,24 @@ const SectionPage = () => {
         return (
           <>
             {isCreateMode ? (
-              <Button variant="primary" size="md" onClick={() => void performAction('createReimbursementAdmin')} disabled={loading}>
-                Create Reimbursement
+                <Button variant="primary" size="md" onClick={() => void performAction('createReimbursementAdmin')} disabled={loading}>
+                  Buat Reimburse
               </Button>
             ) : (
               <>
                 <Button variant="outline" size="md" onClick={() => void performAction('approveReimbursement')} disabled={loading}>
-                  Approve Reimbursement
+                  Setujui Reimburse
                 </Button>
                 <Button variant="outline" size="md" onClick={() => void performAction('rejectReimbursement')} disabled={loading}>
-                  Reject Reimbursement
+                  Tolak Reimburse
                 </Button>
                 <Button variant="outline" size="md" onClick={() => void performAction('markReimbursementPaid')} disabled={loading}>
-                  Mark as Paid
+                  Tandai Sudah Dibayar
                 </Button>
               </>
             )}
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Refresh Reimbursements
+              Muat Ulang Reimburse
             </Button>
           </>
         );
@@ -1949,16 +1949,16 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('approveReimbursement')} disabled={loading}>
-              Approve Reimbursement
+              Setujui Reimburse
             </Button>
             <Button variant="outline" size="md" onClick={() => void performAction('rejectReimbursement')} disabled={loading}>
-              Reject Reimbursement
+              Tolak Reimburse
             </Button>
             <Button variant="outline" size="md" onClick={() => void performAction('markReimbursementPaid')} disabled={loading}>
-              Mark as Paid
+              Tandai Sudah Dibayar
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Refresh Approval Queue
+              Muat Ulang Antrian Persetujuan
             </Button>
           </>
         );
@@ -1966,16 +1966,16 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('submitMyPayroll')} disabled={loading}>
-              Refresh My Payroll
+              Muat Ulang Payroll Saya
             </Button>
             <Button variant="outline" size="md" onClick={() => void performAction('getMyPayrollSlip')} disabled={loading}>
-              Get Payroll Slip
+              Lihat Slip Gaji
             </Button>
             <Button variant="outline" size="md" onClick={() => void performAction('exportMyPayrollCsv')} disabled={loading}>
-              Export Payroll CSV
+              Ekspor Payroll CSV
             </Button>
             <Button variant="outline" size="md" onClick={() => void performAction('exportMyPayrollPdf')} disabled={loading}>
-              Export Payroll PDF
+              Ekspor Payroll PDF
             </Button>
           </>
         );
@@ -1983,10 +1983,10 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('assignRoleToUser')} disabled={loading}>
-              Assign Role to User
+              Tugaskan Peran ke Pengguna
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Refresh Users
+              Muat Ulang Pengguna
             </Button>
           </>
         );
@@ -1994,10 +1994,10 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('assignPermissionToRole')} disabled={loading}>
-              Assign Permission to Role
+              Tugaskan Izin ke Peran
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Refresh Roles
+              Muat Ulang Peran
             </Button>
           </>
         );
@@ -2005,14 +2005,14 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Refresh Permissions
+              Muat Ulang Izin
             </Button>
           </>
         );
       default:
         return supportsList(path) ? (
           <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-            Refresh Data
+            Muat Ulang Data
           </Button>
         ) : null;
     }
@@ -2034,7 +2034,7 @@ const SectionPage = () => {
         <div className="section-actions">
           <Button variant="outline" size="md" onClick={handleRefresh} disabled={loading || !canRefresh}>
             <Search size={16} />
-            Refresh
+            Muat Ulang
           </Button>
         </div>
       </div>
@@ -2056,16 +2056,16 @@ const SectionPage = () => {
       <Card className="section-action-card" glass>
         <div className="section-action-header">
           <div>
-            <h2>Control Panel</h2>
+            <h2>Panel Kontrol</h2>
             <p>
               {supportsCrudModeSplit(path)
-                ? `Route aktif: ${activeCrudMode === 'create' ? 'Create Page' : 'Manage Page'} (dipisah per halaman).`
+                ? `Route aktif: ${activeCrudMode === 'create' ? 'Halaman Tambah' : 'Halaman Kelola'} (dipisah per halaman).`
                 : 'Gunakan panel ini untuk memanggil endpoint sesuai Postman API.'}
             </p>
           </div>
           <div className="action-status-wrap">
             <span className="action-status">{statusMessage}</span>
-            {loading && <span className="action-loading">Loading…</span>}
+            {loading && <span className="action-loading">Memuat…</span>}
           </div>
         </div>
 
@@ -2084,7 +2084,7 @@ const SectionPage = () => {
             <p>{section.subtitle}</p>
           </div>
           <Button variant="secondary" size="sm" onClick={handleRefresh} disabled={loading || !canRefresh}>
-            Refresh Data
+            Muat Ulang Data
           </Button>
         </div>
 
@@ -2108,7 +2108,7 @@ const SectionPage = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={tableColumns.length}>No API data available for this section.</td>
+                  <td colSpan={tableColumns.length}>Tidak ada data API untuk section ini.</td>
                 </tr>
               )}
             </tbody>
@@ -2116,10 +2116,10 @@ const SectionPage = () => {
         </div>
 
         <div className="ui-table-pagination">
-          <span className="pagination-info">Showing 1 to {tableRows.length} entries</span>
+          <span className="pagination-info">Menampilkan 1 sampai {tableRows.length} entri</span>
           <div className="pagination-controls">
-            <button type="button">Prev</button>
-            <button type="button">Next</button>
+            <button type="button">Sebelumnya</button>
+            <button type="button">Berikutnya</button>
           </div>
         </div>
       </Card>
