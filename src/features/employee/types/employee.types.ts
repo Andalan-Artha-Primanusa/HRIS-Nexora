@@ -14,6 +14,9 @@ export interface EmployeeItem {
   department: string;
   hire_date: string;
   salary: number;
+  location_id?: number | null;
+  manager_id?: number | null;
+  work_schedule_id?: number | null;
   status?: "active" | "inactive" | "pending";
   created_at?: string;
   updated_at?: string;
@@ -36,6 +39,9 @@ export interface EmployeeCreatePayload {
   department: string;
   hire_date: string;
   salary: number;
+  location_id?: number;
+  manager_id?: number;
+  work_schedule_id?: number;
 }
 
 /**
@@ -45,6 +51,9 @@ export interface EmployeeUpdatePayload {
   position?: string;
   department?: string;
   salary?: number;
+  location_id?: number;
+  manager_id?: number;
+  work_schedule_id?: number;
   status?: "active" | "inactive" | "pending";
 }
 

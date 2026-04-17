@@ -1,8 +1,4 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Card } from '@/shared/ui/Card';
-import { Button } from '@/shared/ui/Button';
-import { Alert } from '@/shared/ui/Alert';
+import { api } from '@/shared/api/httpClient';
 import { getLocationDetail, updateLocation } from '@/features/location/api/location.service';
 import type { LocationUpdatePayload } from '@/features/location/types/location.types';
 import { MapPin, ArrowLeft } from 'lucide-react';
@@ -17,7 +13,9 @@ const EditLocationPage = () => {
     latitude: '',
     longitude: '',
     radius: '100',
+    department: '',
   });
+  const [departments, setDepartments] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('info');
@@ -40,6 +38,7 @@ const EditLocationPage = () => {
           latitude: String(payload.latitude || ''),
           longitude: String(payload.longitude || ''),
           radius: String(payload.radius || '100'),
+          department: payload.department || '',
         });
         setAlertMessage('');
       } catch (err: any) {
@@ -51,10 +50,22 @@ const EditLocationPage = () => {
       }
     };
 
+    const fetchDepartments = async () => {
+      try {
+        const response = await api.get('/organization/master-data');
+        if (response.data && response.data.data && Array.isArray(response.data.data.departments)) {
+          setDepartments(response.data.data.departments);
+        }
+      } catch (err) {
+        console.error('Failed to fetch departments:', err);
+      }
+    };
+
     void loadDetail();
+    void fetchDepartments();
   }, [id]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -65,6 +76,11 @@ const EditLocationPage = () => {
   const validateForm = (): boolean => {
     if (!formData.name.trim()) {
       setAlertMessage('Nama lokasi wajib diisi');
+      setAlertType('error');
+      return false;
+    }
+    if (!formData.department) {
+      setAlertMessage('Departemen wajib dipilih');
       setAlertType('error');
       return false;
     }
@@ -86,6 +102,7 @@ const EditLocationPage = () => {
       const payload: LocationUpdatePayload = {
         name: formData.name,
         radius: parseFloat(formData.radius),
+        department: formData.department,
       };
 
       await updateLocation(id, payload);
@@ -166,6 +183,32 @@ const EditLocationPage = () => {
               disabled={loading}
             />
             <p className="location-hint">Berikan nama yang deskriptif untuk lokasi ini</p>
+          </div>
+
+          {/* Departemen */}
+          <div className="location-form-group">
+            <label htmlFor="department" className="location-label">
+              Departemen
+              <span className="location-required">*</span>
+            </label>
+            <select
+              id="department"
+              name="department"
+              className="location-input"
+              value={formData.department}
+              onChange={handleInputChange}
+              disabled={loading}
+              style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}
+            >
+              <option value="">Pilih Departemen</option>
+              {departments.map((dept) => (
+                <option key={dept} value={dept}>
+                  {dept}
+                </option>
+              ))}
+              <option value="All Departments">All Departments (Global)</option>
+            </select>
+            <p className="location-hint">Pilih departemen yang memiliki akses ke lokasi ini</p>
           </div>
 
           {/* GPS Coordinates */}
@@ -267,6 +310,10 @@ const EditLocationPage = () => {
           <div className="location-info-item">
             <span className="location-info-label">Nama</span>
             <span className="location-info-value">{formData.name || '—'}</span>
+          </div>
+          <div className="location-info-item">
+            <span className="location-info-label">Departemen</span>
+            <span className="location-info-value">{formData.department || '—'}</span>
           </div>
           <div className="location-info-item">
             <span className="location-info-label">Radius</span>

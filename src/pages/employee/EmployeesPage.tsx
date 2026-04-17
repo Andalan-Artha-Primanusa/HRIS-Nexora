@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { api } from "@/shared/api/httpClient";
+import { getAllLocations } from "@/features/location/api/location.service";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
@@ -34,6 +36,9 @@ type EmployeeFormState = {
   department: string;
   hire_date: string;
   salary: string;
+  location_id: string;
+  manager_id: string;
+  work_schedule_id: string;
 };
 
 const DEFAULT_FORM: EmployeeFormState = {
@@ -44,6 +49,9 @@ const DEFAULT_FORM: EmployeeFormState = {
   department: "",
   hire_date: "",
   salary: "",
+  location_id: "",
+  manager_id: "",
+  work_schedule_id: "",
 };
 
 const formatDateTime = (input: string) => {
@@ -73,6 +81,12 @@ const EmployeesPage = () => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [hasLoaded, setHasLoaded] = useState(false);
+
+  // Metadata State
+  const [allLocations, setAllLocations] = useState<Record<string, any>[]>([]);
+  const [allUsers, setAllUsers] = useState<Record<string, any>[]>([]);
+  const [allSchedules, setAllSchedules] = useState<Record<string, any>[]>([]);
+  const [allDepartments, setAllDepartments] = useState<string[]>([]);
 
   // Search & Filter State
   const [searchText, setSearchText] = useState("");
@@ -204,6 +218,40 @@ const EmployeesPage = () => {
     return id;
   };
 
+  const loadMetadata = async () => {
+    try {
+      console.log("🔍 Fetching metadata...");
+      // Fetch Locations
+      const locs = await getAllLocations();
+      const locList = Array.isArray(locs.items) ? locs.items : [];
+      console.log("📍 Locations fetched:", locList);
+      setAllLocations(locList);
+
+      // Fetch Users (for Managers and direct user_id link)
+      const usersRes = await api.get('/admin/users');
+      let usersList = usersRes.data?.data?.items || usersRes.data?.data || [];
+      if (!Array.isArray(usersList)) usersList = [];
+      console.log("👤 Users fetched:", usersList);
+      setAllUsers(usersList);
+
+      // Fetch Work Schedules
+      const schedRes = await api.get('/work-schedules');
+      let schedList = schedRes.data?.data || schedRes.data || [];
+      if (!Array.isArray(schedList)) schedList = [];
+      console.log("📅 Schedules fetched:", schedList);
+      setAllSchedules(schedList);
+
+      // Fetch Departments
+      const deptRes = await api.get('/organization/master-data');
+      const deptList = deptRes.data?.data?.departments;
+      const finalDeptList = Array.isArray(deptList) ? deptList : [];
+      console.log("🏢 Departments fetched:", finalDeptList);
+      setAllDepartments(finalDeptList);
+    } catch (err) {
+      console.error("❌ Failed to load metadata:", err);
+    }
+  };
+
   const loadEmployees = async () => {
     setLoading(true);
     setStatusMessage("Memuat semua employees...");
@@ -213,6 +261,9 @@ const EmployeesPage = () => {
       const result = await getAllEmployees();
       setItems(result);
       setStatusMessage("Semua employee berhasil dimuat.");
+      
+      // Load metadata in parallel
+      void loadMetadata();
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Gagal memuat employee.";
       setStatusMessage(message);
@@ -235,6 +286,9 @@ const EmployeesPage = () => {
         department: createForm.department,
         hire_date: createForm.hire_date,
         salary: Number(createForm.salary) || 0,
+        location_id: Number(createForm.location_id) || undefined,
+        manager_id: Number(createForm.manager_id) || undefined,
+        work_schedule_id: Number(createForm.work_schedule_id) || undefined,
       };
 
       await createEmployee(payload);
@@ -262,6 +316,9 @@ const EmployeesPage = () => {
         position: updateForm.position,
         department: updateForm.department,
         salary: Number(updateForm.salary) || 0,
+        location_id: Number(updateForm.location_id) || undefined,
+        manager_id: Number(updateForm.manager_id) || undefined,
+        work_schedule_id: Number(updateForm.work_schedule_id) || undefined,
       };
 
       await updateEmployee(id, payload);
@@ -298,6 +355,7 @@ const EmployeesPage = () => {
 
   useEffect(() => {
     if (isAddPage || isUpdatePage) {
+      void loadMetadata();
       return;
     }
 
@@ -329,6 +387,9 @@ const EmployeesPage = () => {
           department: String(result?.department ?? ""),
           hire_date: String(result?.hire_date ?? ""),
           salary: String(result?.salary ?? ""),
+          location_id: String(result?.location_id ?? ""),
+          manager_id: String(result?.manager_id ?? ""),
+          work_schedule_id: String(result?.work_schedule_id ?? ""),
         });
 
         setStatusMessage("Detail employee berhasil dimuat.");
@@ -369,13 +430,19 @@ const EmployeesPage = () => {
 
           <div className="form-grid">
             <div className="form-group">
-              <span>USER ID</span>
-              <input
+              <span>USER</span>
+              <select
                 className="form-input"
                 value={createForm.user_id}
                 onChange={(event) => setCreateForm((prev) => ({ ...prev, user_id: event.target.value }))}
-                placeholder="Masukkan User ID"
-              />
+              >
+                <option value="">Pilih User</option>
+                {allUsers.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.name} ({u.email})
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="form-group">
               <span>KODE KARYAWAN</span>
@@ -397,12 +464,16 @@ const EmployeesPage = () => {
             </div>
             <div className="form-group">
               <span>DEPARTEMEN</span>
-              <input
+              <select
                 className="form-input"
                 value={createForm.department}
                 onChange={(event) => setCreateForm((prev) => ({ ...prev, department: event.target.value }))}
-                placeholder="Contoh: IT Support"
-              />
+              >
+                <option value="">Pilih Departemen</option>
+                {allDepartments.map((d) => (
+                  <option key={d} value={d}>{d}</option>
+                ))}
+              </select>
             </div>
             <div className="form-group">
               <span>TANGGAL BERGABUNG</span>
@@ -421,6 +492,45 @@ const EmployeesPage = () => {
                 onChange={(event) => setCreateForm((prev) => ({ ...prev, salary: event.target.value }))}
                 placeholder="Masukkan nominal gaji"
               />
+            </div>
+            <div className="form-group">
+              <span>LOKASI KERJA</span>
+              <select
+                className="form-input"
+                value={createForm.location_id}
+                onChange={(event) => setCreateForm((prev) => ({ ...prev, location_id: event.target.value }))}
+              >
+                <option value="">Pilih Lokasi</option>
+                {allLocations.map((l) => (
+                  <option key={l.id} value={l.id}>{l.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group">
+              <span>MANAGER</span>
+              <select
+                className="form-input"
+                value={createForm.manager_id}
+                onChange={(event) => setCreateForm((prev) => ({ ...prev, manager_id: event.target.value }))}
+              >
+                <option value="">Pilih Manager</option>
+                {allUsers.map((u) => (
+                  <option key={u.id} value={u.id}>{u.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group">
+              <span>WORK SCHEDULE</span>
+              <select
+                className="form-input"
+                value={createForm.work_schedule_id}
+                onChange={(event) => setCreateForm((prev) => ({ ...prev, work_schedule_id: event.target.value }))}
+              >
+                <option value="">Pilih Jadwal</option>
+                {allSchedules.map((s) => (
+                  <option key={s.id} value={s.id}>{s.name || s.title}</option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -478,12 +588,16 @@ const EmployeesPage = () => {
             </div>
             <div className="form-group">
               <span>DEPARTEMEN</span>
-              <input
+              <select
                 className="form-input"
                 value={updateForm.department}
                 onChange={(event) => setUpdateForm((prev) => ({ ...prev, department: event.target.value }))}
-                placeholder="Masukkan Departemen"
-              />
+              >
+                <option value="">Pilih Departemen</option>
+                {allDepartments.map((d) => (
+                  <option key={d} value={d}>{d}</option>
+                ))}
+              </select>
             </div>
             <div className="form-group">
               <span>GAJI POKOK</span>
@@ -493,6 +607,45 @@ const EmployeesPage = () => {
                 onChange={(event) => setUpdateForm((prev) => ({ ...prev, salary: event.target.value }))}
                 placeholder="Masukkan Gaji"
               />
+            </div>
+            <div className="form-group">
+              <span>LOKASI KERJA</span>
+              <select
+                className="form-input"
+                value={updateForm.location_id}
+                onChange={(event) => setUpdateForm((prev) => ({ ...prev, location_id: event.target.value }))}
+              >
+                <option value="">Pilih Lokasi</option>
+                {allLocations.map((l) => (
+                  <option key={l.id} value={l.id}>{l.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group">
+              <span>MANAGER</span>
+              <select
+                className="form-input"
+                value={updateForm.manager_id}
+                onChange={(event) => setUpdateForm((prev) => ({ ...prev, manager_id: event.target.value }))}
+              >
+                <option value="">Pilih Manager</option>
+                {allUsers.map((u) => (
+                  <option key={u.id} value={u.id}>{u.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group">
+              <span>WORK SCHEDULE</span>
+              <select
+                className="form-input"
+                value={updateForm.work_schedule_id}
+                onChange={(event) => setUpdateForm((prev) => ({ ...prev, work_schedule_id: event.target.value }))}
+              >
+                <option value="">Pilih Jadwal</option>
+                {allSchedules.map((s) => (
+                  <option key={s.id} value={s.id}>{s.name || s.title}</option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -688,6 +841,8 @@ const EmployeesPage = () => {
                     <th>Nama Karyawan</th>
                     <th>Departemen</th>
                     <th>Jabatan</th>
+                    <th>Lokasi</th>
+                    <th>Manager</th>
                     <th>Tgl Bergabung</th>
                     <th className="th-right">Gaji Pokok</th>
                     <th className="th-center">Aksi</th>
@@ -710,6 +865,14 @@ const EmployeesPage = () => {
                       </td>
                       <td><span className="cell-tag">{item.department || "-"}</span></td>
                       <td>{item.position || "-"}</td>
+                      <td>
+                        <span className="cell-tag" style={{ backgroundColor: '#f0fdf4', color: '#166534' }}>
+                          {allLocations.find(l => String(l.id) === String(item.location_id))?.name || "-"}
+                        </span>
+                      </td>
+                      <td>
+                        {allUsers.find(u => String(u.id) === String(item.manager_id))?.name || "-"}
+                      </td>
                       <td>
                         <span className="cell-date">{item.hire_date ? formatDateTime(item.hire_date) : "-"}</span>
                       </td>

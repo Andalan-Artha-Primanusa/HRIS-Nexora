@@ -3,7 +3,10 @@ import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { Alert } from '@/shared/ui/Alert';
 import { api } from '@/shared/api/httpClient';
-import { CheckCircle2, MapPin } from 'lucide-react';
+import { CheckCircle2, MapPin, Building2 } from 'lucide-react';
+import type { LocationItem } from '@/features/location/types/location.types';
+import { getAllLocations } from '@/features/location/api/location.service';
+import { useAuthStore } from '@/app/store/auth.store';
 import './AttendancePages.css';
 
 const AttendanceCheckInPage = () => {
@@ -13,6 +16,10 @@ const AttendanceCheckInPage = () => {
   const [loading, setLoading] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('info');
+  const [locations, setLocations] = useState<LocationItem[]>([]);
+  const [selectedLocationId, setSelectedLocationId] = useState<string>('');
+  const [userDepartment, setUserDepartment] = useState<string>('');
+  const user = useAuthStore((state) => state.user);
 
   const detectGPS = () => {
     setStatus('Mendeteksi lokasi GPS...');
@@ -47,6 +54,67 @@ const AttendanceCheckInPage = () => {
 
   useEffect(() => {
     detectGPS();
+
+    // Fetch User Profile and Locations
+    const initData = async () => {
+      try {
+        // 1. Get user profile for department and direct location assignment
+        const profileRes = await api.get('/me');
+        const employeeData = profileRes.data?.data?.employee;
+        const dept = employeeData?.department || '';
+        const assignedLocationId = employeeData?.location_id;
+        
+        setUserDepartment(dept);
+
+        // 2. Get all locations
+        const locsRes = await getAllLocations();
+        const allLocs = locsRes.items;
+        
+        // 3. Filtering Logic:
+        // Priority 1: Direct assignment (location_id)
+        // Priority 2: Department-based matches + "All Departments"
+        
+        let filtered: LocationItem[] = [];
+        
+        if (assignedLocationId) {
+          // If employee has a direct assignment, show it plus global locations
+          filtered = allLocs.filter(loc => 
+            String(loc.id) === String(assignedLocationId) || 
+            loc.department === 'All Departments'
+          );
+          
+          // Ensure the assigned one is first
+          filtered.sort((a,b) => String(a.id) === String(assignedLocationId) ? -1 : 1);
+        } else {
+          // Fallback to department-based filtering
+          filtered = allLocs.filter(loc => 
+            !loc.department || 
+            loc.department === 'All Departments' || 
+            loc.department === dept
+          );
+        }
+
+        setLocations(filtered);
+        
+        if (filtered.length > 0) {
+          // If we have an assigned location, select it. otherwise select the first one.
+          const defaultLoc = assignedLocationId 
+            ? filtered.find(l => String(l.id) === String(assignedLocationId)) || filtered[0]
+            : filtered[0];
+          setSelectedLocationId(String(defaultLoc.id));
+        } else {
+          const reason = assignedLocationId 
+            ? `Lokasi penugasan Anda (ID: ${assignedLocationId}) tidak ditemukan.`
+            : `Departemen Anda (${dept || 'Belum diatur'}) belum memiliki lokasi absensi yang ditugaskan.`;
+          setAlertMessage(reason);
+          setAlertType('warning' as any);
+        }
+      } catch (err) {
+        console.error('Failed to initialize attendance data:', err);
+      }
+    };
+
+    void initData();
   }, []);
 
   const handleCheckIn = async () => {
@@ -64,6 +132,7 @@ const AttendanceCheckInPage = () => {
       await api.post('/attendance/check-in', {
         latitude,
         longitude,
+        location_id: selectedLocationId,
       });
 
       setStatus('Check-in berhasil');
@@ -85,12 +154,12 @@ const AttendanceCheckInPage = () => {
         <div>
           <span className="attendance-badge">Check In</span>
           <h1>Attendance Check In</h1>
-          <p>Lokasi akan secara otomatis ditangkap dari GPS perangkat Anda.</p>
+          <p>Pilih lokasi kerja Anda dan sistem akan memvalidasi posisi GPS Anda.</p>
         </div>
         <div className="attendance-status-card">
           <CheckCircle2 size={22} />
           <div>
-            <p>Status</p>
+            <p>Lokasi Terdeteksi</p>
             <strong>{status}</strong>
           </div>
         </div>
@@ -105,6 +174,30 @@ const AttendanceCheckInPage = () => {
             dismissible
           />
         )}
+
+        <div className="attendance-form-section">
+          <label className="attendance-label">
+            <Building2 size={18} style={{ display: 'inline', marginRight: '0.5rem' }} />
+            Tujuan Lokasi Kerja (Sesuai Departemen: {userDepartment || '...'})
+          </label>
+          <select 
+            className="attendance-input"
+            value={selectedLocationId}
+            onChange={(e) => setSelectedLocationId(e.target.value)}
+            disabled={loading || locations.length === 0}
+            style={{ width: '100%', marginBottom: '1.5rem', appearance: 'auto' }}
+          >
+            {locations.length === 0 ? (
+              <option value="">Tidak ada lokasi tersedia</option>
+            ) : (
+              locations.map(loc => (
+                <option key={loc.id} value={loc.id}>
+                  {loc.name} ({loc.radius}m radius)
+                </option>
+              ))
+            )}
+          </select>
+        </div>
 
         <div className="attendance-form-grid">
           <label>
@@ -132,7 +225,7 @@ const AttendanceCheckInPage = () => {
             variant="primary" 
             size="md" 
             onClick={handleCheckIn} 
-            disabled={loading || latitude === null || longitude === null}
+            disabled={loading || latitude === null || longitude === null || !selectedLocationId}
           >
             {loading ? 'Mengirim...' : 'Check In Sekarang'}
           </Button>

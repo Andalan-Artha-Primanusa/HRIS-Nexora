@@ -155,6 +155,7 @@ const LocationsPage = () => {
               <thead>
                 <tr>
                   <th>Nama Lokasi</th>
+                  <th>Departemen</th>
                   <th>Latitude</th>
                   <th>Longitude</th>
                   <th>Radius</th>
@@ -171,8 +172,13 @@ const LocationsPage = () => {
                           <div className="cell-avatar">
                             <MapPin size={14} />
                           </div>
-                          <span className="cell-name-text">{String(loc.name || '—')}</span>
+                          <span className="cell-name-text">{loc.name || "N/A"}</span>
                         </div>
+                      </td>
+                      <td>
+                        <span className="cell-tag" style={{ backgroundColor: '#f0f4ff', color: '#1e40af' }}>
+                          {String(loc.department || 'All Departments')}
+                        </span>
                       </td>
                       <td>{parseFloat(String(loc.latitude || 0)).toFixed(6)}</td>
                       <td>{parseFloat(String(loc.longitude || 0)).toFixed(6)}</td>
