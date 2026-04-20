@@ -56,6 +56,9 @@ const PayrollPaymentPage = lazy(() => import("../../pages/payroll/PayrollPayment
 const PayrollGeneratePage = lazy(() => import("../../pages/payroll/PayrollGeneratePage"));
 const PayrollDashboard = lazy(() => import("../../pages/payroll/PayrollDashboard"));
 const NotificationsPage = lazy(() => import("../../pages/notifications/NotificationsPage"));
+const WorkSchedulesPage = lazy(() => import("../../pages/work-schedule/WorkSchedulesPage"));
+const WorkScheduleCreatePage = lazy(() => import("../../pages/work-schedule/WorkScheduleCreatePage"));
+const WorkScheduleEditPage = lazy(() => import("../../pages/work-schedule/WorkScheduleEditPage"));
 
 const sectionRoutes = [
   { path: "/hr-summary" },
@@ -513,6 +516,36 @@ export const router = createBrowserRouter([
           {
             index: true,
             element: <EditLocationPage />,
+          },
+        ],
+      },
+      {
+        path: "/work-schedules",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <WorkSchedulesPage />,
+          },
+        ],
+      },
+      {
+        path: "/work-schedules/add",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <WorkScheduleCreatePage />,
+          },
+        ],
+      },
+      {
+        path: "/work-schedules/edit/:id",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <WorkScheduleEditPage />,
           },
         ],
       },

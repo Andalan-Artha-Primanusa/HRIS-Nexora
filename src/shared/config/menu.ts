@@ -204,6 +204,11 @@ export const menuItems: MenuItem[] = [
         requiredChecker: (user) => RBACUtils.isSuperAdmin(user) || RBACUtils.hasPermission(user, 'location.view' as any)
       },
       { 
+        label: 'Jadwal Kerja', 
+        path: '/work-schedules',
+        requiredChecker: (user) => RBACUtils.isSuperAdmin(user) || RBACUtils.isHR(user)
+      },
+      { 
         label: 'Pengguna', 
         path: '/admin/users',
         requiredChecker: (user) => RBACUtils.isSuperAdmin(user) || RBACUtils.canViewUsers(user)
