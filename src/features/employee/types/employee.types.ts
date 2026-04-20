@@ -48,6 +48,10 @@ export interface EmployeeCreatePayload {
  * Payload for updating employee
  */
 export interface EmployeeUpdatePayload {
+  name?: string;
+  user_id?: string | number;
+  employee_code?: string;
+  hire_date?: string;
   position?: string;
   department?: string;
   salary?: number;
@@ -55,6 +59,22 @@ export interface EmployeeUpdatePayload {
   manager_id?: number;
   work_schedule_id?: number;
   status?: "active" | "inactive" | "pending";
+}
+
+
+/**
+ * Payload for start onboarding
+ */
+export interface EmployeeOnboardingPayload {
+  probation_end_date: string;
+}
+
+/**
+ * Payload for start offboarding
+ */
+export interface EmployeeOffboardingPayload {
+  termination_date: string;
+  termination_reason: string;
 }
 
 /**

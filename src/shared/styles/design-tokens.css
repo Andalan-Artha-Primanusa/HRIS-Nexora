@@ -13,6 +13,7 @@
   /* Primary Colors */
   --color-primary: #2563eb;           /* Main blue - ALL primary actions */
   --color-primary-hover: #1d4ed8;     /* Darker for hover states */
+  --color-primary-dark: #1d4ed8;      /* Alias for legacy or component specific needs */
   --color-primary-light: #dbeafe;     /* Light blue - borders, light bg */
   --color-primary-lighter: #eff6ff;   /* Very light - backgrounds */
 

@@ -23,6 +23,8 @@ const MyKpiPage = lazy(() => import("../../pages/dashboard/kpi/MyKpiPage"));
 const SectionPage = lazy(() => import("../../pages/dashboard/SectionPage"));
 const ProfilesPage = lazy(() => import("../../pages/profiles/ProfilesPage"));
 const EmployeesPage = lazy(() => import("../../pages/employee/EmployeesPage"));
+const EmployeeCreatePage = lazy(() => import("../../pages/employee/EmployeeCreatePage"));
+const EmployeeEditPage = lazy(() => import("../../pages/employee/EmployeeEditPage"));
 const MyReimbursementsPage = lazy(() => import("../../pages/ess/MyReimbursementsPage"));
 const MyPayrollPage = lazy(() => import("../../pages/ess/MyPayrollPage"));
 const MyLeavesPage = lazy(() => import("../../pages/ess/MyLeavesPage"));
@@ -625,36 +627,6 @@ export const router = createBrowserRouter([
         ],
       },
       {
-        path: "/employees",
-        element: <DashboardLayout />,
-        children: [
-          {
-            index: true,
-            element: <EmployeesPage />,
-          },
-        ],
-      },
-      {
-        path: "/employees/add",
-        element: <DashboardLayout />,
-        children: [
-          {
-            index: true,
-            element: <EmployeesPage />,
-          },
-        ],
-      },
-      {
-        path: "/employees/update/:id",
-        element: <DashboardLayout />,
-        children: [
-          {
-            index: true,
-            element: <EmployeesPage />,
-          },
-        ],
-      },
-      {
         path: "/attendance/daily",
         element: <DashboardLayout />,
         children: [
@@ -771,6 +743,41 @@ export const router = createBrowserRouter([
           {
             index: true,
             element: <SectionPage />,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    element: <ProtectedRoute role={["super_admin", "admin", "hr", "manager"]} />,
+    children: [
+      {
+        path: "/employees",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <EmployeesPage />,
+          },
+        ],
+      },
+      {
+        path: "/employees/add",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <EmployeeCreatePage />,
+          },
+        ],
+      },
+      {
+        path: "/employees/update/:id",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <EmployeeEditPage />,
           },
         ],
       },

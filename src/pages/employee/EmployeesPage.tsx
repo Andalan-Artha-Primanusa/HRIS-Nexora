@@ -6,13 +6,17 @@ import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import {
-  createEmployee,
   deleteEmployee,
   getAllEmployees,
-  getEmployeeDetail,
-  updateEmployee,
+  startOnboarding,
+  completeOnboarding,
+  startOffboarding,
+  completeOffboarding,
 } from "@/features/employee/api/employee.service";
-import type { EmployeeCreatePayload, EmployeeItem, EmployeeUpdatePayload } from "@/features/employee/types/employee.types";
+import type { EmployeeItem } from "@/features/employee/types/employee.types";
+import { useAuthStore } from "@/app/store/auth.store";
+import { RBACUtils } from "@/shared/hooks/rbac";
+import EmployeeLifecycleModals from "./components/EmployeeLifecycleModals";
 import {
   Search,
   Filter,
@@ -24,35 +28,15 @@ import {
   ArrowUp,
   ArrowDown,
   Briefcase,
+  Play,
+  CheckCircle,
+  Settings,
+  LogOut,
 } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
 import "./EmployeesPage.css";
 
-type EmployeeFormState = {
-  id: string;
-  user_id: string;
-  employee_code: string;
-  position: string;
-  department: string;
-  hire_date: string;
-  salary: string;
-  location_id: string;
-  manager_id: string;
-  work_schedule_id: string;
-};
 
-const DEFAULT_FORM: EmployeeFormState = {
-  id: "",
-  user_id: "",
-  employee_code: "",
-  position: "",
-  department: "",
-  hire_date: "",
-  salary: "",
-  location_id: "",
-  manager_id: "",
-  work_schedule_id: "",
-};
 
 const formatDateTime = (input: string) => {
   const date = new Date(input);
@@ -68,19 +52,24 @@ const formatDateTime = (input: string) => {
 };
 
 const EmployeesPage = () => {
-  const location = useLocation();
   const navigate = useNavigate();
-  const { id: routeEmployeeId } = useParams<{ id: string }>();
-  const isAddPage = location.pathname === "/employees/add";
-  const isUpdatePage = location.pathname.startsWith("/employees/update/");
 
   const [items, setItems] = useState<EmployeeItem[]>([]);
-  const [createForm, setCreateForm] = useState<EmployeeFormState>(DEFAULT_FORM);
-  const [updateForm, setUpdateForm] = useState<EmployeeFormState>(DEFAULT_FORM);
   const [, setStatusMessage] = useState("Ready to call employee API");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [hasLoaded, setHasLoaded] = useState(false);
+
+  // Authentication & RBAC
+  const user = useAuthStore((state) => state.user);
+  const canManageEmployees = RBACUtils.hasRole(user, ['super_admin', 'admin', 'hr']);
+
+  // Lifecycle Modals State
+  const [activeActionModal, setActiveActionModal] = useState<"onboarding_start" | "onboarding_complete" | "offboarding_start" | "offboarding_complete" | null>(null);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
+  const [onboardingDate, setOnboardingDate] = useState("");
+  const [offboardingDate, setOffboardingDate] = useState("");
+  const [offboardingReason, setOffboardingReason] = useState("");
 
   // Metadata State
   const [allLocations, setAllLocations] = useState<Record<string, any>[]>([]);
@@ -274,65 +263,7 @@ const EmployeesPage = () => {
     }
   };
 
-  const createNewEmployee = async () => {
-    setLoading(true);
-    setStatusMessage("Membuat employee...");
 
-    try {
-      const payload: EmployeeCreatePayload = {
-        user_id: Number(createForm.user_id) || 0,
-        employee_code: createForm.employee_code,
-        position: createForm.position,
-        department: createForm.department,
-        hire_date: createForm.hire_date,
-        salary: Number(createForm.salary) || 0,
-        location_id: Number(createForm.location_id) || undefined,
-        manager_id: Number(createForm.manager_id) || undefined,
-        work_schedule_id: Number(createForm.work_schedule_id) || undefined,
-      };
-
-      await createEmployee(payload);
-      setStatusMessage("Employee berhasil dibuat.");
-      setCreateForm(DEFAULT_FORM);
-      navigate("/employees");
-      await loadEmployees();
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal membuat employee.";
-      setStatusMessage(message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateExistingEmployee = async () => {
-    const id = requireId(updateForm.id);
-    if (!id) return;
-
-    setLoading(true);
-    setStatusMessage("Mengupdate employee...");
-
-    try {
-      const payload: EmployeeUpdatePayload = {
-        position: updateForm.position,
-        department: updateForm.department,
-        salary: Number(updateForm.salary) || 0,
-        location_id: Number(updateForm.location_id) || undefined,
-        manager_id: Number(updateForm.manager_id) || undefined,
-        work_schedule_id: Number(updateForm.work_schedule_id) || undefined,
-      };
-
-      await updateEmployee(id, payload);
-      setStatusMessage("Employee berhasil diupdate.");
-      setUpdateForm(DEFAULT_FORM);
-      navigate("/employees");
-      await loadEmployees();
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal update employee.";
-      setStatusMessage(message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const deleteExistingEmployee = async (idValue: string) => {
     const id = requireId(idValue);
@@ -353,315 +284,44 @@ const EmployeesPage = () => {
     }
   };
 
-  useEffect(() => {
-    if (isAddPage || isUpdatePage) {
-      void loadMetadata();
-      return;
-    }
 
+
+  const handleLifecycleAction = async () => {
+    if (!selectedEmployeeId || !activeActionModal) return;
+    setLoading(true);
+    setStatusMessage("Memproses aksi karyawan...");
+    try {
+      if (activeActionModal === "onboarding_start") {
+        if (!onboardingDate) throw new Error("Tanggal masa percobaan wajib diisi");
+        await startOnboarding(selectedEmployeeId, { probation_end_date: onboardingDate });
+      } else if (activeActionModal === "onboarding_complete") {
+        await completeOnboarding(selectedEmployeeId);
+      } else if (activeActionModal === "offboarding_start") {
+        if (!offboardingDate || !offboardingReason) throw new Error("Tanggal dan alasan berhenti wajib diisi");
+        await startOffboarding(selectedEmployeeId, { termination_date: offboardingDate, termination_reason: offboardingReason });
+      } else if (activeActionModal === "offboarding_complete") {
+        await completeOffboarding(selectedEmployeeId);
+      }
+      setActiveActionModal(null);
+      setStatusMessage("Aksi berhasil diproses.");
+      await loadEmployees();
+    } catch (e: any) {
+      setStatusMessage(e.message || "Gagal memproses aksi");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     void loadEmployees();
-  }, [isAddPage, isUpdatePage]);
+  }, []);
 
   // Reset page on filter changes (like PayrollListPage)
   useEffect(() => {
     setCurrentPage(1);
   }, [searchText, selectedDepartment, selectedPosition, sortBy, sortOrder]);
 
-  useEffect(() => {
-    if (!isUpdatePage || !routeEmployeeId) {
-      return;
-    }
 
-    const loadUpdateDetail = async () => {
-      setLoading(true);
-      setStatusMessage("Memuat detail employee untuk update...");
-
-      try {
-        const result = await getEmployeeDetail(routeEmployeeId);
-
-        setUpdateForm({
-          id: String(result?.id ?? routeEmployeeId),
-          user_id: String(result?.user_id ?? ""),
-          employee_code: String(result?.employee_code ?? ""),
-          position: String(result?.position ?? ""),
-          department: String(result?.department ?? ""),
-          hire_date: String(result?.hire_date ?? ""),
-          salary: String(result?.salary ?? ""),
-          location_id: String(result?.location_id ?? ""),
-          manager_id: String(result?.manager_id ?? ""),
-          work_schedule_id: String(result?.work_schedule_id ?? ""),
-        });
-
-        setStatusMessage("Detail employee berhasil dimuat.");
-      } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : "Gagal memuat detail employee.";
-        setStatusMessage(message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    void loadUpdateDetail();
-  }, [isUpdatePage, routeEmployeeId]);
-
-  if (isAddPage) {
-    return (
-      <div className="crud-page">
-        <div className="page-header">
-          <div className="page-header-title">
-            <span className="page-badge">People Center</span>
-            <h1>Tambah Karyawan</h1>
-            <p>Input data jabatan dan penempatan karyawan baru</p>
-          </div>
-          <div className="page-header-actions">
-            <Button variant="outline" size="md" onClick={() => navigate("/employees")} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
-              Kembali ke Daftar
-            </Button>
-          </div>
-        </div>
-
-        <Card className="control-card" glass>
-          <div style={{ marginBottom: '1rem' }}>
-            <h3 style={{ margin: 0, color: '#1e3a8a', fontWeight: 700, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Briefcase size={18} style={{ color: '#2563eb' }} />
-              Form Data Karyawan
-            </h3>
-          </div>
-
-          <div className="form-grid">
-            <div className="form-group">
-              <span>USER</span>
-              <select
-                className="form-input"
-                value={createForm.user_id}
-                onChange={(event) => setCreateForm((prev) => ({ ...prev, user_id: event.target.value }))}
-              >
-                <option value="">Pilih User</option>
-                {allUsers.map((u) => (
-                  <option key={u.id} value={u.id}>
-                    {u.name} ({u.email})
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group">
-              <span>KODE KARYAWAN</span>
-              <input
-                className="form-input"
-                value={createForm.employee_code}
-                onChange={(event) => setCreateForm((prev) => ({ ...prev, employee_code: event.target.value }))}
-                placeholder="Contoh: EMP-001"
-              />
-            </div>
-            <div className="form-group">
-              <span>JABATAN</span>
-              <input
-                className="form-input"
-                value={createForm.position}
-                onChange={(event) => setCreateForm((prev) => ({ ...prev, position: event.target.value }))}
-                placeholder="Contoh: Manager"
-              />
-            </div>
-            <div className="form-group">
-              <span>DEPARTEMEN</span>
-              <select
-                className="form-input"
-                value={createForm.department}
-                onChange={(event) => setCreateForm((prev) => ({ ...prev, department: event.target.value }))}
-              >
-                <option value="">Pilih Departemen</option>
-                {allDepartments.map((d) => (
-                  <option key={d} value={d}>{d}</option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group">
-              <span>TANGGAL BERGABUNG</span>
-              <input
-                className="form-input"
-                type="date"
-                value={createForm.hire_date}
-                onChange={(event) => setCreateForm((prev) => ({ ...prev, hire_date: event.target.value }))}
-              />
-            </div>
-            <div className="form-group">
-              <span>GAJI POKOK</span>
-              <input
-                className="form-input"
-                value={createForm.salary}
-                onChange={(event) => setCreateForm((prev) => ({ ...prev, salary: event.target.value }))}
-                placeholder="Masukkan nominal gaji"
-              />
-            </div>
-            <div className="form-group">
-              <span>LOKASI KERJA</span>
-              <select
-                className="form-input"
-                value={createForm.location_id}
-                onChange={(event) => setCreateForm((prev) => ({ ...prev, location_id: event.target.value }))}
-              >
-                <option value="">Pilih Lokasi</option>
-                {allLocations.map((l) => (
-                  <option key={l.id} value={l.id}>{l.name}</option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group">
-              <span>MANAGER</span>
-              <select
-                className="form-input"
-                value={createForm.manager_id}
-                onChange={(event) => setCreateForm((prev) => ({ ...prev, manager_id: event.target.value }))}
-              >
-                <option value="">Pilih Manager</option>
-                {allUsers.map((u) => (
-                  <option key={u.id} value={u.id}>{u.name}</option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group">
-              <span>WORK SCHEDULE</span>
-              <select
-                className="form-input"
-                value={createForm.work_schedule_id}
-                onChange={(event) => setCreateForm((prev) => ({ ...prev, work_schedule_id: event.target.value }))}
-              >
-                <option value="">Pilih Jadwal</option>
-                {allSchedules.map((s) => (
-                  <option key={s.id} value={s.id}>{s.name || s.title}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="form-actions">
-            <Button variant="outline" size="md" onClick={() => navigate("/employees")} disabled={loading}>
-              Batal
-            </Button>
-            <Button variant="primary" size="md" onClick={() => void createNewEmployee()} disabled={loading}>
-              <Plus size={16} />
-              Simpan Karyawan
-            </Button>
-          </div>
-        </Card>
-      </div>
-    );
-  }
-
-  if (isUpdatePage) {
-    return (
-      <div className="crud-page">
-        <div className="page-header">
-          <div className="page-header-title">
-            <span className="page-badge">People Center</span>
-            <h1>Update Data Karyawan</h1>
-            <p>Perbarui informasi posisi dan gaji karyawan</p>
-          </div>
-          <div className="page-header-actions">
-            <Button variant="outline" size="md" onClick={() => navigate("/employees")} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
-              Kembali ke Daftar
-            </Button>
-          </div>
-        </div>
-
-        <Card className="control-card" glass>
-          <div style={{ marginBottom: '1rem' }}>
-            <h3 style={{ margin: 0, color: '#1e3a8a', fontWeight: 700, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Pencil size={18} style={{ color: '#2563eb' }} />
-              Form Update Karyawan
-            </h3>
-          </div>
-
-          <div className="form-grid">
-            <div className="form-group">
-              <span>EMPLOYEE ID</span>
-              <input className="form-input" value={updateForm.id} readOnly style={{ backgroundColor: "#f3f4f6" }} />
-            </div>
-            <div className="form-group">
-              <span>JABATAN</span>
-              <input
-                className="form-input"
-                value={updateForm.position}
-                onChange={(event) => setUpdateForm((prev) => ({ ...prev, position: event.target.value }))}
-                placeholder="Masukkan Jabatan"
-              />
-            </div>
-            <div className="form-group">
-              <span>DEPARTEMEN</span>
-              <select
-                className="form-input"
-                value={updateForm.department}
-                onChange={(event) => setUpdateForm((prev) => ({ ...prev, department: event.target.value }))}
-              >
-                <option value="">Pilih Departemen</option>
-                {allDepartments.map((d) => (
-                  <option key={d} value={d}>{d}</option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group">
-              <span>GAJI POKOK</span>
-              <input
-                className="form-input"
-                value={updateForm.salary}
-                onChange={(event) => setUpdateForm((prev) => ({ ...prev, salary: event.target.value }))}
-                placeholder="Masukkan Gaji"
-              />
-            </div>
-            <div className="form-group">
-              <span>LOKASI KERJA</span>
-              <select
-                className="form-input"
-                value={updateForm.location_id}
-                onChange={(event) => setUpdateForm((prev) => ({ ...prev, location_id: event.target.value }))}
-              >
-                <option value="">Pilih Lokasi</option>
-                {allLocations.map((l) => (
-                  <option key={l.id} value={l.id}>{l.name}</option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group">
-              <span>MANAGER</span>
-              <select
-                className="form-input"
-                value={updateForm.manager_id}
-                onChange={(event) => setUpdateForm((prev) => ({ ...prev, manager_id: event.target.value }))}
-              >
-                <option value="">Pilih Manager</option>
-                {allUsers.map((u) => (
-                  <option key={u.id} value={u.id}>{u.name}</option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group">
-              <span>WORK SCHEDULE</span>
-              <select
-                className="form-input"
-                value={updateForm.work_schedule_id}
-                onChange={(event) => setUpdateForm((prev) => ({ ...prev, work_schedule_id: event.target.value }))}
-              >
-                <option value="">Pilih Jadwal</option>
-                {allSchedules.map((s) => (
-                  <option key={s.id} value={s.id}>{s.name || s.title}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="form-actions">
-            <Button variant="outline" size="md" onClick={() => navigate("/employees")} disabled={loading}>
-              Batal
-            </Button>
-            <Button variant="primary" size="md" onClick={() => void updateExistingEmployee()} disabled={loading}>
-              <Pencil size={16} />
-              Update Data
-            </Button>
-          </div>
-        </Card>
-      </div>
-    );
-  }
 
   return (
     <div className="crud-page">
@@ -673,25 +333,7 @@ const EmployeesPage = () => {
           <p>Kelola jabatan, departemen, dan gaji karyawan dalam tampilan yang lebih rapi dan konsisten.</p>
         </div>
         <div className="page-header-actions">
-          <Button
-            variant="primary"
-            size="md"
-            onClick={() => navigate("/employees/add")}
-            disabled={loading}
-          >
-            <Plus size={16} />
-            Tambah Karyawan
-          </Button>
-          <Button
-            variant="outline"
-            size="md"
-            onClick={() => void loadEmployees()}
-            disabled={loading}
-            style={{ borderColor: "#2563eb", color: "#2563eb" }}
-          >
-            <RefreshCw size={16} />
-            Segarkan
-          </Button>
+          {/* Redundant buttons removed in favor of integrated wrapper actions */}
         </div>
       </div>
 
@@ -718,76 +360,98 @@ const EmployeesPage = () => {
         })}
       </div>
 
-      {/* Combined Table & Control Section */}
-      <Card className="table-card" glass>
-        <div className="table-header-bar">
-          <h3>Data Karyawan</h3>
-          <span className="table-count">{paginatedEmployees.length} dari {sortedEmployees.length} data</span>
-        </div>
-
-        <div className="table-card-inner" style={{ paddingBottom: '1.5rem' }}>
-          <div className="control-bar">
-            <div className="search-box">
-              <Search size={18} />
-              <input
-                type="text"
-                placeholder="Cari nama, ID, atau kode karyawan..."
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                className="search-input"
-              />
+      {/* Elyra-Inspired Open Header Section */}
+      <div className="white-unified-wrapper" style={{ marginTop: '2.5rem', boxShadow: '0 10px 40px rgba(0,0,0,0.03)', borderRadius: '32px' }}>
+        <div className="wuw-header">
+          {/* Top Section: Title & Primary Action */}
+          <div className="wuw-header-top">
+            <div className="wuw-title-area">
+              <h3>Daftar Karyawan</h3>
+              <span className="wuw-count-badge">{items.length} Total</span>
             </div>
-
-            <div className="quick-controls">
-              <div className="control-group">
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as any)}
-                  className="sort-select"
-                >
-                  <option value="name">Urutkan: Nama</option>
-                  <option value="id">Urutkan: ID</option>
-                  <option value="code">Urutkan: Kode</option>
-                  <option value="department">Urutkan: Departemen</option>
-                  <option value="position">Urutkan: Jabatan</option>
-                </select>
-                <button
-                  className="sort-order-btn"
-                  onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-                >
-                  {sortOrder === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />}
-                </button>
-              </div>
-
-              <button
-                className={`filter-btn ${showFilters ? "active" : ""}`}
-                onClick={() => setShowFilters(!showFilters)}
+            <div className="wuw-actions-area">
+              <Button
+                variant="outline"
+                size="md"
+                onClick={() => void loadEmployees()}
+                disabled={loading}
+                className="btn-pill"
+                style={{ background: '#f8fafc', borderColor: '#e2e8f0', color: '#64748b' }}
               >
-                <Filter size={18} />
-                <span>Filter</span>
-                <ChevronDown
-                  size={14}
-                  style={{ transform: showFilters ? "rotate(180deg)" : "", transition: "transform 0.3s ease" }}
-                />
-              </button>
-
-              {(searchText || selectedDepartment || selectedPosition) && (
-                <Button variant="outline" size="sm" onClick={clearFilters} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
-                  Bersihkan
+                <RefreshCw size={18} />
+                <span>Segarkan</span>
+              </Button>
+              {canManageEmployees && (
+                <Button
+                  variant="primary"
+                  size="md"
+                  onClick={() => navigate("/employees/add")}
+                  disabled={loading}
+                  className="btn-pill"
+                  style={{ background: '#2563eb', color: '#ffffff', border: 'none', boxShadow: '0 8px 24px rgba(37, 99, 235, 0.25)' }}
+                >
+                  <Plus size={20} />
+                  <span>Tambah Karyawan</span>
                 </Button>
               )}
             </div>
           </div>
 
-          {showFilters && (
-            <div className="filter-panel" style={{ marginTop: '1rem' }}>
+          {/* Bottom Section: Segmented Tabs & Search Tools */}
+          <div className="wuw-header-bottom">
+            <div className="elyra-tabs">
+              <button className="elyra-tab active">Semua</button>
+              <button className="elyra-tab">Aktif</button>
+              <button className="elyra-tab">Probation</button>
+              <button className="elyra-tab">Resigned</button>
+            </div>
+
+            <div className="wuw-actions-area">
+              <div className="search-box">
+                <div className="search-icon-inside"><Search size={18} /></div>
+                <input
+                  type="text"
+                  placeholder="Cari karyawan..."
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  className="search-input-pill"
+                />
+              </div>
+              <button 
+                className={`filter-btn ${showFilters ? "active" : ""}`}
+                onClick={() => setShowFilters(!showFilters)}
+                style={{ 
+                  height: '46px', 
+                  borderRadius: '999px', 
+                  border: 'none', 
+                  background: '#f1f5f9', 
+                  color: '#64748b',
+                  padding: '0 1.25rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.6rem',
+                  fontWeight: 700
+                }}
+              >
+                <Filter size={18} />
+                <span>Filter</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Filter Panel (Integrated Dropdown) */}
+        {showFilters && (
+          <div className="wuw-controls" style={{ padding: '0 2.5rem 2.5rem 2.5rem' }}>
+            <div className="filter-panel" style={{ background: '#f8fafc', padding: '2rem', borderRadius: '24px', border: 'none' }}>
               <div className="filter-row">
                 <div className="filter-group">
-                  <label>Departemen</label>
+                  <label style={{ fontSize: '0.7rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '0.75rem' }}>Departemen</label>
                   <select
                     value={selectedDepartment}
                     onChange={(e) => setSelectedDepartment(e.target.value)}
                     className="filter-select"
+                    style={{ background: '#ffffff', borderRadius: '12px', height: '44px', border: '1px solid #e2e8f0' }}
                   >
                     <option value="">Semua Departemen</option>
                     {uniqueDepartments.map((dept) => (
@@ -796,11 +460,12 @@ const EmployeesPage = () => {
                   </select>
                 </div>
                 <div className="filter-group">
-                  <label>Jabatan</label>
+                  <label style={{ fontSize: '0.7rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '0.75rem' }}>Jabatan</label>
                   <select
                     value={selectedPosition}
                     onChange={(e) => setSelectedPosition(e.target.value)}
                     className="filter-select"
+                    style={{ background: '#ffffff', borderRadius: '12px', height: '44px', border: '1px solid #e2e8f0' }}
                   >
                     <option value="">Semua Jabatan</option>
                     {uniquePositions.map((pos) => (
@@ -808,135 +473,155 @@ const EmployeesPage = () => {
                     ))}
                   </select>
                 </div>
+                {(searchText || selectedDepartment || selectedPosition) && (
+                  <div className="filter-group" style={{ justifyContent: 'flex-end', paddingTop: '1.5rem' }}>
+                    <Button variant="ghost" size="sm" onClick={clearFilters} style={{ color: "#2563eb", fontWeight: 800, fontSize: '0.9rem' }}>
+                      Reset Filter
+                    </Button>
+                  </div>
+                )}
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Integrated Table Area */}
+        <div className="wuw-table-area">
+          {loading && <LoadingState message="Memuat karyawan..." />}
+          {!loading && errorMessage && (
+            <ErrorState message="Koneksi Terputus" error={errorMessage} onRetry={() => void loadEmployees()} />
+          )}
+
+          {!loading && !errorMessage && paginatedEmployees.length === 0 && (
+            <div style={{ padding: '5rem 0' }}>
+              <EmptyState
+                title="Pencarian Kosong"
+                message="Kami tidak menemukan karyawan yang sesuai dengan kriteria Anda."
+                actionLabel="Bersihkan Filter"
+                onAction={clearFilters}
+              />
             </div>
           )}
-        </div>
 
-        {loading && <div className="table-card-inner"><LoadingState message="Memuat data karyawan..." /></div>}
-        {!loading && errorMessage && (
-          <div className="table-card-inner">
-            <ErrorState message="Gagal memuat data karyawan" error={errorMessage} onRetry={() => void loadEmployees()} />
-          </div>
-        )}
-        {!loading && !errorMessage && hasLoaded && paginatedEmployees.length === 0 && (
-          <div className="table-card-inner">
-            <EmptyState
-              icon=""
-              title="Tidak ada data"
-              message="Tidak ada karyawan yang sesuai dengan filter yang dipilih"
-              actionLabel={searchText || selectedDepartment || selectedPosition ? "Bersihkan Filter" : undefined}
-              onAction={searchText || selectedDepartment || selectedPosition ? clearFilters : undefined}
-            />
-          </div>
-        )}
-
-        {!loading && !errorMessage && paginatedEmployees.length > 0 && (
-          <>
-            <div className="table-wrap">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Kode / ID</th>
-                    <th>Nama Karyawan</th>
-                    <th>Departemen</th>
-                    <th>Jabatan</th>
-                    <th>Lokasi</th>
-                    <th>Manager</th>
-                    <th>Tgl Bergabung</th>
-                    <th className="th-right">Gaji Pokok</th>
-                    <th className="th-center">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedEmployees.map((item) => (
-                    <tr key={item.id}>
-                      <td>
-                        <div className="cell-id">{item.employee_code || "N/A"}</div>
-                        <div className="cell-sub">ID: {item.id}</div>
-                      </td>
-                      <td>
-                        <div className="cell-name">
-                          <div className="cell-avatar">
-                            {item.user?.name?.charAt(0).toUpperCase() || "E"}
-                          </div>
-                          <span className="cell-name-text">{item.user?.name || "Unknown"}</span>
-                        </div>
-                      </td>
-                      <td><span className="cell-tag">{item.department || "-"}</span></td>
-                      <td>{item.position || "-"}</td>
-                      <td>
-                        <span className="cell-tag" style={{ backgroundColor: '#f0fdf4', color: '#166534' }}>
-                          {allLocations.find(l => String(l.id) === String(item.location_id))?.name || "-"}
-                        </span>
-                      </td>
-                      <td>
-                        {allUsers.find(u => String(u.id) === String(item.manager_id))?.name || "-"}
-                      </td>
-                      <td>
-                        <span className="cell-date">{item.hire_date ? formatDateTime(item.hire_date) : "-"}</span>
-                      </td>
-                      <td className="cell-amount">
-                        {item.salary ? `Rp ${Number(item.salary).toLocaleString("id-ID")}` : "-"}
-                      </td>
-                      <td>
-                        <div className="cell-actions">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => navigate(`/employees/update/${item.id}`)}
-                            title="Edit"
-                          >
-                            <Pencil size={15} />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => void deleteExistingEmployee(String(item.id))}
-                            title="Delete"
-                            style={{ color: "var(--status-danger)" }}
-                          >
-                            <Trash2 size={15} />
-                          </Button>
-                        </div>
-                      </td>
+          {!loading && !errorMessage && paginatedEmployees.length > 0 && (
+            <>
+              <div className="table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: '400px' }}>Anggota Tim</th>
+                      <th>Departemen</th>
+                      <th>Jabatan</th>
+                      <th>Lokasi</th>
+                      <th>Detail Bergabung</th>
+                      <th className="th-center">Status</th>
+                      <th className="th-center" style={{ width: '120px' }}>Aksi</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {paginatedEmployees.map((item) => (
+                      <tr key={item.id}>
+                        <td>
+                          <div className="cell-name">
+                            <div className="cell-avatar">
+                              {item.user?.name?.charAt(0).toUpperCase() || "E"}
+                            </div>
+                            <div className="cell-stacked">
+                              <span className="cell-name-text">{item.user?.name || "Unknown"}</span>
+                              <span className="cell-stacked__sub">{item.employee_code || item.id}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td><span style={{ color: '#475569', fontWeight: 600 }}>{item.department || "-"}</span></td>
+                        <td><span style={{ color: '#64748b', fontWeight: 500 }}>{item.position || "-"}</span></td>
+                        <td>
+                          <span className="badge-soft badge-soft--blue" style={{ borderRadius: '999px' }}>
+                            {allLocations.find(l => String(l.id) === String(item.location_id))?.name || "Remote"}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="cell-stacked">
+                            <span className="cell-stacked__main" style={{ fontSize: '0.85rem' }}>{item.hire_date ? formatDateTime(item.hire_date) : "-"}</span>
+                            <span className="cell-stacked__sub">Join Date</span>
+                          </div>
+                        </td>
+                        <td className="td-center">
+                          <span className="badge-soft badge-soft--green" style={{ borderRadius: '999px' }}>Aktif</span>
+                        </td>
+                        <td className="td-center">
+                          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => navigate(`/employees/update/${item.id}`)}
+                              style={{ color: '#64748b', padding: '0.5rem' }}
+                            >
+                              <Pencil size={18} />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => void deleteExistingEmployee(String(item.id))}
+                              style={{ color: '#ef4444', padding: '0.5rem' }}
+                            >
+                              <Trash2 size={18} />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
-            {/* Pagination Controls */}
-            {totalPages > 1 && (
-              <div className="pagination">
+              {/* Pagination (Elyra Style) */}
+              <div className="pagination" style={{ padding: '2.5rem', background: '#ffffff', borderTop: 'none', borderBottomLeftRadius: '32px', borderBottomRightRadius: '32px' }}>
                 <div className="pagination__info">
-                  Halaman <strong>{currentPage}</strong> dari <strong>{totalPages}</strong>
+                  <span style={{ color: '#94a3b8', fontSize: '0.9rem', fontWeight: 600 }}>
+                    Menampilkan <strong>{paginatedEmployees.length}</strong> data dari <strong>{sortedEmployees.length}</strong> karyawan
+                  </span>
                 </div>
-                <div className="pagination__controls">
+                <div className="pagination__controls" style={{ gap: '0.75rem' }}>
                   <Button
                     variant="outline"
-                    size="sm"
+                    size="md"
                     onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
-                    style={{ borderColor: "#2563eb", color: "#2563eb" }}
+                    className="btn-pill"
+                    style={{ height: '40px', background: '#ffffff', borderColor: '#e2e8f0', color: '#1e293b' }}
                   >
-                    ← Prev
+                    Prev
                   </Button>
                   <Button
                     variant="outline"
-                    size="sm"
+                    size="md"
                     onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                     disabled={currentPage === totalPages}
-                    style={{ borderColor: "#2563eb", color: "#2563eb" }}
+                    className="btn-pill"
+                    style={{ height: '40px', background: '#ffffff', borderColor: '#e2e8f0', color: '#1e293b' }}
                   >
-                    Next →
+                    Next
                   </Button>
                 </div>
               </div>
-            )}
-          </>
-        )}
-      </Card>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Lifecycle Modals */}
+      <EmployeeLifecycleModals
+        activeActionModal={activeActionModal}
+        setActiveActionModal={setActiveActionModal}
+        onboardingDate={onboardingDate}
+        setOnboardingDate={setOnboardingDate}
+        offboardingDate={offboardingDate}
+        setOffboardingDate={setOffboardingDate}
+        offboardingReason={offboardingReason}
+        setOffboardingReason={setOffboardingReason}
+        handleLifecycleAction={handleLifecycleAction}
+        loading={loading}
+      />
     </div>
   );
 };

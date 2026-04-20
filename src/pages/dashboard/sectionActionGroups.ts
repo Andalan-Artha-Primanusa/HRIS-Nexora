@@ -188,19 +188,22 @@ const getReadActions = (ctx: SectionActionContext) => ({
 const getWorkflowActions = (ctx: SectionActionContext) => ({
   startOnboarding: () => {
     const id = ctx.getRequiredId('Employee ID');
-    return api.put(`/employees/${id}/onboarding/start`, { notes: ctx.formState.lifecycle_notes });
+    return api.put(`/employees/${id}/onboarding/start`, { probation_end_date: ctx.formState.probation_end_date });
   },
   completeOnboarding: () => {
     const id = ctx.getRequiredId('Employee ID');
-    return api.put(`/employees/${id}/onboarding/complete`, { notes: ctx.formState.lifecycle_notes });
+    return api.put(`/employees/${id}/onboarding/complete`);
   },
   startOffboarding: () => {
     const id = ctx.getRequiredId('Employee ID');
-    return api.put(`/employees/${id}/offboarding/start`, { notes: ctx.formState.lifecycle_notes });
+    return api.put(`/employees/${id}/offboarding/start`, { 
+      termination_date: ctx.formState.termination_date,
+      termination_reason: ctx.formState.termination_reason
+    });
   },
   completeOffboarding: () => {
     const id = ctx.getRequiredId('Employee ID');
-    return api.put(`/employees/${id}/offboarding/complete`, { notes: ctx.formState.lifecycle_notes });
+    return api.put(`/employees/${id}/offboarding/complete`);
   },
   approveLeave: () => {
     const id = ctx.getRequiredId('Leave ID');

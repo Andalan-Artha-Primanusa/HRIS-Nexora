@@ -1,5 +1,5 @@
 import { api } from "@/shared/api/httpClient";
-import type { EmployeeCreatePayload, EmployeeItem, EmployeeUpdatePayload } from "../types/employee.types";
+import type { EmployeeCreatePayload, EmployeeItem, EmployeeUpdatePayload, EmployeeOnboardingPayload, EmployeeOffboardingPayload } from "../types/employee.types";
 
 /**
  * Type-safe API response wrapper
@@ -97,27 +97,51 @@ function handleApiError(error: unknown, contextMessage: string): never {
  * Fetch all employees
  */
 export async function getAllEmployees(): Promise<EmployeeItem[]> {
-  try {
-    const response = await api.get<ApiResponse<EmployeeItem[]>>("/employees");
+  let allItems: EmployeeItem[] = [];
+  let currentPage = 1;
+  let hasMore = true;
 
-    if (!response?.data) {
-      throw new Error("No response data from server");
+  try {
+    while (hasMore) {
+      // Use standard page parameter; backend defaults to 15 per page usually
+      const response = await api.get<any>(`/employees?page=${currentPage}`);
+      
+      const payload = response.data;
+      if (!payload) break;
+
+      // Extract items for this page
+      const pageItems = extractArrayFromResponse(payload);
+      if (pageItems.length === 0) break;
+
+      allItems = [...allItems, ...pageItems];
+
+      // Check for next page using common pagination metadata keys
+      // Supporting 'last_page', 'next_page_url', or comparing with 'total'
+      const meta = payload.data || payload; 
+      const lastPage = meta.last_page || (meta.total ? Math.ceil(meta.total / (meta.per_page || 15)) : 1);
+      
+      if (currentPage >= lastPage || pageItems.length === 0) {
+        hasMore = false;
+      } else {
+        currentPage++;
+      }
+
+      // Safety cap to prevent infinite loops in case of API issues
+      if (currentPage > 50) break; 
     }
 
-    const items = extractArrayFromResponse(response.data);
-
     if (typeof window !== "undefined" && (window as any).__DEBUG__) {
-      console.log("👥 Employee data fetched:", {
-        count: items.length,
-        data: items,
+      console.log("👥 All employee data consolidated:", {
+        totalFetched: allItems.length,
+        data: allItems,
         timestamp: new Date().toISOString(),
       });
     }
 
-    return items;
+    return allItems;
   } catch (error) {
-    console.warn("⚠️ Failed to fetch employees:", error);
-    return [];
+    console.warn("⚠️ Failed to fetch all employees:", error);
+    return allItems; // Return what we have so far
   }
 }
 
@@ -199,5 +223,49 @@ export async function deleteEmployee(id: string | number): Promise<void> {
     }
   } catch (error) {
     handleApiError(error, `Failed to delete employee ${id}`);
+  }
+}
+
+/**
+ * Start employee onboarding
+ */
+export async function startOnboarding(id: string | number, payload: EmployeeOnboardingPayload): Promise<void> {
+  try {
+    await api.put(`/employees/${id}/onboarding/start`, payload);
+  } catch (error) {
+    handleApiError(error, `Failed to start onboarding for employee ${id}`);
+  }
+}
+
+/**
+ * Complete employee onboarding
+ */
+export async function completeOnboarding(id: string | number): Promise<void> {
+  try {
+    await api.put(`/employees/${id}/onboarding/complete`);
+  } catch (error) {
+    handleApiError(error, `Failed to complete onboarding for employee ${id}`);
+  }
+}
+
+/**
+ * Start employee offboarding
+ */
+export async function startOffboarding(id: string | number, payload: EmployeeOffboardingPayload): Promise<void> {
+  try {
+    await api.put(`/employees/${id}/offboarding/start`, payload);
+  } catch (error) {
+    handleApiError(error, `Failed to start offboarding for employee ${id}`);
+  }
+}
+
+/**
+ * Complete employee offboarding
+ */
+export async function completeOffboarding(id: string | number): Promise<void> {
+  try {
+    await api.put(`/employees/${id}/offboarding/complete`);
+  } catch (error) {
+    handleApiError(error, `Failed to complete offboarding for employee ${id}`);
   }
 }
