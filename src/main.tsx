@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
 import { router } from "@/app/routes";
+import { ToastProvider } from "@/app/layouts/ToastProvider";
 import "./index.css";
 import "./shared/styles/submenu-table.css";
 
@@ -48,7 +49,9 @@ class ErrorBoundary extends React.Component<{children: any}, {hasError: boolean,
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ErrorBoundary>
-      <RouterProvider router={router} />
+      <ToastProvider>
+        <RouterProvider router={router} />
+      </ToastProvider>
     </ErrorBoundary>
   </React.StrictMode>
 );

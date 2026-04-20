@@ -3,7 +3,7 @@ import { forceLogout } from "@/shared/utils/auth";
 
 /* =========================
    TYPES
-========================= */
+ ========================= */
 export interface LoginPayload {
   email: string;
   password: string;
@@ -26,39 +26,42 @@ export interface GoogleAuthCallbackPayload {
 
 /* =========================
    API CALL
-========================= */
+ ========================= */
+/**
+ * Login user
+ */
 export const login = async (payload: LoginPayload) => {
-  try {
-    const response = await api.post("/login", payload);
-    return response;
-  } catch (error: any) {
-    // 🔒 SECURITY: Log validation errors untuk debugging (development only)
-    if (error.response?.status === 422) {
-      console.error("[LOGIN] 422 Validation Error:", {
-        payload: payload,
-        errors: error.response?.data?.errors,
-        message: error.response?.data?.message,
-      });
-    }
-    throw error;
-  }
+  const response = await api.post("/login", payload);
+  return response.data;
 };
 
+/**
+ * Register user
+ */
 export const register = async (payload: RegisterPayload) => {
   const response = await api.post("/register", payload);
-  return response;
+  return response.data;
 };
 
+/**
+ * Get Google SSO redirect URL
+ */
 export const getGoogleAuthRedirect = async () => {
   const response = await api.get("/auth/google");
-  return response;
+  return response.data;
 };
 
+/**
+ * Handle Google SSO callback
+ */
 export const handleGoogleAuthCallback = async (payload: GoogleAuthCallbackPayload) => {
   const response = await api.get("/auth/google/callback", { params: payload });
-  return response;
+  return response.data;
 };
 
+/**
+ * Logout user
+ */
 export const logout = async () => {
   try {
     await api.post("/logout");
@@ -67,14 +70,10 @@ export const logout = async () => {
   }
 };
 
+/**
+ * Verify current token
+ */
 export const verifyToken = async () => {
-  try {
-    const response = await api.get("/me");
-    return response;
-  } catch (error: any) {
-    if (error.response?.status === 401) {
-      forceLogout(); 
-    }
-    throw error;
-  }
+  const response = await api.get("/me");
+  return response.data;
 };

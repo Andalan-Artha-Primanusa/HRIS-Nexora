@@ -64,7 +64,8 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
 
   const onLogout = async () => {
     await handleLogout();
-    navigate("/login", { replace: true });
+    // 💡 Tidak perlu navigate manual di sini karena handleLogout -> forceLogout 
+    // sudah menangani redirect dengan delay agar toast sempat muncul.
   };
 
   const onRefreshUser = async (event?: React.MouseEvent<HTMLButtonElement>) => {

@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import AuthLayout from "../AuthLayout";
 import GoogleIcon from "../GoogleIcon";
 
+
 interface LoginFieldErrors {
   email?: string;
   password?: string;
@@ -60,39 +61,31 @@ const LoginPage = () => {
       return;
     }
 
-    setIsSubmitting(true);
-
     try {
-      const authResult = await handleLogin({ email: email.trim(), password });
-      navigate(getRoleBasedDashboardPath(authResult.user));
-    } catch (err: unknown) {
-      // 🔒 SECURITY: Show validation errors if available, else generic message
-      let errorMsg = "Login gagal.";
+      const result = await handleLogin({ email: email.trim(), password });
       
-      if (err && typeof err === "object") {
-        const errObj = err as any;
-        // Check for API validation errors
-        if (errObj.response?.status === 422) {
-          const errors = errObj.response?.data?.errors;
-          if (errors && typeof errors === "object") {
-            const firstError = Object.values(errors)[0];
-            if (Array.isArray(firstError)) {
-              errorMsg = firstError[0] as string;
-            } else if (typeof firstError === "string") {
-              errorMsg = firstError;
-            }
-          } else if (errObj.response?.data?.message) {
-            errorMsg = errObj.response.data.message;
-          }
-        } else if (typeof errObj === "string") {
-          errorMsg = errObj;
+      // Check for validation errors returned by hook
+      if (result && "success" in result && result.success === false) {
+        if (result.errors) {
+          // If the backend returns specific field errors
+          const firstError = Object.values(result.errors)[0];
+          setFormError(String(firstError));
         }
+        return;
       }
-      
-      setFormError(errorMsg);
+
+      // Success path
+      if (result && "user" in result) {
+        navigate(getRoleBasedDashboardPath(result.user));
+      }
+    } catch (err: any) {
+      // General errors are already handled by global toast, 
+      // but we can show a fallback in the form if needed.
+      setFormError(err.message || "Terjadi kesalahan saat login.");
     } finally {
       setIsSubmitting(false);
     }
+
   };
 
   const handleGoogleSignIn = async () => {
@@ -214,7 +207,9 @@ const LoginPage = () => {
           {isSsoSubmitting ? <Loader2 size={18} className="auth-button-spinner" /> : <GoogleIcon />}
           {isSsoSubmitting ? "Redirecting to Google..." : "Login with Google (SSO)"}
         </button>
+
       </form>
+
     </AuthLayout>
   );
 };

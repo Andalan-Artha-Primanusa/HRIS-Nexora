@@ -1,52 +1,41 @@
-/**
- * Error handler utility untuk extract dan format error message dari API response
- * Prioritas: userMessage > response message > error message > default message
- * 🔒 SECURITY: Sanitizes error messages to prevent info disclosure
- */
-export const getErrorMessage = (error: any): string => {
-  // Check for custom userMessage dari interceptor
-  if (error.userMessage) {
-    return error.userMessage;
-  }
+import type { AxiosError } from "axios";
 
-  // Check untuk message dari API response
-  if (error.response?.data?.message) {
-    // 🔒 SECURITY: Limit message length to prevent DOM-based XSS
-    const message = String(error.response.data.message).trim();
-    return message.substring(0, 500);
-  }
+export type ApiErrorType = "validation" | "general" | "unauthorized";
 
-  // Check untuk error message
-  if (error.message) {
-    const message = String(error.message).trim();
-    // 🔒 SECURITY: Filter out sensitive stack trace info
-    if (message.includes('stack') || message.includes('eval')) {
-      return 'Terjadi kesalahan. Silahkan coba lagi.';
-    }
-    return message.substring(0, 500);
-  }
-
-  // Default message
-  return 'Terjadi kesalahan. Silahkan coba lagi.';
-};
+export interface ApiError {
+  type: ApiErrorType;
+  message: string;
+  errors?: Record<string, string>;
+}
 
 /**
- * Determine alert type berdasarkan HTTP status code
+ * Standardize error response from Axios
  */
-export const getAlertTypeFromStatus = (status?: number): 'error' | 'warning' | 'info' => {
-  if (!status) return 'error';
-  
-  if (status >= 500) return 'error';
-  if (status === 403 || status === 401) return 'error';
-  if (status >= 400) return 'warning';
-  
-  return 'error';
-};
+export const parseApiError = (error: unknown): ApiError => {
+  const axiosError = error as AxiosError<any>;
+  const status = axiosError.response?.status;
+  const data = axiosError.response?.data;
 
-/**
- * Helper untuk error handling dalam catch block
- * Usage: const message = extractErrorMessage(err);
- */
-export const extractErrorMessage = (error: any): string => {
-  return getErrorMessage(error);
+  // 1. Unauthorized
+  if (status === 401) {
+    return {
+      type: "unauthorized",
+      message: data?.message || "Sesi anda telah berakhir. Silahkan login kembali.",
+    };
+  }
+
+  // 2. Validation Error
+  if (status === 422) {
+    return {
+      type: "validation",
+      message: data?.message || "Data yang dinput tidak valid.",
+      errors: data?.errors || {},
+    };
+  }
+
+  // 3. General Error
+  return {
+    type: "general",
+    message: data?.message || axiosError.message || "Terjadi kesalahan pada server.",
+  };
 };

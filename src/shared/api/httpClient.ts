@@ -1,4 +1,6 @@
 import axios from "axios";
+import { parseApiError } from "./errorHandler";
+import { showToast } from "../ui/toast";
 
 // 🔒 SECURITY: API URL from environment, with fallback for development
 const defaultBaseUrl = "https://moccasin-crab-693879.hostingersite.com/api";
@@ -40,24 +42,49 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// 🚀 Global Response Interceptor (Error Handling & Toast)
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const method = response.config.method?.toUpperCase();
+    const url = response.config.url || "";
+    
+    // Tampilkan toast sukses otomatis untuk mutasi (POST, PUT, DELETE)
+    const isMutation = ["POST", "PUT", "DELETE", "PATCH"].includes(method || "");
+    const isSilentUrl = url.includes("/me") || url.includes("/logout"); // Biarkan /me dan /logout tetap senyap di sini
+
+    if (isMutation && !isSilentUrl) {
+      const message = response.data?.message || (url.includes("/login") ? "Login Berhasil" : "Aksi berhasil dilakukan");
+      showToast(message, "success");
+    }
+
+
+    
+    return response;
+  },
   (error) => {
-    if (error.response?.status === 401) {
+    // Standardize the error using our global parser
+    const parsedError = parseApiError(error);
+
+    // 1. Handle Unauthorized (401)
+    if (parsedError.type === "unauthorized") {
+      showToast(parsedError.message, "error");
+      
       // 🔒 SECURITY: Clear sensitive data on auth failure
-      console.warn("401 Unauthorized:", error.config?.url);
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      
+      // Redirect to login after a short delay
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 1000);
     }
-    
-    // Handle 403 Forbidden errors with user-friendly message
-    if (error.response?.status === 403) {
-      error.userMessage = "Fitur ini kamu tidak ada akses. Silahkan hubungi Admin untuk mendapatkan akses.";
+
+    // 2. Handle General Errors (NOT validation errors)
+    if (parsedError.type === "general") {
+      showToast(parsedError.message, "error");
     }
-    
-    // 🔒 SECURITY: Sanitize error messages to prevent XSS in error display
-    if (error.response?.data?.message) {
-      error.response.data.message = String(error.response.data.message).substring(0, 500);
-    }
-    
-    return Promise.reject(error);
+
+    // Return the standard parsed error object
+    return Promise.reject(parsedError);
   }
 );

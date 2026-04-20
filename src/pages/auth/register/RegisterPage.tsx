@@ -77,14 +77,27 @@ const RegisterPage = () => {
     setIsSubmitting(true);
 
     try {
-      const authResult = await handleRegister({
+      const result = await handleRegister({
         ...form,
         name: form.name.trim(),
         email: form.email.trim(),
       });
-      navigate(getRoleBasedDashboardPath(authResult.user));
-    } catch (err: unknown) {
-      setErrorMessage(typeof err === "string" ? err : "Register gagal.");
+
+      // Check for validation errors returned by hook
+      if (result && "success" in result && result.success === false) {
+        if (result.errors) {
+          const firstError = Object.values(result.errors)[0];
+          setErrorMessage(String(firstError));
+        }
+        return;
+      }
+
+      // Success path
+      if (result && "user" in result) {
+        navigate(getRoleBasedDashboardPath(result.user));
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message || "Terjadi kesalahan saat registrasi.");
     } finally {
       setIsSubmitting(false);
     }

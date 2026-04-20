@@ -8,6 +8,7 @@ import {
 import type { RegisterPayload } from "../api/auth.service";
 import { useAuthStore } from "@/app/store/auth.store";
 import type { AuthUser } from "@/shared/types/rbac.types";
+import type { ApiError } from "@/shared/api/errorHandler";
 
 const TOKEN_KEYS = ["token", "access_token", "jwt", "bearer_token"];
 const USER_KEYS = ["user", "user_info", "userData", "profile"];
@@ -23,41 +24,32 @@ const getFirstExistingValue = (source: UnknownRecord, keys: string[]) => {
       return source[key];
     }
   }
-
   return null;
 };
 
-const extractAuthFromResponse = (response: { data?: unknown }) => {
-  const root = toRecord(response.data);
+/**
+ * Normalisasi data user dan token dari response API
+ */
+const extractAuthFromResponse = (data: unknown) => {
+  const root = toRecord(data);
   const responseData = toRecord(root.data ?? root);
   const nestedData = toRecord(responseData.data);
-
-  // 🔒 SECURITY: Debug logging for response structure
-  console.log("[Auth] Response structure:", {
-    hasRootData: !!root.data,
-    rootKeys: Object.keys(root),
-    responseDataKeys: Object.keys(responseData),
-    nestedDataKeys: Object.keys(nestedData),
-  });
 
   let user =
     getFirstExistingValue(responseData, USER_KEYS) ??
     getFirstExistingValue(nestedData, USER_KEYS) ??
     null;
 
-  // 🔒 SECURITY: Normalize user roles and permissions to ensure consistent structure
+  // Normalisasi roles dan permissions
   if (user && typeof user === "object") {
     const userObj = user as any;
-
-    // Normalize roles - ensure it's always an array of Role objects
     const normalizedRoles: any[] = [];
+    
     if (Array.isArray(userObj.roles)) {
       for (const role of userObj.roles) {
         if (typeof role === "string") {
-          // If role is a string, wrap it in a Role object
           normalizedRoles.push({ id: 0, name: role });
         } else if (typeof role === "object" && role) {
-          // If role is an object, clean up Laravel's pivot data and normalize
           const cleanedRole = {
             id: role.id || 0,
             name: role.name || "",
@@ -69,7 +61,6 @@ const extractAuthFromResponse = (response: { data?: unknown }) => {
                   name: p.name,
                   display_name: p.display_name || p.name,
                   description: p.description,
-                  // Remove Laravel pivot data
                 }))
               : [],
             created_at: role.created_at,
@@ -81,10 +72,7 @@ const extractAuthFromResponse = (response: { data?: unknown }) => {
     }
     userObj.roles = normalizedRoles;
 
-    // Extract all permissions from roles and use them as top-level permissions
-    // This ensures hasPermission() works correctly
     const allPermissions = new Map<string, any>();
-
     for (const role of normalizedRoles) {
       if (Array.isArray(role.permissions)) {
         for (const permission of role.permissions) {
@@ -95,7 +83,6 @@ const extractAuthFromResponse = (response: { data?: unknown }) => {
       }
     }
 
-    // Merge with any existing top-level permissions
     if (Array.isArray(userObj.permissions)) {
       for (const permission of userObj.permissions) {
         if (permission.name && !allPermissions.has(permission.name)) {
@@ -105,14 +92,6 @@ const extractAuthFromResponse = (response: { data?: unknown }) => {
     }
 
     userObj.permissions = Array.from(allPermissions.values());
-
-    // Log untuk debugging roles
-    console.log("[Auth] User extracted:", {
-      name: userObj.name,
-      email: userObj.email,
-      roles: userObj.roles.map((r: any) => ({ id: r.id, name: r.name })),
-      permissionCount: userObj.permissions.length,
-    });
   }
 
   const rawToken =
@@ -122,38 +101,21 @@ const extractAuthFromResponse = (response: { data?: unknown }) => {
 
   const token = typeof rawToken === "string" ? rawToken : null;
 
-  // 🔒 SECURITY: Debug logging for extracted values
-  console.log("[Auth] Extracted auth data:", {
-    foundToken: !!token,
-    foundUser: !!user,
-    userEmail: (user as any)?.email ?? "N/A",
-    tokenLength: token?.length ?? 0,
-  });
-
   return { user, token };
 };
 
-const getFirstExistingParamValue = (
-  params: URLSearchParams[],
-  keys: string[],
-) => {
+const getFirstExistingParamValue = (params: URLSearchParams[], keys: string[]) => {
   for (const key of keys) {
     for (const paramSet of params) {
       const value = paramSet.get(key);
-      if (value) {
-        return value;
-      }
+      if (value) return value;
     }
   }
-
   return null;
 };
 
 const parsePotentialUserPayload = (value: string | null) => {
-  if (!value) {
-    return null;
-  }
-
+  if (!value) return null;
   try {
     return JSON.parse(value);
   } catch {
@@ -165,187 +127,92 @@ const parsePotentialUserPayload = (value: string | null) => {
   }
 };
 
-const normalizeAuthError = (error: unknown, fallbackMessage: string) => {
-  const parsedError = toRecord(error);
-  const response = toRecord(parsedError.response);
-  const responseData = toRecord(response.data);
-
-  const responseMessage = responseData.message;
-  if (typeof responseMessage === "string" && responseMessage.trim()) {
-    return responseMessage;
-  }
-
-  const errorMessage = parsedError.message;
-  if (typeof errorMessage === "string" && errorMessage.trim()) {
-    return errorMessage;
-  }
-
-  return fallbackMessage;
-};
-
 export const useAuth = () => {
   const setAuth = useAuthStore.getState().setAuth;
   const clearAuth = useAuthStore.getState().logout;
 
   const handleLogin = async (payload: { email: string; password: string }) => {
     try {
-      const res = await login(payload);
-      const { user, token } = extractAuthFromResponse(res);
+      const resData = await login(payload);
+      const { user, token } = extractAuthFromResponse(resData);
 
-      if (!token) {
-        throw new Error("Token login tidak ditemukan dari response API");
-      }
-
-      if (!user) {
-        throw new Error("User data tidak ditemukan dari response API");
+      if (!token || !user) {
+        throw { type: "general", message: "Data user atau token tidak valid" };
       }
 
       setAuth(user as AuthUser, token);
-
-      return { user, token, response: res };
-    } catch (error) {
-      throw normalizeAuthError(error, "Login gagal");
+      return { user, token };
+    } catch (error: any) {
+      // Re-throw validation errors to be handled by the component
+      if (error.type === "validation") {
+        return { success: false, errors: error.errors };
+      }
+      throw error;
     }
   };
 
   const handleRegister = async (payload: RegisterPayload) => {
     try {
-      const res = await register(payload);
-      const { user, token } = extractAuthFromResponse(res);
+      const resData = await register(payload);
+      const { user, token } = extractAuthFromResponse(resData);
 
-      if (!token) {
-        throw new Error("Token register tidak ditemukan dari response API");
-      }
-
-      if (!user) {
-        throw new Error("User data tidak ditemukan dari response API");
+      if (!token || !user) {
+        throw { type: "general", message: "Data user atau token tidak valid" };
       }
 
       setAuth(user as AuthUser, token);
-
-      return { user, token, response: res };
-    } catch (error) {
-      throw normalizeAuthError(error, "Register gagal");
+      return { user, token };
+    } catch (error: any) {
+      if (error.type === "validation") {
+        return { success: false, errors: error.errors };
+      }
+      throw error;
     }
   };
 
   const handleGoogleLogin = async () => {
-    try {
-      const response = await getGoogleAuthRedirect();
-      const responseData = response.data?.data ?? response.data;
-      const redirectUrl =
-        responseData?.url ??
-        responseData?.redirect_url ??
-        responseData?.redirectUrl ??
-        response.data?.url ??
-        null;
+    const responseData = await getGoogleAuthRedirect();
+    const data = responseData?.data ?? responseData;
+    const redirectUrl = data?.url ?? data?.redirect_url ?? data?.redirectUrl ?? null;
 
-      if (!redirectUrl) {
-        throw new Error(
-          "URL redirect Google tidak ditemukan dari response API",
-        );
-      }
-
-      return redirectUrl as string;
-    } catch (error) {
-      throw normalizeAuthError(error, "Login with Google gagal");
+    if (!redirectUrl) {
+      throw new Error("URL redirect Google tidak ditemukan");
     }
+
+    return redirectUrl as string;
   };
 
   const handleGoogleCallback = async (searchParams: URLSearchParams) => {
-    try {
-      console.log("[GoogleCallback] Starting Google callback process");
-      const hashText = window.location.hash.startsWith("#")
-        ? window.location.hash.slice(1)
-        : window.location.hash;
-      const hashParams = new URLSearchParams(hashText);
-      const allParams = [searchParams, hashParams];
+    const hashText = window.location.hash.startsWith("#") ? window.location.hash.slice(1) : window.location.hash;
+    const hashParams = new URLSearchParams(hashText);
+    const allParams = [searchParams, hashParams];
 
-      const oauthError =
-        getFirstExistingParamValue(allParams, ["error_description"]) ??
-        getFirstExistingParamValue(allParams, ["error"]);
+    const code = searchParams.get("code");
+    if (!code) throw new Error("Parameter code OAuth tidak ditemukan");
 
-      if (oauthError) {
-        throw new Error(oauthError);
-      }
+    const resData = await handleGoogleAuthCallback({
+      code,
+      state: searchParams.get("state") ?? undefined,
+      scope: searchParams.get("scope") ?? undefined,
+      authuser: searchParams.get("authuser") ?? undefined,
+      prompt: searchParams.get("prompt") ?? undefined,
+    });
 
-      const directToken = getFirstExistingParamValue(allParams, TOKEN_KEYS);
-      if (directToken) {
-        console.log("[GoogleCallback] Found direct token");
-
-        const directUserRaw = getFirstExistingParamValue(allParams, USER_KEYS);
-        const parsedUser = parsePotentialUserPayload(directUserRaw);
-
-        if (!parsedUser) {
-          throw new Error("User Google tidak ditemukan");
-        }
-
-        // Bungkus seperti response API normal
-        const normalized = extractAuthFromResponse({
-          data: {
-            user: parsedUser,
-            token: directToken,
-          },
-        });
-
-        if (!normalized.user || !normalized.token) {
-          throw new Error("Gagal normalisasi data Google login");
-        }
-
-        setAuth(normalized.user as AuthUser, normalized.token);
-
-        return {
-          user: normalized.user,
-          token: normalized.token,
-        };
-      }
-
-      const code = searchParams.get("code");
-      if (!code) {
-        throw new Error("Parameter code OAuth tidak ditemukan");
-      }
-
-      console.log("[GoogleCallback] Calling backend with OAuth code");
-      const response = await handleGoogleAuthCallback({
-        code,
-        state: searchParams.get("state") ?? undefined,
-        scope: searchParams.get("scope") ?? undefined,
-        authuser: searchParams.get("authuser") ?? undefined,
-        prompt: searchParams.get("prompt") ?? undefined,
-      });
-
-      console.log("[GoogleCallback] Backend response received");
-      const { user, token } = extractAuthFromResponse(response);
-      if (!token) {
-        console.error("[GoogleCallback] Token not found in response", {
-          response,
-        });
-        throw new Error("Token login SSO tidak ditemukan dari response API");
-      }
-
-      if (!user) {
-        console.error("[GoogleCallback] User not found in response", {
-          response,
-        });
-        throw new Error("User data tidak ditemukan dari response API");
-      }
-
-      console.log("[GoogleCallback] Setting auth with user and token");
-      setAuth(user as AuthUser, token);
-      return { user, token, response };
-    } catch (error) {
-      console.error("[GoogleCallback] Error in handleGoogleCallback:", error);
-      throw normalizeAuthError(error, "Login Google SSO gagal");
+    const { user, token } = extractAuthFromResponse(resData);
+    if (!token || !user) {
+      throw new Error("Token atau User SSO tidak ditemukan");
     }
+
+    setAuth(user as AuthUser, token);
+    return { user, token };
   };
 
   const handleLogout = async () => {
     try {
       await logout();
     } catch {
-      // ignore logout API error and continue clearing local auth state
-    } finally {
-      clearAuth();
+      // 🔒 Jika API logout gagal (misal token kadaluarsa), 
+      // tetap panggil logout lokal untuk membersihkan sisa data.
     }
   };
 
