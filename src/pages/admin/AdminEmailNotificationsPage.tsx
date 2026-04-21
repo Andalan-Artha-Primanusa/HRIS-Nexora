@@ -8,7 +8,12 @@ import { ROLES } from "@/shared/types/rbac.types";
 import { BellRing, Mail, RefreshCw, ScrollText, Send, ShieldAlert } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
 import "./AdminCrudPages.css";
-import { createAdminEmailNotification, getAdminEmailNotificationLogs, getAdminEmailNotifications } from "@/features/admin/api/admin-batch1.service";
+import {
+  createAdminEmailNotification,
+  getAdminEmailNotificationLogs,
+  getAdminEmailNotifications,
+  createEmailTemplate
+} from "@/features/admin/api/admin-batch1.service";
 
 type EmailNotificationItem = {
   id?: number | string;
@@ -86,7 +91,10 @@ const AdminEmailNotificationsPage = () => {
   const [recipientEmail, setRecipientEmail] = useState("");
   const [message, setMessage] = useState("");
   const [type, setType] = useState("manual");
-
+  const [templateKey, setTemplateKey] = useState("");
+  const [templateName, setTemplateName] = useState("");
+  const [templateSubject, setTemplateSubject] = useState("");
+  const [templateHtml, setTemplateHtml] = useState("");
   const loadData = async () => {
     setLoading(true);
 
@@ -180,6 +188,34 @@ const AdminEmailNotificationsPage = () => {
       setSubmitting(false);
     }
   };
+  const handleCreateTemplate = async (event: React.FormEvent) => {
+  event.preventDefault();
+  setSubmitting(true);
+
+  try {
+    await createEmailTemplate({
+      key: templateKey,
+      name: templateName,
+      subject: templateSubject,
+      html_body: templateHtml,
+    });
+
+    setTemplateKey("");
+    setTemplateName("");
+    setTemplateSubject("");
+    setTemplateHtml("");
+
+    setStatusMessage("Template berhasil dibuat.");
+    setAlertType("success");
+
+    await loadData();
+  } catch (error) {
+    setStatusMessage(getErrorMessage(error as never));
+    setAlertType("error");
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   return (
     <div className="crud-page">
@@ -254,6 +290,73 @@ const AdminEmailNotificationsPage = () => {
           </form>
         </div>
       </Card>
+
+      <Card className="table-card" glass>
+  <div className="table-header-bar">
+    <h3>Buat Email Template</h3>
+    <span className="table-count">POST /admin/email-templates</span>
+  </div>
+
+  <div className="table-card-inner">
+    <form className="crud-form" onSubmit={handleCreateTemplate}>
+      <div className="form-grid">
+
+        <div className="form-group">
+          <label>Template Key</label>
+          <input
+            className="form-input"
+            value={templateKey}
+            onChange={(e) => setTemplateKey(e.target.value)}
+            placeholder="contoh: welcome_email"
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Template Name</label>
+          <input
+            className="form-input"
+            value={templateName}
+            onChange={(e) => setTemplateName(e.target.value)}
+            placeholder="Welcome Email"
+            required
+          />
+        </div>
+
+        <div className="form-group" style={{ gridColumn: "1 / -1" }}>
+          <label>Subject</label>
+          <input
+            className="form-input"
+            value={templateSubject}
+            onChange={(e) => setTemplateSubject(e.target.value)}
+            placeholder="Hello {{name}}"
+            required
+          />
+        </div>
+
+        <div className="form-group" style={{ gridColumn: "1 / -1" }}>
+          <label>HTML Body</label>
+          <textarea
+            className="form-input"
+            value={templateHtml}
+            onChange={(e) => setTemplateHtml(e.target.value)}
+            placeholder="<h1>Hello {{name}}</h1>"
+            rows={6}
+            required
+          />
+        </div>
+
+      </div>
+
+      <div className="form-actions">
+        <Button type="submit" loading={submitting}>
+          <Mail size={16} />
+          Create Template
+        </Button>
+      </div>
+    </form>
+  </div>
+</Card>
 
       <Card className="table-card" glass>
         <div className="table-header-bar">

@@ -38,18 +38,20 @@ export const getAdminNotificationsSummary = async () => {
 export const createAdminNotification = async (payload: {
 	title: string;
 	message: string;
-	user_id?: number;
+	type: string;
+	user_ids: number[];
+	category?: string;
+	data?: Record<string, unknown>;
 }) => {
-	const normalizedPayload: UnknownRecord = {
+	const response = await api.post("/admin/notifications", {
 		title: payload.title,
 		message: payload.message,
-	};
+		type: payload.type,
+		user_ids: payload.user_ids,
+		category: payload.category,
+		data: payload.data,
+	});
 
-	if (typeof payload.user_id === "number") {
-		normalizedPayload.user_ids = [payload.user_id];
-	}
-
-	const response = await api.post("/admin/notifications", normalizedPayload);
 	return extractPayload(response.data);
 };
 
@@ -79,17 +81,28 @@ export const getAdminEmailNotificationLogs = async () => {
 };
 
 export const createAdminEmailNotification = async (payload: {
-	subject: string;
 	recipient_email: string;
-	message: string;
-	type: string;
+	user_id?: number;
+	subject?: string;
+	message?: string;
+	template_key?: string;
+	template_data?: Record<string, unknown>;
+	type?: string;
+	reference_type?: string;
+	reference_id?: number;
 }) => {
 	const response = await api.post("/admin/email-notifications", {
-		subject: payload.subject,
 		recipient_email: payload.recipient_email,
+		user_id: payload.user_id,
+		subject: payload.subject,
 		body: payload.message,
+		template_key: payload.template_key,
+		template_data: payload.template_data,
 		type: payload.type,
+		reference_type: payload.reference_type,
+		reference_id: payload.reference_id,
 	});
+
 	return extractPayload(response.data);
 };
 
@@ -161,5 +174,71 @@ export const importEmployees = async (formData: FormData) => {
 	const response = await api.post("/admin/import/employees", formData, {
 		headers: { "Content-Type": "multipart/form-data" },
 	});
+	return extractPayload(response.data);
+};
+// =============================
+// EMAIL NOTIFICATION (RETRY)
+// =============================
+export const retryAdminEmailNotification = async (id: string | number) => {
+	const response = await api.post(`/admin/email-notifications/${id}/retry`);
+	return extractPayload(response.data);
+};
+
+// =============================
+// EMAIL TEMPLATE (CREATE)
+// =============================
+export const createEmailTemplate = async (payload: {
+	key: string;
+	name: string;
+	description?: string;
+	subject: string;
+	html_body: string;
+	text_body?: string;
+	placeholders?: string[];
+}) => {
+	const response = await api.post("/admin/email-templates", {
+		key: payload.key,
+		name: payload.name,
+		description: payload.description,
+		subject: payload.subject,
+		html_body: payload.html_body,
+		text_body: payload.text_body,
+		placeholders: payload.placeholders,
+	});
+	return extractPayload(response.data);
+};
+
+// =============================
+// EMAIL TEMPLATE (UPDATE)
+// =============================
+export const updateEmailTemplate = async (
+	id: string | number,
+	payload: {
+		name?: string;
+		description?: string;
+		subject?: string;
+		html_body?: string;
+		text_body?: string;
+		placeholders?: string[];
+		is_active?: boolean;
+	}
+) => {
+	const response = await api.put(`/admin/email-templates/${id}`, payload);
+	return extractPayload(response.data);
+};
+
+// =============================
+// EMAIL TEMPLATE (PREVIEW)
+// =============================
+export const previewEmailTemplate = async (
+	id: string | number,
+	data?: Record<string, unknown>
+) => {
+	const response = await api.post(
+		`/admin/email-templates/${id}/preview`,
+		{
+			data: data ?? {},
+		}
+	);
 	return extractPayload(response.data);
 };
