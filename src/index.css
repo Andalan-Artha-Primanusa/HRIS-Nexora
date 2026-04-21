@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap");
 
 /* ========================================
    IMPORT DESIGN SYSTEM
@@ -39,8 +39,8 @@
   --status-info: #3b82f6;
   --status-info-bg: #dbeafe;
 
-  --font-family: "Plus Jakarta Sans", "Poppins", "Segoe UI", sans-serif;
-  --font-heading: "Sora", "Plus Jakarta Sans", sans-serif;
+  --font-family: "Poppins", "Segoe UI", sans-serif;
+  --font-heading: "Poppins", sans-serif;
 
   --shadow-sm: 0 3px 10px rgba(15, 23, 42, 0.06);
   --shadow-md: 0 10px 24px rgba(15, 23, 42, 0.09);
@@ -194,7 +194,7 @@ h6 {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(circle at 8% 12%, rgba(59, 130, 246, 0.08), transparent 26rem),
+  background: radial-gradient(circle at 8% 12%, rgba(59, 130, 246, 0.04), transparent 26rem),
     radial-gradient(circle at 92% 96%, rgba(14, 165, 233, 0.08), transparent 30rem);
 }
 

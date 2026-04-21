@@ -7,6 +7,8 @@ import { Briefcase } from "lucide-react";
 import { api } from "@/shared/api/httpClient";
 import { createEmployee } from "@/features/employee/api/employee.service";
 import { getAllLocations } from "@/features/location/api/location.service";
+import { getAllUsers } from "@/features/admin/api/admin.service";
+import { getAllWorkSchedules } from "@/features/work-schedule/api/work-schedule.service";
 import type { EmployeeCreatePayload } from "@/features/employee/types/employee.types";
 import EmployeeForm, { DEFAULT_FORM } from "./components/EmployeeForm";
 import type { EmployeeFormState } from "./components/EmployeeForm";
@@ -30,14 +32,16 @@ const EmployeeCreatePage = () => {
       const locs = await getAllLocations();
       setAllLocations(Array.isArray(locs.items) ? locs.items : []);
 
-      const usersRes = await api.get('/admin/users');
-      setAllUsers(Array.isArray(usersRes.data?.data?.items) ? usersRes.data.data.items : Array.isArray(usersRes.data?.data) ? usersRes.data.data : []);
+      const usersResult = await getAllUsers(1, 100);
+      setAllUsers(usersResult.items);
 
-      const schedRes = await api.get('/work-schedules');
-      setAllSchedules(Array.isArray(schedRes.data?.data) ? schedRes.data.data : Array.isArray(schedRes.data) ? schedRes.data : []);
+      const schedResult = await getAllWorkSchedules();
+      setAllSchedules(schedResult.items);
 
       const deptRes = await api.get('/organization/master-data');
-      setAllDepartments(Array.isArray(deptRes.data?.data?.departments) ? deptRes.data.data.departments : []);
+      // Deeply check for departments array
+      const rawDepts = deptRes.data?.data?.departments || deptRes.data?.departments || [];
+      setAllDepartments(Array.isArray(rawDepts) ? rawDepts : []);
     } catch (err) {
       console.error("Failed to load metadata:", err);
     }
@@ -48,27 +52,41 @@ const EmployeeCreatePage = () => {
   }, []);
 
   const handleCreate = async () => {
+    // Client-side validation
+    if (!createForm.user_id) {
+      setStatusMessage("Gagal: Silakan pilih User System terlebih dahulu.");
+      return;
+    }
+
     setLoading(true);
     setStatusMessage("Menyimpan employee...");
 
     try {
       const payload: EmployeeCreatePayload = {
-        user_id: Number(createForm.user_id),
-        employee_code: createForm.employee_code,
-        position: createForm.position,
-        department: createForm.department,
-        hire_date: createForm.hire_date,
-        salary: Number(createForm.salary),
-        location_id: createForm.location_id ? Number(createForm.location_id) : undefined,
-        manager_id: createForm.manager_id ? Number(createForm.manager_id) : undefined,
-        work_schedule_id: createForm.work_schedule_id ? Number(createForm.work_schedule_id) : undefined,
+        user_id: createForm.user_id ? Number(createForm.user_id) : null, 
+        manager_id: createForm.manager_id ? Number(createForm.manager_id) : null,
+        employee_code: createForm.employee_code || "",
+        position: createForm.position || "",
+        department: createForm.department || "",
+        status: createForm.status || "pending",
+        hire_date: createForm.hire_date || "",
+        probation_end_date: createForm.probation_end_date || null,
+        salary: createForm.salary ? Number(createForm.salary) : 0,
+        location_id: createForm.location_id ? Number(createForm.location_id) : null,
+        work_schedule_id: createForm.work_schedule_id ? Number(createForm.work_schedule_id) : null,
       };
 
       await createEmployee(payload);
       setCreateForm(DEFAULT_FORM);
       navigate("/employees");
     } catch (error: any) {
-      setStatusMessage(error.message || "Gagal membuat employee");
+      if (error.type === "validation" && error.errors) {
+        const validationErrors = error.errors;
+        const messages = Object.values(validationErrors).flat().join(", ");
+        setStatusMessage(`Gagal: ${messages}`);
+      } else {
+        setStatusMessage(error.message || "Gagal membuat employee");
+      }
     } finally {
       setLoading(false);
     }
