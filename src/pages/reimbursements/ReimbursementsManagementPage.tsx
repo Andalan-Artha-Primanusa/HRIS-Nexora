@@ -1,424 +1,240 @@
-import { useEffect, useMemo, useState } from "react";
-import { BarChart3, FileText, ReceiptText, RefreshCw, Settings2 } from "lucide-react";
+import { useEffect, useState, useMemo } from "react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
+import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import {
   approveReimbursement,
+  rejectReimbursement,
   createReimbursement,
   deleteReimbursement,
   getAllReimbursements,
-  getPendingReimbursements,
-  getReimbursementDetail,
-  getReimbursementStatistics,
-  getReimbursementsByEmployee,
   markReimbursementAsPaid,
-  rejectReimbursement,
   updateReimbursement,
 } from "@/features/reimbursement/api/reimbursement.service";
-import type {
-  ReimbursementCreatePayload,
-  ReimbursementItem,
-  ReimbursementRejectPayload,
-  ReimbursementUpdatePayload,
-} from "@/features/reimbursement/types/reimbursement.types";
+import type { ReimbursementItem, ReimbursementCreatePayload, ReimbursementUpdatePayload } from "@/features/reimbursement/types/reimbursement.types";
+import { BarChart3, Clock3, CircleCheckBig, RefreshCw, DollarSign, Trash2, Edit, Receipt, DownloadCloud, Check, X } from "lucide-react";
+import { showToast } from "@/shared/ui/toast";
 import "@/shared/styles/CrudPage.css";
 
-type ReimbursementFormState = {
-  id: string;
-  employee_id: string;
-  title: string;
-  description: string;
-  amount: string;
-  category: string;
-  expense_date: string;
-  receipt_path: string;
-  note: string;
-};
-
-const DEFAULT_FORM: ReimbursementFormState = {
-  id: "",
-  employee_id: "1",
-  title: "Office Supplies",
-  description: "Monthly office supplies",
-  amount: "1000000",
-  category: "office_supplies",
-  expense_date: "2026-04-09",
-  receipt_path: "/receipts/office_001.pdf",
-  note: "Approved",
-};
-
-const asDisplay = (value: unknown) => {
-  if (value === null || value === undefined) return "-";
-  if (typeof value === "object") return JSON.stringify(value);
-  return String(value);
-};
-
-const getColumns = (items: ReimbursementItem[]) => {
-  if (items.length === 0) {
-    return ["id", "employee_id", "title", "amount", "category", "status", "expense_date"];
+const formatDate = (dateString: string | undefined) => {
+  if (!dateString) return "-";
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  } catch {
+    return dateString;
   }
+};
 
-  const keys = Object.keys(items[0]);
-  const preferred = ["id", "employee_id", "title", "amount", "category", "status", "expense_date"];
-  const merged = [...preferred, ...keys.filter((key) => !preferred.includes(key))];
-  return merged.filter((key, index) => merged.indexOf(key) === index);
+const getEmployeeName = (item: any) => {
+  if (typeof item.employee_name === "string") return item.employee_name;
+  if (item.employee?.name) return item.employee.name;
+  if (item.employee?.user?.name) return item.employee.user.name;
+  if (item.user?.name) return item.user.name;
+  return `EMP-${String(item.employee_id).padStart(3, '0')}`;
+};
+
+const DEFAULT_FORM = {
+  id: "",
+  employee_id: "",
+  title: "",
+  description: "",
+  amount: "",
+  category: "travel",
+  expense_date: new Date().toISOString().split('T')[0],
+  receipt_path: "",
 };
 
 const ReimbursementsManagementPage = () => {
   const [items, setItems] = useState<ReimbursementItem[]>([]);
-  const [selectedDetail, setSelectedDetail] = useState<Record<string, unknown> | null>(null);
-  const [statistics, setStatistics] = useState<Record<string, unknown> | null>(null);
-  const [form, setForm] = useState<ReimbursementFormState>(DEFAULT_FORM);
-  const [filterStatus, setFilterStatus] = useState("");
-  const [filterCategory, setFilterCategory] = useState("");
-  const [filterEmployeeId, setFilterEmployeeId] = useState("");
-  const [statsEmployeeId, setStatsEmployeeId] = useState("");
-  const [responseText, setResponseText] = useState("");
-  const [statusMessage, setStatusMessage] = useState("Ready to call reimbursement API");
   const [loading, setLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [filterStatus, setFilterStatus] = useState("");
+  
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [form, setForm] = useState(DEFAULT_FORM);
 
-  const columns = useMemo(() => getColumns(items), [items]);
+  const [allItemsRaw, setAllItemsRaw] = useState<ReimbursementItem[]>([]);
+
   const summaryCards = useMemo(() => {
-    const pendingCount = items.filter((item) => String(item.status).toLowerCase() === "pending").length;
-    const approvedCount = items.filter((item) => String(item.status).toLowerCase() === "approved").length;
-    const paidCount = items.filter((item) => String(item.status).toLowerCase() === "paid").length;
-    const totalAmount = items.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
-
+    // Gunakan allItemsRaw agar statistik di atas tidak ikut jadi 0 saat difilter
+    const source = allItemsRaw.length > 0 ? allItemsRaw : items;
+    // Total Expense Volume hanya menghitung yang sudah APPROVED atau PAID (bukan Rejected/Draft)
+    const totalAmount = source.reduce((sum, item) => {
+      const s = String(item.status).toLowerCase();
+      if (s === 'rejected' || s === 'draft') return sum;
+      return sum + (Number(item.amount) || 0);
+    }, 0);
+    const paidCount = source.filter(i => String(i.status).toLowerCase() === "paid").length;
     return [
       {
-        label: "Total Reimbursement",
-        subtitle: "Semua data reimbursement",
-        value: String(items.length),
-        change: "Data aktif saat ini",
+        label: "Total Registrations",
+        subtitle: "Semua pengajuan yang masuk",
+        value: String(source.length),
+        change: "Total Ledger",
         tone: "blue" as const,
-        icon: ReceiptText,
-      },
-      {
-        label: "Pending",
-        subtitle: "Menunggu approval",
-        value: String(pendingCount),
-        change: "Perlu tindak lanjut",
-        tone: "orange" as const,
-        icon: Settings2,
-      },
-      {
-        label: "Approved + Paid",
-        subtitle: "Sudah disetujui/proses akhir",
-        value: String(approvedCount + paidCount),
-        change: "Siap dibayarkan atau selesai",
-        tone: "green" as const,
         icon: BarChart3,
       },
       {
-        label: "Total Nominal",
-        subtitle: "Akumulasi amount",
+        label: "Unpaid / Pending",
+        subtitle: "Belum dibayarkan tunai",
+        value: String(source.filter(i => {
+           const s = String(i.status).toLowerCase();
+           return s === 'pending' || s === 'submitted' || s === 'approved';
+        }).length),
+        change: "Hutang perusahaan",
+        tone: "orange" as const,
+        icon: Clock3,
+      },
+      {
+        label: "Paid Successfully",
+        subtitle: "Pembayaran telah diselesaikan",
+        value: String(paidCount),
+        change: "Telah ditransfer finance",
+        tone: "green" as const,
+        icon: CircleCheckBig,
+      },
+      {
+        label: "Total Expense Volume",
+        subtitle: "Total pengeluaran tercatat",
         value: `Rp ${totalAmount.toLocaleString("id-ID")}`,
-        change: statusMessage,
+        change: "Keseluruhan biaya expense",
         tone: "purple" as const,
-        icon: FileText,
+        icon: Receipt,
       },
     ];
-  }, [items, statusMessage]);
+  }, [items, allItemsRaw]);
 
-  const formatResponse = (payload: unknown) => {
-    setResponseText(typeof payload === "string" ? payload : JSON.stringify(payload, null, 2));
-  };
-
-  const requireId = () => {
-    const id = form.id.trim();
-    if (!id) {
-      setStatusMessage("Reimbursement ID wajib diisi.");
-      return null;
-    }
-    return id;
-  };
-
-  const loadAll = async () => {
+  const loadData = async () => {
     setLoading(true);
-    setStatusMessage("Memuat reimbursements...");
-    setResponseText("");
-
     try {
-      const result = await getAllReimbursements({
-        status: filterStatus.trim() || undefined,
-        category: filterCategory.trim() || undefined,
-        employee_id: filterEmployeeId.trim() ? Number(filterEmployeeId) : undefined,
-      });
-      setItems(result.items);
-      formatResponse(result.raw);
-      setStatusMessage("Data reimbursements berhasil dimuat.");
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal memuat reimbursements.";
-      formatResponse(message);
-      setStatusMessage("Gagal memuat reimbursements.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const createItem = async () => {
-    setLoading(true);
-    setStatusMessage("Membuat reimbursement...");
-    setResponseText("");
-
-    try {
-      const payload: ReimbursementCreatePayload = {
-        employee_id: Number(form.employee_id) || 0,
-        title: form.title,
-        description: form.description,
-        amount: Number(form.amount) || 0,
-        category: form.category,
-        expense_date: form.expense_date,
-        receipt_path: form.receipt_path,
-      };
-
-      const result = await createReimbursement(payload);
-      formatResponse(result.raw);
-      setStatusMessage("Reimbursement berhasil dibuat.");
-      await loadAll();
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal membuat reimbursement.";
-      formatResponse(message);
-      setStatusMessage("Gagal membuat reimbursement.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getDetail = async () => {
-    const id = requireId();
-    if (!id) return;
-
-    setLoading(true);
-    setStatusMessage("Memuat detail reimbursement...");
-    setResponseText("");
-
-    try {
-      const result = await getReimbursementDetail(id);
-      const payload =
-        result.payload && typeof result.payload === "object"
-          ? (result.payload as Record<string, unknown>)
-          : null;
-      setSelectedDetail(payload);
-      formatResponse(result.raw);
-      setStatusMessage("Detail reimbursement berhasil dimuat.");
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal memuat detail reimbursement.";
-      formatResponse(message);
-      setStatusMessage("Gagal memuat detail reimbursement.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateItem = async () => {
-    const id = requireId();
-    if (!id) return;
-
-    setLoading(true);
-    setStatusMessage("Mengupdate reimbursement...");
-    setResponseText("");
-
-    try {
-      const payload: ReimbursementUpdatePayload = {
-        title: form.title || undefined,
-        description: form.description || undefined,
-        amount: form.amount ? Number(form.amount) : undefined,
-        category: form.category || undefined,
-        expense_date: form.expense_date || undefined,
-        receipt_path: form.receipt_path || undefined,
-      };
-      const result = await updateReimbursement(id, payload);
-      formatResponse(result.raw);
-      setStatusMessage("Reimbursement berhasil diupdate.");
-      await loadAll();
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal update reimbursement.";
-      formatResponse(message);
-      setStatusMessage("Gagal update reimbursement.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const deleteItem = async () => {
-    const id = requireId();
-    if (!id) return;
-
-    setLoading(true);
-    setStatusMessage("Menghapus reimbursement...");
-    setResponseText("");
-
-    try {
-      const result = await deleteReimbursement(id);
-      formatResponse(result.raw);
-      setStatusMessage("Reimbursement berhasil dihapus.");
-      await loadAll();
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal menghapus reimbursement.";
-      formatResponse(message);
-      setStatusMessage("Gagal menghapus reimbursement.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const approveItem = async () => {
-    const id = requireId();
-    if (!id) return;
-
-    setLoading(true);
-    setStatusMessage("Approve reimbursement...");
-    setResponseText("");
-
-    try {
-      const result = await approveReimbursement(id, { note: form.note || "Approved" });
-      formatResponse(result.raw);
-      setStatusMessage("Reimbursement berhasil di-approve.");
-      await loadAll();
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal approve reimbursement.";
-      formatResponse(message);
-      setStatusMessage("Gagal approve reimbursement.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const rejectItem = async () => {
-    const id = requireId();
-    if (!id) return;
-
-    setLoading(true);
-    setStatusMessage("Reject reimbursement...");
-    setResponseText("");
-
-    try {
-      if (!form.note.trim()) {
-        setStatusMessage("Note wajib diisi untuk reject.");
-        return;
+      const result = await getAllReimbursements();
+      const raw = result.items || [];
+      setAllItemsRaw(raw);
+      
+      if (!filterStatus) {
+        setItems(raw);
+      } else {
+        const filtered = raw.filter(i => {
+          const s = String(i.status).toLowerCase();
+          const f = filterStatus.toLowerCase();
+          // Jika filter 'pending', sertakan juga 'submitted'
+          if (f === "pending") return s === "pending" || s === "submitted";
+          return s === f;
+        });
+        setItems(filtered);
       }
-      const payload: ReimbursementRejectPayload = { note: form.note };
-      const result = await rejectReimbursement(id, payload);
-      formatResponse(result.raw);
-      setStatusMessage("Reimbursement berhasil di-reject.");
-      await loadAll();
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal reject reimbursement.";
-      formatResponse(message);
-      setStatusMessage("Gagal reject reimbursement.");
+    } catch (error: any) {
+      showToast(error.message || "Gagal memuat data dari server.", "error");
     } finally {
       setLoading(false);
     }
   };
 
-  const markPaid = async () => {
-    const id = requireId();
-    if (!id) return;
 
-    setLoading(true);
-    setStatusMessage("Menandai reimbursement paid...");
-    setResponseText("");
-
+  const handleCreateOrUpdate = async () => {
+    if (!form.employee_id || !form.title || !form.amount) return;
+    setActionLoading("form");
     try {
-      const result = await markReimbursementAsPaid(id);
-      formatResponse(result.raw);
-      setStatusMessage("Reimbursement berhasil ditandai paid.");
-      await loadAll();
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal mark reimbursement as paid.";
-      formatResponse(message);
-      setStatusMessage("Gagal mark reimbursement as paid.");
+      if (form.id) {
+        const payload: ReimbursementUpdatePayload = {
+          title: form.title,
+          description: form.description,
+          amount: Number(form.amount),
+          category: form.category,
+          expense_date: form.expense_date,
+          receipt_path: form.receipt_path,
+        };
+        await updateReimbursement(form.id, payload);
+      } else {
+        const payload: ReimbursementCreatePayload = {
+          employee_id: Number(form.employee_id),
+          title: form.title,
+          description: form.description,
+          amount: Number(form.amount),
+          category: form.category,
+          expense_date: form.expense_date,
+          receipt_path: form.receipt_path,
+        };
+        await createReimbursement(payload);
+      }
+      setIsFormOpen(false);
+      setForm(DEFAULT_FORM);
+      await loadData();
+      showToast("Data berhasil disimpan", "success");
+    } catch (error: any) {
+      showToast(error.message || "Simpan data gagal", "error");
     } finally {
-      setLoading(false);
+      setActionLoading(null);
     }
   };
 
-  const loadPending = async () => {
-    setLoading(true);
-    setStatusMessage("Memuat pending reimbursements...");
-    setResponseText("");
-
+  const handleAction = async (actionId: string, actionFn: () => Promise<any>, successMsg: string) => {
+    setActionLoading(actionId);
     try {
-      const result = await getPendingReimbursements();
-      setItems(result.items);
-      formatResponse(result.raw);
-      setStatusMessage("Pending reimbursements berhasil dimuat.");
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal memuat pending reimbursements.";
-      formatResponse(message);
-      setStatusMessage("Gagal memuat pending reimbursements.");
+      await actionFn();
+      await loadData();
+      showToast(successMsg, "success");
+    } catch (error: any) {
+      showToast(error.message || "Aksi gagal", "error");
     } finally {
-      setLoading(false);
+      setActionLoading(null);
     }
   };
 
-  const loadByEmployee = async () => {
-    const employeeId = (filterEmployeeId || form.employee_id).trim();
-    if (!employeeId) {
-      setStatusMessage("Employee ID wajib diisi untuk endpoint by employee.");
-      return;
-    }
-
-    setLoading(true);
-    setStatusMessage("Memuat reimbursements by employee...");
-    setResponseText("");
-
+  const handleDelete = async (id: string) => {
+    if(!window.confirm('Hapus permanen ledger ini?')) return;
+    setActionLoading(id + '_del');
     try {
-      const result = await getReimbursementsByEmployee(employeeId);
-      setItems(result.items);
-      formatResponse(result.raw);
-      setStatusMessage("Reimbursements by employee berhasil dimuat.");
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal memuat reimbursements by employee.";
-      formatResponse(message);
-      setStatusMessage("Gagal memuat reimbursements by employee.");
+      await deleteReimbursement(id);
+      await loadData();
+      showToast("Data dihapus", "success");
+    } catch (error: any) {
+      showToast(error.message || "Gagal menghapus", "error");
     } finally {
-      setLoading(false);
+      setActionLoading(null);
     }
   };
 
-  const loadStatistics = async () => {
-    setLoading(true);
-    setStatusMessage("Memuat reimbursement statistics...");
-    setResponseText("");
-
-    try {
-      const result = await getReimbursementStatistics(statsEmployeeId.trim() || undefined);
-      const payload =
-        result.payload && typeof result.payload === "object"
-          ? (result.payload as Record<string, unknown>)
-          : null;
-      setStatistics(payload);
-      formatResponse(result.raw);
-      setStatusMessage("Reimbursement statistics berhasil dimuat.");
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal memuat reimbursement statistics.";
-      formatResponse(message);
-      setStatusMessage("Gagal memuat reimbursement statistics.");
-    } finally {
-      setLoading(false);
-    }
+  const handleEdit = (item: ReimbursementItem) => {
+    setForm({
+      id: String(item.id),
+      employee_id: String(item.employee_id),
+      title: String(item.title),
+      description: String(item.description || ""),
+      amount: String(item.amount),
+      category: String(item.category),
+      expense_date: String(item.expense_date),
+      receipt_path: String(item.receipt_path || ""),
+    });
+    setIsFormOpen(true);
   };
 
   useEffect(() => {
-    void loadAll();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    void loadData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterStatus]);
 
   return (
     <div className="crud-page">
       {/* Header */}
       <div className="page-header">
         <div className="page-header-title">
-          <span className="page-badge">Reimbursement Center</span>
-          <h1>Reimbursement Management</h1>
-          <p>Kelola reimbursement karyawan mulai dari filtering, approval, hingga status paid dalam satu alur yang konsisten.</p>
+          <span className="page-badge">Reimburse Finance</span>
+          <h1>Reimbursement Ledger</h1>
+          <p>Master list of all company expense reimbursements for Finance processing.</p>
         </div>
         <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={() => void loadAll()} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
+          <Button variant="outline" size="md" onClick={() => void loadData()} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
             <RefreshCw size={16} />
-            Segarkan
+            {loading ? "Memuat..." : "Segarkan"}
+          </Button>
+          <Button variant="primary" size="md" onClick={() => { setForm(DEFAULT_FORM); setIsFormOpen(!isFormOpen); }}>
+            Buat Data Baru
           </Button>
         </div>
       </div>
@@ -427,7 +243,6 @@ const ReimbursementsManagementPage = () => {
       <div className="summary-grid">
         {summaryCards.map((card) => {
           const Icon = card.icon;
-
           return (
             <Card key={card.label} className="summary-card" glass>
               <div className="summary-card__header">
@@ -446,271 +261,215 @@ const ReimbursementsManagementPage = () => {
         })}
       </div>
 
-
-      {/* Form Card */}
-      <Card className="control-card" glass>
-        <div style={{ marginBottom: '0.75rem' }}>
-          <h3 style={{ margin: 0, color: '#1e3a8a', fontWeight: 700, fontSize: '1rem' }}>Form Reimbursement</h3>
-        </div>
-        <div className="filter-panel" style={{ marginTop: 0, paddingTop: 0, borderTop: 'none' }}>
-          <div className="filter-row">
-            <div className="filter-group">
-              <label>ID Reimbursement</label>
-              <input className="form-input" value={form.id} onChange={(event) => setForm((prev) => ({ ...prev, id: event.target.value }))} placeholder="reimbursement id" />
-            </div>
-            <div className="filter-group">
-              <label>ID Karyawan</label>
-              <input className="form-input" value={form.employee_id} onChange={(event) => setForm((prev) => ({ ...prev, employee_id: event.target.value }))} />
-            </div>
-            <div className="filter-group">
-              <label>Judul</label>
-              <input className="form-input" value={form.title} onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))} />
-            </div>
-            <div className="filter-group">
-              <label>Jumlah</label>
-              <input className="form-input" value={form.amount} onChange={(event) => setForm((prev) => ({ ...prev, amount: event.target.value }))} />
-            </div>
-            <div className="filter-group">
-              <label>Kategori</label>
-              <input className="form-input" value={form.category} onChange={(event) => setForm((prev) => ({ ...prev, category: event.target.value }))} />
-            </div>
-            <div className="filter-group">
-              <label>Tanggal Pengeluaran</label>
-              <input className="form-input" type="date" value={form.expense_date} onChange={(event) => setForm((prev) => ({ ...prev, expense_date: event.target.value }))} />
-            </div>
-          </div>
-          <div className="filter-row">
-            <div className="filter-group">
-              <label>Deskripsi</label>
-              <input className="form-input" value={form.description} onChange={(event) => setForm((prev) => ({ ...prev, description: event.target.value }))} />
-            </div>
-            <div className="filter-group">
-              <label>Path Bukti</label>
-              <input className="form-input" value={form.receipt_path} onChange={(event) => setForm((prev) => ({ ...prev, receipt_path: event.target.value }))} />
-            </div>
-            <div className="filter-group">
-              <label>Catatan Approve/Reject</label>
-              <input className="form-input" value={form.note} onChange={(event) => setForm((prev) => ({ ...prev, note: event.target.value }))} />
-            </div>
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1rem' }}>
-          <Button variant="primary" size="md" onClick={() => void createItem()} disabled={loading}>
-            Buat Reimbursement
-          </Button>
-          <Button variant="outline" size="md" onClick={() => void getDetail()} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
-            Lihat Detail
-          </Button>
-          <Button variant="outline" size="md" onClick={() => void updateItem()} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
-            Ubah Reimbursement
-          </Button>
-          <Button variant="outline" size="md" onClick={() => void approveItem()} disabled={loading} style={{ borderColor: '#10b981', color: '#10b981' }}>
-            Approve
-          </Button>
-          <Button variant="outline" size="md" onClick={() => void rejectItem()} disabled={loading} style={{ borderColor: '#ef4444', color: '#ef4444' }}>
-            Reject
-          </Button>
-          <Button variant="outline" size="md" onClick={() => void markPaid()} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
-            Tandai Paid
-          </Button>
-          <Button variant="ghost" size="md" onClick={() => void deleteItem()} disabled={loading} style={{ color: '#ef4444' }}>
-            Hapus Reimbursement
-          </Button>
-        </div>
-      </Card>
-
-      {/* Detail Panel */}
-      {selectedDetail && (
-        <Card className="control-card" glass>
-          <h3 style={{ margin: "0 0 1rem", color: "#1e3a8a", fontWeight: 700 }}>Detail Reimbursement</h3>
-          <pre style={{
-            margin: 0,
-            padding: "1rem",
-            background: "#eff6ff",
-            borderRadius: "12px",
-            border: "1px solid rgba(37, 99, 235, 0.14)",
-            overflow: "auto",
-            fontSize: "0.9rem",
-            lineHeight: 1.5,
-          }}>
-            {JSON.stringify(selectedDetail, null, 2)}
-          </pre>
-        </Card>
-      )}
-
-      {/* Statistics Panel */}
-      {statistics && (
-        <Card className="control-card" glass>
-          <h3 style={{ margin: "0 0 1rem", color: "#1e3a8a", fontWeight: 700 }}>Statistik Reimbursement</h3>
-          <pre style={{
-            margin: 0,
-            padding: "1rem",
-            background: "#eff6ff",
-            borderRadius: "12px",
-            border: "1px solid rgba(37, 99, 235, 0.14)",
-            overflow: "auto",
-            fontSize: "0.9rem",
-            lineHeight: 1.5,
-          }}>
-            {JSON.stringify(statistics, null, 2)}
-          </pre>
+      {/* Form Overlay */}
+      {isFormOpen && (
+        <Card className="table-card" glass style={{ marginBottom: "1.5rem" }}>
+           <div className="table-header-bar">
+             <h3>{form.id ? "Ubah Ledger Entry" : "Buat Ledger Entry Baru"}</h3>
+           </div>
+           <div className="table-card-inner">
+             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>ID Karyawan</label>
+                  <input style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none' }} value={form.employee_id} onChange={(e) => setForm(f => ({...f, employee_id: e.target.value}))} placeholder="Misal: 1" />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>Kategori</label>
+                  <select className="ui-input" style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', background: '#fff' }} value={form.category} onChange={(e) => setForm(f => ({...f, category: e.target.value}))}>
+                    <option value="travel">Travel</option>
+                    <option value="medical">Medical</option>
+                    <option value="office_supplies">Office Supplies</option>
+                    <option value="training">Training</option>
+                    <option value="meal">Meal</option>
+                    <option value="accommodation">Accommodation</option>
+                    <option value="transportation">Transportation</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>Judul Pengeluaran</label>
+                  <input style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none' }} value={form.title} onChange={(e) => setForm(f => ({...f, title: e.target.value}))} placeholder="Tiket Pesawat Jakarta-Bali" />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>Nominal (Rp)</label>
+                  <input style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none' }} type="number" value={form.amount} onChange={(e) => setForm(f => ({...f, amount: e.target.value}))} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>Tanggal Transaksi</label>
+                  <input style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none' }} type="date" value={form.expense_date} onChange={(e) => setForm(f => ({...f, expense_date: e.target.value}))} />
+                </div>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>Path Bukti Lampiran</label>
+                  <input style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none' }} value={form.receipt_path} onChange={(e) => setForm(f => ({...f, receipt_path: e.target.value}))} placeholder="/assets/receipts/005.jpg" />
+                </div>
+             </div>
+             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem', gap: '0.75rem' }}>
+                 <Button variant="ghost" onClick={() => setIsFormOpen(false)}>Batal</Button>
+                 <Button variant="primary" onClick={() => void handleCreateOrUpdate()} disabled={actionLoading === "form"}>Simpan Data Ledger</Button>
+              </div>
+           </div>
         </Card>
       )}
 
       {/* Table */}
       <Card className="table-card" glass>
         <div className="table-header-bar">
-          <h3>Tabel Reimbursement</h3>
-          <span className="table-count">{items.length} data</span>
-        </div>
-
-        <div className="table-card-inner" style={{ paddingBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h3 style={{ margin: 0, color: '#1e3a8a', fontWeight: 600, fontSize: '0.95rem' }}>Filter Data</h3>
-          </div>
-          <div className="filter-panel" style={{ marginTop: 0, paddingTop: 0, borderTop: 'none', background: 'transparent' }}>
-            <div className="filter-row">
-              <div className="filter-group">
-                <label>Status</label>
-                <input className="form-input" value={filterStatus} onChange={(event) => setFilterStatus(event.target.value)} placeholder="pending, approved, paid..." />
-              </div>
-              <div className="filter-group">
-                <label>Kategori</label>
-                <input className="form-input" value={filterCategory} onChange={(event) => setFilterCategory(event.target.value)} placeholder="office_supplies..." />
-              </div>
-              <div className="filter-group">
-                <label>ID Karyawan</label>
-                <input className="form-input" value={filterEmployeeId} onChange={(event) => setFilterEmployeeId(event.target.value)} placeholder="Employee ID" />
-              </div>
-              <div className="filter-group">
-                <label>ID Karyawan untuk Statistik</label>
-                <input className="form-input" value={statsEmployeeId} onChange={(event) => setStatsEmployeeId(event.target.value)} placeholder="Employee ID" />
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1rem' }}>
-              <Button variant="primary" size="md" onClick={() => void loadAll()} disabled={loading}>
-                Terapkan Filter
-              </Button>
-              <Button variant="outline" size="md" onClick={() => void loadPending()} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
-                Ambil Pending
-              </Button>
-              <Button variant="outline" size="md" onClick={() => void loadByEmployee()} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
-                Ambil per Karyawan
-              </Button>
-              <Button variant="outline" size="md" onClick={() => void loadStatistics()} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
-                Ambil Statistik
-              </Button>
-            </div>
+          <h3>Master Reimbursement Ledger</h3>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <select style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', border: '1px solid #cbd5e1', outline: 'none', background: '#fff', fontSize: '0.85rem' }} value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+              <option value="">Semua Status</option>
+              <option value="draft">Selesai Draft</option>
+              <option value="pending">Menunggu (Pending)</option>
+              <option value="approved">Disetujui (Approved)</option>
+              <option value="paid">Dibayarkan (Paid)</option>
+              <option value="rejected">Ditolak (Rejected)</option>
+            </select>
+            <span className="table-count">{items.length} records</span>
           </div>
         </div>
 
-        <div className="table-wrap">
-          <table className="data-table">
-            <thead>
-              <tr>
-                {columns.map((column) => (
-                  <th key={column}>
-                    {column === "id" && "ID"}
-                    {column === "employee_id" && "ID Karyawan"}
-                    {column === "title" && "Judul"}
-                    {column === "amount" && "Jumlah"}
-                    {column === "category" && "Kategori"}
-                    {column === "status" && "Status"}
-                    {column === "expense_date" && "Tanggal"}
-                    {![
-                      "id",
-                      "employee_id",
-                      "title",
-                      "amount",
-                      "category",
-                      "status",
-                      "expense_date",
-                    ].includes(column) && column}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {items.length > 0 ? (
-                items.map((item, index) => (
-                  <tr key={String(item.id ?? index)}>
-                    {columns.map((column) => (
-                      <td key={`${String(item.id ?? index)}-${column}`}>
-                     {column === 'id' ? (
-  <span className="cell-id">{asDisplay(item[column])}</span>
-) : column === 'status' ? (
-  <span className={`status-badge status-badge--${String(item[column] || 'draft').toLowerCase()}`}>
-    {asDisplay(item[column])}
-  </span>
-) : column === 'amount' ? (
-  <span className="cell-amount">
-    Rp {Number(item[column] || 0).toLocaleString('id-ID')}
-  </span>
-) : column === 'category' ? (
-  <span className="cell-tag">{asDisplay(item[column])}</span>
-) : (column.includes('date') || column.endsWith('_at')) ? (
-  item[column]
-    ? new Date(String(item[column])).toLocaleDateString('id-ID', {
-        timeZone: 'Asia/Jakarta',
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric',
-      })
-    : '-'
-) : (
-  asDisplay(item[column])
-)}
-                      </td>
-                    ))}
+        {loading && <div className="table-card-inner"><LoadingState message="Memuat database ledger..." /></div>}
+        {!loading && items.length === 0 && (
+          <div className="table-card-inner">
+            <EmptyState
+              icon=""
+              title="Tidak ada data"
+              message="Belum ada catatan biaya operasional/reimburse."
+            />
+          </div>
+        )}
+
+        {!loading && items.length > 0 && (
+          <div className="table-card-inner">
+            <div className="table-wrap">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>EMPLOYEE</th>
+                    <th>KATEGORI</th>
+                    <th>DETAIL ALOKASI DANA</th>
+                    <th>LAMPIRAN</th>
+                    <th>STATUS PEMBAYARAN</th>
+                    <th className="th-center">AKSI FINANCE</th>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={columns.length} className="cell-empty">
-                    Tidak ada data reimbursement.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </Card>
-
-      {/* Raw Response */}
-      {responseText && (
-        <Card className="control-card" glass>
-          <h3 style={{ margin: "0 0 1rem", color: "#1e3a8a", fontWeight: 700 }}>Raw Response</h3>
-          <pre style={{
-            margin: 0,
-            padding: "1rem",
-            background: "linear-gradient(165deg, #1e3a8a 0%, #2563eb 54%, rgba(37, 99, 235, 0.8) 100%)",
-            color: "white",
-            borderRadius: "12px",
-            border: "1px solid rgba(37, 99, 235, 0.14)",
-            overflow: "auto",
-            fontSize: "0.8rem",
-            lineHeight: 1.48,
-            maxHeight: "320px",
-          }}>
-            {responseText}
-          </pre>
-          <div style={{
-            marginTop: '1rem',
-            color: '#64748b',
-            fontSize: '0.85rem',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.5rem 0.75rem',
-            background: '#eff6ff',
-            borderLeft: '3px solid #2563eb',
-            borderRadius: '8px',
-          }}>
-            {statusMessage}
+                </thead>
+                <tbody>
+                  {items.map((item, index) => {
+                    return (
+                      <tr key={String(item.id ?? index)}>
+                        <td>
+                          <div className="cell-id">{index + 1}</div>
+                          <div className="cell-sub">ID: {item.id}</div>
+                        </td>
+                        <td>
+                          <div className="cell-name">
+                            <div className="cell-avatar">
+                              {getEmployeeName(item).charAt(0).toUpperCase()}
+                            </div>
+                            <span className="cell-name-text">{getEmployeeName(item)}</span>
+                          </div>
+                        </td>
+                        <td>
+                          <span className="cell-tag">{String(item.category).replace('_', ' ')}</span>
+                        </td>
+                        <td>
+                          <div className="cell-date">{String(item.title)}</div>
+                          <div style={{ fontWeight: 700, color: '#0f172a', marginTop: '3px' }}>Rp {Number(item.amount).toLocaleString('id-ID')} ({formatDate(String(item.expense_date))})</div>
+                        </td>
+                        <td>
+                           {item.receipt_path ? (
+                             <a href={String(item.receipt_path)} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#2563eb', fontSize: '0.8rem', textDecoration: 'none' }}>
+                               <DownloadCloud size={14} /> Tinjau
+                             </a>
+                           ) : (
+                             <span style={{ color: '#94a3b8', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px' }}><Receipt size={14}/> -</span>
+                           )}
+                        </td>
+                        <td>
+                           {item.status === 'approved' ? (
+                             <>
+                               <span style={{ color: '#10b981', background: '#ecfdf5', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 600, display: 'inline-block', marginBottom: '4px' }}>APPROVED</span>
+                               <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Menunggu transfer</div>
+                             </>
+                           ) : item.status === 'rejected' ? <span style={{ color: '#ef4444', background: '#fef2f2', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 600 }}>REJECTED</span> :
+                            item.status === 'paid' ? <span style={{ color: '#2563eb', background: '#eff6ff', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 600 }}>LUNAS / PAID</span> :
+                            (item.status === 'pending' || item.status === 'submitted') ? <span style={{ color: '#f59e0b', background: '#fffbeb', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 600 }}>PENDING</span> :
+                             <span style={{ color: '#64748b', background: '#f8fafc', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 600 }}>DRAFT</span>}
+                        </td>
+                        <td>
+                           <div className="cell-actions">
+                             {(item.status === 'pending' || item.status === 'submitted') && (
+                               <>
+                                 <Button
+                                   variant="outline"
+                                   size="sm"
+                                   onClick={() => void handleAction(String(item.id)+'_app', () => approveReimbursement(String(item.id), { note: "Approved from Ledger" }), "Berhasil disetujui")}
+                                   disabled={actionLoading === String(item.id)+'_app'}
+                                   title="Approve"
+                                   style={{ color: '#10b981', borderColor: '#10b981' }}
+                                 >
+                                   <Check size={14} />
+                                 </Button>
+                                 <Button
+                                   variant="outline"
+                                   size="sm"
+                                   onClick={() => {
+                                      const reason = window.prompt("Alasan penolakan:");
+                                      if (reason !== null) {
+                                        void handleAction(String(item.id)+'_rej', () => rejectReimbursement(String(item.id), { note: reason || "Ditolak oleh Admin" }), "Pengajuan ditolak");
+                                      }
+                                   }}
+                                   disabled={actionLoading === String(item.id)+'_rej'}
+                                   title="Reject"
+                                   style={{ color: '#ef4444', borderColor: '#ef4444' }}
+                                 >
+                                   <X size={14} />
+                                 </Button>
+                               </>
+                             )}
+                             {item.status === 'approved' && (
+                               <Button
+                                 variant="outline"
+                                 size="sm"
+                                 onClick={() => void handleAction(String(item.id)+'_paid', () => markReimbursementAsPaid(String(item.id)), "Status diubah menjadi PAID")}
+                                 disabled={actionLoading === String(item.id)+'_paid'}
+                                 title="Tandai Sudah Ditransfer (Mark Paid)"
+                                 style={{ color: '#2563eb', borderColor: '#2563eb' }}
+                               >
+                                 <DollarSign size={15} />
+                               </Button>
+                             )}
+                             <Button
+                                 variant="outline"
+                                 size="sm"
+                                 onClick={() => handleEdit(item)}
+                                 title="Edit Ledger"
+                                 style={{ color: '#64748b', borderColor: '#e2e8f0' }}
+                              >
+                                <Edit size={15} />
+                             </Button>
+                             <Button
+                                 variant="outline"
+                                 size="sm"
+                                 onClick={() => void handleDelete(String(item.id))}
+                                 disabled={actionLoading === String(item.id)+'_del'}
+                                 title="Hapus Permanen"
+                                 style={{ color: '#ef4444', borderColor: '#ef4444' }}
+                              >
+                                 <Trash2 size={15} />
+                             </Button>
+                           </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </Card>
-      )}
+        )}
+      </Card>
     </div>
   );
 };

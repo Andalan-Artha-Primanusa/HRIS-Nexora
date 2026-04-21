@@ -77,19 +77,19 @@ export const deleteReimbursement = async (id: string) => {
 
 /** POST /reimbursements/{id}/approve → approve() */
 export const approveReimbursement = async (id: string, payload?: ReimbursementDecisionPayload) => {
-  const response = await api.post(`/reimbursements/${id}/approve`, payload ?? {});
+  const response = await api.put(`/reimbursements/${id}/approve`, payload ?? {});
   return { raw: response.data };
 };
 
 /** POST /reimbursements/{id}/reject → reject() — note wajib */
 export const rejectReimbursement = async (id: string, payload: ReimbursementRejectPayload) => {
-  const response = await api.post(`/reimbursements/${id}/reject`, payload);
+  const response = await api.put(`/reimbursements/${id}/reject`, payload);
   return { raw: response.data };
 };
 
 /** POST /reimbursements/{id}/mark-paid → markAsPaid() — hanya admin/HR */
 export const markReimbursementAsPaid = async (id: string) => {
-  const response = await api.post(`/reimbursements/${id}/mark-paid`);
+  const response = await api.put(`/reimbursements/${id}/mark-paid`);
   return { raw: response.data };
 };
 

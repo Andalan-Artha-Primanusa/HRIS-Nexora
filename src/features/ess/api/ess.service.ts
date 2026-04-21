@@ -65,8 +65,8 @@ export const createMyReimbursement = async (payload: MyReimbursementPayload) => 
 };
 
 export const submitMyReimbursement = async (id: string) => {
-  // Backend: POST /reimbursements/{id}/submit → submit() controller
-  const response = await api.post(`/reimbursements/${id}/submit`);
+  // Backend: POST /my/reimbursements/{id}/submit → submit() controller
+  const response = await api.post(`/my/reimbursements/${id}/submit`);
   return {
     raw: response.data,
   };

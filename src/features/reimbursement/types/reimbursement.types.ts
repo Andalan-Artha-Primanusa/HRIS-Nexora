@@ -33,7 +33,7 @@ export interface ReimbursementUpdatePayload {
 
 // ─── Payload APPROVE / REJECT ────────────────────────────────────────────────
 export interface ReimbursementDecisionPayload {
-  note?: string; // optional pada approve, required pada reject
+  note?: string; 
 }
 
 // ─── Payload REJECT (note wajib) ─────────────────────────────────────────────

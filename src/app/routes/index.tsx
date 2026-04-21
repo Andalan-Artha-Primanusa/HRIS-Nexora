@@ -29,6 +29,7 @@ const MyReimbursementsPage = lazy(() => import("../../pages/ess/MyReimbursements
 const MyPayrollPage = lazy(() => import("../../pages/ess/MyPayrollPage"));
 const MyLeavesPage = lazy(() => import("../../pages/ess/MyLeavesPage"));
 const ReimbursementsManagementPage = lazy(() => import("../../pages/reimbursements/ReimbursementsManagementPage"));
+const ReimbursementApprovalPage = lazy(() => import("../../pages/reimbursements/ReimbursementApprovalPage"));
 const LocationsPage = lazy(() => import("../../pages/locations/LocationsPage"));
 const CreateLocationPage = lazy(() => import("../../pages/locations/CreateLocationPage"));
 const EditLocationPage = lazy(() => import("../../pages/locations/EditLocationPage"));
@@ -465,7 +466,7 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <ReimbursementsManagementPage />,
+            element: <MyReimbursementsPage />,
           },
         ],
       },
@@ -485,7 +486,7 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <ReimbursementsManagementPage />,
+            element: <ReimbursementApprovalPage />,
           },
         ],
       },

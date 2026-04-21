@@ -114,7 +114,7 @@ export const menuItems: MenuItem[] = [
   {
     label: 'Reimburse & Pengeluaran',
     icon: Receipt,
-    requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
+    requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user) || RBACUtils.isManager(user),
     subItems: [
       { label: 'Ajukan Pengeluaran', path: '/expense/submit' },
       { label: 'Daftar Pengeluaran', path: '/expense/list' },
