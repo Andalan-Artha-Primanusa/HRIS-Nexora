@@ -39,3 +39,12 @@ export const parseApiError = (error: unknown): ApiError => {
     message: data?.message || axiosError.message || "Terjadi kesalahan pada server.",
   };
 };
+
+/**
+ * Helper to get only the message string from an error
+ * 💡 Digunakan oleh banyak komponen untuk menampilakan pesan error singkat
+ */
+export const getErrorMessage = (error: unknown): string => {
+  return parseApiError(error).message;
+};
+
