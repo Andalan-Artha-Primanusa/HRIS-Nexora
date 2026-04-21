@@ -1,3 +1,12 @@
+  // Download template User CSV
+  const handleDownloadUserTemplate = () => {
+    const link = document.createElement("a");
+    link.href = "/template_users_final.csv";
+    link.download = "template_users_final.csv";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
 import { useMemo, useState } from "react";
 import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
@@ -57,7 +66,7 @@ const AdminImportPage = () => {
   const [userFile, setUserFile] = useState<File | null>(null);
   const [userRole, setUserRole] = useState<string>("employee");
   const [employeeFile, setEmployeeFile] = useState<File | null>(null);
-  const [downloadingTemplate, setDownloadingTemplate] = useState(false);
+  // const [downloadingTemplate, setDownloadingTemplate] = useState(false);
   const [submittingUsers, setSubmittingUsers] = useState(false);
   const [submittingEmployees, setSubmittingEmployees] = useState(false);
   const [userImportResult, setUserImportResult] = useState<string | null>(null);
@@ -71,7 +80,7 @@ const AdminImportPage = () => {
       {
         label: "Template",
         subtitle: "Unduh format import terbaru",
-        value: downloadingTemplate ? "..." : "1",
+        value: "1",
         change: "Siapkan file sesuai contoh",
         tone: "blue" as const,
         icon: Download,
@@ -93,38 +102,9 @@ const AdminImportPage = () => {
         icon: Upload,
       },
     ];
-  }, [downloadingTemplate, userFile, employeeFile]);
+  }, [userFile, employeeFile]);
 
-  // Download new combined TXT template
-  const handleDownloadTemplate = () => {
-    setDownloadingTemplate(true);
-    setAlertMessage("");
-    try {
-      const link = document.createElement("a");
-      link.href = "/import_user_employee_template.txt";
-      link.download = "import_user_employee_template.txt";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      setAlertMessage("Template gabungan (TXT) berhasil diunduh.");
-      setAlertType("success");
-    } catch (error: unknown) {
-      setAlertMessage("Gagal mengunduh template gabungan (TXT).");
-      setAlertType("error");
-    } finally {
-      setDownloadingTemplate(false);
-    }
-  };
-
-  // Download template User CSV
-  const handleDownloadUserTemplate = () => {
-    const link = document.createElement("a");
-    link.href = "/template_users_final.csv";
-    link.download = "template_users_final.csv";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-  };
+  // (removed handleDownloadTemplate, no longer needed)
 
   // Download template Employee CSV
   const handleDownloadEmployeeTemplate = () => {
@@ -158,7 +138,7 @@ const AdminImportPage = () => {
     } catch (error: unknown) {
       setAlertMessage(getErrorMessage(error as any));
       setAlertType("error");
-    } finally {
+                       // onClick={handleDownloadTemplate}
       setSubmittingUsers(false);
     }
   };
@@ -200,39 +180,37 @@ const AdminImportPage = () => {
           <h1>Import Center</h1>
           <p>Unduh template, unggah file users maupun employees, dan tinjau hasil proses import langsung dari halaman admin.</p>
         </div>
-        <div className="page-header-actions" style={{ display: "flex", gap: 8 }}>
-
-                {/* Contoh CURL upload file, tampil di bawah halaman dengan UI lebih profesional */}
-
-          <Button
-            variant="outline"
-            size="md"
-            onClick={handleDownloadTemplate}
-            style={{ borderColor: "#6366f1", color: "#6366f1" }}
-          >
-            <Download size={16} />
-            Download Template Gabungan (TXT)
-          </Button>
-          <Button
-            variant="outline"
-            size="md"
-            onClick={handleDownloadUserTemplate}
-            style={{ borderColor: "#2563eb", color: "#2563eb" }}
-          >
-            <Download size={16} />
-            Download Template User
-          </Button>
-          <Button
-            variant="outline"
-            size="md"
-            onClick={handleDownloadEmployeeTemplate}
-            style={{ borderColor: "#059669", color: "#059669" }}
-          >
-            <Download size={16} />
-            Download Template Employee
-          </Button>
-        </div>
       </div>
+
+      {/* Improved Template Download Section */}
+      <Card className="template-download-card" glass style={{ marginBottom: 24, padding: 24 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <h2 style={{ margin: 0, fontSize: 20, fontWeight: 600, color: "#374151" }}>Download Template Import</h2>
+          <p style={{ margin: 0, color: "#6b7280", fontSize: 15 }}>
+            Silakan unduh template berikut sesuai kebutuhan. Pastikan file yang diupload sudah mengikuti struktur kolom pada template.
+          </p>
+          <div style={{ display: "flex", gap: 16, marginTop: 12 }}>
+            <Button
+              variant="outline"
+              size="md"
+              onClick={handleDownloadUserTemplate}
+              style={{ borderColor: "#2563eb", color: "#2563eb", fontWeight: 500, minWidth: 200, boxShadow: "0 2px 8px 0 #2563eb22" }}
+            >
+              <Download size={18} style={{ marginRight: 8 }} />
+              Template User
+            </Button>
+            <Button
+              variant="outline"
+              size="md"
+              onClick={handleDownloadEmployeeTemplate}
+              style={{ borderColor: "#059669", color: "#059669", fontWeight: 500, minWidth: 200, boxShadow: "0 2px 8px 0 #05966922" }}
+            >
+              <Download size={18} style={{ marginRight: 8 }} />
+              Template Employee
+            </Button>
+          </div>
+        </div>
+      </Card>
 
       <div className="summary-grid">
         {summaryCards.map((card) => {
@@ -264,113 +242,110 @@ const AdminImportPage = () => {
         />
       )}
 
-      <Card className="table-card" glass>
-        <div className="table-header-bar">
-          <h3>Import Users</h3>
-          <span className="table-count">{userFile ? userFile.name : "Belum ada file dipilih"}</span>
-        </div>
-        <div className="table-card-inner">
-          <form className="crud-form" onSubmit={handleImportUsers}>
-
-            <div className="crud-form-grid">
-              <label className="crud-form-full">
-                File Users
-                <input
-                  className="crud-input"
-                  type="file"
-                  accept=".xlsx,.xls,.csv"
-                  onChange={(event) => setUserFile(event.target.files?.[0] || null)}
-                />
-                <span className="crud-note">Gunakan template resmi agar struktur kolom sesuai dengan backend.</span>
-              </label>
-              <label className="crud-form-full">
-                Role Users
-                <select
-                  className="crud-input"
-                  value={userRole}
-                  onChange={e => setUserRole(e.target.value)}
+      {/* Side-by-side import forms */}
+      <div style={{ display: "flex", gap: 24, marginTop: 24, flexWrap: "wrap" }}>
+        <Card className="table-card" glass style={{ flex: 1, minWidth: 340 }}>
+          <div className="table-header-bar">
+            <h3>Import Users</h3>
+            <span className="table-count">{userFile ? userFile.name : "Belum ada file dipilih"}</span>
+          </div>
+          <div className="table-card-inner">
+            <form className="crud-form" onSubmit={handleImportUsers}>
+              <div className="crud-form-grid">
+                <label className="crud-form-full">
+                  File Users
+                  <input
+                    className="crud-input"
+                    type="file"
+                    accept=".xlsx,.xls,.csv"
+                    onChange={(event) => setUserFile(event.target.files?.[0] || null)}
+                  />
+                  <span className="crud-note">Gunakan template resmi agar struktur kolom sesuai dengan backend.</span>
+                </label>
+                <label className="crud-form-full">
+                  Role Users
+                  <select
+                    className="crud-input"
+                    value={userRole}
+                    onChange={e => setUserRole(e.target.value)}
+                  >
+                    <option value="employee">employee</option>
+                    <option value="admin">admin</option>
+                    <option value="super_admin">super_admin</option>
+                  </select>
+                  <span className="crud-note">Pilih role user yang akan diimport.</span>
+                </label>
+              </div>
+              <div className="crud-actions">
+                <Button type="submit" variant="primary" size="md" disabled={submittingUsers}>
+                  <Users size={16} />
+                  {submittingUsers ? "Mengimpor..." : "Import Users"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="md"
+                  onClick={() => {
+                    setUserFile(null);
+                    setUserImportResult(null);
+                  }}
+                  disabled={submittingUsers}
                 >
-                  <option value="employee">employee</option>
-                  <option value="admin">admin</option>
-                  <option value="super_admin">super_admin</option>
-                </select>
-                <span className="crud-note">Pilih role user yang akan diimport.</span>
-              </label>
-            </div>
-
-            <div className="crud-actions">
-              <Button type="submit" variant="primary" size="md" disabled={submittingUsers}>
-                <Users size={16} />
-                {submittingUsers ? "Mengimpor..." : "Import Users"}
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="md"
-                onClick={() => {
-                  setUserFile(null);
-                  setUserImportResult(null);
-                }}
-                disabled={submittingUsers}
-              >
-                <RefreshCw size={16} />
-                Reset
-              </Button>
-            </div>
-
-            {userImportResult !== null && (
-              <pre className="crud-response">{userImportResult}</pre>
-            )}
-          </form>
-        </div>
-      </Card>
-
-      <Card className="table-card" glass>
-        <div className="table-header-bar">
-          <h3>Import Employees</h3>
-          <span className="table-count">{employeeFile ? employeeFile.name : "Belum ada file dipilih"}</span>
-        </div>
-        <div className="table-card-inner">
-          <form className="crud-form" onSubmit={handleImportEmployees}>
-            <div className="crud-form-grid">
-              <label className="crud-form-full">
-                File Employees
-                <input
-                  className="crud-input"
-                  type="file"
-                  accept=".xlsx,.xls,.csv"
-                  onChange={(event) => setEmployeeFile(event.target.files?.[0] || null)}
-                />
-                <span className="crud-note">Pastikan data employee sudah mengikuti format field pada template import.</span>
-              </label>
-            </div>
-
-            <div className="crud-actions">
-              <Button type="submit" variant="primary" size="md" disabled={submittingEmployees}>
-                <Upload size={16} />
-                {submittingEmployees ? "Mengimpor..." : "Import Employees"}
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="md"
-                onClick={() => {
-                  setEmployeeFile(null);
-                  setEmployeeImportResult(null);
-                }}
-                disabled={submittingEmployees}
-              >
-                <RefreshCw size={16} />
-                Reset
-              </Button>
-            </div>
-
-            {employeeImportResult !== null && (
-              <pre className="crud-response">{employeeImportResult}</pre>
-            )}
-          </form>
-        </div>
-      </Card>
+                  <RefreshCw size={16} />
+                  Reset
+                </Button>
+              </div>
+              {userImportResult !== null && (
+                <pre className="crud-response">{userImportResult}</pre>
+              )}
+            </form>
+          </div>
+        </Card>
+        <Card className="table-card" glass style={{ flex: 1, minWidth: 340 }}>
+          <div className="table-header-bar">
+            <h3>Import Employees</h3>
+            <span className="table-count">{employeeFile ? employeeFile.name : "Belum ada file dipilih"}</span>
+          </div>
+          <div className="table-card-inner">
+            <form className="crud-form" onSubmit={handleImportEmployees}>
+              <div className="crud-form-grid">
+                <label className="crud-form-full">
+                  File Employees
+                  <input
+                    className="crud-input"
+                    type="file"
+                    accept=".xlsx,.xls,.csv"
+                    onChange={(event) => setEmployeeFile(event.target.files?.[0] || null)}
+                  />
+                  <span className="crud-note">Pastikan data employee sudah mengikuti format field pada template import.</span>
+                </label>
+              </div>
+              <div className="crud-actions">
+                <Button type="submit" variant="primary" size="md" disabled={submittingEmployees}>
+                  <Upload size={16} />
+                  {submittingEmployees ? "Mengimpor..." : "Import Employees"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="md"
+                  onClick={() => {
+                    setEmployeeFile(null);
+                    setEmployeeImportResult(null);
+                  }}
+                  disabled={submittingEmployees}
+                >
+                  <RefreshCw size={16} />
+                  Reset
+                </Button>
+              </div>
+              {employeeImportResult !== null && (
+                <pre className="crud-response">{employeeImportResult}</pre>
+              )}
+            </form>
+          </div>
+        </Card>
+      </div>
     </div>
   );
 };

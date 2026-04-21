@@ -1,3 +1,4 @@
+import { RBACUtils } from "@/shared/hooks/rbac";
 import { useEffect, useMemo, useState } from "react";
 import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
@@ -244,10 +245,39 @@ const AdminAuditLogsPage = () => {
                   {filteredLogs.map((log, index) => {
                     const logId = (log as any).id ?? index;
                     const eventName = String((log as any).action || (log as any).event || "Unknown Event");
-                    const userName = String((log as any).user_name || (log as any).causer_name || "-");
+                    let userName =
+                      (log as any).user_name ||
+                      (log as any).causer_name ||
+                      (log as any).user_id ||
+                      (log as any).causer_id ||
+                      "-";
+                    // If user is an object, show name/email
+                    if (!userName || typeof userName === "object") {
+                      const userObj = (log as any).user || (log as any).causer;
+                      if (userObj && typeof userObj === "object") {
+                        userName = userObj.name || userObj.email || userObj.id || "-";
+                      }
+                    }
+                    userName = String(userName);
                     const moduleName = String((log as any).module || (log as any).subject_type || "-");
                     const ipAddress = String((log as any).ip_address || "-");
-                    const createdAt = String((log as any).created_at || (log as any).timestamp || "-");
+                    const rawDate = (log as any).created_at || (log as any).timestamp || "-";
+                    let createdAt = "-";
+                    if (rawDate && rawDate !== "-") {
+                      const dateObj = new Date(rawDate);
+                      if (!isNaN(dateObj.getTime())) {
+                        createdAt = dateObj.toLocaleString("id-ID", {
+                          year: "numeric",
+                          month: "short",
+                          day: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          second: "2-digit",
+                        });
+                      } else {
+                        createdAt = String(rawDate);
+                      }
+                    }
                     const isSecurityEvent = eventName.toLowerCase().includes("login") || eventName.toLowerCase().includes("permission");
 
                     return (
@@ -269,7 +299,7 @@ const AdminAuditLogsPage = () => {
                         <td>{ipAddress}</td>
                         <td className="cell-date">{createdAt}</td>
                         <td className="td-center">
-                          <div className="cell-actions">
+                          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
                             <Button
                               variant="outline"
                               size="sm"
