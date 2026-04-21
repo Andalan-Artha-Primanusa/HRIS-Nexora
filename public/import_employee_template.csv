@@ -1,3 +1,0 @@
-email,position,department,hire_date,salary,manager_email,status
-john@example.com,Software Engineer,IT,2023-01-15,10000000,manager@example.com,active
-jane@example.com,HR Specialist,HR,2023-02-20,8000000,manager@example.com,active

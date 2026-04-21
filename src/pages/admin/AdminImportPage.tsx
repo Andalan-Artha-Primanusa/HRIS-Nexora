@@ -119,8 +119,8 @@ const AdminImportPage = () => {
   // Download template User CSV
   const handleDownloadUserTemplate = () => {
     const link = document.createElement("a");
-    link.href = "/import_user_template.csv";
-    link.download = "import_user_template.csv";
+    link.href = "/template_users_final.csv";
+    link.download = "template_users_final.csv";
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -129,8 +129,8 @@ const AdminImportPage = () => {
   // Download template Employee CSV
   const handleDownloadEmployeeTemplate = () => {
     const link = document.createElement("a");
-    link.href = "/import_employee_template.csv";
-    link.download = "import_employee_template.csv";
+    link.href = "/template_employee_final.csv";
+    link.download = "template_employee_final.csv";
     document.body.appendChild(link);
     link.click();
     link.remove();
