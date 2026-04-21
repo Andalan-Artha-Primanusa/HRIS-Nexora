@@ -681,6 +681,33 @@ if (column.includes('date') || column.endsWith('_at')) {
   });
 }
 
+// ✅ json rendering fallback (e.g. array of valid periods)
+let parsedVal = value;
+if (typeof value === 'string' && value.trim().startsWith('[') && value.trim().endsWith(']')) {
+  try {
+    parsedVal = JSON.parse(value);
+  } catch {}
+}
+
+if (Array.isArray(parsedVal)) {
+  const formattedParts = parsedVal.map((item: any) => {
+    if (typeof item === 'object' && item !== null) {
+      if ('start_date' in item && 'end_date' in item) {
+        const start = new Date(String(item.start_date)).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+        const end = new Date(String(item.end_date)).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+        return `${start} - ${end}`;
+      }
+      if ('holiday_date' in item && 'name' in item) {
+        const hDate = new Date(String(item.holiday_date)).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+        return `${hDate} (${item.name})`;
+      }
+      return Object.entries(item).map(([k, v]) => `${k}: ${v}`).join(', ');
+    }
+    return String(item);
+  });
+  return formattedParts.join('\n');
+}
+
 // default
 if (typeof value === 'object') {
   try {
@@ -2531,7 +2558,7 @@ const SectionPage = () => {
                 tableRows.map((row: string[], idx: number) => (
                   <tr key={idx}>
                     {row.map((cell: string, cellIndex: number) => (
-                      <td key={`${idx}-${cellIndex}`}>{cell}</td>
+                      <td key={`${idx}-${cellIndex}`} style={{ whiteSpace: 'pre-line' }}>{cell}</td>
                     ))}
                   </tr>
                 ))
