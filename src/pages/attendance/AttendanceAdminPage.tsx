@@ -195,10 +195,35 @@ const AttendanceAdminPage = () => {
                     {columns.map((column) => (
                       <td key={`${String(item.id ?? index)}-${column}`}>
                         {column === 'id' ? (
-                          <span className="cell-id">{asDisplay(item[column])}</span>
-                        ) : (
-                          asDisplay(item[column])
-                        )}
+  <span className="cell-id">{asDisplay(item[column])}</span>
+
+) : column === 'employee_id' ? (
+  <span className="cell-id">
+    EMP-{String(item[column]).padStart(3, '0')}
+  </span>
+
+) : (column.includes('date') || column.endsWith('_at')) ? (
+  item[column]
+    ? new Date(String(item[column])).toLocaleDateString('id-ID', {
+        timeZone: 'Asia/Jakarta',
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+      })
+    : '-'
+
+) : (column.includes('time') || column.includes('check_in') || column.includes('check_out')) ? (
+  item[column]
+    ? new Date(String(item[column])).toLocaleTimeString('id-ID', {
+        timeZone: 'Asia/Jakarta',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : '-'
+
+) : (
+  asDisplay(item[column])
+)}
                       </td>
                     ))}
                   </tr>

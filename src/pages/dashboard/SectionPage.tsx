@@ -655,23 +655,42 @@ const parsePayloadToTable = (payload: unknown) => {
         columns.map((column) => {
           const value = (item as Record<string, unknown>)[column];
           if (value === undefined || value === null) return '-';
-          if (typeof value === 'object') {
-            if (Array.isArray(value)) {
-              if (value.length === 0) return '[empty array]';
-              if (typeof value[0] === 'object') {
-                // Show preview: count and first item keys
-                const preview = JSON.stringify(value[0]);
-                return `[${value.length} items] Preview: ${preview}`;
-              }
-              return value.join(', ');
-            }
-            try {
-              return JSON.stringify(value);
-            } catch {
-              return '[object]';
-            }
-          }
-          return String(value);
+
+// ✅ employee
+if (column === 'employee_id') {
+  return `EMP-${String(value).padStart(3, '0')}`;
+}
+
+// ✅ leave policy boolean
+if (column === 'is_paid') {
+  return value === true || value === 'true' ? 'Paid' : 'Unpaid';
+}
+
+// ✅ leave policy number
+if (column === 'entitlement_value' || column === 'max_carryover_days') {
+  return `${value} hari`;
+}
+
+// ✅ semua tanggal (created_at, start_date, dll)
+if (column.includes('date') || column.endsWith('_at')) {
+  return new Date(String(value)).toLocaleDateString('id-ID', {
+    timeZone: 'Asia/Jakarta',
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  });
+}
+
+// default
+if (typeof value === 'object') {
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return '[object]';
+  }
+}
+
+return String(value);
         })
       );
 

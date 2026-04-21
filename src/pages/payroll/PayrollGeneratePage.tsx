@@ -225,12 +225,51 @@ const PayrollGeneratePage = () => {
             <tbody>
               {items.length > 0 ? (
                 items.map((item, index) => (
-                  <tr key={String(item.id ?? index)}>
-                    {columns.map((column) => {
-                      const record = item as unknown as Record<string, unknown>;
-                      return <td key={`${String(item.id ?? index)}-${column}`}>{asDisplay(record[column])}</td>;
-                    })}
-                  </tr>
+<tr key={String(item.id ?? index)}>
+  {columns.map((column) => {
+    const record = item as unknown as Record<string, unknown>;
+
+    return (
+      <td key={`${String(item.id ?? index)}-${column}`}>
+        {column === 'id' ? (
+          <span className="cell-id">{asDisplay(record[column])}</span>
+
+        ) : column === 'employee_id' ? (
+          `EMP-${String(record[column]).padStart(3, '0')}`
+
+        ) : column === 'period' ? (
+          record[column]
+            ? new Date(String(record[column]) + '-01').toLocaleDateString('id-ID', {
+                month: 'long',
+                year: 'numeric',
+              })
+            : '-'
+
+        ) : column === 'allowance' || column === 'bonus' ? (
+          `Rp ${Number(record[column] || 0).toLocaleString('id-ID')}`
+
+        ) : column === 'status' ? (
+          <span className={`status-badge status-badge--${String(record[column]).toLowerCase()}`}>
+            {asDisplay(record[column])}
+          </span>
+
+        ) : (column.includes('date') || column.endsWith('_at')) ? (
+          record[column]
+            ? new Date(String(record[column])).toLocaleDateString('id-ID', {
+                timeZone: 'Asia/Jakarta',
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric',
+              })
+            : '-'
+
+        ) : (
+          asDisplay(record[column])
+        )}
+      </td>
+    );
+  })}
+</tr>
                 ))
               ) : (
                 <tr>
