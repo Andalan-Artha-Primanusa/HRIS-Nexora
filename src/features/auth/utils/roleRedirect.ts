@@ -113,7 +113,7 @@ export const getRoleBasedDashboardPath = (user: unknown) => {
 };
 
 export const getRoleBasedDashboardPathFromStorage = () => {
-  const rawUser = localStorage.getItem("user");
+  const rawUser = sessionStorage.getItem("user");
   if (!rawUser) {
     return "/dashboard";
   }

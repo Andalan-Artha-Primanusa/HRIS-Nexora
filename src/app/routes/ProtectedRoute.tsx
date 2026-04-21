@@ -5,7 +5,7 @@ import { useAuthSession } from "./useAuthSession";
  * ProtectedRoute Component
  *
  * Protects routes by checking if user has a valid authentication token
- * from Zustand auth store (synced with localStorage).
+ * from Zustand auth store (synced with sessionStorage).
  */
 export const ProtectedRoute = () => {
   const authStatus = useAuthSession();

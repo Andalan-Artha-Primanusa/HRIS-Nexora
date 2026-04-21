@@ -11,7 +11,7 @@ interface AuthState {
 }
 
 const getStoredUser = (): AuthUser | null => {
-  const rawUser = localStorage.getItem("user");
+  const rawUser = sessionStorage.getItem("user");
 
   if (!rawUser) return null;
 
@@ -47,7 +47,7 @@ const getStoredUser = (): AuthUser | null => {
   }
 };
 
-const getStoredToken = () => localStorage.getItem("token");
+const getStoredToken = () => sessionStorage.getItem("token");
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: getStoredUser(),
@@ -59,8 +59,8 @@ export const useAuthStore = create<AuthState>((set) => ({
       roles: user.roles ?? [],
       permissions: user.permissions ?? [],
     };
-    localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(authUser));
+    sessionStorage.setItem("token", token);
+    sessionStorage.setItem("user", JSON.stringify(authUser));
     set({ user: authUser, token, isAuthenticated: true });
   },
   updateUser: (user: AuthUser) => {
@@ -69,12 +69,12 @@ export const useAuthStore = create<AuthState>((set) => ({
       roles: user.roles ?? [],
       permissions: user.permissions ?? [],
     };
-    localStorage.setItem("user", JSON.stringify(authUser));
+    sessionStorage.setItem("user", JSON.stringify(authUser));
     set({ user: authUser });
   },
   logout: () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
     set({ user: null, token: null, isAuthenticated: false });
   },
 }));

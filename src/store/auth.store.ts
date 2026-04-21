@@ -9,7 +9,7 @@ interface AuthState {
 }
 
 const getStoredUser = () => {
-  const rawUser = localStorage.getItem("user");
+  const rawUser = sessionStorage.getItem("user");
 
   if (!rawUser) return null;
 
@@ -20,20 +20,20 @@ const getStoredUser = () => {
   }
 };
 
-const getStoredToken = () => localStorage.getItem("token");
+const getStoredToken = () => sessionStorage.getItem("token");
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: getStoredUser(),
   token: getStoredToken(),
   isAuthenticated: Boolean(getStoredToken()),
   setAuth: (user, token) => {
-    localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(user));
+    sessionStorage.setItem("token", token);
+    sessionStorage.setItem("user", JSON.stringify(user));
     set({ user, token, isAuthenticated: true });
   },
   logout: () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
     set({ user: null, token: null, isAuthenticated: false });
   },
 }));

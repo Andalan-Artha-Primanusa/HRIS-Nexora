@@ -1,7 +1,7 @@
 /**
  * 🔒 SECURITY: Secure Storage Utility
  * Provides secure storage for authentication tokens and user data
- * Note: Frontend localStorage has inherent limitations. For production:
+ * Note: Frontend sessionStorage has inherent limitations. For production:
  * - Use httpOnly cookies (set by backend)
  * - Implement session management backend
  * - Use Web Crypto API for sensitive client data
@@ -27,7 +27,7 @@ export class SecureStorage {
         data: value,
       };
       
-      localStorage.setItem(prefixedKey, JSON.stringify(payload));
+      sessionStorage.setItem(prefixedKey, JSON.stringify(payload));
     } catch (error) {
       console.warn(`[SecureStorage] Failed to set item ${key}:`, error);
     }
@@ -39,7 +39,7 @@ export class SecureStorage {
   static getItem(key: string): any {
     try {
       const prefixedKey = `${STORAGE_PREFIX}${key}`;
-      const stored = localStorage.getItem(prefixedKey);
+      const stored = sessionStorage.getItem(prefixedKey);
       
       if (!stored) return null;
       
@@ -73,7 +73,7 @@ export class SecureStorage {
   static removeItem(key: string): void {
     try {
       const prefixedKey = `${STORAGE_PREFIX}${key}`;
-      localStorage.removeItem(prefixedKey);
+      sessionStorage.removeItem(prefixedKey);
     } catch (error) {
       console.warn(`[SecureStorage] Failed to remove item ${key}:`, error);
     }
@@ -84,10 +84,10 @@ export class SecureStorage {
    */
   static clear(): void {
     try {
-      const keys = Object.keys(localStorage);
+      const keys = Object.keys(sessionStorage);
       keys.forEach(key => {
         if (key.startsWith(STORAGE_PREFIX)) {
-          localStorage.removeItem(key);
+          sessionStorage.removeItem(key);
         }
       });
     } catch (error) {
@@ -102,8 +102,8 @@ export class SecureStorage {
     const keys: string[] = [];
     const appStoragePrefix = STORAGE_PREFIX;
     
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const key = sessionStorage.key(i);
       if (key?.startsWith(appStoragePrefix)) {
         keys.push(key.substring(appStoragePrefix.length));
       }
@@ -119,7 +119,7 @@ export class SecureStorage {
  * FOR PRODUCTION SYSTEMS, FOLLOW THESE GUIDELINES:
  * 
  * 1. TOKEN STORAGE:
- *    ❌ DON'T: Store tokens in localStorage (vulnerable to XSS)
+ *    ❌ DON'T: Store tokens in sessionStorage/localStorage (vulnerable to XSS)
  *    ✅ DO: Use httpOnly, Secure cookies (backend sets these)
  *    
  * 2. USER DATA:

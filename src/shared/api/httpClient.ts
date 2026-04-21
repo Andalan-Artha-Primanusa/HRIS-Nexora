@@ -27,7 +27,7 @@ export const api = axios.create({
 
 // 🔥 Inject token otomatis
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
 
   if (token && typeof token === "string" && token.length > 0) {
     config.headers = config.headers ?? {};
@@ -70,8 +70,8 @@ api.interceptors.response.use(
       showToast(parsedError.message, "error");
       
       // 🔒 SECURITY: Clear sensitive data on auth failure
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
+      sessionStorage.removeItem("token");
+      sessionStorage.removeItem("user");
       
       // Redirect to login after a short delay
       setTimeout(() => {
