@@ -28,13 +28,13 @@ html, body {
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   background: var(--surface);
   color: var(--on-surface);
 }
 
 .font-headline {
-  font-family: 'Manrope', sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
 
 /* =========================
@@ -248,7 +248,7 @@ body {
   font-weight: 800;
   margin-bottom: 16px;
   line-height: 1.1;
-  font-family: 'Manrope', sans-serif;
+  font-family: 'Poppins', sans-serif;
   letter-spacing: -1px;
 }
 
@@ -291,7 +291,7 @@ body {
   transition: all 0.2s ease;
   font-size: 14px;
   color: var(--on-surface);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
 
 .form-group input:focus {
@@ -366,7 +366,7 @@ body {
   justify-content: center;
   gap: 8px;
   box-shadow: 0 4px 12px rgba(0, 74, 198, 0.2);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
 
 .btn-stitch:hover:not(:disabled) {
@@ -438,7 +438,7 @@ body {
   font-size: 14px;
   color: var(--on-surface);
   transition: all 0.2s ease;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
 
 .social-btn:hover {
@@ -500,7 +500,7 @@ body {
   margin-bottom: 8px;
   color: var(--on-surface);
   letter-spacing: -0.5px;
-  font-family: 'Manrope', sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
 
 .subtitle {
@@ -541,7 +541,7 @@ body {
   z-index: 1;
   transition: all 0.2s ease;
   color: var(--on-surface);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
 
 .input-wrapper input:focus {

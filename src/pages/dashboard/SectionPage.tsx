@@ -1249,15 +1249,22 @@ const SectionPage = () => {
               workSchedules.length
             );
 
+            // Helper to get string representation from possibly complex objects
+            const getStringVal = (val: any) => {
+              if (!val) return '';
+              if (typeof val === 'string' || typeof val === 'number') return String(val);
+              return val.name || val.label || val.title || JSON.stringify(val);
+            };
+
             // Buat baris-baris tabel, setiap baris berisi satu data dari tiap kategori (atau kosong jika tidak ada)
             const rows: string[][] = [];
             for (let i = 0; i < maxLength; i++) {
               rows.push([
-                departments[i] || '',
-                positions[i] || '',
-                statuses[i] || '',
-                locations[i] || '',
-                workSchedules[i] || '',
+                getStringVal(departments[i]),
+                getStringVal(positions[i]),
+                getStringVal(statuses[i]),
+                getStringVal(locations[i]),
+                getStringVal(workSchedules[i]),
               ]);
             }
 

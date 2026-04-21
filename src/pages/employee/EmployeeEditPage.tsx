@@ -7,6 +7,8 @@ import { Briefcase } from "lucide-react";
 import { api } from "@/shared/api/httpClient";
 import { getEmployeeDetail, updateEmployee } from "@/features/employee/api/employee.service";
 import { getAllLocations } from "@/features/location/api/location.service";
+import { getAllUsers } from "@/features/admin/api/admin.service";
+import { getAllWorkSchedules } from "@/features/work-schedule/api/work-schedule.service";
 import type { EmployeeUpdatePayload } from "@/features/employee/types/employee.types";
 import EmployeeForm, { DEFAULT_FORM } from "./components/EmployeeForm";
 import type { EmployeeFormState } from "./components/EmployeeForm";
@@ -31,14 +33,16 @@ const EmployeeEditPage = () => {
       const locs = await getAllLocations();
       setAllLocations(Array.isArray(locs.items) ? locs.items : []);
 
-      const usersRes = await api.get('/admin/users');
-      setAllUsers(Array.isArray(usersRes.data?.data?.items) ? usersRes.data.data.items : Array.isArray(usersRes.data?.data) ? usersRes.data.data : []);
+      const usersResult = await getAllUsers(1, 100);
+      setAllUsers(usersResult.items);
 
-      const schedRes = await api.get('/work-schedules');
-      setAllSchedules(Array.isArray(schedRes.data?.data) ? schedRes.data.data : Array.isArray(schedRes.data) ? schedRes.data : []);
+      const schedResult = await getAllWorkSchedules();
+      setAllSchedules(schedResult.items);
 
       const deptRes = await api.get('/organization/master-data');
-      setAllDepartments(Array.isArray(deptRes.data?.data?.departments) ? deptRes.data.data.departments : []);
+      // Deeply check for departments array
+      const rawDepts = deptRes.data?.data?.departments || deptRes.data?.departments || [];
+      setAllDepartments(Array.isArray(rawDepts) ? rawDepts : []);
     } catch (err) {
       console.error("Failed to load metadata:", err);
     }
@@ -71,6 +75,8 @@ const EmployeeEditPage = () => {
           position: String(result?.position ?? ""),
           department: String(result?.department ?? ""),
           hire_date: hireDate,
+          probation_end_date: result?.probation_end_date ? result.probation_end_date.split("T")[0] : "",
+          status: result?.status ?? "pending",
           salary: salary,
           location_id: formatId(result?.location_id),
           manager_id: formatId(result?.manager_id),
@@ -80,7 +86,7 @@ const EmployeeEditPage = () => {
         setStatusMessage("Detail employee berhasil dimuat.");
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : "Gagal memuat detail employee.";
-        setStatusMessage(message);
+        setStatusMessage(`Gagal: ${message}`);
       } finally {
         setLoading(false);
       }
@@ -92,7 +98,7 @@ const EmployeeEditPage = () => {
   const handleUpdate = async () => {
     const targetId = updateForm.id;
     if (!targetId) {
-      setStatusMessage("ID tidak ditemukan untuk update.");
+      setStatusMessage("Gagal: ID tidak ditemukan untuk update.");
       return;
     }
 
@@ -102,21 +108,29 @@ const EmployeeEditPage = () => {
     try {
       const payload: EmployeeUpdatePayload = {
         name: updateForm.name,
-        user_id: updateForm.user_id ? Number(updateForm.user_id) : undefined,
-        employee_code: updateForm.employee_code,
-        hire_date: updateForm.hire_date,
-        position: updateForm.position,
-        department: updateForm.department,
-        salary: Number(updateForm.salary),
-        location_id: updateForm.location_id ? Number(updateForm.location_id) : undefined,
-        manager_id: updateForm.manager_id ? Number(updateForm.manager_id) : undefined,
-        work_schedule_id: updateForm.work_schedule_id ? Number(updateForm.work_schedule_id) : undefined,
+        user_id: updateForm.user_id ? Number(updateForm.user_id) : null,
+        employee_code: updateForm.employee_code || "",
+        hire_date: updateForm.hire_date || "",
+        position: updateForm.position || "",
+        department: updateForm.department || "",
+        salary: updateForm.salary ? Number(updateForm.salary) : 0,
+        status: updateForm.status || "pending",
+        probation_end_date: updateForm.probation_end_date || null,
+        location_id: updateForm.location_id ? Number(updateForm.location_id) : null,
+        manager_id: updateForm.manager_id ? Number(updateForm.manager_id) : null,
+        work_schedule_id: updateForm.work_schedule_id ? Number(updateForm.work_schedule_id) : null,
       };
 
       await updateEmployee(targetId, payload);
       navigate("/employees");
     } catch (error: any) {
-      setStatusMessage(error.message || "Gagal mengupdate employee");
+      if (error.type === "validation" && error.errors) {
+        const validationErrors = error.errors;
+        const messages = Object.values(validationErrors).flat().join(", ");
+        setStatusMessage(`Gagal: ${messages}`);
+      } else {
+        setStatusMessage(error.message || "Gagal mengupdate employee");
+      }
     } finally {
       setLoading(false);
     }

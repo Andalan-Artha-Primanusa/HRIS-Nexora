@@ -33,15 +33,17 @@ export interface EmployeeWithName extends EmployeeItem {
  * Payload for creating new employee
  */
 export interface EmployeeCreatePayload {
-  user_id: number;
+  user_id: string | number | null;
   employee_code: string;
   position: string;
   department: string;
   hire_date: string;
-  salary: number;
-  location_id?: number;
-  manager_id?: number;
-  work_schedule_id?: number;
+  salary: string | number | null;
+  location_id?: string | number | null;
+  manager_id?: string | number | null;
+  work_schedule_id?: string | number | null;
+  status: string;
+  probation_end_date?: string | null;
 }
 
 /**
@@ -49,16 +51,17 @@ export interface EmployeeCreatePayload {
  */
 export interface EmployeeUpdatePayload {
   name?: string;
-  user_id?: string | number;
+  user_id?: string | number | null;
   employee_code?: string;
   hire_date?: string;
   position?: string;
   department?: string;
-  salary?: number;
-  location_id?: number;
-  manager_id?: number;
-  work_schedule_id?: number;
-  status?: "active" | "inactive" | "pending";
+  salary?: string | number | null;
+  location_id?: string | number | null;
+  manager_id?: string | number | null;
+  work_schedule_id?: string | number | null;
+  status?: string;
+  probation_end_date?: string | null;
 }
 
 
