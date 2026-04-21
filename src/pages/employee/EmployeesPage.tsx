@@ -84,6 +84,7 @@ const EmployeesPage = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [selectedPosition, setSelectedPosition] = useState("");
+  const [activeTab, setActiveTab] = useState<"Semua" | "Aktif" | "Probation" | "Resigned">("Semua");
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -101,16 +102,26 @@ const EmployeesPage = () => {
   // Combined Business Logic: Filter -> Sort -> Paginate
   const filteredEmployees = useMemo(() => {
     return items.filter((item) => {
+      // 1. Search Logic
       const searchStr = searchText.toLowerCase();
       const nameMatch = item.user?.name?.toLowerCase().includes(searchStr);
       const codeMatch = item.employee_code?.toLowerCase().includes(searchStr);
       const idMatch = String(item.id).includes(searchStr);
+      const textMatch = nameMatch || codeMatch || idMatch;
+
+      // 2. Metadata Filters (Dept, Position)
       const deptMatch = !selectedDepartment || item.department === selectedDepartment;
       const posMatch = !selectedPosition || item.position === selectedPosition;
 
-      return (nameMatch || codeMatch || idMatch) && deptMatch && posMatch;
+      // 3. Status Tab Filter
+      let statusMatch = true;
+      if (activeTab === "Aktif") statusMatch = item.status === "active";
+      else if (activeTab === "Probation") statusMatch = item.status === "pending";
+      else if (activeTab === "Resigned") statusMatch = item.status === "inactive";
+
+      return textMatch && deptMatch && posMatch && statusMatch;
     });
-  }, [items, searchText, selectedDepartment, selectedPosition]);
+  }, [items, searchText, selectedDepartment, selectedPosition, activeTab]);
 
   const sortedEmployees = useMemo(() => {
     return [...filteredEmployees].sort((a, b) => {
@@ -195,6 +206,7 @@ const EmployeesPage = () => {
     setSearchText("");
     setSelectedDepartment("");
     setSelectedPosition("");
+    setActiveTab("Semua");
     setCurrentPage(1);
   };
 
@@ -319,7 +331,7 @@ const EmployeesPage = () => {
   // Reset page on filter changes (like PayrollListPage)
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchText, selectedDepartment, selectedPosition, sortBy, sortOrder]);
+  }, [searchText, selectedDepartment, selectedPosition, sortBy, sortOrder, activeTab]);
 
 
 
@@ -361,7 +373,7 @@ const EmployeesPage = () => {
       </div>
 
       {/* Elyra-Inspired Open Header Section */}
-      <div className="white-unified-wrapper" style={{ marginTop: '2.5rem', boxShadow: '0 10px 40px rgba(0,0,0,0.03)', borderRadius: '32px' }}>
+      <div className="white-unified-wrapper">
         <div className="wuw-header">
           {/* Top Section: Title & Primary Action */}
           <div className="wuw-header-top">
@@ -375,8 +387,7 @@ const EmployeesPage = () => {
                 size="md"
                 onClick={() => void loadEmployees()}
                 disabled={loading}
-                className="btn-pill"
-                style={{ background: '#f8fafc', borderColor: '#e2e8f0', color: '#64748b' }}
+                className="btn-pill btn-refresh"
               >
                 <RefreshCw size={18} />
                 <span>Segarkan</span>
@@ -387,8 +398,7 @@ const EmployeesPage = () => {
                   size="md"
                   onClick={() => navigate("/employees/add")}
                   disabled={loading}
-                  className="btn-pill"
-                  style={{ background: '#2563eb', color: '#ffffff', border: 'none', boxShadow: '0 8px 24px rgba(37, 99, 235, 0.25)' }}
+                  className="btn-pill btn-add-employee"
                 >
                   <Plus size={20} />
                   <span>Tambah Karyawan</span>
@@ -400,10 +410,15 @@ const EmployeesPage = () => {
           {/* Bottom Section: Segmented Tabs & Search Tools */}
           <div className="wuw-header-bottom">
             <div className="elyra-tabs">
-              <button className="elyra-tab active">Semua</button>
-              <button className="elyra-tab">Aktif</button>
-              <button className="elyra-tab">Probation</button>
-              <button className="elyra-tab">Resigned</button>
+              {(["Semua", "Aktif", "Probation", "Resigned"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  className={`elyra-tab ${activeTab === tab ? "active" : ""}`}
+                  onClick={() => setActiveTab(tab)}
+                >
+                  {tab}
+                </button>
+              ))}
             </div>
 
             <div className="wuw-actions-area">
@@ -418,20 +433,8 @@ const EmployeesPage = () => {
                 />
               </div>
               <button 
-                className={`filter-btn ${showFilters ? "active" : ""}`}
+                className={`filter-btn-rounded ${showFilters ? "active" : ""}`}
                 onClick={() => setShowFilters(!showFilters)}
-                style={{ 
-                  height: '46px', 
-                  borderRadius: '999px', 
-                  border: 'none', 
-                  background: '#f1f5f9', 
-                  color: '#64748b',
-                  padding: '0 1.25rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.6rem',
-                  fontWeight: 700
-                }}
               >
                 <Filter size={18} />
                 <span>Filter</span>
@@ -442,16 +445,15 @@ const EmployeesPage = () => {
 
         {/* Filter Panel (Integrated Dropdown) */}
         {showFilters && (
-          <div className="wuw-controls" style={{ padding: '0 2.5rem 2.5rem 2.5rem' }}>
-            <div className="filter-panel" style={{ background: '#f8fafc', padding: '2rem', borderRadius: '24px', border: 'none' }}>
+          <div className="wuw-controls filter-panel-wrapper">
+            <div className="filter-panel-premium">
               <div className="filter-row">
                 <div className="filter-group">
-                  <label style={{ fontSize: '0.7rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '0.75rem' }}>Departemen</label>
+                  <label>Departemen</label>
                   <select
                     value={selectedDepartment}
                     onChange={(e) => setSelectedDepartment(e.target.value)}
-                    className="filter-select"
-                    style={{ background: '#ffffff', borderRadius: '12px', height: '44px', border: '1px solid #e2e8f0' }}
+                    className="filter-select-premium"
                   >
                     <option value="">Semua Departemen</option>
                     {uniqueDepartments.map((dept) => (
@@ -460,12 +462,11 @@ const EmployeesPage = () => {
                   </select>
                 </div>
                 <div className="filter-group">
-                  <label style={{ fontSize: '0.7rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '0.75rem' }}>Jabatan</label>
+                  <label>Jabatan</label>
                   <select
                     value={selectedPosition}
                     onChange={(e) => setSelectedPosition(e.target.value)}
-                    className="filter-select"
-                    style={{ background: '#ffffff', borderRadius: '12px', height: '44px', border: '1px solid #e2e8f0' }}
+                    className="filter-select-premium"
                   >
                     <option value="">Semua Jabatan</option>
                     {uniquePositions.map((pos) => (
@@ -473,9 +474,9 @@ const EmployeesPage = () => {
                     ))}
                   </select>
                 </div>
-                {(searchText || selectedDepartment || selectedPosition) && (
-                  <div className="filter-group" style={{ justifyContent: 'flex-end', paddingTop: '1.5rem' }}>
-                    <Button variant="ghost" size="sm" onClick={clearFilters} style={{ color: "#2563eb", fontWeight: 800, fontSize: '0.9rem' }}>
+                {(searchText || selectedDepartment || selectedPosition || activeTab !== "Semua") && (
+                  <div className="filter-group-reset">
+                    <Button variant="ghost" size="sm" onClick={clearFilters} className="btn-reset">
                       Reset Filter
                     </Button>
                   </div>
@@ -546,7 +547,13 @@ const EmployeesPage = () => {
                           </div>
                         </td>
                         <td className="td-center">
-                          <span className="badge-soft badge-soft--green" style={{ borderRadius: '999px' }}>Aktif</span>
+                          <span className={`badge-soft badge-soft--${
+                            item.status === "active" ? "green" : 
+                            item.status === "pending" ? "orange" : "red"
+                          }`} style={{ borderRadius: '999px' }}>
+                            {item.status === "active" ? "Aktif" : 
+                             item.status === "pending" ? "Probation" : "Resigned"}
+                          </span>
                         </td>
                         <td className="td-center">
                           <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
