@@ -637,19 +637,30 @@ const ReimbursementsManagementPage = () => {
                   <tr key={String(item.id ?? index)}>
                     {columns.map((column) => (
                       <td key={`${String(item.id ?? index)}-${column}`}>
-                        {column === 'id' ? (
-                          <span className="cell-id">{asDisplay(item[column])}</span>
-                        ) : column === 'status' ? (
-                          <span className={`status-badge status-badge--${String(item[column] || 'draft').toLowerCase()}`}>
-                            {asDisplay(item[column])}
-                          </span>
-                        ) : column === 'amount' ? (
-                          <span className="cell-amount">Rp {Number(item[column] || 0).toLocaleString('id-ID')}</span>
-                        ) : column === 'category' ? (
-                          <span className="cell-tag">{asDisplay(item[column])}</span>
-                        ) : (
-                          asDisplay(item[column])
-                        )}
+                     {column === 'id' ? (
+  <span className="cell-id">{asDisplay(item[column])}</span>
+) : column === 'status' ? (
+  <span className={`status-badge status-badge--${String(item[column] || 'draft').toLowerCase()}`}>
+    {asDisplay(item[column])}
+  </span>
+) : column === 'amount' ? (
+  <span className="cell-amount">
+    Rp {Number(item[column] || 0).toLocaleString('id-ID')}
+  </span>
+) : column === 'category' ? (
+  <span className="cell-tag">{asDisplay(item[column])}</span>
+) : (column.includes('date') || column.endsWith('_at')) ? (
+  item[column]
+    ? new Date(String(item[column])).toLocaleDateString('id-ID', {
+        timeZone: 'Asia/Jakarta',
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+      })
+    : '-'
+) : (
+  asDisplay(item[column])
+)}
                       </td>
                     ))}
                   </tr>
