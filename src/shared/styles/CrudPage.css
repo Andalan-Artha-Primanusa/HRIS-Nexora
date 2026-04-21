@@ -1,3 +1,55 @@
+/* ========================= */
+/* Audit Log Table UI Custom */
+/* ========================= */
+
+.data-table tbody tr:nth-child(even) {
+  background: var(--color-primary-lighter, #f3f6fb);
+}
+
+.data-table tbody tr:hover {
+  background: var(--color-primary-light, #e0eaff);
+  transition: background 0.2s;
+}
+
+.cell-user {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.cell-user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-primary, #2563eb);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 8px rgba(37,99,235,0.08);
+  letter-spacing: 1px;
+}
+
+.cell-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cell-user-name {
+  font-weight: 600;
+  color: var(--cr-text, #1e3a8a);
+  font-size: 1rem;
+}
+
+.cell-user-email {
+  font-size: 0.85rem;
+  color: #6b7280;
+  opacity: 0.85;
+  margin-top: 1px;
+}
 /* ============================================ */
 /* Unified CRUD Page Design System              */
 /* Same UI for ALL dashboard pages              */

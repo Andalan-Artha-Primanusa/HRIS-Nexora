@@ -248,17 +248,19 @@ const AdminAuditLogsPage = () => {
                     let userName =
                       (log as any).user_name ||
                       (log as any).causer_name ||
-                      (log as any).user_id ||
-                      (log as any).causer_id ||
                       "-";
+                    let userEmail = "";
                     // If user is an object, show name/email
                     if (!userName || typeof userName === "object") {
                       const userObj = (log as any).user || (log as any).causer;
                       if (userObj && typeof userObj === "object") {
-                        userName = userObj.name || userObj.email || userObj.id || "-";
+                        userName = userObj.name || userObj.email || "-";
+                        userEmail = userObj.email || "";
                       }
                     }
                     userName = String(userName);
+                    // Avatar inisial
+                    const avatarInitial = userName && userName !== "-" ? userName.charAt(0).toUpperCase() : "?";
                     const moduleName = String((log as any).module || (log as any).subject_type || "-");
                     const ipAddress = String((log as any).ip_address || "-");
                     const rawDate = (log as any).created_at || (log as any).timestamp || "-";
@@ -294,7 +296,15 @@ const AdminAuditLogsPage = () => {
                             </div>
                           </div>
                         </td>
-                        <td>{userName}</td>
+                        <td>
+                          <div className="cell-user">
+                            <div className="cell-user-avatar">{avatarInitial}</div>
+                            <div className="cell-user-info">
+                              <span className="cell-user-name">{userName}</span>
+                              {userEmail && <span className="cell-user-email">{userEmail}</span>}
+                            </div>
+                          </div>
+                        </td>
                         <td><span className="cell-tag">{moduleName}</span></td>
                         <td>{ipAddress}</td>
                         <td className="cell-date">{createdAt}</td>
