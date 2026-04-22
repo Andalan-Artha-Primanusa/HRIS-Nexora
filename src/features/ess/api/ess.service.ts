@@ -31,10 +31,14 @@ const extractArrayPayload = (raw: unknown): GenericApiItem[] => {
 };
 
 export const getMyKpi = async () => {
+  const token = sessionStorage.getItem("token");
+  
   const response = await api.get("/my/kpi", {
     headers: {
-      'Accept': 'application/json'
-    }
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    validateStatus: (status) => (status >= 200 && status < 300) || status === 500
   });
   
   return {

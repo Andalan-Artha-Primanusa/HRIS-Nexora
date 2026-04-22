@@ -184,7 +184,6 @@ export const menuItems: MenuItem[] = [
       { label: 'Laporan Cuti', path: '/reports/leave' },
       { label: 'Laporan Payroll', path: '/reports/payroll' },
       { label: 'Laporan Aset', path: '/reports/assets' },
-      { label: 'Laporan Kustom', path: '/reports/custom' },
     ]
   },
   {

@@ -54,6 +54,11 @@ const PayrollPaymentPage = lazy(() => import("../../pages/payroll/PayrollPayment
 const PayrollGeneratePage = lazy(() => import("../../pages/payroll/PayrollGeneratePage"));
 const PayrollDashboard = lazy(() => import("../../pages/payroll/PayrollDashboard"));
 const NotificationsPage = lazy(() => import("../../pages/notifications/NotificationsPage"));
+const ReportsDashboardPage = lazy(() => import("../../pages/reports/ReportsDashboardPage"));
+const ReportsAttendancePage = lazy(() => import("../../pages/reports/ReportsAttendancePage"));
+const ReportsLeavePage = lazy(() => import("../../pages/reports/ReportsLeavePage"));
+const ReportsPayrollPage = lazy(() => import("../../pages/reports/ReportsPayrollPage"));
+const ReportsAssetsPage = lazy(() => import("../../pages/reports/ReportsAssetsPage"));
 const WorkSchedulesPage = lazy(() => import("../../pages/work-schedule/WorkSchedulesPage"));
 const WorkScheduleCreatePage = lazy(() => import("../../pages/work-schedule/WorkScheduleCreatePage"));
 const WorkScheduleEditPage = lazy(() => import("../../pages/work-schedule/WorkScheduleEditPage"));
@@ -112,13 +117,9 @@ const sectionRoutes = [
   { path: "/workforce/holidays" },
   { path: "/workforce/shift-swaps" },
   { path: "/workforce/overtime-rules" },
-  { path: "/reports/dashboard-summary" },
-  { path: "/reports/attendance" },
-  { path: "/reports/leave" },
-  { path: "/reports/payroll" },
+
   { path: "/reports/competency" },
   { path: "/reports/employee-lifecycle" },
-  { path: "/reports/assets" },
   { path: "/reports/custom" },
   { path: "/settings/company" },
   { path: "/settings/user-role" },
@@ -724,6 +725,31 @@ export const router = createBrowserRouter([
             element: <PayrollDetailsPage />,
           },
         ],
+      },
+      {
+        path: "/reports/dashboard-summary",
+        element: <DashboardLayout />,
+        children: [{ index: true, element: <ReportsDashboardPage /> }],
+      },
+      {
+        path: "/reports/attendance",
+        element: <DashboardLayout />,
+        children: [{ index: true, element: <ReportsAttendancePage /> }],
+      },
+      {
+        path: "/reports/leave",
+        element: <DashboardLayout />,
+        children: [{ index: true, element: <ReportsLeavePage /> }],
+      },
+      {
+        path: "/reports/payroll",
+        element: <DashboardLayout />,
+        children: [{ index: true, element: <ReportsPayrollPage /> }],
+      },
+      {
+        path: "/reports/assets",
+        element: <DashboardLayout />,
+        children: [{ index: true, element: <ReportsAssetsPage /> }],
       },
       ...sectionRoutes.map((route) => ({
         path: route.path,

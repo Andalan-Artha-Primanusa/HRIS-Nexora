@@ -225,6 +225,22 @@ const AdminEmailNotificationsPage = () => {
     return items.find((t) => t.key === templateKeyNotif) ?? null;
   }, [templateKeyNotif, items]);
 
+  useEffect(() => {
+    if (selectedTemplate && selectedTemplate.placeholders && selectedTemplate.placeholders.length > 0) {
+      // Only auto-populate if the user hasn't already modified the JSON (or it's empty)
+      // Actually, it's fine to overwrite when they change template.
+      const templateObj: Record<string, string> = {};
+      selectedTemplate.placeholders.forEach((ph) => {
+        templateObj[ph] = "";
+      });
+      setTemplateDataNotif(JSON.stringify(templateObj, null, 2));
+    } else if (selectedTemplate) {
+      setTemplateDataNotif("{}");
+    } else {
+      setTemplateDataNotif("");
+    }
+  }, [selectedTemplate]);
+
   const handlePreview = async () => {
     if (!selectedTemplate?.id) return;
     setPreviewing(true);
