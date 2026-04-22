@@ -1066,6 +1066,7 @@ const SectionPage = () => {
 
   const loadList = async () => {
     setLoading(true);
+    setSummaryStats([]);
     setStatusMessage('Memuat data...');
 
     try {
@@ -1751,8 +1752,123 @@ const SectionPage = () => {
 
       if (result) {
         const payload = result.data?.data ?? result.data;
+        const actualPayload =
+          payload && typeof payload === 'object' && !Array.isArray(payload) && Array.isArray((payload as any).data)
+            ? (payload as any).data
+            : payload;
+
+        if (basePath === '/reports/dashboard-summary' && payload && typeof payload === 'object') {
+          const reportPayload = payload as any;
+          const stats: SectionStat[] = [];
+
+          if (reportPayload.headcount) {
+            stats.push({ label: 'Total Employees', value: String(reportPayload.headcount.total ?? 0), description: '', variant: 'info' });
+            stats.push({ label: 'Active Employees', value: String(reportPayload.headcount.active ?? 0), description: '', variant: 'success' });
+            stats.push({ label: 'Inactive Employees', value: String(reportPayload.headcount.inactive ?? 0), description: '', variant: 'default' });
+          }
+          if (reportPayload.attendance) {
+            stats.push({ label: 'Present', value: String(reportPayload.attendance.present ?? 0), description: '', variant: 'success' });
+            stats.push({ label: 'Absent', value: String(reportPayload.attendance.absent ?? 0), description: '', variant: 'danger' });
+            stats.push({ label: 'Late', value: String(reportPayload.attendance.late ?? 0), description: '', variant: 'warning' });
+            stats.push({ label: 'Permission', value: String(reportPayload.attendance.permission ?? 0), description: '', variant: 'info' });
+          }
+          if (reportPayload.leave) {
+            stats.push({ label: 'Leave Approved', value: String(reportPayload.leave.approved ?? 0), description: '', variant: 'success' });
+            stats.push({ label: 'Leave Pending', value: String(reportPayload.leave.pending ?? 0), description: '', variant: 'warning' });
+            stats.push({ label: 'Leave Rejected', value: String(reportPayload.leave.rejected ?? 0), description: '', variant: 'danger' });
+          }
+          if (reportPayload.payroll) {
+            stats.push({ label: 'Payroll Total', value: String(reportPayload.payroll.total_amount ?? 0), description: '', variant: 'default' });
+            stats.push({ label: 'Payroll Approved', value: String(reportPayload.payroll.approved ?? 0), description: '', variant: 'success' });
+            stats.push({ label: 'Payroll Paid', value: String(reportPayload.payroll.paid ?? 0), description: '', variant: 'success' });
+            stats.push({ label: 'Payroll Pending', value: String(reportPayload.payroll.pending ?? 0), description: '', variant: 'warning' });
+          }
+          if (reportPayload.training) {
+            stats.push({ label: 'Training Total', value: String(reportPayload.training.total_programs ?? 0), description: '', variant: 'info' });
+            stats.push({ label: 'Training Active', value: String(reportPayload.training.active ?? 0), description: '', variant: 'success' });
+            stats.push({ label: 'Training Completed', value: String(reportPayload.training.completed ?? 0), description: '', variant: 'default' });
+          }
+          if (reportPayload.assets) {
+            stats.push({ label: 'Assets Total', value: String(reportPayload.assets.total ?? 0), description: '', variant: 'info' });
+            stats.push({ label: 'Assets Assigned', value: String(reportPayload.assets.assigned ?? 0), description: '', variant: 'success' });
+            stats.push({ label: 'Assets Available', value: String(reportPayload.assets.available ?? 0), description: '', variant: 'default' });
+          }
+
+          setSummaryStats(stats);
+          setTableColumns([]);
+          setTableRows([]);
+          setStatusMessage('Data dashboard summary berhasil dimuat.');
+          formatResponse(payload);
+          setLoading(false);
+          return;
+        }
+
+        if (basePath === '/reports/attendance' && payload && typeof payload === 'object') {
+          const reportPayload = payload as any;
+          const summary = reportPayload.summary ?? {};
+          const stats: SectionStat[] = [
+            { label: 'Working Days', value: String(summary.total_working_days ?? 0), description: '', variant: 'info' },
+            { label: 'Present', value: String(summary.present_count ?? 0), description: '', variant: 'success' },
+            { label: 'Absent', value: String(summary.absent_count ?? 0), description: '', variant: 'danger' },
+            { label: 'Late', value: String(summary.late_count ?? 0), description: '', variant: 'warning' },
+            { label: 'Permission', value: String(summary.permission_count ?? 0), description: '', variant: 'default' },
+            { label: 'Attendance Rate', value: String(summary.attendance_rate ?? 0), description: '%', variant: 'success' },
+          ];
+          setSummaryStats(stats);
+          const rows = Array.isArray(reportPayload.by_employee) ? reportPayload.by_employee : [];
+          const parsed = parsePayloadToTable(rows);
+          setTableColumns(parsed.columns);
+          setTableRows(parsed.rows);
+          setStatusMessage(rows.length === 0 ? 'Tidak ada data karyawan untuk laporan kehadiran.' : 'Data laporan kehadiran berhasil dimuat.');
+          formatResponse(payload);
+          setLoading(false);
+          return;
+        }
+
+        if (basePath === '/reports/leave' && payload && typeof payload === 'object') {
+          const reportPayload = payload as any;
+          const summary = reportPayload.summary ?? {};
+          const stats: SectionStat[] = [
+            { label: 'Total Leaves Taken', value: String(summary.total_leaves_taken ?? 0), description: '', variant: 'info' },
+            { label: 'Total Days Used', value: String(summary.total_days_used ?? 0), description: '', variant: 'success' },
+            { label: 'Pending Leaves', value: String(reportPayload.pending ?? 0), description: '', variant: 'warning' },
+          ];
+          setSummaryStats(stats);
+          const rows = Array.isArray(reportPayload.by_employee) ? reportPayload.by_employee : [];
+          const parsed = parsePayloadToTable(rows);
+          setTableColumns(parsed.columns);
+          setTableRows(parsed.rows);
+          setStatusMessage(rows.length === 0 ? 'Tidak ada data karyawan untuk laporan cuti.' : 'Data laporan cuti berhasil dimuat.');
+          formatResponse(payload);
+          setLoading(false);
+          return;
+        }
+
+        if (basePath === '/reports/payroll' && payload && typeof payload === 'object') {
+          const reportPayload = payload as any;
+          const summary = reportPayload.summary ?? {};
+          const stats: SectionStat[] = [
+            { label: 'Payroll Count', value: String(summary.total_payroll_count ?? 0), description: '', variant: 'info' },
+            { label: 'Total Salary', value: String(summary.total_salary ?? 0), description: '', variant: 'success' },
+            { label: 'Total Allowance', value: String(summary.total_allowance ?? 0), description: '', variant: 'default' },
+            { label: 'Total Deduction', value: String(summary.total_deduction ?? 0), description: '', variant: 'danger' },
+            { label: 'Total Bonus', value: String(summary.total_bonus ?? 0), description: '', variant: 'success' },
+            { label: 'Total Net Pay', value: String(summary.total_net_pay ?? 0), description: '', variant: 'success' },
+            { label: 'Average Salary', value: String(summary.average_salary ?? 0), description: '', variant: 'info' },
+          ];
+          setSummaryStats(stats);
+          const rows = Array.isArray(reportPayload.by_status) ? reportPayload.by_status : [];
+          const parsed = parsePayloadToTable(rows);
+          setTableColumns(parsed.columns);
+          setTableRows(parsed.rows);
+          setStatusMessage(rows.length === 0 ? 'Tidak ada status payroll untuk laporan payroll.' : 'Data laporan payroll berhasil dimuat.');
+          formatResponse(payload);
+          setLoading(false);
+          return;
+        }
+
         formatResponse(payload);
-        const parsed = parsePayloadToTable(payload);
+        const parsed = parsePayloadToTable(actualPayload);
         setTableColumns(parsed.columns);
         setTableRows(parsed.rows);
         setStatusMessage('Data berhasil dimuat.');
