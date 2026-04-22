@@ -32,6 +32,8 @@ import {
   CheckCircle,
   Settings,
   LogOut,
+  FileText,
+  TrendingUp,
 } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
 import "./EmployeesPage.css";
@@ -556,22 +558,42 @@ const EmployeesPage = () => {
                           </span>
                         </td>
                         <td className="td-center">
-                          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                          <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'center' }}>
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => navigate(`/employees/update/${item.id}`)}
-                              style={{ color: '#64748b', padding: '0.5rem' }}
+                              style={{ color: '#2563eb', padding: '0.4rem' }}
+                              title="Edit Profil"
                             >
-                              <Pencil size={18} />
+                              <Pencil size={16} />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => navigate(`/legal/letters?employee=${item.id}`)}
+                              style={{ color: '#8b5cf6', padding: '0.4rem' }}
+                              title="Buat Surat"
+                            >
+                              <FileText size={16} />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => navigate(`/performance/summary?employee=${item.id}`)}
+                              style={{ color: '#10b981', padding: '0.4rem' }}
+                              title="Kenaikan Jabatan"
+                            >
+                              <TrendingUp size={16} />
                             </Button>
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => void deleteExistingEmployee(String(item.id))}
-                              style={{ color: '#ef4444', padding: '0.5rem' }}
+                              style={{ color: '#ef4444', padding: '0.4rem' }}
+                              title="Hapus"
                             >
-                              <Trash2 size={18} />
+                              <Trash2 size={16} />
                             </Button>
                           </div>
                         </td>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { BarChart3, ClipboardList, PieChart as PieChartIcon, Users, Wallet, TrendingUp } from 'lucide-react';
 import { KpiCards } from '@/features/dashboard/components/KpiCards';
 import { BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -182,6 +183,7 @@ const formatPeriodLabel = (period: string) => {
 };
 
 const OverviewPage: React.FC = () => {
+  const navigate = useNavigate();
   const [attendanceData, setAttendanceData] = useState<AttendanceTrendPoint[]>([]);
   const [departmentData, setDepartmentData] = useState<DepartmentPoint[]>([]);
   const [leaveTypeData, setLeaveTypeData] = useState<LeaveTypePoint[]>([]);
@@ -357,7 +359,7 @@ const OverviewPage: React.FC = () => {
           <p className="page-subtitle">Welcome back, here's what's happening with your organization today.</p>
         </div>
         <div className="page-actions">
-          <Button variant="outline" size="md">Export Report</Button>
+          <Button variant="outline" size="md" onClick={() => navigate('/admin/analytics/people')}>View Analytics</Button>
           <Button variant="primary" size="md">Run Payroll</Button>
         </div>
       </Card>

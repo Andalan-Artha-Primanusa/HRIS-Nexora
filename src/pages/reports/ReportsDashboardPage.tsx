@@ -249,6 +249,18 @@ const ReportsDashboardPage: React.FC = () => {
     { label: 'Data Absensi', sub: 'Total catatan absensi', value: String(attendanceRecords.length), tone: 'cyan', icon: Activity },
   ];
 
+  const getToneColors = (tone: string) => {
+    switch (tone) {
+      case 'blue': return { bg: '#eff6ff', icon: '#2563eb' };
+      case 'green': return { bg: '#f0fdf4', icon: '#10b981' };
+      case 'orange': return { bg: '#fff7ed', icon: '#f59e0b' };
+      case 'purple': return { bg: '#faf5ff', icon: '#8b5cf6' };
+      case 'red': return { bg: '#fef2f2', icon: '#ef4444' };
+      case 'cyan': return { bg: '#ecfeff', icon: '#0891b2' };
+      default: return { bg: '#f8fafc', icon: '#64748b' };
+    }
+  };
+
   return (
     <div className="reports-dashboard">
       {/* ─── Hero ─── */}
@@ -270,23 +282,36 @@ const ReportsDashboardPage: React.FC = () => {
 
       {error && <p className="reports-error">{error}</p>}
 
-      {/* ─── Metrics ─── */}
-      <div className="reports-metrics-grid">
+      <div className="reports-metrics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
         {summaryCards.map(card => {
           const Icon = card.icon;
+          const colors = getToneColors(card.tone);
           return (
-            <Card key={card.label} className="report-metric-card" glass>
-              <div className="report-metric-header">
+            <Card key={card.label} glass style={{ padding: '1.5rem', border: `1px solid ${colors.bg}` }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
                 <div>
-                  <span className="report-metric-label">{card.label}</span>
-                  <p className="report-metric-sublabel">{card.sub}</p>
+                  <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#64748b', display: 'block', marginBottom: '0.25rem' }}>{card.label}</span>
+                  <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#1e293b' }}>{card.value}</div>
                 </div>
-                <span className={`report-metric-icon report-metric-icon--${card.tone}`}>
-                  <Icon size={20} />
+                <span style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  width: '44px', 
+                  height: '44px', 
+                  borderRadius: '12px',
+                  background: colors.bg,
+                  color: colors.icon
+                }}>
+                  <Icon size={22} />
                 </span>
               </div>
-              <div className="report-metric-value">{card.value}</div>
-              <div className="report-metric-change neutral">Live data</div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{card.sub}</span>
+                <span style={{ fontSize: '0.7rem', color: colors.icon, fontWeight: 600, background: `${colors.icon}10`, padding: '2px 8px', borderRadius: '4px' }}>
+                  Live Data
+                </span>
+              </div>
             </Card>
           );
         })}
@@ -355,7 +380,7 @@ const ReportsDashboardPage: React.FC = () => {
                 <PieChart>
                   <Tooltip {...tooltipStyle} />
                   <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                  <Pie data={leaveTypeData} cx="50%" cy="50%" outerRadius={90} fill="#2563eb" dataKey="value" labelLine label={({ name, value }) => `${name}: ${value}`}>
+                  <Pie data={leaveTypeData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={5} fill="#2563eb" dataKey="value">
                     {leaveTypeData.map((_, i) => (
                       <Cell key={`lt-${i}`} fill={chartColors[i % chartColors.length]} />
                     ))}
@@ -376,7 +401,7 @@ const ReportsDashboardPage: React.FC = () => {
                 <PieChart>
                   <Tooltip {...tooltipStyle} />
                   <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                  <Pie data={leaveStatusData} cx="50%" cy="50%" innerRadius={50} outerRadius={90} fill="#10b981" dataKey="value" labelLine label={({ name, value }) => `${name}: ${value}`}>
+                  <Pie data={leaveStatusData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={5} fill="#10b981" dataKey="value">
                     {leaveStatusData.map((_, i) => (
                       <Cell key={`ls-${i}`} fill={['#f59e0b', '#10b981', '#ef4444'][i % 3]} />
                     ))}
@@ -437,7 +462,7 @@ const ReportsDashboardPage: React.FC = () => {
                 <PieChart>
                   <Tooltip {...tooltipStyle} />
                   <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                  <Pie data={reimbursementStatusData} cx="50%" cy="50%" innerRadius={50} outerRadius={90} fill="#8b5cf6" dataKey="value" labelLine label={({ name, value }) => `${name}: ${value}`}>
+                  <Pie data={reimbursementStatusData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={5} fill="#8b5cf6" dataKey="value">
                     {reimbursementStatusData.map((_, i) => (
                       <Cell key={`rs-${i}`} fill={chartColors[i % chartColors.length]} />
                     ))}

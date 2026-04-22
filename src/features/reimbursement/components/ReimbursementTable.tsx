@@ -1,0 +1,132 @@
+import React from 'react';
+import { Edit, Trash2, Eye, Send } from 'lucide-react';
+import type { ReimbursementItem } from '../types/reimbursement.types';
+
+interface ReimbursementTableProps {
+  items: ReimbursementItem[];
+  onView: (item: ReimbursementItem) => void;
+  onEdit?: (item: ReimbursementItem) => void;
+  onDelete?: (item: ReimbursementItem) => void;
+  onSubmit?: (item: ReimbursementItem) => void;
+  isAdmin?: boolean;
+}
+
+export const ReimbursementTable: React.FC<ReimbursementTableProps> = ({
+  items,
+  onView,
+  onEdit,
+  onDelete,
+  onSubmit,
+  isAdmin = false
+}) => {
+  const getStatusClass = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'draft': return 'status-draft';
+      case 'submitted': return 'status-submitted';
+      case 'approved': return 'status-approved';
+      case 'rejected': return 'status-rejected';
+      case 'paid': return 'status-paid';
+      default: return '';
+    }
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return '-';
+    return new Date(dateStr).toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  };
+
+  return (
+    <div className="card-table-wrapper" style={{ overflowX: 'auto', background: 'white', borderRadius: '18px', border: '1px solid #f1f5f9' }}>
+      <table className="crud-table">
+        <thead>
+          <tr>
+            {isAdmin && <th>Employee</th>}
+            <th>Title</th>
+            <th>Category</th>
+            <th>Amount</th>
+            <th>Expense Date</th>
+            <th>Status</th>
+            <th style={{ textAlign: 'right' }}>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {items.length === 0 ? (
+            <tr>
+              <td colSpan={isAdmin ? 7 : 6} style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
+                No reimbursement records found.
+              </td>
+            </tr>
+          ) : (
+            items.map((item: any) => (
+              <tr key={item.id}>
+                {isAdmin && (
+                  <td>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{item.employee?.full_name || 'N/A'}</span>
+                      <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{item.employee?.employee_id || ''}</span>
+                    </div>
+                  </td>
+                )}
+                <td>
+                  <div style={{ fontWeight: 500 }}>{item.title}</div>
+                  <div style={{ fontSize: '0.75rem', color: '#94a3b8', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {item.description}
+                  </div>
+                </td>
+                <td>
+                  <span className="category-tag">{item.category}</span>
+                </td>
+                <td style={{ fontWeight: 700, color: '#1e3a8a' }}>
+                  {formatCurrency(item.amount)}
+                </td>
+                <td>{formatDate(item.expense_date)}</td>
+                <td>
+                  <span className={`status-pill ${getStatusClass(item.status)}`}>
+                    {item.status}
+                  </span>
+                </td>
+                <td style={{ textAlign: 'right' }}>
+                  <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                    <button className="btn-action btn-action-view" title="View Details" onClick={() => onView(item)}>
+                      <Eye size={16} color="#8b5cf6" />
+                    </button>
+                    
+                    {item.status.toLowerCase() === 'draft' && onEdit && (
+                      <button className="btn-action btn-action-edit" title="Edit" onClick={() => onEdit(item)}>
+                        <Edit size={16} color="#2563eb" />
+                      </button>
+                    )}
+                    
+                    {item.status.toLowerCase() === 'draft' && onSubmit && (
+                      <button className="btn-action" title="Submit" style={{ color: '#2563eb' }} onClick={() => onSubmit(item)}>
+                        <Send size={16} color="#2563eb" />
+                      </button>
+                    )}
+                    
+                    {item.status.toLowerCase() === 'draft' && onDelete && (
+                      <button className="btn-action btn-action-delete" title="Delete" onClick={() => onDelete(item)}>
+                        <Trash2 size={16} color="#ef4444" />
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+};

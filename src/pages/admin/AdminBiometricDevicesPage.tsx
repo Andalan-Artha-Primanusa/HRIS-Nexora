@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { Alert } from "@/shared/ui/Alert";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { ROLES } from "@/shared/types/rbac.types";
-import { MonitorCog, RefreshCw, ShieldAlert, Smartphone, Wifi, WifiOff } from "lucide-react";
+import { MonitorCog, RefreshCw, ShieldAlert, Smartphone, Wifi, WifiOff, Plus, Edit2 } from "lucide-react";
 import {
-  createBiometricDevice,
   getBiometricDevices,
   syncBiometricAttendance,
 } from "@/features/admin/api/admin-batch1.service";
@@ -36,6 +36,7 @@ const normalizeBoolean = (value: unknown) => {
 };
 
 const AdminBiometricDevicesPage = () => {
+  const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const canAccess = hasAdminAccess(user);
 
@@ -60,16 +61,9 @@ const AdminBiometricDevicesPage = () => {
 
   const [devices, setDevices] = useState<BiometricDeviceItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
   const [syncingId, setSyncingId] = useState<string | number | null>(null);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertType, setAlertType] = useState<AlertType>("info");
-  const [form, setForm] = useState({
-    name: "",
-    ip_address: "",
-    location: "",
-    port: "",
-  });
 
   const summary = useMemo(() => {
     const online = devices.filter((device) => normalizeBoolean((device as any).is_online ?? (device as any).online ?? (device as any).status === "online")).length;
@@ -98,36 +92,6 @@ const AdminBiometricDevicesPage = () => {
   useEffect(() => {
     void loadDevices();
   }, []);
-
-  const handleCreateDevice = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setSubmitting(true);
-    setAlertMessage("");
-
-    try {
-      await createBiometricDevice({
-        name: form.name,
-        ip_address: form.ip_address,
-        location: form.location || undefined,
-        port: form.port ? Number(form.port) : undefined,
-      });
-
-      setForm({
-        name: "",
-        ip_address: "",
-        location: "",
-        port: "",
-      });
-      await loadDevices();
-      setAlertMessage("Perangkat biometric berhasil ditambahkan.");
-      setAlertType("success");
-    } catch (error: unknown) {
-      setAlertMessage(getErrorMessage(error as any));
-      setAlertType("error");
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
   const handleSync = async (device: BiometricDeviceItem) => {
     const deviceId = (device as any).id;
@@ -183,16 +147,20 @@ const AdminBiometricDevicesPage = () => {
           <h1>Biometric Devices</h1>
           <p>Kelola perangkat biometric, pantau status koneksi, dan jalankan sinkronisasi attendance dari satu halaman admin.</p>
         </div>
-        <div className="page-header-actions">
+        <div className="page-header-actions" style={{ display: 'flex', gap: '0.75rem' }}>
           <Button
             variant="outline"
             size="md"
             onClick={() => void loadDevices()}
-            disabled={loading || submitting}
+            disabled={loading}
             style={{ borderColor: "#2563eb", color: "#2563eb" }}
           >
             <RefreshCw size={16} />
             {loading ? "Memuat..." : "Segarkan"}
+          </Button>
+          <Button variant="primary" size="md" onClick={() => navigate('/admin/biometric-devices/create')}>
+            <Plus size={16} />
+            Tambah Device
           </Button>
         </div>
       </div>
@@ -226,68 +194,6 @@ const AdminBiometricDevicesPage = () => {
           dismissible
         />
       )}
-
-      <Card className="table-card" glass>
-        <div className="table-header-bar">
-          <h3>Tambah Device</h3>
-          <span className="table-count">Registrasi perangkat baru</span>
-        </div>
-        <div className="table-card-inner">
-          <form className="crud-form" onSubmit={handleCreateDevice}>
-            <div className="crud-form-grid">
-              <label>
-                Nama Device
-                <input
-                  className="crud-input"
-                  type="text"
-                  value={form.name}
-                  onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
-                  placeholder="Contoh: ZKTeco Front Office"
-                  required
-                />
-              </label>
-              <label>
-                IP Address
-                <input
-                  className="crud-input"
-                  type="text"
-                  value={form.ip_address}
-                  onChange={(event) => setForm((prev) => ({ ...prev, ip_address: event.target.value }))}
-                  placeholder="192.168.1.10"
-                  required
-                />
-              </label>
-              <label>
-                Port
-                <input
-                  className="crud-input"
-                  type="number"
-                  value={form.port}
-                  onChange={(event) => setForm((prev) => ({ ...prev, port: event.target.value }))}
-                  placeholder="4370"
-                />
-              </label>
-              <label>
-                Lokasi
-                <input
-                  className="crud-input"
-                  type="text"
-                  value={form.location}
-                  onChange={(event) => setForm((prev) => ({ ...prev, location: event.target.value }))}
-                  placeholder="Lobby / Branch / Office"
-                />
-              </label>
-            </div>
-
-            <div className="crud-actions">
-              <Button type="submit" variant="primary" size="md" disabled={submitting}>
-                <Smartphone size={16} />
-                {submitting ? "Menyimpan..." : "Tambah Device"}
-              </Button>
-            </div>
-          </form>
-        </div>
-      </Card>
 
       <Card className="table-card" glass>
         <div className="table-header-bar">
@@ -340,6 +246,13 @@ const AdminBiometricDevicesPage = () => {
                         <td className="cell-date">{String(lastSync)}</td>
                         <td className="td-center">
                           <div className="cell-actions">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => navigate(`/admin/biometric-devices/edit/${deviceId}`)}
+                            >
+                              <Edit2 size={15} />
+                            </Button>
                             <Button
                               variant="outline"
                               size="sm"

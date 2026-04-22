@@ -47,6 +47,15 @@ export const menuItems: MenuItem[] = [
         ]
       },
       {
+        label: 'Legal & Surat',
+        icon: FileText,
+        subItems: [
+          { label: 'Generator Surat', path: '/legal/letters' },
+          { label: 'Kalkulator Pesangon', path: '/legal/severance' },
+          { label: 'PPh21 Progresif', path: '/legal/tax' },
+        ]
+      },
+      {
         label: 'Dokumen',
         icon: FileText,
         subItems: [
@@ -103,6 +112,16 @@ export const menuItems: MenuItem[] = [
     ]
   },
   {
+    label: 'Rekrutmen (ATS)',
+    icon: Briefcase,
+    requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
+    subItems: [
+      { label: 'Lowongan Pekerjaan', path: '/recruitment/openings' },
+      { label: 'Pipeline Kandidat', path: '/recruitment/candidates' },
+      { label: 'Talent Pool', path: '/recruitment/talent-pool' },
+    ]
+  },
+  {
     label: 'Aset & Inventaris',
     icon: Briefcase,
     requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
@@ -116,11 +135,9 @@ export const menuItems: MenuItem[] = [
     icon: Receipt,
     requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user) || RBACUtils.isManager(user),
     subItems: [
-      { label: 'Ajukan Pengeluaran', path: '/expense/submit' },
+      { label: 'Manajemen Reimburse', path: '/reimbursements' },
+      { label: 'Persetujuan Biaya', path: '/expense/approval' },
       { label: 'Daftar Pengeluaran', path: '/expense/list' },
-      { label: 'Persetujuan', path: '/expense/approval' },
-      { label: 'Kategori', path: '/expense/categories' },
-      { label: 'Laporan', path: '/expense/reports' },
     ]
   },
   {
@@ -141,9 +158,8 @@ export const menuItems: MenuItem[] = [
     label: 'Permintaan Layanan HR',
     icon: FileText,
     subItems: [
-      { label: 'Antrian Permintaan', path: '/requests' },
-      { label: 'Penugasan Permintaan', path: '/requests/assign' },
-      { label: 'Update Status Permintaan', path: '/requests/status' },
+      { label: 'Antrian Permintaan', path: '/hr-requests' },
+      { label: 'Laporan SLA', path: '/hr-requests/sla' },
     ]
   },
   {
@@ -152,8 +168,19 @@ export const menuItems: MenuItem[] = [
     requiredChecker: (user) => RBACUtils.isManager(user) || RBACUtils.isHR(user) || RBACUtils.isAdmin(user) || RBACUtils.isSuperAdmin(user),
     subItems: [
       { label: 'Manajemen KPI', path: '/kpis' },
+      { label: 'Manajemen OKR', path: '/performance/okrs' },
+      { label: 'Review 360', path: '/performance/reviews' },
+      { label: 'Sesi Kalibrasi', path: '/performance/calibration' },
       { label: 'Ringkasan Kinerja', path: '/performance/summary' },
-      { label: 'Review Kinerja', path: '/performance/reviews' },
+    ]
+  },
+  {
+    label: 'Engagement & Survei',
+    icon: Users,
+    requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
+    subItems: [
+      { label: 'Survei Kepuasan', path: '/engagement/surveys' },
+      { label: 'Analitik Engagement', path: '/engagement/analytics' },
     ]
   },
   {
@@ -184,12 +211,19 @@ export const menuItems: MenuItem[] = [
       { label: 'Laporan Cuti', path: '/reports/leave' },
       { label: 'Laporan Payroll', path: '/reports/payroll' },
       { label: 'Laporan Aset', path: '/reports/assets' },
+      { label: 'Laporan SDM', path: '/reports/employee' },
     ]
   },
   {
-    label: 'Notifikasi',
-    icon: Settings,
-    subItems: [{ label: 'Pusat Notifikasi', path: '/notifications' }],
+    label: 'Kepatuhan & Kebijakan',
+    icon: ShieldCheck,
+    requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
+    subItems: [
+      { label: 'Dashboard Kepatuhan', path: '/compliance/overview' },
+      { label: 'Kalender Libur', path: '/workforce/holidays' },
+      { label: 'Tukar Shift', path: '/workforce/shift-swaps' },
+      { label: 'Aturan Lembur', path: '/workforce/overtime-rules' },
+    ]
   },
   {
     label: 'Alat Admin',

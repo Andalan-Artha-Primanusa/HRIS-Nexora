@@ -23,10 +23,10 @@ const EmployeesPage = lazy(() => import("../../pages/employee/EmployeesPage"));
 const EmployeeCreatePage = lazy(() => import("../../pages/employee/EmployeeCreatePage"));
 const EmployeeEditPage = lazy(() => import("../../pages/employee/EmployeeEditPage"));
 const MyReimbursementsPage = lazy(() => import("../../pages/ess/MyReimbursementsPage"));
+const AdminReimbursementsPage = lazy(() => import("../../pages/admin/AdminReimbursementsPage"));
 const MyPayrollPage = lazy(() => import("../../pages/ess/MyPayrollPage"));
 const MyLeavesPage = lazy(() => import("../../pages/ess/MyLeavesPage"));
-const ReimbursementsManagementPage = lazy(() => import("../../pages/reimbursements/ReimbursementsManagementPage"));
-const ReimbursementApprovalPage = lazy(() => import("../../pages/reimbursements/ReimbursementApprovalPage"));
+
 const LocationsPage = lazy(() => import("../../pages/locations/LocationsPage"));
 const CreateLocationPage = lazy(() => import("../../pages/locations/CreateLocationPage"));
 const EditLocationPage = lazy(() => import("../../pages/locations/EditLocationPage"));
@@ -59,9 +59,73 @@ const ReportsAttendancePage = lazy(() => import("../../pages/reports/ReportsAtte
 const ReportsLeavePage = lazy(() => import("../../pages/reports/ReportsLeavePage"));
 const ReportsPayrollPage = lazy(() => import("../../pages/reports/ReportsPayrollPage"));
 const ReportsAssetsPage = lazy(() => import("../../pages/reports/ReportsAssetsPage"));
+const ReportsEmployeePage = lazy(() => import("../../pages/reports/ReportsEmployeePage"));
 const WorkSchedulesPage = lazy(() => import("../../pages/work-schedule/WorkSchedulesPage"));
 const WorkScheduleCreatePage = lazy(() => import("../../pages/work-schedule/WorkScheduleCreatePage"));
 const WorkScheduleEditPage = lazy(() => import("../../pages/work-schedule/WorkScheduleEditPage"));
+const JobOpeningsPage = lazy(() => import("../../pages/admin/JobOpeningsPage.tsx"));
+const CandidatePipelinePage = lazy(() => import("../../pages/admin/CandidatePipelinePage.tsx"));
+const TalentPoolPage = lazy(() => import("../../pages/admin/TalentPoolPage.tsx"));
+const OkrManagementPage = lazy(() => import("../../pages/admin/OkrManagementPage.tsx"));
+const EngagementSurveysPage = lazy(() => import("../../pages/admin/EngagementSurveysPage.tsx"));
+const SeveranceCalculatorPage = lazy(() => import("../../pages/admin/SeveranceCalculatorPage.tsx"));
+const EmploymentLettersPage = lazy(() => import("../../pages/admin/EmploymentLettersPage.tsx"));
+const OrgChartPage = lazy(() => import("../../pages/admin/OrgChartPage.tsx"));
+const HrRequestsPage = lazy(() => import("../../pages/admin/HrRequestsPage.tsx"));
+const ComplianceDashboardPage = lazy(() => import("../../pages/admin/ComplianceDashboardPage.tsx"));
+const HolidayCalendarPage = lazy(() => import("../../pages/admin/HolidayCalendarPage.tsx"));
+const TrainingProgramsPage = lazy(() => import("../../pages/admin/TrainingProgramsPage.tsx"));
+const CompetencyMatrixPage = lazy(() => import("../../pages/admin/CompetencyMatrixPage.tsx"));
+const ApprovalFlowPage = lazy(() => import("../../pages/admin/ApprovalFlowPage.tsx"));
+const ProgressiveTaxPage = lazy(() => import("../../pages/admin/ProgressiveTaxPage.tsx"));
+const SuccessionMatrixPage = lazy(() => import("../../pages/admin/SuccessionMatrixPage.tsx"));
+const IdpPage = lazy(() => import("../../pages/admin/IdpPage.tsx"));
+const CalibrationPage = lazy(() => import("../../pages/admin/CalibrationPage.tsx"));
+const Review360Page = lazy(() => import("../../pages/admin/Review360Page.tsx"));
+const ShiftSwapsPage = lazy(() => import("../../pages/admin/ShiftSwapsPage.tsx"));
+const OvertimeRulesPage = lazy(() => import("../../pages/admin/OvertimeRulesPage.tsx"));
+const BiometricDevicesPage = lazy(() => import("../../pages/admin/BiometricDevicesPage.tsx"));
+const CompensationPage = lazy(() => import("../../pages/admin/CompensationPage.tsx"));
+const ComplianceSettingsPage = lazy(() => import("../../pages/admin/ComplianceSettingsPage.tsx"));
+const AssetInventoryPage = lazy(() => import("../../pages/admin/AssetInventoryPage.tsx"));
+const BenefitManagementPage = lazy(() => import("../../pages/admin/BenefitManagementPage.tsx"));
+const DetailedPeopleAnalyticsPage = lazy(() => import("../../pages/admin/DetailedPeopleAnalyticsPage.tsx"));
+const NotificationRulesPage = lazy(() => import("../../pages/admin/NotificationRulesPage.tsx"));
+const JobOpeningFormPage = lazy(() => import("../../pages/admin/JobOpeningFormPage.tsx"));
+const AssetFormPage = lazy(() => import("../../pages/admin/AssetFormPage.tsx"));
+const OkrFormPage = lazy(() => import("../../pages/admin/OkrFormPage.tsx"));
+const SurveyFormPage = lazy(() => import("../../pages/admin/SurveyFormPage.tsx"));
+const BenefitFormPage = lazy(() => import("../../pages/admin/BenefitFormPage.tsx"));
+const TrainingFormPage = lazy(() => import("../../pages/admin/TrainingFormPage.tsx"));
+const BiometricDeviceFormPage = lazy(() => import("../../pages/admin/BiometricDeviceFormPage.tsx"));
+const HolidayFormPage = lazy(() => import("../../pages/admin/HolidayFormPage.tsx"));
+const OvertimeRuleFormPage = lazy(() => import("../../pages/admin/OvertimeRuleFormPage.tsx"));
+const CalibrationFormPage = lazy(() => import("../../pages/admin/CalibrationFormPage.tsx"));
+const HrRequestFormPage = lazy(() => import("../../pages/admin/HrRequestFormPage.tsx"));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 const sectionRoutes = [
   { path: "/hr-summary" },
@@ -417,44 +481,29 @@ export const router = createBrowserRouter([
         ],
       },
       {
+        path: "/my/reimbursements",
+        element: <DashboardLayout />,
+        children: [{ index: true, element: <MyReimbursementsPage /> }],
+      },
+      {
         path: "/reimbursements",
         element: <DashboardLayout />,
-        children: [
-          {
-            index: true,
-            element: <ReimbursementsManagementPage />,
-          },
-        ],
+        children: [{ index: true, element: <AdminReimbursementsPage /> }],
       },
       {
         path: "/expense/submit",
         element: <DashboardLayout />,
-        children: [
-          {
-            index: true,
-            element: <MyReimbursementsPage />,
-          },
-        ],
+        children: [{ index: true, element: <MyReimbursementsPage /> }],
       },
       {
         path: "/expense/list",
         element: <DashboardLayout />,
-        children: [
-          {
-            index: true,
-            element: <ReimbursementsManagementPage />,
-          },
-        ],
+        children: [{ index: true, element: <AdminReimbursementsPage /> }],
       },
       {
         path: "/expense/approval",
         element: <DashboardLayout />,
-        children: [
-          {
-            index: true,
-            element: <ReimbursementApprovalPage />,
-          },
-        ],
+        children: [{ index: true, element: <AdminReimbursementsPage /> }],
       },
       {
         path: "/locations",
@@ -577,6 +626,36 @@ export const router = createBrowserRouter([
         ],
       },
       {
+        path: "/admin/audit-logs",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <AdminAuditLogsPage />,
+          },
+        ],
+      },
+      {
+        path: "/admin/import",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <AdminImportPage />,
+          },
+        ],
+      },
+      {
+        path: "/admin/biometric-devices",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <AdminBiometricDevicesPage />,
+          },
+        ],
+      },
+      {
         path: "/admin/email-notifications",
         element: <DashboardLayout />,
         children: [
@@ -607,13 +686,75 @@ export const router = createBrowserRouter([
         ],
       },
       {
-        path: "/admin/biometric-devices",
         element: <DashboardLayout />,
         children: [
-          {
-            index: true,
-            element: <AdminBiometricDevicesPage />,
-          },
+          { path: "/admin/import", element: <AdminImportPage /> },
+          { path: "/admin/biometric-devices", element: <AdminBiometricDevicesPage /> },
+          { path: "/admin/biometric-devices/create", element: <BiometricDeviceFormPage /> },
+          { path: "/admin/biometric-devices/edit/:id", element: <BiometricDeviceFormPage /> },
+
+          { path: "/recruitment/openings", element: <JobOpeningsPage /> },
+          { path: "/recruitment/openings/create", element: <JobOpeningFormPage /> },
+          { path: "/recruitment/openings/edit/:id", element: <JobOpeningFormPage /> },
+          { path: "/recruitment/candidates", element: <CandidatePipelinePage /> },
+          { path: "/recruitment/talent-pool", element: <TalentPoolPage /> },
+          
+          { path: "/performance/okrs", element: <OkrManagementPage /> },
+          { path: "/performance/okrs/create", element: <OkrFormPage /> },
+          { path: "/performance/okrs/edit/:id", element: <OkrFormPage /> },
+          
+          { path: "/engagement/surveys", element: <EngagementSurveysPage /> },
+          { path: "/engagement/surveys/create", element: <SurveyFormPage /> },
+          { path: "/engagement/surveys/edit/:id", element: <SurveyFormPage /> },
+          { path: "/engagement/analytics", element: <EngagementAnalyticsPage /> },
+          { path: "/engagement/analytics/:id", element: <EngagementAnalyticsPage /> },
+
+          { path: "/legal/severance", element: <SeveranceCalculatorPage /> },
+          { path: "/legal/letters", element: <EmploymentLettersPage /> },
+          { path: "/legal/tax", element: <ProgressiveTaxPage /> },
+          
+          { path: "/organization/chart", element: <OrgChartPage /> },
+          { path: "/hr-requests", element: <HrRequestsPage /> },
+          { path: "/hr-requests/respond/:id", element: <HrRequestFormPage /> },
+          { path: "/hr-requests/sla", element: <SlaPage /> },
+          
+          { path: "/compliance/overview", element: <ComplianceDashboardPage /> },
+          { path: "/compliance/settings", element: <ComplianceSettingsPage /> },
+          
+          { path: "/workforce/holidays", element: <HolidayCalendarPage /> },
+          { path: "/workforce/holidays/create", element: <HolidayFormPage /> },
+          { path: "/workforce/holidays/edit/:id", element: <HolidayFormPage /> },
+
+          { path: "/training/programs", element: <TrainingProgramsPage /> },
+          { path: "/training/programs/create", element: <TrainingFormPage /> },
+          { path: "/training/programs/edit/:id", element: <TrainingFormPage /> },
+
+          { path: "/competencies", element: <CompetencyMatrixPage /> },
+          { path: "/approval-flows", element: <ApprovalFlowPage /> },
+          { path: "/career/succession", element: <SuccessionMatrixPage /> },
+          { path: "/career/idps", element: <IdpPage /> },
+
+          { path: "/performance/calibration", element: <CalibrationPage /> },
+          { path: "/performance/calibration/create", element: <CalibrationFormPage /> },
+          { path: "/performance/calibration/edit/:id", element: <CalibrationFormPage /> },
+          { path: "/performance/reviews", element: <Review360Page /> },
+          
+          { path: "/workforce/shift-swaps", element: <ShiftSwapsPage /> },
+          { path: "/workforce/overtime-rules", element: <OvertimeRulesPage /> },
+          { path: "/workforce/overtime-rules/create", element: <OvertimeRuleFormPage /> },
+          { path: "/workforce/overtime-rules/edit/:id", element: <OvertimeRuleFormPage /> },
+
+          { path: "/biometric/devices", element: <BiometricDevicesPage /> },
+          { path: "/enterprise/compensation", element: <CompensationPage /> },
+          { path: "/inventory/assets", element: <AssetInventoryPage /> },
+          { path: "/inventory/assets/create", element: <AssetFormPage /> },
+          { path: "/inventory/assets/edit/:id", element: <AssetFormPage /> },
+          { path: "/compensation/benefits", element: <BenefitManagementPage /> },
+          { path: "/compensation/benefits/create", element: <BenefitFormPage /> },
+          { path: "/compensation/benefits/edit/:id", element: <BenefitFormPage /> },
+
+          { path: "/analytics/people-detailed", element: <DetailedPeopleAnalyticsPage /> },
+          { path: "/enterprise/notification-rules", element: <NotificationRulesPage /> },
         ],
       },
       {
@@ -750,6 +891,11 @@ export const router = createBrowserRouter([
         path: "/reports/assets",
         element: <DashboardLayout />,
         children: [{ index: true, element: <ReportsAssetsPage /> }],
+      },
+      {
+        path: "/reports/employee",
+        element: <DashboardLayout />,
+        children: [{ index: true, element: <ReportsEmployeePage /> }],
       },
       ...sectionRoutes.map((route) => ({
         path: route.path,
