@@ -68,6 +68,7 @@ const CandidatePipelinePage = lazy(() => import("../../pages/admin/CandidatePipe
 const TalentPoolPage = lazy(() => import("../../pages/admin/TalentPoolPage.tsx"));
 const OkrManagementPage = lazy(() => import("../../pages/admin/OkrManagementPage.tsx"));
 const EngagementSurveysPage = lazy(() => import("../../pages/admin/EngagementSurveysPage.tsx"));
+const EngagementAnalyticsPage = lazy(() => import("../../pages/admin/EngagementAnalyticsPage.tsx"));
 const SeveranceCalculatorPage = lazy(() => import("../../pages/admin/SeveranceCalculatorPage.tsx"));
 const EmploymentLettersPage = lazy(() => import("../../pages/admin/EmploymentLettersPage.tsx"));
 const OrgChartPage = lazy(() => import("../../pages/admin/OrgChartPage.tsx"));
@@ -102,6 +103,7 @@ const HolidayFormPage = lazy(() => import("../../pages/admin/HolidayFormPage.tsx
 const OvertimeRuleFormPage = lazy(() => import("../../pages/admin/OvertimeRuleFormPage.tsx"));
 const CalibrationFormPage = lazy(() => import("../../pages/admin/CalibrationFormPage.tsx"));
 const HrRequestFormPage = lazy(() => import("../../pages/admin/HrRequestFormPage.tsx"));
+const SlaPage = lazy(() => import("../../pages/admin/SlaPage.tsx"));
 
 
 
