@@ -324,3 +324,43 @@
   --section-soft: rgba(29, 78, 216, 0.14);
   --section-border: rgba(29, 78, 216, 0.24);
 }
+.insights-charts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.chart-card {
+  padding: 1.25rem;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--section-border);
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.chart-header h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.chart-wrapper {
+  width: 100%;
+  min-height: 260px;
+}
+
+@media (max-width: 1024px) {
+  .insights-charts-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .insights-charts-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -22,6 +22,18 @@ import {
   MapPin,
   ShieldCheck,
 } from 'lucide-react';
+import {
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
 import './SectionPage.css';
 
 type SectionStat = {
@@ -29,6 +41,12 @@ type SectionStat = {
   value: string;
   description: string;
   variant: 'warning' | 'success' | 'info' | 'default' | 'danger';
+};
+
+type InsightChartData = {
+  headcountByDepartment: { category: string; value: number }[];
+  leaveType: { name: string; value: number }[];
+  helpdeskStatus: { name: string; value: number }[];
 };
 
 type CrudMode = 'create' | 'manage';
@@ -904,6 +922,11 @@ const SectionPage = () => {
   const section = useMemo(() => getSectionData(path), [path]);
   const Icon = section.icon;
   const [summaryStats, setSummaryStats] = useState<SectionStat[]>([]);
+  const [insightsChartData, setInsightsChartData] = useState<InsightChartData>({
+    headcountByDepartment: [],
+    leaveType: [],
+    helpdeskStatus: [],
+  });
   const [tableColumns, setTableColumns] = useState<string[]>(section.tableColumns);
   const [tableRows, setTableRows] = useState<string[][]>([]);
   const [formState, setFormState] = useState<Record<string, string>>(getFormStateByMode(path, activeCrudMode));
@@ -989,6 +1012,7 @@ const SectionPage = () => {
 
   useEffect(() => {
     setSummaryStats([]);
+    setInsightsChartData({ headcountByDepartment: [], leaveType: [], helpdeskStatus: [] });
     setFormState(getFormStateByMode(path, activeCrudMode));
     setSelectedDocumentFile(null);
     setResponseText('');
@@ -1385,92 +1409,58 @@ const SectionPage = () => {
           result = await api.get('/notifications');
           break;
         case '/insights/people/detailed':
+        case '/reports/custom':
           result = await api.get('/insights/people/detailed', { params: { window_days: 30, expiring_days: 30 } });
           if (result && result.data && result.data.data) {
             const payload = result.data.data;
             formatResponse(payload);
-            // Kumpulkan statistik utama
+            // Kumpulkan statistik utama saja, tanpa tabel object-object
             const stats: SectionStat[] = [];
             if (payload.headcount) {
-              stats.push({ label: 'Total Employees', value: String(payload.headcount.total), description: '', variant: 'info' });
+              stats.push({ label: 'Total Employees', value: String(payload.headcount.total ?? 0), description: '', variant: 'info' });
             }
             if (payload.payroll) {
-              stats.push({ label: 'Payroll Records', value: String(payload.payroll.records_count), description: '', variant: 'default' });
-              stats.push({ label: 'Total Take Home Pay', value: `Rp${Number(payload.payroll.total_take_home_pay).toLocaleString('id-ID')}`, description: '', variant: 'success' });
-              stats.push({ label: 'Total Deduction', value: `Rp${Number(payload.payroll.total_deduction).toLocaleString('id-ID')}`, description: '', variant: 'danger' });
+              stats.push({ label: 'Payroll Records', value: String(payload.payroll.records_count ?? 0), description: '', variant: 'default' });
+              stats.push({ label: 'Total Take Home Pay', value: `Rp${Number(payload.payroll.total_take_home_pay ?? 0).toLocaleString('id-ID')}`, description: '', variant: 'success' });
+              stats.push({ label: 'Total Deduction', value: `Rp${Number(payload.payroll.total_deduction ?? 0).toLocaleString('id-ID')}`, description: '', variant: 'danger' });
             }
             if (payload.reimbursement) {
-              stats.push({ label: 'Reimbursements', value: String(payload.reimbursement.records_count), description: '', variant: 'default' });
-              stats.push({ label: 'Pending Reimbursements', value: String(payload.reimbursement.pending_count), description: '', variant: 'warning' });
-              stats.push({ label: 'Total Reimburse Amount', value: `Rp${Number(payload.reimbursement.total_amount).toLocaleString('id-ID')}`, description: '', variant: 'success' });
-              stats.push({ label: 'Pending Amount', value: `Rp${Number(payload.reimbursement.pending_amount).toLocaleString('id-ID')}`, description: '', variant: 'warning' });
+              stats.push({ label: 'Reimbursements', value: String(payload.reimbursement.records_count ?? 0), description: '', variant: 'default' });
+              stats.push({ label: 'Pending Reimbursements', value: String(payload.reimbursement.pending_count ?? 0), description: '', variant: 'warning' });
+              stats.push({ label: 'Total Reimburse Amount', value: `Rp${Number(payload.reimbursement.total_amount ?? 0).toLocaleString('id-ID')}`, description: '', variant: 'success' });
+              stats.push({ label: 'Pending Amount', value: `Rp${Number(payload.reimbursement.pending_amount ?? 0).toLocaleString('id-ID')}`, description: '', variant: 'warning' });
             }
             if (payload.leave) {
-              stats.push({ label: 'Total Leave Pending', value: String(payload.leave.by_status?.pending ?? 0), description: '', variant: 'warning' });
-              stats.push({ label: 'Total Leave Approved', value: String(payload.leave.by_status?.approved ?? 0), description: '', variant: 'success' });
-              stats.push({ label: 'Total Leave Rejected', value: String(payload.leave.by_status?.rejected ?? 0), description: '', variant: 'danger' });
+              stats.push({ label: 'Leave Pending', value: String(payload.leave.by_status?.pending ?? 0), description: '', variant: 'warning' });
+              stats.push({ label: 'Leave Approved', value: String(payload.leave.by_status?.approved ?? 0), description: '', variant: 'success' });
+              stats.push({ label: 'Leave Rejected', value: String(payload.leave.by_status?.rejected ?? 0), description: '', variant: 'danger' });
             }
             if (payload.attendance) {
-              stats.push({ label: 'Total Attendance Records', value: String(payload.attendance.total_records), description: '', variant: 'default' });
-              stats.push({ label: 'Late Count', value: String(payload.attendance.late_count), description: '', variant: 'warning' });
-              stats.push({ label: 'Absent Count', value: String(payload.attendance.absent_count), description: '', variant: 'danger' });
-              stats.push({ label: 'Overtime Minutes', value: String(payload.attendance.overtime_minutes), description: '', variant: 'info' });
+              stats.push({ label: 'Attendance Records', value: String(payload.attendance.total_records ?? 0), description: '', variant: 'default' });
+              stats.push({ label: 'Late Count', value: String(payload.attendance.late_count ?? 0), description: '', variant: 'warning' });
+              stats.push({ label: 'Absent Count', value: String(payload.attendance.absent_count ?? 0), description: '', variant: 'danger' });
+              stats.push({ label: 'Overtime Minutes', value: String(payload.attendance.overtime_minutes ?? 0), description: '', variant: 'info' });
+              if (payload.attendance.overtime_hours !== undefined) {
+                stats.push({ label: 'Overtime Hours', value: String(payload.attendance.overtime_hours), description: '', variant: 'info' });
+              }
             }
             if (payload.training) {
-              stats.push({ label: 'Training Enrollments', value: String(payload.training.enrollment_count), description: '', variant: 'default' });
-              stats.push({ label: 'Training Completed', value: String(payload.training.completed_count), description: '', variant: 'success' });
-              stats.push({ label: 'Completion Rate (%)', value: String(payload.training.completion_rate_percent), description: '', variant: 'info' });
+              stats.push({ label: 'Training Enrollments', value: String(payload.training.enrollment_count ?? 0), description: '', variant: 'default' });
+              stats.push({ label: 'Training Completed', value: String(payload.training.completed_count ?? 0), description: '', variant: 'success' });
+              stats.push({ label: 'Completion Rate (%)', value: String(payload.training.completion_rate_percent ?? 0), description: '', variant: 'info' });
             }
             if (payload.helpdesk) {
-              stats.push({ label: 'Helpdesk Tickets', value: String(payload.helpdesk.ticket_count), description: '', variant: 'default' });
-              stats.push({ label: 'Open Tickets', value: String(payload.helpdesk.open_ticket_count), description: '', variant: 'warning' });
-              stats.push({ label: 'Avg Resolution (hrs)', value: String(payload.helpdesk.avg_resolution_hours), description: '', variant: 'info' });
+              stats.push({ label: 'Helpdesk Tickets', value: String(payload.helpdesk.ticket_count ?? 0), description: '', variant: 'default' });
+              stats.push({ label: 'Open Tickets', value: String(payload.helpdesk.open_ticket_count ?? 0), description: '', variant: 'warning' });
+              stats.push({ label: 'Avg Resolution (hrs)', value: String(payload.helpdesk.avg_resolution_hours ?? 0), description: '', variant: 'info' });
             }
             if (payload.documents) {
-              stats.push({ label: 'Total Documents', value: String(payload.documents.total_documents), description: '', variant: 'default' });
-              stats.push({ label: 'Expiring Soon', value: String(payload.documents.expiring_soon_count), description: '', variant: 'warning' });
+              stats.push({ label: 'Total Documents', value: String(payload.documents.total_documents ?? 0), description: '', variant: 'default' });
+              stats.push({ label: 'Expiring Soon', value: String(payload.documents.expiring_soon_count ?? 0), description: '', variant: 'warning' });
             }
             setSummaryStats(stats);
-
-            // Tampilkan breakdown by_department, by_status, by_type, dsb, sebagai tabel utama jika ada
-            // Prioritas: headcount.by_department, leave.by_type, payroll.by_status, helpdesk.by_status, helpdesk.by_priority
-            let mainTable: { columns: string[]; rows: string[][] } | null = null;
-            if (payload.headcount && payload.headcount.by_department) {
-              const byDept = payload.headcount.by_department;
-              mainTable = {
-                columns: ['Department', 'Employee Count'],
-                rows: Object.entries(byDept).map(([dept, count]) => [dept, String(count)]),
-              };
-            } else if (payload.leave && payload.leave.by_type) {
-              const byType = payload.leave.by_type;
-              mainTable = {
-                columns: ['Leave Type', 'Count'],
-                rows: Object.entries(byType).map(([type, count]) => [type, String(count)]),
-              };
-            } else if (payload.payroll && payload.payroll.by_status) {
-              const byStatus = payload.payroll.by_status;
-              mainTable = {
-                columns: ['Payroll Status', 'Count'],
-                rows: Object.entries(byStatus).map(([status, count]) => [status, String(count)]),
-              };
-            } else if (payload.helpdesk && Array.isArray(payload.helpdesk.by_status)) {
-              mainTable = {
-                columns: ['Helpdesk Status', 'Count'],
-                rows: payload.helpdesk.by_status.map((item: any) => [item.status, String(item.count)]),
-              };
-            } else if (payload.helpdesk && Array.isArray(payload.helpdesk.by_priority)) {
-              mainTable = {
-                columns: ['Helpdesk Priority', 'Count'],
-                rows: payload.helpdesk.by_priority.map((item: any) => [item.priority, String(item.count)]),
-              };
-            }
-            if (mainTable) {
-              setTableColumns(mainTable.columns);
-              setTableRows(mainTable.rows);
-            } else {
-              setTableColumns([]);
-              setTableRows([]);
-            }
+            setTableColumns([]);
+            setTableRows([]);
             setStatusMessage('Data insight berhasil dimuat.');
             setLoading(false);
             return;
@@ -2632,6 +2622,67 @@ const SectionPage = () => {
         </div>
       )}
 
+      {(insightsChartData.headcountByDepartment.length > 0 || insightsChartData.leaveType.length > 0 || insightsChartData.helpdeskStatus.length > 0) && (
+        <div className="insights-charts-grid">
+          {insightsChartData.headcountByDepartment.length > 0 && (
+            <Card className="chart-card" glass>
+              <div className="chart-header">
+                <h3>Headcount by Department</h3>
+              </div>
+              <div className="chart-wrapper">
+                <ResponsiveContainer width="100%" height={260}>
+                  <BarChart data={insightsChartData.headcountByDepartment} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="category" tick={{ fontSize: 12 }} />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="value" fill="#2563eb" radius={[6, 6, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </Card>
+          )}
+
+          {insightsChartData.leaveType.length > 0 && (
+            <Card className="chart-card" glass>
+              <div className="chart-header">
+                <h3>Leave Type Distribution</h3>
+              </div>
+              <div className="chart-wrapper">
+                <ResponsiveContainer width="100%" height={260}>
+                  <PieChart>
+                    <Pie data={insightsChartData.leaveType} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} fill="#3b82f6" label />
+                    {insightsChartData.leaveType.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'][index % 5]} />
+                    ))}
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </Card>
+          )}
+
+          {insightsChartData.helpdeskStatus.length > 0 && (
+            <Card className="chart-card" glass>
+              <div className="chart-header">
+                <h3>Helpdesk Status Breakdown</h3>
+              </div>
+              <div className="chart-wrapper">
+                <ResponsiveContainer width="100%" height={260}>
+                  <PieChart>
+                    <Pie data={insightsChartData.helpdeskStatus} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} fill="#10b981" label />
+                    {insightsChartData.helpdeskStatus.map((_, index) => (
+                      <Cell key={`cell-status-${index}`} fill={['#10b981', '#2563eb', '#f59e0b', '#ef4444', '#8b5cf6'][index % 5]} />
+                    ))}
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </Card>
+          )}
+        </div>
+      )}
+
       <Card className="section-action-card" glass>
         <div className="section-action-header">
           <div>
@@ -2656,52 +2707,54 @@ const SectionPage = () => {
         </div>
       </Card>
 
-      <Card className="section-table-card" glass>
-        <div className="section-table-header">
-          <div>
-            <h2>Data {section.title}</h2>
-            <p>{section.subtitle}</p>
+      {tableColumns.length > 0 && (
+        <Card className="section-table-card" glass>
+          <div className="section-table-header">
+            <div>
+              <h2>Data {section.title}</h2>
+              <p>{section.subtitle}</p>
+            </div>
+            <Button variant="secondary" size="sm" onClick={handleRefresh} disabled={loading || !canRefresh}>
+              Muat Ulang Data
+            </Button>
           </div>
-          <Button variant="secondary" size="sm" onClick={handleRefresh} disabled={loading || !canRefresh}>
-            Muat Ulang Data
-          </Button>
-        </div>
 
-        <div className="ui-table-overflow">
-          <table className="ui-table">
-            <thead>
-              <tr>
-                {tableColumns.map((column: string) => (
-                  <th key={column}>{column}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {tableRows.length > 0 ? (
-                tableRows.map((row: string[], idx: number) => (
-                  <tr key={idx}>
-                    {row.map((cell: string, cellIndex: number) => (
-                      <td key={`${idx}-${cellIndex}`} style={{ whiteSpace: 'pre-line' }}>{cell}</td>
-                    ))}
-                  </tr>
-                ))
-              ) : (
+          <div className="ui-table-overflow">
+            <table className="ui-table">
+              <thead>
                 <tr>
-                  <td colSpan={tableColumns.length}>Tidak ada data API untuk section ini.</td>
+                  {tableColumns.map((column: string) => (
+                    <th key={column}>{column}</th>
+                  ))}
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="ui-table-pagination">
-          <span className="pagination-info">Menampilkan 1 sampai {tableRows.length} entri</span>
-          <div className="pagination-controls">
-            <button type="button">Sebelumnya</button>
-            <button type="button">Berikutnya</button>
+              </thead>
+              <tbody>
+                {tableRows.length > 0 ? (
+                  tableRows.map((row: string[], idx: number) => (
+                    <tr key={idx}>
+                      {row.map((cell: string, cellIndex: number) => (
+                        <td key={`${idx}-${cellIndex}`} style={{ whiteSpace: 'pre-line' }}>{cell}</td>
+                      ))}
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={tableColumns.length}>Tidak ada data API untuk section ini.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
-        </div>
-      </Card>
+
+          <div className="ui-table-pagination">
+            <span className="pagination-info">Menampilkan 1 sampai {tableRows.length} entri</span>
+            <div className="pagination-controls">
+              <button type="button">Sebelumnya</button>
+              <button type="button">Berikutnya</button>
+            </div>
+          </div>
+        </Card>
+      )}
     </div>
   );
 };
