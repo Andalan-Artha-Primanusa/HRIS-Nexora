@@ -151,8 +151,7 @@ export const menuItems: MenuItem[] = [
     icon: Target,
     requiredChecker: (user) => RBACUtils.isManager(user) || RBACUtils.isHR(user) || RBACUtils.isAdmin(user) || RBACUtils.isSuperAdmin(user),
     subItems: [
-      { label: 'Daftar KPI', path: '/kpis' },
-      { label: 'Tambah KPI', path: '/kpis/add' },
+      { label: 'Manajemen KPI', path: '/kpis' },
       { label: 'Ringkasan Kinerja', path: '/performance/summary' },
       { label: 'Review Kinerja', path: '/performance/reviews' },
     ]

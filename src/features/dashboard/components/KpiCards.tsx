@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Card } from '@/shared/ui/Card';
-import { Users, UserCheck, CalendarOff, Clock, CreditCard, TrendingDown } from 'lucide-react';
+import { Users, UserCheck, CalendarOff, Clock,TrendingDown, Target } from 'lucide-react';
 import { api } from '@/shared/api/httpClient';
 import './KpiCards.css';
 
@@ -79,19 +79,19 @@ export const KpiCards: React.FC = () => {
     { title: 'Present Today', value: '-', trend: 'Loading...', icon: UserCheck, color: 'green' },
     { title: 'Pending Leaves', value: '-', trend: 'Loading...', icon: CalendarOff, color: 'orange' },
     { title: 'Pending Reimbursements', value: '-', trend: 'Loading...', icon: Clock, color: 'red' },
-    { title: 'Payroll Records', value: '-', trend: 'Loading...', icon: CreditCard, color: 'purple' },
+    { title: 'Avg. Performance', value: '-', trend: 'Loading...', icon: Target, color: 'purple' },
     { title: 'Attendance Rate', value: '-', trend: 'Loading...', icon: TrendingDown, color: 'teal' },
   ]);
 
   useEffect(() => {
     const loadDashboardKpis = async () => {
-      const [employees, attendanceToday, pendingLeaves, pendingReimbursements, payroll] =
+      const [employees, attendanceToday, pendingLeaves, pendingReimbursements, kpisRes] =
         await Promise.allSettled([
           api.get('/employees'),
           api.get('/attendance/today'),
           api.get('/leaves/pending'),
           api.get('/reimbursements/pending'),
-          api.get('/payroll'),
+          api.get('/kpis'),
         ]);
 
       const employeesCount = employees.status === 'fulfilled' ? getCountFromPayload(employees.value.data) : 0;
@@ -103,7 +103,11 @@ export const KpiCards: React.FC = () => {
         pendingReimbursements.status === 'fulfilled'
           ? getCountFromPayload(pendingReimbursements.value.data)
           : 0;
-      const payrollCount = payroll.status === 'fulfilled' ? getCountFromPayload(payroll.value.data) : 0;
+      const kpis = kpisRes.status === 'fulfilled' ? unwrapPayload(kpisRes.value.data) : [];
+      const kpiItems = Array.isArray(kpis) ? kpis : ((kpis as any)?.items || []);
+      const avgKpiScore = kpiItems.length > 0 
+        ? kpiItems.reduce((acc: number, k: any) => acc + (Number(k.score) || 0), 0) / kpiItems.length 
+        : 0;
 
       const attendanceRate = employeesCount > 0 ? Math.round((presentTodayCount / employeesCount) * 100) : 0;
 
@@ -137,10 +141,10 @@ export const KpiCards: React.FC = () => {
           color: 'red',
         },
         {
-          title: 'Payroll Records',
-          value: String(payrollCount),
-          trend: 'Available payroll data',
-          icon: CreditCard,
+          title: 'Avg. Performance',
+          value: `${avgKpiScore.toFixed(1)}%`,
+          trend: `${kpiItems.length} KPI records tracked`,
+          icon: Target,
           color: 'purple',
         },
         {

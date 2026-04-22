@@ -19,7 +19,13 @@ type KpiRecord = {
   status?: KpiStatus | string;
   created_at?: string;
   updated_at?: string;
-  employee?: { id?: number | string; name?: string };
+  employee?: { 
+    id?: number | string; 
+    name?: string;
+    user?: {
+      name?: string;
+    }
+  };
   [key: string]: unknown;
 };
 
@@ -114,6 +120,12 @@ const MyKpiPage = () => {
     if (value === null || value === undefined || value === '') return '-';
     if (typeof value === 'object') {
       const record = value as Record<string, unknown>;
+      // Handle employee object with nested user name
+      if (record.user && typeof record.user === 'object') {
+        const user = record.user as Record<string, unknown>;
+        if (user.name) return String(user.name);
+      }
+      
       const candidate = record.name ?? record.title ?? record.id;
       if (candidate !== undefined && candidate !== null && typeof candidate !== 'object') {
         return String(candidate);

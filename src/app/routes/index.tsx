@@ -14,12 +14,9 @@ const AttendanceCheckOutPage = lazy(() => import("../../pages/attendance/Attenda
 const AttendanceHistoryPage = lazy(() => import("../../pages/attendance/AttendanceHistoryPage"));
 const AttendanceTodayPage = lazy(() => import("../../pages/attendance/AttendanceTodayPage"));
 const AttendanceAdminPage = lazy(() => import("../../pages/attendance/AttendanceAdminPage"));
-const KpiListPage = lazy(() => import("../../pages/dashboard/kpi/KpiListPage"));
-const KpiCreatePage = lazy(() => import("../../pages/dashboard/kpi/KpiCreatePage"));
-const KpiDetailPage = lazy(() => import("../../pages/dashboard/kpi/KpiDetailPage"));
-const KpiUpdatePage = lazy(() => import("../../pages/dashboard/kpi/KpiUpdatePage"));
-const KpiApprovePage = lazy(() => import("../../pages/dashboard/kpi/KpiApprovePage"));
-const MyKpiPage = lazy(() => import("../../pages/dashboard/kpi/MyKpiPage"));
+const KpiListPage = lazy(() => import("../../pages/admin/AdminKpiPage"));
+const KpiFormPage = lazy(() => import("../../pages/admin/KpiFormPage"));
+const MyKpiPage = lazy(() => import("../../pages/ess/MyKpiPage"));
 const SectionPage = lazy(() => import("../../pages/dashboard/SectionPage"));
 const ProfilesPage = lazy(() => import("../../pages/profiles/ProfilesPage"));
 const EmployeesPage = lazy(() => import("../../pages/employee/EmployeesPage"));
@@ -250,45 +247,13 @@ export const router = createBrowserRouter([
             index: true,
             element: <KpiListPage />,
           },
-        ],
-      },
-      {
-        path: "/kpis/add",
-        element: <DashboardLayout />,
-        children: [
           {
-            index: true,
-            element: <KpiCreatePage />,
+            path: "create",
+            element: <KpiFormPage />,
           },
-        ],
-      },
-      {
-        path: "/kpi/view/:id",
-        element: <DashboardLayout />,
-        children: [
           {
-            index: true,
-            element: <KpiDetailPage />,
-          },
-        ],
-      },
-      {
-        path: "/kpi/update/:id",
-        element: <DashboardLayout />,
-        children: [
-          {
-            index: true,
-            element: <KpiUpdatePage />,
-          },
-        ],
-      },
-      {
-        path: "/kpi/approve/:id",
-        element: <DashboardLayout />,
-        children: [
-          {
-            index: true,
-            element: <KpiApprovePage />,
+            path: "edit/:id",
+            element: <KpiFormPage />,
           },
         ],
       },

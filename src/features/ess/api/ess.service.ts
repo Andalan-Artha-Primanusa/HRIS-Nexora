@@ -31,7 +31,12 @@ const extractArrayPayload = (raw: unknown): GenericApiItem[] => {
 };
 
 export const getMyKpi = async () => {
-  const response = await api.get("/my/kpi");
+  const response = await api.get("/my/kpi", {
+    headers: {
+      'Accept': 'application/json'
+    }
+  });
+  
   return {
     items: extractArrayPayload(response.data),
     raw: response.data,
