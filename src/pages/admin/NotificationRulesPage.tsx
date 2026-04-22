@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Bell, Plus, Settings, Clock, Mail, MessageSquare, Zap } from 'lucide-react';
+import React from 'react';
+import { Bell, Plus, Settings, Clock, Zap } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 

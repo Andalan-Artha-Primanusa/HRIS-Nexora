@@ -5,7 +5,6 @@ import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { Alert } from "@/shared/ui/Alert";
 import { getErrorMessage } from "@/shared/api/errorHandler";
-import { ROLES } from "@/shared/types/rbac.types";
 import { ClipboardList, Eye, RefreshCw, Search, ShieldAlert, ShieldCheck, UserCog } from "lucide-react";
 import {
   getAuditLogById,

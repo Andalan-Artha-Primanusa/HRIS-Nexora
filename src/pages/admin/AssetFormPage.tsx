@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save, Box, Tag, User, Calendar, Shield, Hash } from 'lucide-react';
+import { ArrowLeft, Save, Box, User, Calendar, Shield, Hash } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { assetService } from '@/features/assets/api/asset.service';
@@ -13,6 +13,7 @@ const AssetFormPage: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
+  const [employees, setEmployees] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     category: 'Hardware',
@@ -25,6 +26,17 @@ const AssetFormPage: React.FC = () => {
   });
 
   useEffect(() => {
+    const loadEmployees = async () => {
+      try {
+        const { getAllEmployees } = await import('@/features/employee/api/employee.service');
+        const data = await getAllEmployees();
+        setEmployees(data);
+      } catch (err) {
+        console.error('Failed to load employees', err);
+      }
+    };
+    loadEmployees();
+
     if (isEdit) {
       const fetchAsset = async () => {
         setFetching(true);
@@ -154,7 +166,12 @@ const AssetFormPage: React.FC = () => {
                        <label>Assign to Employee</label>
                        <div style={{ position: 'relative' }}>
                           <User size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                          <input name="assigned_to" value={formData.assigned_to} onChange={handleChange} className="form-control" style={{ paddingLeft: '40px' }} placeholder="Employee ID or Name" />
+                          <select name="assigned_to" value={formData.assigned_to} onChange={handleChange} className="form-control" style={{ paddingLeft: '40px' }}>
+                             <option value="">-- No Assignment --</option>
+                             {employees.map(emp => (
+                                <option key={emp.id} value={emp.id}>{emp.full_name} ({emp.employee_code || emp.id})</option>
+                             ))}
+                          </select>
                        </div>
                     </div>
                  </div>

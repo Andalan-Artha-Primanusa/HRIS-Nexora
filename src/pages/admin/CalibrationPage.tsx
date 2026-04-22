@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Scale, Plus, RefreshCw, Calendar, Users, FileBarChart, CheckCircle2 } from 'lucide-react';
+import { Scale, Plus, RefreshCw, Calendar, Users, FileBarChart } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { performanceService } from '@/features/performance/api/performance.service';

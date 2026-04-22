@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { RefreshCw, Users, Search, Filter } from 'lucide-react';
+import { RefreshCw, Search, Filter } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import { recruitmentService } from '@/features/recruitment/api/recruitment.service';
 import '@/shared/styles/CrudPage.css';

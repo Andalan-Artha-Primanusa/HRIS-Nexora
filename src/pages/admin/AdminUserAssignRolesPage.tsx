@@ -59,11 +59,11 @@ const AdminUserAssignRolesPage = () => {
   const filteredUsers = useMemo(() => {
     if (!searchQuery) return users;
     const lowerQuery = searchQuery.toLowerCase();
-    return users.filter(u => 
-      u.id.toString().includes(lowerQuery) || 
-      u.name.toLowerCase().includes(lowerQuery) || 
-      u.email.toLowerCase().includes(lowerQuery)
-    );
+    return users.filter((u) => {
+      const name = String(u?.name || '').toLowerCase();
+      const email = String(u?.email || '').toLowerCase();
+      return name.includes(lowerQuery) || email.includes(lowerQuery);
+    });
   }, [users, searchQuery]);
 
   const handleSelectUser = (user: UserListItem) => {

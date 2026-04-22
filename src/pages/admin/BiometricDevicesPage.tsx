@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Cpu, Plus, RefreshCw, Radio, CheckCircle2, AlertTriangle, Activity } from 'lucide-react';
+import { Cpu, Plus, Radio, Activity } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { biometricService } from '@/features/biometric/api/biometric.service';

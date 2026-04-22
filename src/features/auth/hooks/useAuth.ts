@@ -8,7 +8,6 @@ import {
 import type { RegisterPayload } from "../api/auth.service";
 import { useAuthStore } from "@/app/store/auth.store";
 import type { AuthUser } from "@/shared/types/rbac.types";
-import type { ApiError } from "@/shared/api/errorHandler";
 
 const TOKEN_KEYS = ["token", "access_token", "jwt", "bearer_token"];
 const USER_KEYS = ["user", "user_info", "userData", "profile"];
@@ -104,32 +103,13 @@ const extractAuthFromResponse = (data: unknown) => {
   return { user, token };
 };
 
-const getFirstExistingParamValue = (params: URLSearchParams[], keys: string[]) => {
-  for (const key of keys) {
-    for (const paramSet of params) {
-      const value = paramSet.get(key);
-      if (value) return value;
-    }
-  }
-  return null;
-};
 
-const parsePotentialUserPayload = (value: string | null) => {
-  if (!value) return null;
-  try {
-    return JSON.parse(value);
-  } catch {
-    try {
-      return JSON.parse(decodeURIComponent(value));
-    } catch {
-      return { name: value };
-    }
-  }
-};
+
+
 
 export const useAuth = () => {
   const setAuth = useAuthStore.getState().setAuth;
-  const clearAuth = useAuthStore.getState().logout;
+  // const clearAuth = useAuthStore.getState().logout;
 
   const handleLogin = async (payload: { email: string; password: string }) => {
     try {
@@ -183,9 +163,9 @@ export const useAuth = () => {
   };
 
   const handleGoogleCallback = async (searchParams: URLSearchParams) => {
-    const hashText = window.location.hash.startsWith("#") ? window.location.hash.slice(1) : window.location.hash;
-    const hashParams = new URLSearchParams(hashText);
-    const allParams = [searchParams, hashParams];
+    // const hashText = window.location.hash.startsWith("#") ? window.location.hash.slice(1) : window.location.hash;
+    // const hashParams = new URLSearchParams(hashText);
+    // const allParams = [searchParams, hashParams];
 
     const code = searchParams.get("code");
     if (!code) throw new Error("Parameter code OAuth tidak ditemukan");

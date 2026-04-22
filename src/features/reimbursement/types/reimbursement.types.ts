@@ -1,5 +1,29 @@
 // ─── Reimbursement Item (dari backend response) ─────────────────────────────
-export type ReimbursementItem = Record<string, unknown>;
+export interface ReimbursementItem {
+  id: string | number;
+  employee_id: string | number;
+  title: string;
+  description?: string;
+  amount: number;
+  category: string;
+  expense_date: string;
+  status: string;
+  receipt_path?: string;
+  note?: string;
+  created_at?: string;
+  updated_at?: string;
+  employee?: {
+    id: string | number;
+    name: string;
+    user?: {
+      name: string;
+    }
+  };
+  user?: {
+    name: string;
+  };
+  employee_name?: string;
+}
 
 // ─── Filters untuk GET /reimbursements ──────────────────────────────────────
 export interface ReimbursementFilters {

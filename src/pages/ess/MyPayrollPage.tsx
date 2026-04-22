@@ -1,111 +1,110 @@
 import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
-import { BarChart3, CheckCircle2, Receipt, Wallet } from "lucide-react";
-import { getMyPayroll } from "@/features/ess/api/ess.service";
+import { Modal } from "@/shared/ui/Modal";
+import { BarChart3, CheckCircle2, Receipt, Wallet, FileText, Download, Printer, X } from "lucide-react";
+import { getMyPayroll, getMyPayrollDetail, exportMyPayrollPdf } from "@/features/ess/api/ess.service";
 import type { GenericApiItem } from "@/features/ess/types/ess.types";
 import "./EssPages.css";
 
-const asDisplay = (value: unknown) => {
-  if (value === null || value === undefined) return "-";
-  if (typeof value === "object") return JSON.stringify(value);
-  return String(value);
-};
-
-const getColumns = (items: GenericApiItem[]) => {
-  if (items.length === 0) {
-    return ["id", "period", "gross_salary", "net_salary", "status"];
-  }
-
-  const keys = Object.keys(items[0]);
-  const preferred = ["id", "period", "gross_salary", "net_salary", "status"];
-  const merged = [...preferred, ...keys.filter((key) => !preferred.includes(key))];
-  return merged.filter((key, index) => merged.indexOf(key) === index);
-};
-
 const MyPayrollPage = () => {
   const [items, setItems] = useState<GenericApiItem[]>([]);
-  const [responseText, setResponseText] = useState("");
-  const [statusMessage, setStatusMessage] = useState("Ready to call my payroll API");
   const [loading, setLoading] = useState(false);
+  const [selectedSlip, setSelectedSlip] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
 
-  const columns = useMemo(() => getColumns(items), [items]);
   const summaryCards = useMemo(() => {
     const paidCount = items.filter((item) => String(item.status ?? "").toLowerCase() === "paid").length;
-    const totalNetSalary = items.reduce((sum, item) => sum + (Number(item.net_salary) || 0), 0);
+    const totalNetSalary = items.reduce((sum, item) => sum + (Number(item.net_salary || item.take_home_pay) || 0), 0);
     const uniquePeriods = new Set(items.map((item) => String(item.period ?? "")).filter(Boolean));
 
     return [
       {
-        label: "Total Payroll",
-        subtitle: "Semua slip payroll pribadi",
+        label: "Total Slip",
+        subtitle: "Seluruh riwayat payroll",
         value: String(items.length),
-        change: "Data payroll aktif",
         tone: "blue" as const,
         icon: BarChart3,
       },
       {
-        label: "Paid",
-        subtitle: "Payroll sudah dibayarkan",
+        label: "Sudah Dibayar",
+        subtitle: "Slip yang telah cair",
         value: String(paidCount),
-        change: "Status selesai",
         tone: "green" as const,
         icon: CheckCircle2,
       },
       {
-        label: "Periode Tercatat",
-        subtitle: "Jumlah periode payroll",
+        label: "Periode",
+        subtitle: "Rentang waktu aktif",
         value: String(uniquePeriods.size),
-        change: "Riwayat periode aktif",
         tone: "orange" as const,
         icon: Receipt,
       },
       {
         label: "Total Gaji Bersih",
-        subtitle: "Akumulasi net salary",
+        subtitle: "Akumulasi pendapatan",
         value: `Rp ${totalNetSalary.toLocaleString("id-ID")}`,
-        change: statusMessage,
         tone: "red" as const,
         icon: Wallet,
       },
     ];
-  }, [items, statusMessage]);
-
-  const formatResponse = (payload: unknown) => {
-    setResponseText(typeof payload === "string" ? payload : JSON.stringify(payload, null, 2));
-  };
+  }, [items]);
 
   const loadPayroll = async () => {
     setLoading(true);
-    setStatusMessage("Memuat data payroll saya...");
-    setResponseText("");
-
     try {
       const result = await getMyPayroll();
       setItems(result.items);
-      formatResponse(result.raw);
-      setStatusMessage("Data payroll saya berhasil dimuat.");
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal memuat payroll saya.";
-      formatResponse(message);
-      setStatusMessage("Gagal memuat payroll saya.");
+    } catch (error) {
+      console.error("Failed to load payroll:", error);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleViewSlip = async (id: string) => {
+    setDetailLoading(true);
+    setIsModalOpen(true);
+    try {
+      const result = await getMyPayrollDetail(id);
+      setSelectedSlip(result.payload);
+    } catch (error) {
+      console.error("Failed to load slip details:", error);
+      setIsModalOpen(false);
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const handleDownloadPdf = async (id: string) => {
+    try {
+      const blob = await exportMyPayrollPdf(id);
+      const url = window.URL.createObjectURL(new Blob([blob]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Slip_Gaji_${selectedSlip?.period || id}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+    } catch (error) {
+      console.error("Failed to download PDF:", error);
+    }
+  };
+
   useEffect(() => {
     void loadPayroll();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const formatCurrency = (val: any) => `Rp ${Number(val || 0).toLocaleString("id-ID")}`;
 
   return (
     <div className="ess-page">
       <div className="ess-header">
         <div className="ess-header-copy">
           <p className="ess-badge">ESS Payroll</p>
-          <h1>My Payroll</h1>
-          <p>Lihat riwayat payroll pribadi dengan tampilan yang rapi, konsisten, dan mudah dipindai.</p>
+          <h1>Riwayat Gaji Saya</h1>
+          <p>Lihat dan unduh slip gaji bulanan Anda dengan aman.</p>
         </div>
         <Button variant="outline" size="md" onClick={() => void loadPayroll()} disabled={loading}>
           Segarkan
@@ -115,7 +114,6 @@ const MyPayrollPage = () => {
       <div className="ess-summary-grid">
         {summaryCards.map((card) => {
           const Icon = card.icon;
-
           return (
             <Card key={card.label} className="ess-summary-card" glass>
               <div className="ess-summary-header">
@@ -128,42 +126,53 @@ const MyPayrollPage = () => {
                 </span>
               </div>
               <div className="ess-summary-value">{card.value}</div>
-              <div className="ess-summary-change">{card.change}</div>
             </Card>
           );
         })}
       </div>
 
       <Card className="ess-card" glass>
-        <h2>Tabel Payroll</h2>
+        <h2>Daftar Slip Gaji</h2>
         <div className="ess-table-wrap">
           <table className="ess-table">
             <thead>
               <tr>
-                {columns.map((column) => (
-                  <th key={column}>
-                    {column === "id" && "ID"}
-                    {column === "period" && "Periode"}
-                    {column === "gross_salary" && "Gaji Kotor"}
-                    {column === "net_salary" && "Gaji Bersih"}
-                    {column === "status" && "Status"}
-                    {!['id', 'period', 'gross_salary', 'net_salary', 'status'].includes(column) && column}
-                  </th>
-                ))}
+                <th>Periode</th>
+                <th>Gaji Pokok</th>
+                <th>Gaji Bersih</th>
+                <th>Status</th>
+                <th style={{ textAlign: 'right' }}>Aksi</th>
               </tr>
             </thead>
             <tbody>
               {items.length > 0 ? (
-                items.map((item, index) => (
-                  <tr key={String(item.id ?? index)}>
-                    {columns.map((column) => (
-                      <td key={`${String(item.id ?? index)}-${column}`}>{asDisplay(item[column])}</td>
-                    ))}
+                items.map((item) => (
+                  <tr key={String(item.id)}>
+                    <td style={{ fontWeight: 600 }}>{item.period}</td>
+                    <td>{formatCurrency(item.basic_salary)}</td>
+                    <td style={{ color: '#10b981', fontWeight: 700 }}>{formatCurrency(item.take_home_pay || item.net_salary)}</td>
+                    <td>
+                      <span className={`ess-status-badge ess-status-badge--${String(item.status).toLowerCase()}`}>
+                        {String(item.status).toUpperCase()}
+                      </span>
+                    </td>
+                    <td style={{ textAlign: 'right' }}>
+                      {String(item.status).toLowerCase() === 'paid' ? (
+                        <Button variant="ghost" size="sm" onClick={() => handleViewSlip(String(item.id))}>
+                          <FileText size={16} style={{ marginRight: '6px' }} />
+                          Lihat Slip
+                        </Button>
+                      ) : (
+                        <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Menunggu Pembayaran</span>
+                      )}
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={columns.length}>Tidak ada data payroll.</td>
+                  <td colSpan={5} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                    Belum ada riwayat slip gaji.
+                  </td>
                 </tr>
               )}
             </tbody>
@@ -171,13 +180,109 @@ const MyPayrollPage = () => {
         </div>
       </Card>
 
-      <Card className="ess-card" glass>
-        <h2>Raw Response</h2>
-        <pre className="ess-response">{responseText || "Response API akan tampil di sini."}</pre>
-        <p className="ess-status">{statusMessage}</p>
-      </Card>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Digital Salary Slip"
+        size="lg"
+      >
+        {detailLoading ? (
+          <div style={{ padding: '3rem', textAlign: 'center' }}>
+            <div className="animate-spin" style={{ margin: '0 auto 1rem' }}><Receipt size={32} color="#2563eb" /></div>
+            <p>Memuat rincian slip gaji...</p>
+          </div>
+        ) : selectedSlip && (
+          <div className="digital-slip">
+            <div className="digital-slip-header">
+              <div className="digital-slip-brand">
+                <div className="slip-logo">HR</div>
+                <div>
+                  <h3>Slip Gaji Digital</h3>
+                  <p>Periode: {selectedSlip.period}</p>
+                </div>
+              </div>
+              <div className="digital-slip-status">
+                <span className="status-badge-paid">PAID</span>
+              </div>
+            </div>
+
+            <div className="digital-slip-grid">
+              <div className="slip-section">
+                <h4>PENERIMAAN</h4>
+                <div className="slip-row">
+                  <span>Gaji Pokok</span>
+                  <span>{formatCurrency(selectedSlip.basic_salary)}</span>
+                </div>
+                {selectedSlip.allowance > 0 && (
+                  <div className="slip-row">
+                    <span>Tunjangan</span>
+                    <span>{formatCurrency(selectedSlip.allowance)}</span>
+                  </div>
+                )}
+                {selectedSlip.bonus > 0 && (
+                  <div className="slip-row">
+                    <span>Bonus</span>
+                    <span>{formatCurrency(selectedSlip.bonus)}</span>
+                  </div>
+                )}
+                <div className="slip-row slip-row--total">
+                  <span>Total Pendapatan Kotor</span>
+                  <span>{formatCurrency(Number(selectedSlip.basic_salary) + Number(selectedSlip.allowance || 0) + Number(selectedSlip.bonus || 0))}</span>
+                </div>
+              </div>
+
+              <div className="slip-section">
+                <h4>POTONGAN</h4>
+                <div className="slip-row">
+                  <span>PPh21 (Pajak)</span>
+                  <span style={{ color: '#ef4444' }}>- {formatCurrency(selectedSlip.pph21)}</span>
+                </div>
+                <div className="slip-row">
+                  <span>BPJS Kesehatan</span>
+                  <span style={{ color: '#ef4444' }}>- {formatCurrency(selectedSlip.bpjs_health)}</span>
+                </div>
+                <div className="slip-row">
+                  <span>BPJS Ketenagakerjaan</span>
+                  <span style={{ color: '#ef4444' }}>- {formatCurrency(selectedSlip.bpjs_employment)}</span>
+                </div>
+                {selectedSlip.total_deduction > (Number(selectedSlip.pph21 || 0) + Number(selectedSlip.bpjs_health || 0) + Number(selectedSlip.bpjs_employment || 0)) && (
+                  <div className="slip-row">
+                    <span>Potongan Lainnya</span>
+                    <span style={{ color: '#ef4444' }}>- {formatCurrency(selectedSlip.total_deduction - (Number(selectedSlip.pph21 || 0) + Number(selectedSlip.bpjs_health || 0) + Number(selectedSlip.bpjs_employment || 0)))}</span>
+                  </div>
+                )}
+                <div className="slip-row slip-row--total">
+                  <span>Total Potongan</span>
+                  <span style={{ color: '#ef4444' }}>- {formatCurrency(selectedSlip.total_deduction)}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="digital-slip-footer">
+              <div className="thp-box">
+                <span className="thp-label">TAKE HOME PAY (GAJI BERSIH)</span>
+                <span className="thp-value">{formatCurrency(selectedSlip.take_home_pay || selectedSlip.net_salary)}</span>
+              </div>
+              
+              <div className="slip-actions">
+                <Button variant="outline" size="md" onClick={() => window.print()}>
+                  <Printer size={16} style={{ marginRight: '8px' }} /> Cetak
+                </Button>
+                <Button variant="primary" size="md" onClick={() => handleDownloadPdf(String(selectedSlip.id))}>
+                  <Download size={16} style={{ marginRight: '8px' }} /> Download PDF
+                </Button>
+              </div>
+            </div>
+            
+            <p className="slip-disclaimer">
+              * Slip gaji ini dihasilkan secara otomatis oleh sistem HRIS dan merupakan dokumen sah perusahaan.
+            </p>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };
 
 export default MyPayrollPage;
+

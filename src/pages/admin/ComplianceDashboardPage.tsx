@@ -5,9 +5,9 @@ import { Button } from '@/shared/ui/Button';
 import { organizationService } from '@/features/organization/api/organization.service';
 
 const ComplianceDashboardPage: React.FC = () => {
-  const [stats, setStats] = useState<any>(null);
+  const [, setStats] = useState<any>(null);
   const [expiringDocs, setExpiringDocs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {

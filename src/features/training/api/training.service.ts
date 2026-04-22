@@ -1,7 +1,6 @@
 import { api } from "@/shared/api/httpClient";
 import type { 
-  TrainingProgram, 
-  Competency 
+  TrainingProgram
 } from "../types/training.types";
 
 export const trainingService = {

@@ -17,6 +17,7 @@ import {
   retryAdminEmailNotification,
   previewEmailTemplate
 } from "@/features/admin/api/admin-batch1.service";
+import { getAllEmployees } from "@/features/employee/api/employee.service";
 
 type EmailTemplateItem = {
   id?: number | string;
@@ -91,6 +92,7 @@ const AdminEmailNotificationsPage = () => {
   const [alertType, setAlertType] = useState<"success" | "error" | "info">("info");
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [employees, setEmployees] = useState<any[]>([]);
 
   // Send email form
   const [subject, setSubject] = useState("");
@@ -112,12 +114,14 @@ const AdminEmailNotificationsPage = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [notificationResult, logResult] = await Promise.all([
+      const [notificationResult, logResult, empResult] = await Promise.all([
         getAdminEmailNotifications(),
         getAdminEmailNotificationLogs(),
+        getAllEmployees()
       ]);
       setItems(Array.isArray(notificationResult) ? notificationResult : (notificationResult && Array.isArray((notificationResult as any).items) ? (notificationResult as any).items : []));
       setLogs(Array.isArray(logResult) ? logResult : (logResult && Array.isArray((logResult as any).items) ? (logResult as any).items : []));
+      setEmployees(empResult);
       setStatusMessage("Data berhasil dimuat.");
       setAlertType("success");
     } catch (error: unknown) {
@@ -271,8 +275,19 @@ const AdminEmailNotificationsPage = () => {
         <form className="crud-form" onSubmit={handleSubmit}>
           <div className="form-grid">
             <div className="form-group">
-              <label htmlFor="email-recipient">Recipient Email <span style={{ color: "red" }}>*</span></label>
-              <input id="email-recipient" type="email" className="form-input" value={recipientEmail} onChange={(e) => setRecipientEmail(e.target.value)} placeholder="nama@company.com" required />
+              <label htmlFor="email-recipient">Recipient Employee <span style={{ color: "red" }}>*</span></label>
+              <select 
+                id="email-recipient" 
+                className="form-input" 
+                value={recipientEmail} 
+                onChange={(e) => setRecipientEmail(e.target.value)} 
+                required
+              >
+                <option value="">-- Select Employee --</option>
+                {employees.map(emp => (
+                  <option key={emp.id} value={emp.user?.email || emp.email}>{emp.full_name} ({emp.user?.email || emp.email})</option>
+                ))}
+              </select>
             </div>
             <div className="form-group">
               <label htmlFor="email-type">Type</label>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Plus, RefreshCw, Filter, Search, BarChart3 } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
 import { 
@@ -20,6 +20,7 @@ import { ReimbursementDetailModal } from '../../features/reimbursement/component
 import { ReimbursementStats } from '../../features/reimbursement/components/ReimbursementStats';
 import type { ReimbursementItem } from '../../features/reimbursement/types/reimbursement.types';
 import '../../features/reimbursement/Reimbursement.css';
+import '@/shared/styles/CrudPage.css';
 
 const AdminReimbursementsPage: React.FC = () => {
   const [items, setItems] = useState<ReimbursementItem[]>([]);

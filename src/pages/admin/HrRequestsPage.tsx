@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MessageSquare, Clock, AlertCircle, CheckCircle2, User, Search, RefreshCw } from 'lucide-react';
+import { User, RefreshCw } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { requestService } from '@/features/requests/api/requests.service';
@@ -113,7 +113,7 @@ const HrRequestsPage: React.FC = () => {
                       </div>
                     </td>
                     <td style={{ textAlign: 'right' }}>
-                       <Button variant="ghost" size="sm" onClick={() => navigate(`/admin/hr-requests/respond/${req.id}`)}>Details</Button>
+                       <Button variant="ghost" size="sm" onClick={() => navigate(`/hr-requests/respond/${req.id}`)}>Details</Button>
                     </td>
                   </tr>
                 );

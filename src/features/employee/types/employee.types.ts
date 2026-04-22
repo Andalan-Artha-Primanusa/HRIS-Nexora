@@ -18,6 +18,8 @@ export interface EmployeeItem {
   manager_id?: number | null;
   work_schedule_id?: number | null;
   status?: "active" | "inactive" | "pending";
+  probation_end_date?: string | null;
+  termination_date?: string | null;
   created_at?: string;
   updated_at?: string;
 }

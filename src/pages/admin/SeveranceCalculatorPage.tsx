@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Calculator, User, FileText, Download, TrendingUp } from 'lucide-react';
+import { Calculator, Download } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { getAllEmployees } from '@/features/employee/api/employee.service';
 import { legalService } from '@/features/legal/api/legal.service';
 import '@/shared/styles/CrudPage.css';
-import { api } from '@/shared/api/httpClient';
 
 const SeveranceCalculatorPage: React.FC = () => {
   const [employees, setEmployees] = useState<any[]>([]);
@@ -15,10 +15,11 @@ const SeveranceCalculatorPage: React.FC = () => {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const response = await api.get('/employees');
-        setEmployees(response.data.data || []);
+        const data = await getAllEmployees();
+        setEmployees(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error(err);
+        setEmployees([]);
       }
     };
     fetchEmployees();

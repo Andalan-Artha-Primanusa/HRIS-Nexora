@@ -1,8 +1,6 @@
 import { api } from "@/shared/api/httpClient";
 import type { 
-  OKR, 
-  Review360, 
-  CalibrationSession 
+  OKR
 } from "../types/performance.types";
 
 export const performanceService = {

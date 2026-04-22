@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { GitBranch, Plus, RefreshCw, Trash2, Edit, Save, X, ChevronRight, User } from 'lucide-react';
+import { GitBranch, Plus, RefreshCw, Trash2, Edit, ChevronRight, User } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { organizationService } from '@/features/organization/api/organization.service';
+import '@/shared/styles/CrudPage.css';
 
 const ApprovalFlowPage: React.FC = () => {
   const [flows, setFlows] = useState<any[]>([]);

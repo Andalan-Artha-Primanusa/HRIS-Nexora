@@ -1,6 +1,6 @@
 import { 
   Users, CalendarDays, CreditCard, Receipt, Target, UserCircle, 
-  FileBarChart, Settings, LayoutDashboard, Network, Briefcase, 
+  FileBarChart, LayoutDashboard, Network, Briefcase, 
   FileText, Clock, Banknote, Database, ShieldCheck
 } from 'lucide-react';
 

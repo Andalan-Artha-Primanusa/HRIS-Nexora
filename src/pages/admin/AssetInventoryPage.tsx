@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Laptop, Plus, RefreshCw, Search, Monitor, Smartphone, Briefcase, User, CheckCircle2 } from 'lucide-react';
+import { Laptop, Plus, RefreshCw, Monitor, Smartphone, Briefcase, User } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { assetService } from '@/features/assets/api/asset.service';

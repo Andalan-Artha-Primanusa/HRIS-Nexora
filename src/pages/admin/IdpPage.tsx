@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Target, Plus, CheckCircle2, Clock, BookOpen, TrendingUp, Award } from 'lucide-react';
+import { Plus, CheckCircle2, Clock, BookOpen, TrendingUp } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { engagementService } from '@/features/engagement/api/engagement.service';
 
 const IdpPage: React.FC = () => {
-  const [idp, setIdp] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [, setIdp] = useState<any>(null);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {

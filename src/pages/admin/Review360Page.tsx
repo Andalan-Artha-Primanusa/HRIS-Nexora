@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Plus, RefreshCw, Star, MessageCircle, Send, CheckCircle2 } from 'lucide-react';
+import { Users, Plus, Send } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { performanceService } from '@/features/performance/api/performance.service';
+import '@/shared/styles/CrudPage.css';
 
 const Review360Page: React.FC = () => {
   const [reviews, setReviews] = useState<any[]>([]);

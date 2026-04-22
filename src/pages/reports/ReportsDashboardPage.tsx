@@ -263,225 +263,130 @@ const ReportsDashboardPage: React.FC = () => {
 
   return (
     <div className="reports-dashboard">
-      {/* ─── Hero ─── */}
       <Card className="reports-hero-card" glass>
         <div className="reports-hero-copy">
-          <p className="reports-badge">Laporan & Analitik</p>
-          <h1 className="reports-title">Ringkasan Laporan</h1>
+          <p className="reports-badge">HR Intelligence</p>
+          <h1 className="reports-title">Pusat Analitik HR</h1>
           <p className="reports-subtitle">
-            Dashboard analitik HR: kehadiran, cuti, payroll, dan klaim reimburse secara visual.
+            Dashboard ringkasan analitik lintas departemen. Pantau tren kehadiran, 
+            status cuti, performa payroll, dan klaim pengeluaran secara visual dan real-time.
           </p>
         </div>
         <div className="reports-actions">
-          <Button variant="outline" size="md" onClick={() => void loadData()} disabled={loading}>
-            <RefreshCw size={16} />
-            {loading ? 'Memuat...' : 'Segarkan'}
+          <Button variant="primary" size="md" onClick={() => void loadData()} disabled={loading}>
+            <RefreshCw size={18} className={loading ? 'animate-spin' : ''} style={{ marginRight: '8px' }} />
+            {loading ? 'Menyinkronkan...' : 'Sinkronisasi Data'}
           </Button>
         </div>
       </Card>
 
       {error && <p className="reports-error">{error}</p>}
 
-      <div className="reports-metrics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
+      <div className="reports-metrics-grid">
         {summaryCards.map(card => {
           const Icon = card.icon;
-          const colors = getToneColors(card.tone);
           return (
-            <Card key={card.label} glass style={{ padding: '1.5rem', border: `1px solid ${colors.bg}` }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+            <Card key={card.label} className="report-metric-card" glass>
+              <div className="report-metric-header">
                 <div>
-                  <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#64748b', display: 'block', marginBottom: '0.25rem' }}>{card.label}</span>
-                  <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#1e293b' }}>{card.value}</div>
+                  <span className="report-metric-label">{card.label}</span>
+                  <p className="report-metric-sublabel">{card.sub}</p>
                 </div>
-                <span style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  width: '44px', 
-                  height: '44px', 
-                  borderRadius: '12px',
-                  background: colors.bg,
-                  color: colors.icon
-                }}>
+                <span className={`report-metric-icon report-metric-icon--${card.tone}`}>
                   <Icon size={22} />
                 </span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{card.sub}</span>
-                <span style={{ fontSize: '0.7rem', color: colors.icon, fontWeight: 600, background: `${colors.icon}10`, padding: '2px 8px', borderRadius: '4px' }}>
-                  Live Data
-                </span>
-              </div>
+              <div className="report-metric-value">{card.value}</div>
+              <div className="report-metric-change neutral">Live HR Data</div>
             </Card>
           );
         })}
       </div>
 
-      {/* ─── Charts ─── */}
-      <div className="reports-charts-section">
-        <div className="reports-charts-grid">
+      <div className="reports-charts-grid">
+        {/* 1. Attendance Trend */}
+        <Card className="reports-chart-card" glass>
+          <h2 className="reports-chart-title"><BarChart3 size={20} color="#2563eb" /> Tren Kehadiran</h2>
+          <p className="reports-chart-subtitle">Perbandingan kehadiran kumulatif dalam satu minggu terakhir</p>
+          {attendanceTrend.some(d => d.present > 0 || d.absent > 0) ? (
+            <ResponsiveContainer width="100%" height={280}>
+              <AreaChart data={attendanceTrend} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="gradPresent" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#2563eb" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
+                <Tooltip {...tooltipStyle} />
+                <Area type="monotone" dataKey="present" stroke="#2563eb" strokeWidth={2} fillOpacity={1} fill="url(#gradPresent)" name="Hadir" />
+              </AreaChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="reports-chart-empty">Belum ada data absensi tercatat</div>
+          )}
+        </Card>
 
-          {/* 1. Attendance Trend (Area) */}
-          <Card className="reports-chart-card" glass>
-            <h2 className="reports-chart-title"><BarChart3 size={16} /> Tren Kehadiran Mingguan</h2>
-            <p className="reports-chart-subtitle">Perbandingan hadir vs absen per hari</p>
-            {attendanceTrend.some(d => d.present > 0 || d.absent > 0) ? (
-              <ResponsiveContainer width="100%" height={280}>
-                <AreaChart data={attendanceTrend} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="gradPresent" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="gradAbsent" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(37,99,235,0.1)" />
-                  <XAxis dataKey="day" stroke="#1e40af" style={{ fontSize: '12px' }} />
-                  <YAxis stroke="#1e40af" style={{ fontSize: '12px' }} />
-                  <Tooltip {...tooltipStyle} />
-                  <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                  <Area type="monotone" dataKey="present" stroke="#2563eb" strokeWidth={2} fillOpacity={1} fill="url(#gradPresent)" name="Hadir" />
-                  <Area type="monotone" dataKey="absent" stroke="#ef4444" strokeWidth={2} fillOpacity={1} fill="url(#gradAbsent)" name="Absen" />
-                </AreaChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="reports-chart-empty">{loading ? 'Memuat data absensi...' : 'Belum ada data absensi.'}</div>
-            )}
-          </Card>
+        {/* 2. Department Distribution */}
+        <Card className="reports-chart-card" glass>
+          <h2 className="reports-chart-title"><Users size={20} color="#2563eb" /> Karyawan per Departemen</h2>
+          <p className="reports-chart-subtitle">Distribusi jumlah SDM berdasarkan unit kerja</p>
+          {departmentData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={departmentData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
+                <Tooltip {...tooltipStyle} cursor={{ fill: '#f8fafc' }} />
+                <Bar dataKey="count" fill="#2563eb" radius={[6, 6, 0, 0]} name="Karyawan" />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="reports-chart-empty">Data departemen tidak tersedia</div>
+          )}
+        </Card>
 
-          {/* 2. Employees by Department (Bar) */}
-          <Card className="reports-chart-card" glass>
-            <h2 className="reports-chart-title"><Users size={16} /> Karyawan per Departemen</h2>
-            <p className="reports-chart-subtitle">Distribusi karyawan menurut departemen</p>
-            {departmentData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={departmentData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(37,99,235,0.1)" />
-                  <XAxis dataKey="name" stroke="#1e40af" style={{ fontSize: '12px' }} />
-                  <YAxis stroke="#1e40af" style={{ fontSize: '12px' }} />
-                  <Tooltip {...tooltipStyle} cursor={{ fill: 'rgba(37,99,235,0.1)' }} />
-                  <Bar dataKey="count" fill="#2563eb" radius={[8, 8, 0, 0]} name="Jumlah Karyawan" />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="reports-chart-empty">{loading ? 'Memuat data departemen...' : 'Belum ada data departemen.'}</div>
-            )}
-          </Card>
+        {/* 3. Leave Distribution */}
+        <Card className="reports-chart-card" glass>
+          <h2 className="reports-chart-title"><PieChartIcon size={20} color="#2563eb" /> Jenis Cuti</h2>
+          <p className="reports-chart-subtitle">Proporsi permohonan cuti berdasarkan kategori</p>
+          {leaveTypeData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={280}>
+              <PieChart>
+                <Pie data={leaveTypeData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={5} dataKey="value">
+                  {leaveTypeData.map((_, i) => <Cell key={i} fill={chartColors[i % chartColors.length]} />)}
+                </Pie>
+                <Tooltip {...tooltipStyle} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="reports-chart-empty">Belum ada data cuti</div>
+          )}
+        </Card>
 
-          {/* 3. Leave Types (Pie) */}
-          <Card className="reports-chart-card" glass>
-            <h2 className="reports-chart-title"><PieChartIcon size={16} /> Distribusi Jenis Cuti</h2>
-            <p className="reports-chart-subtitle">Proporsi cuti berdasarkan tipe</p>
-            {leaveTypeData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={280}>
-                <PieChart>
-                  <Tooltip {...tooltipStyle} />
-                  <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                  <Pie data={leaveTypeData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={5} fill="#2563eb" dataKey="value">
-                    {leaveTypeData.map((_, i) => (
-                      <Cell key={`lt-${i}`} fill={chartColors[i % chartColors.length]} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="reports-chart-empty">{loading ? 'Memuat data cuti...' : 'Belum ada data cuti.'}</div>
-            )}
-          </Card>
-
-          {/* 4. Leave Status (Pie) */}
-          <Card className="reports-chart-card" glass>
-            <h2 className="reports-chart-title"><CalendarDays size={16} /> Status Cuti</h2>
-            <p className="reports-chart-subtitle">Perbandingan pending, approved, dan rejected</p>
-            {leaveStatusData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={280}>
-                <PieChart>
-                  <Tooltip {...tooltipStyle} />
-                  <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                  <Pie data={leaveStatusData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={5} fill="#10b981" dataKey="value">
-                    {leaveStatusData.map((_, i) => (
-                      <Cell key={`ls-${i}`} fill={['#f59e0b', '#10b981', '#ef4444'][i % 3]} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="reports-chart-empty">{loading ? 'Memuat...' : 'Belum ada data cuti.'}</div>
-            )}
-          </Card>
-
-          {/* 5. Payroll Timeline (Stacked Bar) */}
-          <Card className="reports-chart-card" glass>
-            <h2 className="reports-chart-title"><Wallet size={16} /> Status Payroll per Periode</h2>
-            <p className="reports-chart-subtitle">Payroll yang sudah diproses vs pending</p>
-            {payrollTimeline.length > 0 ? (
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={payrollTimeline} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(37,99,235,0.1)" />
-                  <XAxis dataKey="month" stroke="#1e40af" style={{ fontSize: '12px' }} />
-                  <YAxis stroke="#1e40af" style={{ fontSize: '12px' }} />
-                  <Tooltip {...tooltipStyle} cursor={{ fill: 'rgba(37,99,235,0.1)' }} />
-                  <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                  <Bar dataKey="processed" stackId="a" fill="#10b981" radius={[8, 8, 0, 0]} name="Diproses" />
-                  <Bar dataKey="pending" stackId="a" fill="#f59e0b" radius={[0, 0, 0, 0]} name="Pending" />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="reports-chart-empty">{loading ? 'Memuat data payroll...' : 'Belum ada data payroll.'}</div>
-            )}
-          </Card>
-
-          {/* 6. Reimbursement by Category (Bar) */}
-          <Card className="reports-chart-card" glass>
-            <h2 className="reports-chart-title"><FileBarChart size={16} /> Reimburse per Kategori</h2>
-            <p className="reports-chart-subtitle">Total nominal klaim berdasarkan kategori</p>
-            {reimbursementByCategory.length > 0 ? (
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={reimbursementByCategory} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(37,99,235,0.1)" />
-                  <XAxis dataKey="name" stroke="#1e40af" style={{ fontSize: '12px' }} />
-                  <YAxis stroke="#1e40af" style={{ fontSize: '12px' }} />
-                  <Tooltip {...tooltipStyle} cursor={{ fill: 'rgba(37,99,235,0.1)' }} />
-                  <Bar dataKey="value" fill="#8b5cf6" radius={[8, 8, 0, 0]} name="Total (Rp)" />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="reports-chart-empty">{loading ? 'Memuat...' : 'Belum ada data reimburse.'}</div>
-            )}
-          </Card>
-
-          {/* 7. Reimbursement Status (Donut) */}
-          <Card className="reports-chart-card" glass>
-            <h2 className="reports-chart-title"><PieChartIcon size={16} /> Status Reimburse</h2>
-            <p className="reports-chart-subtitle">Distribusi status klaim reimburse</p>
-            {reimbursementStatusData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={280}>
-                <PieChart>
-                  <Tooltip {...tooltipStyle} />
-                  <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                  <Pie data={reimbursementStatusData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={5} fill="#8b5cf6" dataKey="value">
-                    {reimbursementStatusData.map((_, i) => (
-                      <Cell key={`rs-${i}`} fill={chartColors[i % chartColors.length]} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="reports-chart-empty">{loading ? 'Memuat...' : 'Belum ada data reimburse.'}</div>
-            )}
-          </Card>
-
-          {/* 8. Employee Growth (Line) - derived from employees with hire_date */}
-          <Card className="reports-chart-card" glass>
-            <h2 className="reports-chart-title"><TrendingUp size={16} /> Pertumbuhan Karyawan</h2>
-            <p className="reports-chart-subtitle">Jumlah karyawan kumulatif per bulan</p>
-            <EmployeeGrowthChart employees={employees} loading={loading} />
-          </Card>
-
-        </div>
+        {/* 4. Payroll Status */}
+        <Card className="reports-chart-card" glass>
+          <h2 className="reports-chart-title"><Wallet size={20} color="#2563eb" /> Status Payroll</h2>
+          <p className="reports-chart-subtitle">Perbandingan status pemrosesan payroll saat ini</p>
+          {payrollTimeline.length > 0 ? (
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={payrollTimeline} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
+                <Tooltip {...tooltipStyle} />
+                <Legend />
+                <Bar dataKey="processed" stackId="a" fill="#10b981" name="Diproses" />
+                <Bar dataKey="pending" stackId="a" fill="#f59e0b" name="Menunggu" />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="reports-chart-empty">Data payroll tidak ditemukan</div>
+          )}
+        </Card>
       </div>
     </div>
   );

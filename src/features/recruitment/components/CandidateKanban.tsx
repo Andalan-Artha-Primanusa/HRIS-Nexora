@@ -16,7 +16,7 @@ const STAGES = [
   { id: 'hired', label: 'Hired', color: '#14b8a6' },
 ];
 
-export const CandidateKanban: React.FC<CandidateKanbanProps> = ({ candidates, onMoveStage, onViewCandidate }) => {
+export const CandidateKanban: React.FC<CandidateKanbanProps> = ({ candidates, onViewCandidate }) => {
   const getCandidatesByStage = (stageId: string) => {
     return candidates.filter(c => (c.stage || 'applied').toLowerCase() === stageId.toLowerCase());
   };

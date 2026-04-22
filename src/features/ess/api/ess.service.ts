@@ -11,19 +11,23 @@ const extractPayload = (raw: unknown) => {
   return root.data ?? raw;
 };
 
-const extractArrayPayload = (raw: unknown): GenericApiItem[] => {
-  const payload = extractPayload(raw);
+const extractArrayPayload = (raw: any): GenericApiItem[] => {
+  if (!raw) return [];
+  
+  // Pattern 1: Direct Array
+  if (Array.isArray(raw)) return raw;
 
-  if (Array.isArray(payload)) {
-    return payload.filter((item): item is GenericApiItem => !!item && typeof item === "object");
-  }
-
-  const payloadRecord = toRecord(payload);
-  const candidates = [payloadRecord.items, payloadRecord.rows, payloadRecord.data, payloadRecord.results];
-
-  for (const candidate of candidates) {
-    if (Array.isArray(candidate)) {
-      return candidate.filter((item): item is GenericApiItem => !!item && typeof item === "object");
+  // Pattern 2: Laravel standard { data: [...] } or { items: [...] }
+  const root = typeof raw === 'object' ? raw : {};
+  for (const key of ['data', 'items', 'rows', 'results']) {
+    const level1 = root[key];
+    if (Array.isArray(level1)) return level1;
+    
+    // Pattern 3: Laravel Paginated { data: { data: [...] } }
+    if (level1 && typeof level1 === 'object' && !Array.isArray(level1)) {
+      for (const key2 of ['data', 'items', 'rows']) {
+        if (Array.isArray(level1[key2])) return level1[key2];
+      }
     }
   }
 
@@ -87,6 +91,28 @@ export const getMyPayroll = async () => {
     items: extractArrayPayload(response.data),
     raw: response.data,
   };
+};
+
+export const getMyPayrollDetail = async (id: string) => {
+  const response = await api.get(`/my/payroll/${id}`);
+  return {
+    payload: extractPayload(response.data),
+    raw: response.data,
+  };
+};
+
+export const exportMyPayrollCsv = async (id: string) => {
+  const response = await api.get(`/my/payroll/${id}/export`, {
+    responseType: 'blob'
+  });
+  return response.data;
+};
+
+export const exportMyPayrollPdf = async (id: string) => {
+  const response = await api.get(`/my/payroll/${id}/export-pdf`, {
+    responseType: 'blob'
+  });
+  return response.data;
 };
 
 export const getMyLeaves = async () => {

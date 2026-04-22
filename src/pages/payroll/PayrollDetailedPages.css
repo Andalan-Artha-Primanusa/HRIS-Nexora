@@ -1,0 +1,215 @@
+.payroll-detailed-page {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 1.5rem;
+  background: #f8fafc;
+  min-height: 100vh;
+}
+
+.detailed-hero-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2.5rem;
+  border-radius: 32px;
+  background: linear-gradient(135deg, white 0%, #f0f9ff 100%);
+  border: 1px solid white;
+  box-shadow: 0 10px 30px rgba(14, 165, 233, 0.05);
+}
+
+.detailed-hero-purple {
+  background: linear-gradient(135deg, white 0%, #f5f3ff 100%);
+  box-shadow: 0 10px 30px rgba(139, 92, 246, 0.05);
+}
+
+.detailed-hero-copy h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #1e3a8a;
+  margin: 0.5rem 0;
+  letter-spacing: -1px;
+}
+
+.detailed-hero-copy p {
+  color: #64748b;
+  font-size: 1.1rem;
+  max-width: 600px;
+}
+
+.detailed-badge {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  background: rgba(14, 165, 233, 0.1);
+  color: #0ea5e9;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.detailed-hero-purple .detailed-badge {
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+}
+
+.detailed-actions-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.detailed-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.mini-stat-card {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-radius: 24px;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-value {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #1e3a8a;
+  letter-spacing: -0.5px;
+}
+
+.search-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: white;
+  padding: 0.75rem 1.25rem;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+}
+
+.search-box input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 1rem;
+  color: #1e293b;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.detailed-table-card {
+  padding: 2rem;
+  border-radius: 32px;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.table-header h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e3a8a;
+  margin: 0;
+}
+
+.premium-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.premium-table th {
+  text-align: left;
+  padding: 1.25rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: #f8fafc;
+  border-radius: 12px;
+}
+
+.premium-table td {
+  padding: 1.5rem 1rem;
+  font-size: 0.95rem;
+  color: #334155;
+  border-bottom: 1px solid rgba(0,0,0,0.02);
+}
+
+.premium-table tr:last-child td {
+  border-bottom: none;
+}
+
+.premium-table tr:hover td {
+  background: #fbfcfd;
+}
+
+.employee-cell {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.emp-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.emp-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.emp-name {
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.emp-code {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.font-semibold { font-weight: 600; }
+.font-bold { font-weight: 700; }
+.text-center { text-align: center; }
+.py-10 { padding-top: 2.5rem; padding-bottom: 2.5rem; }
+.text-red-600 { color: #dc2626; }
+.text-green-600 { color: #16a34a; }
+.text-orange-600 { color: #ea580c; }
+.text-lg { font-size: 1.125rem; }
+
+@media (max-width: 768px) {
+  .detailed-hero-card { flex-direction: column; text-align: center; padding: 2rem; }
+  .detailed-hero-icon { display: none; }
+  .detailed-actions-bar { flex-direction: column; }
+  .search-box { width: 100%; }
+}

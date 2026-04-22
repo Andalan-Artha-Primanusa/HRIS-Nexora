@@ -58,6 +58,8 @@ const ReportsDashboardPage = lazy(() => import("../../pages/reports/ReportsDashb
 const ReportsAttendancePage = lazy(() => import("../../pages/reports/ReportsAttendancePage"));
 const ReportsLeavePage = lazy(() => import("../../pages/reports/ReportsLeavePage"));
 const ReportsPayrollPage = lazy(() => import("../../pages/reports/ReportsPayrollPage"));
+const PayrollTaxBPJSPage = lazy(() => import("../../pages/payroll/PayrollTaxPage"));
+const PayrollReportsDetailedPage = lazy(() => import("../../pages/payroll/PayrollReportsDetailedPage"));
 const ReportsAssetsPage = lazy(() => import("../../pages/reports/ReportsAssetsPage"));
 const ReportsEmployeePage = lazy(() => import("../../pages/reports/ReportsEmployeePage"));
 const WorkSchedulesPage = lazy(() => import("../../pages/work-schedule/WorkSchedulesPage"));
@@ -102,6 +104,8 @@ const HolidayFormPage = lazy(() => import("../../pages/admin/HolidayFormPage.tsx
 const OvertimeRuleFormPage = lazy(() => import("../../pages/admin/OvertimeRuleFormPage.tsx"));
 const CalibrationFormPage = lazy(() => import("../../pages/admin/CalibrationFormPage.tsx"));
 const HrRequestFormPage = lazy(() => import("../../pages/admin/HrRequestFormPage.tsx"));
+const SlaPage = lazy(() => import("../../pages/admin/SlaPage.tsx"));
+const EngagementAnalyticsPage = lazy(() => import("../../pages/admin/EngagementAnalyticsPage.tsx"));
 
 
 
@@ -163,8 +167,6 @@ const sectionRoutes = [
   { path: "/compliance/overview" },
   { path: "/compliance/audit-summary" },
   { path: "/compliance/expiring-documents" },
-  { path: "/payroll/tax" },
-  { path: "/payroll/reports" },
   { path: "/expense/categories" },
   { path: "/expense/reports" },
   { path: "/performance" },
@@ -866,6 +868,16 @@ export const router = createBrowserRouter([
             element: <PayrollDetailsPage />,
           },
         ],
+      },
+      {
+        path: "/payroll/tax",
+        element: <DashboardLayout />,
+        children: [{ index: true, element: <PayrollTaxBPJSPage /> }],
+      },
+      {
+        path: "/payroll/reports",
+        element: <DashboardLayout />,
+        children: [{ index: true, element: <PayrollReportsDetailedPage /> }],
       },
       {
         path: "/reports/dashboard-summary",

@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Calendar, User, FileText, Info, Check, AlertCircle } from 'lucide-react';
+import { X, Calendar } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
 

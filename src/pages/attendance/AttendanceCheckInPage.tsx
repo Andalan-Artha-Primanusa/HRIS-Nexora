@@ -6,7 +6,7 @@ import { api } from '@/shared/api/httpClient';
 import { CheckCircle2, MapPin, Building2 } from 'lucide-react';
 import type { LocationItem } from '@/features/location/types/location.types';
 import { getAllLocations } from '@/features/location/api/location.service';
-import { useAuthStore } from '@/app/store/auth.store';
+// import { useAuthStore } from '@/app/store/auth.store';
 import './AttendancePages.css';
 
 const AttendanceCheckInPage = () => {
@@ -19,7 +19,7 @@ const AttendanceCheckInPage = () => {
   const [locations, setLocations] = useState<LocationItem[]>([]);
   const [selectedLocationId, setSelectedLocationId] = useState<string>('');
   const [userDepartment, setUserDepartment] = useState<string>('');
-  const user = useAuthStore((state) => state.user);
+  // const user = useAuthStore((state) => state.user);
 
   const detectGPS = () => {
     setStatus('Mendeteksi lokasi GPS...');
@@ -84,7 +84,7 @@ const AttendanceCheckInPage = () => {
           );
           
           // Ensure the assigned one is first
-          filtered.sort((a,b) => String(a.id) === String(assignedLocationId) ? -1 : 1);
+          filtered.sort((a) => String(a.id) === String(assignedLocationId) ? -1 : 1);
         } else {
           // Fallback to department-based filtering
           filtered = allLocs.filter(loc => 

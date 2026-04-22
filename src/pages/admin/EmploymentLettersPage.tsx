@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, User, Download, Plus, Search, RefreshCw } from 'lucide-react';
+import { FileText, Search } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { getAllEmployees } from '@/features/employee/api/employee.service';
 import { legalService } from '@/features/legal/api/legal.service';
 import '@/shared/styles/CrudPage.css';
-import { api } from '@/shared/api/httpClient';
 
 const EmploymentLettersPage: React.FC = () => {
   const [employees, setEmployees] = useState<any[]>([]);
@@ -15,10 +15,11 @@ const EmploymentLettersPage: React.FC = () => {
     const fetchEmployees = async () => {
       setLoading(true);
       try {
-        const response = await api.get('/employees');
-        setEmployees(response.data.data || []);
+        const data = await getAllEmployees();
+        setEmployees(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error(err);
+        setEmployees([]);
       } finally {
         setLoading(false);
       }
@@ -39,10 +40,12 @@ const EmploymentLettersPage: React.FC = () => {
     }
   };
 
-  const filteredEmployees = employees.filter(emp => 
-    emp.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    emp.employee_id.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredEmployees = employees.filter(emp => {
+    const fullName = String(emp?.full_name || '').toLowerCase();
+    const employeeId = String(emp?.employee_id || '').toLowerCase();
+    const query = searchQuery.toLowerCase();
+    return fullName.includes(query) || employeeId.includes(query);
+  });
 
   return (
     <div className="crud-page">

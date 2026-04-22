@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Users, UserCheck, UserMinus, UserPlus, Briefcase, RefreshCw, BarChart3, PieChart as PieIcon, TrendingUp, Calendar } from 'lucide-react';
+import { Users, UserCheck, UserMinus, UserPlus, Briefcase, RefreshCw, BarChart3, PieChart as PieIcon, TrendingUp } from 'lucide-react';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';

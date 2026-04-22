@@ -2,8 +2,8 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
-import { ArrowDown, ArrowUp, Briefcase, ChevronDown, Filter, RefreshCw, Search } from "lucide-react";
-import { getAllPayroll } from "@/features/payroll/api/payroll.service";
+import { ArrowDown, ArrowUp, Briefcase, ChevronDown, Filter, RefreshCw, Search, Download } from "lucide-react";
+import { payrollService, toSafeArray } from "@/features/payroll/api/payroll.service";
 import { getAllEmployees } from "@/features/employee/api/employee.service";
 import { PayrollStatusBadge } from "@/shared/ui/PayrollStatusBadge";
 import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
@@ -46,14 +46,17 @@ const PayrollListPage: React.FC = () => {
 
     try {
       const [payrollData, employeeData] = await Promise.all([
-        getAllPayroll(),
+        payrollService.getPayrollList(),
         getAllEmployees(),
       ]);
 
-      setEmployees(employeeData);
+      const safePayrollData = toSafeArray(payrollData);
+      const safeEmployeeData = Array.isArray(employeeData) ? employeeData : toSafeArray(employeeData);
 
-      const enrichedPayroll = payrollData.map((payroll: any) => {
-        const employee = employeeData.find(
+      setEmployees(safeEmployeeData);
+
+      const enrichedPayroll = safePayrollData.map((payroll: any) => {
+        const employee = safeEmployeeData.find(
           (emp: any) => String(emp.id) === String(payroll.employee_id)
         );
         return {
@@ -176,6 +179,35 @@ const PayrollListPage: React.FC = () => {
     setSortOrder("desc");
   };
 
+  const handleExportCSV = () => {
+    if (sortedItems.length === 0) return;
+    
+    const headers = ["ID", "Employee", "Period", "Basic Salary", "Allowance", "Bonus", "Deduction", "Net Salary", "Status"];
+    const rows = sortedItems.map((item: any) => [
+      item.id,
+      item.employeeName,
+      item.period,
+      item.basic_salary,
+      item.allowance,
+      item.bonus,
+      item.total_deduction,
+      item.take_home_pay || item.net_salary,
+      item.status
+    ]);
+    
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + headers.join(",") + "\n"
+      + rows.map(e => e.join(",")).join("\n");
+      
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Payroll_Report_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const formatCurrency = (value: number) => `Rp ${(value || 0).toLocaleString("id-ID")}`;
 
   const payrollSummaryCards = useMemo(() => [
@@ -209,6 +241,10 @@ const PayrollListPage: React.FC = () => {
           <p>Kelola data payroll karyawan dengan tampilan yang rapi, konsisten, dan mudah dipindai.</p>
         </div>
         <div className="page-header-actions">
+          <Button variant="outline" size="md" onClick={handleExportCSV} disabled={sortedItems.length === 0} style={{ borderColor: "#10b981", color: "#10b981" }}>
+            <Download size={16} />
+            Ekspor CSV
+          </Button>
           <Button variant="outline" size="md" onClick={() => void loadData()} disabled={payrollState.isLoading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
             <RefreshCw size={16} />
             Segarkan

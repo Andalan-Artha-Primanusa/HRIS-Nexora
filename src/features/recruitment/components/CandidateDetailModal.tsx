@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Modal } from '@/shared/ui/Modal';
 import { Button } from '@/shared/ui/Button';
-import { Mail, Phone, Calendar, MapPin, FileText, Download, UserCheck, UserX, MessageSquare } from 'lucide-react';
+import { Mail, Phone, Calendar, MapPin, FileText, Download, UserCheck, UserX, MessageSquare, User } from 'lucide-react';
 import type { Candidate } from '../types/recruitment.types';
 
 interface CandidateDetailModalProps {

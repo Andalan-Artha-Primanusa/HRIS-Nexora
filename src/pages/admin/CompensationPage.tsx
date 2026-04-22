@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { DollarSign, Download, FileJson, RefreshCw, AlertCircle, TrendingUp, Landmark } from 'lucide-react';
+import { RefreshCw, AlertCircle, TrendingUp, Landmark } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { enterpriseService } from '@/features/enterprise/api/enterprise.service';

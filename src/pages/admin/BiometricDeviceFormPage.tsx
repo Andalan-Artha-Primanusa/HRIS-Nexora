@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save, Smartphone, Globe, Hash, Shield, MonitorCog } from 'lucide-react';
+import { ArrowLeft, Save, Globe, Hash, Shield, MonitorCog } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { biometricService } from '@/features/biometric/api/biometric.service';

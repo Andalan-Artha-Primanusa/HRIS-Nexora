@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { BarChart3, CalendarDays, CheckCircle2, RefreshCw } from "lucide-react";
+import { BarChart3, CalendarDays, CheckCircle2, RefreshCw, Zap, Clock, Wallet, LayoutDashboard } from "lucide-react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
 import {
   generateMonthlyPayroll,
   getAllPayroll,
+  toSafeArray,
 } from "@/features/payroll/api/payroll.service";
 import type { PayrollItem } from "@/features/payroll/types/payroll.types";
 import "../admin/AdminCrudPages.css";
@@ -17,15 +18,21 @@ const asDisplay = (value: unknown) => {
   return String(value);
 };
 
-const getColumns = (items: PayrollItem[]) => {
-  if (items.length === 0) {
-    return ["id", "employee_id", "period", "allowance", "bonus", "status"];
-  }
-
-  const keys = Object.keys(items[0]);
-  const preferred = ["id", "employee_id", "period", "allowance", "bonus", "status"];
-  const merged = [...preferred, ...keys.filter((key) => !preferred.includes(key))];
-  return merged.filter((key, index) => merged.indexOf(key) === index);
+const getColumns = () => {
+  return [
+    "id",
+    "employee_id",
+    "period",
+    "basic_salary",
+    "allowance",
+    "bonus",
+    "bpjs_kesehatan",
+    "bpjs_ketenagakerjaan",
+    "pph21",
+    "total_deduction",
+    "take_home_pay",
+    "status"
+  ];
 };
 
 const PayrollGeneratePage = () => {
@@ -43,7 +50,7 @@ const PayrollGeneratePage = () => {
     setErrorModal({ isOpen: true, title, message });
   };
 
-  const columns = useMemo(() => getColumns(items), [items]);
+  const columns = useMemo(() => getColumns(), []);
   const summaryCards = useMemo(() => {
     const paidCount = items.filter((item) => String(item.status).toLowerCase() === "paid").length;
     const pendingCount = items.filter((item) => String(item.status).toLowerCase() === "pending").length;
@@ -51,33 +58,33 @@ const PayrollGeneratePage = () => {
     return [
       {
         label: "Total Payroll",
-        subtitle: "Semua data payroll tersedia",
+        subtitle: "Semua data payroll",
         value: String(items.length),
-        change: "Data payroll saat ini",
+        change: "Entri terdaftar",
         tone: "blue" as const,
-        icon: BarChart3,
+        icon: LayoutDashboard,
       },
       {
         label: "Pending",
-        subtitle: "Belum selesai diproses",
+        subtitle: "Menunggu proses",
         value: String(pendingCount),
-        change: "Butuh tindak lanjut",
+        change: "Perlu approval",
         tone: "orange" as const,
-        icon: RefreshCw,
+        icon: Clock,
       },
       {
         label: "Paid",
-        subtitle: "Payroll sudah dibayar",
+        subtitle: "Sudah dibayarkan",
         value: String(paidCount),
-        change: "Status selesai",
+        change: "Batch selesai",
         tone: "green" as const,
-        icon: CheckCircle2,
+        icon: Wallet,
       },
       {
         label: "Periode Aktif",
-        subtitle: "Periode generate saat ini",
+        subtitle: "Target bulan ini",
         value: period,
-        change: "Target batch bulanan",
+        change: "Fokus operasional",
         tone: "purple" as const,
         icon: CalendarDays,
       },
@@ -89,7 +96,7 @@ const PayrollGeneratePage = () => {
 
     try {
       const result = await getAllPayroll();
-      setItems(result);
+      setItems(toSafeArray(result));
     } catch (error: unknown) {
       const errorText = error instanceof Error ? error.message : "Gagal memuat payroll";
       showErrorModal("Error Muat Data", errorText);
@@ -140,15 +147,16 @@ const PayrollGeneratePage = () => {
       <Card className="payroll-generate-hero" glass>
         <div className="crud-header payroll-generate-header">
           <div className="crud-header-copy">
-            <p className="crud-page-badge">Payroll Center</p>
+            <p className="crud-page-badge">Payroll Operations</p>
             <div className="crud-header-title-row">
-              <span className="crud-header-icon"><CalendarDays size={18} /></span>
+              <span className="crud-header-icon"><Zap size={24} fill="currentColor" /></span>
               <h1>Generate Payroll Bulanan</h1>
             </div>
-            <p>Buat payroll otomatis untuk semua karyawan dalam satu periode.</p>
+            <p>Sistem otomatisasi penggajian karyawan secara massal untuk periode tertentu dengan akurasi data real-time.</p>
           </div>
-          <Button variant="outline" size="md" onClick={() => void loadPayroll()} disabled={loading}>
-            Refresh
+          <Button variant="outline" size="lg" onClick={() => void loadPayroll()} disabled={loading} style={{ color: 'white', borderColor: 'rgba(255,255,255,0.2)' }}>
+            <RefreshCw className={loading ? "animate-spin" : ""} size={18} style={{ marginRight: '8px' }} />
+            Sync Data
           </Button>
         </div>
       </Card>
@@ -165,11 +173,14 @@ const PayrollGeneratePage = () => {
                   <p className="payroll-generate-summary-subtitle">{card.subtitle}</p>
                 </div>
                 <span className={`payroll-generate-summary-icon payroll-generate-summary-icon--${card.tone}`}>
-                  <Icon size={18} />
+                  <Icon size={20} />
                 </span>
               </div>
               <div className="payroll-generate-summary-value">{card.value}</div>
-              <div className="payroll-generate-summary-change">{card.change}</div>
+              <div className="payroll-generate-summary-change">
+                <BarChart3 size={14} />
+                {card.change}
+              </div>
             </Card>
           );
         })}
@@ -178,108 +189,128 @@ const PayrollGeneratePage = () => {
       {/* Success Message - Inline Banner */}
       {message && message.type === "success" && (
         <Card className="crud-card payroll-generate-message" glass>
-          <p>{message.text}</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <CheckCircle2 color="#0ea5e9" size={20} />
+            <p>{message.text}</p>
+          </div>
         </Card>
       )}
 
-      <Card className="crud-card payroll-generate-card" glass>
-        <h2>Generate Payroll Bulanan</h2>
-        <div className="crud-form-grid">
-          <label>
-            <strong>Periode (YYYY-MM)</strong>
-            <input
-              className="crud-input"
-              value={period}
-              onChange={(event) => setPeriod(event.target.value)}
-              placeholder="Contoh: 2026-04"
-            />
-          </label>
-        </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1.5rem', alignItems: 'start' }}>
+        <Card className="crud-card payroll-generate-card" glass>
+          <h2>Konfigurasi Batch</h2>
+          <div className="crud-form-grid" style={{ gridTemplateColumns: '1fr' }}>
+            <label>
+              <strong>Periode Pembayaran (YYYY-MM)</strong>
+              <input
+                className="crud-input"
+                value={period}
+                onChange={(event) => setPeriod(event.target.value)}
+                placeholder="Contoh: 2026-04"
+              />
+            </label>
+          </div>
 
-        <div className="crud-actions">
-          <Button variant="primary" size="md" onClick={() => void generateMonthly()} disabled={loading}>
-            Generate Payroll
-          </Button>
-        </div>
-      </Card>
+          <div className="crud-actions" style={{ marginTop: '2rem' }}>
+            <Button variant="primary" size="lg" onClick={() => void generateMonthly()} disabled={loading} style={{ width: '100%', borderRadius: '12px', height: '52px', fontWeight: '700' }}>
+              {loading ? "Processing..." : "Generate Payroll Sekarang"}
+            </Button>
+          </div>
+          <p style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#94a3b8', textAlign: 'center' }}>
+            Tindakan ini akan mengalkulasi tunjangan, bonus, dan potongan untuk semua karyawan aktif.
+          </p>
+        </Card>
 
-      <Card className="crud-card payroll-generate-card" glass>
-        <h2>Daftar Payroll</h2>
-        <div className="crud-table-wrap">
-          <table className="crud-table payroll-generate-table">
-            <thead>
-              <tr>
-                {columns.map((column) => (
-                  <th key={column}>
-                    {column === "id" && "ID"}
-                    {column === "employee_id" && "ID Karyawan"}
-                    {column === "period" && "Periode"}
-                    {column === "allowance" && "Tunjangan"}
-                    {column === "bonus" && "Bonus"}
-                    {column === "status" && "Status"}
-                    {!["id", "employee_id", "period", "allowance", "bonus", "status"].includes(column) && column}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {items.length > 0 ? (
-                items.map((item, index) => (
-<tr key={String(item.id ?? index)}>
-  {columns.map((column) => {
-    const record = item as unknown as Record<string, unknown>;
-
-    return (
-      <td key={`${String(item.id ?? index)}-${column}`}>
-        {column === 'id' ? (
-          <span className="cell-id">{asDisplay(record[column])}</span>
-
-        ) : column === 'employee_id' ? (
-          `EMP-${String(record[column]).padStart(3, '0')}`
-
-        ) : column === 'period' ? (
-          record[column]
-            ? new Date(String(record[column]) + '-01').toLocaleDateString('id-ID', {
-                month: 'long',
-                year: 'numeric',
-              })
-            : '-'
-
-        ) : column === 'allowance' || column === 'bonus' ? (
-          `Rp ${Number(record[column] || 0).toLocaleString('id-ID')}`
-
-        ) : column === 'status' ? (
-          <span className={`status-badge status-badge--${String(record[column]).toLowerCase()}`}>
-            {asDisplay(record[column])}
-          </span>
-
-        ) : (column.includes('date') || column.endsWith('_at')) ? (
-          record[column]
-            ? new Date(String(record[column])).toLocaleDateString('id-ID', {
-                timeZone: 'Asia/Jakarta',
-                day: '2-digit',
-                month: 'long',
-                year: 'numeric',
-              })
-            : '-'
-
-        ) : (
-          asDisplay(record[column])
-        )}
-      </td>
-    );
-  })}
-</tr>
-                ))
-              ) : (
+        <Card className="crud-card payroll-generate-card" glass>
+          <h2>Daftar Payroll Terbaru</h2>
+          <div className="crud-table-wrap" style={{ border: 'none', boxShadow: 'none' }}>
+            <table className="crud-table payroll-generate-table">
+              <thead>
                 <tr>
-                  <td colSpan={columns.length} className="payroll-generate-empty-row">Belum ada data payroll.</td>
+                  {columns.map((column) => (
+                    <th key={column}>
+                      {column === "id" && "ID"}
+                      {column === "employee_id" && "Karyawan"}
+                      {column === "period" && "Periode"}
+                      {column === "basic_salary" && "Gaji Pokok"}
+                      {column === "allowance" && "Tunjangan"}
+                      {column === "bonus" && "Bonus"}
+                      {column === "bpjs_kesehatan" && "BPJS Kes"}
+                      {column === "bpjs_ketenagakerjaan" && "BPJS TK"}
+                      {column === "pph21" && "PPH21"}
+                      {column === "total_deduction" && "Potongan"}
+                      {column === "take_home_pay" && "THP"}
+                      {column === "status" && "Status"}
+                      {!["id", "employee_id", "period", "basic_salary", "allowance", "bonus", "bpjs_kesehatan", "bpjs_ketenagakerjaan", "pph21", "total_deduction", "take_home_pay", "status"].includes(column) && column}
+                    </th>
+                  ))}
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </Card>
+              </thead>
+              <tbody>
+                {items.length > 0 ? (
+                  items.slice(0, 10).map((item, index) => (
+                    <tr key={String(item.id ?? index)}>
+                      {columns.map((column) => {
+                        const record = item as unknown as Record<string, unknown>;
+
+                        return (
+                          <td key={`${String(item.id ?? index)}-${column}`}>
+                            {column === 'id' ? (
+                              <span className="cell-id">#{asDisplay(record[column])}</span>
+
+                            ) : column === 'employee_id' ? (
+                              <div style={{ fontWeight: '600', whiteSpace: 'nowrap' }}>
+                                {record.employee && typeof record.employee === 'object' && (record.employee as any).user ? (record.employee as any).user.name : `EMP-${String(record[column]).padStart(3, '0')}`}
+                              </div>
+
+                            ) : column === 'period' ? (
+                              <div style={{ whiteSpace: 'nowrap' }}>
+                                {record[column]
+                                  ? new Date(String(record[column]) + '-01').toLocaleDateString('id-ID', {
+                                      month: 'short',
+                                      year: 'numeric',
+                                    })
+                                  : '-'}
+                              </div>
+
+                            ) : ['basic_salary', 'allowance', 'bonus', 'bpjs_kesehatan', 'bpjs_ketenagakerjaan', 'pph21', 'total_deduction', 'take_home_pay'].includes(column) ? (
+                              <span style={{ 
+                                color: column === 'take_home_pay' ? '#6366f1' : column === 'total_deduction' || column.startsWith('bpjs') || column === 'pph21' ? '#f43f5e' : 'inherit', 
+                                fontWeight: column === 'take_home_pay' ? '700' : '500',
+                                whiteSpace: 'nowrap'
+                              }}>
+                                {`Rp ${Number(record[column] || 0).toLocaleString('id-ID')}`}
+                              </span>
+
+                            ) : column === 'status' ? (
+                              <span className={`status-badge status-badge--${String(record[column]).toLowerCase()}`}>
+                                <div className="status-dot" style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'currentColor' }} />
+                                {asDisplay(record[column])}
+                              </span>
+
+                            ) : (
+                              asDisplay(record[column])
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={columns.length} className="payroll-generate-empty-row">Tidak ada data payroll yang ditemukan.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          {items.length > 10 && (
+            <p style={{ marginTop: '1rem', fontSize: '0.85rem', color: '#64748b', textAlign: 'right' }}>
+              Menampilkan 10 data terbaru dari total {items.length} records.
+            </p>
+          )}
+        </Card>
+      </div>
     </div>
   );
 };
