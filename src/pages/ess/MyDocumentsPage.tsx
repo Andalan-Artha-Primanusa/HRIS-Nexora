@@ -201,13 +201,48 @@ const MyDocumentsPage: React.FC = () => {
                 <div className="doc-footer">
                   {getStatusBadge(doc.status)}
                   <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    style={{ color: '#2563eb', gap: '6px' }}
-                    onClick={() => window.open(doc.file_url, '_blank')}
-                  >
-                    <Download size={16} /> Download
-                  </Button>
+  variant="ghost" 
+  size="sm" 
+  style={{ color: '#2563eb', gap: '6px' }}
+  onClick={async () => {
+    try {
+      const token = localStorage.getItem('token');
+
+      const filename = doc.file_url.split('/').pop();
+
+      const res = await fetch(
+        `https://moccasin-crab-693879.hostingersite.com/api/documents/${filename}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // 🔥 INI YANG KAMU TANYA (debug response)
+      if (!res.ok) {
+        const text = await res.text();
+        console.log("ERROR RESPONSE:", text);
+        throw new Error("Download gagal");
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename || "file.pdf";
+      a.click();
+
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      alert("Gagal download file");
+    }
+  }}
+>
+  <Download size={16} /> Download
+</Button>
                 </div>
               </div>
             ))}
