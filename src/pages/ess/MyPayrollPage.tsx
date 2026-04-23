@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
-import { BarChart3, CheckCircle2, Receipt, Wallet, FileText, Download, Printer, X } from "lucide-react";
+import { BarChart3, CheckCircle2, Receipt, Wallet, FileText, Download, Printer } from "lucide-react";
 import { getMyPayroll, getMyPayrollDetail, exportMyPayrollPdf } from "@/features/ess/api/ess.service";
 import type { GenericApiItem } from "@/features/ess/types/ess.types";
 import "./EssPages.css";
@@ -148,7 +148,7 @@ const MyPayrollPage = () => {
               {items.length > 0 ? (
                 items.map((item) => (
                   <tr key={String(item.id)}>
-                    <td style={{ fontWeight: 600 }}>{item.period}</td>
+                    <td style={{ fontWeight: 600 }}>{String(item.period || '-')}</td>
                     <td>{formatCurrency(item.basic_salary)}</td>
                     <td style={{ color: '#10b981', fontWeight: 700 }}>{formatCurrency(item.take_home_pay || item.net_salary)}</td>
                     <td>

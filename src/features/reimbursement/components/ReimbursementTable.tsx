@@ -1,5 +1,4 @@
 import React from 'react';
-import { Edit, Trash2, Eye, Send } from 'lucide-react';
 import type { ReimbursementItem } from '../types/reimbursement.types';
 
 interface ReimbursementTableProps {
@@ -74,8 +73,10 @@ export const ReimbursementTable: React.FC<ReimbursementTableProps> = ({
                 {isAdmin && (
                   <td>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{item.employee?.full_name || 'N/A'}</span>
-                      <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{item.employee?.employee_id || ''}</span>
+                      <span style={{ fontWeight: 600, color: '#1e3a8a' }}>
+                        {item.employee?.full_name || item.employee?.name || item.employee?.user?.name || item.user?.name || item.employee_name || 'N/A'}
+                      </span>
+                      <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{item.employee?.employee_id || item.employee_id || ''}</span>
                     </div>
                   </td>
                 )}
@@ -99,25 +100,41 @@ export const ReimbursementTable: React.FC<ReimbursementTableProps> = ({
                 </td>
                 <td style={{ textAlign: 'right' }}>
                   <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                    <button className="btn-action btn-action-view" title="View Details" onClick={() => onView(item)}>
-                      <Eye size={16} color="#8b5cf6" />
+                    <button 
+                      title="View Details" 
+                      onClick={() => onView(item)}
+                      style={{ width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '10px', border: '1px solid #ede9fe', background: '#f5f3ff', cursor: 'pointer' }}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                     </button>
                     
                     {item.status.toLowerCase() === 'draft' && onEdit && (
-                      <button className="btn-action btn-action-edit" title="Edit" onClick={() => onEdit(item)}>
-                        <Edit size={16} color="#2563eb" />
+                      <button 
+                        title="Edit" 
+                        onClick={() => onEdit(item)}
+                        style={{ width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '10px', border: '1px solid #dbeafe', background: '#eff6ff', cursor: 'pointer' }}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                       </button>
                     )}
                     
                     {item.status.toLowerCase() === 'draft' && onSubmit && (
-                      <button className="btn-action" title="Submit" style={{ color: '#2563eb' }} onClick={() => onSubmit(item)}>
-                        <Send size={16} color="#2563eb" />
+                      <button 
+                        title="Submit" 
+                        onClick={() => onSubmit(item)}
+                        style={{ width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '10px', border: '1px solid #dbeafe', background: '#eff6ff', cursor: 'pointer' }}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
                       </button>
                     )}
                     
                     {item.status.toLowerCase() === 'draft' && onDelete && (
-                      <button className="btn-action btn-action-delete" title="Delete" onClick={() => onDelete(item)}>
-                        <Trash2 size={16} color="#ef4444" />
+                      <button 
+                        title="Delete" 
+                        onClick={() => onDelete(item)}
+                        style={{ width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '10px', border: '1px solid #fee2e2', background: '#fef2f2', cursor: 'pointer' }}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
                       </button>
                     )}
                   </div>

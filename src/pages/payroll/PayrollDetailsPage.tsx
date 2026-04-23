@@ -18,7 +18,7 @@ const asDisplay = (value: unknown) => {
 };
 
 const getColumns = (items: PayrollDetail[]) => {
-  const defaultCols = ["id", "payroll_id", "type", "name", "amount"];
+  const defaultCols = ["id", "payroll_id", "type", "description", "amount"];
   if (!Array.isArray(items) || items.length === 0 || !items[0] || typeof items[0] !== 'object') {
     return defaultCols;
   }
@@ -28,7 +28,6 @@ const getColumns = (items: PayrollDetail[]) => {
   return merged.filter((key, index) => merged.indexOf(key) === index);
 };
 
-const parseJson = <T,>(value: string): T => JSON.parse(value) as T;
 
 const PayrollDetailsPage = () => {
   const location = useLocation();
@@ -40,29 +39,6 @@ const PayrollDetailsPage = () => {
   const [detailType, setDetailType] = useState(defaultType);
   const [detailName, setDetailName] = useState(defaultType === "deduction" ? "Tax" : "Housing Allowance");
   const [detailAmount, setDetailAmount] = useState(defaultType === "deduction" ? "500000" : "2000000");
-  const [bulkDetailsText, setBulkDetailsText] = useState(
-    JSON.stringify(
-      [
-        {
-          type: defaultType,
-          name: defaultType === "deduction" ? "Tax" : "Housing Allowance",
-          amount: defaultType === "deduction" ? 500000 : 2000000,
-        },
-      ],
-      null,
-      2
-    )
-  );
-  const [bulkUpdateText, setBulkUpdateText] = useState(
-    JSON.stringify(
-      [
-        { id: 1, amount: 2500000 },
-        { id: 2, amount: 600000 },
-      ],
-      null,
-      2
-    )
-  );
   const [allPayrolls, setAllPayrolls] = useState<PayrollItem[]>([]);
   const [allEmployees, setAllEmployees] = useState<EmployeeItem[]>([]);
   const [bulkRows, setBulkRows] = useState<Array<{ type: string; name: string; amount: string }>>([
@@ -259,25 +235,6 @@ const PayrollDetailsPage = () => {
     }
   };
 
-  const bulkUpdate = async () => {
-    setLoading(true);
-
-    try {
-      const details = parseJson<Array<{ id: number; amount: number }>>(bulkUpdateText);
-      // Update each detail individually via PUT /payroll-details/{id}
-      await Promise.all(
-        details.map((d) => payrollService.updatePayrollDetail(d.id, { amount: d.amount }))
-      );
-      setStatusMessage("Detail berhasil di-update");
-      await loadPayrollDetails();
-    } catch (error: unknown) {
-      const errorText = error instanceof Error ? error.message : "Gagal bulk update";
-      showErrorModal("Error Bulk Update", errorText);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const deleteSingle = async () => {
     const id = requireDetailId();
     if (!id) {
@@ -303,19 +260,6 @@ const PayrollDetailsPage = () => {
     setDetailType(defaultType);
     setDetailName(defaultType === "deduction" ? "Tax" : "Housing Allowance");
     setDetailAmount(defaultType === "deduction" ? "500000" : "2000000");
-    setBulkDetailsText(
-      JSON.stringify(
-        [
-          {
-            type: defaultType,
-            name: defaultType === "deduction" ? "Tax" : "Housing Allowance",
-            amount: defaultType === "deduction" ? 500000 : 2000000,
-          },
-        ],
-        null,
-        2
-      )
-    );
   }, [defaultType]);
 
   useEffect(() => {
@@ -433,7 +377,7 @@ const PayrollDetailsPage = () => {
                         {column === "id" && "ID"}
                         {column === "payroll_id" && "ID Payroll"}
                         {column === "type" && "Tipe"}
-                        {column === "name" && "Nama"}
+                        {column === "description" && "Nama"}
                         {column === "amount" && "Jumlah"}
                         {!["id", "payroll_id", "type", "name", "amount"].includes(column) && column}
                       </th>
@@ -594,8 +538,8 @@ const PayrollDetailsPage = () => {
                       setDetailId(id);
                       const item = manageItems.find(i => String(i.id) === id);
                       if (item) {
-                        setDetailType(item.type);
-                        setDetailName(item.name);
+                        setDetailType(item.type || "allowance");
+                        setDetailName(item.description || "");
                         setDetailAmount(String(item.amount));
                       }
                     }}
@@ -603,7 +547,7 @@ const PayrollDetailsPage = () => {
                     <option value="">-- Pilih Komponen dari ID {payrollId} --</option>
                     {manageItems.map(item => (
                       <option key={item.id} value={String(item.id)}>
-                        [{String(item.type).toUpperCase()}] {item.name} - Rp {Number(item.amount).toLocaleString()}
+                        [{String(item.type).toUpperCase()}] {item.description} - Rp {Number(item.amount).toLocaleString()}
                       </option>
                     ))}
                   </select>
@@ -691,7 +635,7 @@ const PayrollDetailsPage = () => {
                     {manageItems.length > 0 ? (
                       manageItems.map((item, idx) => (
                         <tr key={item.id}>
-                          <td style={{ fontWeight: 600 }}>{item.name}</td>
+                          <td style={{ fontWeight: 600 }}>{item.description}</td>
                           <td>
                             <span className={`status-badge status-badge--${item.type}`}>
                               {String(item.type).toUpperCase()}
@@ -732,7 +676,7 @@ const PayrollDetailsPage = () => {
                     setLoading(true);
                     try {
                       await Promise.all(
-                        manageItems.map(item => payrollService.updatePayrollDetail(item.id, { amount: item.amount }))
+                        manageItems.map(item => payrollService.updatePayrollDetail(String(item.id), { amount: item.amount }))
                       );
                       setStatusMessage("Bulk update berhasil");
                       await loadPayrollDetails();

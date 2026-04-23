@@ -16,7 +16,17 @@ const TalentPoolPage: React.FC = () => {
     setLoading(true);
     try {
       const data = await recruitmentService.getTalentPool();
-      setCandidates(Array.isArray(data) ? data : data.data || []);
+      let candidatesList = [];
+      if (Array.isArray(data)) {
+        candidatesList = data;
+      } else if (data?.data && Array.isArray(data.data)) {
+        candidatesList = data.data;
+      } else if (data?.data?.data && Array.isArray(data.data.data)) {
+        candidatesList = data.data.data;
+      } else if (data?.candidates && Array.isArray(data.candidates)) {
+        candidatesList = data.candidates;
+      }
+      setCandidates(candidatesList);
     } catch (error) {
       console.error('Error fetching talent pool:', error);
     } finally {

@@ -17,7 +17,7 @@ import {
 import { Link } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
-import { Modal } from "@/shared/ui/Modal";
+import { Badge } from "@/shared/ui/Badge";
 import { payrollService, toSafeArray } from "@/features/payroll/api/payroll.service";
 import { getAllEmployees } from "@/features/employee/api/employee.service";
 import type { PayrollItem } from "@/features/payroll/types/payroll.types";
@@ -33,6 +33,7 @@ import {
   ReceiptText,
   ShieldCheck,
   TrendingUp,
+  RefreshCw,
 } from "lucide-react";
 import "./PayrollDashboard.css";
 
@@ -40,16 +41,6 @@ const PayrollDashboard: React.FC = () => {
   const [payrollItems, setPayrollItems] = useState<PayrollItem[]>([]);
   const [employees, setEmployees] = useState<EmployeeItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [errorModal, setErrorModal] = useState<{ isOpen: boolean; title: string; message: string }>({
-    isOpen: false,
-    title: "",
-    message: "",
-  });
-
-  const showErrorModal = (title: string, message: string) => {
-    setErrorModal({ isOpen: true, title, message });
-  };
 
   // Chart Data States
   const [monthlyTrendData, setMonthlyTrendData] = useState<
@@ -60,9 +51,6 @@ const PayrollDashboard: React.FC = () => {
   >([]);
   const [departmentPayrollData, setDepartmentPayrollData] = useState<
     { name: string; amount: number }[]
-  >([]);
-  const [employeePayrollData, setEmployeePayrollData] = useState<
-    { employee_id: string; employeeName: string; allowance: number; bonus: number; total: number }[]
   >([]);
 
   // KPI States
@@ -93,7 +81,6 @@ const PayrollDashboard: React.FC = () => {
   // Load payroll data
   const loadPayrollData = async () => {
     setLoading(true);
-    setError(null);
 
     try {
       const [payrollData, employeeData] = await Promise.all([
@@ -118,19 +105,16 @@ const PayrollDashboard: React.FC = () => {
         setAveragePayroll(Math.round(total > 0 ? (total / 12) : 0)); // Rough estimate
 
         // Process data for charts
-        processChartData(items, emps);
+        processChartData(items);
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to load payroll data";
-      setError(message);
-      showErrorModal("Error Load Dashboard", message);
       console.error("Error loading payroll:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  const processChartData = (items: PayrollItem[], emps: EmployeeItem[]) => {
+  const processChartData = (items: PayrollItem[]) => {
     // Group by month (assuming period field exists)
     const monthlyMap = new Map<
       string,
@@ -196,25 +180,6 @@ const PayrollDashboard: React.FC = () => {
       employeeMap.set(String(empId), current);
     });
 
-    const employeeArray = Array.from(
-      employeeMap,
-      ([employee_id, data]) => {
-        const employee = emps.find((emp: any) => String(emp.id) === employee_id);
-        const employeeName = getEmployeeName(employee);
-        
-        return {
-          employee_id,
-          employeeName: employeeName || employee_id,
-          allowance: data.allowance,
-          bonus: data.bonus,
-          total: data.allowance + data.bonus,
-        };
-      }
-    )
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 10); // Top 10
-
-    setEmployeePayrollData(employeeArray);
 
     // Department aggregation (simulated - would need actual department data from employees)
     const departmentMap = new Map<string, number>();
@@ -241,9 +206,7 @@ const PayrollDashboard: React.FC = () => {
       // Reload data
       await loadPayrollData();
     } catch (err) {
-      const errorText = err instanceof Error ? err.message : "Failed to generate monthly payroll";
       console.error("Error generating payroll:", err);
-      showErrorModal("Error Generate", errorText);
     }
   };
 
@@ -396,7 +359,7 @@ const PayrollDashboard: React.FC = () => {
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
               <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#64748b" }} tickFormatter={(v) => `Rp ${v/1000000}jt`} />
-              <Tooltip {...tooltipStyle} formatter={(v: number) => formatCurrency(v)} />
+              <Tooltip {...tooltipStyle} formatter={(v: any) => formatCurrency(Number(v))} />
               <Bar dataKey="amount" fill="#3b82f6" radius={[8, 8, 0, 0]} name="Total Payroll" />
             </BarChart>
           </ResponsiveContainer>

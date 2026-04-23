@@ -5,8 +5,6 @@ import {
   CalendarDays,
   Clock,
   Wallet,
-  TrendingUp,
-  FileBarChart,
   RefreshCw,
   PieChart as PieChartIcon,
   Activity,
@@ -19,8 +17,6 @@ import {
   Cell,
   AreaChart,
   Area,
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -149,8 +145,6 @@ const ReportsDashboardPage: React.FC = () => {
   );
 
   const pendingLeaves = useMemo(() => leaveRecords.filter(r => getStr(r, ['status']).toLowerCase() === 'pending').length, [leaveRecords]);
-  const approvedLeaves = useMemo(() => leaveRecords.filter(r => ['approved', 'accepted'].includes(getStr(r, ['status']).toLowerCase())).length, [leaveRecords]);
-  const rejectedLeaves = useMemo(() => leaveRecords.filter(r => ['rejected', 'declined'].includes(getStr(r, ['status']).toLowerCase())).length, [leaveRecords]);
 
   const processedPayroll = useMemo(
     () => payrollRecords.filter(r => ['paid', 'approved'].includes(getStr(r, ['status']).toLowerCase())).length,
@@ -200,12 +194,6 @@ const ReportsDashboardPage: React.FC = () => {
     return Array.from(map, ([name, value]) => ({ name, value }));
   }, [leaveRecords]);
 
-  const leaveStatusData = useMemo(() => [
-    { name: 'Pending', value: pendingLeaves },
-    { name: 'Approved', value: approvedLeaves },
-    { name: 'Rejected', value: rejectedLeaves },
-  ].filter(d => d.value > 0), [pendingLeaves, approvedLeaves, rejectedLeaves]);
-
   const payrollTimeline = useMemo(() => {
     const map = new Map<string, { processed: number; pending: number }>();
     payrollRecords.forEach(r => {
@@ -220,46 +208,14 @@ const ReportsDashboardPage: React.FC = () => {
       .map(([period, v]) => ({ month: formatPeriodLabel(period), processed: v.processed, pending: v.pending }));
   }, [payrollRecords]);
 
-  const reimbursementByCategory = useMemo(() => {
-    const map = new Map<string, number>();
-    reimbursementRecords.forEach(r => {
-      const cat = getStr(r, ['category', 'expense_category']) || 'Other';
-      const amt = getNumericValue(r.amount) ?? 0;
-      map.set(cat, (map.get(cat) || 0) + amt);
-    });
-    return Array.from(map, ([name, value]) => ({ name, value }));
-  }, [reimbursementRecords]);
-
-  const reimbursementStatusData = useMemo(() => {
-    const statusMap = new Map<string, number>();
-    reimbursementRecords.forEach(r => {
-      const s = getStr(r, ['status']) || 'unknown';
-      statusMap.set(s, (statusMap.get(s) || 0) + 1);
-    });
-    return Array.from(statusMap, ([name, value]) => ({ name: name.charAt(0).toUpperCase() + name.slice(1), value }));
-  }, [reimbursementRecords]);
-
   // Summary cards
   const summaryCards = [
     { label: 'Total Karyawan', sub: `${activeEmployees} aktif`, value: String(totalEmployees), tone: 'blue', icon: Users },
-    { label: 'Kehadiran Hari Ini', sub: `${presentToday} hadir`, value: `${attendanceRate}%`, tone: 'green', icon: TrendingUp },
+    { label: 'Kehadiran Hari Ini', sub: `${presentToday} hadir`, value: `${attendanceRate}%`, tone: 'green', icon: Activity },
     { label: 'Cuti Pending', sub: `${leaveRecords.length} total cuti`, value: String(pendingLeaves), tone: 'orange', icon: CalendarDays },
     { label: 'Payroll Diproses', sub: `${payrollRecords.length} payroll records`, value: `${payrollRate}%`, tone: 'purple', icon: Wallet },
     { label: 'Reimburse Pending', sub: `${reimbursementRecords.length} total klaim`, value: String(pendingReimburse), tone: 'red', icon: Clock },
-    { label: 'Data Absensi', sub: 'Total catatan absensi', value: String(attendanceRecords.length), tone: 'cyan', icon: Activity },
   ];
-
-  const getToneColors = (tone: string) => {
-    switch (tone) {
-      case 'blue': return { bg: '#eff6ff', icon: '#2563eb' };
-      case 'green': return { bg: '#f0fdf4', icon: '#10b981' };
-      case 'orange': return { bg: '#fff7ed', icon: '#f59e0b' };
-      case 'purple': return { bg: '#faf5ff', icon: '#8b5cf6' };
-      case 'red': return { bg: '#fef2f2', icon: '#ef4444' };
-      case 'cyan': return { bg: '#ecfeff', icon: '#0891b2' };
-      default: return { bg: '#f8fafc', icon: '#64748b' };
-    }
-  };
 
   return (
     <div className="reports-dashboard">
@@ -304,7 +260,6 @@ const ReportsDashboardPage: React.FC = () => {
       </div>
 
       <div className="reports-charts-grid">
-        {/* 1. Attendance Trend */}
         <Card className="reports-chart-card" glass>
           <h2 className="reports-chart-title"><BarChart3 size={20} color="#2563eb" /> Tren Kehadiran</h2>
           <p className="reports-chart-subtitle">Perbandingan kehadiran kumulatif dalam satu minggu terakhir</p>
@@ -329,7 +284,6 @@ const ReportsDashboardPage: React.FC = () => {
           )}
         </Card>
 
-        {/* 2. Department Distribution */}
         <Card className="reports-chart-card" glass>
           <h2 className="reports-chart-title"><Users size={20} color="#2563eb" /> Karyawan per Departemen</h2>
           <p className="reports-chart-subtitle">Distribusi jumlah SDM berdasarkan unit kerja</p>
@@ -348,7 +302,6 @@ const ReportsDashboardPage: React.FC = () => {
           )}
         </Card>
 
-        {/* 3. Leave Distribution */}
         <Card className="reports-chart-card" glass>
           <h2 className="reports-chart-title"><PieChartIcon size={20} color="#2563eb" /> Jenis Cuti</h2>
           <p className="reports-chart-subtitle">Proporsi permohonan cuti berdasarkan kategori</p>
@@ -367,7 +320,6 @@ const ReportsDashboardPage: React.FC = () => {
           )}
         </Card>
 
-        {/* 4. Payroll Status */}
         <Card className="reports-chart-card" glass>
           <h2 className="reports-chart-title"><Wallet size={20} color="#2563eb" /> Status Payroll</h2>
           <p className="reports-chart-subtitle">Perbandingan status pemrosesan payroll saat ini</p>
@@ -389,51 +341,6 @@ const ReportsDashboardPage: React.FC = () => {
         </Card>
       </div>
     </div>
-  );
-};
-
-/* ─── Sub-component: Employee Growth Chart ─── */
-const EmployeeGrowthChart: React.FC<{ employees: DashboardRecord[]; loading: boolean }> = ({ employees, loading }) => {
-  const data = useMemo(() => {
-    const monthMap = new Map<string, number>();
-    employees.forEach(e => {
-      const raw = getStr(e, ['hire_date', 'created_at', 'start_date']);
-      if (!raw) return;
-      const d = new Date(raw);
-      if (Number.isNaN(d.getTime())) return;
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-      monthMap.set(key, (monthMap.get(key) || 0) + 1);
-    });
-
-    const sorted = Array.from(monthMap.entries()).sort(([a], [b]) => a.localeCompare(b));
-    let cumulative = 0;
-    return sorted.map(([period, count]) => {
-      cumulative += count;
-      return { month: formatPeriodLabel(period), count: cumulative, added: count };
-    });
-  }, [employees]);
-
-  if (data.length === 0) {
-    return <div className="reports-chart-empty">{loading ? 'Memuat...' : 'Belum ada data pertumbuhan karyawan.'}</div>;
-  }
-
-  return (
-    <ResponsiveContainer width="100%" height={280}>
-      <LineChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-        <defs>
-          <linearGradient id="gradGrowth" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#2563eb" stopOpacity={0.15} />
-            <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
-          </linearGradient>
-        </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="rgba(37,99,235,0.1)" />
-        <XAxis dataKey="month" stroke="#1e40af" style={{ fontSize: '12px' }} />
-        <YAxis stroke="#1e40af" style={{ fontSize: '12px' }} />
-        <Tooltip {...tooltipStyle} />
-        <Legend wrapperStyle={{ paddingTop: '20px' }} />
-        <Line type="monotone" dataKey="count" stroke="#2563eb" strokeWidth={2.5} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Total Karyawan" />
-      </LineChart>
-    </ResponsiveContainer>
   );
 };
 

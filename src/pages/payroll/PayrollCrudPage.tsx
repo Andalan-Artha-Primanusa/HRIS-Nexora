@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { BarChart3, Plus, Pencil, Trash2, ArrowLeft, RefreshCw, AlertCircle, Info, UserCircle } from "lucide-react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";

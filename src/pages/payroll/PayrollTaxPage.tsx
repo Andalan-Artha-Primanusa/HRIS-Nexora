@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, Search, Filter, Download, RefreshCw } from 'lucide-react';
+import { ShieldCheck, Search, Download, RefreshCw } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { Badge } from '@/shared/ui/Badge';
@@ -78,7 +78,7 @@ const PayrollTaxPage: React.FC = () => {
         <Card className="mini-stat-card" glass>
           <span className="stat-label">Jumlah Entri</span>
           <span className="stat-value">{totals.records}</span>
-          <Badge variant="ghost">Records</Badge>
+          <Badge variant="default">Records</Badge>
         </Card>
       </div>
 
@@ -138,21 +138,25 @@ const PayrollTaxPage: React.FC = () => {
                   <tr key={item.id}>
                     <td>
                       <div className="employee-cell">
-                        <div className="emp-avatar" style={{ backgroundColor: '#0ea5e920', color: '#0ea5e9' }}>
+                        <div className="emp-avatar" style={{ 
+                          background: 'linear-gradient(135deg, #0ea5e920 0%, #0ea5e940 100%)', 
+                          color: '#0369a1',
+                          boxShadow: 'inset 0 0 0 1px rgba(14, 165, 233, 0.1)'
+                        }}>
                           {(item.employee?.user?.name || 'U')[0]}
                         </div>
                         <div className="emp-info">
-                          <span className="emp-name">{item.employee?.user?.name || 'Unknown'}</span>
-                          <span className="emp-code">{item.employee?.employee_code || item.employee_id}</span>
+                          <span className="emp-name" style={{ color: '#0f172a' }}>{item.employee?.user?.name || 'Unknown'}</span>
+                          <span className="emp-code" style={{ letterSpacing: '0.05em' }}>{item.employee?.employee_code || item.employee_id}</span>
                         </div>
                       </div>
                     </td>
-                    <td><Badge variant="ghost">{item.period}</Badge></td>
-                    <td className="font-semibold">{formatCurrency(item.basic_salary)}</td>
-                    <td className="text-red-600 font-medium">{formatCurrency(item.pph21)}</td>
-                    <td className="text-orange-600 font-medium">{formatCurrency(item.bpjs_kesehatan)}</td>
-                    <td className="text-orange-600 font-medium">{formatCurrency(item.bpjs_ketenagakerjaan)}</td>
-                    <td className="font-bold">{formatCurrency(item.total_deduction)}</td>
+                    <td><Badge variant="default" style={{ fontWeight: 600 }}>{item.period}</Badge></td>
+                    <td style={{ fontWeight: 500, color: '#475569' }}>{formatCurrency(item.basic_salary)}</td>
+                    <td style={{ color: '#e11d48', fontWeight: 600 }}>{formatCurrency(item.pph21)}</td>
+                    <td style={{ color: '#ea580c', fontWeight: 500 }}>{formatCurrency(item.bpjs_kesehatan)}</td>
+                    <td style={{ color: '#ea580c', fontWeight: 500 }}>{formatCurrency(item.bpjs_ketenagakerjaan)}</td>
+                    <td style={{ fontWeight: 800, color: '#1e293b', fontSize: '1.05rem' }}>{formatCurrency(item.total_deduction)}</td>
                   </tr>
                 ))
               ) : (

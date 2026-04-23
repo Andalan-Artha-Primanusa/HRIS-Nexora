@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Search, Download, RefreshCw, Eye } from 'lucide-react';
+import { FileText, Search, Download, RefreshCw } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { Badge } from '@/shared/ui/Badge';
@@ -18,17 +18,15 @@ const formatCurrency = (value: number | string) => {
 const PayrollReportsDetailedPage: React.FC = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
 
   const loadData = async () => {
     setLoading(true);
-    setError(null);
     try {
       const response = await payrollService.getPayrollList();
       setData(toSafeArray(response));
     } catch (err: any) {
-      setError(err.message || 'Gagal memuat laporan payroll');
+      console.error("Failed to load payroll reports:", err);
     } finally {
       setLoading(false);
     }
@@ -78,7 +76,7 @@ const PayrollReportsDetailedPage: React.FC = () => {
         <Card className="mini-stat-card" glass>
           <span className="stat-label">Jumlah Entri</span>
           <span className="stat-value">{totals.records}</span>
-          <Badge variant="ghost">Processed</Badge>
+          <Badge variant="default">Processed</Badge>
         </Card>
       </div>
 
@@ -133,27 +131,34 @@ const PayrollReportsDetailedPage: React.FC = () => {
                   <tr key={item.id}>
                     <td>
                       <div className="employee-cell">
-                        <div className="emp-avatar" style={{ backgroundColor: '#8b5cf620', color: '#8b5cf6' }}>
+                        <div className="emp-avatar" style={{ 
+                          background: 'linear-gradient(135deg, #8b5cf620 0%, #8b5cf640 100%)', 
+                          color: '#5b21b6',
+                          boxShadow: 'inset 0 0 0 1px rgba(139, 92, 246, 0.1)'
+                        }}>
                           {(item.employee?.user?.name || 'U')[0]}
                         </div>
                         <div className="emp-info">
-                          <span className="emp-name">{item.employee?.user?.name || 'Unknown'}</span>
-                          <span className="emp-code">{item.employee?.employee_code || item.employee_id}</span>
+                          <span className="emp-name" style={{ color: '#0f172a' }}>{item.employee?.user?.name || 'Unknown'}</span>
+                          <span className="emp-code" style={{ letterSpacing: '0.05em' }}>{item.employee?.employee_code || item.employee_id}</span>
                         </div>
                       </div>
                     </td>
-                    <td><Badge variant="ghost">{item.period}</Badge></td>
-                    <td>{formatCurrency(item.basic_salary)}</td>
-                    <td className="text-green-600">+{formatCurrency(item.allowance)}</td>
-                    <td className="text-green-600">+{formatCurrency(item.bonus)}</td>
-                    <td className="text-red-600">-{formatCurrency(item.total_deduction)}</td>
-                    <td className="font-bold">{formatCurrency(item.take_home_pay)}</td>
+                    <td><Badge variant="default" style={{ fontWeight: 600 }}>{item.period}</Badge></td>
+                    <td style={{ color: '#475569' }}>{formatCurrency(item.basic_salary)}</td>
+                    <td style={{ color: '#059669', fontWeight: 600 }}>+{formatCurrency(item.allowance)}</td>
+                    <td style={{ color: '#059669', fontWeight: 600 }}>+{formatCurrency(item.bonus)}</td>
+                    <td style={{ color: '#e11d48', fontWeight: 600 }}>-{formatCurrency(item.total_deduction)}</td>
+                    <td style={{ fontWeight: 800, color: '#1e293b', fontSize: '1.05rem' }}>{formatCurrency(item.take_home_pay)}</td>
                     <td>
-                      <Badge variant={
-                        item.status === 'paid' ? 'success' : 
-                        item.status === 'approved' ? 'info' : 
-                        'warning'
-                      }>
+                      <Badge 
+                        variant={
+                          item.status === 'paid' ? 'success' : 
+                          item.status === 'approved' ? 'info' : 
+                          'warning'
+                        }
+                        style={{ padding: '6px 12px', borderRadius: '8px', fontSize: '0.7rem' }}
+                      >
                         {item.status?.toUpperCase() || 'DRAFT'}
                       </Badge>
                     </td>

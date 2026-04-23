@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Wallet, CheckCircle, Clock, Users, TrendingUp, RefreshCw, BarChart3, PieChart as PieIcon } from 'lucide-react';
+import { Wallet, CheckCircle, Users, TrendingUp, RefreshCw, BarChart3, PieChart as PieIcon } from 'lucide-react';
 import { BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
@@ -60,8 +60,6 @@ const ReportsPayrollPage: React.FC = () => {
   }, [records, filterPeriod]);
 
   const paid    = useMemo(() => filteredRecords.filter(r=>['paid','approved'].includes(getStr(r,['status']).toLowerCase())).length, [filteredRecords]);
-  const pending = useMemo(() => filteredRecords.filter(r=>getStr(r,['status']).toLowerCase()==='pending').length, [filteredRecords]);
-  const processed = useMemo(() => filteredRecords.filter(r=>getStr(r,['status']).toLowerCase()==='processed').length, [filteredRecords]);
   const totalNet  = useMemo(() => filteredRecords.reduce((s,r)=>s+getNum(r.net_salary??r.total_salary??r.amount),0), [filteredRecords]);
   const uniqueEmps = useMemo(() => new Set(filteredRecords.map(r=>getStr(r,['employee_id','user_id']))).size, [filteredRecords]);
 
