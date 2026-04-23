@@ -204,7 +204,7 @@ const MyDocumentsPage: React.FC = () => {
                     variant="ghost" 
                     size="sm" 
                     style={{ color: '#2563eb', gap: '6px' }}
-                    onClick={() => window.open(doc.file_url, '_blank')}
+                    onClick={() => window.location.href = doc.file_url}
                   >
                     <Download size={16} /> Download
                   </Button>
