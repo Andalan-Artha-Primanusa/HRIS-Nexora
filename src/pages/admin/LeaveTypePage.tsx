@@ -14,6 +14,7 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
+import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
 import './AdminLeavePages.css';
 
@@ -79,22 +80,14 @@ const LeaveTypePage: React.FC = () => {
           <p>Configure leave categories, entitlement rules, and company leave policies.</p>
         </div>
         <div style={{ display: 'flex', gap: '1rem' }}>
-           <button onClick={() => { window.alert('Refreshing list...'); fetchPolicies(); }} className="btn-refresh" style={{ 
-              padding: '10px', 
-              borderRadius: '12px', 
-              border: '1px solid #e2e8f0', 
-              background: 'white',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-            <RefreshCw size={20} className={loading ? 'animate-spin' : ''} color="#64748b" />
-          </button>
-          <button className="btn-add-policy" onClick={() => console.log('Add New Type clicked')}>
-            <Plus size={20} />
-            Add New Type
-          </button>
+           <Button variant="outline" size="md" onClick={fetchPolicies} disabled={loading}>
+             <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
+             Refresh
+           </Button>
+           <Button variant="primary" size="md" onClick={() => window.location.href = '/leave/type/create'}>
+             <Plus size={20} />
+             Add New Type
+           </Button>
         </div>
       </div>
 
@@ -196,12 +189,12 @@ const LeaveTypePage: React.FC = () => {
                   </td>
                   <td style={{ textAlign: 'right' }}>
                     <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                      <button style={{ padding: '8px', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'white', color: '#64748b', cursor: 'pointer' }}>
+                      <Button variant="ghost" size="sm" onClick={() => window.location.href = `/leave/type/edit/${policy.id}`} style={{ color: '#2563eb', padding: '0.4rem' }}>
                         <Edit size={16} />
-                      </button>
-                      <button style={{ padding: '8px', borderRadius: '8px', border: '1px solid #fee2e2', background: '#fff1f2', color: '#e11d48', cursor: 'pointer' }}>
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => window.location.href = `/leave/type/delete/${policy.id}`} style={{ color: '#ef4444', padding: '0.4rem' }}>
                         <Trash2 size={16} />
-                      </button>
+                      </Button>
                     </div>
                   </td>
                 </tr>

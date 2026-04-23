@@ -520,8 +520,9 @@ const EmployeesPage = () => {
                         <td>
                           <div className="cell-name">
                             <div className="cell-avatar">
-                              {item.user?.name?.charAt(0).toUpperCase() || "E"}
+                              {item.user?.name ? item.user.name.charAt(0).toUpperCase() : String(item.id || 'E').charAt(0).toUpperCase()}
                             </div>
+
                             <div className="cell-stacked">
                               <span className="cell-name-text">{item.user?.name || "Unknown"}</span>
                               <span className="cell-stacked__sub">{item.employee_code || item.id}</span>

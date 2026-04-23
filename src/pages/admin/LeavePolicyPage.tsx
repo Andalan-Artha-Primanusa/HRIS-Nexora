@@ -3,12 +3,12 @@ import {
   Plus, 
   ShieldCheck, 
   Clock, 
-  RefreshCw, 
-  ArrowRight, 
   BookOpen
 } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
+import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
+import { Eye, RefreshCw } from 'lucide-react';
 import './AdminLeavePages.css';
 
 interface LeavePolicy {
@@ -65,22 +65,14 @@ const LeavePolicyPage: React.FC = () => {
           <p>Define the regulatory framework and entitlement rules for all leave categories.</p>
         </div>
         <div style={{ display: 'flex', gap: '1rem' }}>
-           <button onClick={() => { window.alert('Refreshing policies...'); fetchPolicies(); }} className="btn-refresh" style={{ 
-              padding: '10px', 
-              borderRadius: '12px', 
-              border: '1px solid #e2e8f0', 
-              background: 'white',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-            <RefreshCw size={20} className={loading ? 'animate-spin' : ''} color="#64748b" />
-          </button>
-          <button className="btn-add-policy" style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)' }} onClick={() => console.log('Configure Policy clicked')}>
+           <Button variant="outline" size="md" onClick={fetchPolicies} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
+            <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
+            Refresh
+          </Button>
+          <Button variant="primary" size="md" onClick={() => window.location.href = '/leave/policy/create'}>
             <Plus size={20} />
             Configure Policy
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -128,24 +120,9 @@ const LeavePolicyPage: React.FC = () => {
               </div>
             </div>
 
-            <button style={{ 
-              width: '100%', 
-              padding: '12px', 
-              borderRadius: '12px', 
-              border: '1px solid #e2e8f0', 
-              background: 'white', 
-              color: '#7c3aed', 
-              fontWeight: 700, 
-              fontSize: '0.9rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              transition: 'all 0.2s'
-            }}>
-              Adjust Rules <ArrowRight size={16} />
-            </button>
+<Button variant="outline" size="md" onClick={() => window.location.href = `/leave/policy/edit/${policy.id}`} style={{ width: '100%' }}>
+              <Eye size={16} /> View Details
+            </Button>
           </Card>
         ))}
       </div>

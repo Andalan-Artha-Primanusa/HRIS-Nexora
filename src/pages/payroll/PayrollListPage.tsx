@@ -404,18 +404,23 @@ const PayrollListPage: React.FC = () => {
                         <div className="cell-sub">EMP: {item.employee_id}</div>
                       </td>
                       <td>
-                        <div className="cell-name">
-                          <div className="cell-avatar">
-                            {item.employeeName?.charAt(0)?.toUpperCase() || "P"}
+                          <div className="cell-name">
+                            <div className="cell-avatar">
+                              {item.employeeName ? item.employeeName.charAt(0).toUpperCase() : String(item.employee_id || 'P').charAt(0).toUpperCase()}
+                            </div>
+                            <span className="cell-name-text">{item.employeeName || `ID: ${item.employee_id}`}</span>
                           </div>
-                          <span className="cell-name-text">{item.employeeName || "-"}</span>
-                        </div>
+
                       </td>
                       <td><span className="cell-tag">{item.period || "-"}</span></td>
-                      <td className="cell-amount">{formatCurrency(item.basic_salary || 0)}</td>
-                      <td className="cell-amount cell-amount-green">
-                        {formatCurrency(item.take_home_pay || item.net_salary || 0)}
+
+                      <td className="cell-amount" title="Gaji pokok sebelum tunjangan/potongan">
+                        {formatCurrency(item.basic_salary || 0)} <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 'normal' }}>Basic</span>
                       </td>
+                      <td className="cell-amount cell-amount-green" title="Gaji bersih setelah semua tunjangan & potongan">
+                        {formatCurrency(item.take_home_pay || item.net_salary || 0)} <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 'normal' }}>Net</span>
+                      </td>
+
                       <td>
                         <PayrollStatusBadge status={item.status} size="md" />
                       </td>

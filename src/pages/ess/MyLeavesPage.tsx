@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
+
+import { Calendar } from "lucide-react";
+
 import { Button } from "@/shared/ui/Button";
 import { getMyLeaveBalance, getMyLeaves } from "@/features/ess/api/ess.service";
 import type { GenericApiItem } from "@/features/ess/types/ess.types";
@@ -198,9 +201,10 @@ const MyLeavesPage = () => {
           <p className="ess-badge">ESS Center</p>
           <h1>{isBalanceRoute ? "My Leave Balance" : "My Leaves"}</h1>
           <p>
-            {isBalanceRoute
-              ? "View your available leave balance with the same visual language used across the app."
-              : "View your leave history with the same visual language used across the app."}
+      {isBalanceRoute
+        ? "Lihat saldo cuti tersedia Anda dengan tampilan visual yang konsisten dan menarik."
+        : "Lihat riwayat cuti Anda dengan tampilan yang konsisten di seluruh aplikasi."}
+
           </p>
         </div>
         <Button variant="primary" size="md" onClick={handleRefresh} disabled={loading}>
@@ -274,39 +278,49 @@ const MyLeavesPage = () => {
 
       {isBalanceRoute && (
         <Card className="ess-card" glass>
+
           <h2>Your Leave Balance</h2>
           {leaveBalance ? (
-            <div className="ess-balance-grid">
+            <div className="leave-balance-cards" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginTop: '1rem' }}>
               {Object.entries(leaveBalance).map(([key, value]) => {
-                const nestedEntries = isRecord(value) ? Object.entries(value) : null;
-
+                const label = toLabel(key);
+                const isNumeric = isNumericLike(value);
+                const numValue = isNumeric ? Number(value) : 0;
+                
                 return (
-                  <div className="ess-balance-item" key={key}>
-                    <span>{toLabel(key)}</span>
-
-                    {nestedEntries ? (
-                      <div className="ess-balance-list">
-                        {nestedEntries.map(([nestedKey, nestedValue]) => (
-                          <div className="ess-balance-row" key={nestedKey}>
-                            <p className="ess-balance-row-label">{toLabel(nestedKey)}</p>
-                            <p className={`ess-balance-row-value${isNumericLike(nestedValue) ? " is-numeric" : ""}`}>
-                              {asDisplay(nestedValue)}
-                            </p>
-                          </div>
-                        ))}
+                  <Card key={key} className="leave-balance-card" glass style={{ padding: '1.5rem', borderRadius: '20px', border: '1px solid rgba(37,99,235,0.12)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                      <div>
+                        <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700', color: '#1e293b' }}>{label}</h3>
+                        <p style={{ margin: '0.25rem 0 0', color: '#64748b', fontSize: '0.85rem' }}>Available Days</p>
                       </div>
-                    ) : (
-                      <strong className={`ess-balance-main-value${isNumericLike(value) ? " is-numeric" : ""}`}>
+                      <span style={{ fontSize: '2rem', fontWeight: '800', color: '#10b981' }}>
                         {asDisplay(value)}
-                      </strong>
+                      </span>
+                    </div>
+                    {isNumeric && (
+                      <div style={{ height: '12px', background: '#e2e8f0', borderRadius: '6px', overflow: 'hidden' }}>
+                        <div style={{
+                          height: '100%',
+                          background: 'linear-gradient(90deg, #10b981, #059669)',
+                          borderRadius: '6px',
+                          width: `${Math.min(numValue / 30 * 100, 100)}%`,
+                          transition: 'width 0.3s ease'
+                        }} />
+                      </div>
                     )}
-                  </div>
+                  </Card>
                 );
               })}
             </div>
           ) : (
-            <p className="ess-empty">No leave balance data available.</p>
+            <div style={{ textAlign: 'center', padding: '4rem 2rem', color: '#94a3b8' }}>
+              <Calendar size={64} style={{ opacity: 0.3, marginBottom: '1rem' }} />
+              <p style={{ fontSize: '1.1rem', fontWeight: '500' }}>No leave balance data available</p>
+              <p style={{ marginTop: '0.5rem' }}>Your leave entitlements will appear here.</p>
+            </div>
           )}
+
         </Card>
       )}
     </div>

@@ -176,8 +176,9 @@ const AdminImportPage = () => {
     <div className="crud-page">
       <div className="page-header">
         <div className="page-header-title">
-          <span className="page-badge">Admin Center</span>
-          <h1>Import Center</h1>
+
+
+
           <p>Unduh template, unggah file users maupun employees, dan tinjau hasil proses import langsung dari halaman admin.</p>
         </div>
       </div>

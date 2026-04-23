@@ -61,7 +61,6 @@ export const menuItems: MenuItem[] = [
     label: 'Absensi & Waktu',
     icon: Clock,
     subItems: [
-      { label: 'Monitoring Hari Ini', path: '/attendance/daily' },
       { label: 'Riwayat Semua Karyawan', path: '/attendance/daily' },
       { label: 'Timesheet', path: '/attendance/timesheet' },
       { label: 'Lembur', path: '/attendance/overtime' },
@@ -232,8 +231,15 @@ export const menuItems: MenuItem[] = [
       { label: 'Jenis Cuti', path: '/leave/type' },
       { label: 'Kebijakan Cuti', path: '/leave/policy' },
       { label: 'Kategori Pengeluaran', path: '/settings/master-data/expense-category' },
+      {
+        label: 'Pusat Impor (Master Data)',
+        path: '/admin/import',
+        requiredChecker: (user) => RBACUtils.isAdmin(user) || RBACUtils.isSuperAdmin(user),
+      },
+
     ]
   },
+
   {
     label: 'Alat Admin',
     icon: ShieldCheck,
@@ -279,11 +285,8 @@ export const menuItems: MenuItem[] = [
         path: '/admin/audit-logs',
         requiredChecker: (user) => RBACUtils.isAdmin(user) || RBACUtils.isSuperAdmin(user),
       },
-      {
-        label: 'Pusat Impor',
-        path: '/admin/import',
-        requiredChecker: (user) => RBACUtils.isAdmin(user) || RBACUtils.isSuperAdmin(user),
-      },
+// MOVED TO MASTER DATA: Pusat Impor
+
       {
         label: 'Perangkat Biometrik',
         path: '/admin/biometric-devices',
