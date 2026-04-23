@@ -268,6 +268,18 @@ const sectionDefinitions: Record<string, { title: string; subtitle: string; icon
     icon: ShieldCheck,
     color: '#2563EB',
   },
+  '/settings/company': {
+    title: 'Pengaturan Perusahaan',
+    subtitle: 'Kelola profil, informasi kontak, dan identitas perusahaan.',
+    icon: Briefcase,
+    color: '#2563EB',
+  },
+  '/settings/user-role': {
+     title: 'Pengaturan Pengguna & Peran',
+     subtitle: 'Kelola pengguna sistem dan hak akses.',
+    icon: UserCircle,
+    color: '#2563EB',
+  },
 };
 
 type UnknownRecord = Record<string, unknown>;
@@ -644,6 +656,9 @@ const getDefaultFormState = (pathname: string) => {
       return { manager_user_id: '' };
     case '/compliance/expiring-documents':
       return { days: '30' };
+    case '/settings/company':
+      return { company_name: 'PT Andalan Artha Primanusa', email: 'hr@andalan.com', phone: '+62 21 555 1234', address: 'Gedung Sudirman, Lt. 5, Jakarta', tax_id: '01.234.567.8-091.000', timezone: 'Asia/Jakarta' };
+    case '/settings/user-role':
     case '/admin/users':
       return { id: '', role_ids: '' };
     case '/admin/roles':
@@ -823,6 +838,8 @@ const routeActionMatrix: Record<string, string[]> = {
   '/my/payroll': ['submitMyPayroll', 'getMyPayrollSlip', 'exportMyPayrollCsv', 'exportMyPayrollPdf'],
   '/admin/users': ['assignRoleToUser'],
   '/admin/roles': ['assignPermissionToRole'],
+  '/settings/company': ['updateCompanySettings'],
+  '/settings/user-role': ['assignRoleToUser'],
 };
 
 const supportsCrudModeSplit = (pathname: string) => splitCrudPaths.has(getCrudRouteBase(pathname));
@@ -910,6 +927,7 @@ const actionRequiredFields: Record<string, string[]> = {
   cancelLeaveRequest: ['id'],
   exportMyPayrollCsv: ['id'],
   exportMyPayrollPdf: ['id'],
+  updateCompanySettings: ['company_name', 'email'],
 };
 
 const SectionPage = () => {
@@ -1696,7 +1714,7 @@ const SectionPage = () => {
           });
           break;
         case '/settings/company':
-          result = await api.get('/locations');
+          result = { data: [] }; // Mock empty data so the table doesn't render
           break;
         case '/settings/user-role':
           result = await api.get('/admin/users');
@@ -2424,8 +2442,6 @@ const SectionPage = () => {
       case '/expense/list':
       case '/expense/categories':
       case '/expense/reports':
-      case '/settings/company':
-      case '/settings/user-role':
       case '/settings/permissions':
       case '/settings/master-data/department':
       case '/settings/master-data/position':
@@ -2437,6 +2453,23 @@ const SectionPage = () => {
           <>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
               Muat Ulang Data
+            </Button>
+          </>
+        );
+      case '/settings/company':
+        return (
+          <Button variant="primary" size="md" onClick={() => void performAction('updateCompanySettings')} disabled={loading}>
+            Simpan Pengaturan
+          </Button>
+        );
+      case '/settings/user-role':
+        return (
+          <>
+            <Button variant="primary" size="md" onClick={() => void performAction('assignRoleToUser')} disabled={loading}>
+              Assign Role
+            </Button>
+            <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
+              Muat Ulang Pengguna
             </Button>
           </>
         );

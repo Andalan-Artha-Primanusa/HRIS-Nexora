@@ -148,17 +148,23 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
           </div>
           
           <div className={`user-dropdown ${openDropdown ? 'visible' : ''}`}>
-            <button className="dropdown-item" type="button" onClick={() => navigate('/settings/user-role')}>
+            <button className="dropdown-item" type="button" onClick={() => {
+              if (user?.profile?.id) {
+                navigate(`/profiles/update/${user.profile.id}`);
+              } else {
+                navigate('/profiles/add');
+              }
+            }}>
               <UserCircle size={24} />
-              <span>Profile</span>
+              <span>Profil</span>
             </button>
             <button className="dropdown-item" type="button" onClick={() => navigate('/settings/company')}>
               <Settings size={24} />
-              <span>Settings</span>
+              <span>Pengaturan</span>
             </button>
             <button className="dropdown-item logout-item" type="button" onClick={() => void onLogout()}>
               <LogOut size={24} />
-              <span>Logout</span>
+              <span>Keluar</span>
             </button>
           </div>
         </div>

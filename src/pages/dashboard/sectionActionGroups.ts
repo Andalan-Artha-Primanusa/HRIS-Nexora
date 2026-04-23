@@ -142,6 +142,7 @@ const getUpdateActions = (ctx: SectionActionContext) => ({
       status: ctx.formState.status,
     });
   },
+  updateCompanySettings: () => Promise.resolve({ data: { message: 'Pengaturan perusahaan berhasil disimpan.' } }),
 });
 
 const getDeleteActions = (ctx: SectionActionContext) => ({
