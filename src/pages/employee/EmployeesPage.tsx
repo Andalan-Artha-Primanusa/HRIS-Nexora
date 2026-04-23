@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { api } from "@/shared/api/httpClient";
 import { getAllLocations } from "@/features/location/api/location.service";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
@@ -24,14 +24,7 @@ import {
   RefreshCw,
   Pencil,
   Trash2,
-  ChevronDown,
-  ArrowUp,
-  ArrowDown,
   Briefcase,
-  Play,
-  CheckCircle,
-  Settings,
-  LogOut,
   FileText,
   TrendingUp,
 } from "lucide-react";
@@ -60,7 +53,7 @@ const EmployeesPage = () => {
   const [, setStatusMessage] = useState("Ready to call employee API");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [hasLoaded, setHasLoaded] = useState(false);
+  // const [hasLoaded, setHasLoaded] = useState(false);
 
   // Authentication & RBAC
   const user = useAuthStore((state) => state.user);
@@ -68,21 +61,21 @@ const EmployeesPage = () => {
 
   // Lifecycle Modals State
   const [activeActionModal, setActiveActionModal] = useState<"onboarding_start" | "onboarding_complete" | "offboarding_start" | "offboarding_complete" | null>(null);
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
+  const [selectedEmployeeId] = useState<string>("");
   const [onboardingDate, setOnboardingDate] = useState("");
   const [offboardingDate, setOffboardingDate] = useState("");
   const [offboardingReason, setOffboardingReason] = useState("");
 
   // Metadata State
   const [allLocations, setAllLocations] = useState<Record<string, any>[]>([]);
-  const [allUsers, setAllUsers] = useState<Record<string, any>[]>([]);
-  const [allSchedules, setAllSchedules] = useState<Record<string, any>[]>([]);
-  const [allDepartments, setAllDepartments] = useState<string[]>([]);
+  // const [allUsers, setAllUsers] = useState<Record<string, any>[]>([]);
+  // const [allSchedules, setAllSchedules] = useState<Record<string, any>[]>([]);
+  // const [allDepartments, setAllDepartments] = useState<string[]>([]);
 
   // Search & Filter State
   const [searchText, setSearchText] = useState("");
-  const [sortBy, setSortBy] = useState<"id" | "name" | "code" | "department" | "position">("name");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [sortBy] = useState<"id" | "name" | "code" | "department" | "position">("name");
+  const [sortOrder] = useState<"asc" | "desc">("asc");
   const [showFilters, setShowFilters] = useState(false);
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [selectedPosition, setSelectedPosition] = useState("");
@@ -235,21 +228,21 @@ const EmployeesPage = () => {
       let usersList = usersRes.data?.data?.items || usersRes.data?.data || [];
       if (!Array.isArray(usersList)) usersList = [];
       console.log("👤 Users fetched:", usersList);
-      setAllUsers(usersList);
+      // setAllUsers(usersList);
 
       // Fetch Work Schedules
       const schedRes = await api.get('/work-schedules');
       let schedList = schedRes.data?.data || schedRes.data || [];
       if (!Array.isArray(schedList)) schedList = [];
       console.log("📅 Schedules fetched:", schedList);
-      setAllSchedules(schedList);
+      // setAllSchedules(schedList);
 
       // Fetch Departments
       const deptRes = await api.get('/organization/master-data');
       const deptList = deptRes.data?.data?.departments;
       const finalDeptList = Array.isArray(deptList) ? deptList : [];
       console.log("🏢 Departments fetched:", finalDeptList);
-      setAllDepartments(finalDeptList);
+      // setAllDepartments(finalDeptList);
     } catch (err) {
       console.error("❌ Failed to load metadata:", err);
     }
@@ -273,7 +266,7 @@ const EmployeesPage = () => {
       setErrorMessage(message);
     } finally {
       setLoading(false);
-      setHasLoaded(true);
+      // setHasLoaded(true);
     }
   };
 

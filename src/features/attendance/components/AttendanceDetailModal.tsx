@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Clock, MapPin, User, Calendar, ShieldCheck } from 'lucide-react';
+import { X, Clock, MapPin, Calendar } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
 

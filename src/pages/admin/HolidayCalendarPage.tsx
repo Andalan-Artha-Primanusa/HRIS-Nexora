@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Plus, RefreshCw, MapPin, ChevronLeft, ChevronRight, Edit2 } from 'lucide-react';
+import { Plus, RefreshCw, MapPin, ChevronLeft, ChevronRight, Edit2 } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
@@ -14,7 +14,8 @@ const HolidayCalendarPage: React.FC = () => {
     setLoading(true);
     try {
       const response = await api.get('/workforce/holidays');
-      setHolidays(response.data.data || []);
+      const data = response.data?.data || response.data || [];
+      setHolidays(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
     } finally {

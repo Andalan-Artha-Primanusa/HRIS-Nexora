@@ -3,8 +3,7 @@ import type {
   JobOpening, 
   Candidate, 
   Interview, 
-  Offer, 
-  RecruitmentSummary 
+  Offer 
 } from "../types/recruitment.types";
 
 export const recruitmentService = {

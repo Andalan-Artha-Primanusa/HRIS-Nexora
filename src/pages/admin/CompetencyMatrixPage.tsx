@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Target, Search, Filter, Download, Star, Award, User } from 'lucide-react';
+import { Search, Download, Award, User } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { trainingService } from '@/features/training/api/training.service';
+import '@/shared/styles/CrudPage.css';
 
 const CompetencyMatrixPage: React.FC = () => {
   const [competencies, setCompetencies] = useState<any[]>([]);

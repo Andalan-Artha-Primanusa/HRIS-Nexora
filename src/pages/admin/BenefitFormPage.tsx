@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save, Gift, Heart, Shield, Zap, DollarSign, Users } from 'lucide-react';
+import { ArrowLeft, Save, Gift, Shield, DollarSign } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { benefitService } from '@/features/benefits/api/benefit.service';
+import '@/shared/styles/CrudPage.css';
 
 const BenefitFormPage: React.FC = () => {
   const navigate = useNavigate();

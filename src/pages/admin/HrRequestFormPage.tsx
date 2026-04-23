@@ -4,6 +4,7 @@ import { ArrowLeft, Save, MessageSquare, Clock, User, AlertCircle, RefreshCw } f
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { requestService } from '@/features/requests/api/requests.service';
+import '@/shared/styles/CrudPage.css';
 
 const HrRequestFormPage: React.FC = () => {
   const navigate = useNavigate();

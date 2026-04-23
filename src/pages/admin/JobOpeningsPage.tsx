@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, RefreshCw, Search, Briefcase } from 'lucide-react';
+import { Plus, RefreshCw, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
@@ -30,10 +30,12 @@ const JobOpeningsPage: React.FC = () => {
     fetchData();
   }, []);
 
-  const filteredItems = items.filter(item => 
-    item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.department.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredItems = items.filter(item => {
+    const title = String(item?.title || '').toLowerCase();
+    const department = String(item?.department || '').toLowerCase();
+    const query = searchQuery.toLowerCase();
+    return title.includes(query) || department.includes(query);
+  });
 
   const handleEdit = (job: JobOpening) => {
     navigate(`/recruitment/openings/edit/${job.id}`);

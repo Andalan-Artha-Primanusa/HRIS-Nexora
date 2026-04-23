@@ -20,6 +20,8 @@ export type { FilterState } from "./components/PayrollFilters";
 
 // Services
 export {
+  payrollService,
+  toSafeArray,
   getAllPayroll,
   getPayrollDetail,
   createPayroll,

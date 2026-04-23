@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { RefreshCw, Plus, ArrowLeftRight, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { RefreshCw, Plus, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { workforceService } from '@/features/workforce/api/workforce.service';

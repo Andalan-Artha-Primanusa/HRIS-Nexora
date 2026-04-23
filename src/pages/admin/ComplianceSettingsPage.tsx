@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Database, Trash2, UserX, FileText, Plus, AlertCircle } from 'lucide-react';
+import { ShieldCheck, Database, UserX, FileText, Plus, AlertCircle } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 

@@ -1,7 +1,12 @@
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '@/shared/api/httpClient';
 import { getLocationDetail, updateLocation } from '@/features/location/api/location.service';
 import type { LocationUpdatePayload } from '@/features/location/types/location.types';
 import { MapPin, ArrowLeft } from 'lucide-react';
+import { Card } from '@/shared/ui/Card';
+import { Alert } from '@/shared/ui/Alert';
+import { Button } from '@/shared/ui/Button';
 import './LocationForm.css';
 
 const EditLocationPage = () => {

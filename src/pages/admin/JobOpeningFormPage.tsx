@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save, Briefcase, MapPin, DollarSign, Clock, FileText } from 'lucide-react';
+import { ArrowLeft, Save, Briefcase, MapPin, DollarSign, FileText } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { recruitmentService } from '@/features/recruitment/api/recruitment.service';
+import type { JobOpening } from '@/features/recruitment/types/recruitment.types';
 import '@/shared/styles/CrudPage.css';
 
 const JobOpeningFormPage: React.FC = () => {
@@ -13,12 +14,12 @@ const JobOpeningFormPage: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<Partial<JobOpening>>({
     title: '',
     department: '',
     location: '',
-    type: 'Full-time',
-    status: 'Open',
+    type: 'full-time',
+    status: 'open',
     salary_range: '',
     description: '',
     requirements: ''
@@ -129,10 +130,10 @@ const JobOpeningFormPage: React.FC = () => {
                     <div className="form-group">
                        <label>Employment Type</label>
                        <select name="type" value={formData.type} onChange={handleChange} className="form-control">
-                          <option>Full-time</option>
-                          <option>Part-time</option>
-                          <option>Contract</option>
-                          <option>Internship</option>
+                          <option value="full-time">Full-time</option>
+                          <option value="part-time">Part-time</option>
+                          <option value="contract">Contract</option>
+                          <option value="remote">Remote</option>
                        </select>
                     </div>
                     <div className="form-group">
@@ -145,9 +146,9 @@ const JobOpeningFormPage: React.FC = () => {
                     <div className="form-group">
                        <label>Status</label>
                        <select name="status" value={formData.status} onChange={handleChange} className="form-control">
-                          <option value="Open">Active / Open</option>
-                          <option value="Draft">Draft</option>
-                          <option value="Closed">Closed</option>
+                          <option value="open">Active / Open</option>
+                          <option value="draft">Draft</option>
+                          <option value="closed">Closed</option>
                        </select>
                     </div>
                  </div>

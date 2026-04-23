@@ -9,6 +9,7 @@ import { Bell, Megaphone, RefreshCw, Send, ShieldAlert, Users } from "lucide-rea
 import "@/shared/styles/CrudPage.css";
 import "./AdminCrudPages.css";
 import { createAdminNotification, getAdminNotificationsSummary, sendAdminBroadcastNotification } from "@/features/admin/api/admin-batch1.service";
+import { getAllEmployees } from "@/features/employee/api/employee.service";
 
 type SummaryData = {
   total_notifications?: number;
@@ -60,6 +61,7 @@ const AdminNotificationsPage = () => {
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [recipientId, setRecipientId] = useState("");
+  const [employees, setEmployees] = useState<any[]>([]);
 
   const [broadcastTitle, setBroadcastTitle] = useState("");
   const [broadcastMessage, setBroadcastMessage] = useState("");
@@ -69,8 +71,12 @@ const AdminNotificationsPage = () => {
     setLoadingSummary(true);
 
     try {
-      const result = await getAdminNotificationsSummary();
+      const [result, empResult] = await Promise.all([
+        getAdminNotificationsSummary(),
+        getAllEmployees()
+      ]);
       setSummary((result ?? {}) as SummaryData);
+      setEmployees(empResult);
       setStatusMessage("Ringkasan notifikasi berhasil dimuat.");
       setAlertType("success");
     } catch (error: unknown) {
@@ -131,7 +137,8 @@ const AdminNotificationsPage = () => {
       await createAdminNotification({
         title,
         message,
-        user_id: recipientId ? Number(recipientId) : undefined,
+        type: "info",
+        user_ids: recipientId ? [Number(recipientId)] : [],
       });
 
       setTitle("");
@@ -221,8 +228,13 @@ const AdminNotificationsPage = () => {
                   <input id="notification-title" className="form-input" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Contoh: Pengingat update profil" required />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="notification-recipient">User ID</label>
-                  <input id="notification-recipient" className="form-input" value={recipientId} onChange={(event) => setRecipientId(event.target.value)} placeholder="Masukkan user id tujuan" />
+                  <label htmlFor="notification-recipient">Penerima (Karyawan)</label>
+                  <select id="notification-recipient" className="form-input" value={recipientId} onChange={(event) => setRecipientId(event.target.value)}>
+                    <option value="">-- Pilih Penerima (Opsional) --</option>
+                    {employees.map(emp => (
+                      <option key={emp.id} value={emp.user_id || emp.id}>{emp.full_name} ({emp.employee_id})</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="form-group" style={{ gridColumn: "1 / -1" }}>
                   <label htmlFor="notification-message">Pesan</label>

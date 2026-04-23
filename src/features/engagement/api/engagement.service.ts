@@ -1,9 +1,4 @@
 import { api } from "@/shared/api/httpClient";
-import type { 
-  IDP, 
-  SuccessionMatrix, 
-  EngagementSurvey 
-} from "../types/engagement.types";
 
 export const engagementService = {
   // IDPs

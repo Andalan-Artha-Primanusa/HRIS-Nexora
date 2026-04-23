@@ -263,7 +263,7 @@
   justify-content: center;
   border: 1px solid #e2e8f0;
   transition: all 0.2s;
-  background: white;
+  background: #f8fafc;
   color: #64748b;
   cursor: pointer;
 }
@@ -276,6 +276,16 @@
 .btn-action-edit:hover { background: #eff6ff; color: #2563eb; border-color: #dbeafe; }
 .btn-action-delete:hover { background: #fef2f2; color: #ef4444; border-color: #fee2e2; }
 .btn-action-view:hover { background: #f5f3ff; color: #8b5cf6; border-color: #ede9fe; }
+
+.btn-action svg {
+  stroke: currentColor !important;
+  stroke-width: 2 !important;
+  width: 16px !important;
+  height: 16px !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
 
 @media (max-width: 768px) {
   .form-grid {

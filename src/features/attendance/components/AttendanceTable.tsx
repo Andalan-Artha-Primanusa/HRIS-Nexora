@@ -1,5 +1,5 @@
 import React from 'react';
-import { Eye, Trash2, Clock, User, Calendar } from 'lucide-react';
+import { Eye, Trash2, Clock } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 
 interface AttendanceTableProps {
@@ -33,7 +33,7 @@ const formatDate = (date: any) => {
   } catch { return String(date); }
 };
 
-export const AttendanceTable: React.FC<AttendanceTableProps> = ({ items, onView, onDelete, loading }) => {
+export const AttendanceTable: React.FC<AttendanceTableProps> = ({ items, onView, onDelete }) => {
   return (
     <div className="table-wrap">
       <table className="data-table">

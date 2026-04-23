@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BarChart3, Plus, RefreshCw, Send, Users, Calendar, Edit2 } from 'lucide-react';
-import { Card } from '@/shared/ui/Card';
+import { BarChart3, Plus, RefreshCw, Users, Calendar, Edit2 } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import { engagementService } from '@/features/engagement/api/engagement.service';
 import type { EngagementSurvey } from '@/features/engagement/types/engagement.types';

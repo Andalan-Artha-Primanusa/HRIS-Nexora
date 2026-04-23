@@ -3,7 +3,7 @@ import { BarChart3, CreditCard, FileText, ShieldCheck } from "lucide-react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
-import { getPayrollDetail, markPayrollAsPaid, getAllPayroll } from "@/features/payroll/api/payroll.service";
+import { payrollService, toSafeArray } from "@/features/payroll/api/payroll.service";
 import { getAllEmployees } from "@/features/employee/api/employee.service";
 import type { PayrollItem } from "@/features/payroll/types/payroll.types";
 import type { EmployeeItem } from "@/features/employee/types/employee.types";
@@ -27,12 +27,17 @@ const PayrollPaymentPage = () => {
     setErrorModal({ isOpen: true, title, message });
   };
 
+
+
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [empsData, payrollsData] = await Promise.all([getAllEmployees(), getAllPayroll()]);
-        setEmployees(empsData);
-        setAllPayrolls(payrollsData);
+        const [empsData, payrollsData] = await Promise.all([
+          getAllEmployees(),
+          payrollService.getPayrollList()
+        ]);
+        setEmployees(toSafeArray(empsData));
+        setAllPayrolls(toSafeArray(payrollsData));
       } catch (error) {
         console.error("Error loading data:", error);
       }
@@ -50,7 +55,7 @@ const PayrollPaymentPage = () => {
     setLoading(true);
     try {
       const cleanId = String(payrollId).replace(/^[A-Z]+/, "").replace(/^0+/, "") || payrollId;
-      const payroll = await getPayrollDetail(cleanId);
+      const payroll = await payrollService.getPayrollDetail(cleanId);
       setSelectedPayroll(payroll);
       setMessage(null);
     } catch (error) {
@@ -79,12 +84,12 @@ const PayrollPaymentPage = () => {
     setLoading(true);
     try {
       const payrollIdValue = String(selectedPayroll.id).replace(/^[A-Z]+/, "").replace(/^0+/, "") || selectedPayroll.id;
-      const updated = await markPayrollAsPaid(payrollIdValue);
+      const updated = await payrollService.processPayment(payrollIdValue);
       setSelectedPayroll(updated);
       setMessage({ type: "success", text: "Payroll berhasil ditandai sebagai dibayar" });
 
-      const payrollsData = await getAllPayroll();
-      setAllPayrolls(payrollsData);
+      const payrollsData = await payrollService.getPayrollList();
+      setAllPayrolls(toSafeArray(payrollsData));
     } catch (error) {
       const errorText = error instanceof Error ? error.message : "Gagal menandai payroll sebagai dibayar";
       showErrorModal("Error Tandai Dibayar", errorText);
@@ -94,7 +99,7 @@ const PayrollPaymentPage = () => {
   };
 
   const getEmployeeName = (empId: string | number) => {
-    const employee = employees.find((entry) => entry.id === empId || String(entry.id) === String(empId));
+    const employee = safeEmployees.find((entry) => entry.id === empId || String(entry.id) === String(empId));
     return employee ? `${employee.employee_code} - ${employee.user?.name || "Unknown"}` : "Unknown";
   };
 
@@ -120,11 +125,15 @@ const PayrollPaymentPage = () => {
     return labels[status] || status;
   };
 
+  // Ensure allPayrolls and employees are always arrays before filtering
+  const safePayrolls = Array.isArray(allPayrolls) ? allPayrolls : [];
+  const safeEmployees = Array.isArray(employees) ? employees : [];
+
   const summaryCards = [
     {
       label: "All Payroll",
       subtitle: "Seluruh payroll yang dimuat",
-      value: String(allPayrolls.length),
+      value: String(safePayrolls.length),
       change: "Ringkasan data payroll",
       tone: "blue" as const,
       icon: FileText,
@@ -140,7 +149,7 @@ const PayrollPaymentPage = () => {
     {
       label: "Ready to Pay",
       subtitle: "Status yang belum paid",
-      value: String(allPayrolls.filter((item) => item.status !== "paid").length),
+      value: String(safePayrolls.filter((item) => item.status !== "paid").length),
       change: "Perlu ditinjau atau diproses",
       tone: "orange" as const,
       icon: ShieldCheck,
@@ -148,14 +157,14 @@ const PayrollPaymentPage = () => {
     {
       label: "Paid",
       subtitle: "Sudah ditandai dibayar",
-      value: String(allPayrolls.filter((item) => item.status === "paid").length),
+      value: String(safePayrolls.filter((item) => item.status === "paid").length),
       change: "Status final pembayaran",
       tone: "purple" as const,
       icon: CreditCard,
     },
   ];
 
-  const recentPayrolls = allPayrolls.slice(0, 5);
+  const recentPayrolls = safePayrolls.slice(0, 5);
 
   return (
     <div className="crud-page">

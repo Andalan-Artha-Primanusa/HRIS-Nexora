@@ -3,6 +3,7 @@ import { Network, Search, RefreshCw } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import { OrgChartNode } from '@/features/organization/components/OrgChartNode';
 import { organizationService } from '@/features/organization/api/organization.service';
+import '@/shared/styles/CrudPage.css';
 
 const OrgChartPage: React.FC = () => {
   const [chartData, setChartData] = useState<any>(null);

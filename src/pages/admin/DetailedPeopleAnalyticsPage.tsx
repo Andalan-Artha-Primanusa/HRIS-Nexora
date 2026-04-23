@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, Users, UserMinus, UserPlus, AlertCircle, PieChart, BarChart3, ArrowUpRight, ArrowDownRight, ArrowLeft } from 'lucide-react';
+import { Users, UserMinus, UserPlus, AlertCircle, PieChart, BarChart3, ArrowUpRight, ArrowDownRight, ArrowLeft } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { reportingService } from '@/features/reporting/api/reporting.service';
 
 const DetailedPeopleAnalyticsPage: React.FC = () => {
   const navigate = useNavigate();
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [, setData] = useState<any>(null);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {

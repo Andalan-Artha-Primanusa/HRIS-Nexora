@@ -1,6 +1,6 @@
 import { 
   Users, CalendarDays, CreditCard, Receipt, Target, UserCircle, 
-  FileBarChart, Settings, LayoutDashboard, Network, Briefcase, 
+  FileBarChart, LayoutDashboard, Network, Briefcase, 
   FileText, Clock, Banknote, Database, ShieldCheck
 } from 'lucide-react';
 
@@ -46,15 +46,7 @@ export const menuItems: MenuItem[] = [
           { label: 'Master Data', path: '/organization/master-data' },
         ]
       },
-      {
-        label: 'Legal & Surat',
-        icon: FileText,
-        subItems: [
-          { label: 'Generator Surat', path: '/legal/letters' },
-          { label: 'Kalkulator Pesangon', path: '/legal/severance' },
-          { label: 'PPh21 Progresif', path: '/legal/tax' },
-        ]
-      },
+
       {
         label: 'Dokumen',
         icon: FileText,
@@ -84,8 +76,6 @@ export const menuItems: MenuItem[] = [
       { label: 'Persetujuan', path: '/leave/approval' },
       { label: 'Kalender Cuti', path: '/leave/calendar' },
       { label: 'Saldo Cuti', path: '/leave/balance' },
-      { label: 'Jenis Cuti', path: '/leave/type' },
-      { label: 'Kebijakan Cuti', path: '/leave/policy' },
     ]
   },
   {
@@ -131,14 +121,21 @@ export const menuItems: MenuItem[] = [
     ]
   },
   {
-    label: 'Reimburse & Pengeluaran',
-    icon: Receipt,
-    requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user) || RBACUtils.isManager(user),
+    label: 'Legal & Dokumen',
+    icon: FileText,
+    requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
     subItems: [
-      { label: 'Manajemen Reimburse', path: '/reimbursements' },
-      { label: 'Persetujuan Biaya', path: '/expense/approval' },
-      { label: 'Daftar Pengeluaran', path: '/expense/list' },
+      { label: 'Surat Tugas', path: '/admin/assignment-letters' },
+      { label: 'Generator Surat', path: '/legal/letters' },
+      { label: 'Kalkulator Pesangon', path: '/legal/severance' },
+      { label: 'PPh21 Progresif', path: '/legal/tax' },
     ]
+  },
+  {
+    label: 'Manajemen Reimburse',
+    icon: Receipt,
+    path: '/reimbursements',
+    requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user) || RBACUtils.isManager(user),
   },
   {
     label: 'Pelatihan & Kompetensi',
@@ -198,6 +195,7 @@ export const menuItems: MenuItem[] = [
       { label: 'Pelatihan Saya', path: '/my/trainings' },
       { label: 'Kompetensi Saya', path: '/my/competencies' },
       { label: 'Aset Saya', path: '/my/assets' },
+      { label: 'Surat Tugas Saya', path: '/my/assignment-letters' },
       { label: 'Permintaan Saya', path: '/my/requests' },
     ]
   },
@@ -223,6 +221,17 @@ export const menuItems: MenuItem[] = [
       { label: 'Kalender Libur', path: '/workforce/holidays' },
       { label: 'Tukar Shift', path: '/workforce/shift-swaps' },
       { label: 'Aturan Lembur', path: '/workforce/overtime-rules' },
+    ]
+  },
+  {
+    label: 'Master Data',
+    icon: Database,
+    requiredChecker: (user) => RBACUtils.isAdmin(user),
+    subItems: [
+      { label: 'Departemen & Posisi', path: '/organization/master-data' },
+      { label: 'Jenis Cuti', path: '/leave/type' },
+      { label: 'Kebijakan Cuti', path: '/leave/policy' },
+      { label: 'Kategori Pengeluaran', path: '/settings/master-data/expense-category' },
     ]
   },
   {
@@ -288,15 +297,6 @@ export const menuItems: MenuItem[] = [
       {
         label: 'Pengaturan Perusahaan',
         path: '/settings/company',
-        requiredChecker: (user) => RBACUtils.isAdmin(user),
-      },
-      {
-        label: 'Master Data',
-        icon: Database,
-        subItems: [
-          { label: 'Jenis Cuti', path: '/settings/master-data/leave-type' },
-          { label: 'Kategori Pengeluaran', path: '/settings/master-data/expense-category' },
-        ],
         requiredChecker: (user) => RBACUtils.isAdmin(user),
       },
       {

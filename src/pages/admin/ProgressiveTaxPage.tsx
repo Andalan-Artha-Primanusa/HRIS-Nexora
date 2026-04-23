@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { ShieldCheck } from 'lucide-react';
 import { TaxCalculator } from '@/features/legal/components/TaxCalculator';
 import { legalService } from '@/features/legal/api/legal.service';
-import '@/shared/styles/CrudPage.css';
+import { Card } from '@/shared/ui/Card';
+import './ProgressiveTaxPage.css';
 
 const ProgressiveTaxPage: React.FC = () => {
   const [income, setIncome] = useState<number>(0);
@@ -22,14 +24,21 @@ const ProgressiveTaxPage: React.FC = () => {
   };
 
   return (
-    <div className="crud-page">
-      <div className="crud-header">
-        <div>
-          <span className="reimb-badge reimb-badge-admin">Finance & Legal</span>
-          <h1>PPh21 Progressive Tax Calculator</h1>
-          <p>Simulate progressive income tax calculations based on TER and PKP rules.</p>
+    <div className="progressive-tax-container">
+      <Card className="tax-hero-card" glass>
+        <div className="tax-hero-copy">
+          <span className="tax-badge">Legal & Compliance</span>
+          <h1>Simulasi Pajak PPh21</h1>
+          <p className="tax-description">
+            Kalkulator simulasi pajak penghasilan karyawan berdasarkan aturan PPh Pasal 17 terbaru. 
+            Gunakan modul ini untuk <strong>melakukan simulasi</strong> atau pengecekan estimasi potongan pajak secara mandiri 
+            sebelum diproses dalam payroll resmi.
+          </p>
         </div>
-      </div>
+        <div className="tax-hero-icon">
+          <ShieldCheck size={72} color="#2563eb" />
+        </div>
+      </Card>
 
       <TaxCalculator 
         income={income}

@@ -70,12 +70,7 @@ const hasAdminAccess = (user: any) => {
   return roleNames.includes(ROLES.ADMIN) || roleNames.includes(ROLES.SUPER_ADMIN) || roleNames.includes(ROLES.HR);
 };
 
-const formatDate = (value?: string) => {
-  if (!value) return "—";
-  const date = new Date(value);
-  if (isNaN(date.getTime())) return value;
-  return date.toLocaleDateString("id-ID", { day: 'numeric', month: 'short', year: 'numeric' });
-};
+
 
 const getStatusClass = (status?: string) => {
   const normalized = String(status || "").toLowerCase();
@@ -134,8 +129,10 @@ const AdminKpiPage = () => {
 
   const filteredKpis = useMemo(() => {
     return kpis.filter(kpi => {
-      const matchSearch = kpi.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         kpi.employee?.user?.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const title = String(kpi?.title || '').toLowerCase();
+      const empName = String(kpi?.employee?.user?.name || '').toLowerCase();
+      const query = searchTerm.toLowerCase();
+      const matchSearch = title.includes(query) || empName.includes(query);
       const matchStatus = statusFilter === "all" || kpi.status === statusFilter;
       const matchPeriod = !periodFilter || kpi.period === periodFilter;
       
@@ -147,7 +144,7 @@ const AdminKpiPage = () => {
     const total = kpis.length;
     const approved = kpis.filter(k => k.status === 'approved').length;
     const submitted = kpis.filter(k => k.status === 'submitted').length;
-    const draft = kpis.filter(k => k.status === 'draft').length;
+    // const draft = kpis.filter(k => k.status === 'draft').length;
     const avgScore = total > 0 ? kpis.reduce((acc, k) => acc + k.score, 0) / total : 0;
 
     return [
@@ -353,7 +350,7 @@ const AdminKpiPage = () => {
                   fill="#8b5cf6" 
                   radius={[0, 4, 4, 0]} 
                   barSize={20}
-                  label={{ position: 'right', fontSize: 10, formatter: (val: number) => `${val}%` }}
+                  label={{ position: 'right', fontSize: 10, formatter: (val: any) => `${val}%` }}
                 />
               </BarChart>
             </ResponsiveContainer>

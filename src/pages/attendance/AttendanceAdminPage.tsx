@@ -11,7 +11,7 @@ import {
 import { AttendanceSummary } from "@/features/attendance/components/AttendanceSummary";
 import { AttendanceTable } from "@/features/attendance/components/AttendanceTable";
 import { AttendanceDetailModal } from "@/features/attendance/components/AttendanceDetailModal";
-import { RefreshCw, Search, Filter, Calendar as CalendarIcon } from "lucide-react";
+import { RefreshCw, Search, Filter } from "lucide-react";
 import { showToast } from "@/shared/ui/toast";
 import "@/shared/styles/CrudPage.css";
 

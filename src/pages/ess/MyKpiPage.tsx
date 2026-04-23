@@ -9,11 +9,7 @@ import {
   Search,
   RefreshCw, 
   CheckCircle2, 
-  Clock, 
-  FileText, 
-  TrendingUp,
   Calendar,
-  LayoutDashboard,
   Eye,
   X,
   User

@@ -4,7 +4,6 @@ import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { Alert } from "@/shared/ui/Alert";
 import { 
-  ArrowLeft, 
   Save, 
   User, 
   Calendar, 

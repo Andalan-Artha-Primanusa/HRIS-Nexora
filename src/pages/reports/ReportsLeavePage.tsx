@@ -19,7 +19,7 @@ const getStr = (rec: Rec, keys: string[]) => { for (const k of keys) { const v =
 const getNum = (v: unknown) => { if (typeof v === 'number' && Number.isFinite(v)) return v; if (typeof v === 'string') { const p = Number(v); if (Number.isFinite(p)) return p; } return 0; };
 
 const TT = { contentStyle: { backgroundColor:'#fff', border:'1px solid #dbeafe', borderRadius:'8px' }, labelStyle: { color:'#1e40af', fontWeight:'bold' as const } };
-const COLORS = ['#2563eb','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4'];
+// const COLORS = ['#2563eb','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4'];
 
 const mkMonth = (raw: string) => { const d = new Date(raw); if (Number.isNaN(d.getTime())) return null; return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; };
 const fmtMonth = (k: string) => { const [y,m] = k.split('-'); return new Date(Number(y),Number(m)-1,1).toLocaleDateString('id-ID',{month:'short',year:'numeric'}); };

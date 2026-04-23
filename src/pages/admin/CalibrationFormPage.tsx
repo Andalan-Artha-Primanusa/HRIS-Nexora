@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save, Scale, Users, Calendar, Info, ShieldCheck, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Save, Users, Info, ShieldCheck, AlertCircle } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { performanceService } from '@/features/performance/api/performance.service';
+import '@/shared/styles/CrudPage.css';
 
 const CalibrationFormPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = Boolean(id);
 
+  const [employees, setEmployees] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     title: '',
     date: '',
@@ -23,6 +25,17 @@ const CalibrationFormPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    const loadEmployees = async () => {
+      try {
+        const { getAllEmployees } = await import('@/features/employee/api/employee.service');
+        const data = await getAllEmployees();
+        setEmployees(data);
+      } catch (err) {
+        console.error('Failed to load employees', err);
+      }
+    };
+    loadEmployees();
+
     if (isEdit) {
       const fetchSession = async () => {
         try {
@@ -145,13 +158,16 @@ const CalibrationFormPage: React.FC = () => {
             <div className="crud-form-grid">
               <label className="crud-form-full">
                 Facilitator (HR Admin)
-                <input 
-                  type="text" 
+                <select 
                   className="crud-input" 
                   value={formData.facilitator}
                   onChange={e => setFormData({ ...formData, facilitator: e.target.value })}
-                  placeholder="Assign an HR lead for this session"
-                />
+                >
+                   <option value="">-- Select Facilitator --</option>
+                   {employees.map(emp => (
+                      <option key={emp.id} value={emp.id}>{emp.full_name} ({emp.employee_code || emp.id})</option>
+                   ))}
+                </select>
               </label>
               <label className="crud-form-full">
                 Participating Managers

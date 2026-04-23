@@ -2589,29 +2589,27 @@ const SectionPage = () => {
 
   return (
     <div className={`section-page section-variant-${sectionKey}`}>
-      <div className="section-header">
-        <div className="section-header-left">
-          <div className="section-icon" style={{ backgroundColor: section.color + '22' }}>
-            <Icon size={22} color={section.color} />
-          </div>
-          <div>
-            <h1 className="section-title">{section.title}</h1>
-            <p className="section-subtitle">{section.subtitle}</p>
-          </div>
+      <Card className="section-hero-card" glass>
+        <div className="section-hero-copy">
+          <span className="section-badge">Management Console</span>
+          <h1 className="section-title">{section.title}</h1>
+          <p className="section-subtitle">{section.subtitle}</p>
         </div>
-
-        <div className="section-actions">
-          <Button variant="outline" size="md" onClick={handleRefresh} disabled={loading || !canRefresh}>
-            <Search size={16} />
-            Muat Ulang
+        <div className="section-hero-icon-wrapper">
+          <Icon size={80} strokeWidth={1.5} color={section.color} />
+        </div>
+        <div className="section-hero-actions">
+          <Button variant="primary" size="md" onClick={handleRefresh} disabled={loading || !canRefresh}>
+            <Search size={18} style={{ marginRight: '8px' }} />
+            Segarkan Data
           </Button>
         </div>
-      </div>
+      </Card>
 
       {summaryStats.length > 0 && (
         <div className="section-summary-grid">
           {summaryStats.map((stat) => (
-            <Card key={stat.label} className="summary-card" glass>
+            <Card key={stat.label} className={`summary-card payroll-accent-${stat.variant === 'danger' ? 'red' : stat.variant === 'success' ? 'green' : stat.variant === 'warning' ? 'orange' : 'blue'}`} glass>
               <div className="summary-card-top">
                 <span className="summary-card-label">{stat.label}</span>
                 <Badge variant={stat.variant}>{stat.description}</Badge>
@@ -2627,16 +2625,16 @@ const SectionPage = () => {
           {insightsChartData.headcountByDepartment.length > 0 && (
             <Card className="chart-card" glass>
               <div className="chart-header">
-                <h3>Headcount by Department</h3>
+                <h3>Distribusi Headcount</h3>
               </div>
               <div className="chart-wrapper">
                 <ResponsiveContainer width="100%" height={260}>
                   <BarChart data={insightsChartData.headcountByDepartment} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="category" tick={{ fontSize: 12 }} />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="value" fill="#2563eb" radius={[6, 6, 0, 0]} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                    <XAxis dataKey="category" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
+                    <Tooltip cursor={{fill: '#f8fafc'}} />
+                    <Bar dataKey="value" fill={section.color} radius={[6, 6, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -2646,12 +2644,12 @@ const SectionPage = () => {
           {insightsChartData.leaveType.length > 0 && (
             <Card className="chart-card" glass>
               <div className="chart-header">
-                <h3>Leave Type Distribution</h3>
+                <h3>Jenis Cuti</h3>
               </div>
               <div className="chart-wrapper">
                 <ResponsiveContainer width="100%" height={260}>
                   <PieChart>
-                    <Pie data={insightsChartData.leaveType} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} fill="#3b82f6" label />
+                    <Pie data={insightsChartData.leaveType} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={90} fill="#3b82f6" label />
                     {insightsChartData.leaveType.map((_, index) => (
                       <Cell key={`cell-${index}`} fill={['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'][index % 5]} />
                     ))}
@@ -2665,12 +2663,12 @@ const SectionPage = () => {
           {insightsChartData.helpdeskStatus.length > 0 && (
             <Card className="chart-card" glass>
               <div className="chart-header">
-                <h3>Helpdesk Status Breakdown</h3>
+                <h3>Status Tiket</h3>
               </div>
               <div className="chart-wrapper">
                 <ResponsiveContainer width="100%" height={260}>
                   <PieChart>
-                    <Pie data={insightsChartData.helpdeskStatus} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} fill="#10b981" label />
+                    <Pie data={insightsChartData.helpdeskStatus} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={90} fill="#10b981" label />
                     {insightsChartData.helpdeskStatus.map((_, index) => (
                       <Cell key={`cell-status-${index}`} fill={['#10b981', '#2563eb', '#f59e0b', '#ef4444', '#8b5cf6'][index % 5]} />
                     ))}
@@ -2686,23 +2684,25 @@ const SectionPage = () => {
       <Card className="section-action-card" glass>
         <div className="section-action-header">
           <div>
-            <h2>Panel Kontrol</h2>
+            <h2>Panel Operasional</h2>
             <p>
               {supportsCrudModeSplit(path)
-                ? `Route aktif: ${activeCrudMode === 'create' ? 'Halaman Tambah' : 'Halaman Kelola'} (dipisah per halaman).`
-                : 'Gunakan panel ini untuk memanggil endpoint sesuai Postman API.'}
+                ? `Mode: ${activeCrudMode === 'create' ? 'Input Data Baru' : 'Manajemen Data'}.`
+                : 'Eksekusi aksi cepat dan manajemen data sistem secara real-time.'}
             </p>
           </div>
           <div className="action-status-wrap">
-            <span className="action-status">{statusMessage}</span>
-            {loading && <span className="action-loading">Memuat…</span>}
+            <Badge variant={statusMessage.includes('Error') ? 'danger' : 'info'}>{statusMessage}</Badge>
+            {loading && <span className="action-loading">Memproses...</span>}
           </div>
         </div>
 
-        <div className="section-action-grid">
-          <div className="section-action-form">
+        <div className="section-action-form">
+          <div className="section-action-inputs">
             {renderFormFields()}
-            <div className="section-action-buttons">{renderActionButtons()}</div>
+          </div>
+          <div className="section-action-buttons">
+            {renderActionButtons()}
           </div>
         </div>
       </Card>
@@ -2711,11 +2711,11 @@ const SectionPage = () => {
         <Card className="section-table-card" glass>
           <div className="section-table-header">
             <div>
-              <h2>Data {section.title}</h2>
-              <p>{section.subtitle}</p>
+              <h2>Data Terdaftar</h2>
+              <p>Daftar entri yang tersimpan dalam modul {section.title}.</p>
             </div>
-            <Button variant="secondary" size="sm" onClick={handleRefresh} disabled={loading || !canRefresh}>
-              Muat Ulang Data
+            <Button variant="ghost" size="sm" onClick={handleRefresh} disabled={loading || !canRefresh}>
+              Muat Ulang
             </Button>
           </div>
 
@@ -2739,19 +2739,13 @@ const SectionPage = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={tableColumns.length}>Tidak ada data API untuk section ini.</td>
+                    <td colSpan={tableColumns.length} style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
+                      Belum ada data tersedia untuk ditampilkan.
+                    </td>
                   </tr>
                 )}
               </tbody>
             </table>
-          </div>
-
-          <div className="ui-table-pagination">
-            <span className="pagination-info">Menampilkan 1 sampai {tableRows.length} entri</span>
-            <div className="pagination-controls">
-              <button type="button">Sebelumnya</button>
-              <button type="button">Berikutnya</button>
-            </div>
           </div>
         </Card>
       )}

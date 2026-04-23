@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Plus, RefreshCw, Filter, Search, BarChart3 } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
 import { 
@@ -20,6 +20,7 @@ import { ReimbursementDetailModal } from '../../features/reimbursement/component
 import { ReimbursementStats } from '../../features/reimbursement/components/ReimbursementStats';
 import type { ReimbursementItem } from '../../features/reimbursement/types/reimbursement.types';
 import '../../features/reimbursement/Reimbursement.css';
+import '@/shared/styles/CrudPage.css';
 
 const AdminReimbursementsPage: React.FC = () => {
   const [items, setItems] = useState<ReimbursementItem[]>([]);
@@ -173,7 +174,7 @@ const AdminReimbursementsPage: React.FC = () => {
 
       {stats && <ReimbursementStats stats={stats} />}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '1.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '1.5rem', alignItems: 'start' }}>
         <Card className="crud-card" glass style={{ padding: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, minWidth: '300px' }}>

@@ -360,7 +360,7 @@ const OverviewPage: React.FC = () => {
         </div>
         <div className="page-actions">
           <Button variant="outline" size="md" onClick={() => navigate('/admin/analytics/people')}>View Analytics</Button>
-          <Button variant="primary" size="md">Run Payroll</Button>
+          <Button variant="primary" size="md" onClick={() => navigate('/payroll/approve')}>Run Payroll</Button>
         </div>
       </Card>
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save, MessageSquare, Calendar, Users, ListPlus, Send } from 'lucide-react';
+import { ArrowLeft, Save, MessageSquare, Calendar, ListPlus, Send } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { engagementService } from '@/features/engagement/api/engagement.service';

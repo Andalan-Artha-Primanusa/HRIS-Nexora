@@ -1,5 +1,5 @@
 import React from 'react';
-import { BarChart3, Clock3, CircleCheckBig, CircleX, Calendar } from 'lucide-react';
+import { BarChart3, Clock3, CircleCheckBig, CircleX } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 
 interface LeaveSummaryProps {

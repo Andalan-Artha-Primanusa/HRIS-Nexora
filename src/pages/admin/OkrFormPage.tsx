@@ -14,7 +14,15 @@ const OkrFormPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
   const [employees, setEmployees] = useState<any[]>([]);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string;
+    description: string;
+    period: string;
+    status: 'draft' | 'in-progress' | 'completed' | 'cancelled';
+    owner_id: string | number;
+    progress: number;
+    key_results: any[];
+  }>({
     title: '',
     description: '',
     period: 'Q2 2024',
@@ -140,11 +148,16 @@ const OkrFormPage: React.FC = () => {
                        </div>
                     </div>
                     <div className="form-group">
-                       <label>Owner (Employee ID)</label>
-                       <div style={{ position: 'relative' }}>
-                          <User size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                                                     <input name="owner_id" value={formData.owner_id} onChange={handleChange} className="form-control" style={{ paddingLeft: '40px' }} placeholder="Search employee..." />
-                       </div>
+                        <label>Owner (Employee)</label>
+                        <div style={{ position: 'relative' }}>
+                           <User size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                           <select name="owner_id" value={formData.owner_id} onChange={handleChange} className="form-control" style={{ paddingLeft: '40px' }}>
+                              <option value="">-- Select Owner --</option>
+                              {employees.map(emp => (
+                                 <option key={emp.id} value={emp.id}>{emp.full_name} ({emp.employee_code || emp.id})</option>
+                              ))}
+                           </select>
+                        </div>
                     </div>
                     <div className="form-group">
                        <label>Current Progress (%)</label>

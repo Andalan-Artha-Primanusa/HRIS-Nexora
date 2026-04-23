@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { RefreshCw, Search, UserMinus } from 'lucide-react';
+import { RefreshCw, Search } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { recruitmentService } from '@/features/recruitment/api/recruitment.service';
@@ -16,7 +16,17 @@ const TalentPoolPage: React.FC = () => {
     setLoading(true);
     try {
       const data = await recruitmentService.getTalentPool();
-      setCandidates(Array.isArray(data) ? data : data.data || []);
+      let candidatesList = [];
+      if (Array.isArray(data)) {
+        candidatesList = data;
+      } else if (data?.data && Array.isArray(data.data)) {
+        candidatesList = data.data;
+      } else if (data?.data?.data && Array.isArray(data.data.data)) {
+        candidatesList = data.data.data;
+      } else if (data?.candidates && Array.isArray(data.candidates)) {
+        candidatesList = data.candidates;
+      }
+      setCandidates(candidatesList);
     } catch (error) {
       console.error('Error fetching talent pool:', error);
     } finally {
@@ -28,9 +38,12 @@ const TalentPoolPage: React.FC = () => {
     fetchData();
   }, []);
 
-  const filteredCandidates = candidates.filter(c => 
-    c.full_name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredCandidates = candidates.filter(c => {
+    const lowerQuery = (searchQuery || '').toLowerCase();
+    const fullName = String(c?.full_name || '').toLowerCase();
+    const email = String(c?.email || '').toLowerCase();
+    return fullName.includes(lowerQuery) || email.includes(lowerQuery);
+  });
 
   return (
     <div className="crud-page">

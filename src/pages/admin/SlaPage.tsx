@@ -8,7 +8,7 @@ import '@/shared/styles/CrudPage.css';
 const SlaPage: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [stats, setStats] = useState({
+  const [stats] = useState({
     avg_response_time: '2.4 hrs',
     avg_resolution_time: '18.5 hrs',
     sla_compliance: '94.2%',

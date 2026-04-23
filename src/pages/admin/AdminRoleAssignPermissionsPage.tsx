@@ -89,10 +89,12 @@ const AdminRoleAssignPermissionsPage = () => {
     const groups: Record<string, Permission[]> = {};
     
     const filtered = permSearch 
-      ? permissions.filter(p => 
-          p.name.toLowerCase().includes(permSearch.toLowerCase()) || 
-          (p.display_name && p.display_name.toLowerCase().includes(permSearch.toLowerCase()))
-        )
+      ? permissions.filter(p => {
+          const name = String(p?.name || '').toLowerCase();
+          const displayName = String(p?.display_name || '').toLowerCase();
+          const query = permSearch.toLowerCase();
+          return name.includes(query) || displayName.includes(query);
+        })
       : permissions;
 
     filtered.forEach(p => {

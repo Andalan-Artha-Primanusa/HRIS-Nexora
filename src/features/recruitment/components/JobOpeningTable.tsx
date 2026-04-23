@@ -1,6 +1,5 @@
 import React from 'react';
-import { Eye, Edit, Trash2, MapPin, Users, Calendar } from 'lucide-react';
-import { Button } from '@/shared/ui/Button';
+import { Eye, Edit, Trash2, MapPin, Calendar } from 'lucide-react';
 import type { JobOpening } from '../types/recruitment.types';
 
 interface JobOpeningTableProps {

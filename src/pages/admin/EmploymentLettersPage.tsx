@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, User, Download, Plus, Search, RefreshCw } from 'lucide-react';
+import { FileText, Search, RefreshCw, Calendar } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { getAllEmployees } from '@/features/employee/api/employee.service';
 import { legalService } from '@/features/legal/api/legal.service';
 import '@/shared/styles/CrudPage.css';
-import { api } from '@/shared/api/httpClient';
 
 const EmploymentLettersPage: React.FC = () => {
   const [employees, setEmployees] = useState<any[]>([]);
@@ -15,10 +15,11 @@ const EmploymentLettersPage: React.FC = () => {
     const fetchEmployees = async () => {
       setLoading(true);
       try {
-        const response = await api.get('/employees');
-        setEmployees(response.data.data || []);
+        const data = await getAllEmployees();
+        setEmployees(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error(err);
+        setEmployees([]);
       } finally {
         setLoading(false);
       }
@@ -39,10 +40,12 @@ const EmploymentLettersPage: React.FC = () => {
     }
   };
 
-  const filteredEmployees = employees.filter(emp => 
-    emp.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    emp.employee_id.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredEmployees = employees.filter(emp => {
+    const fullName = String(emp?.full_name || '').toLowerCase();
+    const employeeId = String(emp?.employee_id || '').toLowerCase();
+    const query = searchQuery.toLowerCase();
+    return fullName.includes(query) || employeeId.includes(query);
+  });
 
   return (
     <div className="crud-page">
@@ -54,58 +57,159 @@ const EmploymentLettersPage: React.FC = () => {
         </div>
       </div>
 
-      <Card glass style={{ padding: '1.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-          <div style={{ position: 'relative', width: '350px' }}>
-            <Search size={18} color="#94a3b8" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+      <Card glass style={{ padding: '0', overflow: 'hidden', border: '1px solid var(--cr-border)' }}>
+        <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--cr-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.3)' }}>
+          <div style={{ position: 'relative', width: '400px' }}>
+            <Search size={18} color="#94a3b8" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
             <input 
               type="text" 
               className="form-control" 
               placeholder="Search employee by name or ID..." 
-              style={{ paddingLeft: '40px', width: '100%' }}
+              style={{ 
+                paddingLeft: '44px', 
+                width: '100%',
+                borderRadius: '12px',
+                border: '1px solid #e2e8f0',
+                height: '45px',
+                fontSize: '0.95rem'
+              }}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <Button variant="outline" onClick={() => {}}>
-            <FileText size={18} style={{ marginRight: '8px' }} />
-            Assignment Letter Queue
-          </Button>
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
+             <Button variant="outline" onClick={() => {}} style={{ borderRadius: '10px' }}>
+              <FileText size={18} style={{ marginRight: '8px' }} />
+              Queue
+            </Button>
+          </div>
         </div>
 
-        <div className="crud-table-wrap">
+        <div className="crud-table-wrap" style={{ margin: '0' }}>
           <table className="crud-table">
             <thead>
-              <tr>
-                <th>Employee</th>
+              <tr style={{ background: '#f8fafc' }}>
+                <th style={{ padding: '1.25rem 1.5rem' }}>Employee</th>
                 <th>Department</th>
                 <th>Position</th>
                 <th>Join Date</th>
-                <th style={{ textAlign: 'right' }}>Generate Document</th>
+                <th style={{ textAlign: 'right', paddingRight: '1.5rem' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={5} style={{ textAlign: 'center' }}>Loading employees...</td></tr>
-              ) : filteredEmployees.map((emp) => (
-                <tr key={emp.id}>
-                  <td>
-                    <div style={{ fontWeight: 600 }}>{emp.full_name}</div>
-                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{emp.employee_id}</div>
+                <tr>
+                  <td colSpan={5} style={{ textAlign: 'center', padding: '4rem' }}>
+                    <div className="animate-spin" style={{ marginBottom: '1rem' }}>
+                      <RefreshCw size={24} color="#2563eb" />
+                    </div>
+                    Loading employees...
                   </td>
-                  <td>{emp.department || 'N/A'}</td>
-                  <td>{emp.designation || 'N/A'}</td>
-                  <td>{emp.hire_date || '-'}</td>
+                </tr>
+              ) : filteredEmployees.length === 0 ? (
+                <tr>
+                  <td colSpan={5} style={{ textAlign: 'center', padding: '4rem', color: '#94a3b8' }}>
+                    No employees found matching your search.
+                  </td>
+                </tr>
+              ) : filteredEmployees.map((emp) => (
+                <tr key={emp.id} style={{ transition: 'all 0.2s' }}>
+                  <td style={{ padding: '1.25rem 1.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ 
+                        width: '40px', 
+                        height: '40px', 
+                        borderRadius: '12px', 
+                        background: 'linear-gradient(135deg, #2563eb, #4f46e5)',
+                        color: 'white',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 700,
+                        fontSize: '0.9rem',
+                        boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)'
+                      }}>
+                        {(emp.full_name || 'U').charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <div style={{ fontWeight: 600, color: '#1e293b', fontSize: '0.95rem' }}>
+                          {emp.full_name || emp.user?.name || emp.name || 'Unknown Employee'}
+                        </div>
+                        <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{emp.employee_id || emp.employee_code || '#'+emp.id}</div>
+                      </div>
+                    </div>
+                  </td>
                   <td>
+                    <span style={{ 
+                      padding: '4px 10px', 
+                      background: '#f1f5f9', 
+                      borderRadius: '6px', 
+                      fontSize: '0.85rem',
+                      color: '#475569',
+                      fontWeight: 500
+                    }}>
+                      {emp.department || 'N/A'}
+                    </span>
+                  </td>
+                  <td>
+                    <div style={{ fontSize: '0.9rem', color: '#334155' }}>{emp.designation || emp.position || 'N/A'}</div>
+                  </td>
+                  <td>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem', color: '#64748b' }}>
+                      <Calendar size={14} />
+                      {emp.hire_date ? new Date(emp.hire_date).toLocaleDateString('id-ID', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric'
+                      }) : '-'}
+                    </div>
+                  </td>
+                  <td style={{ paddingRight: '1.5rem' }}>
                     <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                      <Button variant="ghost" size="sm" onClick={() => handleGenerate(emp.id, 'employment')}>
-                        <FileText size={14} style={{ marginRight: '4px' }} />
+                      <button 
+                        className="btn-action-generate"
+                        onClick={() => handleGenerate(emp.id, 'employment')}
+                        title="Generate Surat Keterangan Kerja"
+                        style={{
+                          padding: '8px 12px',
+                          borderRadius: '8px',
+                          border: '1px solid #e2e8f0',
+                          background: 'white',
+                          color: '#2563eb',
+                          fontSize: '0.85rem',
+                          fontWeight: 600,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        <FileText size={14} />
                         Suket Kerja
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleGenerate(emp.id, 'experience')}>
-                        <FileText size={14} style={{ marginRight: '4px' }} />
+                      </button>
+                      <button 
+                        className="btn-action-generate"
+                        onClick={() => handleGenerate(emp.id, 'experience')}
+                        title="Generate Surat Pengalaman Kerja (Paklaring)"
+                        style={{
+                          padding: '8px 12px',
+                          borderRadius: '8px',
+                          border: '1px solid #e2e8f0',
+                          background: 'white',
+                          color: '#059669',
+                          fontSize: '0.85rem',
+                          fontWeight: 600,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        <FileText size={14} />
                         Paklaring
-                      </Button>
+                      </button>
                     </div>
                   </td>
                 </tr>

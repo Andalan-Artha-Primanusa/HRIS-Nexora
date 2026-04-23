@@ -6,7 +6,7 @@ import { Button } from "@/shared/ui/Button";
 import { Alert } from "@/shared/ui/Alert";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { ROLES } from "@/shared/types/rbac.types";
-import { MonitorCog, RefreshCw, ShieldAlert, Smartphone, Wifi, WifiOff, Plus, Edit2 } from "lucide-react";
+import { MonitorCog, RefreshCw, ShieldAlert, Wifi, WifiOff, Plus, Edit2 } from "lucide-react";
 import {
   getBiometricDevices,
   syncBiometricAttendance,

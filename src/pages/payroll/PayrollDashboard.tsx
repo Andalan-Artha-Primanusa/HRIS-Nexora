@@ -17,11 +17,8 @@ import {
 import { Link } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
-import { Modal } from "@/shared/ui/Modal";
-import {
-  getAllPayroll,
-  generateMonthlyPayroll,
-} from "@/features/payroll/api/payroll.service";
+import { Badge } from "@/shared/ui/Badge";
+import { payrollService, toSafeArray } from "@/features/payroll/api/payroll.service";
 import { getAllEmployees } from "@/features/employee/api/employee.service";
 import type { PayrollItem } from "@/features/payroll/types/payroll.types";
 import type { EmployeeItem } from "@/features/employee/types/employee.types";
@@ -36,6 +33,7 @@ import {
   ReceiptText,
   ShieldCheck,
   TrendingUp,
+  RefreshCw,
 } from "lucide-react";
 import "./PayrollDashboard.css";
 
@@ -43,16 +41,6 @@ const PayrollDashboard: React.FC = () => {
   const [payrollItems, setPayrollItems] = useState<PayrollItem[]>([]);
   const [employees, setEmployees] = useState<EmployeeItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [errorModal, setErrorModal] = useState<{ isOpen: boolean; title: string; message: string }>({
-    isOpen: false,
-    title: "",
-    message: "",
-  });
-
-  const showErrorModal = (title: string, message: string) => {
-    setErrorModal({ isOpen: true, title, message });
-  };
 
   // Chart Data States
   const [monthlyTrendData, setMonthlyTrendData] = useState<
@@ -63,9 +51,6 @@ const PayrollDashboard: React.FC = () => {
   >([]);
   const [departmentPayrollData, setDepartmentPayrollData] = useState<
     { name: string; amount: number }[]
-  >([]);
-  const [employeePayrollData, setEmployeePayrollData] = useState<
-    { employee_id: string; employeeName: string; allowance: number; bonus: number; total: number }[]
   >([]);
 
   // KPI States
@@ -96,16 +81,15 @@ const PayrollDashboard: React.FC = () => {
   // Load payroll data
   const loadPayrollData = async () => {
     setLoading(true);
-    setError(null);
 
     try {
       const [payrollData, employeeData] = await Promise.all([
-        getAllPayroll(),
+        payrollService.getPayrollList(),
         getAllEmployees(),
       ]);
 
-      const items = payrollData || [];
-      const emps = employeeData || [];
+      const items = toSafeArray(payrollData);
+      const emps = Array.isArray(employeeData) ? employeeData : toSafeArray(employeeData);
       setPayrollItems(items);
       setEmployees(emps);
 
@@ -121,19 +105,16 @@ const PayrollDashboard: React.FC = () => {
         setAveragePayroll(Math.round(total > 0 ? (total / 12) : 0)); // Rough estimate
 
         // Process data for charts
-        processChartData(items, emps);
+        processChartData(items);
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to load payroll data";
-      setError(message);
-      showErrorModal("Error Load Dashboard", message);
       console.error("Error loading payroll:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  const processChartData = (items: PayrollItem[], emps: EmployeeItem[]) => {
+  const processChartData = (items: PayrollItem[]) => {
     // Group by month (assuming period field exists)
     const monthlyMap = new Map<
       string,
@@ -199,25 +180,6 @@ const PayrollDashboard: React.FC = () => {
       employeeMap.set(String(empId), current);
     });
 
-    const employeeArray = Array.from(
-      employeeMap,
-      ([employee_id, data]) => {
-        const employee = emps.find((emp: any) => String(emp.id) === employee_id);
-        const employeeName = getEmployeeName(employee);
-        
-        return {
-          employee_id,
-          employeeName: employeeName || employee_id,
-          allowance: data.allowance,
-          bonus: data.bonus,
-          total: data.allowance + data.bonus,
-        };
-      }
-    )
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 10); // Top 10
-
-    setEmployeePayrollData(employeeArray);
 
     // Department aggregation (simulated - would need actual department data from employees)
     const departmentMap = new Map<string, number>();
@@ -240,13 +202,11 @@ const PayrollDashboard: React.FC = () => {
     const period = new Date().toISOString().slice(0, 7); // YYYY-MM format
 
     try {
-      await generateMonthlyPayroll({ period });
+      await payrollService.generateMonthlyPayroll(period);
       // Reload data
       await loadPayrollData();
     } catch (err) {
-      const errorText = err instanceof Error ? err.message : "Failed to generate monthly payroll";
       console.error("Error generating payroll:", err);
-      showErrorModal("Error Generate", errorText);
     }
   };
 
@@ -258,328 +218,196 @@ const PayrollDashboard: React.FC = () => {
     return `Rp ${value.toLocaleString("id-ID")}`;
   };
 
+  const tooltipStyle = {
+    contentStyle: {
+      backgroundColor: "#fff",
+      border: "1px solid #dbeafe",
+      borderRadius: "12px",
+      boxShadow: "0 10px 25px rgba(37, 99, 235, 0.1)",
+    },
+    labelStyle: { color: "#1e3a8a", fontWeight: "bold" as const },
+  };
+
   return (
     <div className="payroll-dashboard">
-      {/* Error Modal */}
-      <Modal
-        isOpen={errorModal.isOpen}
-        onClose={() => setErrorModal({ ...errorModal, isOpen: false })}
-        title={errorModal.title}
-        size="md"
-      >
-        <div style={{ padding: "16px 0", whiteSpace: "pre-wrap" }}>
-          <p style={{ margin: 0, lineHeight: "1.6", color: "var(--color-text-primary)" }}>
-            {errorModal.message}
-          </p>
-        </div>
-      </Modal>
-
-      {/* Page Header */}
       <Card className="payroll-hero-card" glass>
         <div className="payroll-hero-copy">
-          <p className="payroll-badge">Payroll Center</p>
-          <h1 className="payroll-title">Dashboard Payroll</h1>
-          <p className="payroll-subtitle">Kelola payroll, generate payroll bulanan, dan review payslip karyawan dengan tampilan yang rapi, konsisten, dan mudah dipindai.</p>
+          <p className="payroll-badge">Payroll Operations</p>
+          <h1 className="payroll-title">Dashboard Penggajian</h1>
+          <p className="payroll-subtitle">
+            Pusat manajemen payroll perusahaan. Lacak tren, generate data bulanan, 
+            dan kelola slip gaji karyawan secara efisien dalam satu dasbor terpadu.
+          </p>
         </div>
         <div className="payroll-actions">
-          <Button
-            variant="outline"
-            size="md"
-            onClick={() => void loadPayrollData()}
-            disabled={loading}
-          >
+          <Button variant="ghost" size="md" onClick={() => void loadPayrollData()} disabled={loading}>
+            <RefreshCw size={18} style={{ marginRight: "8px" }} />
             Segarkan
           </Button>
-          <Button
-            variant="primary"
-            size="md"
-            onClick={() => void handleGenerateMonthly()}
-            disabled={loading}
-          >
-            Generate Bulanan
+          <Button variant="primary" size="md" onClick={() => void handleGenerateMonthly()} disabled={loading}>
+            Generate Payroll
           </Button>
         </div>
       </Card>
 
-      {/* Error Alert */}
-      {error && (
-        <Card className="payroll-error-card" glass>
-          <p className="payroll-error-text">⚠️ {error}</p>
-        </Card>
-      )}
-
-      {/* KPI Cards */}
-      <div className="metrics-grid payroll-kpi-grid">
-        <Card className="metric-card payroll-kpi-card payroll-accent-blue" glass>
-          <div className="metric-header kpi-header">
+      <div className="payroll-kpi-grid">
+        <Card className="payroll-kpi-card payroll-accent-blue" glass>
+          <div className="kpi-header">
             <div>
-              <span className="metric-label kpi-label">Total Payroll</span>
-              <p className="metric-subtitle">Jumlah record payroll di sistem</p>
+              <span className="kpi-label">Total Record</span>
+              <div className="kpi-value">{totalPayroll}</div>
             </div>
-            <span className="metric-icon kpi-icon"><FileText size={18} /></span>
+            <span className="kpi-icon"><FileText size={20} /></span>
           </div>
-          <div className="metric-value kpi-value">{totalPayroll}</div>
-          <div className="metric-change neutral kpi-subtext">
-            <span>Data payroll terdaftar</span>
-          </div>
+          <Badge variant="info">Seluruh Riwayat</Badge>
         </Card>
 
-        <Card className="metric-card payroll-kpi-card payroll-accent-green" glass>
-          <div className="metric-header kpi-header">
+        <Card className="payroll-kpi-card payroll-accent-green" glass>
+          <div className="kpi-header">
             <div>
-              <span className="metric-label kpi-label">Telah Diproses</span>
-              <p className="metric-subtitle">Payroll dengan status paid/approved</p>
+              <span className="kpi-label">Selesai Diproses</span>
+              <div className="kpi-value">{totalProcessed}</div>
             </div>
-            <span className="metric-icon kpi-icon"><CheckCircle2 size={18} /></span>
+            <span className="kpi-icon"><CheckCircle2 size={20} /></span>
           </div>
-          <div className="metric-value kpi-value">{totalProcessed}</div>
-          <div className="metric-change positive kpi-subtext">
-            <span>
-              {totalPayroll > 0
-                ? `${((totalProcessed / totalPayroll) * 100).toFixed(1)}%`
-                : "0%"}{" "}
-              selesai
-            </span>
-          </div>
+          <Badge variant="success">
+            {totalPayroll > 0 ? `${((totalProcessed / totalPayroll) * 100).toFixed(1)}%` : "0%"} Tuntas
+          </Badge>
         </Card>
 
-        <Card className="metric-card payroll-kpi-card payroll-accent-orange" glass>
-          <div className="metric-header kpi-header">
+        <Card className="payroll-kpi-card payroll-accent-orange" glass>
+          <div className="kpi-header">
             <div>
-              <span className="metric-label kpi-label">Menunggu</span>
-              <p className="metric-subtitle">Payroll yang masih pending</p>
+              <span className="kpi-label">Pending / Draft</span>
+              <div className="kpi-value">{totalPending}</div>
             </div>
-            <span className="metric-icon kpi-icon"><Clock3 size={18} /></span>
+            <span className="kpi-icon"><Clock3 size={20} /></span>
           </div>
-          <div className="metric-value kpi-value">{totalPending}</div>
-          <div className="metric-change neutral kpi-subtext">
-            <span>Menunggu persetujuan</span>
-          </div>
+          <Badge variant="warning">Butuh Review</Badge>
         </Card>
 
-        <Card className="metric-card payroll-kpi-card payroll-accent-purple" glass>
-          <div className="metric-header kpi-header">
+        <Card className="payroll-kpi-card payroll-accent-purple" glass>
+          <div className="kpi-header">
             <div>
-              <span className="metric-label kpi-label">Rata-rata Bulanan</span>
-              <p className="metric-subtitle">Estimasi volume payroll per bulan</p>
+              <span className="kpi-label">Rata-rata / Bulan</span>
+              <div className="kpi-value">{averagePayroll}</div>
             </div>
-            <span className="metric-icon kpi-icon"><TrendingUp size={18} /></span>
+            <span className="kpi-icon"><TrendingUp size={20} /></span>
           </div>
-          <div className="metric-value kpi-value">{averagePayroll}</div>
-          <div className="metric-change neutral kpi-subtext">
-            <span>Perkiraan rerata</span>
-          </div>
+          <Badge variant="info">Estimasi Volume</Badge>
         </Card>
       </div>
 
-      {/* Charts Section */}
       <div className="payroll-charts-grid">
-        {/* Monthly Trend Chart */}
-        <Card className="chart-card payroll-chart-card payroll-accent-blue" glass>
-          <h2 className="chart-title payroll-section-title">Tren Pemprosesan Payroll</h2>
-          <p className="chart-subtitle">Perbandingan payroll diproses vs menunggu tiap periode</p>
+        <Card className="payroll-chart-card" glass>
+          <h2 className="payroll-section-title">Tren Pemrosesan</h2>
+          <p className="chart-subtitle">Status payroll (Paid vs Pending) per periode</p>
           {monthlyTrendData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={monthlyTrendData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
+              <AreaChart data={monthlyTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorProcessed" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="colorPending" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
+                <Tooltip {...tooltipStyle} />
                 <Legend />
-                <Area
-                  type="monotone"
-                  dataKey="processed"
-                  stackId="1"
-                  stroke="#10b981"
-                  fill="#10b98122"
-                  name="Diproses"
-                />
-                <Area
-                  type="monotone"
-                  dataKey="pending"
-                  stackId="1"
-                  stroke="#f59e0b"
-                  fill="#f59e0b22"
-                  name="Menunggu"
-                />
+                <Area type="monotone" dataKey="processed" stackId="1" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorProcessed)" name="Diproses" />
+                <Area type="monotone" dataKey="pending" stackId="1" stroke="#f59e0b" strokeWidth={2} fillOpacity={1} fill="url(#colorPending)" name="Menunggu" />
               </AreaChart>
             </ResponsiveContainer>
           ) : (
-            <p className="chart-empty">Tidak ada data tersedia</p>
+            <div className="chart-empty">Belum ada data periode</div>
           )}
         </Card>
 
-        {/* Payroll Status Breakdown */}
-        <Card className="chart-card payroll-chart-card payroll-accent-blue" glass>
-          <h2 className="chart-title payroll-section-title">Ringkasan Status Payroll</h2>
-          <p className="chart-subtitle">Distribusi status payroll saat ini</p>
+        <Card className="payroll-chart-card" glass>
+          <h2 className="payroll-section-title">Status Saat Ini</h2>
+          <p className="chart-subtitle">Distribusi status dari semua catatan payroll</p>
           {payrollStatusData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
-                <Pie
-                  data={payrollStatusData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, value }) => `${name}: ${value}`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {payrollStatusData.map((_entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={chartColors[index % chartColors.length]}
-                    />
+                <Pie data={payrollStatusData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={5} dataKey="value" nameKey="name">
+                  {payrollStatusData.map((_, index) => (
+                    <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip {...tooltipStyle} />
+                <Legend />
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <p className="chart-empty">Tidak ada data tersedia</p>
+            <div className="chart-empty">Belum ada data status</div>
           )}
         </Card>
       </div>
 
-      {/* Department Payroll Comparison */}
-      <Card className="chart-card payroll-full-width-chart payroll-accent-blue" glass>
-        <h2 className="chart-title payroll-section-title">Payroll berdasarkan Departemen</h2>
-        <p className="chart-subtitle">Akumulasi nilai payroll per kelompok departemen</p>
+      <Card className="payroll-chart-card payroll-full-width-chart" glass>
+        <h2 className="payroll-section-title">Distribusi Gaji per Departemen</h2>
+        <p className="chart-subtitle">Total kompensasi (Tunjangan + Bonus) per departemen</p>
         {departmentPayrollData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={departmentPayrollData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip
-                formatter={(value) => formatCurrency(value as number)}
-              />
-              <Bar dataKey="amount" fill="#2563eb" name="Total Payroll" />
+          <ResponsiveContainer width="100%" height={320}>
+            <BarChart data={departmentPayrollData} margin={{ top: 10, right: 30, left: 20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#64748b" }} tickFormatter={(v) => `Rp ${v/1000000}jt`} />
+              <Tooltip {...tooltipStyle} formatter={(v: any) => formatCurrency(Number(v))} />
+              <Bar dataKey="amount" fill="#3b82f6" radius={[8, 8, 0, 0]} name="Total Payroll" />
             </BarChart>
           </ResponsiveContainer>
         ) : (
-          <p className="chart-empty">Tidak ada data tersedia</p>
+          <div className="chart-empty">Data departemen tidak ditemukan</div>
         )}
       </Card>
 
-      {/* Top Employees by Compensation */}
-      <Card className="chart-card payroll-full-width-chart payroll-accent-blue" glass>
-        <h2 className="chart-title payroll-section-title">Top 10 Karyawan dengan Kompensasi Terbesar</h2>
-        <p className="chart-subtitle">Ranking kompensasi berdasarkan tunjangan dan bonus</p>
-        {employeePayrollData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={employeePayrollData} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis type="number" />
-              <YAxis dataKey="employeeName" type="category" width={150} />
-              <Tooltip
-                formatter={(value) => formatCurrency(value as number)}
-              />
-              <Legend />
-              <Bar dataKey="allowance" stackId="a" fill="#10b981" name="Tunjangan" />
-              <Bar dataKey="bonus" stackId="a" fill="#f59e0b" name="Bonus" />
-            </BarChart>
-          </ResponsiveContainer>
-        ) : (
-          <p className="chart-empty">Tidak ada data tersedia</p>
-        )}
-      </Card>
-
-      {/* Action Links */}
-      <Card className="chart-card payroll-quick-actions payroll-accent-blue" glass>
-        <h2 className="chart-title payroll-section-title">Aksi Cepat</h2>
-        <p className="chart-subtitle">Navigasi cepat ke modul payroll yang paling sering digunakan</p>
+      <Card className="payroll-quick-actions" glass>
+        <h2 className="payroll-section-title">Aksi Cepat</h2>
+        <p className="chart-subtitle">Akses langsung ke fungsi operasional payroll</p>
         <div className="payroll-action-links">
-          <Link 
-            to="/payroll/list" 
-            className="action-link payroll-action-link payroll-accent-blue"
-          >
-            <span className="action-icon"><BarChart3 size={24} /></span>
-            <div className="action-content">
-              <h4>Daftar Payroll</h4>
-              <p>Lihat semua data payroll</p>
-            </div>
-          </Link>
-
-          <Link 
-            to="/payroll/crud" 
-            className="action-link payroll-action-link payroll-accent-green"
-          >
-            <span className="action-icon"><PencilLine size={24} /></span>
-            <div className="action-content">
-              <h4>Kelola Payroll</h4>
-              <p>Buat, ubah, atau hapus payroll</p>
-            </div>
-          </Link>
-
-          <Link 
-            to="/payroll/approve" 
-            className="action-link payroll-action-link payroll-accent-sky"
-          >
-            <span className="action-icon"><ShieldCheck size={24} /></span>
-            <div className="action-content">
-              <h4>Setujui Payroll</h4>
-              <p>Review dan setujui payroll</p>
-            </div>
-          </Link>
-
-          <Link 
-            to="/payroll/payment" 
-            className="action-link payroll-action-link payroll-accent-green"
-          >
-            <span className="action-icon"><CreditCard size={24} /></span>
-            <div className="action-content">
-              <h4>Pembayaran</h4>
-              <p>Tandai payroll sebagai dibayar</p>
-            </div>
-          </Link>
-
-          <Link 
-            to="/payroll/component/allowance" 
-            className="action-link payroll-action-link payroll-accent-orange"
-          >
-            <span className="action-icon"><ReceiptText size={24} /></span>
-            <div className="action-content">
-              <h4>Komponen Payroll</h4>
-              <p>Kelola komponen gaji</p>
-            </div>
-          </Link>
-
-          <Link 
-            to="/payroll/details" 
-            className="action-link payroll-action-link payroll-accent-purple"
-          >
-            <span className="action-icon"><LayoutDashboard size={24} /></span>
-            <div className="action-content">
-              <h4>Detail Komponen</h4>
-              <p>Lihat detail komponen payroll</p>
-            </div>
-          </Link>
+          {[
+            { to: "/payroll/list", label: "Daftar Payroll", sub: "Lihat semua riwayat", icon: BarChart3, accent: "blue" },
+            { to: "/payroll/crud", label: "Kelola Payroll", sub: "Update data manual", icon: PencilLine, accent: "green" },
+            { to: "/payroll/approve", label: "Persetujuan", sub: "Review & approve", icon: ShieldCheck, accent: "sky" },
+            { to: "/payroll/payment", label: "Pembayaran", sub: "Proses transaksi", icon: CreditCard, accent: "green" },
+            { to: "/payroll/component/allowance", label: "Komponen Gaji", sub: "Atur tunjangan", icon: ReceiptText, accent: "orange" },
+            { to: "/payroll/details", label: "Analitik Komponen", sub: "Detail variabel gaji", icon: LayoutDashboard, accent: "purple" },
+          ].map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link key={item.to} to={item.to} className={`payroll-action-link payroll-accent-${item.accent}`}>
+                <span className="action-icon"><Icon size={24} /></span>
+                <div className="action-content">
+                  <h4>{item.label}</h4>
+                  <p>{item.sub}</p>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </Card>
 
-      {/* Payroll List Table Preview */}
       {payrollItems.length > 0 && (
-        <Card className="chart-card payroll-table-preview payroll-accent-blue" glass>
+        <Card className="payroll-table-preview" glass>
           <div className="payroll-table-header">
-            <div className="payroll-table-head-copy">
-              <h2 className="chart-title payroll-section-title">Catatan Payroll Terbaru</h2>
-              <p className="chart-subtitle">Ringkasan 5 payroll terakhir yang masuk ke sistem</p>
+            <div>
+              <h2 className="payroll-section-title">Catatan Terbaru</h2>
+              <p className="chart-subtitle">Ringkasan entri payroll terakhir</p>
             </div>
-            <Link 
-              to="/payroll/list" 
-              className="view-all-link"
-            >
-              Lihat Semua →
-            </Link>
+            <Link to="/payroll/list" className="view-all-link">Lihat Semua →</Link>
           </div>
-          <div className="payroll-table-wrap">
+          <div className="ui-table-overflow">
             <table className="payroll-table">
               <thead>
                 <tr>
-                  <th>ID Payroll</th>
-                  <th>Nama Karyawan</th>
+                  <th>Karyawan</th>
                   <th>Periode</th>
                   <th>Tunjangan</th>
                   <th>Bonus</th>
@@ -587,23 +415,17 @@ const PayrollDashboard: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {payrollItems.slice(0, 5).map((item: any, index) => {
-                  const emp = employees.find((e: any) => e.id === item.employee_id);
-                  const empName = emp ? getEmployeeName(emp) : "Unknown";
+                {payrollItems.slice(0, 5).map((item: any, idx) => {
+                  const emp = employees.find((e: any) => String(e.id) === String(item.employee_id));
                   return (
-                    <tr key={index}>
-                      <td>{item.id || "-"}</td>
-                      <td>{empName}</td>
+                    <tr key={idx}>
+                      <td style={{ fontWeight: 600 }}>{emp ? getEmployeeName(emp) : `ID: ${item.employee_id}`}</td>
                       <td>{item.period || "-"}</td>
                       <td>{formatCurrency(item.allowance || 0)}</td>
                       <td>{formatCurrency(item.bonus || 0)}</td>
                       <td>
-                        <span className={`status-badge payroll-status-${item.status || "draft"}`}>
-                          {item.status === "paid" && "Sudah Dibayar"}
-                          {item.status === "approved" && "Disetujui"}
-                          {item.status === "pending" && "Menunggu"}
-                          {item.status === "rejected" && "Ditolak"}
-                          {!["paid", "approved", "pending", "rejected"].includes(item.status) && (item.status ? item.status.charAt(0).toUpperCase() + item.status.slice(1) : "Draft")}
+                        <span className={`status-badge payroll-status-${item.status?.toLowerCase() || "draft"}`}>
+                          {item.status?.toUpperCase() || "DRAFT"}
                         </span>
                       </td>
                     </tr>
@@ -615,11 +437,7 @@ const PayrollDashboard: React.FC = () => {
         </Card>
       )}
 
-      {loading && (
-        <Card className="payroll-loading payroll-accent-blue" glass>
-          <p>Memuat data payroll...</p>
-        </Card>
-      )}
+      {loading && <div className="payroll-loading-overlay">Memproses data...</div>}
     </div>
   );
 };

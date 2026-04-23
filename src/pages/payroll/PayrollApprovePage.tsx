@@ -3,10 +3,7 @@ import { BarChart3, CheckCircle2, Clock3, CreditCard, ShieldCheck } from "lucide
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
-import {
-  approvePayroll,
-  getAllPayroll,
-} from "@/features/payroll/api/payroll.service";
+import { payrollService, toSafeArray } from "@/features/payroll/api/payroll.service";
 import { getAllEmployees } from "@/features/employee/api/employee.service";
 import type { PayrollItem } from "@/features/payroll/types/payroll.types";
 import type { EmployeeItem } from "@/features/employee/types/employee.types";
@@ -30,13 +27,18 @@ const PayrollApprovePage = () => {
     setErrorModal({ isOpen: true, title, message });
   };
 
+
+
   // Load data
   const loadData = async () => {
     setLoading(true);
     try {
-      const [payrollData, employeeData] = await Promise.all([getAllPayroll(), getAllEmployees()]);
-      setPayrolls(payrollData);
-      setEmployees(employeeData);
+      const [payrollData, employeeData] = await Promise.all([
+        payrollService.getPayrollList(),
+        getAllEmployees()
+      ]);
+      setPayrolls(toSafeArray(payrollData));
+      setEmployees(toSafeArray(employeeData));
       setMessage(null);
     } catch (error) {
       const errorText = error instanceof Error ? error.message : "Gagal memuat data";
@@ -80,7 +82,7 @@ const PayrollApprovePage = () => {
       console.log("Approving payroll ID:", selectedPayroll.id);
       // Extract numeric ID if prefixed (e.g., "P003" -> "3")
       const payrollId = String(selectedPayroll.id).replace(/^[A-Z]+/, "").replace(/^0+/, "") || selectedPayroll.id;
-      await approvePayroll(payrollId);
+      await payrollService.approvePayroll(payrollId);
       
       setMessage({ type: "success", text: `Payroll ID ${selectedPayroll.id} berhasil disetujui` });
       setSelectedPayrollId("");
@@ -127,9 +129,12 @@ const PayrollApprovePage = () => {
     return labels[status] || status;
   };
 
+  // Ensure payrolls is always an array before filtering
+  const safePayrolls = Array.isArray(payrolls) ? payrolls : [];
+  
   // Filter payrolls that are pending approval
-  const pendingPayrolls = payrolls.filter((p) => p.status === "draft" || p.status === "pending");
-  const otherPayrolls = payrolls.filter((p) => p.status === "approved" || p.status === "paid");
+  const pendingPayrolls = safePayrolls.filter((p) => p.status === "draft" || p.status === "pending");
+  const otherPayrolls = safePayrolls.filter((p) => p.status === "approved" || p.status === "paid");
 
   const summaryCards = [
     {

@@ -12,6 +12,7 @@ import {
   getPayrollDetail,
   markPayrollAsPaid,
   updatePayroll,
+  toSafeArray,
 } from "@/features/payroll/api/payroll.service";
 import type { PayrollCreatePayload, PayrollItem, PayrollUpdatePayload } from "@/features/payroll/types/payroll.types";
 import "../admin/AdminCrudPages.css";
@@ -39,13 +40,13 @@ const asDisplay = (value: unknown) => {
 };
 
 const getColumns = (items: PayrollItem[]) => {
-  if (items.length === 0) {
-    return ["id", "employee_id", "period", "allowance", "bonus", "status"];
+  const defaultCols = ["id", "employee_id", "period", "allowance", "bonus", "status"];
+  if (!Array.isArray(items) || items.length === 0 || !items[0] || typeof items[0] !== 'object') {
+    return defaultCols;
   }
 
   const keys = Object.keys(items[0]);
-  const preferred = ["id", "employee_id", "period", "allowance", "bonus", "status"];
-  const merged = [...preferred, ...keys.filter((key) => !preferred.includes(key))];
+  const merged = [...defaultCols, ...keys.filter((key) => !defaultCols.includes(key))];
   return merged.filter((key, index) => merged.indexOf(key) === index);
 };
 
@@ -79,7 +80,7 @@ const PayrollManagementPage = () => {
 
     try {
       const result = await getAllPayroll();
-      setItems(result);
+      setItems(toSafeArray(result));
     } catch (error: unknown) {
       const errorText = error instanceof Error ? error.message : "Gagal muat payroll";
       showErrorModal("Error Load Data", errorText);

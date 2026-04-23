@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Layers, Search, Filter, Download, User, ArrowRight } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { engagementService } from '@/features/engagement/api/engagement.service';
+import '@/shared/styles/CrudPage.css';
 
 const SuccessionMatrixPage: React.FC = () => {
   const [data, setData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -21,14 +22,6 @@ const SuccessionMatrixPage: React.FC = () => {
     };
     fetchData();
   }, []);
-
-  // 9-Box Grid Mockup
-  const gridLabels = [
-    { x: 'Potential', y: 'Performance' },
-    ['Risk', 'Inconsistent', 'Average'],
-    ['Emerging', 'Core Employee', 'High Professional'],
-    ['Future Star', 'Rising Star', 'Star Player']
-  ];
 
   return (
     <div className="crud-page">

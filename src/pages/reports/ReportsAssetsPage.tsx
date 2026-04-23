@@ -142,7 +142,7 @@ const ReportsAssetsPage: React.FC = () => {
                 <BarChart data={valueByCategory} margin={{top:10,right:30,left:0,bottom:0}}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(37,99,235,0.1)"/>
                   <XAxis dataKey="name" stroke="#1e40af" style={{fontSize:'12px'}}/><YAxis stroke="#1e40af" style={{fontSize:'12px'}} tickFormatter={(v:number)=>Intl.NumberFormat('id-ID',{notation:'compact'}).format(v)}/>
-                  <Tooltip {...TT} formatter={(v:number)=>fmtRp(v)} cursor={{fill:'rgba(37,99,235,0.1)'}}/>
+                  <Tooltip {...TT} formatter={(v:any)=>fmtRp(Number(v))} cursor={{fill:'rgba(37,99,235,0.1)'}}/>
                   <Bar dataKey="value" fill="#8b5cf6" radius={[8,8,0,0]} name="Nilai (Rp)"/>
                 </BarChart>
               </ResponsiveContainer>

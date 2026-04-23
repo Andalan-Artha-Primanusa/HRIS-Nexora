@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save, GraduationCap, Calendar, User, BookOpen, Clock, Globe } from 'lucide-react';
+import { ArrowLeft, Save, Calendar, BookOpen, Clock, Globe, Users } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { trainingService } from '@/features/training/api/training.service';
@@ -13,7 +13,17 @@ const TrainingFormPage: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string;
+    description: string;
+    category: string;
+    provider: string;
+    duration: string;
+    start_date: string;
+    end_date: string;
+    max_participants: number;
+    status: 'draft' | 'active' | 'completed' | 'cancelled';
+  }>({
     title: '',
     description: '',
     category: 'Technical',
@@ -22,7 +32,7 @@ const TrainingFormPage: React.FC = () => {
     start_date: '',
     end_date: '',
     max_participants: 0,
-    status: 'Planned'
+    status: 'active'
   });
 
   useEffect(() => {

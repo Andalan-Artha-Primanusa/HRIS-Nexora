@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
-import type { ReimbursementItem, ReimbursementCreatePayload } from '../types/reimbursement.types';
+import type { ReimbursementItem } from '../types/reimbursement.types';
 
 interface ReimbursementModalProps {
   isOpen: boolean;

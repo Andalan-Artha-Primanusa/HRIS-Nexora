@@ -58,6 +58,8 @@ const ReportsDashboardPage = lazy(() => import("../../pages/reports/ReportsDashb
 const ReportsAttendancePage = lazy(() => import("../../pages/reports/ReportsAttendancePage"));
 const ReportsLeavePage = lazy(() => import("../../pages/reports/ReportsLeavePage"));
 const ReportsPayrollPage = lazy(() => import("../../pages/reports/ReportsPayrollPage"));
+const PayrollTaxBPJSPage = lazy(() => import("../../pages/payroll/PayrollTaxPage"));
+const PayrollReportsDetailedPage = lazy(() => import("../../pages/payroll/PayrollReportsDetailedPage"));
 const ReportsAssetsPage = lazy(() => import("../../pages/reports/ReportsAssetsPage"));
 const ReportsEmployeePage = lazy(() => import("../../pages/reports/ReportsEmployeePage"));
 const WorkSchedulesPage = lazy(() => import("../../pages/work-schedule/WorkSchedulesPage"));
@@ -97,6 +99,8 @@ const AssetFormPage = lazy(() => import("../../pages/admin/AssetFormPage.tsx"));
 const OkrFormPage = lazy(() => import("../../pages/admin/OkrFormPage.tsx"));
 const SurveyFormPage = lazy(() => import("../../pages/admin/SurveyFormPage.tsx"));
 const BenefitFormPage = lazy(() => import("../../pages/admin/BenefitFormPage.tsx"));
+const LeaveTypePage = lazy(() => import("../../pages/admin/LeaveTypePage"));
+const LeavePolicyPage = lazy(() => import("../../pages/admin/LeavePolicyPage"));
 const TrainingFormPage = lazy(() => import("../../pages/admin/TrainingFormPage.tsx"));
 const BiometricDeviceFormPage = lazy(() => import("../../pages/admin/BiometricDeviceFormPage.tsx"));
 const HolidayFormPage = lazy(() => import("../../pages/admin/HolidayFormPage.tsx"));
@@ -104,6 +108,15 @@ const OvertimeRuleFormPage = lazy(() => import("../../pages/admin/OvertimeRuleFo
 const CalibrationFormPage = lazy(() => import("../../pages/admin/CalibrationFormPage.tsx"));
 const HrRequestFormPage = lazy(() => import("../../pages/admin/HrRequestFormPage.tsx"));
 const SlaPage = lazy(() => import("../../pages/admin/SlaPage.tsx"));
+<<<<<<< HEAD
+=======
+const EngagementAnalyticsPage = lazy(() => import("../../pages/admin/EngagementAnalyticsPage.tsx"));
+const AssetAssignmentsPage = lazy(() => import("../../pages/admin/AssetAssignmentsPage.tsx"));
+const AssignmentLettersPage = lazy(() => import("../../pages/admin/AssignmentLettersPage.tsx"));
+const MyAssetsPage = lazy(() => import("../../pages/ess/MyAssetsPage.tsx"));
+const MyAssignmentLettersPage = lazy(() => import("../../pages/ess/MyAssignmentLettersPage.tsx"));
+const MyDocumentsPage = lazy(() => import("../../pages/ess/MyDocumentsPage.tsx"));
+>>>>>>> f8461d5b2d9b40b417386debbd6cbf5ff7e0abdd
 
 
 
@@ -140,17 +153,10 @@ const sectionRoutes = [
   { path: "/organization/master-data" },
   { path: "/documents/review" },
   { path: "/documents/expiring" },
-  { path: "/my/documents" },
   { path: "/notifications" },
   { path: "/attendance/timesheet" },
   { path: "/attendance/overtime" },
   { path: "/attendance/reports" },
-  { path: "/leave/type/create" },
-  { path: "/leave/type/manage" },
-  { path: "/leave/policy/create" },
-  { path: "/leave/policy/manage" },
-  { path: "/assets" },
-  { path: "/assets/assignments" },
   { path: "/my/assets" },
   { path: "/training/programs" },
   { path: "/training/enrollments" },
@@ -161,12 +167,9 @@ const sectionRoutes = [
   { path: "/requests" },
   { path: "/requests/assign" },
   { path: "/requests/status" },
-  { path: "/approval-flows" },
   { path: "/compliance/overview" },
   { path: "/compliance/audit-summary" },
   { path: "/compliance/expiring-documents" },
-  { path: "/payroll/tax" },
-  { path: "/payroll/reports" },
   { path: "/expense/categories" },
   { path: "/expense/reports" },
   { path: "/performance" },
@@ -190,7 +193,6 @@ const sectionRoutes = [
   { path: "/settings/company" },
   { path: "/settings/user-role" },
   { path: "/settings/permissions" },
-  { path: "/settings/master-data/leave-type" },
   { path: "/settings/master-data/expense-category" },
   { path: "/settings/notification" },
 ];
@@ -246,6 +248,11 @@ export const router = createBrowserRouter([
   {
     element: <ProtectedRoute />,
     children: [
+      {
+        path: "/approval-flows",
+        element: <DashboardLayout />,
+        children: [{ index: true, element: <ApprovalFlowPage /> }],
+      },
       {
         path: "/dashboard",
         element: <DashboardLayout />,
@@ -345,6 +352,21 @@ export const router = createBrowserRouter([
         ],
       },
       {
+        path: "/my/assets",
+        element: <DashboardLayout />,
+        children: [{ index: true, element: <MyAssetsPage /> }],
+      },
+      {
+        path: "/my/assignment-letters",
+        element: <DashboardLayout />,
+        children: [{ index: true, element: <MyAssignmentLettersPage /> }],
+      },
+      {
+        path: "/my/documents",
+        element: <DashboardLayout />,
+        children: [{ index: true, element: <MyDocumentsPage /> }],
+      },
+      {
         path: "/my/payroll",
         element: <DashboardLayout />,
         children: [
@@ -436,11 +458,17 @@ export const router = createBrowserRouter([
       },
       {
         path: "/leave/type",
-        element: <Navigate to="/leave/type/manage" replace />,
+        element: <DashboardLayout />,
+        children: [{ index: true, element: <LeaveTypePage /> }],
       },
       {
         path: "/leave/policy",
-        element: <Navigate to="/leave/policy/manage" replace />,
+        element: <DashboardLayout />,
+        children: [{ index: true, element: <LeavePolicyPage /> }],
+      },
+      {
+        path: "/settings/master-data/leave-type",
+        element: <Navigate to="/leave/type" replace />,
       },
       {
         path: "/profiles",
@@ -713,6 +741,7 @@ export const router = createBrowserRouter([
 
           { path: "/legal/severance", element: <SeveranceCalculatorPage /> },
           { path: "/legal/letters", element: <EmploymentLettersPage /> },
+          { path: "/admin/assignment-letters", element: <AssignmentLettersPage /> },
           { path: "/legal/tax", element: <ProgressiveTaxPage /> },
           
           { path: "/organization/chart", element: <OrgChartPage /> },
@@ -732,7 +761,6 @@ export const router = createBrowserRouter([
           { path: "/training/programs/edit/:id", element: <TrainingFormPage /> },
 
           { path: "/competencies", element: <CompetencyMatrixPage /> },
-          { path: "/approval-flows", element: <ApprovalFlowPage /> },
           { path: "/career/succession", element: <SuccessionMatrixPage /> },
           { path: "/career/idps", element: <IdpPage /> },
 
@@ -749,6 +777,9 @@ export const router = createBrowserRouter([
           { path: "/biometric/devices", element: <BiometricDevicesPage /> },
           { path: "/enterprise/compensation", element: <CompensationPage /> },
           { path: "/inventory/assets", element: <AssetInventoryPage /> },
+          { path: "/assets", element: <AssetInventoryPage /> },
+          { path: "/assets/assignments", element: <AssetAssignmentsPage /> },
+          { path: "/admin/assignment-letters", element: <AssignmentLettersPage /> },
           { path: "/inventory/assets/create", element: <AssetFormPage /> },
           { path: "/inventory/assets/edit/:id", element: <AssetFormPage /> },
           { path: "/compensation/benefits", element: <BenefitManagementPage /> },
@@ -868,6 +899,16 @@ export const router = createBrowserRouter([
             element: <PayrollDetailsPage />,
           },
         ],
+      },
+      {
+        path: "/payroll/tax",
+        element: <DashboardLayout />,
+        children: [{ index: true, element: <PayrollTaxBPJSPage /> }],
+      },
+      {
+        path: "/payroll/reports",
+        element: <DashboardLayout />,
+        children: [{ index: true, element: <PayrollReportsDetailedPage /> }],
       },
       {
         path: "/reports/dashboard-summary",

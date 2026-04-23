@@ -107,6 +107,7 @@ const MenuItemComponent: React.FC<{
     <li className="menu-item-wrapper">
       <NavLink
         to={item.path ?? '#'}
+        end
         className={({ isActive: isLinkActive }) =>
           clsx(
             level > 0 ? 'submenu-item' : 'menu-item',

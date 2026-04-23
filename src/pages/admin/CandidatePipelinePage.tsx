@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { RefreshCw, Users, Search, Filter } from 'lucide-react';
+import { RefreshCw, Search, Filter } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import { recruitmentService } from '@/features/recruitment/api/recruitment.service';
 import '@/shared/styles/CrudPage.css';
@@ -19,7 +19,17 @@ const CandidatePipelinePage: React.FC = () => {
     setLoading(true);
     try {
       const data = await recruitmentService.getCandidates();
-      setCandidates(Array.isArray(data) ? data : data.data || []);
+      let candidatesList = [];
+      if (Array.isArray(data)) {
+        candidatesList = data;
+      } else if (data?.data && Array.isArray(data.data)) {
+        candidatesList = data.data;
+      } else if (data?.data?.data && Array.isArray(data.data.data)) {
+        candidatesList = data.data.data;
+      } else if (data?.candidates && Array.isArray(data.candidates)) {
+        candidatesList = data.candidates;
+      }
+      setCandidates(candidatesList);
     } catch (error) {
       console.error('Error fetching candidates:', error);
     } finally {
