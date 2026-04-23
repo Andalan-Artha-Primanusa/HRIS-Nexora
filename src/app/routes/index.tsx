@@ -108,15 +108,11 @@ const OvertimeRuleFormPage = lazy(() => import("../../pages/admin/OvertimeRuleFo
 const CalibrationFormPage = lazy(() => import("../../pages/admin/CalibrationFormPage.tsx"));
 const HrRequestFormPage = lazy(() => import("../../pages/admin/HrRequestFormPage.tsx"));
 const SlaPage = lazy(() => import("../../pages/admin/SlaPage.tsx"));
-<<<<<<< HEAD
-=======
-const EngagementAnalyticsPage = lazy(() => import("../../pages/admin/EngagementAnalyticsPage.tsx"));
 const AssetAssignmentsPage = lazy(() => import("../../pages/admin/AssetAssignmentsPage.tsx"));
 const AssignmentLettersPage = lazy(() => import("../../pages/admin/AssignmentLettersPage.tsx"));
 const MyAssetsPage = lazy(() => import("../../pages/ess/MyAssetsPage.tsx"));
 const MyAssignmentLettersPage = lazy(() => import("../../pages/ess/MyAssignmentLettersPage.tsx"));
 const MyDocumentsPage = lazy(() => import("../../pages/ess/MyDocumentsPage.tsx"));
->>>>>>> f8461d5b2d9b40b417386debbd6cbf5ff7e0abdd
 
 
 
