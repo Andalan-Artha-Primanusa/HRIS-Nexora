@@ -188,32 +188,25 @@ const PayrollCrudPage = () => {
         </div>
       </Modal>
 
-      <Card className="crud-header-card" glass>
-        <div className="crud-header">
-          <div className="crud-header-copy">
-            <p className="crud-page-badge">Payroll Operations</p>
-            <div className="crud-header-title-row">
-              <span className="crud-header-icon">
-                <BarChart3 size={24} />
-              </span>
-              <h1>Kelola Payroll</h1>
-            </div>
-            <p>Administer employee payroll records with precision. Create, update, or remove entries with a streamlined workflow.</p>
-          </div>
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <Button variant="outline" size="lg" onClick={() => void loadData()} disabled={loading} style={{ color: 'white', borderColor: 'rgba(255,255,255,0.2)' }}>
-              <RefreshCw className={loading ? "animate-spin" : ""} size={18} style={{ marginRight: '8px' }} />
-              Sync
-            </Button>
-            {view === 'list' && (
-              <Button variant="primary" size="lg" onClick={openCreateForm} style={{ background: 'var(--primary)', border: 'none', fontWeight: '700' }}>
-                <Plus size={20} style={{ marginRight: '8px' }} />
-                Tambah Payroll
-              </Button>
-            )}
-          </div>
+      <div className="page-header">
+        <div className="page-header-title">
+          <span className="page-badge">Payroll Operations</span>
+          <h1>Kelola Payroll</h1>
+          <p>Administer employee payroll records with precision. Create, update, or remove entries with a streamlined workflow.</p>
         </div>
-      </Card>
+        <div className="page-header-actions">
+          <Button variant="outline" size="md" onClick={() => void loadData()} disabled={loading}>
+            <RefreshCw className={loading ? "animate-spin" : ""} size={16} />
+            Sync
+          </Button>
+          {view === 'list' && (
+            <Button variant="primary" size="md" onClick={openCreateForm}>
+              <Plus size={16} />
+              Tambah Payroll
+            </Button>
+          )}
+        </div>
+      </div>
 
       {message && message.type === "success" && (
         <Card className="crud-card" glass style={{ borderLeft: '4px solid #10b981', background: 'rgba(16, 185, 129, 0.05)' }}>
@@ -225,54 +218,60 @@ const PayrollCrudPage = () => {
       )}
 
       {view === "list" ? (
-        <Card className="crud-card" glass>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-            <h2>Daftar Payroll Karyawan</h2>
-            <p style={{ fontSize: '0.875rem', color: '#64748b' }}>Total {payrolls.length} entri ditemukan</p>
+        <div className="white-unified-wrapper">
+          <div className="wuw-header">
+            <div className="wuw-header-top">
+              <div className="wuw-title-area">
+                <h3>Daftar Payroll Karyawan</h3>
+                <span className="wuw-count-badge">{payrolls.length} Total</span>
+              </div>
+            </div>
           </div>
-          <div className="crud-table-wrap">
-            <table className="crud-table">
-              <thead>
-                <tr>
-                  <th>Karyawan</th>
-                  <th>Periode</th>
-                  <th>Gaji Pokok</th>
-                  <th>Tunjangan</th>
-                  <th>Bonus</th>
-                  <th>Take Home Pay</th>
-                  <th style={{ textAlign: 'center' }}>Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {payrolls.length > 0 ? (
-                  payrolls.map((payroll) => (
-                    <tr key={payroll.id} className={selectedPayrollId === String(payroll.id) ? "is-selected" : ""}>
-                      <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <UserCircle size={32} color="#94a3b8" />
-                          <div style={{ fontWeight: '700' }}>{getEmployeeName(String(payroll.employee_id))}</div>
-                        </div>
-                      </td>
-                      <td>
-                        <div style={{ fontWeight: '500', color: '#64748b' }}>
-                          {new Date(payroll.period + '-01').toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}
-                        </div>
-                      </td>
-                      <td>Rp {Number(payroll.basic_salary || 0).toLocaleString("id-ID")}</td>
-                      <td>Rp {Number(payroll.allowance || 0).toLocaleString("id-ID")}</td>
-                      <td style={{ color: '#10b981', fontWeight: '600' }}>Rp {Number(payroll.bonus || 0).toLocaleString("id-ID")}</td>
-                      <td style={{ fontWeight: '800', color: 'var(--primary)' }}>Rp {Number(payroll.take_home_pay || 0).toLocaleString("id-ID")}</td>
-                      <td style={{ textAlign: 'center' }}>
-                        <div className="action-btn-group" style={{ justifyContent: 'center' }}>
-                          <button onClick={() => selectPayroll(payroll, "edit")} className="action-btn action-btn-edit" title="Edit">
-                            <Pencil size={16} />
-                          </button>
-                          <button onClick={() => selectPayroll(payroll, "delete")} className="action-btn action-btn-delete" title="Delete">
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
+
+          <div className="wuw-table-area">
+            <div className="crud-table-wrap">
+              <table className="crud-table">
+                <thead>
+                  <tr>
+                    <th>Karyawan</th>
+                    <th>Periode</th>
+                    <th>Gaji Pokok</th>
+                    <th>Tunjangan</th>
+                    <th>Bonus</th>
+                    <th>Take Home Pay</th>
+                    <th style={{ textAlign: 'center' }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {payrolls.length > 0 ? (
+                    payrolls.map((payroll) => (
+                      <tr key={payroll.id} className={selectedPayrollId === String(payroll.id) ? "is-selected" : ""}>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <UserCircle size={32} color="#94a3b8" />
+                            <div style={{ fontWeight: '700' }}>{getEmployeeName(String(payroll.employee_id))}</div>
+                          </div>
+                        </td>
+                        <td>
+                          <div style={{ fontWeight: '500', color: '#64748b' }}>
+                            {new Date(payroll.period + '-01').toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}
+                          </div>
+                        </td>
+                        <td>Rp {Number(payroll.basic_salary || 0).toLocaleString("id-ID")}</td>
+                        <td>Rp {Number(payroll.allowance || 0).toLocaleString("id-ID")}</td>
+                        <td style={{ color: '#10b981', fontWeight: '600' }}>Rp {Number(payroll.bonus || 0).toLocaleString("id-ID")}</td>
+                        <td style={{ fontWeight: '800', color: 'var(--primary)' }}>Rp {Number(payroll.take_home_pay || 0).toLocaleString("id-ID")}</td>
+                        <td style={{ textAlign: 'center' }}>
+                          <div className="action-btn-group" style={{ justifyContent: 'center' }}>
+                            <button onClick={() => selectPayroll(payroll, "edit")} className="action-btn action-btn-edit" title="Edit">
+                              <Pencil size={16} />
+                            </button>
+                            <button onClick={() => selectPayroll(payroll, "delete")} className="action-btn action-btn-delete" title="Delete">
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
                   ))
                 ) : (
                   <tr>
@@ -281,8 +280,9 @@ const PayrollCrudPage = () => {
                 )}
               </tbody>
             </table>
+            </div>
           </div>
-        </Card>
+        </div>
       ) : (
         <div className="form-view-container">
           <Card className="crud-card" glass>
@@ -398,6 +398,7 @@ const PayrollCrudPage = () => {
               </Button>
             </div>
           </Card>
+        </div>
         </div>
       )}
     </div>

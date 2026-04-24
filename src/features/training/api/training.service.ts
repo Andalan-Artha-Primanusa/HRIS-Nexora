@@ -39,6 +39,10 @@ export const trainingService = {
     const response = await api.get('/competencies');
     return response.data;
   },
+  getMyCompetencies: async () => {
+    const response = await api.get('/my/competencies');
+    return response.data;
+  },
   getEmployeeCompetencies: async (employeeId: string | number) => {
     const response = await api.get(`/competencies/employee/${employeeId}`);
     return response.data;

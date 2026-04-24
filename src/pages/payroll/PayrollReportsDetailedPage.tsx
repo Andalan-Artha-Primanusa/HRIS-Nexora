@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Search, Download, RefreshCw } from 'lucide-react';
+import { FileText, Search, RefreshCw } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { Badge } from '@/shared/ui/Badge';
 import { payrollService, toSafeArray } from '@/features/payroll/api/payroll.service';
-import './PayrollDetailedPages.css';
+import '@/shared/styles/CrudPage.css';
 
 const formatCurrency = (value: number | string) => {
   const num = typeof value === 'string' ? parseFloat(value) : value;
@@ -50,129 +50,137 @@ const PayrollReportsDetailedPage: React.FC = () => {
   }), { thp: 0, deductions: 0, records: 0 });
 
   return (
-    <div className="payroll-detailed-page">
-      <Card className="detailed-hero-card detailed-hero-purple" glass>
-        <div className="detailed-hero-copy">
-          <span className="detailed-badge">Financial Reports</span>
+    <div className="crud-page">
+      <div className="page-header">
+        <div className="page-header-title">
+          <span className="page-badge">Financial Reports</span>
           <h1>Laporan Detail Payroll</h1>
           <p>Laporan komprehensif seluruh komponen penghasilan dan potongan karyawan.</p>
         </div>
-        <div className="detailed-hero-icon">
-          <FileText size={72} color="#8b5cf6" />
-        </div>
-      </Card>
-
-      <div className="detailed-stats-grid">
-        <Card className="mini-stat-card" glass>
-          <span className="stat-label">Total Take Home Pay</span>
-          <span className="stat-value">{formatCurrency(totals.thp)}</span>
-          <Badge variant="success">Net Disbursement</Badge>
-        </Card>
-        <Card className="mini-stat-card" glass>
-          <span className="stat-label">Total Potongan</span>
-          <span className="stat-value text-red-600">{formatCurrency(totals.deductions)}</span>
-          <Badge variant="danger">Total Deductions</Badge>
-        </Card>
-        <Card className="mini-stat-card" glass>
-          <span className="stat-label">Jumlah Entri</span>
-          <span className="stat-value">{totals.records}</span>
-          <Badge variant="default">Processed</Badge>
-        </Card>
-      </div>
-
-      <div className="detailed-actions-bar">
-        <div className="search-box">
-          <Search size={18} />
-          <input 
-            type="text" 
-            placeholder="Cari karyawan atau kode..." 
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-        <div className="action-buttons">
+        <div className="page-header-actions">
           <Button variant="outline" size="md" onClick={() => void loadData()} disabled={loading}>
-            <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
-          </Button>
-          <Button variant="primary" size="md">
-            <Download size={18} style={{ marginRight: '8px' }} />
-            Unduh Excel
+            <RefreshCw size={16} />
+            Refresh
           </Button>
         </div>
       </div>
 
-      <Card className="detailed-table-card" glass>
-        <div className="table-header">
-          <h2>Rincian Penggajian Karyawan</h2>
-          <Badge variant="info">{filteredData.length} Records</Badge>
+      <div className="summary-grid">
+        <Card className="summary-card" glass>
+          <div className="summary-card__header">
+            <div>
+              <span className="summary-card__label">Total Take Home Pay</span>
+              <p className="summary-card__subtitle">Net Disbursement</p>
+            </div>
+            <span className="summary-card__icon summary-card__icon--green">
+              <FileText size={20} />
+            </span>
+          </div>
+          <div className="summary-card__value summary-card__value--green">{formatCurrency(totals.thp)}</div>
+          <div className="summary-card__change">Total THP</div>
+        </Card>
+
+        <Card className="summary-card" glass>
+          <div className="summary-card__header">
+            <div>
+              <span className="summary-card__label">Total Potongan</span>
+              <p className="summary-card__subtitle">Total Deductions</p>
+            </div>
+            <span className="summary-card__icon summary-card__icon--red">
+              <FileText size={20} />
+            </span>
+          </div>
+          <div className="summary-card__value summary-card__value--red">{formatCurrency(totals.deductions)}</div>
+          <div className="summary-card__change">Potongan seluruh karyawan</div>
+        </Card>
+
+        <Card className="summary-card" glass>
+          <div className="summary-card__header">
+            <div>
+              <span className="summary-card__label">Jumlah Entri</span>
+              <p className="summary-card__subtitle">Processed</p>
+            </div>
+            <span className="summary-card__icon summary-card__icon--blue">
+              <FileText size={20} />
+            </span>
+          </div>
+          <div className="summary-card__value summary-card__value--blue">{totals.records}</div>
+          <div className="summary-card__change">Records</div>
+        </Card>
+      </div>
+
+      <div className="white-unified-wrapper">
+        <div className="wuw-header">
+          <div className="wuw-header-top">
+            <div className="wuw-title-area">
+              <h3>Laporan Payroll</h3>
+              <span className="wuw-count-badge">{filteredData.length} Records</span>
+            </div>
+            <div className="search-box">
+              <Search size={18} />
+              <input 
+                type="text" 
+                placeholder="Cari karyawan..." 
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+          </div>
         </div>
 
-        <div className="ui-table-overflow">
-          <table className="premium-table">
-            <thead>
-              <tr>
-                <th>Karyawan</th>
-                <th>Periode</th>
-                <th>Gaji Pokok</th>
-                <th>Tunjangan</th>
-                <th>Bonus</th>
-                <th>Potongan</th>
-                <th>Gaji Bersih (THP)</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
+        <div className="wuw-table-area">
+          <div className="table-wrap">
+            <table className="data-table">
+              <thead>
                 <tr>
-                  <td colSpan={8} className="text-center py-10">Memuat data...</td>
+                  <th>Karyawan</th>
+                  <th>Periode</th>
+                  <th>Gaji Pokok</th>
+                  <th>Tunjangan</th>
+                  <th>Bonus</th>
+                  <th>Potongan</th>
+                  <th>THP</th>
+                  <th>Status</th>
                 </tr>
-              ) : filteredData.length > 0 ? (
-                filteredData.map((item) => (
-                  <tr key={item.id}>
-                    <td>
-                      <div className="employee-cell">
-                        <div className="emp-avatar" style={{ 
-                          background: 'linear-gradient(135deg, #8b5cf620 0%, #8b5cf640 100%)', 
-                          color: '#5b21b6',
-                          boxShadow: 'inset 0 0 0 1px rgba(139, 92, 246, 0.1)'
-                        }}>
-                          {(item.employee?.user?.name || 'U')[0]}
-                        </div>
-                        <div className="emp-info">
-                          <span className="emp-name" style={{ color: '#0f172a' }}>{item.employee?.user?.name || 'Unknown'}</span>
-                          <span className="emp-code" style={{ letterSpacing: '0.05em' }}>{item.employee?.employee_code || item.employee_id}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td><Badge variant="default" style={{ fontWeight: 600 }}>{item.period}</Badge></td>
-                    <td style={{ color: '#475569' }}>{formatCurrency(item.basic_salary)}</td>
-                    <td style={{ color: '#059669', fontWeight: 600 }}>+{formatCurrency(item.allowance)}</td>
-                    <td style={{ color: '#059669', fontWeight: 600 }}>+{formatCurrency(item.bonus)}</td>
-                    <td style={{ color: '#e11d48', fontWeight: 600 }}>-{formatCurrency(item.total_deduction)}</td>
-                    <td style={{ fontWeight: 800, color: '#1e293b', fontSize: '1.05rem' }}>{formatCurrency(item.take_home_pay)}</td>
-                    <td>
-                      <Badge 
-                        variant={
-                          item.status === 'paid' ? 'success' : 
-                          item.status === 'approved' ? 'info' : 
-                          'warning'
-                        }
-                        style={{ padding: '6px 12px', borderRadius: '8px', fontSize: '0.7rem' }}
-                      >
-                        {item.status?.toUpperCase() || 'DRAFT'}
-                      </Badge>
-                    </td>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan={8} className="text-center py-10">Memuat data...</td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={8} className="text-center py-10">Tidak ada data ditemukan.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                ) : filteredData.length > 0 ? (
+                  filteredData.map((item) => (
+                    <tr key={item.id}>
+                      <td>
+                        <div className="cell-name">
+                          <div className="cell-avatar">
+                            {(item.employee?.user?.name || 'U')[0]}
+                          </div>
+                          <div className="cell-stacked">
+                            <span className="cell-name-text">{item.employee?.user?.name || 'Unknown'}</span>
+                            <span className="cell-stacked__sub">{item.employee?.employee_code || item.employee_id}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td>{item.period}</td>
+                      <td>{formatCurrency(item.basic_salary)}</td>
+                      <td>{formatCurrency(item.allowance)}</td>
+                      <td style={{ color: '#10b981' }}>{formatCurrency(item.bonus)}</td>
+                      <td style={{ color: '#ef4444' }}>{formatCurrency(item.total_deduction)}</td>
+                      <td style={{ fontWeight: 800, color: '#2563eb' }}>{formatCurrency(item.take_home_pay)}</td>
+                      <td><Badge variant={item.status === 'paid' ? 'success' : 'warning'}>{item.status}</Badge></td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={8} className="text-center py-10">Tidak ada data ditemukan.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </Card>
+      </div>
     </div>
   );
 };

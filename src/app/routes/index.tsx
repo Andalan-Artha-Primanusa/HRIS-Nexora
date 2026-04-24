@@ -14,6 +14,9 @@ const AttendanceCheckOutPage = lazy(() => import("../../pages/attendance/Attenda
 const AttendanceHistoryPage = lazy(() => import("../../pages/attendance/AttendanceHistoryPage"));
 const AttendanceTodayPage = lazy(() => import("../../pages/attendance/AttendanceTodayPage"));
 const AttendanceAdminPage = lazy(() => import("../../pages/attendance/AttendanceAdminPage"));
+const TimesheetPage = lazy(() => import("../../pages/attendance/TimesheetPage"));
+const OvertimePage = lazy(() => import("../../pages/attendance/OvertimePage"));
+const AttendanceReportsPage = lazy(() => import("../../pages/attendance/AttendanceReportsPage"));
 const KpiListPage = lazy(() => import("../../pages/admin/AdminKpiPage"));
 const KpiFormPage = lazy(() => import("../../pages/admin/KpiFormPage"));
 const MyKpiPage = lazy(() => import("../../pages/ess/MyKpiPage"));
@@ -26,6 +29,8 @@ const MyReimbursementsPage = lazy(() => import("../../pages/ess/MyReimbursements
 const AdminReimbursementsPage = lazy(() => import("../../pages/admin/AdminReimbursementsPage"));
 const MyPayrollPage = lazy(() => import("../../pages/ess/MyPayrollPage"));
 const MyLeavesPage = lazy(() => import("../../pages/ess/MyLeavesPage"));
+const MyTrainingsPage = lazy(() => import("../../pages/ess/MyTrainingsPage"));
+const MyCompetenciesPage = lazy(() => import("../../pages/ess/MyCompetenciesPage"));
 
 const LocationsPage = lazy(() => import("../../pages/locations/LocationsPage"));
 const CreateLocationPage = lazy(() => import("../../pages/locations/CreateLocationPage"));
@@ -78,6 +83,7 @@ const HrRequestsPage = lazy(() => import("../../pages/admin/HrRequestsPage.tsx")
 const ComplianceDashboardPage = lazy(() => import("../../pages/admin/ComplianceDashboardPage.tsx"));
 const HolidayCalendarPage = lazy(() => import("../../pages/admin/HolidayCalendarPage.tsx"));
 const TrainingProgramsPage = lazy(() => import("../../pages/admin/TrainingProgramsPage.tsx"));
+const TrainingEnrollmentsPage = lazy(() => import("../../pages/admin/TrainingEnrollmentsPage.tsx"));
 const CompetencyMatrixPage = lazy(() => import("../../pages/admin/CompetencyMatrixPage.tsx"));
 const ApprovalFlowPage = lazy(() => import("../../pages/admin/ApprovalFlowPage.tsx"));
 const ProgressiveTaxPage = lazy(() => import("../../pages/admin/ProgressiveTaxPage.tsx"));
@@ -99,6 +105,10 @@ const AssetFormPage = lazy(() => import("../../pages/admin/AssetFormPage.tsx"));
 const OkrFormPage = lazy(() => import("../../pages/admin/OkrFormPage.tsx"));
 const SurveyFormPage = lazy(() => import("../../pages/admin/SurveyFormPage.tsx"));
 const BenefitFormPage = lazy(() => import("../../pages/admin/BenefitFormPage.tsx"));
+const ExpenseCategoryPage = lazy(() => import("../../pages/admin/ExpenseCategoryPage.tsx"));
+const MasterDataPage = lazy(() => import("../../pages/admin/MasterDataPage.tsx"));
+const CompanySettingsPage = lazy(() => import("../../pages/admin/CompanySettingsPage.tsx"));
+const NotificationSettingsPage = lazy(() => import("../../pages/admin/NotificationSettingsPage.tsx"));
 const LeaveTypePage = lazy(() => import("../../pages/admin/LeaveTypePage"));
 const LeavePolicyPage = lazy(() => import("../../pages/admin/LeavePolicyPage"));
 const LeaveTypeFormPage = lazy(() => import("../../pages/admin/LeaveTypeFormPage"));
@@ -371,6 +381,16 @@ export const router = createBrowserRouter([
             element: <MyPayrollPage />,
           },
         ],
+      },
+      {
+        path: "/my/trainings",
+        element: <DashboardLayout />,
+        children: [{ index: true, element: <MyTrainingsPage /> }],
+      },
+      {
+        path: "/my/competencies",
+        element: <DashboardLayout />,
+        children: [{ index: true, element: <MyCompetenciesPage /> }],
       },
       {
         path: "/leave/my-leave",
@@ -765,6 +785,7 @@ export const router = createBrowserRouter([
           { path: "/training/programs", element: <TrainingProgramsPage /> },
           { path: "/training/programs/create", element: <TrainingFormPage /> },
           { path: "/training/programs/edit/:id", element: <TrainingFormPage /> },
+          { path: "/training/enrollments", element: <TrainingEnrollmentsPage /> },
 
           { path: "/competencies", element: <CompetencyMatrixPage /> },
           { path: "/career/succession", element: <SuccessionMatrixPage /> },
@@ -797,6 +818,11 @@ export const router = createBrowserRouter([
 
           { path: "/analytics/people-detailed", element: <DetailedPeopleAnalyticsPage /> },
           { path: "/enterprise/notification-rules", element: <NotificationRulesPage /> },
+
+          { path: "/settings/company", element: <CompanySettingsPage /> },
+          { path: "/settings/notification", element: <NotificationSettingsPage /> },
+          { path: "/organization/master-data", element: <MasterDataPage /> },
+          { path: "/settings/master-data/expense-category", element: <ExpenseCategoryPage /> },
         ],
       },
       {
@@ -948,6 +974,21 @@ export const router = createBrowserRouter([
         path: "/reports/employee",
         element: <DashboardLayout />,
         children: [{ index: true, element: <ReportsEmployeePage /> }],
+      },
+      {
+        path: "/attendance/timesheet",
+        element: <DashboardLayout />,
+        children: [{ index: true, element: <TimesheetPage /> }],
+      },
+      {
+        path: "/attendance/overtime",
+        element: <DashboardLayout />,
+        children: [{ index: true, element: <OvertimePage /> }],
+      },
+      {
+        path: "/attendance/reports",
+        element: <DashboardLayout />,
+        children: [{ index: true, element: <AttendanceReportsPage /> }],
       },
       ...sectionRoutes.map((route) => ({
         path: route.path,
