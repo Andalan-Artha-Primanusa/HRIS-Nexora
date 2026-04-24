@@ -552,43 +552,36 @@ const EmployeesPage = () => {
                           </span>
                         </td>
                         <td className="td-center">
-                          <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'center' }}>
-                            <Button
-                              variant="ghost"
-                              size="sm"
+                          <div className="action-btn-group">
+                            <button
+                              className="action-btn action-btn-edit"
                               onClick={() => navigate(`/employees/update/${item.id}`)}
-                              style={{ color: '#2563eb', padding: '0.4rem' }}
                               title="Edit Profil"
                             >
                               <Pencil size={16} />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
+                            </button>
+                            <button
+                              className="action-btn action-btn-secondary"
                               onClick={() => navigate(`/legal/letters?employee=${item.id}`)}
-                              style={{ color: '#8b5cf6', padding: '0.4rem' }}
                               title="Buat Surat"
                             >
                               <FileText size={16} />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
+                            </button>
+                            <button
+                              className="action-btn action-btn-view"
                               onClick={() => navigate(`/performance/summary?employee=${item.id}`)}
-                              style={{ color: '#10b981', padding: '0.4rem' }}
+                              style={{ color: '#10b981', background: '#ecfdf5' }}
                               title="Kenaikan Jabatan"
                             >
                               <TrendingUp size={16} />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
+                            </button>
+                            <button
+                              className="action-btn action-btn-delete"
                               onClick={() => void deleteExistingEmployee(String(item.id))}
-                              style={{ color: '#ef4444', padding: '0.4rem' }}
                               title="Hapus"
                             >
                               <Trash2 size={16} />
-                            </Button>
+                            </button>
                           </div>
                         </td>
                       </tr>

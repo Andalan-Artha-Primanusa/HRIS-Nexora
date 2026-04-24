@@ -54,6 +54,10 @@ const getCreateActions = (ctx: SectionActionContext) => ({
     const { id: _id, ...payload } = ctx.formState;
     return api.post('/leave-policies', payload);
   },
+  createLeaveType: () => {
+    const { id: _id, ...payload } = ctx.formState;
+    return api.post('/leave-types', payload);
+  },
   createReimbursement: () =>
     api.post('/my/reimbursements', ctx.buildPayloadByKeys(['title', 'description', 'amount', 'category', 'expense_date', 'receipt_path'])),
   createAsset: () => api.post('/assets', ctx.buildPayloadByKeys(['asset_code', 'name', 'category', 'cost', 'purchase_date', 'location_id'])),
@@ -129,6 +133,11 @@ const getUpdateActions = (ctx: SectionActionContext) => ({
     const { id: _id, ...payload } = ctx.formState;
     return api.put(`/leave-policies/${id}`, payload);
   },
+  updateLeaveType: () => {
+    const id = ctx.getRequiredId('Type ID');
+    const { id: _id, ...payload } = ctx.formState;
+    return api.put(`/leave-types/${id}`, payload);
+  },
   updateRequestStatus: () => {
     const id = ctx.getRequiredId('Request ID');
     return api.put(`/requests/${id}/status`, {
@@ -152,6 +161,10 @@ const getDeleteActions = (ctx: SectionActionContext) => ({
   deleteLeavePolicy: () => {
     const id = ctx.getRequiredId('Policy ID');
     return api.delete(`/leave-policies/${id}`);
+  },
+  deleteLeaveType: () => {
+    const id = ctx.getRequiredId('Type ID');
+    return api.delete(`/leave-types/${id}`);
   },
   cancelLeaveRequest: () => {
     const id = ctx.getRequiredId('Leave ID');

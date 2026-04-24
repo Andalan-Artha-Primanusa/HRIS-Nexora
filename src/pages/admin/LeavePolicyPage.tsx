@@ -3,12 +3,15 @@ import {
   Plus, 
   ShieldCheck, 
   Clock, 
-  BookOpen
+  BookOpen,
+  Edit,
+  Trash2,
+  Eye,
+  RefreshCw
 } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
-import { Eye, RefreshCw } from 'lucide-react';
 import './AdminLeavePages.css';
 
 interface LeavePolicy {
@@ -76,55 +79,114 @@ const LeavePolicyPage: React.FC = () => {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '1.5rem' }}>
-        {loading ? (
-          <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '4rem' }}>
-            <RefreshCw size={40} className="animate-spin" color="#7c3aed" />
-            <p style={{ marginTop: '1rem', color: '#64748b', fontWeight: 500 }}>Fetching company policies...</p>
-          </div>
-        ) : policies.length === 0 ? (
-          <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '4rem', color: '#94a3b8' }}>
-            No policies defined yet.
-          </div>
-        ) : policies.map((policy) => (
-          <Card key={policy.id} glass className="leave-policy-card" style={{ padding: '1.5rem', borderRadius: '24px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
-                <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: '#f5f3ff', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <BookOpen size={24} />
-                </div>
-                <span className={`policy-badge ${policy.is_paid ? 'policy-badge-paid' : 'policy-badge-unpaid'}`} style={{ fontSize: '0.65rem' }}>
-                  {policy.is_paid ? 'PAID' : 'UNPAID'}
-                </span>
-              </div>
-              
-              <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.25rem', fontWeight: 800, color: '#1e293b' }}>{policy.name}</h3>
-              <p style={{ margin: '0 0 1.5rem 0', fontSize: '0.85rem', color: '#64748b', lineHeight: 1.5 }}>
-                Internal code: <span className="policy-code">{policy.policy_code}</span>
-              </p>
+      <Card glass style={{ padding: '0', borderRadius: '24px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+        <div className="table-responsive">
+          <table className="leave-type-table">
+            <thead>
+              <tr>
+                <th>Kebijakan</th>
+                <th>Kode</th>
+                <th>Tahun</th>
+                <th>Jatah (Hari)</th>
+                <th>Carryover</th>
+                <th>Status</th>
+                <th style={{ textAlign: 'right' }}>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '4rem' }}>
+                    <RefreshCw size={32} className="animate-spin" color="#7c3aed" />
+                    <p style={{ marginTop: '1rem', color: '#64748b' }}>Memuat kebijakan...</p>
+                  </td>
+                </tr>
+              ) : policies.length === 0 ? (
+                <tr>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '4rem', color: '#94a3b8' }}>
+                    Belum ada kebijakan yang dikonfigurasi.
+                  </td>
+                </tr>
+              ) : policies.map((policy) => (
+                <tr key={policy.id} className="leave-policy-row">
+                  <td>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ 
+                        width: '40px', 
+                        height: '40px', 
+                        borderRadius: '12px', 
+                        background: '#f5f3ff', 
+                        color: '#7c3aed',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <ShieldCheck size={20} />
+                      </div>
+                      <div>
+                        <div style={{ fontWeight: 700, color: '#1e293b' }}>{policy.name}</div>
+                        <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Tipe: {policy.entitlement_type?.toUpperCase() || 'FIXED'}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span className="policy-code">{policy.policy_code}</span>
+                  </td>
+                  <td>
+                    <span style={{ fontWeight: 700, color: '#1e3a8a' }}>{policy.year}</span>
+                  </td>
+                  <td>
+                    <div style={{ fontWeight: 800, color: '#1e293b' }}>{policy.entitlement_value} Hari</div>
+                  </td>
+                  <td>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#64748b' }}>
+                      <Clock size={14} />
+                      <span>{policy.max_carryover_days} Hari</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span className={`policy-badge ${policy.is_paid ? 'policy-badge-paid' : 'policy-badge-unpaid'}`}>
+                      {policy.is_paid ? 'PAID' : 'UNPAID'}
+                    </span>
+                  </td>
+                  <td style={{ textAlign: 'right' }}>
+                    <div className="action-btn-group">
+                      <button 
+                        className="action-btn action-btn-edit" 
+                        onClick={() => window.location.href = `/leave/policy/edit/${policy.id}`}
+                        title="Edit Kebijakan"
+                      >
+                        <Edit size={16} />
+                      </button>
+                      <button 
+                        className="action-btn action-btn-delete" 
+                        onClick={() => {
+                          if (window.confirm('Hapus kebijakan ini?')) {
+                            void api.delete(`/leave-policies/${policy.id}`).then(() => void fetchPolicies());
+                          }
+                        }}
+                        title="Hapus Kebijakan"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-                <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '16px' }}>
-                  <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', marginBottom: '4px' }}>Entitlement</div>
-                  <div style={{ fontWeight: 800, color: '#1e293b', fontSize: '1.1rem' }}>{policy.entitlement_value} Days</div>
-                </div>
-                <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '16px' }}>
-                  <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', marginBottom: '4px' }}>Carryover</div>
-                  <div style={{ fontWeight: 800, color: '#1e293b', fontSize: '1.1rem' }}>{policy.max_carryover_days} Days</div>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: '#64748b', marginBottom: '1.5rem' }}>
-                <Clock size={14} />
-                <span>Accrual Mode: <strong style={{ color: '#475569' }}>{(policy.entitlement_type || 'fixed').toUpperCase()}</strong></span>
-              </div>
-            </div>
-
-<Button variant="outline" size="md" onClick={() => window.location.href = `/leave/policy/edit/${policy.id}`} style={{ width: '100%' }}>
-              <Eye size={16} /> View Details
-            </Button>
-          </Card>
-        ))}
+      <div style={{ marginTop: '2rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
+        <Card glass style={{ padding: '1.5rem', borderRadius: '20px', borderLeft: '4px solid #7c3aed' }}>
+          <h4 style={{ margin: '0 0 0.5rem 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <ShieldCheck size={18} color="#7c3aed" /> Compliance Mode
+          </h4>
+          <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>
+            Seluruh kebijakan ini akan diterapkan secara otomatis pada perhitungan saldo cuti karyawan.
+          </p>
+        </Card>
       </div>
     </div>
   );

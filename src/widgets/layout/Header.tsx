@@ -92,15 +92,6 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
         >
           <Menu size={40} />
         </button>
-        
-        <div className="search-bar">
-          <Search size={32} className="search-icon text-gray" />
-          <input 
-            type="text" 
-            placeholder="Search employee, leave, payroll..." 
-            className="search-input"
-          />
-        </div>
       </div>
       
       <div className="header-right">
@@ -148,9 +139,9 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
           </div>
           
           <div className={`user-dropdown ${openDropdown ? 'visible' : ''}`}>
-            <button className="dropdown-item" type="button" onClick={() => navigate('/settings/user-role')}>
+            <button className="dropdown-item" type="button" onClick={() => navigate('//profiles')}>
               <UserCircle size={24} />
-              <span>Profile</span>
+              <span>Profile Saya</span>
             </button>
             <button className="dropdown-item" type="button" onClick={() => navigate('/settings/company')}>
               <Settings size={24} />

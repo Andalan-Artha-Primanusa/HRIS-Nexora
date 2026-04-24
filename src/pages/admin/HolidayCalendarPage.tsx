@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, RefreshCw, MapPin, ChevronLeft, ChevronRight, Edit2 } from 'lucide-react';
-import { Card } from '@/shared/ui/Card';
-import { Button } from '@/shared/ui/Button';
-import { api } from '@/shared/api/httpClient';
+import { Plus, Calendar, RefreshCw, Edit, Trash2, ShieldCheck, Info, ChevronLeft, ChevronRight } from 'lucide-react';
+import { workforceService } from '@/features/workforce/api/workforce.service';
+import './AdminWorkforcePages.css';
 
 const HolidayCalendarPage: React.FC = () => {
   const navigate = useNavigate();
@@ -13,9 +12,8 @@ const HolidayCalendarPage: React.FC = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await api.get('/workforce/holidays');
-      const data = response.data?.data || response.data || [];
-      setHolidays(Array.isArray(data) ? data : []);
+      const data = await workforceService.getHolidays();
+      setHolidays(Array.isArray(data) ? data : data.data || []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -28,140 +26,90 @@ const HolidayCalendarPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="crud-page">
-      <div className="crud-header">
-        <div>
-          <span className="reimb-badge reimb-badge-admin">Workforce Policy</span>
-          <h1>Holiday Calendar 2026</h1>
-          <p>Manage national holidays and company-specific off-days.</p>
+    <div className="admin-workforce-page">
+      <div className="workforce-header">
+        <div className="workforce-header-content">
+          <h1>Kalender Libur</h1>
+          <p>Kelola hari libur nasional dan kebijakan libur perusahaan untuk sinkronisasi jadwal kerja global.</p>
         </div>
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <Button variant="ghost" onClick={fetchData} disabled={loading}>
-            <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
-          </Button>
-          <Button variant="primary" onClick={() => navigate('/workforce/holidays/create')}>
-            <Plus size={18} style={{ marginRight: '8px' }} />
-            Add Holiday
-          </Button>
-        </div>
+        <button className="wf-create-btn" onClick={() => navigate('/workforce/holidays/create')}>
+          <Plus size={28} />
+          Tambah Libur
+        </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '1.5rem' }}>
-        <Card glass style={{ padding: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-            <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#1e3a8a' }}>April 2026</h2>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <Button variant="ghost" size="sm"><ChevronLeft size={20} /></Button>
-              <Button variant="ghost" size="sm"><ChevronRight size={20} /></Button>
-            </div>
+      <div className="workforce-stats-grid">
+        {[
+          { label: 'Total Libur (YTD)', value: '16', color: '#ef4444' },
+          { label: 'Libur Terdekat', value: '12d', color: '#f59e0b' },
+          { label: 'Cuti Bersama', value: '04', color: '#10b981' },
+          { label: 'Audit Ready', value: '100%', color: '#3b82f6' },
+        ].map((stat, i) => (
+          <div key={i} className="stat-card-premium">
+             <div className="stat-value" style={{ color: stat.color }}>{stat.value}</div>
+             <div className="stat-label">{stat.label}</div>
           </div>
+        ))}
+      </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '1px', background: '#e2e8f0', border: '1px solid #e2e8f0', borderRadius: '12px', overflow: 'hidden' }}>
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-              <div key={day} style={{ padding: '0.75rem', textAlign: 'center', background: '#f8fafc', fontSize: '0.75rem', fontWeight: 700, color: '#64748b' }}>
-                {day}
-              </div>
-            ))}
-            {Array.from({ length: 35 }).map((_, i) => {
-              const day = i - 2; 
-              const isHoliday = [1, 2, 10, 15].includes(day);
-              return (
-                <div key={i} style={{ 
-                  height: '100px', 
-                  padding: '0.5rem', 
-                  background: 'white', 
-                  fontSize: '0.9rem', 
-                  color: (i % 7 === 0) ? '#ef4444' : '#1e293b',
-                  opacity: (day < 1 || day > 30) ? 0.3 : 1,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '4px'
-                }}>
-                  <span style={{ fontWeight: isHoliday ? 700 : 400 }}>{day > 0 && day <= 30 ? day : ''}</span>
-                  {isHoliday && (
-                    <div style={{ 
-                      fontSize: '0.65rem', 
-                      background: '#fee2e2', 
-                      color: '#ef4444', 
-                      padding: '2px 4px', 
-                      borderRadius: '4px',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis'
-                    }}>
-                      National Holiday
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </Card>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <Card glass style={{ padding: '1.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-               <h3 style={{ margin: 0, fontSize: '1rem', color: '#1e3a8a' }}>Upcoming Holidays</h3>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {holidays.length === 0 ? (
-                [
-                  { id: 1, name: 'Idul Fitri 1447H', date: 'March 20, 2026', color: '#ef4444', day: 20 },
-                  { id: 2, name: 'Good Friday', date: 'April 3, 2026', color: '#ef4444', day: 3 },
-                  { id: 3, name: 'Labor Day', date: 'May 1, 2026', color: '#ef4444', day: 1 },
-                ].map((h, i) => (
-                  <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'center', padding: '0.75rem', background: '#f8fafc', borderRadius: '10px', position: 'relative' }}>
-                    <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '1px solid #e2e8f0' }}>
-                      <span style={{ fontSize: '0.65rem', fontWeight: 700, color: h.color }}>APR</span>
-                      <span style={{ fontSize: '0.9rem', fontWeight: 800 }}>{h.day}</span>
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{h.name}</div>
-                      <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{h.date}</div>
-                    </div>
-                    <Button variant="ghost" size="sm" onClick={() => navigate(`/workforce/holidays/edit/${h.id}`)}>
-                      <Edit2 size={14} />
-                    </Button>
-                  </div>
-                ))
-              ) : (
-                holidays.map((h) => (
-                  <div key={h.id} style={{ display: 'flex', gap: '12px', alignItems: 'center', padding: '0.75rem', background: '#f8fafc', borderRadius: '10px' }}>
-                    <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '1px solid #e2e8f0' }}>
-                      <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#ef4444' }}>HOL</span>
-                      <span style={{ fontSize: '0.9rem', fontWeight: 800 }}>{new Date(h.date).getDate()}</span>
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{h.name}</div>
-                      <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{h.date}</div>
-                    </div>
-                    <Button variant="ghost" size="sm" onClick={() => navigate(`/workforce/holidays/edit/${h.id}`)}>
-                      <Edit2 size={14} />
-                    </Button>
-                  </div>
-                ))
-              )}
-            </div>
-          </Card>
-
-          <Card glass style={{ padding: '1.5rem' }}>
-            <h3 style={{ margin: '0 0 1rem', fontSize: '1rem', color: '#1e3a8a' }}>Location Policies</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <MapPin size={16} color="#64748b" />
-                <span style={{ fontSize: '0.85rem' }}>Jakarta Office: <strong>Standard</strong></span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <MapPin size={16} color="#64748b" />
-                <span style={{ fontSize: '0.85rem' }}>Remote: <strong>Regional Specific</strong></span>
-              </div>
-            </div>
-          </Card>
+      <div className="workforce-table-card">
+        <div className="workforce-table-header">
+           <h3 className="workforce-table-title">Daftar Hari Libur Nasional & Perusahaan</h3>
+           <button className="wf-action-btn" onClick={fetchData}><RefreshCw size={20} className={loading ? 'animate-spin' : ''} /></button>
         </div>
+
+        <table className="workforce-table">
+          <thead>
+            <tr>
+              <th>Hari Libur</th>
+              <th>Tanggal</th>
+              <th>Tipe</th>
+              <th>Berulang</th>
+              <th>Status</th>
+              <th style={{ textAlign: 'right' }}>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr><td colSpan={6} style={{ textAlign: 'center', padding: '10rem' }}><RefreshCw className="animate-spin" size={48} color="#2563eb" /></td></tr>
+            ) : !Array.isArray(holidays) || holidays.length === 0 ? (
+              <tr>
+                <td colSpan={6} style={{ textAlign: 'center', padding: '10rem' }}>
+                   <div style={{ opacity: 0.1, marginBottom: '2rem' }}><Calendar size={100} /></div>
+                   <h2 style={{ color: '#94a3b8', margin: 0 }}>Belum ada kalender libur.</h2>
+                </td>
+              </tr>
+            ) : holidays.map((h) => (
+              <tr key={h.id}>
+                <td>
+                  <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#0f172a' }}>{h.name}</div>
+                  <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '4px' }}>{h.description || 'No description provided.'}</div>
+                </td>
+                <td>
+                  <div style={{ fontWeight: 800 }}>{new Date(h.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
+                </td>
+                <td>
+                   <span style={{ fontWeight: 800, color: '#1e40af' }}>{h.type}</span>
+                </td>
+                <td>
+                   <span style={{ fontWeight: 700 }}>{h.is_recurring ? 'YA' : 'TIDAK'}</span>
+                </td>
+                <td>
+                  <span className="status-pill status-active">ACTIVE</span>
+                </td>
+                <td style={{ textAlign: 'right' }}>
+                   <div className="wf-btn-group" style={{ justifyContent: 'flex-end' }}>
+                      <button className="wf-action-btn" onClick={() => navigate(`/workforce/holidays/edit/${h.id}`)}><Edit size={22} /></button>
+                      <button className="wf-action-btn wf-action-btn-danger"><Trash2 size={22} /></button>
+                   </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
 };
 
 export default HolidayCalendarPage;
-

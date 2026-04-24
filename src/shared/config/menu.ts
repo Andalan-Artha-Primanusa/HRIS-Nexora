@@ -33,7 +33,6 @@ export const menuItems: MenuItem[] = [
     icon: Users,
     requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
     subItems: [
-      { label: 'Profil', path: '/profiles' },
       { label: 'Daftar Karyawan', path: '/employees' },
       { 
         label: 'Organisasi', 

@@ -18,32 +18,29 @@ import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
 import './AdminLeavePages.css';
 
-interface LeavePolicy {
+interface LeaveType {
   id: number;
   name: string;
-  policy_code: string;
-  entitlement_type: string;
-  entitlement_value: number;
-  max_carryover_days: number;
+  code: string;
+  description: string;
   is_paid: boolean;
-  active: boolean;
+  is_active: boolean;
   created_at?: string;
 }
 
 const LeaveTypePage: React.FC = () => {
-  const [policies, setPolicies] = useState<LeavePolicy[]>([]);
+  const [types, setTypes] = useState<LeaveType[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const fetchPolicies = async () => {
+  const fetchTypes = async () => {
     setLoading(true);
-    console.log('Fetching policies from /leave-policies...');
+    console.log('Fetching leave types from /leave-types...');
     try {
-      const response = await api.get('/leave-policies');
-      console.log('Leave Policies Response Raw:', response);
+      const response = await api.get('/leave-types');
+      console.log('Leave Types Response Raw:', response);
       
       let data = response.data;
-      // Handle Laravel/Custom API response structures
       if (data && typeof data === 'object') {
         if (Array.isArray(data.data)) data = data.data;
         else if (data.data && Array.isArray(data.data.data)) data = data.data.data;
@@ -51,22 +48,22 @@ const LeaveTypePage: React.FC = () => {
         else if (data.status === 'success' && Array.isArray(data.data)) data = data.data;
       }
       
-      setPolicies(Array.isArray(data) ? data : []);
+      setTypes(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error('Error fetching leave policies:', error);
-      setPolicies([]);
+      console.error('Error fetching leave types:', error);
+      setTypes([]);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchPolicies();
+    fetchTypes();
   }, []);
 
-  const filteredPolicies = policies.filter(p => 
-    p.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.policy_code?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredTypes = types.filter(t => 
+    t.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    t.code?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -76,17 +73,17 @@ const LeaveTypePage: React.FC = () => {
           <span className="policy-badge policy-badge-paid" style={{ marginBottom: '1rem', background: 'linear-gradient(135deg, #2563eb, #1e40af)', color: 'white', border: 'none' }}>
             <Settings size={14} /> Master Data
           </span>
-          <h1>Leave Types & Policies</h1>
-          <p>Configure leave categories, entitlement rules, and company leave policies.</p>
+          <h1>Daftar Jenis Cuti</h1>
+          <p>Kelola kategori cuti utama (Tahunan, Sakit, dsb) untuk seluruh perusahaan.</p>
         </div>
         <div style={{ display: 'flex', gap: '1rem' }}>
-           <Button variant="outline" size="md" onClick={fetchPolicies} disabled={loading}>
+           <Button variant="outline" size="md" onClick={fetchTypes} disabled={loading}>
              <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
-             Refresh
+             Segarkan
            </Button>
            <Button variant="primary" size="md" onClick={() => window.location.href = '/leave/type/create'}>
              <Plus size={20} />
-             Add New Type
+             Tambah Jenis Cuti
            </Button>
         </div>
       </div>
@@ -96,7 +93,7 @@ const LeaveTypePage: React.FC = () => {
           <Search size={20} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
           <input 
             type="text" 
-            placeholder="Search leave types or codes..." 
+            placeholder="Cari berdasarkan nama atau kode..." 
             className="search-input"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -119,12 +116,12 @@ const LeaveTypePage: React.FC = () => {
           <table className="leave-type-table">
             <thead>
               <tr>
-                <th>Leave Type</th>
-                <th>Code</th>
-                <th>Entitlement</th>
-                <th>Carryover</th>
+                <th>Nama Cuti</th>
+                <th>Kode</th>
+                <th>Deskripsi</th>
+                <th>Tipe Pembayaran</th>
                 <th>Status</th>
-                <th style={{ textAlign: 'right' }}>Actions</th>
+                <th style={{ textAlign: 'right' }}>Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -132,25 +129,25 @@ const LeaveTypePage: React.FC = () => {
                 <tr>
                   <td colSpan={6} style={{ textAlign: 'center', padding: '4rem' }}>
                     <RefreshCw size={32} className="animate-spin" color="#2563eb" />
-                    <p style={{ marginTop: '1rem', color: '#64748b' }}>Loading configurations...</p>
+                    <p style={{ marginTop: '1rem', color: '#64748b' }}>Memuat data...</p>
                   </td>
                 </tr>
-              ) : filteredPolicies.length === 0 ? (
+              ) : filteredTypes.length === 0 ? (
                 <tr>
                   <td colSpan={6} style={{ textAlign: 'center', padding: '4rem', color: '#94a3b8' }}>
-                    No leave types found.
+                    Belum ada jenis cuti yang terdaftar.
                   </td>
                 </tr>
-              ) : filteredPolicies.map((policy) => (
-                <tr key={policy.id} className="leave-policy-row">
+              ) : filteredTypes.map((type) => (
+                <tr key={type.id} className="leave-policy-row">
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <div style={{ 
                         width: '40px', 
                         height: '40px', 
                         borderRadius: '12px', 
-                        background: policy.is_paid ? '#eff6ff' : '#fff1f2', 
-                        color: policy.is_paid ? '#2563eb' : '#e11d48',
+                        background: type.is_paid ? '#eff6ff' : '#fff1f2', 
+                        color: type.is_paid ? '#2563eb' : '#e11d48',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center'
@@ -158,43 +155,54 @@ const LeaveTypePage: React.FC = () => {
                         <Calendar size={20} />
                       </div>
                       <div>
-                        <div style={{ fontWeight: 700, color: '#1e293b' }}>{policy.name}</div>
-                        <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Updated {new Date().toLocaleDateString()}</div>
+                        <div style={{ fontWeight: 700, color: '#1e293b' }}>{type.name}</div>
+                        <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Terdaftar pada {type.created_at ? new Date(type.created_at).toLocaleDateString() : '-'}</div>
                       </div>
                     </div>
                   </td>
                   <td>
-                    <span className="policy-code">{policy.policy_code}</span>
+                    <span className="policy-code">{type.code}</span>
+                  </td>
+                  <td style={{ maxWidth: '250px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {type.description || '-'}
                   </td>
                   <td>
-                    <div>
-                      <span className="entitlement-value">{policy.entitlement_value}</span>
-                      <span className="entitlement-unit">Days / Year</span>
-                    </div>
-                    <div style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'capitalize' }}>
-                      {policy.entitlement_type || 'fixed'} Allotment
-                    </div>
+                    <span className={`policy-badge ${type.is_paid ? 'policy-badge-paid' : 'policy-badge-unpaid'}`}>
+                      {type.is_paid ? 'Paid' : 'Unpaid'}
+                    </span>
                   </td>
                   <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#475569', fontWeight: 500 }}>
-                      <Info size={14} color="#94a3b8" />
-                      {policy.max_carryover_days} Days Max
-                    </div>
-                  </td>
-                  <td>
-                    <span className={`policy-badge ${policy.is_paid ? 'policy-badge-paid' : 'policy-badge-unpaid'}`}>
-                      {policy.is_paid ? <CheckCircle size={12} /> : <XCircle size={12} />}
-                      {policy.is_paid ? 'Paid Leave' : 'Unpaid Leave'}
+                    <span className={`status-pill ${type.is_active ? 'status-active' : 'status-inactive'}`} style={{ 
+                      padding: '4px 12px', 
+                      borderRadius: '20px', 
+                      fontSize: '0.75rem', 
+                      fontWeight: 700,
+                      background: type.is_active ? '#dcfce7' : '#f1f5f9',
+                      color: type.is_active ? '#16a34a' : '#64748b'
+                    }}>
+                      {type.is_active ? 'ACTIVE' : 'INACTIVE'}
                     </span>
                   </td>
                   <td style={{ textAlign: 'right' }}>
-                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                      <Button variant="ghost" size="sm" onClick={() => window.location.href = `/leave/type/edit/${policy.id}`} style={{ color: '#2563eb', padding: '0.4rem' }}>
+                    <div className="action-btn-group">
+                      <button 
+                        className="action-btn action-btn-edit" 
+                        onClick={() => window.location.href = `/leave/type/edit/${type.id}`}
+                        title="Edit Jenis Cuti"
+                      >
                         <Edit size={16} />
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={() => window.location.href = `/leave/type/delete/${policy.id}`} style={{ color: '#ef4444', padding: '0.4rem' }}>
+                      </button>
+                      <button 
+                        className="action-btn action-btn-delete" 
+                        onClick={() => {
+                          if (window.confirm('Hapus jenis cuti ini?')) {
+                            void api.delete(`/leave-types/${type.id}`).then(() => void fetchTypes());
+                          }
+                        }}
+                        title="Hapus Jenis Cuti"
+                      >
                         <Trash2 size={16} />
-                      </Button>
+                      </button>
                     </div>
                   </td>
                 </tr>

@@ -1,107 +1,145 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Database, UserX, FileText, Plus, AlertCircle } from 'lucide-react';
+import { ShieldCheck, Database, UserX, FileText, Plus, AlertCircle, Trash2, Edit, Save, ArrowLeft } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { useNavigate } from 'react-router-dom';
+import './AdminWorkforcePages.css';
 
 const ComplianceSettingsPage: React.FC = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'retention' | 'privacy'>('retention');
 
   return (
-    <div className="crud-page">
-      <div className="crud-header">
-        <div>
-          <span className="reimb-badge reimb-badge-admin">Security & Privacy</span>
-          <h1>Compliance Settings</h1>
-          <p>Configure data retention policies and manage employee privacy requests.</p>
+    <div className="admin-workforce-page">
+      <div className="workforce-header">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          <Button variant="ghost" onClick={() => navigate('/compliance/overview')} style={{ borderRadius: '16px', width: '48px', height: '48px', padding: 0 }}>
+             <ArrowLeft size={24} />
+          </Button>
+          <div>
+            <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Governance Controls</span>
+            <h1>Konfigurasi Kepatuhan</h1>
+            <p>Kelola kebijakan retensi data dan permintaan privasi karyawan sesuai dengan regulasi perlindungan data.</p>
+          </div>
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', gap: '1rem' }}>
          <Button 
            variant={activeTab === 'retention' ? 'primary' : 'outline'} 
            onClick={() => setActiveTab('retention')}
+           style={{ borderRadius: '16px', padding: '0 2rem', height: '54px', fontWeight: 700 }}
          >
-           <Database size={18} style={{ marginRight: '8px' }} />
-           Retention Policies
+           <Database size={20} style={{ marginRight: '10px' }} />
+           Kebijakan Retensi
          </Button>
          <Button 
            variant={activeTab === 'privacy' ? 'primary' : 'outline'} 
            onClick={() => setActiveTab('privacy')}
+           style={{ borderRadius: '16px', padding: '0 2rem', height: '54px', fontWeight: 700 }}
          >
-           <UserX size={18} style={{ marginRight: '8px' }} />
-           Privacy Requests
+           <UserX size={20} style={{ marginRight: '10px' }} />
+           Permintaan Privasi
          </Button>
       </div>
 
       {activeTab === 'retention' ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem' }}>
+        <div className="workforce-grid">
            {[
-             { name: 'Payroll Records', period: '10 Years', category: 'Finance', icon: <FileText /> },
-             { name: 'Employee Contracts', period: 'Permanent', category: 'Legal', icon: <ShieldCheck /> },
-             { name: 'Attendance Logs', period: '2 Years', category: 'Operational', icon: <Database /> },
+             { name: 'Payroll Records', period: '10 Tahun', category: 'Finance', icon: <FileText size={24} />, color: '#2563eb' },
+             { name: 'Employee Contracts', period: 'Permanen', category: 'Legal', icon: <ShieldCheck size={24} />, color: '#10b981' },
+             { name: 'Attendance Logs', period: '2 Tahun', category: 'Operational', icon: <Database size={24} />, color: '#f59e0b' },
            ].map((policy, i) => (
-             <Card key={i} glass style={{ padding: '1.5rem' }}>
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '1rem' }}>
-                   <div style={{ padding: '8px', background: '#eff6ff', borderRadius: '8px', color: '#2563eb' }}>
+             <Card key={i} glass style={{ padding: '2rem', borderRadius: '28px', border: '1px solid #f1f5f9' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+                   <div style={{ width: '54px', height: '54px', background: `${policy.color}15`, color: policy.color, borderRadius: '16px', display: 'grid', placeItems: 'center' }}>
                       {policy.icon}
                    </div>
-                   <h3 style={{ margin: 0, fontSize: '1.1rem' }}>{policy.name}</h3>
+                   <div style={{ display: 'flex', gap: '8px' }}>
+                      <button className="wf-action-btn"><Edit size={16} /></button>
+                      <button className="wf-action-btn wf-action-btn-danger"><Trash2 size={16} /></button>
+                   </div>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '1.25rem' }}>
-                   <span style={{ color: '#64748b' }}>Retention Period</span>
-                   <span style={{ fontWeight: 700 }}>{policy.period}</span>
+                
+                <h3 style={{ margin: '0 0 0.5rem', fontSize: '1.25rem', fontWeight: 800, color: '#1e3a8a' }}>{policy.name}</h3>
+                <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#64748b', marginBottom: '1.5rem', textTransform: 'uppercase' }}>KATEGORI: {policy.category}</div>
+
+                <div style={{ padding: '1.25rem', background: '#f8fafc', borderRadius: '16px', marginBottom: '1.5rem' }}>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+                      <span style={{ color: '#64748b', fontWeight: 600 }}>Periode Retensi</span>
+                      <span style={{ fontWeight: 800, color: '#1e293b' }}>{policy.period}</span>
+                   </div>
                 </div>
-                <div style={{ padding: '0.75rem', background: '#f8fafc', borderRadius: '8px', fontSize: '0.75rem', color: '#64748b', marginBottom: '1.5rem' }}>
-                   Policy compliant with local labor regulations and data protection acts.
-                </div>
-                <Button variant="outline" style={{ width: '100%' }}>Modify Policy</Button>
+                
+                <p style={{ margin: 0, fontSize: '0.8rem', color: '#94a3b8', lineHeight: 1.5 }}>
+                   Kebijakan ini mematuhi standar hukum ketenagakerjaan dan undang-undang perlindungan data pribadi yang berlaku.
+                </p>
              </Card>
            ))}
-           <Card glass style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed #cbd5e1' }}>
-              <Button variant="ghost">
-                 <Plus size={24} style={{ marginBottom: '8px' }} />
-                 <br />
-                 New Retention Rule
-              </Button>
+           <Card glass style={{ padding: '2rem', borderRadius: '28px', border: '2px dashed #e2e8f0', background: 'transparent', display: 'grid', placeItems: 'center' }}>
+              <div style={{ textAlign: 'center' }}>
+                 <div style={{ width: '60px', height: '60px', background: '#f8fafc', borderRadius: '50%', display: 'grid', placeItems: 'center', margin: '0 auto 1rem', color: '#94a3b8' }}>
+                    <Plus size={32} />
+                 </div>
+                 <h4 style={{ margin: 0, color: '#64748b', fontWeight: 700 }}>Tambah Aturan Baru</h4>
+                 <Button variant="ghost" size="sm" style={{ marginTop: '0.5rem' }}>Klik untuk mengonfigurasi</Button>
+              </div>
            </Card>
         </div>
       ) : (
-        <Card glass style={{ padding: '1.5rem' }}>
-           <h3 style={{ margin: '0 0 1.5rem', fontSize: '1.1rem' }}>Active Privacy Requests (GDPR/Right to be Forgotten)</h3>
-           <div className="crud-table-wrap">
-              <table className="crud-table">
-                 <thead>
-                    <tr>
-                       <th>Subject</th>
-                       <th>Request Type</th>
-                       <th>Request Date</th>
-                       <th>SLA Status</th>
-                       <th style={{ textAlign: 'right' }}>Actions</th>
-                    </tr>
-                 </thead>
-                 <tbody>
-                    <tr>
-                       <td style={{ fontWeight: 600 }}>John Doe</td>
-                       <td>Data Deletion</td>
-                       <td>{new Date().toLocaleDateString()}</td>
-                       <td><span className="status-pill status-approved" style={{ background: '#fef2f2', color: '#ef4444' }}>Due in 5 days</span></td>
-                       <td style={{ textAlign: 'right' }}>
-                          <Button variant="primary" size="sm">Process Request</Button>
-                       </td>
-                    </tr>
-                 </tbody>
-              </table>
+        <div className="workforce-table-card">
+           <div className="workforce-table-header">
+              <h3 className="workforce-table-title">Permintaan Privasi Aktif (Right to be Forgotten)</h3>
+              <Button variant="primary" size="sm" style={{ borderRadius: '12px' }}>
+                <Plus size={16} style={{ marginRight: '8px' }} /> Request Manual
+              </Button>
            </div>
-           <div style={{ marginTop: '2rem', padding: '1rem', background: '#fff7ed', borderRadius: '12px', display: 'flex', gap: '12px' }}>
-              <AlertCircle size={24} color="#ea580c" />
+           <table className="workforce-table">
+              <thead>
+                 <tr>
+                    <th>Subjek / Karyawan</th>
+                    <th>Tipe Permintaan</th>
+                    <th>Tanggal Masuk</th>
+                    <th>Status SLA</th>
+                    <th style={{ textAlign: 'right' }}>Aksi</th>
+                 </tr>
+              </thead>
+              <tbody>
+                 <tr>
+                    <td>
+                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#fef2f2', color: '#ef4444', display: 'grid', placeItems: 'center', fontWeight: 800 }}>JD</div>
+                          <div>
+                             <div style={{ fontWeight: 800 }}>John Doe</div>
+                             <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Ex-Employee (Marketing)</div>
+                          </div>
+                       </div>
+                    </td>
+                    <td><span style={{ fontWeight: 700 }}>Penghapusan Data</span></td>
+                    <td>{new Date().toLocaleDateString()}</td>
+                    <td>
+                       <span style={{ padding: '6px 12px', borderRadius: '10px', background: '#fee2e2', color: '#dc2626', fontSize: '0.75rem', fontWeight: 800 }}>
+                          SISA 5 HARI
+                       </span>
+                    </td>
+                    <td style={{ textAlign: 'right' }}>
+                       <Button variant="primary" size="sm" style={{ borderRadius: '10px', fontWeight: 700 }}>Proses Sekarang</Button>
+                    </td>
+                 </tr>
+              </tbody>
+           </table>
+           <div style={{ padding: '2rem', background: '#fff7ed', borderTop: '1px solid #ffedd5', display: 'flex', gap: '1.5rem' }}>
+              <div style={{ width: '48px', height: '48px', background: '#ea580c', borderRadius: '12px', display: 'grid', placeItems: 'center', color: 'white', flexShrink: 0 }}>
+                 <AlertCircle size={24} />
+              </div>
               <div>
-                 <h4 style={{ margin: '0 0 4px', color: '#9a3412', fontSize: '0.9rem' }}>Privacy Notice</h4>
-                 <p style={{ margin: 0, color: '#9a3412', fontSize: '0.8rem', opacity: 0.8 }}>
-                    Processing deletion requests will permanently remove employee data across all modules. This action cannot be undone.
+                 <h4 style={{ margin: '0 0 4px', color: '#9a3412', fontSize: '1rem', fontWeight: 800 }}>Peringatan Keamanan</h4>
+                 <p style={{ margin: 0, color: '#9a3412', fontSize: '0.9rem', opacity: 0.8, lineHeight: 1.5 }}>
+                    Memproses permintaan penghapusan data akan menghapus seluruh catatan karyawan secara permanen dari seluruh modul sistem (Payroll, Attendance, Asset). Tindakan ini tidak dapat dibatalkan.
                  </p>
               </div>
            </div>
-        </Card>
+        </div>
       )}
     </div>
   );

@@ -101,6 +101,8 @@ const SurveyFormPage = lazy(() => import("../../pages/admin/SurveyFormPage.tsx")
 const BenefitFormPage = lazy(() => import("../../pages/admin/BenefitFormPage.tsx"));
 const LeaveTypePage = lazy(() => import("../../pages/admin/LeaveTypePage"));
 const LeavePolicyPage = lazy(() => import("../../pages/admin/LeavePolicyPage"));
+const LeaveTypeFormPage = lazy(() => import("../../pages/admin/LeaveTypeFormPage"));
+const LeavePolicyFormPage = lazy(() => import("../../pages/admin/LeavePolicyFormPage"));
 const TrainingFormPage = lazy(() => import("../../pages/admin/TrainingFormPage.tsx"));
 const BiometricDeviceFormPage = lazy(() => import("../../pages/admin/BiometricDeviceFormPage.tsx"));
 const HolidayFormPage = lazy(() => import("../../pages/admin/HolidayFormPage.tsx"));
@@ -113,6 +115,8 @@ const AssignmentLettersPage = lazy(() => import("../../pages/admin/AssignmentLet
 const MyAssetsPage = lazy(() => import("../../pages/ess/MyAssetsPage.tsx"));
 const MyAssignmentLettersPage = lazy(() => import("../../pages/ess/MyAssignmentLettersPage.tsx"));
 const MyDocumentsPage = lazy(() => import("../../pages/ess/MyDocumentsPage.tsx"));
+const ShiftSwapFormPage = lazy(() => import("../../pages/admin/ShiftSwapFormPage.tsx"));
+
 
 
 
@@ -163,7 +167,6 @@ const sectionRoutes = [
   { path: "/requests" },
   { path: "/requests/assign" },
   { path: "/requests/status" },
-  { path: "/compliance/overview" },
   { path: "/compliance/audit-summary" },
   { path: "/compliance/expiring-documents" },
   { path: "/expense/categories" },
@@ -179,9 +182,6 @@ const sectionRoutes = [
   { path: "/career/succession" },
   { path: "/engagement/surveys" },
   { path: "/recruitment/openings" },
-  { path: "/workforce/holidays" },
-  { path: "/workforce/shift-swaps" },
-  { path: "/workforce/overtime-rules" },
 
   { path: "/reports/competency" },
   { path: "/reports/employee-lifecycle" },
@@ -453,14 +453,24 @@ export const router = createBrowserRouter([
         ],
       },
       {
-        path: "/leave/type",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <LeaveTypePage /> }],
-      },
-      {
         path: "/leave/policy",
         element: <DashboardLayout />,
-        children: [{ index: true, element: <LeavePolicyPage /> }],
+        children: [
+          { index: true, element: <LeavePolicyPage /> },
+          { path: "create", element: <LeavePolicyFormPage /> },
+          { path: "edit/:id", element: <LeavePolicyFormPage /> },
+          { path: "manage", element: <SectionPage /> },
+        ],
+      },
+      {
+        path: "/leave/type",
+        element: <DashboardLayout />,
+        children: [
+          { index: true, element: <LeaveTypePage /> },
+          { path: "create", element: <LeaveTypeFormPage /> },
+          { path: "edit/:id", element: <LeaveTypeFormPage /> },
+          { path: "manage", element: <SectionPage /> },
+        ],
       },
       {
         path: "/settings/master-data/leave-type",
@@ -766,7 +776,10 @@ export const router = createBrowserRouter([
           { path: "/performance/reviews", element: <Review360Page /> },
           
           { path: "/workforce/shift-swaps", element: <ShiftSwapsPage /> },
+          { path: "/workforce/shift-swaps/create", element: <ShiftSwapFormPage /> },
+          { path: "/workforce/shift-swaps/edit/:id", element: <ShiftSwapFormPage /> },
           { path: "/workforce/overtime-rules", element: <OvertimeRulesPage /> },
+
           { path: "/workforce/overtime-rules/create", element: <OvertimeRuleFormPage /> },
           { path: "/workforce/overtime-rules/edit/:id", element: <OvertimeRuleFormPage /> },
 
