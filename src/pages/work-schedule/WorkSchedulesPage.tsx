@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
-import { Button } from "@/shared/ui/Button";
+import { Button, EditAction, DeleteAction } from "@/shared/ui";
 import { Alert } from "@/shared/ui/Alert";
 import { getAllWorkSchedules, deleteWorkSchedule } from "@/features/work-schedule/api/work-schedule.service";
 import type { WorkScheduleItem } from "@/features/work-schedule/types/work-schedule.types";
@@ -188,17 +188,11 @@ const WorkSchedulesPage = () => {
                     </td>
                     <td>
                       <div className="cell-actions">
-                        <Button
-                          variant="outline"
-                          size="sm"
+                        <EditAction
                           onClick={() => navigate(`/work-schedules/edit/${schedule.id}`)}
                           disabled={loading}
-                        >
-                          <Pencil size={15} />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
+                        />
+                        <DeleteAction
                           onClick={() => {
                             if (deleteConfirmId === schedule.id) {
                               void handleDelete(schedule.id);
@@ -207,10 +201,8 @@ const WorkSchedulesPage = () => {
                             }
                           }}
                           disabled={loading}
-                          style={{ color: deleteConfirmId === schedule.id ? '#ef4444' : undefined }}
-                        >
-                          <Trash2 size={15} />
-                        </Button>
+                          className={deleteConfirmId === schedule.id ? 'active' : ''}
+                        />
                         {deleteConfirmId === schedule.id && (
                           <span style={{ fontSize: '0.8rem', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '4px' }}>
                             Yakin?

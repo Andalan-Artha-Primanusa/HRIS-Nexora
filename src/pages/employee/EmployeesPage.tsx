@@ -3,7 +3,7 @@ import { api } from "@/shared/api/httpClient";
 import { getAllLocations } from "@/features/location/api/location.service";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
-import { Button } from "@/shared/ui/Button";
+import { Button, ViewAction, EditAction, DeleteAction, TableAction } from "@/shared/ui";
 import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import {
   deleteEmployee,
@@ -552,42 +552,28 @@ const EmployeesPage = () => {
                         </td>
                         <td className="td-center">
                           <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'center' }}>
-                            <Button
-                              variant="ghost"
-                              size="sm"
+                            <EditAction 
                               onClick={() => navigate(`/employees/update/${item.id}`)}
-                              style={{ color: '#2563eb', padding: '0.4rem' }}
                               title="Edit Profil"
-                            >
-                              <Pencil size={16} />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
+                            />
+                            <TableAction
+                              variant="view"
                               onClick={() => navigate(`/legal/letters?employee=${item.id}`)}
-                              style={{ color: '#8b5cf6', padding: '0.4rem' }}
+                              icon={<FileText size={16} />}
                               title="Buat Surat"
-                            >
-                              <FileText size={16} />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
+                              style={{ color: '#8b5cf6' }}
+                            />
+                            <TableAction
+                              variant="view"
                               onClick={() => navigate(`/performance/summary?employee=${item.id}`)}
-                              style={{ color: '#10b981', padding: '0.4rem' }}
+                              icon={<TrendingUp size={16} />}
                               title="Kenaikan Jabatan"
-                            >
-                              <TrendingUp size={16} />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
+                              style={{ color: '#10b981' }}
+                            />
+                            <DeleteAction
                               onClick={() => void deleteExistingEmployee(String(item.id))}
-                              style={{ color: '#ef4444', padding: '0.4rem' }}
                               title="Hapus"
-                            >
-                              <Trash2 size={16} />
-                            </Button>
+                            />
                           </div>
                         </td>
                       </tr>

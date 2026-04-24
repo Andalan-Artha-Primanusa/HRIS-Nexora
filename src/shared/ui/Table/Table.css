@@ -184,7 +184,8 @@
   color: var(--color-text-primary);
 }
 
-.table-action-button.delete:hover {
+.table-action-button.delete:hover,
+.table-action-button.delete.active {
   background-color: #fee2e2;
   color: var(--color-error);
 }

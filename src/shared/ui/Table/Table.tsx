@@ -1,5 +1,6 @@
 import React from 'react';
 import type { ReactNode } from 'react';
+import { Eye, Edit2, Trash2, CheckCircle, XCircle } from 'lucide-react';
 import './Table.css';
 
 /* ========================================
@@ -181,25 +182,73 @@ export const TableEmpty: React.FC<TableEmptyProps> = ({
 
 interface TableActionProps {
   onClick: () => void;
-  icon: ReactNode;
+  icon?: ReactNode;
   title?: string;
   variant?: 'view' | 'edit' | 'delete' | 'approve' | 'reject';
   disabled?: boolean;
+  className?: string;
+  style?: React.CSSProperties;
 }
 
-export const TableAction: React.FC<TableActionProps> = ({ onClick, icon, title, variant = 'view', disabled = false }) => {
+export const TableAction: React.FC<TableActionProps> = ({ 
+  onClick, 
+  icon, 
+  title, 
+  variant = 'view', 
+  disabled = false,
+  className = '',
+  style
+}) => {
+  const getDefaultIcon = () => {
+    switch (variant) {
+      case 'view': return <Eye size={16} />;
+      case 'edit': return <Edit2 size={16} />;
+      case 'delete': return <Trash2 size={16} />;
+      case 'approve': return <CheckCircle size={16} />;
+      case 'reject': return <XCircle size={16} />;
+      default: return null;
+    }
+  };
+
+  const getDefaultTitle = () => {
+    switch (variant) {
+      case 'view': return 'View Details';
+      case 'edit': return 'Edit Item';
+      case 'delete': return 'Delete Item';
+      case 'approve': return 'Approve';
+      case 'reject': return 'Reject';
+      default: return '';
+    }
+  };
+
   return (
     <button
-      className={`table-action-button ${variant}`}
-      onClick={onClick}
-      title={title}
+      className={`table-action-button ${variant} ${className}`}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
+      title={title || getDefaultTitle()}
       disabled={disabled}
       type="button"
+      style={style}
     >
-      {icon}
+      {icon || getDefaultIcon()}
     </button>
   );
 };
+
+export const ViewAction: React.FC<Omit<TableActionProps, 'variant' | 'icon'>> = (props) => (
+  <TableAction {...props} variant="view" />
+);
+
+export const EditAction: React.FC<Omit<TableActionProps, 'variant' | 'icon'>> = (props) => (
+  <TableAction {...props} variant="edit" />
+);
+
+export const DeleteAction: React.FC<Omit<TableActionProps, 'variant' | 'icon'>> = (props) => (
+  <TableAction {...props} variant="delete" />
+);
 
 interface TableActionsProps {
   children: ReactNode;

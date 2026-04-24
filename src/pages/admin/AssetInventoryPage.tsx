@@ -5,7 +5,7 @@ import {
   User, Search, Trash2, Pencil, ArrowRight, Hash, Calendar, Filter
 } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
-import { Button } from '@/shared/ui/Button';
+import { Button, EditAction, DeleteAction } from '@/shared/ui';
 import { assetService } from '@/features/assets/api/asset.service';
 import '@/shared/styles/CrudPage.css';
 
@@ -226,23 +226,17 @@ const AssetInventoryPage: React.FC = () => {
                         View Assignment
                       </Button>
                     )}
-                    <Button
-                      variant="ghost"
+                    <EditAction
                       onClick={() => navigate(`/inventory/assets/edit/${asset.id}`)}
-                      style={{ flex: 1, height: '42px', borderRadius: '10px', background: '#f8fafc', border: '1px solid #e2e8f0' }}
                       title="Edit Asset"
-                    >
-                      <Pencil size={16} />
-                    </Button>
-                    <Button
-                      variant="ghost"
+                      style={{ flex: 1, height: '42px', borderRadius: '10px' }}
+                    />
+                    <DeleteAction
                       onClick={() => handleDelete(asset.id, asset.name)}
                       disabled={deletingId === asset.id}
-                      style={{ height: '42px', width: '42px', borderRadius: '10px', background: '#fef2f2', border: '1px solid #fecaca', color: '#ef4444', padding: 0 }}
+                      style={{ height: '42px', width: '42px', borderRadius: '10px' }}
                       title="Delete Asset"
-                    >
-                      <Trash2 size={16} />
-                    </Button>
+                    />
                   </div>
                 </div>
               </Card>

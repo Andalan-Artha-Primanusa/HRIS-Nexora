@@ -59,6 +59,9 @@ export {
   TableEmpty,
   TableAction,
   TableActions,
+  ViewAction,
+  EditAction,
+  DeleteAction,
 } from './Table/Table';
 
 /* ========================================
