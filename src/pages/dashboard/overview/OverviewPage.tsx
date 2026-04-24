@@ -362,12 +362,12 @@ const OverviewPage: React.FC = () => {
             <p className="hero-subtitle">Welcome back, here's what's happening with your organization today.</p>
           </div>
           <div className="hero-actions">
-            <Button variant="outline" size="md" onClick={() => navigate('/admin/analytics/people')}>
+            <button className="btn-outline" onClick={() => navigate('/admin/analytics/people')}>
               View Analytics
-            </Button>
-            <Button variant="primary" size="md" onClick={() => navigate('/payroll/approve')}>
+            </button>
+            <button className="btn-primary" onClick={() => navigate('/payroll/approve')}>
               Run Payroll
-            </Button>
+            </button>
           </div>
         </div>
       </Card>

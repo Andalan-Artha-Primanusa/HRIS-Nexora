@@ -1,15 +1,15 @@
 .section-page {
   --section-accent: #2563eb;
-  --section-soft: rgba(37, 99, 235, 0.08);
-  --section-border: rgba(37, 99, 235, 0.15);
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-blur: blur(12px);
-  
+  --section-soft: #e0e7ff;
+  --section-border: #c7d2fe;
+  --glass-bg: #ffffff;
+  --glass-blur: none;
+
   display: flex;
   flex-direction: column;
   gap: 2rem;
   padding: 1.5rem;
-  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  background: var(--gray-100);
   min-height: 100vh;
   animation: fadeIn 0.4s ease-out;
 }
@@ -25,24 +25,11 @@
   justify-content: space-between;
   align-items: center;
   gap: 2rem;
-  background: linear-gradient(135deg, white 0%, #f0f7ff 100%);
+  background: var(--white);
   padding: 2.5rem;
   border-radius: 32px;
-  border: 1px solid white;
-  box-shadow: 0 10px 30px rgba(37, 99, 235, 0.05);
-  position: relative;
-  overflow: hidden;
-}
-
-.section-header::before {
-  content: "";
-  position: absolute;
-  top: -50%;
-  right: -10%;
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, var(--section-soft) 0%, transparent 70%);
-  border-radius: 50%;
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-sm);
 }
 
 .section-header-left {
@@ -124,37 +111,13 @@
 .section-action-card {
   padding: 2rem;
   border-radius: 32px;
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  border: 1px solid white;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
 }
 
 .glass-shimmer {
   position: relative;
   overflow: hidden;
-}
-
-.glass-shimmer::after {
-  content: "";
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(
-    45deg,
-    transparent 45%,
-    rgba(255, 255, 255, 0.1) 50%,
-    transparent 55%
-  );
-  transform: rotate(-45deg);
-  animation: shimmer 6s infinite;
-  pointer-events: none;
-}
-
-@keyframes shimmer {
-  0% { transform: translate(-100%, -100%) rotate(-45deg); }
-  100% { transform: translate(100%, 100%) rotate(-45deg); }
 }
 
 .section-action-header h2 {
@@ -363,10 +326,10 @@
 }
 
 .profile-field {
-  background: rgba(255, 255, 255, 0.5);
+  background: var(--gray-50);
   padding: 1.25rem;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid var(--gray-200);
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -375,7 +338,6 @@
 
 .profile-field:hover {
   transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.8);
 }
 
 .field-label {

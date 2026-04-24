@@ -1,6 +1,6 @@
 .crud-page {
   padding: 1.5rem;
-  background: #f8fafc;
+  background: #f1f5f9;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -8,10 +8,9 @@
 }
 
 .hero-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 2rem 2.5rem;
+  background: #1e40af;
+  border-radius: 20px;
+  padding: 2.5rem;
 }
 
 .hero-card-inner {
@@ -29,28 +28,27 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: #dbeafe;
   padding: 0.4rem 1rem;
   border-radius: 50px;
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: #2563eb;
+  color: #ffffff;
   margin-bottom: 1rem;
 }
 
 .hero-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #0f172a;
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #ffffff;
   margin: 0 0 0.5rem 0;
   letter-spacing: -0.5px;
 }
 
 .hero-subtitle {
   font-size: 1rem;
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.9);
   margin: 0;
   max-width: 50ch;
 }
@@ -59,6 +57,28 @@
   display: flex;
   gap: 0.75rem;
   flex-shrink: 0;
+}
+
+.hero-actions .btn-outline,
+.hero-actions .btn-primary {
+  background: #ffffff;
+  border: none;
+  color: #1e40af;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hero-actions .btn-outline:hover,
+.hero-actions .btn-primary:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
 .error-card {
@@ -75,13 +95,9 @@
 }
 
 .analytics-title-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: #1e40af;
   border-radius: 16px;
   padding: 1.5rem 2rem;
-}
-
-.analytics-title-inner {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -90,24 +106,23 @@
 .analytics-icon {
   width: 48px;
   height: 48px;
-  background: #dbeafe;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #2563eb;
+  color: #ffffff;
 }
 
 .analytics-title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #0f172a;
+  color: #ffffff;
   margin: 0;
 }
 
 .analytics-subtitle {
   font-size: 0.875rem;
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.85);
   margin: 0.25rem 0 0 0;
 }
 
@@ -119,15 +134,16 @@
 
 .metric-card {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
   border-radius: 16px;
   padding: 1.5rem;
   transition: all 0.2s ease;
+  border: 1px solid #e2e8f0;
 }
 
 .metric-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+  border-color: #1e40af;
 }
 
 .metric-header {
@@ -165,7 +181,7 @@
 
 .metric-icon--blue {
   background: #dbeafe;
-  color: #2563eb;
+  color: #1e40af;
 }
 
 .metric-icon--green {
@@ -203,9 +219,15 @@
 
 .chart-card {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
   border-radius: 16px;
   padding: 1.5rem;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.chart-card:hover {
+  border-color: #1e40af;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.1);
 }
 
 .chart-header {
