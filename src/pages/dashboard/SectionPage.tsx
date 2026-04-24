@@ -191,12 +191,12 @@ const sectionDefinitions: Record<string, { title: string; subtitle: string; icon
     icon: Target,
     color: '#2563EB',
   },
-  requests: {
-     title: 'Permintaan Layanan HR',
-     subtitle: 'Pantau tiket HR, penugasan PIC, dan update status request.',
-    icon: FileText,
-    color: '#2563EB',
-  },
+  // requests: {
+  //    title: 'Permintaan Layanan HR',
+  //    subtitle: 'Pantau tiket HR, penugasan PIC, dan update status request.',
+  //   icon: FileText,
+  //   color: '#2563EB',
+  // },
   notifications: {
      title: 'Pusat Notifikasi',
      subtitle: 'Notifikasi approval, pengingat, dan update status lintas modul.',
