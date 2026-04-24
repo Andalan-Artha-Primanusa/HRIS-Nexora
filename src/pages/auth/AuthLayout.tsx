@@ -116,15 +116,37 @@ const AuthLayout = ({ title, subtitle, children, footer }: AuthLayoutProps) => {
           {children}
           {footer}
           
-          <div style={{ marginTop: '3rem', paddingTop: '2rem', borderTop: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', opacity: 0.8 }}>
+          <div style={{ 
+            marginTop: '1.5rem',
+            paddingTop: '1.5rem',
+            borderTop: '1px solid var(--border-color)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.5rem',
+            opacity: 0.8
+          }}>
             <img 
-              src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2070&auto=format&fit=crop" 
-              alt="Berkemah Team" 
-              style={{ width: '120px', height: '80px', objectFit: 'cover', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }} 
+              src="/foto-berkemah.png"
+              alt="Berkemah Team"
+              style={{ 
+                width: '120px',
+                height: '80px',
+                objectFit: 'cover',
+                borderRadius: '12px',
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+
+                marginBottom: '4px'
+              }} 
             />
+
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Powered by</span>
-              <span style={{ fontSize: '0.9rem', fontWeight: 900, color: 'var(--primary-color)' }}>Berkemah Team</span>
+              <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                Powered by
+              </span>
+              <span style={{ fontSize: '0.9rem', fontWeight: 900, color: 'var(--primary-color)' }}>
+                Berkemah Team
+              </span>
             </div>
           </div>
         </div>
