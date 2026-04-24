@@ -160,7 +160,6 @@ const sectionRoutes = [
   { path: "/organization/summary" },
   { path: "/organization/chart" },
   { path: "/organization/team" },
-  { path: "/organization/master-data" },
   { path: "/documents/review" },
   { path: "/documents/expiring" },
   { path: "/notifications" },
@@ -168,9 +167,6 @@ const sectionRoutes = [
   { path: "/attendance/overtime" },
   { path: "/attendance/reports" },
   { path: "/my/assets" },
-  { path: "/training/programs" },
-  { path: "/training/enrollments" },
-  { path: "/competencies" },
   { path: "/my/trainings" },
   { path: "/my/competencies" },
   { path: "/my/requests" },
@@ -196,11 +192,8 @@ const sectionRoutes = [
   { path: "/reports/competency" },
   { path: "/reports/employee-lifecycle" },
   { path: "/reports/custom" },
-  { path: "/settings/company" },
   { path: "/settings/user-role" },
   { path: "/settings/permissions" },
-  { path: "/settings/master-data/expense-category" },
-  { path: "/settings/notification" },
 ];
 
 const RootRedirect = () => {

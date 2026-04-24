@@ -399,7 +399,6 @@ const PayrollCrudPage = () => {
             </div>
           </Card>
         </div>
-        </div>
       )}
     </div>
   );

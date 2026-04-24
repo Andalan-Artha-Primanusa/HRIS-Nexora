@@ -1,23 +1,95 @@
 import React, { useState, useEffect } from 'react';
-import { RefreshCw, Save, Bell, Mail, MessageSquare, CheckCircle, ToggleLeft, ToggleRight } from 'lucide-react';
+import { RefreshCw, Save, Bell, Mail, MessageSquare, Smartphone, CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
 import '@/shared/styles/CrudPage.css';
+import './NotificationSettingsPage.css';
+
+interface NotificationChannel {
+  id: string;
+  name: string;
+  description: string;
+  icon: React.ElementType;
+  enabled: boolean;
+}
 
 interface NotificationSetting {
   id: string;
   name: string;
   description: string;
-  email_enabled: boolean;
-  push_enabled: boolean;
-  in_app_enabled: boolean;
+  channels: {
+    email: boolean;
+    push: boolean;
+    in_app: boolean;
+  };
+  category: 'leave' | 'payroll' | 'announcement' | 'system' | 'approval';
 }
 
 const NotificationSettingsPage: React.FC = () => {
   const [settings, setSettings] = useState<NotificationSetting[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<string>('all');
+
+  const defaultSettings: NotificationSetting[] = [
+    {
+      id: 'leave_request',
+      name: 'Leave Request',
+      description: 'When employees submit leave requests',
+      category: 'leave',
+      channels: { email: true, push: true, in_app: true }
+    },
+    {
+      id: 'leave_approval',
+      name: 'Leave Approval',
+      description: 'When leave requests are approved or rejected',
+      category: 'approval',
+      channels: { email: true, push: true, in_app: true }
+    },
+    {
+      id: 'payroll_ready',
+      name: 'Payroll Ready',
+      description: 'When payroll is ready for review',
+      category: 'payroll',
+      channels: { email: true, push: false, in_app: true }
+    },
+    {
+      id: 'payroll_paid',
+      name: 'Payroll Paid',
+      description: 'When salary has been disbursed',
+      category: 'payroll',
+      channels: { email: true, push: true, in_app: true }
+    },
+    {
+      id: 'announcement',
+      name: 'Company Announcement',
+      description: 'Important company announcements and updates',
+      category: 'announcement',
+      channels: { email: true, push: true, in_app: true }
+    },
+    {
+      id: 'overtime_request',
+      name: 'Overtime Request',
+      description: 'When overtime requests need approval',
+      category: 'approval',
+      channels: { email: true, push: true, in_app: true }
+    },
+    {
+      id: 'reimbursement',
+      name: 'Reimbursement',
+      description: 'Reimbursement request status updates',
+      category: 'approval',
+      channels: { email: true, push: false, in_app: true }
+    },
+    {
+      id: 'attendance_alert',
+      name: 'Attendance Alert',
+      description: 'Attendance-related notifications',
+      category: 'system',
+      channels: { email: false, push: true, in_app: true }
+    },
+  ];
 
   const fetchData = async () => {
     setLoading(true);
@@ -25,15 +97,14 @@ const NotificationSettingsPage: React.FC = () => {
       const response = await api.get('/notification-settings');
       const data = response.data;
       const settingsArray = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
-      setSettings(settingsArray);
+      if (settingsArray.length > 0) {
+        setSettings(settingsArray);
+      } else {
+        setSettings(defaultSettings);
+      }
     } catch (err) {
       console.error(err);
-      setSettings([
-        { id: 'leave_request', name: 'Leave Request', description: 'Notifikasi pengajuan cuti', email_enabled: true, push_enabled: true, in_app_enabled: true },
-        { id: 'leave_approval', name: 'Leave Approval', description: 'Notifikasi persetujuan cuti', email_enabled: true, push_enabled: true, in_app_enabled: true },
-        { id: 'payroll_ready', name: 'Payroll Ready', description: 'Notifikasi slip gaji ready', email_enabled: true, push_enabled: false, in_app_enabled: true },
-        { id: 'announcement', name: 'Announcement', description: 'Pengumuman perusahaan', email_enabled: true, push_enabled: true, in_app_enabled: true },
-      ]);
+      setSettings(defaultSettings);
     } finally {
       setLoading(false);
     }
@@ -43,40 +114,81 @@ const NotificationSettingsPage: React.FC = () => {
     fetchData();
   }, []);
 
-  const toggleSetting = (id: string, field: 'email_enabled' | 'push_enabled' | 'in_app_enabled') => {
-    setSettings(prev => prev.map(s => s.id === id ? { ...s, [field]: !s[field] } : s));
+  const toggleChannel = (settingId: string, channel: 'email' | 'push' | 'in_app') => {
+    setSettings(prev => prev.map(s => 
+      s.id === settingId 
+        ? { ...s, channels: { ...s.channels, [channel]: !s.channels[channel] } }
+        : s
+    ));
+  };
+
+  const toggleAllInCategory = (category: string, enabled: boolean) => {
+    if (category === 'all') {
+      setSettings(prev => prev.map(s => ({
+        ...s,
+        channels: { email: enabled, push: enabled, in_app: enabled }
+      })));
+    } else {
+      setSettings(prev => prev.map(s => 
+        s.category === category 
+          ? { ...s, channels: { email: enabled, push: enabled, in_app: enabled } }
+          : s
+      ));
+    }
   };
 
   const handleSave = async () => {
     setSaving(true);
     try {
       await api.put('/notification-settings', { settings });
-      alert('Notification settings saved!');
+      alert('Notification settings saved successfully!');
     } catch (err) {
       console.error(err);
+      alert('Failed to save settings');
     } finally {
       setSaving(false);
     }
   };
 
-  const activeCount = settings.filter(s => s.in_app_enabled).length;
+  const filteredSettings = activeCategory === 'all' 
+    ? settings 
+    : settings.filter(s => s.category === activeCategory);
+
+  const categories = [
+    { key: 'all', label: 'All', icon: Bell },
+    { key: 'leave', label: 'Leave', icon: Clock },
+    { key: 'payroll', label: 'Payroll', icon: CheckCircle },
+    { key: 'approval', label: 'Approvals', icon: AlertTriangle },
+    { key: 'announcement', label: 'Announcements', icon: MessageSquare },
+    { key: 'system', label: 'System', icon: Bell },
+  ];
+
+  const channelIcons = {
+    email: Mail,
+    push: Smartphone,
+    in_app: Bell,
+  };
+
+  const enabledCount = settings.reduce((acc, s) => acc + (s.channels.in_app ? 1 : 0), 0);
+  const emailEnabledCount = settings.reduce((acc, s) => acc + (s.channels.email ? 1 : 0), 0);
+  const pushEnabledCount = settings.reduce((acc, s) => acc + (s.channels.push ? 1 : 0), 0);
 
   return (
-    <div className="crud-page">
+    <div className="crud-page notification-page">
       <div className="page-header">
         <div className="page-header-title">
           <span className="page-badge">Settings</span>
-          <h1>Pengaturan Notifikasi</h1>
-          <p>Kelola preferensi notifikasi untuk berbagai события.</p>
+          <h1>Notification Settings</h1>
+          <p>Configure how you receive notifications across different channels.</p>
         </div>
         <div className="page-header-actions">
           <Button variant="outline" size="md" onClick={fetchData} disabled={loading}>
-            <RefreshCw size={16} />
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
             Refresh
           </Button>
           <Button variant="primary" size="md" onClick={handleSave} disabled={saving}>
             <Save size={16} />
-            {saving ? 'Saving...' : 'Simpan'}
+            {saving ? 'Saving...' : 'Save Changes'}
           </Button>
         </div>
       </div>
@@ -85,45 +197,43 @@ const NotificationSettingsPage: React.FC = () => {
         <Card className="summary-card" glass>
           <div className="summary-card__header">
             <div>
-              <span className="summary-card__label">Total Notifikasi</span>
-              <p className="summary-card__subtitle">Semua jenis</p>
+              <span className="summary-card__label">Total Notifications</span>
+              <p className="summary-card__subtitle">Configured</p>
             </div>
             <span className="summary-card__icon summary-card__icon--blue">
               <Bell size={20} />
             </span>
           </div>
           <div className="summary-card__value summary-card__value--blue">{settings.length}</div>
-          <div className="summary-card__change">Notification Types</div>
+          <div className="summary-card__change">Notification types</div>
         </Card>
 
         <Card className="summary-card" glass>
           <div className="summary-card__header">
             <div>
-              <span className="summary-card__label">Aktif</span>
-              <p className="summary-card__subtitle">Notifikasi aktif</p>
+              <span className="summary-card__label">Email Enabled</span>
+              <p className="summary-card__subtitle">Via email</p>
             </div>
             <span className="summary-card__icon summary-card__icon--green">
-              <CheckCircle size={20} />
+              <Mail size={20} />
             </span>
           </div>
-          <div className="summary-card__value summary-card__value--green">{activeCount}</div>
+          <div className="summary-card__value summary-card__value--green">{emailEnabledCount}</div>
           <div className="summary-card__change">Active</div>
         </Card>
 
         <Card className="summary-card" glass>
           <div className="summary-card__header">
             <div>
-              <span className="summary-card__label">Email</span>
-              <p className="summary-card__subtitle">Via email</p>
+              <span className="summary-card__label">Push Enabled</span>
+              <p className="summary-card__subtitle">Mobile push</p>
             </div>
             <span className="summary-card__icon summary-card__icon--orange">
-              <Mail size={20} />
+              <Smartphone size={20} />
             </span>
           </div>
-          <div className="summary-card__value summary-card__value--orange">
-            {settings.filter(s => s.email_enabled).length}
-          </div>
-          <div className="summary-card__change">Email Enabled</div>
+          <div className="summary-card__value summary-card__value--orange">{pushEnabledCount}</div>
+          <div className="summary-card__change">Active</div>
         </Card>
       </div>
 
@@ -131,60 +241,87 @@ const NotificationSettingsPage: React.FC = () => {
         <div className="wuw-header">
           <div className="wuw-header-top">
             <div className="wuw-title-area">
-              <h3>Pengaturan Notifikasi</h3>
-              <span className="wuw-count-badge">{settings.length} Total</span>
+              <h3>Notification Preferences</h3>
+              <span className="wuw-count-badge">{filteredSettings.length} items</span>
+            </div>
+            <div className="category-filters">
+              {categories.map(cat => (
+                <button
+                  key={cat.key}
+                  className={`category-filter ${activeCategory === cat.key ? 'active' : ''}`}
+                  onClick={() => setActiveCategory(cat.key)}
+                >
+                  <cat.icon size={14} />
+                  {cat.label}
+                </button>
+              ))}
             </div>
           </div>
         </div>
 
         <div className="wuw-table-area">
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '3rem' }}>Loading...</div>
-          ) : settings.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
-              <Bell size={48} style={{ opacity: 0.3, marginBottom: '1rem' }} />
-              <p>Belum ada pengaturan notifikasi.</p>
+            <div className="notification-loading">
+              <RefreshCw size={32} className="animate-spin" />
+              <p>Loading notification settings...</p>
             </div>
           ) : (
-            <div style={{ padding: '1rem' }}>
-              {settings.map((setting) => (
-                <Card key={setting.id} glass style={{ padding: '1.5rem', marginBottom: '1rem', borderRadius: '16px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-                    <div>
-                      <h4 style={{ margin: 0, fontWeight: 700, color: '#1e293b' }}>{setting.name}</h4>
-                      <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748b' }}>{setting.description}</p>
+            <div className="notification-list">
+              <div className="notification-header-row">
+                <div className="notification-info">Notification Type</div>
+                <div className="notification-channels">
+                  <div className="channel-header">
+                    <Mail size={16} />
+                    <span>Email</span>
+                  </div>
+                  <div className="channel-header">
+                    <Smartphone size={16} />
+                    <span>Push</span>
+                  </div>
+                  <div className="channel-header">
+                    <Bell size={16} />
+                    <span>In-App</span>
+                  </div>
+                </div>
+              </div>
+
+              {filteredSettings.map((setting) => (
+                <div key={setting.id} className="notification-item">
+                  <div className="notification-info">
+                    <div className="notification-icon">
+                      <Bell size={18} />
                     </div>
-                    <div style={{ display: 'flex', gap: '1rem' }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                        <Mail size={18} color={setting.email_enabled ? '#2563eb' : '#94a3b8'} />
-                        <button 
-                          onClick={() => toggleSetting(setting.id, 'email_enabled')}
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-                        >
-                          {setting.email_enabled ? <ToggleRight size={24} color="#2563eb" /> : <ToggleLeft size={24} color="#94a3b8" />}
-                        </button>
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                        <MessageSquare size={18} color={setting.push_enabled ? '#2563eb' : '#94a3b8'} />
-                        <button 
-                          onClick={() => toggleSetting(setting.id, 'push_enabled')}
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-                        >
-                          {setting.push_enabled ? <ToggleRight size={24} color="#2563eb" /> : <ToggleLeft size={24} color="#94a3b8" />}
-                        </button>
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                        <Bell size={18} color={setting.in_app_enabled ? '#2563eb' : '#94a3b8'} />
-                        <button 
-                          onClick={() => toggleSetting(setting.id, 'in_app_enabled')}
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-                        >
-                          {setting.in_app_enabled ? <ToggleRight size={24} color="#2563eb" /> : <ToggleLeft size={24} color="#94a3b8" />}
-                        </button>
-                      </div>
+                    <div className="notification-text">
+                      <h4>{setting.name}</h4>
+                      <p>{setting.description}</p>
                     </div>
                   </div>
-                </Card>
+                  <div className="notification-channels">
+                    {(['email', 'push', 'in_app'] as const).map(channel => {
+                      const IconComponent = channelIcons[channel];
+                      const isEnabled = setting.channels[channel];
+                      return (
+                        <button
+                          key={channel}
+                          className={`channel-toggle ${isEnabled ? 'enabled' : ''}`}
+                          onClick={() => toggleChannel(setting.id, channel)}
+                          title={`Toggle ${channel} notifications`}
+                        >
+                          {isEnabled ? (
+                            <div className="toggle-on">
+                              <CheckCircle size={20} />
+                            </div>
+                          ) : (
+                            <div className="toggle-off">
+                              <XCircle size={20} />
+                            </div>
+                          )}
+                          <span className="channel-label">{channel === 'in_app' ? 'In-App' : channel === 'push' ? 'Push' : 'Email'}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               ))}
             </div>
           )}

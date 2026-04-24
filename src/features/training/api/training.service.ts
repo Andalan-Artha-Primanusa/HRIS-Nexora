@@ -33,6 +33,10 @@ export const trainingService = {
     const response = await api.post(`/training/programs/${id}/enroll`);
     return response.data;
   },
+  getEnrollments: async () => {
+    const response = await api.get('/training/enrollments');
+    return response.data;
+  },
 
   // Competencies
   getCompetencies: async () => {
