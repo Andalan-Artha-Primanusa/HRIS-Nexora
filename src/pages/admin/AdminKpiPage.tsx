@@ -528,21 +528,21 @@ const AdminKpiPage = () => {
                       <span className={getStatusClass(kpi.status)}>{kpi.status}</span>
                     </td>
                     <td className="td-right">
-                      <div className="action-group">
-                        <Button variant="ghost" size="sm" onClick={() => handleViewDetail(kpi)} title="Lihat Detail">
+                      <div className="action-btn-group">
+                        <button className="action-btn action-btn-view" onClick={() => handleViewDetail(kpi)} title="Lihat Detail">
                           <Eye size={16} />
-                        </Button>
+                        </button>
                         {kpi.status === 'submitted' && (
-                          <Button variant="ghost" size="sm" onClick={() => handleApprove(kpi.id)} title="Setujui">
-                            <CheckCircle2 size={16} color="#10b981" />
-                          </Button>
+                          <button className="action-btn action-btn-success" onClick={() => handleApprove(kpi.id)} title="Setujui">
+                            <CheckCircle2 size={16} />
+                          </button>
                         )}
-                        <Button variant="ghost" size="sm" onClick={() => handleEdit(kpi)} title="Ubah">
+                        <button className="action-btn action-btn-edit" onClick={() => handleEdit(kpi)} title="Ubah">
                           <FileText size={16} />
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleDelete(kpi.id)} title="Hapus">
-                          <Trash2 size={16} color="#ef4444" />
-                        </Button>
+                        </button>
+                        <button className="action-btn action-btn-delete" onClick={() => handleDelete(kpi.id)} title="Hapus">
+                          <Trash2 size={16} />
+                        </button>
                       </div>
                     </td>
                   </tr>

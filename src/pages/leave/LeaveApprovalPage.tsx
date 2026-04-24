@@ -232,27 +232,23 @@ const LeaveApprovalPage = () => {
                           {leave.reason ? String(leave.reason).substring(0, 35) + (String(leave.reason).length > 35 ? "..." : "") : "-"}
                         </td>
                         <td>
-                          <div className="cell-actions">
-                            <Button
-                              variant="outline"
-                              size="sm"
+                          <div className="action-btn-group">
+                            <button 
+                              className="action-btn action-btn-success" 
                               onClick={() => void handleApprove(leave.id)}
                               disabled={actionLoading === String(leave.id)}
                               title="Approve"
-                              style={{ color: '#10b981', borderColor: '#10b981' }}
                             >
-                              <Check size={15} />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
+                              <Check size={16} />
+                            </button>
+                            <button 
+                              className="action-btn action-btn-delete" 
                               onClick={() => void handleReject(leave.id)}
                               disabled={actionLoading === String(leave.id)}
                               title="Reject"
-                              style={{ color: '#ef4444', borderColor: '#ef4444' }}
                             >
-                              <X size={15} />
-                            </Button>
+                              <X size={16} />
+                            </button>
                           </div>
                         </td>
                       </tr>

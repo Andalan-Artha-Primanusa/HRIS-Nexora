@@ -55,10 +55,10 @@ const ComplianceSettingsPage: React.FC = () => {
                    <div style={{ width: '54px', height: '54px', background: `${policy.color}15`, color: policy.color, borderRadius: '16px', display: 'grid', placeItems: 'center' }}>
                       {policy.icon}
                    </div>
-                   <div style={{ display: 'flex', gap: '8px' }}>
-                      <button className="wf-action-btn"><Edit size={16} /></button>
-                      <button className="wf-action-btn wf-action-btn-danger"><Trash2 size={16} /></button>
-                   </div>
+<div style={{ display: 'flex', gap: '8px' }}>
+                       <button className="action-btn action-btn-edit"><Edit size={16} /></button>
+                       <button className="action-btn action-btn-delete"><Trash2 size={16} /></button>
+                    </div>
                 </div>
                 
                 <h3 style={{ margin: '0 0 0.5rem', fontSize: '1.25rem', fontWeight: 800, color: '#1e3a8a' }}>{policy.name}</h3>

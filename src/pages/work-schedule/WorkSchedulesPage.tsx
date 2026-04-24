@@ -187,18 +187,17 @@ const WorkSchedulesPage = () => {
                       </div>
                     </td>
                     <td>
-                      <div className="cell-actions">
-                        <Button
-                          variant="outline"
-                          size="sm"
+                      <div className="action-btn-group">
+                        <button
+                          className="action-btn action-btn-edit"
                           onClick={() => navigate(`/work-schedules/edit/${schedule.id}`)}
                           disabled={loading}
+                          title="Edit"
                         >
-                          <Pencil size={15} />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
+                          <Pencil size={16} />
+                        </button>
+                        <button
+                          className="action-btn action-btn-delete"
                           onClick={() => {
                             if (deleteConfirmId === schedule.id) {
                               void handleDelete(schedule.id);
@@ -207,22 +206,21 @@ const WorkSchedulesPage = () => {
                             }
                           }}
                           disabled={loading}
-                          style={{ color: deleteConfirmId === schedule.id ? '#ef4444' : undefined }}
+                          title="Hapus"
                         >
-                          <Trash2 size={15} />
-                        </Button>
+                          <Trash2 size={16} />
+                        </button>
                         {deleteConfirmId === schedule.id && (
                           <span style={{ fontSize: '0.8rem', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '4px' }}>
                             Yakin?
-                            <Button
-                              variant="ghost"
-                              size="sm"
+                            <button
+                              className="action-btn"
                               onClick={() => setDeleteConfirmId(null)}
                               disabled={loading}
-                              style={{ padding: '0 4px', fontSize: '0.8rem', color: '#64748b' }}
+                              style={{ padding: '4px 8px', fontSize: '0.75rem', background: '#f1f5f9', color: '#64748b' }}
                             >
                               Batal
-                            </Button>
+                            </button>
                           </span>
                         )}
                       </div>

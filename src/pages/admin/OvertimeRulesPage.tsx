@@ -55,9 +55,9 @@ const OvertimeRulesPage: React.FC = () => {
       <div className="workforce-table-card">
         <div className="workforce-table-header">
            <h3 className="workforce-table-title">Daftar Kebijakan Lembur</h3>
-           <button className="wf-action-btn" onClick={fetchData}>
-              <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
-           </button>
+<button className="action-btn" onClick={fetchData} style={{ background: '#f1f5f9', color: '#64748b' }}>
+               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            </button>
         </div>
 
         <table className="workforce-table">
@@ -98,14 +98,14 @@ const OvertimeRulesPage: React.FC = () => {
                   </span>
                 </td>
                 <td style={{ textAlign: 'right' }}>
-                   <div className="wf-btn-group" style={{ justifyContent: 'flex-end' }}>
-                      <button className="wf-action-btn" onClick={() => navigate(`/workforce/overtime-rules/edit/${rule.id}`)}>
-                         <Edit size={22} />
-                      </button>
-                      <button className="wf-action-btn wf-action-btn-danger">
-                         <Trash2 size={22} />
-                      </button>
-                   </div>
+<div className="action-btn-group">
+                       <button className="action-btn action-btn-edit" onClick={() => navigate(`/workforce/overtime-rules/edit/${rule.id}`)}>
+                          <Edit size={16} />
+                       </button>
+                       <button className="action-btn action-btn-delete">
+                          <Trash2 size={16} />
+                       </button>
+                    </div>
                 </td>
               </tr>
             ))}

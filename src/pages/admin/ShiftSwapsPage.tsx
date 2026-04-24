@@ -55,9 +55,9 @@ const ShiftSwapsPage: React.FC = () => {
       <div className="workforce-table-card">
         <div className="workforce-table-header">
            <h3 className="workforce-table-title">Riwayat Penukaran Shift</h3>
-           <div className="wf-btn-group">
-              <button className="wf-action-btn" onClick={fetchData}><RefreshCw size={20} className={loading ? 'animate-spin' : ''} /></button>
-           </div>
+<div className="action-btn-group">
+               <button className="action-btn" onClick={fetchData} style={{ background: '#f1f5f9', color: '#64748b' }}><RefreshCw size={16} className={loading ? 'animate-spin' : ''} /></button>
+            </div>
         </div>
 
         <table className="workforce-table">
@@ -107,10 +107,10 @@ const ShiftSwapsPage: React.FC = () => {
                   </span>
                 </td>
                 <td style={{ textAlign: 'right' }}>
-                   <div className="wf-btn-group" style={{ justifyContent: 'flex-end' }}>
-                      <button className="wf-action-btn" title="Approve"><CheckCircle2 size={24} color="#16a34a" /></button>
-                      <button className="wf-action-btn wf-action-btn-danger" title="Reject"><XCircle size={24} color="#ef4444" /></button>
-                   </div>
+<div className="action-btn-group">
+                       <button className="action-btn action-btn-success" title="Approve"><CheckCircle2 size={16} /></button>
+                       <button className="action-btn action-btn-delete" title="Reject"><XCircle size={16} /></button>
+                    </div>
                 </td>
               </tr>
             ))}

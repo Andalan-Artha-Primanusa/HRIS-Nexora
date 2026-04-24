@@ -263,12 +263,14 @@ const PayrollCrudPage = () => {
                       <td style={{ color: '#10b981', fontWeight: '600' }}>Rp {Number(payroll.bonus || 0).toLocaleString("id-ID")}</td>
                       <td style={{ fontWeight: '800', color: 'var(--primary)' }}>Rp {Number(payroll.take_home_pay || 0).toLocaleString("id-ID")}</td>
                       <td style={{ textAlign: 'center' }}>
-                        <button onClick={() => selectPayroll(payroll, "edit")} className="crud-inline-button crud-inline-button--primary" title="Edit">
-                          <Pencil size={16} />
-                        </button>
-                        <button onClick={() => selectPayroll(payroll, "delete")} className="crud-inline-button crud-inline-button--danger" title="Delete">
-                          <Trash2 size={16} />
-                        </button>
+                        <div className="action-btn-group" style={{ justifyContent: 'center' }}>
+                          <button onClick={() => selectPayroll(payroll, "edit")} className="action-btn action-btn-edit" title="Edit">
+                            <Pencil size={16} />
+                          </button>
+                          <button onClick={() => selectPayroll(payroll, "delete")} className="action-btn action-btn-delete" title="Delete">
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -285,7 +287,7 @@ const PayrollCrudPage = () => {
         <div className="form-view-container">
           <Card className="crud-card" glass>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2.5rem' }}>
-              <button onClick={handleBack} className="crud-inline-button" style={{ border: '1px solid #e2e8f0' }}>
+              <button onClick={handleBack} className="action-btn" style={{ background: '#f1f5f9', color: '#64748b' }}>
                 <ArrowLeft size={18} />
               </button>
               <h2 style={{ marginBottom: 0 }}>

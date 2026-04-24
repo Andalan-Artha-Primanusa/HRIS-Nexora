@@ -418,3 +418,15 @@ h6 {
   box-shadow: 0 4px 12px rgba(124, 58, 237, 0.12);
 }
 
+.action-btn-success {
+  color: #16a34a;
+  background: #dcfce7;
+}
+
+.action-btn-success:hover {
+  background: #bbf7d0;
+  border-color: #86efac;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.12);
+}
+

@@ -275,8 +275,9 @@ const PayrollApprovePage = () => {
                       <button
                         type="button"
                         onClick={() => handleSelectPayroll(p)}
-                        className={`crud-inline-button ${selectedPayrollId === String(p.id) ? "crud-inline-button--primary" : "crud-inline-button--info"}`}
+                        className={`action-btn ${selectedPayrollId === String(p.id) ? "action-btn-edit" : ""}`}
                         disabled={loading}
+                        style={{ background: selectedPayrollId === String(p.id) ? '#eff6ff' : '#f1f5f9', color: selectedPayrollId === String(p.id) ? '#2563eb' : '#64748b' }}
                       >
                         Pilih
                       </button>

@@ -184,19 +184,17 @@ const LocationsPage = () => {
                       <td>{parseFloat(String(loc.longitude || 0)).toFixed(6)}</td>
                       <td><span className="cell-tag">{String(loc.radius || 0)}m</span></td>
                       <td>
-                        <div className="cell-actions">
-                          <Button
-                            variant="outline"
-                            size="sm"
+                        <div className="action-btn-group">
+                          <button
+                            className="action-btn action-btn-edit"
                             onClick={() => navigate(`/locations/edit/${loc.id}`)}
                             disabled={loading || deleteConfirm === String(loc.id)}
                             title="Edit"
                           >
-                            <Pencil size={15} />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
+                            <Pencil size={16} />
+                          </button>
+                          <button
+                            className="action-btn action-btn-delete"
                             onClick={() => {
                               if (deleteConfirm === String(loc.id)) {
                                 void handleDelete(String(loc.id));
@@ -205,23 +203,21 @@ const LocationsPage = () => {
                               }
                             }}
                             disabled={loading}
-                            style={{ color: deleteConfirm === String(loc.id) ? '#ef4444' : undefined }}
                             title="Hapus"
                           >
-                            <Trash2 size={15} />
-                          </Button>
+                            <Trash2 size={16} />
+                          </button>
                           {deleteConfirm === String(loc.id) && (
                             <span style={{ fontSize: '0.8rem', color: '#ef4444', display: 'flex', alignItems: 'center' }}>
                               Hapus?{' '}
-                              <Button
-                                variant="ghost"
-                                size="sm"
+                              <button
+                                className="action-btn"
                                 onClick={() => setDeleteConfirm(null)}
                                 disabled={loading}
-                                style={{ padding: '0 0.5rem' }}
+                                style={{ padding: '4px 8px', fontSize: '0.75rem', background: '#f1f5f9', color: '#64748b' }}
                               >
                                 Batal
-                              </Button>
+                              </button>
                             </span>
                           )}
                         </div>

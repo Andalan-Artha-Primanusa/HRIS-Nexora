@@ -55,11 +55,11 @@ const ComplianceDashboardPage: React.FC = () => {
       <div className="workforce-table-card">
         <div className="workforce-table-header">
            <h3 className="workforce-table-title">Status Kepatuhan Dokumen Karyawan</h3>
-           <div className="wf-btn-group">
-              <button className="wf-action-btn" onClick={fetchData}><RefreshCw size={20} className={loading ? 'animate-spin' : ''} /></button>
-              <button className="wf-action-btn"><Filter size={20} /></button>
-              <button className="wf-action-btn"><Download size={20} /></button>
-           </div>
+<div className="action-btn-group">
+               <button className="action-btn" onClick={fetchData} style={{ background: '#f1f5f9', color: '#64748b' }}><RefreshCw size={16} className={loading ? 'animate-spin' : ''} /></button>
+               <button className="action-btn" style={{ background: '#f1f5f9', color: '#64748b' }}><Filter size={16} /></button>
+               <button className="action-btn" style={{ background: '#f1f5f9', color: '#64748b' }}><Download size={16} /></button>
+            </div>
         </div>
 
         <table className="workforce-table">
@@ -98,9 +98,9 @@ const ComplianceDashboardPage: React.FC = () => {
                   </span>
                 </td>
                 <td style={{ textAlign: 'right' }}>
-                   <div className="wf-btn-group" style={{ justifyContent: 'flex-end' }}>
-                      <button className="wf-action-btn"><Edit size={20} /></button>
-                   </div>
+<div className="action-btn-group">
+                       <button className="action-btn action-btn-edit"><Edit size={16} /></button>
+                    </div>
                 </td>
               </tr>
             ))}

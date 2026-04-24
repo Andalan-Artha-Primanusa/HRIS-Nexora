@@ -91,13 +91,13 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({ items, onView,
                   </span>
                 </td>
                 <td>
-                  <div className="cell-actions">
-                    <Button variant="ghost" size="sm" onClick={() => onView(String(item.id))} title="Lihat Detail">
-                      <Eye size={18} color="#8b5cf6" />
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => onDelete(String(item.id))} title="Hapus Record">
-                      <Trash2 size={18} color="#ef4444" />
-                    </Button>
+                  <div className="action-btn-group">
+                    <button className="action-btn action-btn-view" onClick={() => onView(String(item.id))} title="Lihat Detail">
+                      <Eye size={16} />
+                    </button>
+                    <button className="action-btn action-btn-delete" onClick={() => onDelete(String(item.id))} title="Hapus Record">
+                      <Trash2 size={16} />
+                    </button>
                   </div>
                 </td>
               </tr>
