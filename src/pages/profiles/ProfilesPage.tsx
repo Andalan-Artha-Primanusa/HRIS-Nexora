@@ -11,19 +11,10 @@ import {
   Heart,
   GraduationCap,
   CreditCard,
-  Clock,
-  FileText,
   Shield,
-  CheckCircle2,
   Building2,
-  Mail,
-  Calendar,
-  Phone,
-  Layers,
-  Map,
   Search,
-  Filter,
-  ChevronDown,
+  RefreshCw,
 } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
@@ -600,6 +591,7 @@ const ProfilesPage = () => {
 
   // Filter & Search states
   const [searchText, setSearchText] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [selectedPosition, setSelectedPosition] = useState("");
@@ -986,105 +978,152 @@ const ProfilesPage = () => {
     );
   }
 
-  if (isViewPage) {
-    return (
-      <div className="profiles-page crud-page">
-        <div className="profiles-list-header" style={{ borderBottom: "2px solid #e2e8f0", paddingBottom: "20px" }}>
-          <div className="profiles-list-title">
-            <h1 style={{ color: "var(--color-primary)", marginBottom: "4px" }}>📋 Detail Profil</h1>
-            <p style={{ color: "var(--color-text-secondary)", fontSize: "0.9rem" }}>Melihat informasi lengkap karyawan</p>
+  return (
+    <div className="profiles-page crud-page">
+      <Card className="crud-card" glass>
+          <div className="profiles-list-header" style={{ borderBottom: "2px solid #e2e8f0", paddingBottom: "20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div className="profiles-list-title">
+              <h1 style={{ color: "var(--color-primary)", marginBottom: "4px" }}>Daftar Profil Karyawan</h1>
+              <p style={{ color: "var(--color-text-secondary)", fontSize: "0.9rem" }}>Kelola profil dan data karyawan</p>
+            </div>
+            <div className="profiles-list-actions">
+              <Button variant="primary" size="sm" onClick={() => navigate('/profiles/create')}>
+                <Plus size={16} /> Tambah Profil
+              </Button>
+            </div>
           </div>
-          <div className="profiles-list-actions">
-<button
-                          className="action-btn action-btn-delete"
-                          onClick={() => void handleDelete(String(p.id))}
-                          title="Delete Profile"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
+
+          <div style={{ marginBottom: "1.5rem", display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+            <div className="search-box" style={{ flex: 1, minWidth: "250px", position: "relative" }}>
+              <Search size={18} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#64748b" }} />
+              <input
+                type="text"
+                className="form-input"
+                placeholder="Cari nama, email, atau ID karyawan..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                style={{ paddingLeft: "40px", marginBottom: 0 }}
+              />
+            </div>
+            <select
+              className="form-input"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              style={{ minWidth: "150px", marginBottom: 0 }}
+            >
+              <option value="all">Semua Status</option>
+              <option value="active">Aktif</option>
+              <option value="pending">Probation</option>
+              <option value="inactive">Non-Aktif</option>
+            </select>
+          </div>
+
+          <div className="table-wrap">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Profil</th>
+                  <th>ID Karyawan</th>
+                  <th>Departemen</th>
+                  <th>Jabatan</th>
+                  <th>Tanggal Bergabung</th>
+                  <th className="th-center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan={6} style={{ textAlign: "center", padding: "3rem" }}>
+                      <RefreshCw size={32} className="animate-spin" style={{ opacity: 0.5 }} />
+                      <p style={{ marginTop: "0.5rem", opacity: 0.6 }}>Memuat data...</p>
                     </td>
-                    <td>
-                      <div className="cell-name">
-                        <div className="cell-avatar">
-                          {p.user?.name?.charAt(0).toUpperCase() || "P"}
+                  </tr>
+                ) : filteredProfiles.length > 0 ? (
+                  filteredProfiles.map((p: any) => (
+                    <tr key={p.id}>
+                      <td>
+                        <div className="cell-name">
+                          <div className="cell-avatar">
+                            {p.user?.name?.charAt(0).toUpperCase() || "P"}
+                          </div>
+                          <span className="cell-name-text">{p.user?.name || "Unknown"}</span>
                         </div>
-                        <span className="cell-name-text">{p.user?.name || "Unknown"}</span>
-                      </div>
-                    </td>
-                    <td>{p.employee?.department || "-"}</td>
-                    <td>{p.employee?.position || "-"}</td>
-                    <td>{p.employee?.hire_date ? formatDate(p.employee.hire_date) : "-"}</td>
-                    <td>
-                      <div className="action-btn-group">
-                        <button
-                          className="action-btn action-btn-view"
-                          onClick={() => navigate(`/profiles/view/${p.id}`)}
-                          title="View Details"
-                        >
-                          <Eye size={16} />
-                        </button>
-                        <button
-                          className="action-btn action-btn-edit"
-                          onClick={() => navigate(`/profiles/update/${p.id}`)}
-                          title="Edit Profile"
-                        >
-                          <Pencil size={16} />
-                        </button>
-                        <button
-                          className="action-btn action-btn-delete"
-                          onClick={() => void handleDelete(String(p.id))}
-                          title="Delete Profile"
-                          style={{ color: "#ef4444", borderColor: "#ef4444" }}
-                        >
-                          <Trash2 size={15} />
-                        </Button>
+                      </td>
+                      <td>
+                        <span className="cell-tag">{p.employee?.employee_id || p.id}</span>
+                      </td>
+                      <td>{p.employee?.department || "-"}</td>
+                      <td>{p.employee?.position || "-"}</td>
+                      <td>{p.employee?.hire_date ? formatDate(p.employee.hire_date) : "-"}</td>
+                      <td>
+                        <div className="action-btn-group" style={{ justifyContent: "center" }}>
+                          <button
+                            className="action-btn action-btn-view"
+                            onClick={() => navigate(`/profiles/view/${p.id}`)}
+                            title="View Details"
+                          >
+                            <Eye size={16} />
+                          </button>
+                          <button
+                            className="action-btn action-btn-edit"
+                            onClick={() => navigate(`/profiles/update/${p.id}`)}
+                            title="Edit Profile"
+                          >
+                            <Pencil size={16} />
+                          </button>
+                          <button
+                            className="action-btn action-btn-delete"
+                            onClick={() => void handleDelete(String(p.id))}
+                            title="Delete Profile"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={6}>
+                      <div className="submenu-table-empty">
+                        Tidak ada data karyawan yang ditemukan.
                       </div>
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={6}>
-                    <div className="submenu-table-empty">
-                      Tidak ada data karyawan yang ditemukan.
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination bar */}
-        {totalPages > 1 && (
-          <div className="pagination-container" style={{ padding: '1rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(148, 163, 184, 0.25)' }}>
-            <div className="pagination-info">
-              Halaman <strong>{currentPage}</strong> dari <strong>{totalPages}</strong>
-            </div>
-            <div className="pagination-controls" style={{ display: "flex", gap: "8px" }}>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                disabled={currentPage === 1}
-              >
-                ← Sebelumnya
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                disabled={currentPage === totalPages}
-              >
-                Selanjutnya →
-              </Button>
-            </div>
+                )}
+              </tbody>
+            </table>
           </div>
-        )}
+
+          {totalPages > 1 && (
+            <div className="pagination-container" style={{ padding: "1rem 1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid rgba(148, 163, 184, 0.25)" }}>
+              <div className="pagination-info">
+                Halaman <strong>{currentPage}</strong> dari <strong>{totalPages}</strong>
+              </div>
+              <div className="pagination-controls" style={{ display: "flex", gap: "8px" }}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                >
+                  ← Sebelumnya
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  Selanjutnya →
+                </Button>
+              </div>
+            </div>
+          )}
       </Card>
     </div>
   );
-};
+}
 
 export default ProfilesPage;
+                      

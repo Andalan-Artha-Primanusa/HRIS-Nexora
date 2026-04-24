@@ -361,6 +361,88 @@ h6 {
 .action-btn {
   padding: 8px;
   border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  outline: none;
+  background: white;
+  color: #2563eb;
+}
+
+.action-btn:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+}
+
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.action-btn-edit {
+  color: #2563eb;
+  background: white;
+  border-color: #e2e8f0;
+}
+
+.action-btn-edit:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.action-btn-delete {
+  color: #2563eb;
+  background: white;
+  border-color: #e2e8f0;
+}
+
+.action-btn-delete:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.action-btn-view {
+  color: #2563eb;
+  background: white;
+  border-color: #e2e8f0;
+}
+
+.action-btn-view:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.action-btn-secondary {
+  color: #2563eb;
+  background: white;
+  border-color: #e2e8f0;
+}
+
+.action-btn-secondary:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.action-btn-success {
+  color: #2563eb;
+  background: white;
+  border-color: #e2e8f0;
+}
+
+.action-btn-success:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.action-btn {
+  padding: 8px;
+  border-radius: 10px;
   border: 1px solid transparent;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
