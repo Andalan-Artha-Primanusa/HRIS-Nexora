@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BarChart3, ClipboardList, PieChart as PieChartIcon, Users, Wallet, TrendingUp } from 'lucide-react';
+import { BarChart3, ClipboardList, PieChart as PieChartIcon, Users, Wallet, TrendingUp, Activity } from 'lucide-react';
 import { KpiCards } from '@/features/dashboard/components/KpiCards';
 import { BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card } from '@/shared/ui/Card';
@@ -351,19 +351,32 @@ const OverviewPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">Dashboard Center</span>
-          <h1>Dashboard Overview</h1>
-          <p>Welcome back, here's what's happening with your organization today.</p>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Activity size={14} />
+              <span>Dashboard Center</span>
+            </div>
+            <h1 className="hero-title">Dashboard Overview</h1>
+            <p className="hero-subtitle">Welcome back, here's what's happening with your organization today.</p>
+          </div>
+          <div className="hero-actions">
+            <Button variant="outline" size="md" onClick={() => navigate('/admin/analytics/people')}>
+              View Analytics
+            </Button>
+            <Button variant="primary" size="md" onClick={() => navigate('/payroll/approve')}>
+              Run Payroll
+            </Button>
+          </div>
         </div>
-        <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={() => navigate('/admin/analytics/people')}>View Analytics</Button>
-          <Button variant="primary" size="md" onClick={() => navigate('/payroll/approve')}>Run Payroll</Button>
-        </div>
-      </div>
+      </Card>
 
-      {error && <p className="overview-error">{error}</p>}
+      {error && (
+        <Card className="error-card">
+          <p>{error}</p>
+        </Card>
+      )}
 
       <KpiCards />
 
@@ -372,7 +385,7 @@ const OverviewPage: React.FC = () => {
           const Icon = card.icon;
 
           return (
-            <Card key={card.label} className="metric-card overview-summary-card" glass>
+            <Card key={card.label} className="metric-card">
               <div className="metric-header">
                 <div>
                   <span className="metric-label">{card.label}</span>
@@ -383,29 +396,34 @@ const OverviewPage: React.FC = () => {
                 </span>
               </div>
               <div className="metric-value">{card.value}</div>
-              <div className="metric-change positive">
+              <div className="metric-change">
                 <span>{card.change}</span>
               </div>
             </Card>
           );
         })}
-      </div>
+</div>
 
-      <div className="white-unified-wrapper">
-        <div className="wuw-header">
-          <div className="wuw-header-top">
-            <div className="wuw-title-area">
-              <h3>Analytics Dashboard</h3>
-              <span className="wuw-count-badge">Real-time Data</span>
-            </div>
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <BarChart3 size={20} />
+          </div>
+          <div>
+            <h2 className="analytics-title">Analytics Dashboard</h2>
+            <p className="analytics-subtitle">Real-time data insights</p>
           </div>
         </div>
+      </Card>
 
-        <div className="charts-section">
-          <div className="charts-grid charts-grid-2col">
-            <Card className="chart-card" glass>
-              <h2 className="chart-title"><BarChart3 size={16} /> Weekly Attendance Trend</h2>
-              <p className="chart-subtitle">Employee presence tracking this week</p>
+      <div className="charts-section">
+          <Card className="chart-card">
+              <div className="chart-header">
+                <div className="chart-title-area">
+                  <h3 className="chart-title">Weekly Attendance Trend</h3>
+                  <p className="chart-subtitle">Employee presence tracking this week</p>
+                </div>
+              </div>
               {loading && attendanceData.length === 0 ? (
                 <div className="chart-empty">Loading attendance data...</div>
               ) : attendanceData.length > 0 ? (
@@ -421,17 +439,17 @@ const OverviewPage: React.FC = () => {
                         <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(37, 99, 235, 0.1)" />
-                    <XAxis dataKey="day" stroke="#1e40af" style={{ fontSize: '12px' }} />
-                    <YAxis stroke="#1e40af" style={{ fontSize: '12px' }} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <XAxis dataKey="day" stroke="#64748b" style={{ fontSize: '12px' }} />
+                    <YAxis stroke="#64748b" style={{ fontSize: '12px' }} />
                     <Tooltip 
                       contentStyle={{ 
                         backgroundColor: '#fff', 
-                        border: '1px solid #dbeafe',
+                        border: '1px solid #e2e8f0',
                         borderRadius: '8px',
-                        boxShadow: '0 4px 12px rgba(37, 99, 235, 0.1)'
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
                       }}
-                      labelStyle={{ color: '#1e40af', fontWeight: 'bold' }}
+                      labelStyle={{ color: '#0f172a', fontWeight: 600 }}
                     />
                     <Legend wrapperStyle={{ paddingTop: '20px' }} />
                     <Area type="monotone" dataKey="present" stroke="#2563eb" strokeWidth={2} fillOpacity={1} fill="url(#colorPresent)" name="Present" />
@@ -443,26 +461,30 @@ const OverviewPage: React.FC = () => {
               )}
             </Card>
 
-            <Card className="chart-card" glass>
-              <h2 className="chart-title"><Users size={16} /> Employees by Department</h2>
-              <p className="chart-subtitle">Total workforce distribution</p>
+            <Card className="chart-card">
+              <div className="chart-header">
+                <div className="chart-title-area">
+                  <h3 className="chart-title">Employees by Department</h3>
+                  <p className="chart-subtitle">Total workforce distribution</p>
+                </div>
+              </div>
               {loading && departmentData.length === 0 ? (
                 <div className="chart-empty">Loading department data...</div>
               ) : departmentData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={280}>
                   <BarChart data={departmentData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(37, 99, 235, 0.1)" />
-                    <XAxis dataKey="name" stroke="#1e40af" style={{ fontSize: '12px' }} />
-                    <YAxis stroke="#1e40af" style={{ fontSize: '12px' }} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <XAxis dataKey="name" stroke="#64748b" style={{ fontSize: '12px' }} />
+                    <YAxis stroke="#64748b" style={{ fontSize: '12px' }} />
                     <Tooltip 
                       contentStyle={{ 
                         backgroundColor: '#fff', 
-                        border: '1px solid #dbeafe',
+                        border: '1px solid #e2e8f0',
                         borderRadius: '8px',
-                        boxShadow: '0 4px 12px rgba(37, 99, 235, 0.1)'
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
                       }}
-                      labelStyle={{ color: '#1e40af', fontWeight: 'bold' }}
-                      cursor={{ fill: 'rgba(37, 99, 235, 0.1)' }}
+                      labelStyle={{ color: '#0f172a', fontWeight: 600 }}
+                      cursor={{ fill: 'rgba(37, 99, 235, 0.05)' }}
                     />
                     <Bar dataKey="count" fill="#2563eb" radius={[8, 8, 0, 0]} name="Employee Count" />
                   </BarChart>
@@ -472,26 +494,30 @@ const OverviewPage: React.FC = () => {
               )}
             </Card>
 
-            <Card className="chart-card" glass>
-              <h2 className="chart-title"><Wallet size={16} /> Payroll Processing Status</h2>
-              <p className="chart-subtitle">Monthly payroll completion rate</p>
+            <Card className="chart-card">
+              <div className="chart-header">
+                <div className="chart-title-area">
+                  <h3 className="chart-title">Payroll Processing Status</h3>
+                  <p className="chart-subtitle">Monthly payroll completion rate</p>
+                </div>
+              </div>
               {loading && payrollData.length === 0 ? (
                 <div className="chart-empty">Loading payroll data...</div>
               ) : payrollData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={280}>
                   <BarChart data={payrollData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(37, 99, 235, 0.1)" />
-                    <XAxis dataKey="month" stroke="#1e40af" style={{ fontSize: '12px' }} />
-                    <YAxis stroke="#1e40af" style={{ fontSize: '12px' }} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <XAxis dataKey="month" stroke="#64748b" style={{ fontSize: '12px' }} />
+                    <YAxis stroke="#64748b" style={{ fontSize: '12px' }} />
                     <Tooltip 
                       contentStyle={{ 
                         backgroundColor: '#fff', 
-                        border: '1px solid #dbeafe',
+                        border: '1px solid #e2e8f0',
                         borderRadius: '8px',
-                        boxShadow: '0 4px 12px rgba(37, 99, 235, 0.1)'
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
                       }}
-                      labelStyle={{ color: '#1e40af', fontWeight: 'bold' }}
-                      cursor={{ fill: 'rgba(37, 99, 235, 0.1)' }}
+                      labelStyle={{ color: '#0f172a', fontWeight: 600 }}
+                      cursor={{ fill: 'rgba(37, 99, 235, 0.05)' }}
                     />
                     <Legend wrapperStyle={{ paddingTop: '20px' }} />
                     <Bar dataKey="processed" stackId="a" fill="#10b981" radius={[8, 8, 0, 0]} name="Processed" />
@@ -503,9 +529,13 @@ const OverviewPage: React.FC = () => {
               )}
             </Card>
 
-            <Card className="chart-card" glass>
-              <h2 className="chart-title"><PieChartIcon size={16} /> Leave Types Distribution</h2>
-              <p className="chart-subtitle">Leave requests by type</p>
+            <Card className="chart-card">
+              <div className="chart-header">
+                <div className="chart-title-area">
+                  <h3 className="chart-title">Leave Types Distribution</h3>
+                  <p className="chart-subtitle">Leave requests by type</p>
+                </div>
+              </div>
               {loading && leaveTypeData.length === 0 ? (
                 <div className="chart-empty">Loading leave data...</div>
               ) : leaveTypeData.length > 0 ? (
@@ -514,11 +544,11 @@ const OverviewPage: React.FC = () => {
                     <Tooltip 
                       contentStyle={{ 
                         backgroundColor: '#fff', 
-                        border: '1px solid #dbeafe',
+                        border: '1px solid #e2e8f0',
                         borderRadius: '8px',
-                        boxShadow: '0 4px 12px rgba(37, 99, 235, 0.1)'
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
                       }}
-                      labelStyle={{ color: '#1e40af', fontWeight: 'bold' }}
+                      labelStyle={{ color: '#0f172a', fontWeight: 600 }}
                     />
                     <Legend wrapperStyle={{ paddingTop: '20px' }} />
                     <Pie
@@ -541,8 +571,6 @@ const OverviewPage: React.FC = () => {
                 <div className="chart-empty">No leave data available.</div>
               )}
             </Card>
-          </div>
-        </div>
       </div>
     </div>
   );
