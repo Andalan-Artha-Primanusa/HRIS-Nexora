@@ -35,66 +35,73 @@ const OvertimeRulesPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">Workforce</span>
-          <h1>Aturan Lembur</h1>
-          <p>Konfigurasi pengganda gaji dan batasan jam lembur.</p>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Timer size={16} />
+              <span>Workforce</span>
+            </div>
+            <h1 className="hero-title">Aturan Lembur</h1>
+            <p className="hero-subtitle">
+              Konfigurasi pengganda gaji dan batasan jam lembur.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={fetchData} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+            <button className="btn-primary" onClick={() => navigate('/workforce/overtime-rules/create')}>
+              <Plus size={16} />
+              Buat Aturan
+            </button>
+          </div>
         </div>
-        <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={fetchData} disabled={loading}>
-            <RefreshCw size={16} />
-            Refresh
-          </Button>
-          <Button variant="primary" size="md" onClick={() => navigate('/workforce/overtime-rules/create')}>
-            <Plus size={16} />
-            Buat Aturan
-          </Button>
+      </Card>
+
+      <div className="leave-requests-wrapper">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Aturan Aktif</p>
+              <p className="leave-summary-subtitle">Total aturan</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-green">
+              <Clock size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-green">{activeRules.length}</div>
+          <p className="leave-summary-trend">Aturan Aktif</p>
         </div>
-      </div>
 
-      <div className="summary-grid">
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
             <div>
-              <span className="summary-card__label">Aturan Aktif</span>
-              <p className="summary-card__subtitle">Total aturan</p>
+              <p className="leave-summary-label">Rata-rata</p>
+              <p className="leave-summary-subtitle">Multiplier</p>
             </div>
-            <span className="summary-card__icon summary-card__icon--green">
-              <Clock size={20} />
-            </span>
+            <div className="leave-summary-icon-wrapper leave-icon-blue">
+              <DollarSign size={28} />
+            </div>
           </div>
-          <div className="summary-card__value summary-card__value--green">{activeRules.length}</div>
-          <div className="summary-card__change">Active</div>
-        </Card>
+          <div className="leave-summary-value leave-value-blue">1.5x</div>
+          <p className="leave-summary-trend">Multiplier</p>
+        </div>
 
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
             <div>
-              <span className="summary-card__label">Avg Multiplier</span>
-              <p className="summary-card__subtitle">Rata-rata</p>
+              <p className="leave-summary-label">Max Hours/Day</p>
+              <p className="leave-summary-subtitle">Batas harian</p>
             </div>
-            <span className="summary-card__icon summary-card__icon--blue">
-              <DollarSign size={20} />
-            </span>
-          </div>
-          <div className="summary-card__value summary-card__value--blue">1.5x</div>
-          <div className="summary-card__change">Multiplier</div>
-        </Card>
-
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
-            <div>
-              <span className="summary-card__label">Max Hours/Day</span>
-              <p className="summary-card__subtitle">Batas harian</p>
+            <div className="leave-summary-icon-wrapper leave-icon-orange">
+              <Timer size={28} />
             </div>
-            <span className="summary-card__icon summary-card__icon--orange">
-              <Clock size={20} />
-            </span>
           </div>
-          <div className="summary-card__value summary-card__value--orange">4h</div>
-          <div className="summary-card__change">Hours</div>
-        </Card>
+          <div className="leave-summary-value leave-value-orange">4h</div>
+          <p className="leave-summary-trend">Jam Harian</p>
+        </div>
       </div>
 
       <div className="white-unified-wrapper">
