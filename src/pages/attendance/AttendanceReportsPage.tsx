@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Card } from '@/shared/ui/Card';
-import { Button } from '@/shared/ui/Button';
 import { Alert } from '@/shared/ui/Alert';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
-import { BarChart3, RefreshCw, Users, TrendingUp, Clock, Calendar } from 'lucide-react';
+import { BarChart3, RefreshCw, Users, TrendingUp, Clock, Calendar, FileText } from 'lucide-react';
 import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import './AttendanceShared.css';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface ReportRecord {
@@ -67,19 +68,25 @@ const AttendanceReportsPage = () => {
 
   return (
     <div className="crud-page">
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">Attendance Center</span>
-          <h1>Laporan Kehadiran</h1>
-          <p>Analitik dan laporan kehadiran karyawan.</p>
+      {/* Header - Same style as Dashboard */}
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <FileText size={16} />
+              <span>Pusat Laporan</span>
+            </div>
+            <h1 className="hero-title">Laporan Kehadiran</h1>
+            <p className="hero-subtitle">Analitik dan laporan kehadiran karyawan.</p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => void loadRecords()}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+          </div>
         </div>
-        <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={() => void loadRecords()} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
-            <RefreshCw size={16} />
-            {loading ? 'Memuat...' : 'Segarkan'}
-          </Button>
-        </div>
-      </div>
+      </Card>
 
       {alertMessage && (
         <Alert variant={alertType === 'success' ? 'success' : 'error'} title={alertType === 'success' ? 'Berhasil' : 'Kesalahan'}>
@@ -87,82 +94,93 @@ const AttendanceReportsPage = () => {
         </Alert>
       )}
 
-      <div className="summary-grid">
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
+      {/* Summary Cards */}
+      <div className="attendance-reports-wrapper">
+        <div className="attendance-summary-card">
+          <div className="attendance-summary-header">
             <div>
-              <span className="summary-card__label">Total Records</span>
-              <p className="summary-card__subtitle">Semua laporan</p>
+              <p className="attendance-summary-label">Total Records</p>
+              <p className="attendance-summary-subtitle">Semua laporan</p>
             </div>
-            <span className="summary-card__icon summary-card__icon--blue">
-              <BarChart3 size={20} />
-            </span>
-          </div>
-          <div className="summary-card__value summary-card__value--blue">{records.length}</div>
-          <div className="summary-card__change">Data 30 hari terakhir</div>
-        </Card>
-
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
-            <div>
-              <span className="summary-card__label">Hadir</span>
-              <p className="summary-card__subtitle">Total kehadiran</p>
-            </div>
-            <span className="summary-card__icon summary-card__icon--green">
-              <Users size={20} />
-            </span>
-          </div>
-          <div className="summary-card__value summary-card__value--green">{totalPresent}</div>
-          <div className="summary-card__change">Total check-in</div>
-        </Card>
-
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
-            <div>
-              <span className="summary-card__label">Tidak Hadir</span>
-              <p className="summary-card__subtitle">Total absen</p>
-            </div>
-            <span className="summary-card__icon summary-card__icon--red">
-              <Clock size={20} />
-            </span>
-          </div>
-          <div className="summary-card__value summary-card__value--red">{totalAbsent}</div>
-          <div className="summary-card__change">Tanpa keterangan</div>
-        </Card>
-
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
-            <div>
-              <span className="summary-card__label">Terlambat</span>
-              <p className="summary-card__subtitle">Total late</p>
-            </div>
-            <span className="summary-card__icon summary-card__icon--orange">
-              <TrendingUp size={20} />
-            </span>
-          </div>
-          <div className="summary-card__value summary-card__value--orange">{totalLate}</div>
-          <div className="summary-card__change">Tidak tepat waktu</div>
-        </Card>
-      </div>
-
-      <div className="white-unified-wrapper">
-        <div className="wuw-header">
-          <div className="wuw-header-top">
-            <div className="wuw-title-area">
-              <h3>Analitik Kehadiran</h3>
-              <span className="wuw-count-badge">30 Hari</span>
+            <div className="attendance-summary-icon-wrapper attendance-icon-blue">
+              <BarChart3 size={28} />
             </div>
           </div>
+          <div className="attendance-summary-value attendance-value-blue">{records.length}</div>
+          <p className="attendance-summary-trend">Data 30 hari terakhir</p>
         </div>
 
-        <div className="wuw-table-area">
+        <div className="attendance-summary-card">
+          <div className="attendance-summary-header">
+            <div>
+              <p className="attendance-summary-label">Hadir</p>
+              <p className="attendance-summary-subtitle">Total kehadiran</p>
+            </div>
+            <div className="attendance-summary-icon-wrapper attendance-icon-green">
+              <Users size={28} />
+            </div>
+          </div>
+          <div className="attendance-summary-value attendance-value-green">{totalPresent}</div>
+          <p className="attendance-summary-trend">Total check-in</p>
+        </div>
+
+        <div className="attendance-summary-card">
+          <div className="attendance-summary-header">
+            <div>
+              <p className="attendance-summary-label">Tidak Hadir</p>
+              <p className="attendance-summary-subtitle">Total absen</p>
+            </div>
+            <div className="attendance-summary-icon-wrapper attendance-icon-red">
+              <Clock size={28} />
+            </div>
+          </div>
+          <div className="attendance-summary-value attendance-value-red">{totalAbsent}</div>
+          <p className="attendance-summary-trend">Tanpa keterangan</p>
+        </div>
+
+        <div className="attendance-summary-card">
+          <div className="attendance-summary-header">
+            <div>
+              <p className="attendance-summary-label">Terlambat</p>
+              <p className="attendance-summary-subtitle">Total late</p>
+            </div>
+            <div className="attendance-summary-icon-wrapper attendance-icon-orange">
+              <TrendingUp size={28} />
+            </div>
+          </div>
+          <div className="attendance-summary-value attendance-value-orange">{totalLate}</div>
+          <p className="attendance-summary-trend">Tidak tepat waktu</p>
+        </div>
+      </div>
+
+      {/* Analytics Title Card */}
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <BarChart3 size={24} />
+          </div>
+          <div>
+            <h2 className="analytics-title">Analitik Kehadiran</h2>
+            <p className="analytics-subtitle">Tren kehadiran 30 hari terakhir</p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Chart Section */}
+      <div className="chart-section">
+        <Card className="chart-card">
           {loading && <LoadingState message="Memuat laporan..." />}
           {!loading && records.length === 0 && (
-            <EmptyState title="Tidak Ada Data" message="Belum ada data laporan." />
+            <div className="empty-state">
+              <EmptyState title="Tidak Ada Data" message="Belum ada data laporan." />
+            </div>
           )}
           {!loading && records.length > 0 && (
-            <div style={{ padding: '2rem' }}>
-              <h3 style={{ marginBottom: '1rem', color: '#1e293b' }}>Tren Kehadiran Mingguan</h3>
+            <>
+              <div className="chart-header">
+                <h3 className="chart-title">Tren Kehadiran Mingguan</h3>
+                <p className="chart-subtitle">Perbandingan kehadiran karyawan</p>
+              </div>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(37, 99, 235, 0.1)" />
@@ -181,9 +199,9 @@ const AttendanceReportsPage = () => {
                   <Bar dataKey="absent" fill="#ef4444" radius={[4, 4, 0, 0]} name="Absent" />
                 </BarChart>
               </ResponsiveContainer>
-            </div>
+            </>
           )}
-        </div>
+        </Card>
       </div>
     </div>
   );

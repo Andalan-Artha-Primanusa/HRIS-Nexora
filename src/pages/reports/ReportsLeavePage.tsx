@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { CalendarDays, CheckCircle, XCircle, Clock, Users, TrendingUp, RefreshCw, PieChart as PieIcon } from 'lucide-react';
+import { CalendarDays, CheckCircle, XCircle, Clock, Users, TrendingUp, RefreshCw, PieChart as PieIcon, ClipboardList } from 'lucide-react';
 import { BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 import './ReportsDashboardPage.css';
 
 type Rec = Record<string, unknown>;
@@ -60,23 +62,87 @@ const ReportsLeavePage: React.FC = () => {
 
   return (
     <div className="reports-dashboard">
-      <Card className="reports-hero-card" glass>
-        <div className="reports-hero-copy">
-          <p className="reports-badge">Laporan &amp; Analitik</p>
-          <h1 className="reports-title">Laporan Cuti</h1>
-          <p className="reports-subtitle">Analisis pengajuan cuti, status persetujuan, dan distribusi jenis cuti karyawan.</p>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <ClipboardList size={16} />
+              <span>Laporan & Analitik</span>
+            </div>
+            <h1 className="hero-title">Laporan Cuti</h1>
+            <p className="hero-subtitle">
+              Analisis pengajuan cuti, status persetujuan, dan distribusi jenis cuti karyawan.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => void load()} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+          </div>
         </div>
-        <div className="reports-actions"><Button variant="outline" size="md" onClick={() => void load()} disabled={loading}><RefreshCw size={16}/>{loading?'Memuat...':'Segarkan'}</Button></div>
       </Card>
+
       {error && <p className="reports-error">{error}</p>}
-      <div className="reports-metrics-grid">
-        <MetricCard label="Total Pengajuan" sub="Semua records" value={String(records.length)} tone="blue" icon={CalendarDays}/>
-        <MetricCard label="Approved" sub={`${records.length>0?Math.round((approved/records.length)*100):0}% dari total`} value={String(approved)} tone="green" icon={CheckCircle}/>
-        <MetricCard label="Pending" sub="Menunggu persetujuan" value={String(pending)} tone="orange" icon={Clock}/>
-        <MetricCard label="Rejected" sub="Ditolak" value={String(rejected)} tone="red" icon={XCircle}/>
-        <MetricCard label="Total Hari Cuti" sub="Kumulatif semua karyawan" value={String(Math.round(totalDays))} tone="purple" icon={TrendingUp}/>
-        <MetricCard label="Karyawan Mengajukan" sub="Unik per employee" value={String(uniqueEmps)} tone="cyan" icon={Users}/>
+
+      <div className="leave-requests-wrapper">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Total Pengajuan</p>
+              <p className="leave-summary-subtitle">Semua records</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-blue">
+              <CalendarDays size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-blue">{records.length}</div>
+          <p className="leave-summary-trend">Total Cuti</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Disetujui</p>
+              <p className="leave-summary-subtitle">Cuti disetujui</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-green">
+              <CheckCircle size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-green">{approved}</div>
+          <p className="leave-summary-trend">Cuti Disetujui</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Menunggu</p>
+              <p className="leave-summary-subtitle">Menunggu persetujuan</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-orange">
+              <Clock size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-orange">{pending}</div>
+          <p className="leave-summary-trend">Menunggu</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Ditolak</p>
+              <p className="leave-summary-subtitle">Cuti ditolak</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-red">
+              <XCircle size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-red">{rejected}</div>
+          <p className="leave-summary-trend">Cuti Ditolak</p>
+        </div>
       </div>
+
       <div className="reports-charts-section">
         <div className="reports-charts-grid">
           <Card className="reports-chart-card" glass>

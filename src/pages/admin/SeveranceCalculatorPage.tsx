@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Calculator, Download } from 'lucide-react';
+import { Calculator, Download, RefreshCw, BookTemplate, Plus } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { getAllEmployees } from '@/features/employee/api/employee.service';
 import { legalService } from '@/features/legal/api/legal.service';
 import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 
 const SeveranceCalculatorPage: React.FC = () => {
   const [employees, setEmployees] = useState<any[]>([]);
@@ -71,13 +73,26 @@ const SeveranceCalculatorPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <div className="crud-header">
-        <div>
-          <span className="reimb-badge reimb-badge-admin">Legal & Compliance</span>
-          <h1>Severance Calculator</h1>
-          <p>Automatic severance calculation based on PP 35/2021.</p>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <BookTemplate size={16} />
+              <span>Legal & Kepatuhan</span>
+            </div>
+            <h1 className="hero-title">Kalkulator Pesangon</h1>
+            <p className="hero-subtitle">
+              Perhitungan pesangon otomatis berdasarkan PP 35/2021.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => window.location.reload()}>
+              <RefreshCw size={16} />
+              Segarkan
+            </button>
+          </div>
         </div>
-      </div>
+      </Card>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '2rem' }}>
         <Card glass style={{ padding: '2rem', borderRadius: '24px', border: '1px solid var(--cr-border)' }}>

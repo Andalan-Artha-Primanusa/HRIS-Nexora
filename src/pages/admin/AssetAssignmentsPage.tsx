@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, RefreshCw, User, Calendar, MapPin, Box, FileText } from 'lucide-react';
+import { Plus, RefreshCw, User, Calendar, MapPin, Box, FileText, Package, Handshake } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { assetService } from '@/features/assets/api/asset.service';
 import { AssignAssetModal } from '@/features/assets/components/AssignAssetModal';
 import { ReturnAssetModal } from '@/features/assets/components/ReturnAssetModal';
 import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 
 const AssetAssignmentsPage: React.FC = () => {
   const [assignments, setAssignments] = useState<any[]>([]);
@@ -73,23 +75,30 @@ const AssetAssignmentsPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">Inventory</span>
-          <h1>Asset Assignments</h1>
-          <p>Track and manage all company property checked out to employees.</p>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Handshake size={16} />
+              <span>Inventaris</span>
+            </div>
+            <h1 className="hero-title">Penugasan Aset</h1>
+            <p className="hero-subtitle">
+              Lacak dan kelola semua properti perusahaan yang dipinjamkan kepada karyawan.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={fetchData} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+            <button className="btn-primary" onClick={() => setIsAssignModalOpen(true)}>
+              <Plus size={16} />
+              Buat Penugasan
+            </button>
+          </div>
         </div>
-        <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={fetchData} disabled={loading}>
-            <RefreshCw size={16} />
-            Refresh
-          </Button>
-          <Button variant="primary" size="md" onClick={() => setIsAssignModalOpen(true)}>
-            <Plus size={16} />
-            Create Assignment
-          </Button>
-        </div>
-      </div>
+      </Card>
 
       {loading ? (
         <div style={{ textAlign: 'center', padding: '5rem', color: '#64748b' }}>

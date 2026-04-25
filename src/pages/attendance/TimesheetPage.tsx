@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Card } from '@/shared/ui/Card';
-import { Button } from '@/shared/ui/Button';
 import { Alert } from '@/shared/ui/Alert';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
-import { History, CheckCircle2, Clock, RefreshCw, XCircle, Calendar } from 'lucide-react';
+import { History, CheckCircle2, Clock, RefreshCw, XCircle, Calendar, Timer } from 'lucide-react';
 import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import './AttendanceShared.css';
 
 interface TimesheetRecord {
   id?: number;
@@ -75,19 +76,25 @@ const TimesheetPage = () => {
 
   return (
     <div className="crud-page">
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">Attendance Center</span>
-          <h1>Timesheet</h1>
-          <p>Riwayat kehadiran harian, check-in dan check-out karyawan.</p>
+      {/* Header - Same style as Dashboard */}
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Timer size={16} />
+              <span>Pusat Timesheet</span>
+            </div>
+            <h1 className="hero-title">Timesheet</h1>
+            <p className="hero-subtitle">Riwayat kehadiran harian, check-in dan check-out karyawan.</p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => void loadRecords()}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+          </div>
         </div>
-        <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={() => void loadRecords()} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
-            <RefreshCw size={16} />
-            {loading ? 'Memuat...' : 'Segarkan'}
-          </Button>
-        </div>
-      </div>
+      </Card>
 
       {alertMessage && (
         <Alert variant={alertType === 'success' ? 'success' : 'error'} title={alertType === 'success' ? 'Berhasil' : 'Kesalahan'}>
@@ -95,92 +102,107 @@ const TimesheetPage = () => {
         </Alert>
       )}
 
-      <div className="summary-grid">
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
+      {/* Summary Cards */}
+      <div className="attendance-timesheet-wrapper">
+        <div className="attendance-summary-card">
+          <div className="attendance-summary-header">
             <div>
-              <span className="summary-card__label">Total Records</span>
-              <p className="summary-card__subtitle">Semua data timesheet</p>
+              <p className="attendance-summary-label">Total Records</p>
+              <p className="attendance-summary-subtitle">Semua data timesheet</p>
             </div>
-            <span className="summary-card__icon summary-card__icon--blue">
-              <History size={20} />
-            </span>
-          </div>
-          <div className="summary-card__value summary-card__value--blue">{records.length}</div>
-          <div className="summary-card__change">Data timesheet bulan ini</div>
-        </Card>
-
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
-            <div>
-              <span className="summary-card__label">Hadir</span>
-              <p className="summary-card__subtitle">Kehadiran lengkap</p>
-            </div>
-            <span className="summary-card__icon summary-card__icon--green">
-              <CheckCircle2 size={20} />
-            </span>
-          </div>
-          <div className="summary-card__value summary-card__value--green">
-            {records.filter(r => (r.status || '').toLowerCase().includes('present')).length}
-          </div>
-          <div className="summary-card__change">Check-in & check-out</div>
-        </Card>
-
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
-            <div>
-              <span className="summary-card__label">Terlambat</span>
-              <p className="summary-card__subtitle">Keterlambatan</p>
-            </div>
-            <span className="summary-card__icon summary-card__icon--orange">
-              <Clock size={20} />
-            </span>
-          </div>
-          <div className="summary-card__value summary-card__value--orange">
-            {records.filter(r => (r.status || '').toLowerCase().includes('late')).length}
-          </div>
-          <div className="summary-card__change">Tidak tepat waktu</div>
-        </Card>
-      </div>
-
-      <div className="white-unified-wrapper">
-        <div className="wuw-header">
-          <div className="wuw-header-top">
-            <div className="wuw-title-area">
-              <h3>Daftar Timesheet</h3>
-              <span className="wuw-count-badge">{records.length} Total</span>
+            <div className="attendance-summary-icon-wrapper attendance-icon-blue">
+              <History size={28} />
             </div>
           </div>
+          <div className="attendance-summary-value attendance-value-blue">{records.length}</div>
+          <p className="attendance-summary-trend">Data timesheet tersimpan</p>
         </div>
 
-        <div className="wuw-table-area">
+        <div className="attendance-summary-card">
+          <div className="attendance-summary-header">
+            <div>
+              <p className="attendance-summary-label">Hadir</p>
+              <p className="attendance-summary-subtitle">Kehadiran lengkap</p>
+            </div>
+            <div className="attendance-summary-icon-wrapper attendance-icon-green">
+              <CheckCircle2 size={28} />
+            </div>
+          </div>
+          <div className="attendance-summary-value attendance-value-green">
+            {records.filter(r => (r.status || '').toLowerCase().includes('present')).length}
+          </div>
+          <p className="attendance-summary-trend">Check-in & check-out selesai</p>
+        </div>
+
+        <div className="attendance-summary-card">
+          <div className="attendance-summary-header">
+            <div>
+              <p className="attendance-summary-label">Terlambat</p>
+              <p className="attendance-summary-subtitle">Keterlambatan</p>
+            </div>
+            <div className="attendance-summary-icon-wrapper attendance-icon-orange">
+              <Clock size={28} />
+            </div>
+          </div>
+          <div className="attendance-summary-value attendance-value-orange">
+            {records.filter(r => (r.status || '').toLowerCase().includes('late')).length}
+          </div>
+          <p className="attendance-summary-trend">Tidak tepat waktu</p>
+        </div>
+      </div>
+
+      {/* Analytics Title Card */}
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <History size={24} />
+          </div>
+          <div>
+            <h2 className="analytics-title">Daftar Timesheet</h2>
+            <p className="analytics-subtitle">Riwayat kehadiran harian</p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Table Section */}
+      <div className="table-section">
+        <div className="table-wrap">
           {loading && <LoadingState message="Memuat timesheet..." />}
           {!loading && records.length === 0 && (
-            <EmptyState title="Tidak Ada Data" message="Belum ada data timesheet." />
+            <div className="empty-state">
+              <EmptyState title="Tidak Ada Data" message="Belum ada data timesheet." />
+            </div>
           )}
           {!loading && records.length > 0 && (
-            <div className="table-wrap">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Tanggal</th>
-                    <th>Check In</th>
-                    <th>Check Out</th>
-                    <th>Status</th>
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Tanggal</th>
+                  <th>Check In</th>
+                  <th>Check Out</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {records.map((record, idx) => (
+                  <tr key={record.id || idx}>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <Calendar size={16} color="#64748b" />
+                        {formatDate(record.date)}
+                      </div>
+                    </td>
+                    <td style={{ fontWeight: 600 }}>{formatTime(record.check_in)}</td>
+                    <td style={{ fontWeight: 600 }}>{formatTime(record.check_out)}</td>
+                    <td>
+                      <span className={`status-badge status-badge--${getStatusClass(record.status)}`}>
+                        {record.status || '-'}
+                      </span>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {records.map((record, idx) => (
-                    <tr key={record.id || idx}>
-                      <td><Calendar size={14} /> {formatDate(record.date)}</td>
-                      <td>{formatTime(record.check_in)}</td>
-                      <td>{formatTime(record.check_out)}</td>
-                      <td><span className={`badge-soft badge-soft--${getStatusClass(record.status)}`}>{record.status || '-'}</span></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
       </div>

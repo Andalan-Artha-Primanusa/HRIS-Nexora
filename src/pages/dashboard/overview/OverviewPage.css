@@ -98,19 +98,24 @@
   background: #1e40af;
   border-radius: 16px;
   padding: 1.5rem 2rem;
+}
+
+.analytics-title-inner {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
 .analytics-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #ffffff;
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .analytics-title {
@@ -118,12 +123,14 @@
   font-weight: 700;
   color: #ffffff;
   margin: 0;
+  font-family: 'Poppins', sans-serif;
 }
 
 .analytics-subtitle {
   font-size: 0.875rem;
   color: rgba(255, 255, 255, 0.85);
   margin: 0.25rem 0 0 0;
+  font-family: 'Poppins', sans-serif;
 }
 
 .summary-grid {
@@ -170,33 +177,34 @@
 }
 
 .metric-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .metric-icon--blue {
-  background: #dbeafe;
-  color: #1e40af;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #1d4ed8;
 }
 
 .metric-icon--green {
-  background: #d1fae5;
-  color: #10b981;
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: #059669;
 }
 
 .metric-icon--orange {
-  background: #fef3c7;
-  color: #f59e0b;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #d97706;
 }
 
 .metric-icon--purple {
-  background: #ede9fe;
-  color: #8b5cf6;
+  background: linear-gradient(135deg, #ede9fe 0%, #d8b4fe 100%);
+  color: #7c3aed;
 }
 
 .metric-value {

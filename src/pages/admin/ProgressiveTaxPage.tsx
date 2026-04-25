@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { ShieldCheck } from 'lucide-react';
+import { ShieldCheck, BookTemplate, RefreshCw } from 'lucide-react';
 import { TaxCalculator } from '@/features/legal/components/TaxCalculator';
 import { legalService } from '@/features/legal/api/legal.service';
 import { Card } from '@/shared/ui/Card';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 import './ProgressiveTaxPage.css';
 
 const ProgressiveTaxPage: React.FC = () => {
@@ -25,18 +27,24 @@ const ProgressiveTaxPage: React.FC = () => {
 
   return (
     <div className="progressive-tax-container">
-      <Card className="tax-hero-card" glass>
-        <div className="tax-hero-copy">
-          <span className="tax-badge">Legal & Compliance</span>
-          <h1>Simulasi Pajak PPh21</h1>
-          <p className="tax-description">
-            Kalkulator simulasi pajak penghasilan karyawan berdasarkan aturan PPh Pasal 17 terbaru. 
-            Gunakan modul ini untuk <strong>melakukan simulasi</strong> atau pengecekan estimasi potongan pajak secara mandiri 
-            sebelum diproses dalam payroll resmi.
-          </p>
-        </div>
-        <div className="tax-hero-icon">
-          <ShieldCheck size={72} color="#2563eb" />
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <BookTemplate size={16} />
+              <span>Legal & Kepatuhan</span>
+            </div>
+            <h1 className="hero-title">Simulasi Pajak PPh21</h1>
+            <p className="hero-subtitle">
+              Kalkulator simulasi pajak penghasilan karyawan berdasarkan aturan PPh Pasal 17 terbaru.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => window.location.reload()} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+          </div>
         </div>
       </Card>
 

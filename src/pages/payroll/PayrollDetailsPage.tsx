@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { BarChart3, CreditCard, FileText, PlusCircle, Settings2, X } from "lucide-react";
+import { BarChart3, PlusCircle, Settings2, X, RefreshCw, Wallet, Gift, MinusCircle } from "lucide-react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
@@ -8,7 +8,9 @@ import { payrollService, toSafeArray, getAllPayroll } from "@/features/payroll/a
 import { getAllEmployees } from "@/features/employee/api/employee.service";
 import type { PayrollDetail, PayrollItem } from "@/features/payroll/types/payroll.types";
 import type { EmployeeItem } from "@/features/employee/types/employee.types";
-import "../admin/AdminCrudPages.css";
+import "@/shared/styles/CrudPage.css";
+import "@/pages/dashboard/overview/OverviewPage.css";
+import "@/pages/payroll/PayrollShared.css";
 import "./PayrollDetailsPage.css";
 
 const asDisplay = (value: unknown) => {
@@ -114,7 +116,7 @@ const PayrollDetailsPage = () => {
         value: String(allowanceCount),
         change: "Penguat take home pay",
         tone: "green" as const,
-        icon: PlusCircle,
+        icon: Gift,
       },
       {
         label: "Deductions",
@@ -122,7 +124,7 @@ const PayrollDetailsPage = () => {
         value: String(deductionCount),
         change: "Pengurang take home pay",
         tone: "orange" as const,
-        icon: CreditCard,
+        icon: MinusCircle,
       },
       {
         label: "Current Type",
@@ -282,40 +284,47 @@ const PayrollDetailsPage = () => {
         </div>
       </Modal>
 
-      <Card className="payroll-details-hero" glass>
-        <div className="crud-header payroll-details-header">
-          <div className="crud-header-copy">
-            <p className="crud-page-badge">Payroll Center</p>
-            <div className="crud-header-title-row">
-              <span className="crud-header-icon"><FileText size={18} /></span>
-              <h1>Komponen Payroll</h1>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Wallet size={16} />
+              <span>Pusat Payroll</span>
             </div>
-            <p>Kelola komponen tunjangan dan potongan payroll karyawan dengan tampilan yang rapi, konsisten, dan mudah dipindai.</p>
-            <p className="payroll-details-status">{statusMessage}</p>
+            <h1 className="hero-title">Komponen Payroll</h1>
+            <p className="hero-subtitle">
+              Kelola komponen tunjangan dan potongan payroll karyawan.
+            </p>
           </div>
-          <Button variant="outline" size="md" onClick={() => void loadPayrollDetails()} disabled={loading}>
-            Segarkan
-          </Button>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => void loadPayrollDetails()} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+            <button className="btn-primary" onClick={() => window.location.href = '/payroll'}>
+              Kelola Payroll
+            </button>
+          </div>
         </div>
       </Card>
 
-      <div className="payroll-details-summary-grid">
+      <div className="summary-grid">
         {componentSummaryCards.map((card) => {
           const Icon = card.icon;
 
           return (
-            <Card key={card.label} className="payroll-details-summary-card" glass>
-              <div className="payroll-details-summary-header">
+            <Card key={card.label} className="metric-card">
+              <div className="metric-header">
                 <div>
-                  <span className="payroll-details-summary-label">{card.label}</span>
-                  <p className="payroll-details-summary-subtitle">{card.subtitle}</p>
+                  <span className="metric-label">{card.label}</span>
+                  <p className="metric-subtitle">{card.subtitle}</p>
                 </div>
-                <span className={`payroll-details-summary-icon payroll-details-summary-icon--${card.tone}`}>
-                  <Icon size={18} />
+                <span className={`metric-icon metric-icon--${card.tone}`}>
+                  <Icon size={22} />
                 </span>
               </div>
-              <div className="payroll-details-summary-value">{card.value}</div>
-              <div className="payroll-details-summary-change">{card.change}</div>
+              <div className="metric-value" style={{ color: card.tone === 'orange' ? '#f59e0b' : card.tone === 'blue' ? '#2563eb' : card.tone === 'green' ? '#10b981' : '#8b5cf6' }}>{card.value}</div>
+              <div className="summary-card-change">{card.change}</div>
             </Card>
           );
         })}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, RefreshCw, Filter } from 'lucide-react';
+import { Plus, RefreshCw, Filter, Wallet } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
 import { 
@@ -15,6 +15,8 @@ import { ReimbursementModal } from '../../features/reimbursement/components/Reim
 import { ReimbursementDetailModal } from '../../features/reimbursement/components/ReimbursementDetailModal';
 import { ReimbursementStats } from '../../features/reimbursement/components/ReimbursementStats';
 import type { ReimbursementItem } from '../../features/reimbursement/types/reimbursement.types';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 import '../../features/reimbursement/Reimbursement.css';
 
 const MyReimbursementsPage: React.FC = () => {
@@ -99,46 +101,55 @@ const MyReimbursementsPage: React.FC = () => {
 
   return (
     <div className="reimbursement-container">
-      <div className="reimb-header">
-        <div className="reimb-title-section">
-          <span className="reimb-badge reimb-badge-ess">ESS Module</span>
-          <h1>My Reimbursements</h1>
-          <p>Track and manage your expense claims.</p>
-        </div>
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <Button variant="ghost" onClick={fetchData} disabled={loading}>
-            <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
-          </Button>
-          <Button variant="primary" onClick={handleOpenCreate}>
-            <Plus size={18} style={{ marginRight: '8px' }} />
-            New Claim
-          </Button>
-        </div>
-      </div>
-
-      {stats && <ReimbursementStats stats={stats} />}
-
-      <Card className="crud-card" glass style={{ padding: '1.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <Filter size={18} color="#64748b" />
-            <select 
-              className="form-control" 
-              style={{ width: '200px', padding: '0.5rem' }}
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-            >
-              <option value="">All Statuses</option>
-              <option value="draft">Draft</option>
-              <option value="submitted">Submitted</option>
-              <option value="approved">Approved</option>
-              <option value="rejected">Rejected</option>
-              <option value="paid">Paid</option>
-            </select>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Wallet size={16} />
+              <span>Layanan Mandiri</span>
+            </div>
+            <h1 className="hero-title">Imbalan Saya</h1>
+            <p className="hero-subtitle">
+              Lacak dan kelola klaim pengeluaran Anda.
+            </p>
           </div>
-          <span style={{ fontSize: '0.875rem', color: '#64748b' }}>
-            Showing {items.length} records
-          </span>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={fetchData} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+            <button className="btn-primary" onClick={handleOpenCreate}>
+              <Plus size={16} />
+              Klaim Baru
+            </button>
+          </div>
+        </div>
+      </Card>
+
+      <div className="white-unified-wrapper">
+        <div className="wuw-header">
+          <div className="wuw-header-top">
+            <div className="wuw-title-area">
+              <h3>Daftar Klaim</h3>
+              <span className="wuw-count-badge">{items.length} klaim</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <Filter size={18} color="#64748b" />
+              <select 
+                className="form-control" 
+                style={{ width: '200px', padding: '0.5rem' }}
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+              >
+                <option value="">Semua Status</option>
+                <option value="draft">Draft</option>
+                <option value="submitted">Submitted</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+                <option value="paid">Paid</option>
+              </select>
+            </div>
+          </div>
         </div>
 
         <ReimbursementTable 
@@ -148,7 +159,7 @@ const MyReimbursementsPage: React.FC = () => {
           onDelete={handleDelete}
           onSubmit={handleSubmit}
         />
-      </Card>
+      </div>
 
       <ReimbursementModal 
         isOpen={isModalOpen}

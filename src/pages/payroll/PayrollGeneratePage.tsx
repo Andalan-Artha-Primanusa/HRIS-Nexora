@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { BarChart3, CalendarDays, CheckCircle2, RefreshCw, Zap, Clock, Wallet, LayoutDashboard } from "lucide-react";
+import { BarChart3, CalendarDays, CheckCircle2, RefreshCw, Zap, Clock, Wallet, LayoutDashboard, FileText, CheckCircle, XCircle } from "lucide-react";
 import { Card } from "@/shared/ui/Card";
-import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
 import {
   generateMonthlyPayroll,
@@ -9,8 +8,9 @@ import {
   toSafeArray,
 } from "@/features/payroll/api/payroll.service";
 import type { PayrollItem } from "@/features/payroll/types/payroll.types";
-import "../admin/AdminCrudPages.css";
-import "./PayrollGeneratePage.css";
+import "@/shared/styles/CrudPage.css";
+import "@/pages/dashboard/overview/OverviewPage.css";
+import "@/pages/payroll/PayrollShared.css";
 
 const asDisplay = (value: unknown) => {
   if (value === null || value === undefined) return "-";
@@ -143,22 +143,30 @@ const PayrollGeneratePage = () => {
         </div>
       </Modal>
 
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">Payroll Operations</span>
-          <h1>Generate Payroll Bulanan</h1>
-          <p>Sistem otomatisasi penggajian karyawan secara massal untuk periode tertentu dengan akurasi data real-time.</p>
+      {/* Header - Same style as Dashboard */}
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Zap size={16} />
+              <span>Operasi Penggajian</span>
+            </div>
+            <h1 className="hero-title">Generate Payroll Bulanan</h1>
+            <p className="hero-subtitle">
+              Sistem otomatisasi penggajian karyawan secara massal untuk periode tertentu dengan akurasi data real-time.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => void loadPayroll()} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Sync Data
+            </button>
+          </div>
         </div>
-        <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={() => void loadPayroll()} disabled={loading}>
-            <RefreshCw className={loading ? "animate-spin" : ""} size={16} />
-            Sync Data
-          </Button>
-        </div>
-      </div>
+      </Card>
 
       {message && message.type === "success" && (
-        <Card className="crud-card payroll-generate-message" glass>
+        <Card className="crud-card payroll-generate-message">
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <CheckCircle2 color="#0ea5e9" size={20} />
             <p>{message.text}</p>
@@ -166,67 +174,74 @@ const PayrollGeneratePage = () => {
         </Card>
       )}
 
-      <div className="summary-grid">
+      {/* Summary Cards - New style */}
+      <div className="leave-requests-wrapper">
         {summaryCards.map((card) => {
           const Icon = card.icon;
-
           return (
-            <Card key={card.label} className="summary-card" glass>
-              <div className="summary-card__header">
+            <div key={card.label} className="leave-summary-card">
+              <div className="leave-summary-header">
                 <div>
-                  <span className="summary-card__label">{card.label}</span>
-                  <p className="summary-card__subtitle">{card.subtitle}</p>
+                  <p className="leave-summary-label">{card.label}</p>
+                  <p className="leave-summary-subtitle">{card.subtitle}</p>
                 </div>
-                <span className={`summary-card__icon summary-card__icon--${card.tone}`}>
-                  <Icon size={20} />
-                </span>
+                <div className={`leave-summary-icon-wrapper ${card.tone === 'blue' ? 'leave-icon-blue' : card.tone === 'green' ? 'leave-icon-green' : card.tone === 'orange' ? 'leave-icon-orange' : 'leave-icon-purple'}`}>
+                  <Icon size={28} />
+                </div>
               </div>
-              <div className={`summary-card__value summary-card__value--${card.tone}`}>{card.value}</div>
-              <div className="summary-card__change">{card.change}</div>
-            </Card>
+              <div className={`leave-summary-value ${card.tone === 'blue' ? 'leave-value-blue' : card.tone === 'green' ? 'leave-value-green' : card.tone === 'orange' ? 'leave-value-orange' : 'leave-value-purple'}`}>{card.value}</div>
+              <p className="leave-summary-trend">{card.change}</p>
+            </div>
           );
         })}
       </div>
 
-      <div className="white-unified-wrapper">
-        <div className="wuw-header">
-          <div className="wuw-header-top">
-            <div className="wuw-title-area">
-              <h3>Generate Payroll</h3>
-              <span className="wuw-count-badge">{items.length} Total</span>
-            </div>
+      {/* Analytics Title Card */}
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <Zap size={24} />
+          </div>
+          <div>
+            <h2 className="analytics-title">Generate Payroll</h2>
+            <p className="analytics-subtitle">{items.length} Total</p>
           </div>
         </div>
+      </Card>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1.5rem', alignItems: 'start' }}>
-          <Card className="crud-card" glass>
-            <h2>Konfigurasi Batch</h2>
-            <div className="crud-form-grid" style={{ gridTemplateColumns: '1fr' }}>
-              <label>
-                <strong>Periode Pembayaran (YYYY-MM)</strong>
-                <input
-                  className="crud-input"
-                  value={period}
-                  onChange={(event) => setPeriod(event.target.value)}
-                  placeholder="Contoh: 2026-04"
-                />
-              </label>
-            </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1.5rem', alignItems: 'start' }}>
+        <Card className="crud-table-card">
+          <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem', fontWeight: '700', color: '#1e293b' }}>Konfigurasi Batch</h3>
+          <div style={{ display: 'grid', gap: '1rem' }}>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <strong style={{ fontSize: '0.85rem', color: '#64748b' }}>Periode Pembayaran (YYYY-MM)</strong>
+              <input
+                style={{ padding: '0.75rem 1rem', borderRadius: '10px', border: '1px solid #e2e8f0', fontSize: '0.95rem', fontFamily: "'Poppins', sans-serif" }}
+                value={period}
+                onChange={(event) => setPeriod(event.target.value)}
+                placeholder="Contoh: 2026-04"
+              />
+            </label>
+          </div>
 
-            <div className="crud-actions" style={{ marginTop: '2rem' }}>
-              <Button variant="primary" size="lg" onClick={() => void generateMonthly()} disabled={loading} style={{ width: '100%', borderRadius: '12px', height: '52px', fontWeight: '700' }}>
-                {loading ? "Processing..." : "Generate Payroll Sekarang"}
-              </Button>
-            </div>
-            <p style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#94a3b8', textAlign: 'center' }}>
-              Tindakan ini akan mengalkulasi tunjangan, bonus, dan potongan untuk semua karyawan aktif.
-            </p>
-          </Card>
+          <div style={{ marginTop: '1.5rem' }}>
+            <button 
+              onClick={() => void generateMonthly()} 
+              disabled={loading}
+              style={{ width: '100%', padding: '0.875rem 1.5rem', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', color: '#fff', fontSize: '0.95rem', fontWeight: '700', fontFamily: "'Poppins', sans-serif", cursor: 'pointer' }}
+            >
+              {loading ? "Processing..." : "Generate Payroll Sekarang"}
+            </button>
+          </div>
+          <p style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#94a3b8', textAlign: 'center' }}>
+            Tindakan ini akan mengalkulasi tunjangan, bonus, dan potongan untuk semua karyawan aktif.
+          </p>
+        </Card>
 
-          <Card className="crud-card" glass>
-            <h2>Daftar Payroll Terbaru</h2>
-            <div className="crud-table-wrap" style={{ border: 'none', boxShadow: 'none' }}>
-              <table className="crud-table">
+        <Card className="crud-table-card">
+          <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem', fontWeight: '700', color: '#1e293b' }}>Daftar Payroll Terbaru</h3>
+          <div className="crud-table-wrap" style={{ border: 'none', boxShadow: 'none' }}>
+            <table className="crud-table">
                 <thead>
                   <tr>
                     {columns.map((column) => (
@@ -243,7 +258,7 @@ const PayrollGeneratePage = () => {
                         {column === "total_deduction" && "Potongan"}
                         {column === "take_home_pay" && "THP"}
                         {column === "status" && "Status"}
-                        {!["id", "employee_id", "period", "basic_salary", "allowance", "bonus", "bpjs_kesehatan", "bpjs_ketenagakerjaan", "pph21", "total_deduction", "take_home_pay", "status"].includes(column) && column}
+                        {!["id", "employee_id", "period", "basic_salary", "allowance", "bonus", "bpjs_kesehatan", "bpjs_ketenagakerjaan", "pph21", "total_deduction", "take_home_pay", "status"].includes(column) ? column : null}
                       </th>
                     ))}
                   </tr>
@@ -268,7 +283,7 @@ const PayrollGeneratePage = () => {
                               ) : column === 'period' ? (
                                 <div style={{ whiteSpace: 'nowrap' }}>
                                   {record[column]
-                                    ? new Date(String(record[column]) + '-01').toLocaleDateString('id-ID', {
+                                    ? new Date(String(record[column]) + "-01").toLocaleDateString('id-ID', {
                                         month: 'short',
                                         year: 'numeric',
                                       })
@@ -312,7 +327,6 @@ const PayrollGeneratePage = () => {
               </p>
             )}
           </Card>
-        </div>
       </div>
     </div>
   );

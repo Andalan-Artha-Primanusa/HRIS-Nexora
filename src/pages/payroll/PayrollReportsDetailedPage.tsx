@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Search, RefreshCw } from 'lucide-react';
+import { Search, RefreshCw, FileText, DollarSign, Receipt, Users } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { Badge } from '@/shared/ui/Badge';
 import { payrollService, toSafeArray } from '@/features/payroll/api/payroll.service';
 import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 
 const formatCurrency = (value: number | string) => {
   const num = typeof value === 'string' ? parseFloat(value) : value;
@@ -51,61 +53,71 @@ const PayrollReportsDetailedPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">Financial Reports</span>
-          <h1>Laporan Detail Payroll</h1>
-          <p>Laporan komprehensif seluruh komponen penghasilan dan potongan karyawan.</p>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Receipt size={16} />
+              <span>Pusat Payroll</span>
+            </div>
+            <h1 className="hero-title">Laporan Detail Payroll</h1>
+            <p className="hero-subtitle">
+              Laporan komprehensif seluruh komponen penghasilan dan potongan karyawan.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => void loadData()} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+            <button className="btn-primary" onClick={() => window.location.href = '/payroll'}>
+              Kelola Payroll
+            </button>
+          </div>
         </div>
-        <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={() => void loadData()} disabled={loading}>
-            <RefreshCw size={16} />
-            Refresh
-          </Button>
-        </div>
-      </div>
+      </Card>
 
       <div className="summary-grid">
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
+        <Card className="metric-card">
+          <div className="metric-header">
             <div>
-              <span className="summary-card__label">Total Take Home Pay</span>
-              <p className="summary-card__subtitle">Net Disbursement</p>
+              <span className="metric-label">Total Take Home Pay</span>
+              <p className="metric-subtitle">Net Disbursement</p>
             </div>
-            <span className="summary-card__icon summary-card__icon--green">
-              <FileText size={20} />
+            <span className="metric-icon metric-icon--green">
+              <DollarSign size={22} />
             </span>
           </div>
-          <div className="summary-card__value summary-card__value--green">{formatCurrency(totals.thp)}</div>
-          <div className="summary-card__change">Total THP</div>
+          <div className="metric-value" style={{ color: '#10b981' }}>{formatCurrency(totals.thp)}</div>
+          <div className="summary-card-change">Total THP</div>
         </Card>
 
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
+        <Card className="metric-card">
+          <div className="metric-header">
             <div>
-              <span className="summary-card__label">Total Potongan</span>
-              <p className="summary-card__subtitle">Total Deductions</p>
+              <span className="metric-label">Total Potongan</span>
+              <p className="metric-subtitle">Total Deductions</p>
             </div>
-            <span className="summary-card__icon summary-card__icon--red">
-              <FileText size={20} />
+            <span className="metric-icon metric-icon--red">
+              <Receipt size={22} />
             </span>
           </div>
-          <div className="summary-card__value summary-card__value--red">{formatCurrency(totals.deductions)}</div>
-          <div className="summary-card__change">Potongan seluruh karyawan</div>
+          <div className="metric-value" style={{ color: '#ef4444' }}>{formatCurrency(totals.deductions)}</div>
+          <div className="summary-card-change">Potongan seluruh karyawan</div>
         </Card>
 
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
+        <Card className="metric-card">
+          <div className="metric-header">
             <div>
-              <span className="summary-card__label">Jumlah Entri</span>
-              <p className="summary-card__subtitle">Processed</p>
+              <span className="metric-label">Jumlah Entri</span>
+              <p className="metric-subtitle">Processed</p>
             </div>
-            <span className="summary-card__icon summary-card__icon--blue">
-              <FileText size={20} />
+            <span className="metric-icon metric-icon--blue">
+              <Users size={22} />
             </span>
           </div>
-          <div className="summary-card__value summary-card__value--blue">{totals.records}</div>
-          <div className="summary-card__change">Records</div>
+          <div className="metric-value" style={{ color: '#2563eb' }}>{totals.records}</div>
+          <div className="summary-card-change">Total records</div>
         </Card>
       </div>
 

@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/shared/ui/Card";
-import { Button } from "@/shared/ui/Button";
 import { Alert } from "@/shared/ui/Alert";
 import { getLeaveCalendar } from "@/features/leave/api/leave.service";
 
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { BarChart3, ChevronLeft, ChevronRight, CircleCheckBig, CircleX, Clock3 } from "lucide-react";
+import { BarChart3, ChevronLeft, ChevronRight, CircleCheckBig, CircleX, Clock3, Calendar, RefreshCw } from "lucide-react";
+import "@/shared/styles/CrudPage.css";
+import "@/pages/dashboard/overview/OverviewPage.css";
+import "./LeaveShared.css";
 import "./LeavePages.css";
 
 interface CalendarEvent {
@@ -155,16 +157,25 @@ const LeaveCalendarPage = () => {
   ];
 
   return (
-    <div className="leave-page">
-      <Card className="leave-hero-card" glass>
-        <div className="leave-hero-copy">
-          <p className="leave-badge">Leave Center</p>
-          <h1 className="leave-title">Leave Calendar & Analytics</h1>
-          <p className="leave-subtitle">Visual calendar view of leave requests with consistent analytics and cleaner readability.</p>
+    <div className="crud-page">
+      {/* Header - Same style as Dashboard */}
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Calendar size={16} />
+              <span>Pusat Kalender</span>
+            </div>
+            <h1 className="hero-title">Kalender Cuti</h1>
+            <p className="hero-subtitle">Visual kalender pengajuan cuti dengan analitik yang konsisten.</p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => void loadCalendar()}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+          </div>
         </div>
-        <Button variant="primary" size="md" onClick={() => void loadCalendar()} disabled={loading}>
-          {loading ? 'Loading...' : 'Refresh Calendar'}
-        </Button>
       </Card>
 
       {alertMessage && (
@@ -176,31 +187,81 @@ const LeaveCalendarPage = () => {
         />
       )}
 
-      <div className="leave-summary-grid">
-        {leaveSummaryCards.map((card) => {
-          const Icon = card.icon;
+      {/* Summary Cards */}
+      <div className="leave-requests-wrapper">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Total Pengajuan</p>
+              <p className="leave-summary-subtitle">Semua data cuti</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-blue">
+              <BarChart3 size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-blue">{stats.total}</div>
+          <p className="leave-summary-trend">Ringkasan keseluruhan</p>
+        </div>
 
-          return (
-            <Card key={card.label} className="leave-summary-card" glass>
-              <div className="leave-summary-header">
-                <div>
-                  <span className="leave-summary-label">{card.label}</span>
-                  <p className="leave-summary-subtitle">{card.subtitle}</p>
-                </div>
-                <span className={`leave-summary-icon leave-summary-icon--${card.tone}`}>
-                  <Icon size={18} />
-                </span>
-              </div>
-              <div className={`leave-summary-value leave-summary-value--${card.tone}`}>{card.value}</div>
-              <div className="leave-summary-change">{card.change}</div>
-            </Card>
-          );
-        })}
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Menunggu</p>
+              <p className="leave-summary-subtitle">Menunggu persetujuan</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-orange">
+              <Clock3 size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-orange">{stats.pending}</div>
+          <p className="leave-summary-trend">Perlu tindakan approval</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Disetujui</p>
+              <p className="leave-summary-subtitle">Pengajuan disetujui</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-green">
+              <CircleCheckBig size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-green">{stats.approved}</div>
+          <p className="leave-summary-trend">Status final berhasil</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Ditolak</p>
+              <p className="leave-summary-subtitle">Pengajuan ditolak</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-red">
+              <CircleX size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-red">{stats.rejected}</div>
+          <p className="leave-summary-trend">Perlu revisi</p>
+        </div>
       </div>
 
-      <div className="calendar-section">
+      {/* Analytics Title Card */}
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <Calendar size={24} />
+          </div>
+          <div>
+            <h2 className="analytics-title">Kalender Cuti</h2>
+            <p className="analytics-subtitle">Visual kalender pengajuan cuti</p>
+          </div>
+        </div>
+      </Card>
+
+      <div className="crud-table-section">
         {/* Calendar Grid */}
-        <Card className="calendar-card" glass>
+        <Card className="crud-table-card">
           <div className="calendar-header">
             <button 
               className="calendar-nav-btn"
@@ -262,15 +323,15 @@ const LeaveCalendarPage = () => {
           <div className="calendar-legend">
             <div className="legend-item">
               <div className="legend-color approved"></div>
-              <span>Approved</span>
+              <span>Disetujui</span>
             </div>
             <div className="legend-item">
               <div className="legend-color pending"></div>
-              <span>Pending</span>
+              <span>Menunggu</span>
             </div>
             <div className="legend-item">
               <div className="legend-color rejected"></div>
-              <span>Rejected</span>
+              <span>Ditolak</span>
             </div>
           </div>
         </Card>
@@ -279,7 +340,7 @@ const LeaveCalendarPage = () => {
         <div className="calendar-charts-grid">
           {/* Leave Types Pie Chart */}
           <Card className="chart-card" glass>
-            <h3 className="chart-title">Leave Types Distribution</h3>
+            <h3 className="chart-title">Distribusi Jenis Cuti</h3>
             <ResponsiveContainer width="100%" height={280}>
               <PieChart>
                 <Tooltip 
@@ -309,7 +370,7 @@ const LeaveCalendarPage = () => {
 
           {/* Status Overview Bar Chart */}
           <Card className="chart-card" glass>
-            <h3 className="chart-title">Status Overview</h3>
+            <h3 className="chart-title">Ringkasan Status</h3>
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={[{ name: 'Requests', approved: stats.approved, pending: stats.pending, rejected: stats.rejected }]}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(37, 99, 235, 0.1)" />
@@ -331,7 +392,7 @@ const LeaveCalendarPage = () => {
 
           {/* Status by Type */}
           <Card className="chart-card full-width" glass>
-            <h3 className="chart-title">Status Breakdown by Leave Type</h3>
+            <h3 className="chart-title">Detail Status per Jenis Cuti</h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={stats.statusByType}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(37, 99, 235, 0.1)" />

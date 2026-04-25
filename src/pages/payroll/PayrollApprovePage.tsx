@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
-import { BarChart3, CheckCircle2, Clock3, CreditCard, ShieldCheck } from "lucide-react";
+import { BarChart3, CheckCircle2, Clock3, CreditCard, ShieldCheck, RefreshCw, CheckCircle, Eye, FileCheck } from "lucide-react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
+import { PayrollStatusBadge } from "@/shared/ui/PayrollStatusBadge";
 import { payrollService, toSafeArray } from "@/features/payroll/api/payroll.service";
 import { getAllEmployees } from "@/features/employee/api/employee.service";
 import type { PayrollItem } from "@/features/payroll/types/payroll.types";
 import type { EmployeeItem } from "@/features/employee/types/employee.types";
-import "../admin/AdminCrudPages.css";
+import "@/shared/styles/CrudPage.css";
+import "@/pages/dashboard/overview/OverviewPage.css";
+import "@/pages/payroll/PayrollShared.css";
 import "./PayrollApprovePage.css";
 
 const PayrollApprovePage = () => {
@@ -181,45 +184,53 @@ const PayrollApprovePage = () => {
         size="md"
       >
         <div style={{ padding: "16px 0", whiteSpace: "pre-wrap" }}>
-          <p style={{ margin: 0, lineHeight: "1.6", color: "var(--color-text-primary)" }}>
+          <p style={{ margin: 0, lineHeight: "1.6", color: "#1e293b" }}>
             {errorModal.message}
           </p>
         </div>
       </Modal>
 
-      <Card className="payroll-approve-hero" glass>
-        <div className="crud-header payroll-approve-header">
-          <div className="crud-header-copy">
-            <p className="crud-page-badge">Payroll Center</p>
-            <div className="crud-header-title-row">
-              <span className="crud-header-icon"><ShieldCheck size={18} /></span>
-              <h1>Persetujuan Payroll</h1>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <ShieldCheck size={16} />
+              <span>Pusat Payroll</span>
             </div>
-            <p>Setujui data payroll karyawan sebelum diproses untuk pembayaran dengan tampilan yang rapi, konsisten, dan mudah dipindai.</p>
+            <h1 className="hero-title">Persetujuan Payroll</h1>
+            <p className="hero-subtitle">
+              Setujui data payroll karyawan sebelum diproses untuk pembayaran.
+            </p>
           </div>
-          <Button variant="outline" size="md" onClick={() => void loadData()} disabled={loading}>
-            Segarkan Data
-          </Button>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => void loadData()} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+            <button className="btn-primary" onClick={() => window.location.href = '/payroll'}>
+              Kelola Payroll
+            </button>
+          </div>
         </div>
       </Card>
 
-      <div className="payroll-approve-summary-grid">
+      <div className="summary-grid">
         {summaryCards.map((card) => {
           const Icon = card.icon;
 
           return (
-            <Card key={card.label} className="payroll-approve-summary-card" glass>
-              <div className="payroll-approve-summary-header">
+            <Card key={card.label} className="metric-card">
+              <div className="metric-header">
                 <div>
-                  <span className="payroll-approve-summary-label">{card.label}</span>
-                  <p className="payroll-approve-summary-subtitle">{card.subtitle}</p>
+                  <span className="metric-label">{card.label}</span>
+                  <p className="metric-subtitle">{card.subtitle}</p>
                 </div>
-                <span className={`payroll-approve-summary-icon payroll-approve-summary-icon--${card.tone}`}>
-                  <Icon size={18} />
+                <span className={`metric-icon metric-icon--${card.tone}`}>
+                  <Icon size={22} />
                 </span>
               </div>
-              <div className="payroll-approve-summary-value">{card.value}</div>
-              <div className="payroll-approve-summary-change">{card.change}</div>
+              <div className="metric-value" style={{ color: card.tone === 'orange' ? '#f59e0b' : card.tone === 'blue' ? '#2563eb' : card.tone === 'green' ? '#10b981' : '#8b5cf6' }}>{card.value}</div>
+              <div className="summary-card-change">{card.change}</div>
             </Card>
           );
         })}
@@ -227,69 +238,92 @@ const PayrollApprovePage = () => {
 
       {/* Success Message */}
       {message && message.type === "success" && (
-        <Card className="crud-card payroll-approve-message" glass>
-          <p>
-            {message.text}
-          </p>
+        <Card className="message-card">
+          <CheckCircle size={20} style={{ color: '#10b981', marginRight: '8px' }} />
+          <span>{message.text}</span>
         </Card>
       )}
 
-      {/* Payroll Yang Perlu Disetujui */}
-      <Card className="crud-card payroll-approve-card" glass>
-        <h2>Menunggu Persetujuan ({pendingPayrolls.length})</h2>
-        {pendingPayrolls.length > 0 ? (
-          <div className="crud-table-wrap">
-            <table className="crud-table payroll-approve-table">
-              <thead>
-                <tr>
-                  <th>Karyawan</th>
-                  <th>Periode</th>
-                  <th className="text-right">Gaji Pokok</th>
-                  <th className="text-right">Gaji Bersih</th>
-                  <th className="text-center">Status</th>
-                  <th className="text-center">Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {pendingPayrolls.map((p) => (
-                  <tr
-                    key={p.id}
-                    className={selectedPayrollId === String(p.id) ? "is-selected" : ""}
-                  >
-                    <td>
-                      <strong>{getEmployeeName(p.employee_id)}</strong>
-                    </td>
-                    <td>{p.period}</td>
-                    <td className="text-right">
-                      Rp {Number(p.basic_salary || 0).toLocaleString("id-ID")}
-                    </td>
-                    <td className="text-right payroll-approve-total">
-                      Rp {Number(p.take_home_pay || p.net_salary || 0).toLocaleString("id-ID")}
-                    </td>
-                    <td className="text-center">
-                      <span className="payroll-status-pill" style={{ backgroundColor: getStatusColor(p.status) }}>
-                        {getStatusLabel(p.status)}
-                      </span>
-                    </td>
-                    <td className="text-center">
-                      <button
-                        type="button"
-                        onClick={() => handleSelectPayroll(p)}
-                        className={`action-btn ${selectedPayrollId === String(p.id) ? "action-btn-edit" : ""}`}
-                        disabled={loading}
-                        style={{ background: selectedPayrollId === String(p.id) ? '#eff6ff' : '#f1f5f9', color: selectedPayrollId === String(p.id) ? '#2563eb' : '#64748b' }}
-                      >
-                        Pilih
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <Clock3 size={24} />
           </div>
-        ) : (
-            <p className="payroll-approve-empty">Tidak ada payroll yang menunggu persetujuan</p>
-        )}
+          <div>
+            <h2 className="analytics-title">Menunggu Persetujuan</h2>
+            <p className="analytics-subtitle">{pendingPayrolls.length} payroll</p>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="crud-table-card">
+        <div className="crud-table-wrap">
+          <table className="crud-table">
+            <thead>
+              <tr>
+                <th>Karyawan</th>
+                <th>Periode</th>
+                <th className="text-right">Gaji Pokok</th>
+                <th className="text-right">Gaji Bersih</th>
+                <th className="text-center">Status</th>
+                <th className="text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pendingPayrolls.map((p) => (
+                <tr
+                  key={p.id}
+                  className={selectedPayrollId === String(p.id) ? "is-selected" : ""}
+                >
+                  <td className="crud-table-name">
+                      <div className="crud-table-avatar">
+                        {getEmployeeName(p.employee_id).charAt(0).toUpperCase()}
+                      </div>
+                      <span>{getEmployeeName(p.employee_id)}</span>
+                    </td>
+                    <td><span className="crud-table-tag">{p.period}</span></td>
+                    <td className="crud-table-amount">
+                      Rp {Number(p.basic_salary || 0).toLocaleString("id-ID")}
+                      <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 'normal', display: 'block' }}>Basic</span>
+                    </td>
+                    <td className="crud-table-amount crud-table-amount-green">
+                      Rp {Number(p.take_home_pay || p.net_salary || 0).toLocaleString("id-ID")}
+                      <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 'normal', display: 'block' }}>Net</span>
+                    </td>
+                    <td>
+                      <PayrollStatusBadge status={p.status || 'pending'} size="sm" />
+                    </td>
+                    <td className="text-center">
+                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                        <button
+                          type="button"
+                          onClick={() => handleSelectPayroll(p)}
+                          className={selectedPayrollId === String(p.id) ? "action-btn action-btn-edit" : "action-btn"}
+                          disabled={loading}
+                          title="Pilih untuk approve"
+                        >
+                          <Eye size={14} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedPayroll(p);
+                            setSelectedPayrollId(String(p.id));
+                          }}
+                          className="action-btn action-btn-edit"
+                          disabled={loading}
+                          title="Approve payroll"
+                          style={{ background: '#10b981', color: '#fff' }}
+                        >
+                          <FileCheck size={14} />
+                        </button>
+                      </div>
+                    </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </Card>
 
       {/* Approval Modal */}
@@ -367,39 +401,54 @@ const PayrollApprovePage = () => {
 
       {/* Payroll Sudah Disetujui */}
       {otherPayrolls.length > 0 && (
-          <Card className="crud-card payroll-approve-card payroll-approve-card--approved" glass>
-            <h2>Telah Disetujui ({otherPayrolls.length})</h2>
-            <div className="crud-table-wrap payroll-approve-table-wrap">
-              <table className="crud-table payroll-approve-table payroll-approve-table--compact">
+        <>
+          <Card className="analytics-title-card">
+            <div className="analytics-title-inner">
+              <div className="analytics-icon">
+                <CheckCircle2 size={24} />
+              </div>
+              <div>
+                <h2 className="analytics-title">Telah Disetujui</h2>
+                <p className="analytics-subtitle">{otherPayrolls.length} payroll</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="crud-table-card">
+            <div className="crud-table-wrap">
+              <table className="crud-table">
                 <thead>
-                <tr>
+                  <tr>
                     <th>Karyawan</th>
                     <th>Periode</th>
                     <th className="text-right">Gaji Bersih</th>
                     <th className="text-center">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {otherPayrolls.slice(0, 5).map((p) => (
-                    <tr key={p.id}>
-                      <td>
-                      {getEmployeeName(p.employee_id)}
-                    </td>
-                      <td>{p.period}</td>
-                      <td className="text-right">
-                      Rp {Number(p.take_home_pay || p.net_salary || 0).toLocaleString("id-ID")}
-                    </td>
-                      <td className="text-center">
-                        <span className="payroll-status-pill payroll-status-pill--compact" style={{ backgroundColor: getStatusColor(p.status) }}>
-                        {getStatusLabel(p.status)}
-                      </span>
-                    </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
+                </thead>
+                <tbody>
+                  {otherPayrolls.slice(0, 5).map((p) => (
+                    <tr key={p.id}>
+<td className="crud-table-name">
+                      <div className="crud-table-avatar">
+                        {getEmployeeName(p.employee_id).charAt(0).toUpperCase()}
+                      </div>
+                      <span>{getEmployeeName(p.employee_id)}</span>
+                    </td>
+                    <td><span className="crud-table-tag">{p.period}</span></td>
+                    <td className="crud-table-amount crud-table-amount-green">
+                      Rp {Number(p.take_home_pay || p.net_salary || 0).toLocaleString("id-ID")}
+                      <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 'normal', display: 'block' }}>Net</span>
+                    </td>
+<td>
+                      <PayrollStatusBadge status={p.status || 'approved'} size="sm" />
+                    </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </>
       )}
     </div>
   );

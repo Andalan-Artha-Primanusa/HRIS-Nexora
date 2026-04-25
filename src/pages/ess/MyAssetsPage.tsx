@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Briefcase, Calendar, ShieldCheck, Info } from 'lucide-react';
+import { Box, Briefcase, Calendar, ShieldCheck, Info, Package, RefreshCw } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { assetService } from '@/features/assets/api/asset.service';
 import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 
 const MyAssetsPage: React.FC = () => {
   const [assets, setAssets] = useState<any[]>([]);
@@ -41,13 +43,26 @@ const MyAssetsPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <div className="crud-header">
-        <div>
-          <span className="reimb-badge reimb-badge-ess">Employee Self Service</span>
-          <h1>My Assets</h1>
-          <p>List of company property currently assigned to you.</p>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Package size={16} />
+              <span>Employee Self Service</span>
+            </div>
+            <h1 className="hero-title">Aset Saya</h1>
+            <p className="hero-subtitle">
+              Daftar properti perusahaan yang saat ini ditugaskan kepada Anda.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={fetchData} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+          </div>
         </div>
-      </div>
+      </Card>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem' }}>
         {loading ? (

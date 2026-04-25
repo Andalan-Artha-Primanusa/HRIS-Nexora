@@ -16,7 +16,6 @@ import {
 } from "recharts";
 import { Link } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
-import { Button } from "@/shared/ui/Button";
 import { Badge } from "@/shared/ui/Badge";
 import { payrollService, toSafeArray } from "@/features/payroll/api/payroll.service";
 import { getAllEmployees } from "@/features/employee/api/employee.service";
@@ -34,7 +33,10 @@ import {
   ShieldCheck,
   TrendingUp,
   RefreshCw,
+  Wallet,
 } from "lucide-react";
+import "@/shared/styles/CrudPage.css";
+import "@/pages/dashboard/overview/OverviewPage.css";
 import "./PayrollDashboard.css";
 
 const PayrollDashboard: React.FC = () => {
@@ -229,109 +231,116 @@ const PayrollDashboard: React.FC = () => {
   };
 
   return (
-    <div className="payroll-dashboard">
-      <Card className="payroll-hero-card" glass>
-        <div className="payroll-hero-copy">
-          <p className="payroll-badge">Payroll Operations</p>
-          <h1 className="payroll-title">Dashboard Penggajian</h1>
-          <p className="payroll-subtitle">
-            Pusat manajemen payroll perusahaan. Lacak tren, generate data bulanan, 
-            dan kelola slip gaji karyawan secara efisien dalam satu dasbor terpadu.
-          </p>
-        </div>
-        <div className="payroll-actions">
-          <Button variant="ghost" size="md" onClick={() => void loadPayrollData()} disabled={loading}>
-            <RefreshCw size={18} style={{ marginRight: "8px" }} />
-            Segarkan
-          </Button>
-          <Button variant="primary" size="md" onClick={() => void handleGenerateMonthly()} disabled={loading}>
-            Generate Payroll
-          </Button>
+    <div className="crud-page">
+      {/* Header - Same style as Dashboard */}
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Wallet size={16} />
+              <span>Operasi Penggajian</span>
+            </div>
+            <h1 className="hero-title">Dashboard Penggajian</h1>
+            <p className="hero-subtitle">
+              Pusat manajemen payroll perusahaan. Lacak tren, generate data bulanan, 
+              dan kelola slip gaji karyawan secara efisien dalam satu dasbor terpadu.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => void loadPayrollData()} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+          </div>
         </div>
       </Card>
 
-      <div className="payroll-kpi-grid">
-        <Card className="payroll-kpi-card payroll-accent-blue" glass>
-          <div className="kpi-header">
+      {/* Summary Cards */}
+      <div className="leave-requests-wrapper">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
             <div>
-              <span className="kpi-label">Total Record</span>
-              <div className="kpi-value">{totalPayroll}</div>
+              <p className="leave-summary-label">Total Record</p>
+              <p className="leave-summary-subtitle">Seluruh riwayat payroll</p>
             </div>
-            <span className="kpi-icon"><FileText size={20} /></span>
+            <div className="leave-summary-icon-wrapper leave-icon-blue">
+              <FileText size={28} />
+            </div>
           </div>
-          <Badge variant="info">Seluruh Riwayat</Badge>
-        </Card>
+          <div className="leave-summary-value leave-value-blue">{totalPayroll}</div>
+          <p className="leave-summary-trend">Seluruh Riwayat</p>
+        </div>
 
-        <Card className="payroll-kpi-card payroll-accent-green" glass>
-          <div className="kpi-header">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
             <div>
-              <span className="kpi-label">Selesai Diproses</span>
-              <div className="kpi-value">{totalProcessed}</div>
+              <p className="leave-summary-label">Selesai Diproses</p>
+              <p className="leave-summary-subtitle">Status paid/approved</p>
             </div>
-            <span className="kpi-icon"><CheckCircle2 size={20} /></span>
+            <div className="leave-summary-icon-wrapper leave-icon-green">
+              <CheckCircle2 size={28} />
+            </div>
           </div>
-          <Badge variant="success">
-            {totalPayroll > 0 ? `${((totalProcessed / totalPayroll) * 100).toFixed(1)}%` : "0%"} Tuntas
-          </Badge>
-        </Card>
+          <div className="leave-summary-value leave-value-green">{totalProcessed}</div>
+          <p className="leave-summary-trend">{totalPayroll > 0 ? `${((totalProcessed / totalPayroll) * 100).toFixed(1)}%` : "0%"} Tuntas</p>
+        </div>
 
-        <Card className="payroll-kpi-card payroll-accent-orange" glass>
-          <div className="kpi-header">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
             <div>
-              <span className="kpi-label">Pending / Draft</span>
-              <div className="kpi-value">{totalPending}</div>
+              <p className="leave-summary-label">Menunggu</p>
+              <p className="leave-summary-subtitle">Status pending/draft</p>
             </div>
-            <span className="kpi-icon"><Clock3 size={20} /></span>
+            <div className="leave-summary-icon-wrapper leave-icon-orange">
+              <Clock3 size={28} />
+            </div>
           </div>
-          <Badge variant="warning">Butuh Review</Badge>
-        </Card>
+          <div className="leave-summary-value leave-value-orange">{totalPending}</div>
+          <p className="leave-summary-trend">Butuh Review</p>
+        </div>
 
-        <Card className="payroll-kpi-card payroll-accent-purple" glass>
-          <div className="kpi-header">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
             <div>
-              <span className="kpi-label">Rata-rata / Bulan</span>
-              <div className="kpi-value">{averagePayroll}</div>
+              <p className="leave-summary-label">Rata-rata / Bulan</p>
+              <p className="leave-summary-subtitle">Estimasi volume</p>
             </div>
-            <span className="kpi-icon"><TrendingUp size={20} /></span>
+            <div className="leave-summary-icon-wrapper leave-icon-purple">
+              <TrendingUp size={28} />
+            </div>
           </div>
-          <Badge variant="info">Estimasi Volume</Badge>
-        </Card>
+          <div className="leave-summary-value leave-value-purple">{averagePayroll}</div>
+          <p className="leave-summary-trend">Estimasi Volume</p>
+        </div>
       </div>
 
-      <div className="payroll-charts-grid">
-        <Card className="payroll-chart-card" glass>
-          <h2 className="payroll-section-title">Tren Pemrosesan</h2>
-          <p className="chart-subtitle">Status payroll (Paid vs Pending) per periode</p>
-          {monthlyTrendData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={monthlyTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorProcessed" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="colorPending" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
-                <Tooltip {...tooltipStyle} />
-                <Legend />
-                <Area type="monotone" dataKey="processed" stackId="1" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorProcessed)" name="Diproses" />
-                <Area type="monotone" dataKey="pending" stackId="1" stroke="#f59e0b" strokeWidth={2} fillOpacity={1} fill="url(#colorPending)" name="Menunggu" />
-              </AreaChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="chart-empty">Belum ada data periode</div>
-          )}
-        </Card>
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <TrendingUp size={24} />
+          </div>
+          <div>
+            <h2 className="analytics-title">Tren Pemrosesan</h2>
+            <p className="analytics-subtitle">Status payroll per periode</p>
+          </div>
+        </div>
+      </Card>
 
-        <Card className="payroll-chart-card" glass>
-          <h2 className="payroll-section-title">Status Saat Ini</h2>
-          <p className="chart-subtitle">Distribusi status dari semua catatan payroll</p>
+<Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <ReceiptText size={24} />
+          </div>
+          <div>
+            <h2 className="analytics-title">Status Saat Ini</h2>
+            <p className="analytics-subtitle">Distribusi status payroll</p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Charts Grid */}
+      <div className="payroll-charts-grid">
+        <Card className="crud-table-card">
           {payrollStatusData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
@@ -348,96 +357,26 @@ const PayrollDashboard: React.FC = () => {
             <div className="chart-empty">Belum ada data status</div>
           )}
         </Card>
+
+        <Card className="crud-table-card">
+          <h3 className="payroll-section-title">Distribusi Gaji per Departemen</h3>
+          <p className="chart-subtitle">Total kompensasi (Tunjangan + Bonus) per departemen</p>
+          {departmentPayrollData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={320}>
+              <BarChart data={departmentPayrollData} margin={{ top: 10, right: 30, left: 20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#64748b" }} tickFormatter={(v) => `Rp ${v/1000000}jt`} />
+                <Tooltip {...tooltipStyle} formatter={(v: any) => formatCurrency(Number(v))} />
+                <Bar dataKey="amount" fill="#3b82f6" radius={[8, 8, 0, 0]} name="Total Payroll" />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="chart-empty">Data departemen tidak ditemukan</div>
+          )}
+        </Card>
       </div>
 
-      <Card className="payroll-chart-card payroll-full-width-chart" glass>
-        <h2 className="payroll-section-title">Distribusi Gaji per Departemen</h2>
-        <p className="chart-subtitle">Total kompensasi (Tunjangan + Bonus) per departemen</p>
-        {departmentPayrollData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={320}>
-            <BarChart data={departmentPayrollData} margin={{ top: 10, right: 30, left: 20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#64748b" }} tickFormatter={(v) => `Rp ${v/1000000}jt`} />
-              <Tooltip {...tooltipStyle} formatter={(v: any) => formatCurrency(Number(v))} />
-              <Bar dataKey="amount" fill="#3b82f6" radius={[8, 8, 0, 0]} name="Total Payroll" />
-            </BarChart>
-          </ResponsiveContainer>
-        ) : (
-          <div className="chart-empty">Data departemen tidak ditemukan</div>
-        )}
-      </Card>
-
-      <Card className="payroll-quick-actions" glass>
-        <h2 className="payroll-section-title">Aksi Cepat</h2>
-        <p className="chart-subtitle">Akses langsung ke fungsi operasional payroll</p>
-        <div className="payroll-action-links">
-          {[
-            { to: "/payroll/list", label: "Daftar Payroll", sub: "Lihat semua riwayat", icon: BarChart3, accent: "blue" },
-            { to: "/payroll/crud", label: "Kelola Payroll", sub: "Update data manual", icon: PencilLine, accent: "green" },
-            { to: "/payroll/approve", label: "Persetujuan", sub: "Review & approve", icon: ShieldCheck, accent: "sky" },
-            { to: "/payroll/payment", label: "Pembayaran", sub: "Proses transaksi", icon: CreditCard, accent: "green" },
-            { to: "/payroll/component/allowance", label: "Komponen Gaji", sub: "Atur tunjangan", icon: ReceiptText, accent: "orange" },
-            { to: "/payroll/details", label: "Analitik Komponen", sub: "Detail variabel gaji", icon: LayoutDashboard, accent: "purple" },
-          ].map((item) => {
-            const Icon = item.icon;
-            return (
-              <Link key={item.to} to={item.to} className={`payroll-action-link payroll-accent-${item.accent}`}>
-                <span className="action-icon"><Icon size={24} /></span>
-                <div className="action-content">
-                  <h4>{item.label}</h4>
-                  <p>{item.sub}</p>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      </Card>
-
-      {payrollItems.length > 0 && (
-        <Card className="payroll-table-preview" glass>
-          <div className="payroll-table-header">
-            <div>
-              <h2 className="payroll-section-title">Catatan Terbaru</h2>
-              <p className="chart-subtitle">Ringkasan entri payroll terakhir</p>
-            </div>
-            <Link to="/payroll/list" className="view-all-link">Lihat Semua →</Link>
-          </div>
-          <div className="ui-table-overflow">
-            <table className="payroll-table">
-              <thead>
-                <tr>
-                  <th>Karyawan</th>
-                  <th>Periode</th>
-                  <th>Tunjangan</th>
-                  <th>Bonus</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {payrollItems.slice(0, 5).map((item: any, idx) => {
-                  const emp = employees.find((e: any) => String(e.id) === String(item.employee_id));
-                  return (
-                    <tr key={idx}>
-                      <td style={{ fontWeight: 600 }}>{emp ? getEmployeeName(emp) : `ID: ${item.employee_id}`}</td>
-                      <td>{item.period || "-"}</td>
-                      <td>{formatCurrency(item.allowance || 0)}</td>
-                      <td>{formatCurrency(item.bonus || 0)}</td>
-                      <td>
-                        <span className={`status-badge payroll-status-${item.status?.toLowerCase() || "draft"}`}>
-                          {item.status?.toUpperCase() || "DRAFT"}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </Card>
-      )}
-
-      {loading && <div className="payroll-loading-overlay">Memproses data...</div>}
     </div>
   );
 };

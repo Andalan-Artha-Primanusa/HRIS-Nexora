@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Download, Award, Users, TrendingUp, Plus, RefreshCw, Edit, Trash2, Target, Star } from 'lucide-react';
+import { Search, Download, Award, Users, TrendingUp, Plus, RefreshCw, Edit, Trash2, Target, Star, BookTemplate } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { trainingService } from '@/features/training/api/training.service';
 import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 import './CompetencyMatrixPage.css';
 
 const CompetencyMatrixPage: React.FC = () => {
@@ -61,70 +63,73 @@ const CompetencyMatrixPage: React.FC = () => {
 
   return (
     <div className="crud-page competency-page">
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">Competency</span>
-          <h1>Competency Matrix</h1>
-          <p>Manage employee skills, technical expertise, and core competencies.</p>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Target size={16} />
+              <span>Kompetensi</span>
+            </div>
+            <h1 className="hero-title">Matriks Kompetensi</h1>
+            <p className="hero-subtitle">
+              Kelola keterampilan, keahlian teknis, dan kompetensi inti karyawan.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={fetchData} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+            <button className="btn-primary" onClick={() => {}}>
+              <Download size={16} />
+              Ekspor
+            </button>
+          </div>
         </div>
-        <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={fetchData} disabled={loading}>
-            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-            Refresh
-          </Button>
-          <Button variant="outline" size="md">
-            <Download size={16} />
-            Export
-          </Button>
-          <Button variant="primary" size="md">
-            <Plus size={16} />
-            Add Competency
-          </Button>
+      </Card>
+
+      <div className="leave-requests-wrapper">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Total Kompetensi</p>
+              <p className="leave-summary-subtitle">Seluruh kompetensi karyawan</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-blue">
+              <Award size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-blue">{competencies.length}</div>
+          <p className="leave-summary-trend">Kompetensi</p>
         </div>
-      </div>
 
-      <div className="summary-grid">
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
             <div>
-              <span className="summary-card__label">Total Skills</span>
-              <p className="summary-card__subtitle">All competencies</p>
+              <p className="leave-summary-label">Ahli</p>
+              <p className="leave-summary-subtitle">Tingkat ahli</p>
             </div>
-            <span className="summary-card__icon summary-card__icon--blue">
-              <Award size={20} />
-            </span>
+            <div className="leave-summary-icon-wrapper" style={{ background: '#f5f3ff' }}>
+              <Star size={28} color="#8b5cf6" />
+            </div>
           </div>
-          <div className="summary-card__value summary-card__value--blue">{competencies.length}</div>
-          <div className="summary-card__change">Skills</div>
-        </Card>
+          <div className="leave-summary-value" style={{ color: '#8b5cf6' }}>{expertCount}</div>
+          <p className="leave-summary-trend">Keahlian Ahli</p>
+        </div>
 
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
             <div>
-              <span className="summary-card__label">Expert</span>
-              <p className="summary-card__subtitle">Expert level skills</p>
+              <p className="leave-summary-label">Mahir</p>
+              <p className="leave-summary-subtitle">Tingkat mahir</p>
             </div>
-            <span className="summary-card__icon summary-card__icon--purple">
-              <Star size={20} />
-            </span>
-          </div>
-          <div className="summary-card__value summary-card__value--purple">{expertCount}</div>
-          <div className="summary-card__change">Expert skills</div>
-        </Card>
-
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
-            <div>
-              <span className="summary-card__label">Advanced</span>
-              <p className="summary-card__subtitle">Advanced level</p>
+            <div className="leave-summary-icon-wrapper leave-icon-green">
+              <TrendingUp size={28} />
             </div>
-            <span className="summary-card__icon summary-card__icon--green">
-              <TrendingUp size={20} />
-            </span>
           </div>
-          <div className="summary-card__value summary-card__value--green">{advancedCount}</div>
-          <div className="summary-card__change">Advanced skills</div>
-        </Card>
+          <div className="leave-summary-value leave-value-green">{advancedCount}</div>
+          <p className="leave-summary-trend">Keahlian Mahir</p>
+        </div>
       </div>
 
       <div className="white-unified-wrapper">

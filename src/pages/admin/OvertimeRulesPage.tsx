@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Clock, RefreshCw, Edit, Trash2, DollarSign, Search } from 'lucide-react';
+import { Plus, Clock, RefreshCw, Edit, Trash2, DollarSign, Search, Timer } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { workforceService } from '@/features/workforce/api/workforce.service';
 import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 
 const OvertimeRulesPage: React.FC = () => {
   const navigate = useNavigate();

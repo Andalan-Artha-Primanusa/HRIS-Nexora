@@ -17,23 +17,26 @@ import {
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { ROLES } from "@/shared/types/rbac.types";
 
-import {  
-  Plus, 
-  Search, 
-  RefreshCw, 
-  CheckCircle2, 
-  Clock, 
-  FileText, 
-  Trash2, 
-  User, 
+import {
+  Plus,
+  Search,
+  RefreshCw,
+  CheckCircle2,
+  Clock,
+  FileText,
+  Trash2,
+  User,
   Calendar,
   TrendingUp,
   AlertCircle,
   Eye,
   X,
-  Download
+  Download,
+  Target
 } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
+import "@/pages/dashboard/overview/OverviewPage.css";
+import "@/pages/payroll/PayrollShared.css";
 import "./AdminKpiPage.css";
 import { 
   getAdminKpis, 
@@ -229,44 +232,87 @@ const AdminKpiPage = () => {
 
   return (
     <div className="crud-page kpi-page">
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">Performance</span>
-          <h1>KPI Management</h1>
-          <p>Manage employee performance targets and KPI achievements.</p>
-        </div>
-        <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={handleExportCSV}>
-            <Download size={16} />
-            Export CSV
-          </Button>
-          <Button variant="outline" size="md" onClick={loadData} disabled={loading}>
-            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-            Refresh
-          </Button>
-          <Button variant="primary" size="md" onClick={handleOpenCreate}>
-            <Plus size={16} />
-            Create KPI
-          </Button>
-        </div>
-      </div>
-
-      <div className="summary-grid">
-        {stats.map((stat) => (
-          <Card key={stat.label} className="summary-card" glass>
-            <div className="summary-card__header">
-              <div>
-                <span className="summary-card__label">{stat.label}</span>
-                <p className="summary-card__subtitle">{stat.label === "Rata-rata Skor" ? "Average" : "Total"}</p>
-              </div>
-              <span className={`summary-card__icon summary-card__icon--${stat.color === 'purple' ? 'purple' : stat.color}`}>
-                {stat.icon}
-              </span>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Target size={16} />
+              <span>Kinerja</span>
             </div>
-            <div className={`summary-card__value summary-card__value--${stat.color === 'purple' ? 'purple' : stat.color}`}>{stat.value}</div>
-            <div className="summary-card__change">{stat.label}</div>
-          </Card>
-        ))}
+            <h1 className="hero-title">Pengelolaan KPI</h1>
+            <p className="hero-subtitle">
+              Kelola target kinerja dan pencapaian KPI karyawan.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={loadData} disabled={loading}>
+              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+              Segarkan
+            </button>
+            <button className="btn-primary" onClick={handleOpenCreate}>
+              <Plus size={16} />
+              Buat KPI
+            </button>
+          </div>
+        </div>
+      </Card>
+
+      <div className="leave-requests-wrapper">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Total KPI</p>
+              <p className="leave-summary-subtitle">Seluruh target kinerja</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-blue">
+              <FileText size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-blue">{stats[0]?.value || 0}</div>
+          <p className="leave-summary-trend">Total KPI</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Disetujui</p>
+              <p className="leave-summary-subtitle">KPI yang disetujui</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-green">
+              <CheckCircle2 size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-green">{stats[1]?.value || 0}</div>
+          <p className="leave-summary-trend">KPI Disetujui</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Menunggu Review</p>
+              <p className="leave-summary-subtitle">KPI yang diajukan</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-orange">
+              <Clock size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-orange">{stats[2]?.value || 0}</div>
+          <p className="leave-summary-trend">Butuh Tinjauan</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Rata-rata Skor</p>
+              <p className="leave-summary-subtitle">Skor kinerja rata-rata</p>
+            </div>
+            <div className="leave-summary-icon-wrapper" style={{ background: '#f5f3ff' }}>
+              <TrendingUp size={28} color="#8b5cf6" />
+            </div>
+          </div>
+          <div className="leave-summary-value" style={{ color: '#8b5cf6' }}>{stats[3]?.value || '0%'}</div>
+          <p className="leave-summary-trend">Skor Rata-rata</p>
+        </div>
       </div>
 
       <div className="white-unified-wrapper">

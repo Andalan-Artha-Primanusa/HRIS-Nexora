@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, RefreshCw, GraduationCap, Calendar, Users, BookOpen, Search, Clock, Award, Edit, Trash2 } from 'lucide-react';
+import { Plus, RefreshCw, GraduationCap, Calendar, Users, BookOpen, Search, Clock, Award, Edit, Trash2, BookTemplate, CheckCircle } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { trainingService } from '@/features/training/api/training.service';
 import type { TrainingProgram } from '@/features/training/types/training.types';
 import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 import './TrainingProgramsPage.css';
 
 const TrainingProgramsPage: React.FC = () => {
@@ -63,68 +65,75 @@ const TrainingProgramsPage: React.FC = () => {
     }
   };
 
-  return (
+return (
     <div className="crud-page training-page">
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">L&D</span>
-          <h1>Training Programs</h1>
-          <p>Manage employee training programs, certifications, and skill development.</p>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <GraduationCap size={16} />
+              <span>L & D</span>
+            </div>
+            <h1 className="hero-title">Program Pelatihan</h1>
+            <p className="hero-subtitle">
+              Kelola program pelatihan karyawan, sertifikasi, dan pengembangan keterampilan.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={fetchData} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+            <button className="btn-primary" onClick={() => navigate('/training/programs/create')}>
+              <Plus size={16} />
+              Tambah Program
+            </button>
+          </div>
         </div>
-        <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={fetchData} disabled={loading}>
-            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-            Refresh
-          </Button>
-          <Button variant="primary" size="md" onClick={() => navigate('/training/programs/create')}>
-            <Plus size={16} />
-            New Program
-          </Button>
+      </Card>
+
+      <div className="leave-requests-wrapper">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Total Program</p>
+              <p className="leave-summary-subtitle">Seluruh program pelatihan</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-blue">
+              <GraduationCap size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-blue">{programs.length}</div>
+          <p className="leave-summary-trend">Program Pelatihan</p>
         </div>
-      </div>
 
-      <div className="summary-grid">
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
             <div>
-              <span className="summary-card__label">Total Programs</span>
-              <p className="summary-card__subtitle">All programs</p>
+              <p className="leave-summary-label">Aktif</p>
+              <p className="leave-summary-subtitle">Program yang sedang aktif</p>
             </div>
-            <span className="summary-card__icon summary-card__icon--blue">
-              <GraduationCap size={20} />
-            </span>
+            <div className="leave-summary-icon-wrapper leave-icon-green">
+              <CheckCircle size={28} />
+            </div>
           </div>
-          <div className="summary-card__value summary-card__value--blue">{programs.length}</div>
-          <div className="summary-card__change">Programs</div>
-        </Card>
+          <div className="leave-summary-value leave-value-green">{activePrograms}</div>
+          <p className="leave-summary-trend">Program Aktif</p>
+        </div>
 
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
             <div>
-              <span className="summary-card__label">Active</span>
-              <p className="summary-card__subtitle">Currently active</p>
+              <p className="leave-summary-label">Terdaftar</p>
+              <p className="leave-summary-subtitle">Total peserta</p>
             </div>
-            <span className="summary-card__icon summary-card__icon--green">
-              <Clock size={20} />
-            </span>
-          </div>
-          <div className="summary-card__value summary-card__value--green">{activePrograms}</div>
-          <div className="summary-card__change">Active programs</div>
-        </Card>
-
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
-            <div>
-              <span className="summary-card__label">Enrolled</span>
-              <p className="summary-card__subtitle">Total participants</p>
+            <div className="leave-summary-icon-wrapper leave-icon-orange">
+              <Users size={28} />
             </div>
-            <span className="summary-card__icon summary-card__icon--orange">
-              <Users size={20} />
-            </span>
           </div>
-          <div className="summary-card__value summary-card__value--orange">{totalEnrolled}</div>
-          <div className="summary-card__change">Enrolled employees</div>
-        </Card>
+          <div className="leave-summary-value leave-value-orange">{totalEnrolled}</div>
+          <p className="leave-summary-trend">Karyawan Terdaftar</p>
+        </div>
       </div>
 
       <div className="white-unified-wrapper">

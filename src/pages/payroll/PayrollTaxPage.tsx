@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, Search, Download, RefreshCw } from 'lucide-react';
+import { ShieldCheck, Search, RefreshCw, DollarSign, Users } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { Badge } from '@/shared/ui/Badge';
 import { payrollService, toSafeArray } from '@/features/payroll/api/payroll.service';
 import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 
 const formatCurrency = (value: number | string) => {
   const num = typeof value === 'string' ? parseFloat(value) : value;
@@ -53,19 +55,29 @@ const PayrollTaxPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">Compliance & Legal</span>
-          <h1>Laporan Pajak & BPJS</h1>
-          <p>Ringkasan potongan PPh21 dan iuran BPJS karyawan per periode penggajian.</p>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <ShieldCheck size={16} />
+              <span>Pusat Payroll</span>
+            </div>
+            <h1 className="hero-title">Laporan Pajak & BPJS</h1>
+            <p className="hero-subtitle">
+              Ringkasan potongan PPh21 dan iuran BPJS karyawan per periode penggajian.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => void loadData()} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+            <button className="btn-primary" onClick={() => window.location.href = '/payroll'}>
+              Kelola Payroll
+            </button>
+          </div>
         </div>
-        <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={() => void loadData()} disabled={loading}>
-            <RefreshCw size={16} />
-            Refresh
-          </Button>
-        </div>
-      </div>
+      </Card>
 
       {error && (
         <Card className="crud-card" glass>
@@ -74,46 +86,46 @@ const PayrollTaxPage: React.FC = () => {
       )}
 
       <div className="summary-grid">
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
+        <Card className="metric-card">
+          <div className="metric-header">
             <div>
-              <span className="summary-card__label">Total PPh21</span>
-              <p className="summary-card__subtitle">Akumulasi</p>
+              <span className="metric-label">Total PPh21</span>
+              <p className="metric-subtitle">Akumulasi</p>
             </div>
-            <span className="summary-card__icon summary-card__icon--blue">
-              <ShieldCheck size={20} />
+            <span className="metric-icon metric-icon--blue">
+              <DollarSign size={22} />
             </span>
           </div>
-          <div className="summary-card__value summary-card__value--blue">{formatCurrency(totals.pph21)}</div>
-          <div className="summary-card__change">Potongan pajak</div>
+          <div className="metric-value" style={{ color: '#2563eb' }}>{formatCurrency(totals.pph21)}</div>
+          <div className="summary-card-change">Potongan pajak</div>
         </Card>
 
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
+        <Card className="metric-card">
+          <div className="metric-header">
             <div>
-              <span className="summary-card__label">Total Iuran BPJS</span>
-              <p className="summary-card__subtitle">Kesehatan & TK</p>
+              <span className="metric-label">Total Iuran BPJS</span>
+              <p className="metric-subtitle">Kesehatan & TK</p>
             </div>
-            <span className="summary-card__icon summary-card__icon--orange">
-              <ShieldCheck size={20} />
+            <span className="metric-icon metric-icon--orange">
+              <ShieldCheck size={22} />
             </span>
           </div>
-          <div className="summary-card__value summary-card__value--orange">{formatCurrency(totals.bpjs)}</div>
-          <div className="summary-card__change">Iuran BPJS</div>
+          <div className="metric-value" style={{ color: '#f59e0b' }}>{formatCurrency(totals.bpjs)}</div>
+          <div className="summary-card-change">Iuran BPJS</div>
         </Card>
 
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
+        <Card className="metric-card">
+          <div className="metric-header">
             <div>
-              <span className="summary-card__label">Jumlah Entri</span>
-              <p className="summary-card__subtitle">Records</p>
+              <span className="metric-label">Jumlah Entri</span>
+              <p className="metric-subtitle">Records</p>
             </div>
-            <span className="summary-card__icon summary-card__icon--green">
-              <ShieldCheck size={20} />
+            <span className="metric-icon metric-icon--green">
+              <Users size={22} />
             </span>
           </div>
-          <div className="summary-card__value summary-card__value--green">{totals.records}</div>
-          <div className="summary-card__change">Total records</div>
+          <div className="metric-value" style={{ color: '#10b981' }}>{totals.records}</div>
+          <div className="summary-card-change">Total records</div>
         </Card>
       </div>
 

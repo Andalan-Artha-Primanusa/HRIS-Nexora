@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Calendar, RefreshCw, Edit, Trash2, ShieldCheck } from 'lucide-react';
+import { Plus, Calendar, RefreshCw, Edit, Trash2, ShieldCheck, CalendarDays } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { workforceService } from '@/features/workforce/api/workforce.service';
 import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 
 const HolidayCalendarPage: React.FC = () => {
   const navigate = useNavigate();
@@ -31,66 +33,59 @@ const HolidayCalendarPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">Workforce</span>
-          <h1>Kalender Libur</h1>
-          <p>Kelola hari libur nasional dan kebijakan libur perusahaan.</p>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <CalendarDays size={16} />
+              <span>Workforce</span>
+            </div>
+            <h1 className="hero-title">Kalender Libur</h1>
+            <p className="hero-subtitle">
+              Kelola hari libur nasional dan kebijakan libur perusahaan.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={fetchData} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+            <button className="btn-primary" onClick={() => navigate('/workforce/holidays/create')}>
+              <Plus size={16} />
+              Tambah Libur
+            </button>
+          </div>
         </div>
-        <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={fetchData} disabled={loading}>
-            <RefreshCw size={16} />
-            Refresh
-          </Button>
-          <Button variant="primary" size="md" onClick={() => navigate('/workforce/holidays/create')}>
-            <Plus size={16} />
-            Tambah Libur
-          </Button>
+      </Card>
+
+      <div className="leave-requests-wrapper">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Total Libur</p>
+              <p className="leave-summary-subtitle">Tahun ini</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-red">
+              <Calendar size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-red">{holidays.length}</div>
+          <p className="leave-summary-trend">Total Libur</p>
         </div>
-      </div>
 
-      <div className="summary-grid">
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
             <div>
-              <span className="summary-card__label">Total Libur</span>
-              <p className="summary-card__subtitle">Tahun ini</p>
+              <p className="leave-summary-label">Libur Terdekat</p>
+              <p className="leave-summary-subtitle">Akan datang</p>
             </div>
-            <span className="summary-card__icon summary-card__icon--red">
-              <Calendar size={20} />
-            </span>
-          </div>
-          <div className="summary-card__value summary-card__value--red">{holidays.length}</div>
-          <div className="summary-card__change">Hari libur</div>
-        </Card>
-
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
-            <div>
-              <span className="summary-card__label">Libur Terdekat</span>
-              <p className="summary-card__subtitle">Akan datang</p>
+            <div className="leave-summary-icon-wrapper leave-icon-orange">
+              <Calendar size={28} />
             </div>
-            <span className="summary-card__icon summary-card__icon--orange">
-              <Calendar size={20} />
-            </span>
           </div>
-          <div className="summary-card__value summary-card__value--orange">-</div>
-          <div className="summary-card__change">Next holiday</div>
-        </Card>
-
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
-            <div>
-              <span className="summary-card__label">Audit Ready</span>
-              <p className="summary-card__subtitle">Status kepatuhan</p>
-            </div>
-            <span className="summary-card__icon summary-card__icon--green">
-              <ShieldCheck size={20} />
-            </span>
-          </div>
-          <div className="summary-card__value summary-card__value--green">100%</div>
-          <div className="summary-card__change">Compliant</div>
-        </Card>
+          <div className="leave-summary-value leave-value-orange">-</div>
+          <p className="leave-summary-trend">Next Holiday</p>
+        </div>
       </div>
 
       <div className="white-unified-wrapper">

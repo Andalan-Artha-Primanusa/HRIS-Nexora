@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeftRight, Plus, CheckCircle2, XCircle, RefreshCw, Calendar, ArrowRight, Search } from 'lucide-react';
+import { ArrowLeftRight, Plus, CheckCircle2, XCircle, RefreshCw, Calendar, ArrowRight, Search, ArrowLeftRightIcon } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { workforceService } from '@/features/workforce/api/workforce.service';
 import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 
 const ShiftSwapsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -44,66 +46,87 @@ const ShiftSwapsPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">Workforce</span>
-          <h1>Tukar Shift</h1>
-          <p>Kelola permintaan penukaran jadwal kerja antar karyawan.</p>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <ArrowLeftRight size={16} />
+              <span>Workforce</span>
+            </div>
+            <h1 className="hero-title">Tukar Shift</h1>
+            <p className="hero-subtitle">
+              Kelola permintaan penukaran jadwal kerja antar karyawan.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={fetchData} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+            <button className="btn-primary" onClick={() => navigate('/workforce/shift-swaps/create')}>
+              <Plus size={16} />
+              Request Baru
+            </button>
+          </div>
         </div>
-        <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={fetchData} disabled={loading}>
-            <RefreshCw size={16} />
-            Refresh
-          </Button>
-          <Button variant="primary" size="md" onClick={() => navigate('/workforce/shift-swaps/create')}>
-            <Plus size={16} />
-            Request Baru
-          </Button>
+      </Card>
+
+      <div className="leave-requests-wrapper">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Pending</p>
+              <p className="leave-summary-subtitle">Menunggu persetujuan</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-orange">
+              <ArrowLeftRight size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-orange">{pendingSwaps.length}</div>
+          <p className="leave-summary-trend">Menunggu</p>
         </div>
-      </div>
 
-      <div className="summary-grid">
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
             <div>
-              <span className="summary-card__label">Pending</span>
-              <p className="summary-card__subtitle">Menunggu persetujuan</p>
+              <p className="leave-summary-label">Disetujui</p>
+              <p className="leave-summary-subtitle">Disetujui hari ini</p>
             </div>
-            <span className="summary-card__icon summary-card__icon--orange">
-              <ArrowLeftRight size={20} />
-            </span>
+            <div className="leave-summary-icon-wrapper leave-icon-green">
+              <CheckCircle2 size={28} />
+            </div>
           </div>
-          <div className="summary-card__value summary-card__value--orange">{pendingSwaps.length}</div>
-          <div className="summary-card__change">Pending</div>
-        </Card>
+          <div className="leave-summary-value leave-value-green">{approvedSwaps.length}</div>
+          <p className="leave-summary-trend">Disetujui</p>
+        </div>
 
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
             <div>
-              <span className="summary-card__label">Approved</span>
-              <p className="summary-card__subtitle">Disetujui hari ini</p>
+              <p className="leave-summary-label">Ditolak</p>
+              <p className="leave-summary-subtitle">Ditolak</p>
             </div>
-            <span className="summary-card__icon summary-card__icon--green">
-              <CheckCircle2 size={20} />
-            </span>
+            <div className="leave-summary-icon-wrapper leave-icon-red">
+              <XCircle size={28} />
+            </div>
           </div>
-          <div className="summary-card__value summary-card__value--green">{approvedSwaps.length}</div>
-          <div className="summary-card__change">Approved</div>
-        </Card>
+          <div className="leave-summary-value leave-value-red">{rejectedSwaps.length}</div>
+          <p className="leave-summary-trend">Ditolak</p>
+        </div>
 
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
             <div>
-              <span className="summary-card__label">Total Swaps</span>
-              <p className="summary-card__subtitle">Semua penukaran</p>
+              <p className="leave-summary-label">Total Tukar</p>
+              <p className="leave-summary-subtitle">Semua penukaran</p>
             </div>
-            <span className="summary-card__icon summary-card__icon--blue">
-              <ArrowLeftRight size={20} />
-            </span>
+            <div className="leave-summary-icon-wrapper leave-icon-blue">
+              <Calendar size={28} />
+            </div>
           </div>
-          <div className="summary-card__value summary-card__value--blue">{swaps.length}</div>
-          <div className="summary-card__change">Total</div>
-        </Card>
+          <div className="leave-summary-value leave-value-blue">{swaps.length}</div>
+          <p className="leave-summary-trend">Total Tukar</p>
+        </div>
       </div>
 
       <div className="white-unified-wrapper">

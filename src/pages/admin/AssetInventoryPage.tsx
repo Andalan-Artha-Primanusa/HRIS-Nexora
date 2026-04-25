@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Laptop, Plus, RefreshCw, Monitor, Smartphone, Briefcase,
-  User, Search, Trash2, Pencil, ArrowRight, Hash, Calendar
+  Search, Trash2, Pencil, Package, PackageOpen, ArrowRight
 } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { assetService } from '@/features/assets/api/asset.service';
 import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 
 const STATUS_FILTERS = ['All', 'available', 'assigned', 'maintenance', 'retired'];
 
@@ -91,23 +93,30 @@ const AssetInventoryPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">Inventory</span>
-          <h1>Asset Inventory</h1>
-          <p>Manage and monitor all company property in real-time.</p>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Package size={16} />
+              <span>Pusat Aset</span>
+            </div>
+            <h1 className="hero-title">Asset Inventory</h1>
+            <p className="hero-subtitle">
+              Kelola dan pantau semua properti perusahaan secara real-time.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => fetchData(activeStatus)} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+            <button className="btn-primary" onClick={() => navigate('/inventory/assets/create')}>
+              <Plus size={16} />
+              Tambah Aset
+            </button>
+          </div>
         </div>
-        <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={() => fetchData(activeStatus)} disabled={loading}>
-            <RefreshCw size={16} />
-            Refresh
-          </Button>
-          <Button variant="primary" size="md" onClick={() => navigate('/inventory/assets/create')}>
-            <Plus size={16} />
-            Add Asset
-          </Button>
-        </div>
-      </div>
+      </Card>
 
       <div className="filter-tabs">
         {STATUS_FILTERS.map(status => (

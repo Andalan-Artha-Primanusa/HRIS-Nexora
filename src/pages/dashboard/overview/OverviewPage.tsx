@@ -201,34 +201,34 @@ const OverviewPage: React.FC = () => {
 
   const summaryCards = [
     {
-      label: "Today's Attendance",
+      label: 'Kehadiran Hari Ini',
       subtitle: 'Persentase kehadiran hari ini',
       value: `${totalEmployees > 0 ? Math.round((presentToday / totalEmployees) * 100) : 0}%`,
-      change: `${presentToday} present today`,
+      change: `${presentToday} hadir hari ini`,
       tone: 'blue',
       icon: TrendingUp,
     },
     {
-      label: 'Pending Leave Requests',
-      subtitle: 'Menunggu approval',
+      label: 'Cuti Menunggu',
+      subtitle: 'Menunggu persetujuan',
       value: String(pendingLeaves),
-      change: 'From /leaves/pending',
+      change: 'Dari /leaves/pending',
       tone: 'orange',
       icon: ClipboardList,
     },
     {
-      label: 'Active Employees',
+      label: 'Karyawan Aktif',
       subtitle: 'Karyawan aktif bulan ini',
       value: String(activeEmployees),
-      change: `${totalEmployees} total employees`,
+      change: `${totalEmployees} total karyawan`,
       tone: 'green',
       icon: Users,
     },
     {
-      label: 'Payroll Status',
+      label: 'Status Payroll',
       subtitle: 'Payroll bulan berjalan',
       value: `${processedPayrollRate}%`,
-      change: `${payrollData.length} payroll records · ${pendingReimbursements} reimbursement pending`,
+      change: `${payrollData.length} data payroll · ${pendingReimbursements} reimbursement menunggu`,
       tone: 'purple',
       icon: Wallet,
     },
@@ -355,18 +355,18 @@ const OverviewPage: React.FC = () => {
         <div className="hero-card-inner">
           <div className="hero-content">
             <div className="hero-badge">
-              <Activity size={14} />
-              <span>Dashboard Center</span>
+              <Activity size={16} />
+              <span>Pusat Dashboard</span>
             </div>
-            <h1 className="hero-title">Dashboard Overview</h1>
-            <p className="hero-subtitle">Welcome back, here's what's happening with your organization today.</p>
+            <h1 className="hero-title">Ringkasan Dashboard</h1>
+            <p className="hero-subtitle">Selamat datang kembali, berikut informasi organisasi Anda hari ini.</p>
           </div>
           <div className="hero-actions">
             <button className="btn-outline" onClick={() => navigate('/admin/analytics/people')}>
-              View Analytics
+              Lihat Analitik
             </button>
             <button className="btn-primary" onClick={() => navigate('/payroll/approve')}>
-              Run Payroll
+              Jalankan Payroll
             </button>
           </div>
         </div>
@@ -392,7 +392,7 @@ const OverviewPage: React.FC = () => {
                   <p className="metric-subtitle">{card.subtitle}</p>
                 </div>
                 <span className={`metric-icon metric-icon--${card.tone}`}>
-                  <Icon size={20} />
+                  <Icon size={24} />
                 </span>
               </div>
               <div className="metric-value">{card.value}</div>
@@ -407,11 +407,11 @@ const OverviewPage: React.FC = () => {
       <Card className="analytics-title-card">
         <div className="analytics-title-inner">
           <div className="analytics-icon">
-            <BarChart3 size={20} />
+            <BarChart3 size={24} />
           </div>
           <div>
-            <h2 className="analytics-title">Analytics Dashboard</h2>
-            <p className="analytics-subtitle">Real-time data insights</p>
+            <h2 className="analytics-title">Dashboard Analitik</h2>
+            <p className="analytics-subtitle">Data dan insight real-time</p>
           </div>
         </div>
       </Card>
@@ -420,12 +420,12 @@ const OverviewPage: React.FC = () => {
           <Card className="chart-card">
               <div className="chart-header">
                 <div className="chart-title-area">
-                  <h3 className="chart-title">Weekly Attendance Trend</h3>
-                  <p className="chart-subtitle">Employee presence tracking this week</p>
+                  <h3 className="chart-title">Tren Kehadiran Mingguan</h3>
+                  <p className="chart-subtitle">Pelacakan kehadiran karyawan minggu ini</p>
                 </div>
               </div>
               {loading && attendanceData.length === 0 ? (
-                <div className="chart-empty">Loading attendance data...</div>
+                <div className="chart-empty">Memuat data kehadiran...</div>
               ) : attendanceData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={280}>
                   <AreaChart data={attendanceData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
@@ -452,24 +452,24 @@ const OverviewPage: React.FC = () => {
                       labelStyle={{ color: '#0f172a', fontWeight: 600 }}
                     />
                     <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                    <Area type="monotone" dataKey="present" stroke="#2563eb" strokeWidth={2} fillOpacity={1} fill="url(#colorPresent)" name="Present" />
-                    <Area type="monotone" dataKey="absent" stroke="#ef4444" strokeWidth={2} fillOpacity={1} fill="url(#colorAbsent)" name="Absent" />
+                    <Area type="monotone" dataKey="present" stroke="#2563eb" strokeWidth={2} fillOpacity={1} fill="url(#colorPresent)" name="Hadir" />
+                    <Area type="monotone" dataKey="absent" stroke="#ef4444" strokeWidth={2} fillOpacity={1} fill="url(#colorAbsent)" name="Tidak Hadir" />
                   </AreaChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="chart-empty">No attendance data available.</div>
+                <div className="chart-empty">Tidak ada data kehadiran.</div>
               )}
             </Card>
 
             <Card className="chart-card">
               <div className="chart-header">
                 <div className="chart-title-area">
-                  <h3 className="chart-title">Employees by Department</h3>
-                  <p className="chart-subtitle">Total workforce distribution</p>
+                  <h3 className="chart-title">Karyawan per Departemen</h3>
+                  <p className="chart-subtitle">Distribusi total workforce</p>
                 </div>
               </div>
               {loading && departmentData.length === 0 ? (
-                <div className="chart-empty">Loading department data...</div>
+                <div className="chart-empty">Memuat data departemen...</div>
               ) : departmentData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={280}>
                   <BarChart data={departmentData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
@@ -486,23 +486,23 @@ const OverviewPage: React.FC = () => {
                       labelStyle={{ color: '#0f172a', fontWeight: 600 }}
                       cursor={{ fill: 'rgba(37, 99, 235, 0.05)' }}
                     />
-                    <Bar dataKey="count" fill="#2563eb" radius={[8, 8, 0, 0]} name="Employee Count" />
+                    <Bar dataKey="count" fill="#2563eb" radius={[8, 8, 0, 0]} name="Jumlah Karyawan" />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="chart-empty">No department data available.</div>
+                <div className="chart-empty">Tidak ada data departemen.</div>
               )}
             </Card>
 
             <Card className="chart-card">
               <div className="chart-header">
                 <div className="chart-title-area">
-                  <h3 className="chart-title">Payroll Processing Status</h3>
-                  <p className="chart-subtitle">Monthly payroll completion rate</p>
+                  <h3 className="chart-title">Status Payroll</h3>
+                  <p className="chart-subtitle">Tingkat penyelesaian payroll bulanan</p>
                 </div>
               </div>
               {loading && payrollData.length === 0 ? (
-                <div className="chart-empty">Loading payroll data...</div>
+                <div className="chart-empty">Memuat data payroll...</div>
               ) : payrollData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={280}>
                   <BarChart data={payrollData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
@@ -520,24 +520,24 @@ const OverviewPage: React.FC = () => {
                       cursor={{ fill: 'rgba(37, 99, 235, 0.05)' }}
                     />
                     <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                    <Bar dataKey="processed" stackId="a" fill="#10b981" radius={[8, 8, 0, 0]} name="Processed" />
-                    <Bar dataKey="pending" stackId="a" fill="#f59e0b" radius={[0, 0, 0, 0]} name="Pending" />
+                    <Bar dataKey="processed" stackId="a" fill="#10b981" radius={[8, 8, 0, 0]} name="Selesai" />
+                    <Bar dataKey="pending" stackId="a" fill="#f59e0b" radius={[0, 0, 0, 0]} name="Menunggu" />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="chart-empty">No payroll data available.</div>
+                <div className="chart-empty">Tidak ada data payroll.</div>
               )}
             </Card>
 
             <Card className="chart-card">
               <div className="chart-header">
                 <div className="chart-title-area">
-                  <h3 className="chart-title">Leave Types Distribution</h3>
-                  <p className="chart-subtitle">Leave requests by type</p>
+                  <h3 className="chart-title">Distribusi Jenis Cuti</h3>
+                  <p className="chart-subtitle">Pengajuan cuti berdasarkan jenis</p>
                 </div>
               </div>
               {loading && leaveTypeData.length === 0 ? (
-                <div className="chart-empty">Loading leave data...</div>
+                <div className="chart-empty">Memuat data cuti...</div>
               ) : leaveTypeData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={280}>
                   <PieChart>
@@ -568,7 +568,7 @@ const OverviewPage: React.FC = () => {
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="chart-empty">No leave data available.</div>
+                <div className="chart-empty">Tidak ada data cuti.</div>
               )}
             </Card>
       </div>

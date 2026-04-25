@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { RefreshCw, GraduationCap, Clock, CheckCircle, BookOpen, Play } from 'lucide-react';
+import { RefreshCw, GraduationCap, Clock, CheckCircle, BookOpen, Play, BookTemplate } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
 import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 
 const MyTrainingsPage: React.FC = () => {
   const [trainings, setTrainings] = useState<any[]>([]);
@@ -42,70 +44,77 @@ const MyTrainingsPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">ESS</span>
-          <h1>My Trainings</h1>
-          <p>Track your training enrollments, progress, and completed courses.</p>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <BookTemplate size={16} />
+              <span>Layanan Mandiri</span>
+            </div>
+            <h1 className="hero-title">Pelatihan Saya</h1>
+            <p className="hero-subtitle">
+              Lacak pendaftaran pelatihan, kemajuan, dan kursus yang telah selesai.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={fetchData} disabled={loading}>
+              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+              Segarkan
+            </button>
+          </div>
         </div>
-        <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={fetchData} disabled={loading}>
-            <RefreshCw size={16} />
-            Refresh
-          </Button>
+      </Card>
+
+      <div className="leave-requests-wrapper">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Total Pendaftaran</p>
+              <p className="leave-summary-subtitle">Seluruh pelatihan</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-blue">
+              <GraduationCap size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-blue">{trainings.length}</div>
+          <p className="leave-summary-trend">Total Pelatihan</p>
         </div>
-      </div>
 
-      <div className="summary-grid">
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
             <div>
-              <span className="summary-card__label">Total Enrollments</span>
-              <p className="summary-card__subtitle">All trainings</p>
+              <p className="leave-summary-label">Sedang Berlangsung</p>
+              <p className="leave-summary-subtitle">Pelatihan aktif</p>
             </div>
-            <span className="summary-card__icon summary-card__icon--blue">
-              <GraduationCap size={20} />
-            </span>
+            <div className="leave-summary-icon-wrapper leave-icon-orange">
+              <Play size={28} />
+            </div>
           </div>
-          <div className="summary-card__value summary-card__value--blue">{trainings.length}</div>
-          <div className="summary-card__change">Enrolled programs</div>
-        </Card>
+          <div className="leave-summary-value leave-value-orange">{inProgressTrainings.length}</div>
+          <p className="leave-summary-trend">Sedang Berlangsung</p>
+        </div>
 
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
             <div>
-              <span className="summary-card__label">In Progress</span>
-              <p className="summary-card__subtitle">Active trainings</p>
+              <p className="leave-summary-label">Selesai</p>
+              <p className="leave-summary-subtitle">Pelatihan selesai</p>
             </div>
-            <span className="summary-card__icon summary-card__icon--orange">
-              <Play size={20} />
-            </span>
-          </div>
-          <div className="summary-card__value summary-card__value--orange">{inProgressTrainings.length}</div>
-          <div className="summary-card__change">Ongoing</div>
-        </Card>
-
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
-            <div>
-              <span className="summary-card__label">Completed</span>
-              <p className="summary-card__subtitle">Finished trainings</p>
+            <div className="leave-summary-icon-wrapper leave-icon-green">
+              <CheckCircle size={28} />
             </div>
-            <span className="summary-card__icon summary-card__icon--green">
-              <CheckCircle size={20} />
-            </span>
           </div>
-          <div className="summary-card__value summary-card__value--green">{completedTrainings.length}</div>
-          <div className="summary-card__change">Completed</div>
-        </Card>
+          <div className="leave-summary-value leave-value-green">{completedTrainings.length}</div>
+          <p className="leave-summary-trend">Pelatihan Selesai</p>
+        </div>
       </div>
 
       <div className="white-unified-wrapper">
         <div className="wuw-header">
           <div className="wuw-header-top">
             <div className="wuw-title-area">
-              <h3>My Training History</h3>
-              <span className="wuw-count-badge">{trainings.length} Total</span>
+              <h3>Daftar Pelatihan</h3>
+              <span className="wuw-count-badge">{trainings.length} pelatihan</span>
             </div>
           </div>
         </div>

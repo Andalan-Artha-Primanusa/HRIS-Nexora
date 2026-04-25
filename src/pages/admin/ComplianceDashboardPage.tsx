@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShieldCheck, AlertTriangle, FileCheck, Clock, Plus, RefreshCw, Edit, Filter, Download, Search } from 'lucide-react';
+import { ShieldCheck, AlertTriangle, FileCheck, Clock, Plus, RefreshCw, Edit, Filter, Download, Search, Shield } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { workforceService } from '@/features/workforce/api/workforce.service';
 import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 
 const ComplianceDashboardPage: React.FC = () => {
   const navigate = useNavigate();
@@ -40,66 +42,87 @@ const ComplianceDashboardPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">Compliance</span>
-          <h1>Dashboard Kepatuhan</h1>
-          <p>Monitor status kepatuhan regulasi dan kesiapan audit.</p>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Shield size={16} />
+              <span>Kepatuhan</span>
+            </div>
+            <h1 className="hero-title">Dashboard Kepatuhan</h1>
+            <p className="hero-subtitle">
+              Pantau status kepatuhan regulasi dan kesiapan audit.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={fetchData} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+            <button className="btn-primary" onClick={() => navigate('/compliance/settings')}>
+              <Plus size={16} />
+              Buat Kebijakan
+            </button>
+          </div>
         </div>
-        <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={fetchData} disabled={loading}>
-            <RefreshCw size={16} />
-            Refresh
-          </Button>
-          <Button variant="primary" size="md" onClick={() => navigate('/compliance/settings')}>
-            <Plus size={16} />
-            Buat Kebijakan
-          </Button>
+      </Card>
+
+      <div className="leave-requests-wrapper">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Total Dokumen</p>
+              <p className="leave-summary-subtitle">Employee documents</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-blue">
+              <FileCheck size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-blue">{documents.length}</div>
+          <p className="leave-summary-trend">Total Dokumen</p>
         </div>
-      </div>
 
-      <div className="summary-grid">
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
             <div>
-              <span className="summary-card__label">Total Dokumen</span>
-              <p className="summary-card__subtitle">Employee documents</p>
+              <p className="leave-summary-label">Critical Risk</p>
+              <p className="leave-summary-subtitle">Perlu perhatian</p>
             </div>
-            <span className="summary-card__icon summary-card__icon--blue">
-              <FileCheck size={20} />
-            </span>
+            <div className="leave-summary-icon-wrapper leave-icon-red">
+              <AlertTriangle size={28} />
+            </div>
           </div>
-          <div className="summary-card__value summary-card__value--blue">{documents.length}</div>
-          <div className="summary-card__change">Documents</div>
-        </Card>
+          <div className="leave-summary-value leave-value-red">{criticalCount}</div>
+          <p className="leave-summary-trend">Risiko Kritis</p>
+        </div>
 
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
             <div>
-              <span className="summary-card__label">Critical Risk</span>
-              <p className="summary-card__subtitle">Perlu perhatian</p>
+              <p className="leave-summary-label">Medium Risk</p>
+              <p className="leave-summary-subtitle">Perlu dipantau</p>
             </div>
-            <span className="summary-card__icon summary-card__icon--red">
-              <AlertTriangle size={20} />
-            </span>
+            <div className="leave-summary-icon-wrapper leave-icon-orange">
+              <Clock size={28} />
+            </div>
           </div>
-          <div className="summary-card__value summary-card__value--red">{criticalCount}</div>
-          <div className="summary-card__change">Critical</div>
-        </Card>
+          <div className="leave-summary-value leave-value-orange">{mediumCount}</div>
+          <p className="leave-summary-trend">Risiko Sedang</p>
+        </div>
 
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
             <div>
-              <span className="summary-card__label">Compliant</span>
-              <p className="summary-card__subtitle">Status aman</p>
+              <p className="leave-summary-label">Compliant</p>
+              <p className="leave-summary-subtitle">Sudah sesuai</p>
             </div>
-            <span className="summary-card__icon summary-card__icon--green">
-              <ShieldCheck size={20} />
-            </span>
+            <div className="leave-summary-icon-wrapper leave-icon-green">
+              <ShieldCheck size={28} />
+            </div>
           </div>
-          <div className="summary-card__value summary-card__value--green">{compliantCount}</div>
-          <div className="summary-card__change">Compliant</div>
-        </Card>
+          <div className="leave-summary-value leave-value-green">{compliantCount}</div>
+          <p className="leave-summary-trend">Kepatuhan</p>
+        </div>
       </div>
 
       <div className="white-unified-wrapper">
