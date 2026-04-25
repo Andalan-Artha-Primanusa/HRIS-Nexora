@@ -3,15 +3,17 @@ import {
   Plus, 
   ShieldCheck, 
   Clock, 
-  BookOpen,
   Edit,
   Trash2,
-  Eye,
-  RefreshCw
+  RefreshCw,
+  CalendarDays
 } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
+import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 import './AdminLeavePages.css';
 
 interface LeavePolicy {
@@ -58,30 +60,90 @@ const LeavePolicyPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="admin-leave-page">
-      <div className="admin-leave-header">
-        <div>
-          <span className="policy-badge policy-badge-paid" style={{ marginBottom: '1rem', background: 'linear-gradient(135deg, #7c3aed, #5b21b6)', color: 'white', border: 'none' }}>
-            <ShieldCheck size={14} /> Governance
-          </span>
-          <h1>Leave Policies & Rules</h1>
-          <p>Define the regulatory framework and entitlement rules for all leave categories.</p>
+    <div className="crud-page">
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <CalendarDays size={16} />
+              <span>Governance</span>
+            </div>
+            <h1 className="hero-title">Leave Policies & Rules</h1>
+            <p className="hero-subtitle">
+              Tentukan kerangka regulasi dan aturan hak cuti untuk semua kategori.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={fetchPolicies} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+            <button className="btn-primary" onClick={() => window.location.href = '/leave/policy/create'}>
+              <Plus size={16} />
+              Konfigurasi Policy
+            </button>
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '1rem' }}>
-           <Button variant="outline" size="md" onClick={fetchPolicies} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
-            <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
-            Refresh
-          </Button>
-          <Button variant="primary" size="md" onClick={() => window.location.href = '/leave/policy/create'}>
-            <Plus size={20} />
-            Configure Policy
-          </Button>
+      </Card>
+
+      <div className="leave-requests-wrapper">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Total Policies</p>
+              <p className="leave-summary-subtitle">Semua aturan</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-purple">
+              <ShieldCheck size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-purple">{policies.length}</div>
+          <p className="leave-summary-trend">Policies</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Paid Leave</p>
+              <p className="leave-summary-subtitle">Cuti berbayar</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-green">
+              <Clock size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-green">{policies.filter(p => p.is_paid).length}</div>
+          <p className="leave-summary-trend">Paid</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Active Policies</p>
+              <p className="leave-summary-subtitle">Policies aktif</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-blue">
+              <ShieldCheck size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-blue">{policies.filter(p => p.active).length}</div>
+          <p className="leave-summary-trend">Active</p>
         </div>
       </div>
 
-      <Card glass style={{ padding: '0', borderRadius: '24px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
-        <div className="table-responsive">
-          <table className="leave-type-table">
+      <div className="white-unified-wrapper">
+        <div className="wuw-header">
+          <div className="wuw-header-top">
+            <div className="wuw-title-area">
+              <h3>Daftar Kebijakan Cuti</h3>
+              <span className="wuw-count-badge">{policies.length} Total</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="wuw-table-area">
+          <Card glass style={{ padding: '0', borderRadius: '24px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+            <div className="table-responsive">
+              <table className="leave-type-table">
             <thead>
               <tr>
                 <th>Kebijakan</th>
@@ -175,18 +237,26 @@ const LeavePolicyPage: React.FC = () => {
               ))}
             </tbody>
           </table>
+          </div>
+          </Card>
         </div>
-      </Card>
 
-      <div style={{ marginTop: '2rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
-        <Card glass style={{ padding: '1.5rem', borderRadius: '20px', borderLeft: '4px solid #7c3aed' }}>
-          <h4 style={{ margin: '0 0 0.5rem 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <ShieldCheck size={18} color="#7c3aed" /> Compliance Mode
-          </h4>
-          <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>
-            Seluruh kebijakan ini akan diterapkan secara otomatis pada perhitungan saldo cuti karyawan.
-          </p>
-        </Card>
+        <div className="leave-requests-wrapper" style={{ marginTop: '2rem' }}>
+          <div className="leave-summary-card">
+            <div className="leave-summary-header">
+              <div>
+                <p className="leave-summary-label">Compliance Mode</p>
+                <p className="leave-summary-subtitle">Otomatis diterapkan</p>
+              </div>
+              <div className="leave-summary-icon-wrapper leave-icon-purple">
+                <ShieldCheck size={28} />
+              </div>
+            </div>
+            <p className="leave-summary-trend" style={{ fontSize: '0.85rem', lineHeight: 1.5 }}>
+              Seluruh kebijakan ini akan diterapkan secara otomatis pada perhitungan saldo cuti karyawan.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

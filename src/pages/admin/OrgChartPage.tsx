@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Network, Search, RefreshCw } from 'lucide-react';
-import { Button } from '@/shared/ui/Button';
+import { Network, Search, RefreshCw, Share2 } from 'lucide-react';
+import { Card } from '@/shared/ui/Card';
 import { OrgChartNode } from '@/features/organization/components/OrgChartNode';
 import { organizationService } from '@/features/organization/api/organization.service';
 import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 
 const OrgChartPage: React.FC = () => {
   const [chartData, setChartData] = useState<any>(null);
@@ -37,42 +39,46 @@ const OrgChartPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <div className="crud-header">
-        <div>
-          <span className="reimb-badge reimb-badge-admin">Organization</span>
-          <h1>Struktur Organisasi</h1>
-          <p>Visualisasi hirarki departemen dan manajemen perusahaan secara real-time.</p>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Share2 size={16} />
+              <span>Organization</span>
+            </div>
+            <h1 className="hero-title">Struktur Organisasi</h1>
+            <p className="hero-subtitle">
+              Visualisasi hirarki departemen dan manajemen perusahaan secara real-time.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline">
+              <Search size={16} />
+              Cari
+            </button>
+            <button className="btn-primary">
+              Export PDF
+            </button>
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <Button variant="outline"><Search size={18} style={{ marginRight: '8px' }} /> Cari</Button>
-          <Button variant="primary">Export PDF</Button>
-        </div>
-      </div>
+      </Card>
 
-      <div style={{ 
-        overflow: 'auto', 
-        padding: '3rem 1rem', 
-        background: '#f8fafc', 
-        borderRadius: '16px', 
-        minHeight: '600px',
-        display: 'flex',
-        justifyContent: 'center'
-      }}>
-        {loading ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <RefreshCw size={24} className="animate-spin" color="#2563eb" />
-            <span>Memuat...</span>
-          </div>
-        ) : chartData ? (
-          <OrgChartNode node={chartData} renderChildren={renderChildren} />
-        ) : (
-          <div style={{ textAlign: 'center', color: '#94a3b8' }}>
-            <Network size={48} style={{ marginBottom: '1rem', opacity: 0.3 }} />
-            <p>Data tidak ditemukan.</p>
-          </div>
-        )}
+      <div className="white-unified-wrapper" style={{ minHeight: '600px', padding: '3rem' }}> 
+          {loading ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <RefreshCw size={24} className="animate-spin" color="#2563eb" />
+              <span>Memuat...</span>
+            </div>
+          ) : chartData ? (
+            <OrgChartNode node={chartData} renderChildren={renderChildren} />
+          ) : (
+            <div style={{ textAlign: 'center', color: '#94a3b8' }}>
+              <Network size={48} style={{ marginBottom: '1rem', opacity: 0.3 }} />
+              <p>Data tidak ditemukan.</p>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
   );
 };
 

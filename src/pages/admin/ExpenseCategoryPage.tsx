@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, RefreshCw, Edit, Trash2, Search, Tag, DollarSign, CheckCircle, XCircle, FileText, TrendingUp } from 'lucide-react';
+import { Plus, RefreshCw, Edit, Trash2, Search, Tag, DollarSign, CheckCircle, FileText, Receipt } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
 import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 import './ExpenseCategoryPage.css';
 
 interface ExpenseCategory {
@@ -132,71 +134,78 @@ const ExpenseCategoryPage: React.FC = () => {
   };
 
   return (
-    <div className="crud-page expense-category-page">
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">Settings</span>
-          <h1>Expense Categories</h1>
-          <p>Manage expense categories for reimbursement requests.</p>
+    <div className="crud-page">
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Receipt size={16} />
+              <span>Settings</span>
+            </div>
+            <h1 className="hero-title">Expense Categories</h1>
+            <p className="hero-subtitle">
+              Kelola kategori pengeluaran untuk permintaan reimbursemen.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={fetchData} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+            <button className="btn-primary" onClick={() => handleOpenModal()}>
+              <Plus size={16} />
+              Tambah Kategori
+            </button>
+          </div>
         </div>
-        <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={fetchData} disabled={loading}>
-            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-            Refresh
-          </Button>
-          <Button variant="primary" size="md" onClick={() => handleOpenModal()}>
-            <Plus size={16} />
-            Add Category
-          </Button>
+      </Card>
+
+      <div className="leave-requests-wrapper">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Total Categories</p>
+              <p className="leave-summary-subtitle">Semua kategori</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-blue">
+              <Tag size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-blue">{totalCategories}</div>
+          <p className="leave-summary-trend">Categories</p>
         </div>
-      </div>
 
-      <div className="summary-grid">
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
             <div>
-              <span className="summary-card__label">Total Categories</span>
-              <p className="summary-card__subtitle">All categories</p>
+              <p className="leave-summary-label">Active</p>
+              <p className="leave-summary-subtitle">Tersedia</p>
             </div>
-            <span className="summary-card__icon summary-card__icon--blue">
-              <Tag size={20} />
-            </span>
+            <div className="leave-summary-icon-wrapper leave-icon-green">
+              <CheckCircle size={28} />
+            </div>
           </div>
-          <div className="summary-card__value summary-card__value--blue">{totalCategories}</div>
-          <div className="summary-card__change">Categories</div>
-        </Card>
+          <div className="leave-summary-value leave-value-green">{activeCount}</div>
+          <p className="leave-summary-trend">Active</p>
+        </div>
 
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
             <div>
-              <span className="summary-card__label">Active</span>
-              <p className="summary-card__subtitle">Available</p>
+              <p className="leave-summary-label">Avg Max Claim</p>
+              <p className="leave-summary-subtitle">Rata-rata limit</p>
             </div>
-            <span className="summary-card__icon summary-card__icon--green">
-              <CheckCircle size={20} />
-            </span>
-          </div>
-          <div className="summary-card__value summary-card__value--green">{activeCount}</div>
-          <div className="summary-card__change">Active categories</div>
-        </Card>
-
-        <Card className="summary-card" glass>
-          <div className="summary-card__header">
-            <div>
-              <span className="summary-card__label">Avg Max Claim</span>
-              <p className="summary-card__subtitle">Average limit</p>
+            <div className="leave-summary-icon-wrapper leave-icon-orange">
+              <DollarSign size={28} />
             </div>
-            <span className="summary-card__icon summary-card__icon--orange">
-              <DollarSign size={20} />
-            </span>
           </div>
-          <div className="summary-card__value summary-card__value--orange">
+          <div className="leave-summary-value leave-value-orange">
             {totalCategories > 0 
               ? `Rp ${Math.round(categories.reduce((sum, c) => sum + (c.max_claim || 0), 0) / totalCategories).toLocaleString('id-ID')}`
               : '-'}
           </div>
-          <div className="summary-card__change">Average limit</div>
-        </Card>
+          <p className="leave-summary-trend">Average</p>
+        </div>
       </div>
 
       <div className="white-unified-wrapper">

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, RefreshCw, Edit, Trash2, Search, Building2, Users, MapPin, Briefcase, MoreVertical, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, RefreshCw, Edit, Trash2, Search, Building2, Users, MapPin, Briefcase, Database, CheckCircle, XCircle } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
-import { api } from '@/shared/api/httpClient';
 import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 import './MasterDataPage.css';
 
 interface MasterDataItem {
@@ -150,52 +151,54 @@ const MasterDataPage: React.FC = () => {
   const activeTabData = tabs.find(t => t.key === activeTab);
 
   return (
-    <div className="crud-page master-data-page">
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">Organization</span>
-          <h1>Master Data</h1>
-          <p>Manage your organization's core data: departments, positions, and locations.</p>
+    <div className="crud-page">
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Database size={16} />
+              <span>Organization</span>
+            </div>
+            <h1 className="hero-title">Master Data</h1>
+            <p className="hero-subtitle">
+              Kelola data inti organisasi: departemen, posisi, dan lokasi.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={fetchData} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+            <button className="btn-primary" onClick={() => handleOpenModal()}>
+              <Plus size={16} />
+              Tambah {activeTab === 'department' ? 'Departemen' : activeTab === 'position' ? 'Posisi' : 'Lokasi'}
+            </button>
+          </div>
         </div>
-        <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={fetchData} disabled={loading}>
-            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-            Refresh
-          </Button>
-          <Button variant="primary" size="md" onClick={() => handleOpenModal()}>
-            <Plus size={16} />
-            Add {activeTab === 'department' ? 'Department' : activeTab === 'position' ? 'Position' : 'Location'}
-          </Button>
-        </div>
-      </div>
+      </Card>
 
-      <div className="summary-grid">
+      <div className="leave-requests-wrapper">
         {tabs.map((tab) => (
-          <Card 
+          <div 
             key={tab.key} 
-            className="summary-card" 
-            glass 
-            style={{ 
-              cursor: 'pointer', 
-              border: activeTab === tab.key ? '2px solid #2563eb' : '2px solid transparent',
-              transition: 'all 0.2s ease'
-            }}
+            className="leave-summary-card"
+            style={{ cursor: 'pointer', border: activeTab === tab.key ? '2px solid #2563eb' : '2px solid transparent' }}
             onClick={() => setActiveTab(tab.key as any)}
           >
-            <div className="summary-card__header">
+            <div className="leave-summary-header">
               <div>
-                <span className="summary-card__label">{tab.label}</span>
-                <p className="summary-card__subtitle">Total count</p>
+                <p className="leave-summary-label">{tab.label}</p>
+                <p className="leave-summary-subtitle">Total count</p>
               </div>
-              <span className={`summary-card__icon summary-card__icon--${tab.key === 'department' ? 'blue' : tab.key === 'position' ? 'green' : 'orange'}`}>
-                <tab.icon size={20} />
-              </span>
+              <div className={`leave-summary-icon-wrapper ${tab.key === 'department' ? 'leave-icon-blue' : tab.key === 'position' ? 'leave-icon-green' : 'leave-icon-orange'}`}>
+                <tab.icon size={28} />
+              </div>
             </div>
-            <div className={`summary-card__value summary-card__value--${tab.key === 'department' ? 'blue' : tab.key === 'position' ? 'green' : 'orange'}`}>
+            <div className={`leave-summary-value ${tab.key === 'department' ? 'leave-value-blue' : tab.key === 'position' ? 'leave-value-green' : 'leave-value-orange'}`}>
               {tab.data.length}
             </div>
-            <div className="summary-card__change">{tab.label}</div>
-          </Card>
+            <p className="leave-summary-trend">{tab.label}</p>
+          </div>
         ))}
       </div>
 

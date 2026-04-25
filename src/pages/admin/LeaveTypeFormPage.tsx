@@ -2,17 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
-import { Badge } from '@/shared/ui/Badge';
 import { api } from '@/shared/api/httpClient';
 import { 
   Save, 
   ArrowLeft, 
   CalendarDays, 
-  CheckCircle, 
-  XCircle,
-  Settings,
-  Info
+  RefreshCw,
+  Info,
+  CheckCircle,
+  XCircle
 } from 'lucide-react';
+import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 import './AdminLeavePages.css';
 
 const LeaveTypeFormPage: React.FC = () => {
@@ -97,152 +99,162 @@ const LeaveTypeFormPage: React.FC = () => {
 
   if (fetching) {
     return (
-      <div className="admin-leave-page" style={{ textAlign: 'center', padding: '5rem' }}>
-        <Settings className="animate-spin" size={48} color="#2563eb" />
+      <div className="crud-page" style={{ textAlign: 'center', padding: '5rem' }}>
+        <RefreshCw className="animate-spin" size={48} color="#2563eb" />
         <p>Memuat konfigurasi...</p>
       </div>
     );
   }
 
   return (
-    <div className="admin-leave-page">
-      <div className="admin-leave-header">
-        <div>
-          <Button variant="ghost" size="sm" onClick={() => navigate('/leave/type')} style={{ marginBottom: '1rem', padding: 0 }}>
-            <ArrowLeft size={16} /> Kembali ke Daftar
-          </Button>
-          <h1>{isEdit ? 'Edit Jenis Cuti' : 'Tambah Jenis Cuti Baru'}</h1>
-          <p>Konfigurasi kategori cuti dan aturan dasarnya.</p>
+    <div className="crud-page">
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <CalendarDays size={16} />
+              <span>{isEdit ? 'Edit' : 'Master Data'}</span>
+            </div>
+            <h1 className="hero-title">{isEdit ? 'Edit Jenis Cuti' : 'Tambah Jenis Cuti Baru'}</h1>
+            <p className="hero-subtitle">
+              Konfigurasi kategori cuti dan aturan dasarnya.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => navigate('/leave/type')}>
+              <ArrowLeft size={16} />
+              Kembali
+            </button>
+            <button className="btn-primary" type="submit" form="leave-type-form" disabled={loading}>
+              {loading ? <RefreshCw size={16} className="animate-spin" /> : <Save size={16} />}
+              {loading ? 'Menyimpan...' : (isEdit ? 'Simpan Perubahan' : 'Tambah Jenis Cuti')}
+            </button>
+          </div>
         </div>
-        <Badge variant={isEdit ? 'info' : 'success'}>
-          {isEdit ? 'Mode Edit' : 'Mode Pembuatan'}
-        </Badge>
-      </div>
+      </Card>
 
-      <div style={{ maxWidth: '800px' }}>
-        <form onSubmit={handleSubmit}>
+      <form id="leave-type-form" onSubmit={handleSubmit} className="white-unified-wrapper" style={{ maxWidth: '800px', margin: '0 auto' }}>
           <Card glass style={{ padding: '2rem', borderRadius: '24px' }}>
-            <div className="form-section-header" style={{ marginBottom: '2rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '2rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem' }}>
                 <div style={{ padding: '10px', borderRadius: '12px', background: '#eff6ff', color: '#2563eb' }}>
                   <CalendarDays size={24} />
                 </div>
                 <h3 style={{ margin: 0 }}>Informasi Dasar</h3>
               </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                <div style={{ gridColumn: 'span 2' }}>
+                  <label>Nama Jenis Cuti</label>
+                  <input 
+                    type="text" 
+                    name="name" 
+                    value={formData.name} 
+                    onChange={handleChange} 
+                    required 
+                    placeholder="Contoh: Cuti Tahunan, Cuti Sakit"
+                    style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
+                  />
+                </div>
+
+                <div>
+                  <label>Kode Unik</label>
+                  <input 
+                    type="text" 
+                    name="code" 
+                    value={formData.code} 
+                    onChange={handleChange} 
+                    required 
+                    placeholder="Contoh: AL, SL, ML"
+                    style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
+                  />
+                </div>
+
+                <div>
+                  <label>Status Berbayar</label>
+                  <select 
+                    name="is_paid" 
+                    value={formData.is_paid} 
+                    onChange={handleChange} 
+                    style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
+                  >
+                    <option value="true">Berbayar (Paid)</option>
+                    <option value="false">Tidak Berbayar (Unpaid)</option>
+                  </select>
+                </div>
+
+                <div style={{ gridColumn: 'span 2' }}>
+                  <label>Deskripsi</label>
+                  <textarea 
+                    name="description" 
+                    value={formData.description} 
+                    onChange={handleChange} 
+                    placeholder="Berikan keterangan singkat mengenai jenis cuti ini..."
+                    style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '0.95rem', resize: 'vertical' }}
+                    rows={4}
+                  />
+                </div>
+
+                <div>
+                  <label>Status Aktif</label>
+                  <select 
+                    name="is_active" 
+                    value={formData.is_active} 
+                    onChange={handleChange} 
+                    style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
+                  >
+                    <option value="true">Aktif</option>
+                    <option value="false">Non-Aktif</option>
+                  </select>
+                </div>
+              </div>
+
+              {message && (
+                <div style={{ 
+                  marginTop: '1.5rem', 
+                  padding: '1rem', 
+                  borderRadius: '12px', 
+                  background: message.includes('berhasil') ? '#f0fdf4' : '#fef2f2',
+                  color: message.includes('berhasil') ? '#16a34a' : '#dc2626',
+                  fontSize: '0.9rem',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  {message.includes('berhasil') ? <CheckCircle size={18} /> : <XCircle size={18} />}
+                  {message}
+                </div>
+              )}
+
+              <div style={{ marginTop: '2.5rem', display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                <Button variant="ghost" type="button" onClick={() => navigate('/leave/type')}>
+                  Batal
+                </Button>
+                <Button variant="primary" type="submit" disabled={loading}>
+                  {loading ? 'Menyimpan...' : (
+                    <>
+                      <Save size={18} />
+                      {isEdit ? 'Perbarui Jenis Cuti' : 'Simpan Jenis Cuti'}
+                    </>
+                  )}
+                </Button>
+              </div>
+            </Card>
+
+            <div style={{ marginTop: '2rem' }}>
+              <Card glass style={{ padding: '1.5rem', borderLeft: '4px solid #2563eb' }}>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <Info size={20} color="#2563eb" />
+                  <div>
+                    <h4 style={{ margin: '0 0 0.5rem 0' }}>Panduan Pengisian</h4>
+                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', lineHeight: 1.5 }}>
+                      Pastikan kode unik tidak duplikat dengan jenis cuti lain. Kode ini akan digunakan untuk tracking dan pelaporan sistem.
+                    </p>
+                  </div>
+                </div>
+              </Card>
             </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-              <div className="action-form-group" style={{ gridColumn: 'span 2' }}>
-                <label>Nama Jenis Cuti</label>
-                <input 
-                  type="text" 
-                  name="name" 
-                  value={formData.name} 
-                  onChange={handleChange} 
-                  required 
-                  placeholder="Contoh: Cuti Tahunan, Cuti Sakit"
-                  className="action-input"
-                />
-              </div>
-
-              <div className="action-form-group">
-                <label>Kode Unik</label>
-                <input 
-                  type="text" 
-                  name="code" 
-                  value={formData.code} 
-                  onChange={handleChange} 
-                  required 
-                  placeholder="Contoh: AL, SL, ML"
-                  className="action-input"
-                />
-              </div>
-
-              <div className="action-form-group">
-                <label>Status Berbayar</label>
-                <select 
-                  name="is_paid" 
-                  value={formData.is_paid} 
-                  onChange={handleChange} 
-                  className="action-input"
-                >
-                  <option value="true">Berbayar (Paid)</option>
-                  <option value="false">Tidak Berbayar (Unpaid)</option>
-                </select>
-              </div>
-
-              <div className="action-form-group" style={{ gridColumn: 'span 2' }}>
-                <label>Deskripsi</label>
-                <textarea 
-                  name="description" 
-                  value={formData.description} 
-                  onChange={handleChange} 
-                  placeholder="Berikan keterangan singkat mengenai jenis cuti ini..."
-                  className="action-input"
-                  rows={4}
-                />
-              </div>
-
-              <div className="action-form-group">
-                <label>Status Aktif</label>
-                <select 
-                  name="is_active" 
-                  value={formData.is_active} 
-                  onChange={handleChange} 
-                  className="action-input"
-                >
-                  <option value="true">Aktif</option>
-                  <option value="false">Non-Aktif</option>
-                </select>
-              </div>
-            </div>
-
-            {message && (
-              <div style={{ 
-                marginTop: '1.5rem', 
-                padding: '1rem', 
-                borderRadius: '12px', 
-                background: message.includes('berhasil') ? '#f0fdf4' : '#fef2f2',
-                color: message.includes('berhasil') ? '#16a34a' : '#dc2626',
-                fontSize: '0.9rem',
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}>
-                {message.includes('berhasil') ? <CheckCircle size={18} /> : <XCircle size={18} />}
-                {message}
-              </div>
-            )}
-
-            <div style={{ marginTop: '2.5rem', display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-              <Button variant="ghost" type="button" onClick={() => navigate('/leave/type')}>
-                Batal
-              </Button>
-              <Button variant="primary" type="submit" disabled={loading}>
-                {loading ? 'Menyimpan...' : (
-                  <>
-                    <Save size={18} />
-                    {isEdit ? 'Perbarui Jenis Cuti' : 'Simpan Jenis Cuti'}
-                  </>
-                )}
-              </Button>
-            </div>
-          </Card>
-        </form>
-
-        <div style={{ marginTop: '2rem' }}>
-          <Card glass style={{ padding: '1.5rem', borderLeft: '4px solid #2563eb' }}>
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <Info size={20} color="#2563eb" />
-              <div>
-                <h4 style={{ margin: '0 0 0.5rem 0' }}>Panduan Pengisian</h4>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', lineHeight: 1.5 }}>
-                  Pastikan kode unik tidak duplikat dengan jenis cuti lain. Kode ini akan digunakan untuk tracking dan pelaporan sistem.
-                </p>
-              </div>
-            </div>
-          </Card>
+          </form>
         </div>
       </div>
     </div>

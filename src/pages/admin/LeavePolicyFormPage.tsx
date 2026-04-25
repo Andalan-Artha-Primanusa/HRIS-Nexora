@@ -2,18 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
-import { Badge } from '@/shared/ui/Badge';
 import { api } from '@/shared/api/httpClient';
 import { 
   Save, 
   ArrowLeft, 
   ShieldCheck, 
-  CheckCircle, 
-  XCircle,
-  Settings,
+  RefreshCw,
   Info,
-  Layers
+  Layers,
+  CheckCircle,
+  XCircle,
+  Settings
 } from 'lucide-react';
+import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 import './AdminLeavePages.css';
 
 const LeavePolicyFormPage: React.FC = () => {
@@ -113,7 +116,7 @@ const LeavePolicyFormPage: React.FC = () => {
 
   if (fetching) {
     return (
-      <div className="admin-leave-page" style={{ textAlign: 'center', padding: '5rem' }}>
+      <div className="crud-page" style={{ textAlign: 'center', padding: '5rem' }}>
         <Settings className="animate-spin" size={48} color="#7c3aed" />
         <p>Memuat konfigurasi kebijakan...</p>
       </div>
@@ -121,34 +124,43 @@ const LeavePolicyFormPage: React.FC = () => {
   }
 
   return (
-    <div className="admin-leave-page">
-      <div className="admin-leave-header">
-        <div>
-          <Button variant="ghost" size="sm" onClick={() => navigate('/leave/policy')} style={{ marginBottom: '1rem', padding: 0 }}>
-            <ArrowLeft size={16} /> Kembali ke Daftar
-          </Button>
-          <h1>{isEdit ? 'Edit Kebijakan Cuti' : 'Buat Kebijakan Cuti Baru'}</h1>
-          <p>Tentukan aturan jatah, akumulasi, dan batasan carry-forward.</p>
+    <div className="crud-page">
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <ShieldCheck size={16} />
+              <span>Governance</span>
+            </div>
+            <h1 className="hero-title">{isEdit ? 'Edit Kebijakan Cuti' : 'Buat Kebijakan Cuti Baru'}</h1>
+            <p className="hero-subtitle">
+              Tentukan aturan jatah, akumulasi, dan batasan carry-forward.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => navigate('/leave/policy')}>
+              <ArrowLeft size={16} />
+              Kembali
+            </button>
+            <button className="btn-primary" type="submit" form="leave-policy-form" disabled={loading}>
+              {loading ? <RefreshCw size={16} className="animate-spin" /> : <Save size={16} />}
+              {loading ? 'Menyimpan...' : (isEdit ? 'Simpan Perubahan' : 'Buat Kebijakan')}
+            </button>
+          </div>
         </div>
-        <Badge variant={isEdit ? 'info' : 'success'} style={{ background: '#7c3aed', color: 'white' }}>
-          {isEdit ? 'Policy Update' : 'New Configuration'}
-        </Badge>
-      </div>
+      </Card>
 
-      <div style={{ maxWidth: '900px' }}>
-        <form onSubmit={handleSubmit}>
-          <Card glass style={{ padding: '2.5rem', borderRadius: '32px' }}>
-            <div className="form-section-header" style={{ marginBottom: '2rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ padding: '10px', borderRadius: '12px', background: '#f5f3ff', color: '#7c3aed' }}>
-                  <ShieldCheck size={24} />
-                </div>
-                <h3 style={{ margin: 0 }}>Parameter Kebijakan</h3>
+      <form id="leave-policy-form" onSubmit={handleSubmit} className="white-unified-wrapper" style={{ maxWidth: '900px', margin: '0 auto' }}>
+<Card glass style={{ padding: '2.5rem', borderRadius: '32px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '2rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem' }}>
+              <div style={{ padding: '10px', borderRadius: '12px', background: '#f5f3ff', color: '#7c3aed' }}>
+                <ShieldCheck size={24} />
               </div>
+              <h3 style={{ margin: 0 }}>Parameter Kebijakan</h3>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '1.5rem' }}>
-              <div className="action-form-group" style={{ gridColumn: 'span 4' }}>
+              <div style={{ gridColumn: 'span 4' }}>
                 <label>Nama Kebijakan</label>
                 <input 
                   type="text" 
@@ -157,11 +169,11 @@ const LeavePolicyFormPage: React.FC = () => {
                   onChange={handleChange} 
                   required 
                   placeholder="Contoh: Kebijakan Cuti Tahunan 2026"
-                  className="action-input"
+                  style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
                 />
               </div>
 
-              <div className="action-form-group" style={{ gridColumn: 'span 2' }}>
+              <div style={{ gridColumn: 'span 2' }}>
                 <label>Tahun Berlaku</label>
                 <input 
                   type="number" 
@@ -169,92 +181,71 @@ const LeavePolicyFormPage: React.FC = () => {
                   value={formData.year} 
                   onChange={handleChange} 
                   required 
-                  className="action-input"
+                  style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
                 />
               </div>
 
-              <div className="action-form-group" style={{ gridColumn: 'span 3' }}>
-                <label>Kode Kebijakan</label>
-                <input 
-                  type="text" 
-                  name="policy_code" 
-                  value={formData.policy_code} 
-                  onChange={handleChange} 
-                  required 
-                  placeholder="Contoh: POL-2026-AL"
-                  className="action-input"
-                />
-              </div>
-
-              <div className="action-form-group" style={{ gridColumn: 'span 3' }}>
-                <label>Tipe Jatah (Entitlement)</label>
-                <select 
-                  name="entitlement_type" 
-                  value={formData.entitlement_type} 
-                  onChange={handleChange} 
-                  className="action-input"
-                >
-                  <option value="fixed">Fixed (Langsung Diberikan)</option>
-                  <option value="accrual">Accrual (Akumulasi per Bulan)</option>
-                </select>
-              </div>
-
-              <div className="action-form-group" style={{ gridColumn: 'span 2' }}>
+              <div>
                 <label>Jatah Hari Dasar</label>
                 <input 
                   type="number" 
                   name="entitlement_value" 
                   value={formData.entitlement_value} 
                   onChange={handleChange} 
-                  className="action-input"
+                  required 
+                  style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
                 />
               </div>
 
-              <div className="action-form-group" style={{ gridColumn: 'span 2' }}>
-                <label>Max Carry-Forward</label>
+              <div>
+                <label>Max Carryover</label>
                 <input 
                   type="number" 
                   name="max_carryover_days" 
                   value={formData.max_carryover_days} 
                   onChange={handleChange} 
-                  className="action-input"
+                  required 
+                  style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
                 />
               </div>
 
-              <div className="action-form-group" style={{ gridColumn: 'span 2' }}>
+              <div>
+                <label>Tipe Jatah</label>
+                <select 
+                  name="entitlement_type" 
+                  value={formData.entitlement_type} 
+                  onChange={handleChange} 
+                  style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
+                >
+                  <option value="fixed">Fixed</option>
+                  <option value="prorated">Prorated</option>
+                  <option value="tenure-based">Tenure Based</option>
+                </select>
+              </div>
+
+              <div>
+                <label>Status Pembayaran</label>
+                <select 
+                  name="is_paid" 
+                  value={formData.is_paid} 
+                  onChange={handleChange} 
+                  style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
+                >
+                  <option value="true">Paid</option>
+                  <option value="false">Unpaid</option>
+                </select>
+              </div>
+
+              <div style={{ gridColumn: 'span 2' }}>
                 <label>Status Kebijakan</label>
                 <select 
                   name="active" 
                   value={formData.active} 
                   onChange={handleChange} 
-                  className="action-input"
+                  style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
                 >
                   <option value="true">Aktif</option>
-                  <option value="false">Draft / Non-Aktif</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="form-section-header" style={{ margin: '2.5rem 0 1.5rem 0', borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ padding: '10px', borderRadius: '12px', background: '#f5f3ff', color: '#7c3aed' }}>
-                  <Layers size={24} />
-                </div>
-                <h3 style={{ margin: 0 }}>Aturan Finansial</h3>
-              </div>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-              <div className="action-form-group">
-                <label>Cuti Dibayar?</label>
-                <select 
-                  name="is_paid" 
-                  value={formData.is_paid} 
-                  onChange={handleChange} 
-                  className="action-input"
-                >
-                  <option value="true">Ya, Dibayar Penuh</option>
-                  <option value="false">Tidak (Potong Gaji/Unpaid)</option>
+                  <option value="false">Non-Aktif</option>
                 </select>
               </div>
             </div>
@@ -292,21 +283,21 @@ const LeavePolicyFormPage: React.FC = () => {
               </Button>
             </div>
           </Card>
-        </form>
 
-        <div style={{ marginTop: '2rem' }}>
-          <Card glass style={{ padding: '1.5rem', borderLeft: '4px solid #7c3aed' }}>
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <Info size={20} color="#7c3aed" />
-              <div>
-                <h4 style={{ margin: '0 0 0.5rem 0' }}>Policy Compliance</h4>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', lineHeight: 1.5 }}>
-                  Setiap perubahan kebijakan akan direkam dalam log audit. Pastikan "Jatah Hari Dasar" sudah sesuai dengan regulasi ketenagakerjaan yang berlaku.
-                </p>
+          <div style={{ marginTop: '2rem' }}>
+            <Card glass style={{ padding: '1.5rem', borderLeft: '4px solid #7c3aed' }}>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <Info size={20} color="#7c3aed" />
+                <div>
+                  <h4 style={{ margin: '0 0 0.5rem 0' }}>Policy Compliance</h4>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', lineHeight: 1.5 }}>
+                    Setiap perubahan kebijakan akan direkam dalam log audit. Pastikan "Jatah Hari Dasar" sudah sesuai dengan regulasi ketenagakerjaan yang berlaku.
+                  </p>
+                </div>
               </div>
-            </div>
-          </Card>
-        </div>
+            </Card>
+          </div>
+        </form>
       </div>
     </div>
   );

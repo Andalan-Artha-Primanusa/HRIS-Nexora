@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save, Clock, DollarSign, Settings, Info, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Save, Clock, DollarSign, Timer, Settings, Info, RefreshCw, CheckCircle2 } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
-import { Button } from '@/shared/ui/Button';
-import { workforceService } from '@/features/workforce/api/workforce.service';
 import './AdminWorkforcePages.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 
 const OvertimeRuleFormPage: React.FC = () => {
   const navigate = useNavigate();
@@ -61,26 +61,36 @@ const OvertimeRuleFormPage: React.FC = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  if (fetching) return <div style={{ padding: '5rem', textAlign: 'center' }}><RefreshCw className="animate-spin" /></div>;
+if (fetching) return <div style={{ padding: '5rem', textAlign: 'center' }}><RefreshCw className="animate-spin" /></div>;
 
   return (
-    <div className="admin-workforce-page">
-      <div className="workforce-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-           <Button variant="ghost" onClick={() => navigate('/workforce/overtime-rules')} style={{ borderRadius: '16px', width: '48px', height: '48px', padding: 0 }}>
-              <ArrowLeft size={24} />
-           </Button>
-           <div>
-              <span className="workforce-badge badge-overtime">
-                <Clock size={14} /> Payroll Strategy
-              </span>
-              <h1>{isEdit ? 'Edit Aturan Lembur' : 'Aturan Lembur Baru'}</h1>
-              <p>Tentukan pengganda kalkulasi dan batas kepatuhan hukum ketenagakerjaan untuk lembur karyawan.</p>
-           </div>
+    <div className="crud-page">
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Timer size={16} />
+              <span>Workforce</span>
+            </div>
+            <h1 className="hero-title">{isEdit ? 'Edit Aturan Lembur' : 'Aturan Lembur Baru'}</h1>
+            <p className="hero-subtitle">
+              Tentukan pengganda kalkulasi dan batas kepatuhan hukum ketenagakerjaan untuk lembur karyawan.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => navigate('/workforce/overtime-rules')}>
+              <ArrowLeft size={16} />
+              Kembali
+            </button>
+            <button className="btn-primary" type="submit" form="overtime-form" disabled={loading}>
+              {loading ? <RefreshCw size={16} className="animate-spin" /> : <Save size={16} />}
+              {loading ? 'Menyimpan...' : (isEdit ? 'Simpan Perubahan' : 'Aktifkan Aturan')}
+            </button>
+          </div>
         </div>
-      </div>
+      </Card>
 
-      <form onSubmit={handleSubmit}>
+<form id="overtime-form" onSubmit={handleSubmit} className="white-unified-wrapper">
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
               <Card glass style={{ padding: '2.5rem', borderRadius: '32px' }}>
@@ -151,13 +161,13 @@ const OvertimeRuleFormPage: React.FC = () => {
               </Card>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                 <Button type="submit" variant="primary" size="lg" disabled={loading} style={{ width: '100%', height: '60px', borderRadius: '20px', fontWeight: 800, fontSize: '1.1rem', boxShadow: '0 10px 20px rgba(37, 99, 235, 0.2)' }}>
-                    {loading ? <RefreshCw className="animate-spin" /> : <Save size={20} style={{ marginRight: '10px' }} />}
+                 <button className="btn-primary" type="submit" disabled={loading} style={{ width: '100%', height: '60px', borderRadius: '20px', fontWeight: 800, fontSize: '1.1rem' }}>
+                    {loading ? <RefreshCw size={16} className="animate-spin" /> : <Save size={16} style={{ marginRight: '10px' }} />}
                     {loading ? 'Menyimpan...' : (isEdit ? 'Simpan Perubahan' : 'Aktifkan Aturan')}
-                 </Button>
-                 <Button type="button" variant="ghost" onClick={() => navigate('/workforce/overtime-rules')} style={{ width: '100%', height: '54px', borderRadius: '20px', fontWeight: 700 }}>
+                 </button>
+                 <button className="btn-outline" type="button" onClick={() => navigate('/workforce/overtime-rules')} style={{ width: '100%', height: '54px', borderRadius: '20px', fontWeight: 700 }}>
                     Batalkan
-                 </Button>
+                 </button>
               </div>
            </div>
         </div>
