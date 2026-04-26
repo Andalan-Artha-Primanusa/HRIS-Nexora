@@ -21,25 +21,6 @@ import {
   Search,
   MapPin,
   ShieldCheck,
-  Plus,
-  RefreshCcw,
-  CheckCircle,
-  XCircle,
-  Save,
-  Trash2,
-  Pencil,
-  Eye,
-  Send,
-  FileSearch,
-  Download,
-  Banknote,
-  UserPlus,
-  Shield,
-  FileUp,
-  Play,
-  FileBarChart,
-  ChevronLeft,
-  ChevronRight,
 } from 'lucide-react';
 import {
   BarChart,
@@ -191,12 +172,12 @@ const sectionDefinitions: Record<string, { title: string; subtitle: string; icon
     icon: Target,
     color: '#2563EB',
   },
-  // requests: {
-  //    title: 'Permintaan Layanan HR',
-  //    subtitle: 'Pantau tiket HR, penugasan PIC, dan update status request.',
-  //   icon: FileText,
-  //   color: '#2563EB',
-  // },
+  requests: {
+     title: 'Permintaan Layanan HR',
+     subtitle: 'Pantau tiket HR, penugasan PIC, dan update status request.',
+    icon: FileText,
+    color: '#2563EB',
+  },
   notifications: {
      title: 'Pusat Notifikasi',
      subtitle: 'Notifikasi approval, pengingat, dan update status lintas modul.',
@@ -252,14 +233,8 @@ const sectionDefinitions: Record<string, { title: string; subtitle: string; icon
     color: '#2563EB',
   },
   '/profiles': {
-     title: 'Profil Karyawan',
+     title: 'Profil',
      subtitle: 'Kelola profil karyawan dan informasi kontak.',
-    icon: UserCircle,
-    color: '#2563EB',
-  },
-  '/profiles': {
-    title: 'Profil Saya',
-    subtitle: 'Lihat dan kelola informasi profil pribadi Anda.',
     icon: UserCircle,
     color: '#2563EB',
   },
@@ -293,76 +268,16 @@ const sectionDefinitions: Record<string, { title: string; subtitle: string; icon
     icon: ShieldCheck,
     color: '#2563EB',
   },
-  '/attendance/timesheet': {
-     title: 'Timesheet Karyawan',
-     subtitle: 'Daftar rincian jam kerja harian dan total durasi kerja.',
-    icon: Clock,
+  '/settings/company': {
+    title: 'Pengaturan Perusahaan',
+    subtitle: 'Kelola profil, informasi kontak, dan identitas perusahaan.',
+    icon: Briefcase,
     color: '#2563EB',
   },
-  '/attendance/overtime': {
-     title: 'Daftar Lembur',
-     subtitle: 'Ringkasan pengajuan dan persetujuan jam lembur karyawan.',
-    icon: Clock,
-    color: '#2563EB',
-  },
-  '/attendance/reports': {
-     title: 'Laporan Kehadiran',
-     subtitle: 'Analisa mendalam mengenai tren absensi dan kepatuhan waktu.',
-    icon: FileBarChart,
-    color: '#2563EB',
-  },
-  '/attendance/daily': {
-    title: 'Monitoring Kehadiran',
-    subtitle: 'Pantau status kehadiran seluruh karyawan hari ini secara real-time.',
-    icon: Users,
-    color: '#2563EB',
-  },
-  '/payroll/component/allowance': {
-     title: 'Manajemen Tunjangan',
-     subtitle: 'Kelola komponen pendapatan tambahan (allowance) karyawan.',
-    icon: Banknote,
-    color: '#2563EB',
-  },
-  '/payroll/component/deduction': {
-    title: 'Manajemen Potongan',
-    subtitle: 'Kelola komponen potongan gaji (deduction) karyawan.',
-    icon: CreditCard,
-    color: '#2563EB',
-  },
-  '/leave/balance': {
-    title: 'Saldo Cuti',
-    subtitle: 'Lihat ringkasan saldo cuti tahunan dan jenis cuti lainnya.',
-    icon: CalendarDays,
-    color: '#2563EB',
-  },
-  '/leave/approval': {
-    title: 'Persetujuan Cuti',
-    subtitle: 'Review dan berikan keputusan (Setuju/Tolak) untuk pengajuan cuti karyawan.',
-    icon: CalendarDays,
-    color: '#2563EB',
-  },
-  '/leave/calendar': {
-    title: 'Kalender Cuti',
-    subtitle: 'Lihat jadwal cuti seluruh karyawan dalam format kalender.',
-    icon: CalendarDays,
-    color: '#2563EB',
-  },
-  '/leave/my-leave': {
-    title: 'Cuti Saya',
-    subtitle: 'Lihat riwayat pengajuan cuti pribadi dan sisa saldo cuti Anda.',
-    icon: CalendarDays,
-    color: '#2563EB',
-  },
-  '/leave/type': {
-    title: 'Jenis Cuti',
-    subtitle: 'Kelola berbagai kategori cuti yang tersedia untuk karyawan.',
-    icon: CalendarDays,
-    color: '#2563EB',
-  },
-  '/leave/policy': {
-    title: 'Kebijakan Cuti',
-    subtitle: 'Atur aturan cuti tahunan, jatah hari, dan carry forward.',
-    icon: CalendarDays,
+  '/settings/user-role': {
+     title: 'Pengaturan Pengguna & Peran',
+     subtitle: 'Kelola pengguna sistem dan hak akses.',
+    icon: UserCircle,
     color: '#2563EB',
   },
 };
@@ -455,7 +370,6 @@ const getSectionTableKey = (pathname: string) => {
   if (pathname.startsWith('/organization/')) return 'organization';
   if (pathname.startsWith('/employment/')) return 'employment';
   if (pathname.startsWith('/leave/')) return 'leave';
-  if (pathname.startsWith('/payroll/component/')) return 'payroll';
   if (pathname.startsWith('/payroll/')) return 'payroll';
   if (pathname.startsWith('/expense/')) return 'expense';
   if (pathname.startsWith('/performance/')) return 'performance';
@@ -486,11 +400,11 @@ const getSectionData = (pathname: string) => {
 
   const tableColumns: Record<string, string[]> = {
     employees: ['Name', 'Department', 'Position', 'Status', 'Actions'],
-    organization: ['Name', 'Type', 'Manager', 'Members', 'Status', 'Actions'],
+    organization: ['Name', 'Type', 'Manager', 'Members', 'Status'],
     employment: ['Employee', 'Position', 'Start Date', 'Salary', 'Status'],
     documents: ['Document', 'Employee', 'Type', 'Expired', 'Status'],
-    attendance: ['Date', 'Present', 'Absent', 'Overtime', 'Status', 'Actions'],
-    leave: ['Employee', 'Leave Type', 'Start', 'End', 'Status', 'Actions'],
+    attendance: ['Date', 'Present', 'Absent', 'Overtime', 'Status'],
+    leave: ['Employee', 'Leave Type', 'Start', 'End', 'Status'],
     payroll: ['Payroll Period', 'Employees', 'Total', 'Status', 'Actions'],
     expense: ['Title', 'Category', 'Amount', 'Status', 'Date'],
     assets: ['Asset', 'Category', 'Assigned To', 'Status', 'Updated'],
@@ -508,11 +422,11 @@ const getSectionData = (pathname: string) => {
     recruitment: ['Opening', 'Department', 'Type', 'Status', 'Updated'],
     compliance: ['Metric', 'Value', 'Window', 'Status', 'Updated'],
     approval_flows: ['Flow', 'Module', 'Steps', 'Status', 'Updated'],
-    profiles: ['Name', 'Email', 'Phone', 'City', 'Status', 'Actions'],
-    locations: ['Location', 'Latitude', 'Longitude', 'Radius', 'Status', 'Actions'],
-    kpis: ['Title', 'Employee', 'Target', 'Progress', 'Status', 'Actions'],
-    reimbursements: ['Title', 'Category', 'Amount', 'Status', 'Date', 'Actions'],
-    admin: ['Entity', 'Role / Access', 'Updated', 'Status', 'Actions'],
+    profiles: ['Name', 'Email', 'Phone', 'City', 'Status'],
+    locations: ['Location', 'Latitude', 'Longitude', 'Radius', 'Status'],
+    kpis: ['Title', 'Employee', 'Target', 'Progress', 'Status'],
+    reimbursements: ['Title', 'Category', 'Amount', 'Status', 'Date'],
+    admin: ['Entity', 'Role / Access', 'Updated', 'Status'],
     dashboard: ['Metric', 'Value', 'Trend', 'Status'],
   };
 
@@ -637,13 +551,16 @@ const getDefaultFormState = (pathname: string) => {
     case '/leave/approval':
       return { id: '', approval_notes: '' };
     case '/leave/type':
-      return { id: '', name: '', code: '', description: '', is_paid: 'true', is_active: 'true' };
     case '/leave/policy':
-      return { id: '', name: '', policy_code: '', year: new Date().getFullYear().toString(), annual_allowance: '12', carry_over_allowance: '0', max_carryover_days: '5', entitlement_type: 'fixed', entitlement_value: '12', is_paid: 'true', active: 'true' };
-    case '/profiles':
-      return { id: '', phone: '', address: '', birth_date: '', gender: '', nationality: '', id_number: '', bank_name: '', bank_account_number: '', tax_number: '' };
-    case '/leave/balance':
-      return { id: '' };
+      return {
+        id: '',
+        name: '',
+        policy_code: '',
+        entitlement_type: 'fixed',
+        entitlement_value: '',
+        max_carryover_days: '',
+        is_paid: 'true',
+      };
     case '/attendance/check-in':
       return { latitude: '', longitude: '' };
     case '/attendance/check-out':
@@ -674,7 +591,7 @@ const getDefaultFormState = (pathname: string) => {
     case '/requests/status':
       return { id: '', status: '', completion_notes: '' };
     case '/training/programs':
-      return { title: '', description: '', provider: '', mode: 'online', start_date: '', end_date: '', budget: '', status: 'draft' };
+      return { title: '', name: '', code: '', category: '', description: '', provider: '', mode: '', duration_hours: '', start_date: '', end_date: '', budget: '', status: '' };
     case '/training/enrollments':
       return { id: '', employee_ids: '', attendance_percentage: '', assessment_score: '' };
     case '/competencies':
@@ -692,7 +609,7 @@ const getDefaultFormState = (pathname: string) => {
     case '/locations':
       return { name: '', latitude: '', longitude: '', radius: '' };
     case '/reimbursements':
-      return { id: '', employee_id: '', title: '', description: '', amount: '', category: '', expense_date: '', receipt_path: '', approval_note: '', rejection_note: '' };
+      return { id: '', title: '', description: '', amount: '', category: '', expense_date: '', receipt_path: '', approval_note: '', rejection_note: '' };
     case '/expense/approval':
       return { id: '', approval_note: '', rejection_note: '' };
     case '/reports/attendance':
@@ -748,82 +665,110 @@ const getDefaultFormState = (pathname: string) => {
       return { id: '', permission_ids: '' };
     case '/admin/permissions':
       return {};
-    case '/leave/type':
-      return { id: '', name: '', code: '', description: '', is_paid: 'true', is_active: 'true' };
-    case '/leave/policy':
-      return { id: '', name: '', policy_code: '', year: new Date().getFullYear().toString(), annual_allowance: '12', carry_over_allowance: '0', max_carryover_days: '5', entitlement_type: 'fixed', entitlement_value: '12', is_paid: 'true', active: 'true' };
     default:
       return {} as Record<string, string>;
   }
 };
 
-const formatVal = (val: unknown): string => {
-  if (val === null || val === undefined) return '-';
-  if (typeof val === 'boolean') return val ? 'Yes' : 'No';
-  if (Array.isArray(val)) {
-    if (val.length === 0) return '-';
-    // Handle nested arrays of objects (like periods or dates)
-    return val.map(item => {
-      if (typeof item === 'object' && item !== null) {
-        const v = item as Record<string, unknown>;
-        if (v.start_date && v.end_date) return `${v.start_date} - ${v.end_date}`;
-        if (v.name) return String(v.name);
-        return JSON.stringify(item);
-      }
-      return String(item);
-    }).join(', ');
-  }
-  if (typeof val === 'object') {
-    try {
-      const v = val as Record<string, unknown>;
-      if (v.name) return String(v.name);
-      if (v.label) return String(v.label);
-      if (v.title) return String(v.title);
-      if (v.email) return String(v.email);
-      if (v.employee_code) return String(v.employee_code);
-      
-      const keys = Object.keys(v).filter(k => typeof v[k] !== 'object' && k !== 'id').slice(0, 3);
-      if (keys.length > 0) {
-        return keys.map(k => `${k}: ${v[k]}`).join(', ');
-      }
-      
-      return JSON.stringify(val);
-    } catch {
-      return '[Object]';
-    }
-  }
-  return String(val);
-};
-
 const parsePayloadToTable = (payload: unknown) => {
-  if (!payload) return { columns: ['Result'], rows: [['No data available']] };
-
   if (Array.isArray(payload)) {
     if (payload.length === 0) {
       return { columns: ['Result'], rows: [['No data available']] };
     }
 
-    const first = payload[0] as Record<string, unknown>;
-    const columns = Object.keys(first).filter((k) => k !== 'created_at' && k !== 'updated_at' && k !== 'deleted_at');
-    
+    if (typeof payload[0] === 'object' && payload[0] !== null && !Array.isArray(payload[0])) {
+      const columns = Array.from(
+        payload.reduce<Set<string>>((keys, item) => {
+          Object.keys(item as Record<string, unknown>).forEach((key) => keys.add(key));
+          return keys;
+        }, new Set<string>())
+      );
+
+      const rows = payload.map((item) =>
+        columns.map((column) => {
+          const value = (item as Record<string, unknown>)[column];
+          if (value === undefined || value === null) return '-';
+
+// ✅ employee
+if (column === 'employee_id') {
+  return `EMP-${String(value).padStart(3, '0')}`;
+}
+
+// ✅ leave policy boolean
+if (column === 'is_paid') {
+  return value === true || value === 'true' ? 'Paid' : 'Unpaid';
+}
+
+// ✅ leave policy number
+if (column === 'entitlement_value' || column === 'max_carryover_days') {
+  return `${value} hari`;
+}
+
+// ✅ semua tanggal (created_at, start_date, dll)
+if (column.includes('date') || column.endsWith('_at')) {
+  return new Date(String(value)).toLocaleDateString('id-ID', {
+    timeZone: 'Asia/Jakarta',
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  });
+}
+
+// ✅ json rendering fallback (e.g. array of valid periods)
+let parsedVal = value;
+if (typeof value === 'string' && value.trim().startsWith('[') && value.trim().endsWith(']')) {
+  try {
+    parsedVal = JSON.parse(value);
+  } catch {}
+}
+
+if (Array.isArray(parsedVal)) {
+  const formattedParts = parsedVal.map((item: any) => {
+    if (typeof item === 'object' && item !== null) {
+      if ('start_date' in item && 'end_date' in item) {
+        const start = new Date(String(item.start_date)).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+        const end = new Date(String(item.end_date)).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+        return `${start} - ${end}`;
+      }
+      if ('holiday_date' in item && 'name' in item) {
+        const hDate = new Date(String(item.holiday_date)).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+        return `${hDate} (${item.name})`;
+      }
+      return Object.entries(item).map(([k, v]) => `${k}: ${v}`).join(', ');
+    }
+    return String(item);
+  });
+  return formattedParts.join('\n');
+}
+
+// default
+if (typeof value === 'object') {
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return '[object]';
+  }
+}
+
+return String(value);
+        })
+      );
+
+      return { columns: columns.length ? columns : ['Result'], rows };
+    }
+
     return {
-      columns,
-      rows: payload.map((item) => columns.map((col) => {
-        if (col === 'id') return (item as Record<string, unknown>)[col];
-        return formatVal((item as Record<string, unknown>)[col]);
-      })),
+      columns: ['Value'],
+      rows: payload.map((item) => [String(item)]),
     };
   }
 
   if (typeof payload === 'object' && payload !== null) {
     const obj = payload as Record<string, unknown>;
-    const columns = Object.keys(obj).filter((k) => k !== 'created_at' && k !== 'updated_at' && k !== 'deleted_at');
+    const columns = Object.keys(obj);
     return {
       columns: columns.length ? columns : ['Result'],
-      rows: [columns.map((key) => {
-        if (key === 'id') return obj[key];
-        return formatVal(obj[key]);
-      })],
+      rows: [columns.map((key) => String(obj[key] ?? '-'))],
     };
   }
 
@@ -843,7 +788,6 @@ const selectOptionsByField: Record<string, string[]> = {
   active: ['true', 'false'],
   requires_approval: ['true', 'false'],
   is_paid: ['true', 'false'],
-  is_active: ['true', 'false'],
 };
 
 const dateFields = new Set(['start_date', 'end_date', 'hire_date', 'expense_date', 'issue_date', 'expiry_date', 'assigned_at', 'expected_return_date', 'period', 'target_date', 'swap_date']);
@@ -855,7 +799,7 @@ const routeActionMatrix: Record<string, string[]> = {
   '/employees/add': ['createEmployee'],
   '/employees': ['startOnboarding', 'completeOnboarding', 'startOffboarding', 'completeOffboarding'],
   '/leave/requests': ['createLeave', 'updateLeaveRequest', 'cancelLeaveRequest'],
-  '/leave/type': ['createLeaveType', 'updateLeaveType', 'deleteLeaveType'],
+  '/leave/type': ['createLeavePolicy', 'updateLeavePolicy', 'deleteLeavePolicy'],
   '/leave/policy': ['createLeavePolicy', 'updateLeavePolicy', 'deleteLeavePolicy'],
   '/leave/approval': ['approveLeave', 'rejectLeave'],
   '/attendance/check-in': ['checkIn'],
@@ -917,9 +861,15 @@ const getFormStateByMode = (pathname: string, mode: CrudMode) => {
     case '/leave/requests':
       return { leave_type: '', start_date: '', end_date: '', total_days: '', reason: '' };
     case '/leave/type':
-      return { name: '', code: '', description: '', is_paid: 'true', is_active: 'true' };
     case '/leave/policy':
-      return { name: '', policy_code: '', year: new Date().getFullYear().toString(), annual_allowance: '12', carry_over_allowance: '0', max_carryover_days: '5', entitlement_type: 'fixed', entitlement_value: '12', is_paid: 'true', active: 'true' };
+      return {
+        name: '',
+        policy_code: '',
+        entitlement_type: 'fixed',
+        entitlement_value: '',
+        max_carryover_days: '',
+        is_paid: 'true',
+      };
     case '/reimbursements':
       return { title: '', description: '', amount: '', category: '', expense_date: '', receipt_path: '' };
     default:
@@ -939,12 +889,7 @@ const actionRequiredFields: Record<string, string[]> = {
   rejectLeave: ['id'],
   updateLeavePolicy: ['id'],
   deleteLeavePolicy: ['id'],
-  updateLeaveType: ['id'],
-  deleteLeaveType: ['id'],
-  createLeaveType: ['name', 'code'],
-  createLeavePolicy: ['name', 'policy_code', 'year'],
   submitMyReimbursement: ['id'],
-  createReimbursementAdmin: ['employee_id', 'title', 'amount', 'category', 'expense_date'],
   approveReimbursement: ['id'],
   rejectReimbursement: ['id'],
   markReimbursementPaid: ['id'],
@@ -1007,9 +952,6 @@ const SectionPage = () => {
   const [, setResponseText] = useState('');
   const [statusMessage, setStatusMessage] = useState('Ready to call API');
   const [loading, setLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
 
   const validateActionRequest = (action: string) => {
     const allowedActions = routeActionMatrix[basePath] ?? [];
@@ -1099,7 +1041,7 @@ const SectionPage = () => {
       void loadHrSummaryStats();
     }
     if (supportsList(path)) {
-      void loadList(1);
+      void loadList();
     }
   }, [path, activeCrudMode, section.tableColumns, loadHrSummaryStats]);
 
@@ -1112,7 +1054,7 @@ const SectionPage = () => {
     }
 
     if (supportsList(path)) {
-      void loadList(currentPage);
+      void loadList();
     }
   };
 
@@ -1164,84 +1106,59 @@ const SectionPage = () => {
     setResponseText(typeof payload === 'string' ? payload : JSON.stringify(payload, null, 2));
   };
 
-  const loadList = async (page: number = 1) => {
+  const loadList = async () => {
     setLoading(true);
     setSummaryStats([]);
     setStatusMessage('Memuat data...');
-    setCurrentPage(page);
 
     try {
       let result;
-      const params = { page, per_page: 15 };
-      
       switch (basePath) {
         case '/profiles':
-          result = await api.get('/profiles', { params });
-          break;
-        case '/my/profile':
-          result = await api.get('/my/profile');
+          result = await api.get('/profiles');
           break;
         case '/employees':
-          result = await api.get('/employees', { params });
+          result = await api.get('/employees');
           break;
         case '/leave/requests':
-          result = await api.get('/leaves', { params });
-          break;
-        case '/leave/my-leave':
-          result = await api.get('/leaves/my', { params });
-          break;
-        case '/leave/approval':
-          result = await api.get('/leaves/pending', { params });
-          break;
-        case '/leave/type':
-          result = await api.get('/leave-types', { params });
-          break;
-        case '/leave/policy':
-          result = await api.get('/leave-policies', { params });
-          break;
-        case '/attendance':
-        case '/attendance/daily':
-          result = await api.get('/attendance/all', { params });
-          break;
-        case '/attendance/timesheet':
-          result = await api.get('/attendance/history', { params });
-          break;
-        case '/attendance/shifts':
-          result = await api.get('/work-schedules', { params });
-          break;
-        case '/attendance/overtime':
-          result = await api.get('/attendance/overtime', { params: { ...params, days: 30 } });
-          break;
-        case '/attendance/reports':
-          result = await api.get('/attendance/intelligence', { params: { ...params, days: 30 } });
-          break;
-        case '/attendance/history':
-          result = await api.get('/attendance/history', { params });
-          break;
-        case '/leave/balance':
-          result = await api.get('/leaves/balance');
+          result = await api.get('/leaves');
           break;
         case '/leave/my-leave':
           result = await api.get('/leaves/my');
           break;
+        case '/leave/approval':
+          result = await api.get('/leaves/pending');
+          break;
+        case '/leave/type':
+        case '/leave/policy':
+          result = await api.get('/leave-policies');
+          break;
+        case '/attendance':
+        case '/attendance/daily':
+          result = await api.get('/attendance/all');
+          break;
+        case '/attendance/timesheet':
+          result = await api.get('/attendance/history');
+          break;
+        case '/attendance/shifts':
+          result = await api.get('/work-schedules');
+          break;
+        case '/attendance/overtime':
+          result = await api.get('/attendance/overtime', { params: { days: 30 } });
+          break;
+        case '/attendance/reports':
+          result = await api.get('/attendance/intelligence', { params: { days: 30 } });
+          break;
+        case '/attendance/history':
+          result = await api.get('/attendance/history');
+          break;
         case '/attendance/today':
-          result = await api.get('/attendance/today', { params });
+          result = await api.get('/attendance/today');
           break;
         case '/payroll':
-        case '/payroll/list':
-        case '/payroll/crud':
         case '/payroll/tax':
         case '/payroll/reports':
-          result = await api.get('/payroll', { params });
-          break;
-        case '/admin/audit-logs':
-          result = await api.get('/audit-logs');
-          break;
-        case '/admin/import':
-          result = await api.get('/admin/import/template', { params: { type: 'employee' } });
-          break;
-        case '/admin/email-notifications':
-          result = await api.get('/notifications', { params: { type: 'email' } });
+          result = await api.get('/payroll');
           break;
         case '/reimbursements':
         case '/expense/submit':
@@ -1842,20 +1759,11 @@ const SectionPage = () => {
       }
 
       if (result) {
-        let payload = result.data?.data ?? result.data;
-        let actualPayload = payload;
-
-        // Laravel style pagination handling
-        if (payload && typeof payload === 'object' && !Array.isArray(payload) && Array.isArray((payload as any).data)) {
-          actualPayload = (payload as any).data;
-          setTotalPages((payload as any).last_page ?? 1);
-          setTotalItems((payload as any).total ?? actualPayload.length);
-          setCurrentPage((payload as any).current_page ?? page);
-        } else if (Array.isArray(payload)) {
-          setTotalPages(1);
-          setTotalItems(payload.length);
-          setCurrentPage(1);
-        }
+        const payload = result.data?.data ?? result.data;
+        const actualPayload =
+          payload && typeof payload === 'object' && !Array.isArray(payload) && Array.isArray((payload as any).data)
+            ? (payload as any).data
+            : payload;
 
         if (basePath === '/reports/dashboard-summary' && payload && typeof payload === 'object') {
           const reportPayload = payload as any;
@@ -2089,23 +1997,23 @@ const SectionPage = () => {
           <>
             {isCreateMode ? (
               <Button variant="primary" size="md" onClick={() => void performAction('createProfile')} disabled={loading}>
-                <Plus size={16} /> Create Profile
+                Create Profile
               </Button>
             ) : (
               <>
                 <Button variant="outline" size="md" onClick={() => void performAction('getProfileDetail')} disabled={loading}>
-                  <Eye size={16} /> Get Profile Detail
+                  Get Profile Detail
                 </Button>
                 <Button variant="secondary" size="md" onClick={() => void performAction('updateProfile')} disabled={loading}>
-                  <Save size={16} /> Update Profile
+                  Update Profile
                 </Button>
                 <Button variant="outline" size="md" onClick={() => void performAction('deleteProfile')} disabled={loading}>
-                  <Trash2 size={16} /> Delete Profile
+                  Delete Profile
                 </Button>
               </>
             )}
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              <RefreshCcw size={16} /> Refresh Profiles
+              Refresh Profiles
             </Button>
           </>
         );
@@ -2119,19 +2027,19 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('startOnboarding')} disabled={loading}>
-              <Plus size={16} /> Start Onboarding
+              Start Onboarding
             </Button>
             <Button variant="outline" size="md" onClick={() => void performAction('completeOnboarding')} disabled={loading}>
-              <CheckCircle size={16} /> Complete Onboarding
+              Complete Onboarding
             </Button>
             <Button variant="outline" size="md" onClick={() => void performAction('startOffboarding')} disabled={loading}>
-              <XCircle size={16} /> Start Offboarding
+              Start Offboarding
             </Button>
             <Button variant="outline" size="md" onClick={() => void performAction('completeOffboarding')} disabled={loading}>
-              <CheckCircle size={16} /> Complete Offboarding
+              Complete Offboarding
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              <RefreshCcw size={16} /> Refresh Employees
+              Refresh Employees
             </Button>
           </>
         );
@@ -2158,46 +2066,25 @@ const SectionPage = () => {
           </>
         );
       case '/leave/type':
-        return (
-          <>
-            {isCreateMode ? (
-              <Button variant="primary" size="md" onClick={() => void performAction('createLeaveType')} disabled={loading}>
-                <Plus size={16} /> Tambah Jenis Cuti
-              </Button>
-            ) : (
-              <>
-                <Button variant="outline" size="md" onClick={() => void performAction('updateLeaveType')} disabled={loading}>
-                  <Save size={16} /> Update Jenis
-                </Button>
-                <Button variant="outline" size="md" onClick={() => void performAction('deleteLeaveType')} disabled={loading}>
-                  <Trash2 size={16} /> Hapus Jenis
-                </Button>
-              </>
-            )}
-            <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              <RefreshCcw size={16} /> Segarkan
-            </Button>
-          </>
-        );
       case '/leave/policy':
         return (
           <>
             {isCreateMode ? (
               <Button variant="primary" size="md" onClick={() => void performAction('createLeavePolicy')} disabled={loading}>
-                <Plus size={16} /> Buat Kebijakan
+                Create Policy
               </Button>
             ) : (
               <>
                 <Button variant="outline" size="md" onClick={() => void performAction('updateLeavePolicy')} disabled={loading}>
-                  <Save size={16} /> Update Kebijakan
+                  Update Policy
                 </Button>
                 <Button variant="outline" size="md" onClick={() => void performAction('deleteLeavePolicy')} disabled={loading}>
-                  <Trash2 size={16} /> Hapus Kebijakan
+                  Delete Policy
                 </Button>
               </>
             )}
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              <RefreshCcw size={16} /> Segarkan
+              Refresh Policies
             </Button>
           </>
         );
@@ -2342,10 +2229,10 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('createTrainingProgram')} disabled={loading}>
-              <Plus size={16} /> Buat Program
+              Buat Program
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              <RefreshCcw size={16} /> Muat Ulang Program
+              Muat Ulang Program
             </Button>
           </>
         );
@@ -2353,15 +2240,16 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('enrollTrainingProgram')} disabled={loading}>
-              <UserPlus size={16} /> Daftarkan Karyawan
+              Daftarkan Karyawan
             </Button>
             <Button variant="outline" size="md" onClick={() => void performAction('completeTrainingEnrollment')} disabled={loading}>
-              <CheckCircle size={16} /> Selesaikan Pendaftaran
+              Selesaikan Pendaftaran
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              <RefreshCcw size={16} /> Muat Ulang Pendaftaran
+              Muat Ulang Pendaftaran
             </Button>
-          </>)
+          </>
+        );
       case '/competencies':
       case '/my/competencies':
         return (
@@ -2541,7 +2429,6 @@ const SectionPage = () => {
       case '/performance/summary':
       case '/recruitment/openings':
       case '/documents/expiring':
-      case '/my/profile':
       case '/my/assets':
       case '/my/trainings':
       case '/attendance/daily':
@@ -2565,7 +2452,6 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              <RefreshCcw size={18} style={{ marginRight: '8px' }} />
               Muat Ulang Data
             </Button>
           </>
@@ -2598,7 +2484,6 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              <Search size={18} style={{ marginRight: '8px' }} />
               Terapkan Filter Laporan
             </Button>
           </>
@@ -2606,7 +2491,6 @@ const SectionPage = () => {
       case '/my/kpi':
         return (
           <Button variant="primary" size="md" onClick={() => void performAction('submitKpi')} disabled={!formState.id || loading}>
-            <Send size={18} style={{ marginRight: '8px' }} />
             Submit KPI
           </Button>
         );
@@ -2614,19 +2498,15 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('generatePayroll')} disabled={loading}>
-              <Play size={18} style={{ marginRight: '8px' }} />
               Proses Payroll Bulanan
             </Button>
             <Button variant="outline" size="md" onClick={() => void performAction('approvePayroll')} disabled={loading}>
-              <CheckCircle size={18} style={{ marginRight: '8px' }} />
               Setujui Payroll
             </Button>
             <Button variant="outline" size="md" onClick={() => void performAction('markPayrollPaid')} disabled={loading}>
-              <Banknote size={18} style={{ marginRight: '8px' }} />
               Tandai Payroll Sudah Dibayar
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              <RefreshCcw size={18} style={{ marginRight: '8px' }} />
               Muat Ulang Payroll
             </Button>
           </>
@@ -2635,11 +2515,9 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('createLocation')} disabled={loading}>
-              <MapPin size={18} style={{ marginRight: '8px' }} />
               Tambah Lokasi
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              <RefreshCcw size={18} style={{ marginRight: '8px' }} />
               Muat Ulang Lokasi
             </Button>
           </>
@@ -2649,27 +2527,22 @@ const SectionPage = () => {
           <>
             {isCreateMode ? (
                 <Button variant="primary" size="md" onClick={() => void performAction('createReimbursementAdmin')} disabled={loading}>
-                  <Plus size={18} style={{ marginRight: '8px' }} />
                   Buat Reimburse
               </Button>
             ) : (
               <>
                 <Button variant="outline" size="md" onClick={() => void performAction('approveReimbursement')} disabled={loading}>
-                  <CheckCircle size={18} style={{ marginRight: '8px' }} />
                   Setujui Reimburse
                 </Button>
                 <Button variant="outline" size="md" onClick={() => void performAction('rejectReimbursement')} disabled={loading}>
-                  <XCircle size={18} style={{ marginRight: '8px' }} />
                   Tolak Reimburse
                 </Button>
                 <Button variant="outline" size="md" onClick={() => void performAction('markReimbursementPaid')} disabled={loading}>
-                  <Banknote size={18} style={{ marginRight: '8px' }} />
                   Tandai Sudah Dibayar
                 </Button>
               </>
             )}
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              <RefreshCcw size={18} style={{ marginRight: '8px' }} />
               Muat Ulang Reimburse
             </Button>
           </>
@@ -2678,19 +2551,15 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('approveReimbursement')} disabled={loading}>
-              <CheckCircle size={18} style={{ marginRight: '8px' }} />
               Setujui Reimburse
             </Button>
             <Button variant="outline" size="md" onClick={() => void performAction('rejectReimbursement')} disabled={loading}>
-              <XCircle size={18} style={{ marginRight: '8px' }} />
               Tolak Reimburse
             </Button>
             <Button variant="outline" size="md" onClick={() => void performAction('markReimbursementPaid')} disabled={loading}>
-              <Banknote size={18} style={{ marginRight: '8px' }} />
               Tandai Sudah Dibayar
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              <RefreshCcw size={18} style={{ marginRight: '8px' }} />
               Muat Ulang Antrian Persetujuan
             </Button>
           </>
@@ -2699,19 +2568,15 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('submitMyPayroll')} disabled={loading}>
-              <RefreshCcw size={18} style={{ marginRight: '8px' }} />
               Muat Ulang Payroll Saya
             </Button>
             <Button variant="outline" size="md" onClick={() => void performAction('getMyPayrollSlip')} disabled={loading}>
-              <Eye size={18} style={{ marginRight: '8px' }} />
               Lihat Slip Gaji
             </Button>
             <Button variant="outline" size="md" onClick={() => void performAction('exportMyPayrollCsv')} disabled={loading}>
-              <FileUp size={18} style={{ marginRight: '8px' }} />
               Ekspor Payroll CSV
             </Button>
             <Button variant="outline" size="md" onClick={() => void performAction('exportMyPayrollPdf')} disabled={loading}>
-              <FileText size={18} style={{ marginRight: '8px' }} />
               Ekspor Payroll PDF
             </Button>
           </>
@@ -2720,11 +2585,9 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('assignRoleToUser')} disabled={loading}>
-              <UserPlus size={18} style={{ marginRight: '8px' }} />
               Tugaskan Peran ke Pengguna
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              <RefreshCcw size={18} style={{ marginRight: '8px' }} />
               Muat Ulang Pengguna
             </Button>
           </>
@@ -2733,11 +2596,9 @@ const SectionPage = () => {
         return (
           <>
             <Button variant="primary" size="md" onClick={() => void performAction('assignPermissionToRole')} disabled={loading}>
-              <Shield size={18} style={{ marginRight: '8px' }} />
               Tugaskan Izin ke Peran
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              <RefreshCcw size={18} style={{ marginRight: '8px' }} />
               Muat Ulang Peran
             </Button>
           </>
@@ -2753,243 +2614,15 @@ const SectionPage = () => {
       default:
         return supportsList(path) ? (
           <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-            <RefreshCcw size={18} style={{ marginRight: '8px' }} />
             Muat Ulang Data
           </Button>
         ) : null;
     }
   };
 
-  const renderLeaveTypeView = () => {
-    if (!tableRows.length) return (
-      <div style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>Belum ada jenis cuti terdaftar.</div>
-    );
-
-    return (
-      <div className="leave-type-grid">
-        {tableRows.map((row, i) => {
-          const name = row[tableColumns.indexOf('NAME')] || row[tableColumns.indexOf('Name')] || 'Unknown';
-          const code = row[tableColumns.indexOf('CODE')] || row[tableColumns.indexOf('Code')] || '-';
-          const desc = row[tableColumns.indexOf('DESCRIPTION')] || row[tableColumns.indexOf('Description')] || '';
-          const isPaid = row[tableColumns.indexOf('IS_PAID')] || row[tableColumns.indexOf('Is Paid')];
-          const isActive = row[tableColumns.indexOf('IS_ACTIVE')] || row[tableColumns.indexOf('Is Active')];
-
-          return (
-            <div key={i} className="leave-type-card glass-shimmer" onClick={() => {
-              const obj: any = {};
-              tableColumns.forEach((col, idx) => { obj[col.toLowerCase()] = row[idx]; });
-              setFormState(obj);
-            }}>
-              <div className="leave-type-icon-box">
-                <CalendarDays size={24} />
-              </div>
-              <div className="leave-type-info">
-                <h3>{String(name)}</h3>
-                <p>{String(desc)}</p>
-                <small style={{ color: '#94a3b8', fontWeight: 600 }}>CODE: {String(code)}</small>
-              </div>
-              <div className="leave-type-meta">
-                <Badge variant={isPaid === 'Yes' || isPaid === true ? 'success' : 'default'}>
-                  {isPaid === 'Yes' || isPaid === true ? 'Paid' : 'Unpaid'}
-                </Badge>
-                <Badge variant={isActive === 'Yes' || isActive === true ? 'info' : 'danger'}>
-                  {isActive === 'Yes' || isActive === true ? 'Active' : 'Inactive'}
-                </Badge>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-
-  const renderLeavePolicyView = () => {
-    if (!tableRows.length) return (
-      <div style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>Belum ada kebijakan cuti terdaftar.</div>
-    );
-
-    return (
-      <div className="leave-policy-list">
-        {tableRows.map((row, i) => {
-          const year = row[tableColumns.indexOf('YEAR')] || row[tableColumns.indexOf('Year')] || '-';
-          const name = row[tableColumns.indexOf('NAME')] || row[tableColumns.indexOf('Name')] || 'General Policy';
-          const allowance = row[tableColumns.indexOf('ANNUAL_ALLOWANCE')] || row[tableColumns.indexOf('Annual Allowance')] || '0';
-          const carryOver = row[tableColumns.indexOf('CARRY_OVER_ALLOWANCE')] || row[tableColumns.indexOf('Carry Over Allowance')] || '0';
-          const active = row[tableColumns.indexOf('ACTIVE')] || row[tableColumns.indexOf('Active')];
-
-          return (
-            <div key={i} className="leave-policy-item glass-shimmer" onClick={() => {
-              const obj: any = {};
-              tableColumns.forEach((col, idx) => { obj[col.toLowerCase()] = row[idx]; });
-              setFormState(obj);
-            }}>
-              <div className="policy-main-info">
-                <div className="policy-year-badge">{String(year)}</div>
-                <div className="policy-details">
-                  <span className="policy-name">{String(name)}</span>
-                  <div className="policy-stats">
-                    <div className="stat-group">
-                      <span className="stat-label">Allowance</span>
-                      <span className="stat-value">{String(allowance)} Days</span>
-                    </div>
-                    <div className="stat-group">
-                      <span className="stat-label">Carry Over</span>
-                      <span className="stat-value">{String(carryOver)} Days</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="policy-actions">
-                <Badge variant={active === 'Yes' || active === true ? 'success' : 'danger'}>
-                  {active === 'Yes' || active === true ? 'Active' : 'Inactive'}
-                </Badge>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-
-  const renderAdminLeaveView = () => {
-    if (!tableRows.length) return (
-      <div style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>Belum ada pengajuan cuti masuk.</div>
-    );
-
-    return (
-      <div className="leave-type-grid">
-        {tableRows.map((row, i) => {
-          const employee = row[tableColumns.indexOf('EMPLOYEE')] || row[tableColumns.indexOf('Employee')] || 'N/A';
-          const type = row[tableColumns.indexOf('LEAVE_TYPE')] || row[tableColumns.indexOf('Leave Type')] || '-';
-          const start = row[tableColumns.indexOf('START')] || row[tableColumns.indexOf('Start')] || '-';
-          const end = row[tableColumns.indexOf('END')] || row[tableColumns.indexOf('End')] || '-';
-          const status = row[tableColumns.indexOf('STATUS')] || row[tableColumns.indexOf('Status')] || 'Pending';
-
-          const statusVariant = 
-            status === 'Approved' ? 'success' : 
-            status === 'Rejected' ? 'danger' : 
-            status === 'Pending' ? 'warning' : 'default';
-
-          return (
-            <div key={i} className="leave-type-card glass-shimmer" onClick={() => {
-              const obj: any = {};
-              tableColumns.forEach((col, idx) => { obj[col.toLowerCase().replace(/ /g, '_')] = row[idx]; });
-              setFormState(obj);
-            }}>
-              <div className="leave-type-icon-box">
-                <Users size={24} />
-              </div>
-              <div className="leave-type-info">
-                <h3>{String(employee)}</h3>
-                <p>{String(type)} Cuti</p>
-                <small style={{ color: '#94a3b8', fontWeight: 600 }}>{String(start)} s/d {String(end)}</small>
-              </div>
-              <div className="leave-type-meta">
-                <Badge variant={statusVariant}>{String(status)}</Badge>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-
-  const renderMyLeaveView = () => {
-    if (!tableRows.length) return (
-      <div style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>Belum ada pengajuan cuti.</div>
-    );
-
-    return (
-      <div className="leave-policy-list">
-        {tableRows.map((row, i) => {
-          const type = row[tableColumns.indexOf('TYPE')] || row[tableColumns.indexOf('Type')] || row[tableColumns.indexOf('LEAVE_TYPE')] || row[tableColumns.indexOf('Leave Type')] || '-';
-          const start = row[tableColumns.indexOf('START_DATE')] || row[tableColumns.indexOf('Start Date')] || row[tableColumns.indexOf('START')] || row[tableColumns.indexOf('Start')] || '-';
-          const end = row[tableColumns.indexOf('END_DATE')] || row[tableColumns.indexOf('End Date')] || row[tableColumns.indexOf('END')] || row[tableColumns.indexOf('End')] || '-';
-          const status = row[tableColumns.indexOf('STATUS')] || row[tableColumns.indexOf('Status')] || 'Pending';
-          const total = row[tableColumns.indexOf('TOTAL_DAYS')] || row[tableColumns.indexOf('Total Days')] || '-';
-
-          const statusVariant = 
-            status === 'Approved' ? 'success' : 
-            status === 'Rejected' ? 'danger' : 
-            status === 'Pending' ? 'warning' : 'default';
-
-          return (
-            <div key={i} className="leave-policy-item glass-shimmer">
-              <div className="policy-main-info">
-                <div className="policy-year-badge" style={{ background: statusVariant === 'success' ? '#10b981' : statusVariant === 'warning' ? '#f59e0b' : '#ef4444' }}>
-                  {String(total)}d
-                </div>
-                <div className="policy-details">
-                  <span className="policy-name">{String(type)}</span>
-                  <div className="policy-stats">
-                    <div className="stat-group">
-                      <span className="stat-label">Range</span>
-                      <span className="stat-value">{String(start)} - {String(end)}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="policy-actions">
-                <Badge variant={statusVariant}>{String(status)}</Badge>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-
-  const renderProfileView = () => {
-    if (!tableRows.length) return (
-      <div style={{ textAlign: 'center', padding: '5rem', color: '#64748b', background: 'rgba(255,255,255,0.5)', borderRadius: '16px' }}>
-        <UserCircle size={48} style={{ marginBottom: '1rem', opacity: 0.3 }} />
-        <p>Belum ada data profil tersedia. Silakan muat ulang atau lengkapi data Anda.</p>
-        <Button variant="primary" size="md" onClick={() => setActiveCrudMode('create')} style={{ marginTop: '1.5rem' }}>
-          <Plus size={18} style={{ marginRight: '8px' }} />
-          Lengkapi Profil Sekarang
-        </Button>
-      </div>
-    );
-    
-    // Attempt to find user name and role if nested
-    const profileObj = (tableRows[0] as any);
-    
-    return (
-      <div className="profile-detail-view">
-        <div className="profile-header-box">
-          <div className="profile-avatar-large">
-            <UserCircle size={64} />
-          </div>
-          <div className="profile-header-info">
-            <h2>Data Profil Pribadi</h2>
-            <p>Informasi dasar dan kontak yang terdaftar di sistem.</p>
-          </div>
-          <div style={{ marginLeft: 'auto' }}>
-            <Button variant="outline" size="sm" onClick={() => setActiveCrudMode('manage')}>
-              <Settings size={18} style={{ marginRight: '8px' }} />
-              Perbarui Data
-            </Button>
-          </div>
-        </div>
-        <div className="profile-grid">
-          {tableColumns.map((col, idx) => {
-            const val = tableRows[0][idx];
-            if (!val || val === '-') return null;
-            return (
-              <div key={col} className="profile-field">
-                <span className="field-label">{col.replace(/_/g, ' ').toUpperCase()}</span>
-                <span className="field-value">{String(val)}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className={`section-page section-variant-${sectionKey}`}>
-      <Card className="section-hero-card glass-shimmer" glass>
+      <Card className="section-hero-card" glass>
         <div className="section-hero-copy">
           <span className="section-badge">Management Console</span>
           <h1 className="section-title">{section.title}</h1>
@@ -3119,137 +2752,34 @@ const SectionPage = () => {
             </Button>
           </div>
 
-          {path === '/my/profile' ? renderProfileView() : 
-           path === '/leave/type' ? renderLeaveTypeView() :
-           path === '/leave/policy' ? renderLeavePolicyView() :
-           path === '/leave/my-leave' ? renderMyLeaveView() :
-           path === '/leave/requests' || path === '/leave/approval' ? renderAdminLeaveView() : (
-            <div className="ui-table-overflow">
-              <table className="ui-table">
-                <thead>
-                  <tr>
-                    {tableColumns.map((column: string) => (
-                      <th key={column}>{column}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {tableRows.length > 0 ? (
-                    tableRows.map((row, i) => {
-                      // Find ID if it exists in the row
-                      const idIdx = tableColumns.findIndex(c => c.toLowerCase() === 'id');
-                      const rowId = idIdx !== -1 ? String(row[idIdx]) : '';
-
-                      return (
-                        <tr key={i}>
-                          {row.map((cell, j) => {
-                            const colName = tableColumns[j].toLowerCase();
-                            
-                            // Hide ID column if not explicitly asked
-                            if (colName === 'id') return null;
-
-                            // Handle Actions column
-                            if (colName === 'actions') {
-                              return (
-                                <td key={j} className="td-center">
-                                  <div className="action-btn-group">
-                                    <button 
-                                      className="action-btn action-btn-edit" 
-                                      onClick={() => {
-                                        const obj: any = {};
-                                        tableColumns.forEach((col, idx) => { obj[col.toLowerCase()] = row[idx]; });
-                                        setFormState(obj);
-                                        setActiveCrudMode('manage');
-                                      }}
-                                      title="Edit"
-                                    >
-                                      <Pencil size={16} />
-                                    </button>
-                                    <button 
-                                      className="action-btn action-btn-delete"
-                                      onClick={() => {
-                                        if (window.confirm('Are you sure you want to delete this item?')) {
-                                          setFormState({ id: rowId });
-                                          // Note: In a real app we'd trigger a specific delete action
-                                          // but SectionPage is very generic.
-                                          alert('Hapus ID: ' + rowId + '. Silakan klik tombol hapus di panel operasional jika tersedia.');
-                                        }
-                                      }}
-                                      title="Hapus"
-                                    >
-                                      <Trash2 size={16} />
-                                    </button>
-                                  </div>
-                                </td>
-                              );
-                            }
-
-                            return (
-                              <td key={j} className={String(cell).length > 50 ? 'long-text' : ''}>
-                                {formatVal(cell)}
-                              </td>
-                            );
-                          })}
-                        </tr>
-                      );
-                    })
-                  ) : (
-                    <tr>
-                      <td colSpan={tableColumns.length} style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
-                        Belum ada data tersedia untuk ditampilkan.
-                      </td>
+          <div className="ui-table-overflow">
+            <table className="ui-table">
+              <thead>
+                <tr>
+                  {tableColumns.map((column: string) => (
+                    <th key={column}>{column}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {tableRows.length > 0 ? (
+                  tableRows.map((row: string[], idx: number) => (
+                    <tr key={idx}>
+                      {row.map((cell: string, cellIndex: number) => (
+                        <td key={`${idx}-${cellIndex}`} style={{ whiteSpace: 'pre-line' }}>{cell}</td>
+                      ))}
                     </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {tableRows.length > 0 && totalPages > 1 && (
-            <div className="table-pagination">
-              <div className="pagination-info">
-                Menampilkan <b>{(currentPage - 1) * 15 + 1}</b> sampai <b>{Math.min(currentPage * 15, totalItems)}</b> dari <b>{totalItems}</b> data
-              </div>
-              <div className="pagination-controls">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => void loadList(currentPage - 1)} 
-                  disabled={currentPage <= 1 || loading}
-                >
-                  <ChevronLeft size={16} /> Sebelumnya
-                </Button>
-                
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  const pageNum = i + 1;
-                  // Simple logic to show a few pages around current if total is large
-                  // For now just show first 5 or total
-                  return (
-                    <Button 
-                      key={pageNum}
-                      variant={currentPage === pageNum ? 'primary' : 'outline'} 
-                      size="sm"
-                      onClick={() => void loadList(pageNum)}
-                      disabled={loading}
-                    >
-                      {pageNum}
-                    </Button>
-                  );
-                })}
-
-                {totalPages > 5 && <span style={{ padding: '0 0.5rem' }}>...</span>}
-                
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => void loadList(currentPage + 1)} 
-                  disabled={currentPage >= totalPages || loading}
-                >
-                  Berikutnya <ChevronRight size={16} />
-                </Button>
-              </div>
-            </div>
-          )}
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={tableColumns.length} style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
+                      Belum ada data tersedia untuk ditampilkan.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </Card>
       )}
     </div>
