@@ -20,6 +20,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { Badge } from "@/shared/ui/Badge";
+import { Alert } from "@/shared/ui/Alert";
 import { useProfiles } from "@/features/profile/hooks/useProfiles";
 import type { Profile, ProfilePayload } from "@/features/profile/types/profile.types";
 import "./ProfilesPage.css";
@@ -723,7 +724,7 @@ const ProfilesPage = () => {
       },
     ],
     [paginatedProfiles.length, profiles.length, sortedProfiles.length, uniqueDepartments.length, uniquePositions.length]
-  );
+);
 
   // Reset pagination when filters change
   useEffect(() => {
@@ -744,7 +745,6 @@ const ProfilesPage = () => {
     }
 
     void loadProfiles();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAddPage, isViewPage, isUpdatePage]);
 
   useEffect(() => {
@@ -772,8 +772,147 @@ const ProfilesPage = () => {
     };
 
     void loadDetail();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isViewPage, isUpdatePage, routeProfileId]);
+
+  // View Page
+  if (isViewPage) {
+    const profile = selectedProfile;
+    return (
+      <div className="crud-page">
+        <Card className="hero-card">
+          <div className="hero-card-inner">
+            <div className="hero-content">
+              <div className="hero-badge">
+                <User size={16} />
+                <span>HR Management</span>
+              </div>
+              <h1 className="hero-title">Detail Profil</h1>
+              <p className="hero-subtitle">
+                Lihat informasi lengkap profil karyawan.
+              </p>
+            </div>
+            <div className="hero-actions">
+              <button className="btn-outline" onClick={() => navigate("/profiles")}>
+                Kembali
+              </button>
+              <button className="btn-primary" onClick={() => navigate(`/profiles/update/${routeProfileId}`)}>
+                <Pencil size={16} />
+                Edit
+              </button>
+            </div>
+          </div>
+        </Card>
+
+        <div className="white-unified-wrapper">
+          <Card className="table-card" glass>
+            <div className="table-header-bar">
+              <h3>Data Profil</h3>
+              <span className="table-count">ID: {profile?.id}</span>
+            </div>
+            <div className="table-card-inner">
+              <div className="detail-view">
+                <div className="detail-row">
+                  <span className="detail-label">Nama</span>
+                  <span className="detail-value">{profile?.user?.name || '-'}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="detail-label">Email</span>
+                  <span className="detail-value">{profile?.user?.email || '-'}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="detail-label">Telepon</span>
+                  <span className="detail-value">{profile?.phone || '-'}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="detail-label">Alamat</span>
+                  <span className="detail-value">{profile?.address || '-'}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="detail-label">Departemen</span>
+                  <span className="detail-value">{profile?.employee?.department || '-'}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="detail-label">Jabatan</span>
+                  <span className="detail-value">{profile?.employee?.position || '-'}</span>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // Update Page
+  if (isUpdatePage) {
+    return (
+      <div className="crud-page">
+        <Card className="hero-card">
+          <div className="hero-card-inner">
+            <div className="hero-content">
+              <div className="hero-badge">
+                <User size={16} />
+                <span>HR Management</span>
+              </div>
+              <h1 className="hero-title">Edit Profil</h1>
+              <p className="hero-subtitle">
+                Ubah informasi profil karyawan.
+              </p>
+            </div>
+            <div className="hero-actions">
+              <button className="btn-outline" onClick={() => navigate("/profiles")} disabled={loading}>
+                Batal
+              </button>
+            </div>
+          </div>
+        </Card>
+
+        {errorMessage && (
+          <Alert type="error" message={errorMessage} onClose={() => {}} dismissible />
+        )}
+
+        <div className="white-unified-wrapper">
+          <div className="form-grid">
+            <Card className="table-card" glass>
+              <div className="table-header-bar">
+                <h3>Edit Profil</h3>
+                <span className="table-count">Formulir</span>
+              </div>
+              <div className="table-card-inner">
+                <div className="crud-form">
+                  <div className="form-grid">
+                    <div className="form-group">
+                      <label>Telepon</label>
+                      <input
+                        type="text"
+                        value={updateForm.phone}
+                        onChange={(e) => handleUpdateChange('phone', e.target.value)}
+                        className="form-input"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Alamat</label>
+                      <input
+                        type="text"
+                        value={updateForm.address}
+                        onChange={(e) => handleUpdateChange('address', e.target.value)}
+                        className="form-input"
+                      />
+                    </div>
+                  </div>
+                  <div className="form-actions">
+                    <Button variant="primary" onClick={() => void handleUpdate()} disabled={loading}>
+                      Simpan Perubahan
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleCreateChange = (key: keyof ProfileFormState, value: string) => {
     setCreateForm((prev) => ({ ...prev, [key]: value }));
@@ -895,235 +1034,197 @@ const ProfilesPage = () => {
 
   if (isAddPage) {
     return (
-      <div className="profiles-page crud-page">
-        <div className="profiles-list-header" style={{ borderBottom: "2px solid #e2e8f0", paddingBottom: "20px" }}>
-          <div className="profiles-list-title">
-            <h1 style={{ color: "var(--color-primary)", marginBottom: "4px" }}>👤 Tambah Profil Baru</h1>
-            <p style={{ color: "var(--color-text-secondary)", fontSize: "0.9rem" }}>Lengkapi informasi profil karyawan secara detail</p>
+      <div className="crud-page">
+        <Card className="hero-card">
+          <div className="hero-card-inner">
+            <div className="hero-content">
+              <div className="hero-badge">
+                <User size={16} />
+                <span>HR Management</span>
+              </div>
+              <h1 className="hero-title">Tambah Profil Baru</h1>
+              <p className="hero-subtitle">
+                Lengkapi informasi profil karyawan.
+              </p>
+            </div>
+            <div className="hero-actions">
+              <button className="btn-outline" onClick={() => navigate("/profiles")} disabled={loading}>
+                Kembali
+              </button>
+            </div>
           </div>
-          <Button variant="outline" size="md" onClick={() => navigate("/profiles")} disabled={loading}>
-            Kembali ke Daftar
-          </Button>
-        </div>
-
-        <Card className="profiles-status-card" glass>
-          <div className="profiles-status-row">
-            <Badge variant={errorMessage ? "danger" : "info"}>{statusMessage}</Badge>
-          </div>
-          {validationMessage && <p className="profiles-message profiles-message--error">{validationMessage}</p>}
-          {errorMessage && <p className="profiles-message profiles-message--error">{errorMessage}</p>}
         </Card>
 
-        {FIELD_GROUPS.map((group) => (
-          <Card key={group.title} className="profiles-panel" glass style={{ marginBottom: "1.5rem" }}>
-            <div className="profiles-panel-header" style={{ marginBottom: "20px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <div style={{ color: "var(--color-primary)" }}>{group.icon}</div>
-                <h2 style={{ color: "var(--color-primary)", margin: 0 }}>{group.title}</h2>
-              </div>
-            </div>
-            <div className="profiles-form-grid">
-              {group.fields.map((field) => (
-                <label key={field} className="profiles-form-group">
-                  <span style={{ color: "var(--color-primary)", fontWeight: "700", fontSize: "0.75rem" }}>{field.replace(/_/g, " ").toUpperCase()}</span>
-                  {field === "gender" ? (
-                    <select
-                      value={createForm[field]}
-                      onChange={(event) => handleCreateChange(field, event.target.value)}
-                      className="profiles-input"
-                    >
-                      <option value="">Pilih gender</option>
-                      <option value="male">Laki-laki</option>
-                      <option value="female">Perempuan</option>
-                      <option value="other">Lainnya</option>
-                    </select>
-                  ) : field === "marital_status" ? (
-                    <select
-                      value={createForm[field]}
-                      onChange={(event) => handleCreateChange(field, event.target.value)}
-                      className="profiles-input"
-                    >
-                      <option value="">Pilih status pernikahan</option>
-                      <option value="single">Single</option>
-                      <option value="married">Married</option>
-                      <option value="divorced">Divorced</option>
-                      <option value="widowed">Widowed</option>
-                    </select>
-                  ) : (
-                    <input
-                      value={createForm[field]}
-                      onChange={(event) => handleCreateChange(field, event.target.value)}
-                      placeholder={`Masukkan ${field.replace(/_/g, " ")}`}
-                      className="profiles-input"
-                      type={field === "birth_date" ? "date" : field.includes("phone") ? "tel" : "text"}
-                    />
-                  )}
-                </label>
-              ))}
-            </div>
-          </Card>
-        ))}
+        {errorMessage && (
+          <Alert type="error" message={errorMessage} onClose={() => {}} dismissible />
+        )}
 
-        <div className="profiles-actions" style={{ justifyContent: "flex-end", marginTop: "1rem" }}>
-          <Button variant="outline" size="md" onClick={() => navigate("/profiles")} disabled={loading}>
-            Batal
-          </Button>
-          <Button variant="primary" size="md" onClick={() => void handleCreate()} disabled={loading}>
-            <Plus size={16} />
-            Simpan Profil
-          </Button>
+        <div className="white-unified-wrapper">
+          <div className="form-grid">
+            <Card className="table-card" glass>
+              <div className="table-header-bar">
+                <h3>Data Profil</h3>
+                <span className="table-count">Formulir</span>
+              </div>
+              <div className="table-card-inner">
+                <div className="crud-form">
+                  {FIELD_GROUPS.map((group) => (
+                    <div key={group.title} className="form-section">
+                      <h4>{group.title}</h4>
+                      <div className="form-grid">
+                        {group.fields.map((field) => (
+                          <div key={field} className="form-group">
+                            <label>{field.replace(/_/g, ' ').toUpperCase()}</label>
+                            {field === "gender" ? (
+                              <select
+                                value={createForm[field]}
+                                onChange={(event) => handleCreateChange(field, event.target.value)}
+                                className="form-input"
+                              >
+                                <option value="">Pilih</option>
+                                <option value="male">Laki-laki</option>
+                                <option value="female">Perempuan</option>
+                              </select>
+                            ) : field === "marital_status" ? (
+                              <select
+                                value={createForm[field]}
+                                onChange={(event) => handleCreateChange(field, event.target.value)}
+                                className="form-input"
+                              >
+                                <option value="">Pilih</option>
+                                <option value="single">Single</option>
+                                <option value="married">Married</option>
+                              </select>
+                            ) : (
+                              <input
+                                type="text"
+                                value={createForm[field]}
+                                onChange={(event) => handleCreateChange(field, event.target.value)}
+                                className="form-input"
+                                placeholder={field.replace(/_/g, ' ')}
+                              />
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                  <div className="form-actions">
+                    <Button variant="primary" onClick={() => void handleCreate()} disabled={loading}>
+                      <Plus size={16} />
+                      Simpan Profil
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
         </div>
-        <ErrorModal errors={validationErrors} isOpen={isErrorModalOpen} onClose={() => setIsErrorModalOpen(false)} />
       </div>
     );
   }
 
+  // Main List Page
   return (
-    <div className="profiles-page crud-page">
-      <Card className="crud-card" glass>
-          <div className="profiles-list-header" style={{ borderBottom: "2px solid #e2e8f0", paddingBottom: "20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <div className="profiles-list-title">
-              <h1 style={{ color: "var(--color-primary)", marginBottom: "4px" }}>Daftar Profil Karyawan</h1>
-              <p style={{ color: "var(--color-text-secondary)", fontSize: "0.9rem" }}>Kelola profil dan data karyawan</p>
+    <div className="crud-page">
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <User size={16} />
+              <span>HR Management</span>
             </div>
-            <div className="profiles-list-actions">
-              <Button variant="primary" size="sm" onClick={() => navigate('/profiles/create')}>
-                <Plus size={16} /> Tambah Profil
-              </Button>
+            <h1 className="hero-title">Kelola Profil Karyawan</h1>
+            <p className="hero-subtitle">
+              Kelola profil dan data karyawan perusahaan.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => void loadProfiles()}>
+              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+            </button>
+            <button className="btn-primary" onClick={() => navigate('/profiles/add')}>
+              <Plus size={16} />
+              Tambah Profil
+            </button>
+          </div>
+        </div>
+      </Card>
+
+      {errorMessage && (
+        <Alert type="error" message={errorMessage} onClose={() => {}} dismissible />
+      )}
+
+      <div className="white-unified-wrapper">
+        <div className="wuw-header">
+          <div className="wuw-header-top">
+            <div className="wuw-title-area">
+              <h3>Daftar Karyawan</h3>
+              <span className="wuw-count-badge">{profiles.length} karyawan</span>
             </div>
           </div>
+        </div>
 
-          <div style={{ marginBottom: "1.5rem", display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-            <div className="search-box" style={{ flex: 1, minWidth: "250px", position: "relative" }}>
-              <Search size={18} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#64748b" }} />
-              <input
-                type="text"
-                className="form-input"
-                placeholder="Cari nama, email, atau ID karyawan..."
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                style={{ paddingLeft: "40px", marginBottom: 0 }}
-              />
-            </div>
-            <select
-              className="form-input"
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              style={{ minWidth: "150px", marginBottom: 0 }}
-            >
-              <option value="all">Semua Status</option>
-              <option value="active">Aktif</option>
-              <option value="pending">Probation</option>
-              <option value="inactive">Non-Aktif</option>
-            </select>
-          </div>
-
-          <div className="table-wrap">
+        <div className="table-card">
+          <div className="table-card-inner">
             <table className="data-table">
               <thead>
                 <tr>
                   <th>Profil</th>
-                  <th>ID Karyawan</th>
+                  <th>ID</th>
                   <th>Departemen</th>
                   <th>Jabatan</th>
-                  <th>Tanggal Bergabung</th>
+                  <th>Bergabung</th>
                   <th className="th-center">Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={6} style={{ textAlign: "center", padding: "3rem" }}>
-                      <RefreshCw size={32} className="animate-spin" style={{ opacity: 0.5 }} />
-                      <p style={{ marginTop: "0.5rem", opacity: 0.6 }}>Memuat data...</p>
+                    <td colSpan={6} style={{ textAlign: 'center', padding: '3rem' }}>
+                      Memuat...
                     </td>
                   </tr>
-                ) : filteredProfiles.length > 0 ? (
-                  filteredProfiles.map((p: any) => (
+                ) : profiles.length > 0 ? (
+                  profiles.map((p: any) => (
                     <tr key={p.id}>
                       <td>
                         <div className="cell-name">
-                          <div className="cell-avatar">
-                            {p.user?.name?.charAt(0).toUpperCase() || "P"}
-                          </div>
-                          <span className="cell-name-text">{p.user?.name || "Unknown"}</span>
+                          <span className="cell-name-text">{p.user?.name || 'Unknown'}</span>
                         </div>
                       </td>
-                      <td>
-                        <span className="cell-tag">{p.employee?.employee_id || p.id}</span>
-                      </td>
-                      <td>{p.employee?.department || "-"}</td>
-                      <td>{p.employee?.position || "-"}</td>
-                      <td>{p.employee?.hire_date ? formatDate(p.employee.hire_date) : "-"}</td>
-                      <td>
-                        <div className="action-btn-group" style={{ justifyContent: "center" }}>
-                          <button
-                            className="action-btn action-btn-view"
-                            onClick={() => navigate(`/profiles/view/${p.id}`)}
-                            title="View Details"
-                          >
-                            <Eye size={16} />
-                          </button>
-                          <button
-                            className="action-btn action-btn-edit"
-                            onClick={() => navigate(`/profiles/update/${p.id}`)}
-                            title="Edit Profile"
-                          >
-                            <Pencil size={16} />
-                          </button>
-                          <button
-                            className="action-btn action-btn-delete"
-                            onClick={() => void handleDelete(String(p.id))}
-                            title="Delete Profile"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
+                      <td><span className="cell-tag">{p.employee?.employee_id || p.id}</span></td>
+                      <td>{p.employee?.department || '-'}</td>
+                      <td>{p.employee?.position || '-'}</td>
+                      <td>{p.employee?.hire_date ? formatDate(p.employee.hire_date) : '-'}</td>
+                      <td className="td-center">
+                        <button className="btn-icon" onClick={() => navigate(`/profiles/view/${p.id}`)} title="View">
+                          <Eye size={16} />
+                        </button>
+                        <button className="btn-icon" onClick={() => navigate(`/profiles/update/${p.id}`)} title="Edit">
+                          <Pencil size={16} />
+                        </button>
+                        <button className="btn-icon btn-danger" onClick={() => void handleDelete(String(p.id))} title="Delete">
+                          <Trash2 size={16} />
+                        </button>
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
                     <td colSpan={6}>
-                      <div className="submenu-table-empty">
-                        Tidak ada data karyawan yang ditemukan.
-                      </div>
+                      <div className="empty-state">Tidak ada data.</div>
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
-
-          {totalPages > 1 && (
-            <div className="pagination-container" style={{ padding: "1rem 1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid rgba(148, 163, 184, 0.25)" }}>
-              <div className="pagination-info">
-                Halaman <strong>{currentPage}</strong> dari <strong>{totalPages}</strong>
-              </div>
-              <div className="pagination-controls" style={{ display: "flex", gap: "8px" }}>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
-                >
-                  ← Sebelumnya
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                  disabled={currentPage === totalPages}
-                >
-                  Selanjutnya →
-                </Button>
-              </div>
-            </div>
-          )}
-      </Card>
+        </div>
+      </div>
     </div>
   );
-}
+};
 
 export default ProfilesPage;
                       

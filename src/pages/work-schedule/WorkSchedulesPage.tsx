@@ -17,6 +17,8 @@ import {
   TrendingUp
 } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
+import "@/pages/dashboard/overview/OverviewPage.css";
+import "@/pages/payroll/PayrollShared.css";
 import "./WorkSchedulesPage.css";
 
 const parseTimeToMinutes = (time?: string) => {
@@ -202,26 +204,26 @@ const WorkSchedulesPage = () => {
               Buat Jadwal Baru
             </button>
           </div>
-        </div>
+</div>
       </Card>
 
-      <div className="summary-grid">
+      <div className="leave-requests-wrapper">
         {summaryCards.map((card) => {
           const Icon = card.icon;
           return (
-            <Card key={card.label} className="metric-card">
-              <div className="metric-header">
+            <div key={card.label} className="leave-summary-card">
+              <div className="leave-summary-header">
                 <div>
-                  <span className="metric-label">{card.label}</span>
-                  <p className="metric-subtitle">{card.subtitle}</p>
+                  <p className="leave-summary-label">{card.label}</p>
+                  <p className="leave-summary-subtitle">{card.subtitle}</p>
                 </div>
-                <span className={`metric-icon metric-icon--${card.tone}`}>
-                  <Icon size={24} />
-                </span>
+                <div className={`leave-summary-icon-wrapper leave-icon-${card.tone === 'blue' ? 'blue' : card.tone === 'green' ? 'green' : card.tone === 'orange' ? 'orange' : 'purple'}`}>
+                  <Icon size={28} />
+                </div>
               </div>
-              <div className="metric-value">{card.value}</div>
-              <div className="metric-change">{card.change}</div>
-            </Card>
+              <div className={`leave-summary-value leave-value-${card.tone === 'blue' ? 'blue' : card.tone === 'green' ? 'green' : card.tone === 'orange' ? 'orange' : 'purple'}`}>{card.value}</div>
+              <p className="leave-summary-trend">{card.change}</p>
+            </div>
           );
         })}
       </div>

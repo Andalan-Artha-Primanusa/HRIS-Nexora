@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { RefreshCw, Save, Building2, Mail, Phone, MapPin, Globe, Clock, User, Briefcase } from 'lucide-react';
+import { RefreshCw, Save, Building2, Mail, Phone, MapPin, Globe, Clock, User, Briefcase, Settings } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
 import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 import './CompanySettingsPage.css';
 
 const CompanySettingsPage: React.FC = () => {
@@ -83,25 +85,32 @@ const CompanySettingsPage: React.FC = () => {
 
   return (
     <div className="crud-page settings-page">
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">Settings</span>
-          <h1>Company Settings</h1>
-          <p>Manage your company information and preferences.</p>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Settings size={16} />
+              <span>Settings</span>
+            </div>
+            <h1 className="hero-title">Company Settings</h1>
+            <p className="hero-subtitle">
+              Manage your company information and preferences.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={fetchData} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              {loading ? 'Memuat...' : 'Segarkan'}
+            </button>
+            <button className="btn-primary" onClick={handleSave} disabled={saving}>
+              <Save size={16} />
+              {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
+            </button>
+          </div>
         </div>
-        <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={fetchData} disabled={loading}>
-            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-            Refresh
-          </Button>
-          <Button variant="primary" size="md" onClick={handleSave} disabled={saving}>
-            <Save size={16} />
-            {saving ? 'Saving...' : 'Save Changes'}
-          </Button>
-        </div>
-      </div>
+      </Card>
 
-      <div className="summary-grid">
+      <div className="white-unified-wrapper">
         <Card className="summary-card" glass>
           <div className="summary-card__header">
             <div>

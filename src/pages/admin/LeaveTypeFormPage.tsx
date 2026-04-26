@@ -134,7 +134,7 @@ const LeaveTypeFormPage: React.FC = () => {
       </Card>
 
       <form id="leave-type-form" onSubmit={handleSubmit} className="white-unified-wrapper" style={{ maxWidth: '800px', margin: '0 auto' }}>
-          <Card glass style={{ padding: '2rem', borderRadius: '24px' }}>
+        <Card glass style={{ padding: '2rem', borderRadius: '24px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '2rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem' }}>
                 <div style={{ padding: '10px', borderRadius: '12px', background: '#eff6ff', color: '#2563eb' }}>
                   <CalendarDays size={24} />
@@ -253,10 +253,8 @@ const LeaveTypeFormPage: React.FC = () => {
                   </div>
                 </div>
               </Card>
-            </div>
-          </form>
         </div>
-      </div>
+      </form>
     </div>
   );
 };

@@ -316,11 +316,10 @@ const CreateLocationPage = () => {
             >
               Batal
             </Button>
-          </div>
+</div>
         </form>
-      </Card>
+      </div>
 
-      {/* Info Preview */}
       <Card className="location-info-card" glass>
         <h3 className="location-info-title">Preview Lokasi</h3>
         <div className="location-info-grid">
@@ -360,8 +359,7 @@ const CreateLocationPage = () => {
             Buka di Google Maps →
           </a>
         )}
-        </Card>
-      </div>
+      </Card>
     </div>
   );
 };

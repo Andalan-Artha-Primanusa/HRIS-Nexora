@@ -321,9 +321,8 @@ const EditLocationPage = () => {
             </Button>
           </div>
         </form>
-      </Card>
+      </div>
 
-      {/* Info Preview */}
       <Card className="location-info-card" glass>
         <h3 className="location-info-title">Informasi Lokasi</h3>
         <div className="location-info-grid">
@@ -363,8 +362,7 @@ const EditLocationPage = () => {
             Buka di Google Maps →
           </a>
         )}
-        </Card>
-      </div>
+      </Card>
     </div>
   );
 };

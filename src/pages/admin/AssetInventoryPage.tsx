@@ -68,19 +68,19 @@ const AssetInventoryPage: React.FC = () => {
 
   const getAssetIcon = (category: string) => {
     const c = category?.toLowerCase();
-    if (c?.includes('laptop') || c?.includes('macbook') || c?.includes('electronics')) return <Laptop size={22} />;
-    if (c?.includes('mobile') || c?.includes('phone')) return <Smartphone size={22} />;
-    if (c?.includes('monitor') || c?.includes('display')) return <Monitor size={22} />;
-    return <Briefcase size={22} />;
+    if (c?.includes('laptop') || c?.includes('macbook') || c?.includes('electronics')) return <Laptop size={20} />;
+    if (c?.includes('mobile') || c?.includes('phone')) return <Smartphone size={20} />;
+    if (c?.includes('monitor') || c?.includes('display')) return <Monitor size={20} />;
+    return <Briefcase size={20} />;
   };
 
   const getStatusStyle = (status: string) => {
     switch (status?.toLowerCase()) {
-      case 'available': return { bg: '#dcfce7', text: '#16a34a' };
-      case 'assigned': return { bg: '#dbeafe', text: '#1d4ed8' };
-      case 'maintenance': return { bg: '#fef3c7', text: '#b45309' };
-      case 'retired': return { bg: '#f1f5f9', text: '#64748b' };
-      default: return { bg: '#f1f5f9', text: '#64748b' };
+      case 'available':   return { bg: '#dcfce7', color: '#166534' };
+      case 'assigned':    return { bg: '#dbeafe', color: '#1d4ed8' };
+      case 'maintenance': return { bg: '#fef3c7', color: '#b45309' };
+      case 'retired':     return { bg: '#f1f5f9', color: '#64748b' };
+      default:            return { bg: '#f1f5f9', color: '#64748b' };
     }
   };
 
@@ -93,6 +93,8 @@ const AssetInventoryPage: React.FC = () => {
 
   return (
     <div className="crud-page">
+
+      {/* ===== HERO CARD (tidak diubah) ===== */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -118,6 +120,7 @@ const AssetInventoryPage: React.FC = () => {
         </div>
       </Card>
 
+      {/* ===== FILTER TABS ===== */}
       <div className="filter-tabs">
         {STATUS_FILTERS.map(status => (
           <button
@@ -130,7 +133,10 @@ const AssetInventoryPage: React.FC = () => {
         ))}
       </div>
 
+      {/* ===== MAIN CONTENT WRAPPER ===== */}
       <div className="white-unified-wrapper">
+
+        {/* Header / Search */}
         <div className="wuw-header">
           <div className="wuw-header-top">
             <div className="wuw-title-area">
@@ -139,9 +145,9 @@ const AssetInventoryPage: React.FC = () => {
             </div>
             <div className="search-box">
               <Search size={18} />
-              <input 
-                type="text" 
-                placeholder="Search assets..." 
+              <input
+                type="text"
+                placeholder="Search assets..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -149,6 +155,7 @@ const AssetInventoryPage: React.FC = () => {
           </div>
         </div>
 
+        {/* Table / Card Area */}
         <div className="wuw-table-area">
           {loading ? (
             <div style={{ textAlign: 'center', padding: '5rem', color: '#94a3b8' }}>
@@ -156,69 +163,174 @@ const AssetInventoryPage: React.FC = () => {
               <p>Loading inventory...</p>
             </div>
           ) : filteredAssets.length === 0 ? (
-            <Card glass style={{ textAlign: 'center', padding: '5rem' }}>
-              <Briefcase size={48} color="#cbd5e1" style={{ marginBottom: '1rem' }} />
-              <h3 style={{ color: '#475569' }}>No assets found</h3>
-              <p style={{ color: '#94a3b8' }}>Try changing the filter or adding a new asset.</p>
-            </Card>
+            <div style={{
+              textAlign: 'center',
+              padding: '5rem',
+              background: 'white',
+              borderRadius: '16px',
+              border: '0.5px solid #e2e8f0',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '12px',
+              color: '#94a3b8',
+            }}>
+              <Briefcase size={48} style={{ opacity: 0.3 }} />
+              <h3 style={{ color: '#475569', margin: 0 }}>No assets found</h3>
+              <p style={{ margin: 0 }}>Try changing the filter or adding a new asset.</p>
+            </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '1.5rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               {filteredAssets.map((asset) => {
                 const statusStyle = getStatusStyle(asset.status);
+                const holderName =
+                  asset.current_holder?.user?.name ||
+                  asset.current_holder?.full_name ||
+                  asset.current_holder?.name ||
+                  'In Stock';
+
                 return (
-                  <Card key={asset.id} glass style={{ padding: '1.75rem', borderRadius: '24px', border: '1px solid rgba(226,232,240,0.5)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
-                      <div style={{ display: 'flex', gap: '14px' }}>
-                        <div style={{ padding: '12px', background: 'linear-gradient(135deg, #f8fafc, #f1f5f9)', borderRadius: '14px', color: '#475569', border: '1px solid #e2e8f0' }}>
+                  <div
+                    key={asset.id}
+                    style={{
+                      background: 'white',
+                      borderRadius: '16px',
+                      border: '0.5px solid #e2e8f0',
+                      padding: '20px 24px',
+                    }}
+                  >
+                    {/* Top row: icon + name + status */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+                      <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
+                        <div style={{
+                          width: '44px', height: '44px',
+                          background: '#eff6ff',
+                          border: '0.5px solid #bfdbfe',
+                          borderRadius: '12px',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          color: '#1d4ed8', flexShrink: 0,
+                        }}>
                           {getAssetIcon(asset.category)}
                         </div>
                         <div>
-                          <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#1e293b' }}>{asset.name}</h3>
-                          <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '3px' }}>
-                            {asset.code || '—'} {asset.brand ? ` | ${asset.brand}` : ''}
-                          </div>
+                          <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 500, color: '#1e293b' }}>
+                            {asset.name}
+                          </h4>
+                          <p style={{ margin: '3px 0 0', fontSize: '12px', color: '#94a3b8' }}>
+                            {[asset.code, asset.brand].filter(Boolean).join(' · ') || '—'}
+                          </p>
                         </div>
                       </div>
-                      <span style={{ padding: '5px 12px', borderRadius: '8px', fontSize: '0.73rem', fontWeight: 700, textTransform: 'uppercase', background: statusStyle.bg, color: statusStyle.text }}>
+                      <span style={{
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        textTransform: 'uppercase',
+                        padding: '4px 10px',
+                        borderRadius: '20px',
+                        background: statusStyle.bg,
+                        color: statusStyle.color,
+                        flexShrink: 0,
+                      }}>
                         {asset.status}
                       </span>
                     </div>
 
-                    <div style={{ background: 'rgba(248,250,252,0.6)', borderRadius: '14px', padding: '1.1rem', marginBottom: '1.5rem' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-                        <span style={{ color: '#94a3b8' }}>Purchase Date</span>
-                        <span style={{ fontWeight: 600, color: '#475569' }}>{asset.purchase_date || 'N/A'}</span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-                        <span style={{ color: '#94a3b8' }}>Serial No.</span>
-                        <span style={{ fontWeight: 600, color: '#475569' }}>{asset.serial_number || 'N/A'}</span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-                        <span style={{ color: '#94a3b8' }}>Holder</span>
-                        <span style={{ fontWeight: 600, color: '#475569' }}>
-                          {asset.current_holder?.user?.name || asset.current_holder?.full_name || asset.current_holder?.name || 'In Stock'}
-                        </span>
-                      </div>
+                    {/* Info rows */}
+                    <div style={{
+                      background: '#f8faff',
+                      border: '0.5px solid #e0eaff',
+                      borderRadius: '10px',
+                      padding: '12px 16px',
+                      marginBottom: '16px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px',
+                    }}>
+                      {[
+                        { label: 'Purchase Date', value: asset.purchase_date || 'N/A' },
+                        { label: 'Serial No.',    value: asset.serial_number || 'N/A' },
+                        { label: 'Holder',        value: holderName },
+                      ].map(({ label, value }) => (
+                        <div key={label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+                          <span style={{ color: '#94a3b8' }}>{label}</span>
+                          <span style={{ fontWeight: 500, color: '#1e293b' }}>{value}</span>
+                        </div>
+                      ))}
                     </div>
 
-                    <div style={{ display: 'flex', gap: '0.65rem' }}>
+                    {/* Action buttons */}
+                    <div style={{ display: 'flex', gap: '8px' }}>
                       {asset.status?.toLowerCase() === 'available' ? (
-                        <Button variant="primary" style={{ flex: 1.4, height: '42px', borderRadius: '10px' }} onClick={() => navigate('/assets/assignments')}>
-                          Assign <ArrowRight size={15} style={{ marginLeft: '6px' }} />
-                        </Button>
+                        <button
+                          onClick={() => navigate('/assets/assignments')}
+                          style={{
+                            flex: 1,
+                            height: '38px',
+                            borderRadius: '10px',
+                            background: '#1d4ed8',
+                            color: 'white',
+                            border: 'none',
+                            fontSize: '13px',
+                            fontWeight: 500,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '6px',
+                          }}
+                        >
+                          Assign <ArrowRight size={14} />
+                        </button>
                       ) : (
-                        <Button variant="outline" style={{ flex: 1.4, height: '42px', borderRadius: '10px' }} onClick={() => navigate('/assets/assignments')}>
+                        <button
+                          onClick={() => navigate('/assets/assignments')}
+                          style={{
+                            flex: 1,
+                            height: '38px',
+                            borderRadius: '10px',
+                            background: 'white',
+                            color: '#1d4ed8',
+                            border: '0.5px solid #bfdbfe',
+                            fontSize: '13px',
+                            fontWeight: 500,
+                            cursor: 'pointer',
+                          }}
+                        >
                           View Assignment
-                        </Button>
+                        </button>
                       )}
-                      <Button variant="ghost" onClick={() => navigate(`/inventory/assets/edit/${asset.id}`)} style={{ height: '42px', width: '42px', borderRadius: '10px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                        <Pencil size={16} />
-                      </Button>
-                      <Button variant="ghost" onClick={() => handleDelete(asset.id, asset.name)} disabled={deletingId === asset.id} style={{ height: '42px', width: '42px', borderRadius: '10px', background: '#fef2f2', border: '1px solid #fecaca', color: '#ef4444' }}>
-                        <Trash2 size={16} />
-                      </Button>
+                      <button
+                        onClick={() => navigate(`/inventory/assets/edit/${asset.id}`)}
+                        style={{
+                          width: '38px', height: '38px',
+                          borderRadius: '10px',
+                          background: '#f8fafc',
+                          border: '0.5px solid #e2e8f0',
+                          color: '#475569',
+                          cursor: 'pointer',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}
+                      >
+                        <Pencil size={15} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(asset.id, asset.name)}
+                        disabled={deletingId === asset.id}
+                        style={{
+                          width: '38px', height: '38px',
+                          borderRadius: '10px',
+                          background: '#fef2f2',
+                          border: '0.5px solid #fecaca',
+                          color: '#ef4444',
+                          cursor: deletingId === asset.id ? 'not-allowed' : 'pointer',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          opacity: deletingId === asset.id ? 0.5 : 1,
+                        }}
+                      >
+                        <Trash2 size={15} />
+                      </button>
                     </div>
-                  </Card>
+                  </div>
                 );
               })}
             </div>

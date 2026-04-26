@@ -7,14 +7,17 @@ import { Alert } from "@/shared/ui/Alert";
 import { getAllRoles } from "@/features/admin/api/admin.service";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { RBACUtils } from "@/shared/hooks/rbac";
-import { KeyRound, RefreshCw, ShieldAlert, ShieldPlus } from "lucide-react";
+import { KeyRound, RefreshCw, ShieldAlert, ShieldPlus, Shield, Plus } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
+import "@/pages/dashboard/overview/OverviewPage.css";
+import "@/pages/payroll/PayrollShared.css";
 import "./AdminRolesPage.css";
 
-interface RoleData {
+interface Role {
   id: number;
   name: string;
-  display_name: string;
+  display_name?: string;
+  description?: string;
   permissions_count?: number;
 }
 
@@ -27,152 +30,163 @@ const AdminRolesPage = () => {
     return "admin-roles-perm-chip admin-roles-perm-chip--active";
   };
   
-  if (!canViewRoles) {
+if (!canViewRoles) {
     return (
       <div className="crud-page">
-        <div className="page-header">
-          <div className="page-header-title">
-            <span className="page-badge">Admin Center</span>
-            <h1><ShieldAlert size={22} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 8 }} />Akses Ditolak</h1>
-            <p>Anda tidak memiliki izin untuk mengakses halaman ini.</p>
-          </div>
-        </div>
-        <Card className="table-card" glass>
-          <div className="table-card-inner">
-            <p>Silakan hubungi Administrator untuk mendapatkan akses.</p>
+        <Card className="hero-card">
+          <div className="hero-card-inner">
+            <div className="hero-content">
+              <div className="hero-badge">
+                <Shield size={16} />
+                <span>Admin Center</span>
+              </div>
+              <h1 className="hero-title">Akses Ditolak</h1>
+              <p className="hero-subtitle">
+                Anda tidak memiliki izin untuk mengakses halaman ini.
+              </p>
+            </div>
           </div>
         </Card>
+
+        <div className="white-unified-wrapper">
+          <Card glass style={{ padding: '2rem', textAlign: 'center' }}>
+            <p>Silakan hubungi Administrator untuk mendapatkan akses.</p>
+</Card>
+        </div>
       </div>
     );
   }
-  
-  const [roles, setRoles] = useState<RoleData[]>([]);
+
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const filteredRoles = roles.filter(r => r.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingRole, setEditingRole] = useState<Role | null>(null);
+  const [formData, setFormData] = useState({ name: "", description: "" });
+  const [saving, setSaving] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
-  const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('info');
-  const [loading, setLoading] = useState(false);
+  const [alertType, setAlertType] = useState<"success" | "error" | "info">("info");
 
   const loadRoles = async () => {
-    setLoading(true);
-    setStatusMessage("Memuat data roles...");
-
     try {
-      const result = await getAllRoles();
-      const formattedRoles = result.items.map((item: any) => {
-        const displayName = item.display_name || item.name || `Role ${item.id}`;
-        const name = item.name || '';
-        const permCount = item.permissions_count || (Array.isArray(item.permissions) ? item.permissions.length : 0);
-        
-        return {
-          id: item.id,
-          name: name,
-          display_name: displayName,
-          permissions_count: permCount,
-        };
-      });
-      
-      setRoles(formattedRoles);
-      setStatusMessage(`${formattedRoles.length} role berhasil dimuat.`);
-      setAlertType('success');
+      const data = await getAllRoles();
+      const rolesArray = Array.isArray(data) ? data : data.data || [];
+      setRoles(rolesArray);
     } catch (error: unknown) {
-      const message = getErrorMessage(error as any);
-      setStatusMessage(message);
-      setAlertType('error');
-    } finally {
-      setLoading(false);
+      setStatusMessage(getErrorMessage(error as never));
+      setAlertType("error");
     }
   };
 
   useEffect(() => {
     void loadRoles();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleCreate = () => {
+    setEditingRole(null);
+    setFormData({ name: "", description: "" });
+    setIsModalOpen(true);
+  };
+
+  const handleEdit = (role: Role) => {
+    setEditingRole(role);
+    setFormData({ name: role.name, description: role.description || "" });
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async (id: number) => {
+    setStatusMessage("Fitur hapus role belum tersedia.");
+    setAlertType("info");
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    setStatusMessage("Fitur buat role belum tersedia.");
+    setAlertType("info");
+    setIsModalOpen(false);
+  };
 
   return (
     <div className="crud-page">
-      {/* Header */}
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">Admin Center</span>
-          <h1>Role Management</h1>
-          <p>Kelola dan tampilkan daftar role beserta jumlah permission yang terhubung.</p>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Shield size={16} />
+              <span>Admin Center</span>
+            </div>
+            <h1 className="hero-title">Kelola Role</h1>
+            <p className="hero-subtitle">
+              Manajemen role dan permission pengguna sistem.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-primary" onClick={handleCreate}>
+              <Plus size={16} />
+              Tambah Role
+            </button>
+          </div>
         </div>
-        <div className="page-header-actions">
-          <Button
-            variant="primary"
-            size="md"
-            onClick={() => navigate("/admin/roles/assign-permissions")}
-          >
-            <ShieldPlus size={16} />
-            Assign Permission
-          </Button>
-          <Button
-            variant="outline"
-            size="md"
-            onClick={() => void loadRoles()}
-            disabled={loading}
-            style={{ borderColor: "#2563eb", color: "#2563eb" }}
-          >
-            <RefreshCw size={16} />
-            {loading ? "Memuat..." : "Segarkan"}
-          </Button>
-        </div>
-      </div>
+      </Card>
 
-      {statusMessage && (
-        <Alert
-          type={alertType}
-          message={statusMessage}
-          onClose={() => setStatusMessage('')}
-          dismissible
-        />
-      )}
+      {statusMessage && <Alert type={alertType} message={statusMessage} onClose={() => setStatusMessage("")} dismissible />}
 
-      {/* Table */}
-      <Card className="table-card" glass>
-        <div className="table-header-bar">
-          <h3>Daftar Roles</h3>
-          <span className="table-count">{roles.length} roles</span>
+      <div className="white-unified-wrapper">
+        <div className="wuw-header">
+          <div className="wuw-header-top">
+            <div className="wuw-title-area">
+              <h3>Daftar Role</h3>
+              <span className="wuw-count-badge">{roles.length} roles</span>
+            </div>
+            <div className="wuw-actions">
+              <input
+                type="text"
+                placeholder="Cari role..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input"
+              />
+            </div>
+          </div>
         </div>
 
-        {roles.length === 0 ? (
-          <div className="table-card-inner">
+        <div className="wuw-table-area">
+          {roles.length === 0 ? (
             <div className="empty-state">
               <KeyRound size={32} style={{ opacity: 0.4 }} />
               <p>Tidak ada data role</p>
             </div>
-          </div>
-        ) : (
-          <div className="table-wrap">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Role</th>
-                  <th className="th-center">Permissions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {roles.map((r) => (
-                  <tr key={r.id}>
-                    <td>
-                      <span className="cell-id">{r.id}</span>
-                    </td>
-                    <td>
-                      <div className="cell-name-text" style={{ fontWeight: 600 }}>{r.display_name || r.name || `Role ${r.id}`}</div>
-                      <div className="cell-sub">{r.name || "—"}</div>
-                    </td>
-                    <td style={{ textAlign: 'center' }}>
-                      <span className={permissionChipClass(r.permissions_count || 0)}>
-                        {r.permissions_count || 0}
-                      </span>
-                    </td>
+          ) : (
+            <div className="table-wrap">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Nama Role</th>
+                    <th>Display Name</th>
+                    <th>Permissions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </Card>
+                </thead>
+                <tbody>
+                  {roles.map((role) => (
+                    <tr key={role.id}>
+                      <td>{role.id}</td>
+                      <td>
+                        <span className="cell-name">{role.name}</span>
+                      </td>
+                      <td>{role.display_name}</td>
+                      <td>
+                        <span className={permissionChipClass(role.permissions_count || 0)}>
+                          {role.permissions_count || 0} permissions
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+</div>
+      </div>
     </div>
   );
 };

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { RefreshCw, Save, Bell, Mail, MessageSquare, Smartphone, CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react';
+import { RefreshCw, Save, Bell, Mail, MessageSquare, Smartphone, CheckCircle, XCircle, Clock, AlertTriangle, Settings } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
 import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 import './NotificationSettingsPage.css';
 
 interface NotificationChannel {
@@ -175,25 +177,32 @@ const NotificationSettingsPage: React.FC = () => {
 
   return (
     <div className="crud-page notification-page">
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">Settings</span>
-          <h1>Notification Settings</h1>
-          <p>Configure how you receive notifications across different channels.</p>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Bell size={16} />
+              <span>Settings</span>
+            </div>
+            <h1 className="hero-title">Notification Settings</h1>
+            <p className="hero-subtitle">
+              Configure how you receive notifications across different channels.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={fetchData} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              {loading ? 'Memuat...' : 'Segarkan'}
+            </button>
+            <button className="btn-primary" onClick={handleSave} disabled={saving}>
+              <Save size={16} />
+              {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
+            </button>
+          </div>
         </div>
-        <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={fetchData} disabled={loading}>
-            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-            Refresh
-          </Button>
-          <Button variant="primary" size="md" onClick={handleSave} disabled={saving}>
-            <Save size={16} />
-            {saving ? 'Saving...' : 'Save Changes'}
-          </Button>
-        </div>
-      </div>
+      </Card>
 
-      <div className="summary-grid">
+      <div className="white-unified-wrapper">
         <Card className="summary-card" glass>
           <div className="summary-card__header">
             <div>

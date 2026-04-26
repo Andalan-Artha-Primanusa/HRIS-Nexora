@@ -7,8 +7,10 @@ import { Alert } from "@/shared/ui/Alert";
 import { getAllUsers } from "@/features/admin/api/admin.service";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { RBACUtils } from "@/shared/hooks/rbac";
-import { RefreshCw, ShieldAlert, UserPlus, Users } from "lucide-react";
+import { RefreshCw, ShieldAlert, UserPlus, Users, Shield } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
+import "@/pages/dashboard/overview/OverviewPage.css";
+import "@/pages/payroll/PayrollShared.css";
 import "./AdminUsersPage.css";
 
 interface UserData {
@@ -31,18 +33,25 @@ const AdminUsersPage = () => {
   if (!canViewUsers) {
     return (
       <div className="crud-page">
-        <div className="page-header">
-          <div className="page-header-title">
-            <span className="page-badge">Admin Center</span>
-            <h1><ShieldAlert size={22} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 8 }} />Akses Ditolak</h1>
-            <p>Anda tidak memiliki izin untuk mengakses halaman ini.</p>
-          </div>
-        </div>
-        <Card className="table-card" glass>
-          <div className="table-card-inner">
-            <p>Silakan hubungi Administrator untuk mendapatkan akses.</p>
+        <Card className="hero-card">
+          <div className="hero-card-inner">
+            <div className="hero-content">
+              <div className="hero-badge">
+                <Shield size={16} />
+                <span>Admin Center</span>
+              </div>
+              <h1 className="hero-title">Akses Ditolak</h1>
+              <p className="hero-subtitle">
+                Anda tidak memiliki izin untuk mengakses halaman ini.
+              </p>
+            </div>
           </div>
         </Card>
+        <div className="white-unified-wrapper">
+          <Card glass style={{ padding: '2rem', textAlign: 'center' }}>
+            <p>Silakan hubungi Administrator untuk mendapatkan akses.</p>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -86,34 +95,37 @@ const AdminUsersPage = () => {
 
   return (
     <div className="crud-page">
-      {/* Header */}
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">Admin Center</span>
-          <h1>User Management</h1>
-          <p>Kelola dan tampilkan daftar pengguna beserta role mereka.</p>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Shield size={16} />
+              <span>Admin Center</span>
+            </div>
+            <h1 className="hero-title">User Management</h1>
+            <p className="hero-subtitle">
+              Kelola dan tampilkan daftar pengguna beserta role mereka.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button
+              className="btn-outline"
+              onClick={() => void loadUsers()}
+              disabled={loading}
+            >
+              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+              {loading ? "Memuat..." : "Segarkan"}
+            </button>
+            <button
+              className="btn-primary"
+              onClick={() => navigate("/admin/users/assign-roles")}
+            >
+              <UserPlus size={16} />
+              Assign Role
+            </button>
+          </div>
         </div>
-        <div className="page-header-actions">
-          <Button
-            variant="primary"
-            size="md"
-            onClick={() => navigate("/admin/users/assign-roles")}
-          >
-            <UserPlus size={16} />
-            Assign Role
-          </Button>
-          <Button
-            variant="outline"
-            size="md"
-            onClick={() => void loadUsers()}
-            disabled={loading}
-            style={{ borderColor: "#2563eb", color: "#2563eb" }}
-          >
-            <RefreshCw size={16} />
-            {loading ? "Memuat..." : "Segarkan"}
-          </Button>
-        </div>
-      </div>
+      </Card>
 
       {statusMessage && (
         <Alert
