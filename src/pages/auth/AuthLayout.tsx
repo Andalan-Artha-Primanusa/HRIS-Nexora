@@ -130,13 +130,10 @@ const AuthLayout = ({ title, subtitle, children, footer }: AuthLayoutProps) => {
               src="/foto-berkemah.png"
               alt="Berkemah Team"
               style={{ 
-                width: '120px',
-                height: '80px',
+                width: '160px',
+                height: '140px',
                 objectFit: 'cover',
-                borderRadius: '12px',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-
-                marginBottom: '4px'
+                borderRadius: '8px'
               }} 
             />
 
