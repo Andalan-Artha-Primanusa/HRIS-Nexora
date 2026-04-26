@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Search, RefreshCw, Calendar } from 'lucide-react';
+import { FileText, Search, RefreshCw, Calendar, BookTemplate, Plus } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { getAllEmployees } from '@/features/employee/api/employee.service';
 import { legalService } from '@/features/legal/api/legal.service';
 import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 
 const EmploymentLettersPage: React.FC = () => {
   const [employees, setEmployees] = useState<any[]>([]);
@@ -49,13 +51,26 @@ const EmploymentLettersPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <div className="crud-header">
-        <div>
-          <span className="reimb-badge reimb-badge-admin">Legal & Correspondence</span>
-          <h1>Employment Letters</h1>
-          <p>Generate formal letters for employees (Experience, Employment, and Assignment).</p>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <BookTemplate size={16} />
+              <span>Legal & Korespondensi</span>
+            </div>
+            <h1 className="hero-title">Surat Pekerjaan</h1>
+            <p className="hero-subtitle">
+              Hasilkan surat formal untuk karyawan (Pengalaman, Kerja, dan Penugasan).
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => window.location.reload()} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+          </div>
         </div>
-      </div>
+      </Card>
 
       <Card glass style={{ padding: '0', overflow: 'hidden', border: '1px solid var(--cr-border)' }}>
         <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--cr-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.3)' }}>
@@ -64,7 +79,7 @@ const EmploymentLettersPage: React.FC = () => {
             <input 
               type="text" 
               className="form-control" 
-              placeholder="Search employee by name or ID..." 
+              placeholder="Cari karyawan berdasarkan nama atau ID..." 
               style={{ 
                 paddingLeft: '44px', 
                 width: '100%',

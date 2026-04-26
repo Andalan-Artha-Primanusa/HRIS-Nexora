@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Card } from "@/shared/ui/Card";
-import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
-import { ArrowDown, ArrowUp, Briefcase, ChevronDown, Filter, RefreshCw, Search, Download } from "lucide-react";
+import { ArrowDown, ArrowUp, Briefcase, ChevronDown, Filter, RefreshCw, Search, Download, Wallet, FileText, CheckCircle2, Clock3, XCircle, TrendingUp } from "lucide-react";
 import { payrollService, toSafeArray } from "@/features/payroll/api/payroll.service";
 import { getAllEmployees } from "@/features/employee/api/employee.service";
 import { PayrollStatusBadge } from "@/shared/ui/PayrollStatusBadge";
@@ -11,6 +10,8 @@ import type { PayrollItem } from "@/features/payroll/types/payroll.types";
 import type { EmployeeItem } from "@/features/employee/types/employee.types";
 import { useDataState } from "@/features/payroll/hooks/usePayrollState";
 import "@/shared/styles/CrudPage.css";
+import "@/pages/dashboard/overview/OverviewPage.css";
+import "./PayrollShared.css";
 
 interface PayrollWithEmployeeName extends PayrollItem {
   employeeName?: string;
@@ -233,56 +234,70 @@ const PayrollListPage: React.FC = () => {
         </div>
       </Modal>
 
-      {/* Header */}
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">Payroll Center</span>
-          <h1>Daftar Payroll</h1>
-          <p>Kelola data payroll karyawan dengan tampilan yang rapi, konsisten, dan mudah dipindai.</p>
+      {/* Header - Same style as Dashboard */}
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Wallet size={16} />
+              <span>Pusat Penggajian</span>
+            </div>
+            <h1 className="hero-title">Daftar Payroll</h1>
+            <p className="hero-subtitle">
+              Kelola data payroll karyawan dengan tampilan yang rapi, konsisten, dan mudah dipindai.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={handleExportCSV} disabled={sortedItems.length === 0} style={{ borderColor: "#10b981", color: "#10b981" }}>
+              <Download size={16} />
+              Ekspor CSV
+            </button>
+            <button className="btn-outline" onClick={() => void loadData()} disabled={payrollState.isLoading}>
+              <RefreshCw size={16} className={payrollState.isLoading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+          </div>
         </div>
-        <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={handleExportCSV} disabled={sortedItems.length === 0} style={{ borderColor: "#10b981", color: "#10b981" }}>
-            <Download size={16} />
-            Ekspor CSV
-          </Button>
-          <Button variant="outline" size="md" onClick={() => void loadData()} disabled={payrollState.isLoading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
-            <RefreshCw size={16} />
-            Segarkan
-          </Button>
-        </div>
-      </div>
+      </Card>
 
-      {/* Summary Cards */}
-      <div className="summary-grid">
+      {/* Summary Cards - New style */}
+      <div className="leave-requests-wrapper">
         {payrollSummaryCards.map((card) => {
           const Icon = card.icon;
           return (
-            <Card key={card.label} className="summary-card" glass>
-              <div className="summary-card__header">
+            <div key={card.label} className="leave-summary-card">
+              <div className="leave-summary-header">
                 <div>
-                  <span className="summary-card__label">{card.label}</span>
-                  <p className="summary-card__subtitle">{card.subtitle}</p>
+                  <p className="leave-summary-label">{card.label}</p>
+                  <p className="leave-summary-subtitle">{card.subtitle}</p>
                 </div>
-                <span className={`summary-card__icon summary-card__icon--${card.tone}`}>
-                  <Icon size={20} />
-                </span>
+                <div className={`leave-summary-icon-wrapper ${card.tone === 'blue' ? 'leave-icon-blue' : card.tone === 'green' ? 'leave-icon-green' : card.tone === 'orange' ? 'leave-icon-orange' : card.tone === 'red' ? 'leave-icon-red' : 'leave-icon-purple'}`}>
+                  <Icon size={28} />
+                </div>
               </div>
-              <div className={`summary-card__value summary-card__value--${card.tone}`}>{card.value}</div>
-              <div className="summary-card__change">{card.change}</div>
-            </Card>
+              <div className={`leave-summary-value ${card.tone === 'blue' ? 'leave-value-blue' : card.tone === 'green' ? 'leave-value-green' : card.tone === 'orange' ? 'leave-value-orange' : card.tone === 'red' ? 'leave-value-red' : 'leave-value-purple'}`}>{card.value}</div>
+              <p className="leave-summary-trend">{card.change}</p>
+            </div>
           );
         })}
       </div>
 
-      {/* Combined Table & Control Section */}
-      <Card className="table-card" glass>
-        <div className="table-header-bar">
-          <h3>Data Payroll</h3>
-          <span className="table-count">{paginatedItems.length} dari {sortedItems.length} data</span>
+      {/* Table Section - New styling */}
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <FileText size={24} />
+          </div>
+          <div>
+            <h2 className="analytics-title">Data Payroll</h2>
+            <p className="analytics-subtitle">{paginatedItems.length} dari {sortedItems.length} data</p>
+          </div>
         </div>
+      </Card>
 
-        <div className="table-card-inner" style={{ paddingBottom: '1.5rem' }}>
-          <div className="control-bar">
+      <div className="crud-table-section">
+      <Card className="crud-table-card">
+        <div className="control-bar">
             <div className="search-box">
               <Search size={18} />
               <input
@@ -314,9 +329,9 @@ const PayrollListPage: React.FC = () => {
               </button>
 
               {(searchText || selectedEmployeeId || selectedPeriod || selectedStatus) && (
-                <Button variant="outline" size="sm" onClick={clearFilters} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
+                <button className="btn-clear" onClick={clearFilters}>
                   Bersihkan
-                </Button>
+                </button>
               )}
             </div>
           </div>
@@ -362,7 +377,7 @@ const PayrollListPage: React.FC = () => {
               </div>
             </div>
           )}
-        </div>
+        </Card>
 
         {payrollState.isLoading && <div className="table-card-inner"><LoadingState message="Memuat data payroll..." /></div>}
         {payrollState.isError && (
@@ -383,66 +398,64 @@ const PayrollListPage: React.FC = () => {
         )}
 
         {payrollState.isSuccess && paginatedItems.length > 0 && (
-          <>
-            <div className="table-wrap">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>ID Payroll</th>
-                    <th>Nama Karyawan</th>
-                    <th>Periode</th>
-                    <th className="th-right">Gaji Pokok</th>
-                    <th className="th-right">Gaji Bersih</th>
-                    <th>Status</th>
+          <div className="crud-table-wrap">
+            <table className="crud-table">
+              <thead>
+                <tr>
+                  <th>ID Payroll</th>
+                  <th>Nama Karyawan</th>
+                  <th>Periode</th>
+                  <th className="th-right">Gaji Pokok</th>
+                  <th className="th-right">Gaji Bersih</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedItems.map((item: any, index) => (
+                  <tr key={`${item.id}-${index}`}>
+                    <td className="crud-table-id">
+                      <div>{item.id || "N/A"}</div>
+                      <div className="crud-table-sub">EMP: {item.employee_id}</div>
+                    </td>
+                    <td className="crud-table-name">
+                      <div className="crud-table-avatar">
+                        {item.employeeName ? item.employeeName.charAt(0).toUpperCase() : String(item.employee_id || 'P').charAt(0).toUpperCase()}
+                      </div>
+                      <span>{item.employeeName || `ID: ${item.employee_id}`}</span>
+                    </td>
+                    <td><span className="crud-table-tag">{item.period || "-"}</span></td>
+                    <td className="crud-table-amount">
+                      {formatCurrency(item.basic_salary || 0)} <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 'normal' }}>Basic</span>
+                    </td>
+                    <td className="crud-table-amount crud-table-amount-green">
+                      {formatCurrency(item.take_home_pay || item.net_salary || 0)} <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 'normal' }}>Net</span>
+                    </td>
+                    <td>
+                      <PayrollStatusBadge status={item.status} size="md" />
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {paginatedItems.map((item: any, index) => (
-                    <tr key={`${item.id}-${index}`}>
-                      <td>
-                        <div className="cell-id">{item.id || "N/A"}</div>
-                        <div className="cell-sub">EMP: {item.employee_id}</div>
-                      </td>
-                      <td>
-                        <div className="cell-name">
-                          <div className="cell-avatar">
-                            {item.employeeName?.charAt(0)?.toUpperCase() || "P"}
-                          </div>
-                          <span className="cell-name-text">{item.employeeName || "-"}</span>
-                        </div>
-                      </td>
-                      <td><span className="cell-tag">{item.period || "-"}</span></td>
-                      <td className="cell-amount">{formatCurrency(item.basic_salary || 0)}</td>
-                      <td className="cell-amount cell-amount-green">
-                        {formatCurrency(item.take_home_pay || item.net_salary || 0)}
-                      </td>
-                      <td>
-                        <PayrollStatusBadge status={item.status} size="md" />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {totalPages > 1 && (
-              <div className="pagination">
-                <div className="pagination__info">
-                  Halaman <strong>{currentPage}</strong> dari <strong>{totalPages}</strong>
-                </div>
-                <div className="pagination__controls">
-                  <Button variant="outline" size="sm" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
-                    ← Prev
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
-                    Next →
-                  </Button>
-                </div>
-              </div>
-            )}
-          </>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
-      </Card>
+
+        {payrollState.isSuccess && paginatedItems.length > 0 && totalPages > 1 && (
+          <div className="pagination">
+            <div className="pagination__info">
+              Halaman <strong>{currentPage}</strong> dari <strong>{totalPages}</strong>
+            </div>
+            <div className="pagination__controls">
+              <button className="btn-outline" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1}>
+                ← Prev
+              </button>
+              <button className="btn-outline" onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages}>
+                Next →
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BarChart3, ClipboardList, PieChart as PieChartIcon, Users, Wallet, TrendingUp } from 'lucide-react';
+import { BarChart3, ClipboardList, PieChart as PieChartIcon, Users, Wallet, TrendingUp, Activity } from 'lucide-react';
 import { KpiCards } from '@/features/dashboard/components/KpiCards';
 import { BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card } from '@/shared/ui/Card';
@@ -201,34 +201,34 @@ const OverviewPage: React.FC = () => {
 
   const summaryCards = [
     {
-      label: "Today's Attendance",
+      label: 'Kehadiran Hari Ini',
       subtitle: 'Persentase kehadiran hari ini',
       value: `${totalEmployees > 0 ? Math.round((presentToday / totalEmployees) * 100) : 0}%`,
-      change: `${presentToday} present today`,
+      change: `${presentToday} hadir hari ini`,
       tone: 'blue',
       icon: TrendingUp,
     },
     {
-      label: 'Pending Leave Requests',
-      subtitle: 'Menunggu approval',
+      label: 'Cuti Menunggu',
+      subtitle: 'Menunggu persetujuan',
       value: String(pendingLeaves),
-      change: 'From /leaves/pending',
+      change: 'Dari /leaves/pending',
       tone: 'orange',
       icon: ClipboardList,
     },
     {
-      label: 'Active Employees',
+      label: 'Karyawan Aktif',
       subtitle: 'Karyawan aktif bulan ini',
       value: String(activeEmployees),
-      change: `${totalEmployees} total employees`,
+      change: `${totalEmployees} total karyawan`,
       tone: 'green',
       icon: Users,
     },
     {
-      label: 'Payroll Status',
+      label: 'Status Payroll',
       subtitle: 'Payroll bulan berjalan',
       value: `${processedPayrollRate}%`,
-      change: `${payrollData.length} payroll records · ${pendingReimbursements} reimbursement pending`,
+      change: `${payrollData.length} data payroll · ${pendingReimbursements} reimbursement menunggu`,
       tone: 'purple',
       icon: Wallet,
     },
@@ -327,8 +327,7 @@ const OverviewPage: React.FC = () => {
           }
 
           payrollMap.set(period, current);
-        }
-        );
+        });
 
         const payrollTimeline = Array.from(payrollMap.entries())
           .sort(([periodA], [periodB]) => periodA.localeCompare(periodB))
@@ -351,195 +350,227 @@ const OverviewPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="overview-page">
-      <Card className="overview-hero-card" glass>
-        <div className="overview-hero-copy">
-          <p className="overview-badge">Dashboard Center</p>
-          <h1 className="page-title">Dashboard Overview</h1>
-          <p className="page-subtitle">Welcome back, here's what's happening with your organization today.</p>
-        </div>
-        <div className="page-actions">
-          <Button variant="outline" size="md" onClick={() => navigate('/admin/analytics/people')}>View Analytics</Button>
-          <Button variant="primary" size="md" onClick={() => navigate('/payroll/approve')}>Run Payroll</Button>
+    <div className="crud-page">
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Activity size={16} />
+              <span>Pusat Dashboard</span>
+            </div>
+            <h1 className="hero-title">Ringkasan Dashboard</h1>
+            <p className="hero-subtitle">Selamat datang kembali, berikut informasi organisasi Anda hari ini.</p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => navigate('/admin/analytics/people')}>
+              Lihat Analitik
+            </button>
+            <button className="btn-primary" onClick={() => navigate('/payroll/approve')}>
+              Jalankan Payroll
+            </button>
+          </div>
         </div>
       </Card>
 
-      {error && <p className="overview-error">{error}</p>}
+      {error && (
+        <Card className="error-card">
+          <p>{error}</p>
+        </Card>
+      )}
 
-      {/* KPI Cards Section */}
       <KpiCards />
 
-      {/* Metrics Summary Cards */}
-      <div className="metrics-grid">
+      <div className="summary-grid">
         {summaryCards.map((card) => {
           const Icon = card.icon;
 
           return (
-            <Card key={card.label} className="metric-card overview-summary-card" glass>
+            <Card key={card.label} className="metric-card">
               <div className="metric-header">
                 <div>
                   <span className="metric-label">{card.label}</span>
                   <p className="metric-subtitle">{card.subtitle}</p>
                 </div>
                 <span className={`metric-icon metric-icon--${card.tone}`}>
-                  <Icon size={20} />
+                  <Icon size={24} />
                 </span>
               </div>
               <div className="metric-value">{card.value}</div>
-              <div className="metric-change positive">
+              <div className="metric-change">
                 <span>{card.change}</span>
               </div>
             </Card>
           );
         })}
-      </div>
+</div>
 
-      {/* Charts Section */}
-      <div className="charts-section">
-        <div className="charts-grid charts-grid-2col">
-          {/* Attendance Trend Chart */}
-          <Card className="chart-card" glass>
-            <h2 className="chart-title"><BarChart3 size={16} /> Weekly Attendance Trend</h2>
-            <p className="chart-subtitle">Employee presence tracking this week</p>
-            {loading && attendanceData.length === 0 ? (
-              <div className="chart-empty">Loading attendance data...</div>
-            ) : attendanceData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={280}>
-                <AreaChart data={attendanceData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorPresent" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#2563eb" stopOpacity={0}/>
-                  </linearGradient>
-                  <linearGradient id="colorAbsent" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(37, 99, 235, 0.1)" />
-                <XAxis dataKey="day" stroke="#1e40af" style={{ fontSize: '12px' }} />
-                <YAxis stroke="#1e40af" style={{ fontSize: '12px' }} />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#fff', 
-                    border: '1px solid #dbeafe',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 12px rgba(37, 99, 235, 0.1)'
-                  }}
-                  labelStyle={{ color: '#1e40af', fontWeight: 'bold' }}
-                />
-                <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                <Area type="monotone" dataKey="present" stroke="#2563eb" strokeWidth={2} fillOpacity={1} fill="url(#colorPresent)" name="Present" />
-                <Area type="monotone" dataKey="absent" stroke="#ef4444" strokeWidth={2} fillOpacity={1} fill="url(#colorAbsent)" name="Absent" />
-                </AreaChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="chart-empty">No attendance data available.</div>
-            )}
-          </Card>
-
-          {/* Department Distribution Chart */}
-          <Card className="chart-card" glass>
-            <h2 className="chart-title"><Users size={16} /> Employees by Department</h2>
-            <p className="chart-subtitle">Total workforce distribution</p>
-            {loading && departmentData.length === 0 ? (
-              <div className="chart-empty">Loading department data...</div>
-            ) : departmentData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={departmentData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(37, 99, 235, 0.1)" />
-                <XAxis dataKey="name" stroke="#1e40af" style={{ fontSize: '12px' }} />
-                <YAxis stroke="#1e40af" style={{ fontSize: '12px' }} />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#fff', 
-                    border: '1px solid #dbeafe',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 12px rgba(37, 99, 235, 0.1)'
-                  }}
-                  labelStyle={{ color: '#1e40af', fontWeight: 'bold' }}
-                  cursor={{ fill: 'rgba(37, 99, 235, 0.1)' }}
-                />
-                <Bar dataKey="count" fill="#2563eb" radius={[8, 8, 0, 0]} name="Employee Count" />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="chart-empty">No department data available.</div>
-            )}
-          </Card>
-
-          {/* Payroll Status Chart */}
-          <Card className="chart-card" glass>
-            <h2 className="chart-title"><Wallet size={16} /> Payroll Processing Status</h2>
-            <p className="chart-subtitle">Monthly payroll completion rate</p>
-            {loading && payrollData.length === 0 ? (
-              <div className="chart-empty">Loading payroll data...</div>
-            ) : payrollData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={payrollData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(37, 99, 235, 0.1)" />
-                <XAxis dataKey="month" stroke="#1e40af" style={{ fontSize: '12px' }} />
-                <YAxis stroke="#1e40af" style={{ fontSize: '12px' }} />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#fff', 
-                    border: '1px solid #dbeafe',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 12px rgba(37, 99, 235, 0.1)'
-                  }}
-                  labelStyle={{ color: '#1e40af', fontWeight: 'bold' }}
-                  cursor={{ fill: 'rgba(37, 99, 235, 0.1)' }}
-                />
-                <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                <Bar dataKey="processed" stackId="a" fill="#10b981" radius={[8, 8, 0, 0]} name="Processed" />
-                <Bar dataKey="pending" stackId="a" fill="#f59e0b" radius={[0, 0, 0, 0]} name="Pending" />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="chart-empty">No payroll data available.</div>
-            )}
-          </Card>
-
-          {/* Leave Types Distribution Chart */}
-          <Card className="chart-card" glass>
-            <h2 className="chart-title"><PieChartIcon size={16} /> Leave Types Distribution</h2>
-            <p className="chart-subtitle">Leave requests by type</p>
-            {loading && leaveTypeData.length === 0 ? (
-              <div className="chart-empty">Loading leave data...</div>
-            ) : leaveTypeData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={280}>
-                <PieChart>
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#fff', 
-                    border: '1px solid #dbeafe',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 12px rgba(37, 99, 235, 0.1)'
-                  }}
-                  labelStyle={{ color: '#1e40af', fontWeight: 'bold' }}
-                />
-                <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                <Pie
-                  data={leaveTypeData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={true}
-                  label={({ name, value }) => `${name}: ${value}`}
-                  outerRadius={90}
-                  fill="#2563eb"
-                  dataKey="value"
-                >
-                  {leaveTypeData.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
-                  ))}
-                </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="chart-empty">No leave data available.</div>
-            )}
-          </Card>
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <BarChart3 size={24} />
+          </div>
+          <div>
+            <h2 className="analytics-title">Dashboard Analitik</h2>
+            <p className="analytics-subtitle">Data dan insight real-time</p>
+          </div>
         </div>
+      </Card>
+
+      <div className="charts-section">
+          <Card className="chart-card">
+              <div className="chart-header">
+                <div className="chart-title-area">
+                  <h3 className="chart-title">Tren Kehadiran Mingguan</h3>
+                  <p className="chart-subtitle">Pelacakan kehadiran karyawan minggu ini</p>
+                </div>
+              </div>
+              {loading && attendanceData.length === 0 ? (
+                <div className="chart-empty">Memuat data kehadiran...</div>
+              ) : attendanceData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={280}>
+                  <AreaChart data={attendanceData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorPresent" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#2563eb" stopOpacity={0}/>
+                      </linearGradient>
+                      <linearGradient id="colorAbsent" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <XAxis dataKey="day" stroke="#64748b" style={{ fontSize: '12px' }} />
+                    <YAxis stroke="#64748b" style={{ fontSize: '12px' }} />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: '#fff', 
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
+                      }}
+                      labelStyle={{ color: '#0f172a', fontWeight: 600 }}
+                    />
+                    <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                    <Area type="monotone" dataKey="present" stroke="#2563eb" strokeWidth={2} fillOpacity={1} fill="url(#colorPresent)" name="Hadir" />
+                    <Area type="monotone" dataKey="absent" stroke="#ef4444" strokeWidth={2} fillOpacity={1} fill="url(#colorAbsent)" name="Tidak Hadir" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="chart-empty">Tidak ada data kehadiran.</div>
+              )}
+            </Card>
+
+            <Card className="chart-card">
+              <div className="chart-header">
+                <div className="chart-title-area">
+                  <h3 className="chart-title">Karyawan per Departemen</h3>
+                  <p className="chart-subtitle">Distribusi total workforce</p>
+                </div>
+              </div>
+              {loading && departmentData.length === 0 ? (
+                <div className="chart-empty">Memuat data departemen...</div>
+              ) : departmentData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart data={departmentData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <XAxis dataKey="name" stroke="#64748b" style={{ fontSize: '12px' }} />
+                    <YAxis stroke="#64748b" style={{ fontSize: '12px' }} />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: '#fff', 
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
+                      }}
+                      labelStyle={{ color: '#0f172a', fontWeight: 600 }}
+                      cursor={{ fill: 'rgba(37, 99, 235, 0.05)' }}
+                    />
+                    <Bar dataKey="count" fill="#2563eb" radius={[8, 8, 0, 0]} name="Jumlah Karyawan" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="chart-empty">Tidak ada data departemen.</div>
+              )}
+            </Card>
+
+            <Card className="chart-card">
+              <div className="chart-header">
+                <div className="chart-title-area">
+                  <h3 className="chart-title">Status Payroll</h3>
+                  <p className="chart-subtitle">Tingkat penyelesaian payroll bulanan</p>
+                </div>
+              </div>
+              {loading && payrollData.length === 0 ? (
+                <div className="chart-empty">Memuat data payroll...</div>
+              ) : payrollData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart data={payrollData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <XAxis dataKey="month" stroke="#64748b" style={{ fontSize: '12px' }} />
+                    <YAxis stroke="#64748b" style={{ fontSize: '12px' }} />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: '#fff', 
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
+                      }}
+                      labelStyle={{ color: '#0f172a', fontWeight: 600 }}
+                      cursor={{ fill: 'rgba(37, 99, 235, 0.05)' }}
+                    />
+                    <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                    <Bar dataKey="processed" stackId="a" fill="#10b981" radius={[8, 8, 0, 0]} name="Selesai" />
+                    <Bar dataKey="pending" stackId="a" fill="#f59e0b" radius={[0, 0, 0, 0]} name="Menunggu" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="chart-empty">Tidak ada data payroll.</div>
+              )}
+            </Card>
+
+            <Card className="chart-card">
+              <div className="chart-header">
+                <div className="chart-title-area">
+                  <h3 className="chart-title">Distribusi Jenis Cuti</h3>
+                  <p className="chart-subtitle">Pengajuan cuti berdasarkan jenis</p>
+                </div>
+              </div>
+              {loading && leaveTypeData.length === 0 ? (
+                <div className="chart-empty">Memuat data cuti...</div>
+              ) : leaveTypeData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={280}>
+                  <PieChart>
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: '#fff', 
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
+                      }}
+                      labelStyle={{ color: '#0f172a', fontWeight: 600 }}
+                    />
+                    <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                    <Pie
+                      data={leaveTypeData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={true}
+                      label={({ name, value }) => `${name}: ${value}`}
+                      outerRadius={90}
+                      fill="#2563eb"
+                      dataKey="value"
+                    >
+                      {leaveTypeData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="chart-empty">Tidak ada data cuti.</div>
+              )}
+            </Card>
       </div>
     </div>
   );

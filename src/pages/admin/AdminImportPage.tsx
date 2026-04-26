@@ -1,12 +1,3 @@
-  // Download template User CSV
-  const handleDownloadUserTemplate = () => {
-    const link = document.createElement("a");
-    link.href = "/template_users_final.csv";
-    link.download = "template_users_final.csv";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-  };
 import { useMemo, useState } from "react";
 import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
@@ -14,13 +5,15 @@ import { Button } from "@/shared/ui/Button";
 import { Alert } from "@/shared/ui/Alert";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { ROLES } from "@/shared/types/rbac.types";
-import { Download, FileSpreadsheet, RefreshCw, ShieldAlert, Upload, Users } from "lucide-react";
+import { Download, FileSpreadsheet, RefreshCw, ShieldAlert, Upload, Users, UploadCloud } from "lucide-react";
 import {
   importEmployees,
   importUsers,
 } from "@/features/admin/api/admin-batch1.service";
 
 import "@/shared/styles/CrudPage.css";
+import "@/pages/dashboard/overview/OverviewPage.css";
+import "@/pages/payroll/PayrollShared.css";
 import "./AdminCrudPages.css";
 
 type AlertType = "success" | "error" | "info";
@@ -40,25 +33,32 @@ const AdminImportPage = () => {
   if (!canAccess) {
     return (
       <div className="crud-page">
-        <div className="page-header">
-          <div className="page-header-title">
-            <span className="page-badge">Admin Center</span>
-            <h1><ShieldAlert size={22} style={{ display: "inline", verticalAlign: "middle", marginRight: 8 }} />Akses Ditolak</h1>
-            <p>Anda tidak memiliki izin untuk mengakses halaman ini.</p>
-          </div>
-          <a
-            href={(import.meta.env.VITE_BASE_URL ? import.meta.env.VITE_BASE_URL : "") + "/import_user_employee_template.txt"}
-            download
-            style={{ marginLeft: 8, color: '#6366f1', textDecoration: 'underline', fontSize: 14 }}
-          >
-            Download Template Gabungan (TXT)
-          </a>
-        </div>
-        <Card className="table-card" glass>
-          <div className="table-card-inner">
-            <p>Silakan hubungi Administrator untuk mendapatkan akses.</p>
+        <Card className="hero-card">
+          <div className="hero-card-inner">
+            <div className="hero-content">
+              <div className="hero-badge">
+                <ShieldAlert size={16} />
+                <span>Admin Center</span>
+              </div>
+              <h1 className="hero-title">Akses Ditolak</h1>
+              <p className="hero-subtitle">
+                Anda tidak memiliki izin untuk mengakses halaman ini.
+              </p>
+            </div>
           </div>
         </Card>
+        <div className="white-unified-wrapper">
+          <Card glass style={{ padding: '2rem', textAlign: 'center' }}>
+            <p style={{ color: '#64748b' }}>Silakan hubungi Administrator untuk mendapatkan akses.</p>
+            <a
+              href={(import.meta.env.VITE_BASE_URL ? import.meta.env.VITE_BASE_URL : "") + "/import_user_employee_template.txt"}
+              download
+              style={{ marginTop: '1rem', color: '#6366f1', textDecoration: 'underline', fontSize: 14, display: 'inline-block' }}
+            >
+              Download Template Gabungan (TXT)
+            </a>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -66,7 +66,6 @@ const AdminImportPage = () => {
   const [userFile, setUserFile] = useState<File | null>(null);
   const [userRole, setUserRole] = useState<string>("employee");
   const [employeeFile, setEmployeeFile] = useState<File | null>(null);
-  // const [downloadingTemplate, setDownloadingTemplate] = useState(false);
   const [submittingUsers, setSubmittingUsers] = useState(false);
   const [submittingEmployees, setSubmittingEmployees] = useState(false);
   const [userImportResult, setUserImportResult] = useState<string | null>(null);
@@ -104,9 +103,15 @@ const AdminImportPage = () => {
     ];
   }, [userFile, employeeFile]);
 
-  // (removed handleDownloadTemplate, no longer needed)
+  const handleDownloadUserTemplate = () => {
+    const link = document.createElement("a");
+    link.href = "/template_users_final.csv";
+    link.download = "template_users_final.csv";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
 
-  // Download template Employee CSV
   const handleDownloadEmployeeTemplate = () => {
     const link = document.createElement("a");
     link.href = "/template_employee_final.csv";
@@ -138,7 +143,6 @@ const AdminImportPage = () => {
     } catch (error: unknown) {
       setAlertMessage(getErrorMessage(error as any));
       setAlertType("error");
-                       // onClick={handleDownloadTemplate}
       setSubmittingUsers(false);
     }
   };
@@ -174,61 +178,69 @@ const AdminImportPage = () => {
 
   return (
     <div className="crud-page">
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">Admin Center</span>
-          <h1>Import Center</h1>
-          <p>Unduh template, unggah file users maupun employees, dan tinjau hasil proses import langsung dari halaman admin.</p>
-        </div>
-      </div>
-
-      {/* Improved Template Download Section */}
-      <Card className="template-download-card" glass style={{ marginBottom: 24, padding: 24 }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <h2 style={{ margin: 0, fontSize: 20, fontWeight: 600, color: "#374151" }}>Download Template Import</h2>
-          <p style={{ margin: 0, color: "#6b7280", fontSize: 15 }}>
-            Silakan unduh template berikut sesuai kebutuhan. Pastikan file yang diupload sudah mengikuti struktur kolom pada template.
-          </p>
-          <div style={{ display: "flex", gap: 16, marginTop: 12 }}>
-            <Button
-              variant="outline"
-              size="md"
-              onClick={handleDownloadUserTemplate}
-              style={{ borderColor: "#2563eb", color: "#2563eb", fontWeight: 500, minWidth: 200, boxShadow: "0 2px 8px 0 #2563eb22" }}
-            >
-              <Download size={18} style={{ marginRight: 8 }} />
-              Template User
-            </Button>
-            <Button
-              variant="outline"
-              size="md"
-              onClick={handleDownloadEmployeeTemplate}
-              style={{ borderColor: "#059669", color: "#059669", fontWeight: 500, minWidth: 200, boxShadow: "0 2px 8px 0 #05966922" }}
-            >
-              <Download size={18} style={{ marginRight: 8 }} />
-              Template Employee
-            </Button>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <UploadCloud size={16} />
+              <span>Admin Center</span>
+            </div>
+            <h1 className="hero-title">Import Data</h1>
+            <p className="hero-subtitle">
+              Unduh template, unsubgah file users maupun employees, dan tinjau hasil proses import langsung dari halaman admin.
+            </p>
           </div>
         </div>
       </Card>
 
-      <div className="summary-grid">
+      <div className="white-unified-wrapper">
+        <Card glass style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#374151' }}>Download Template Import</h3>
+            <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>
+              Silakan unduh template berikut sesuai kebutuhan. Pastikan file yang diupload sudah mengikuti struktur kolom pada template.
+            </p>
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '0.75rem' }}>
+              <Button
+                variant="outline"
+                size="md"
+                onClick={handleDownloadUserTemplate}
+                style={{ borderColor: '#2563eb', color: '#2563eb', fontWeight: 500 }}
+              >
+                <Download size={16} style={{ marginRight: 8 }} />
+                Template User
+              </Button>
+              <Button
+                variant="outline"
+                size="md"
+                onClick={handleDownloadEmployeeTemplate}
+                style={{ borderColor: '#059669', color: '#059669', fontWeight: 500 }}
+              >
+                <Download size={16} style={{ marginRight: 8 }} />
+                Template Employee
+              </Button>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      <div className="leave-requests-wrapper">
         {summaryCards.map((card) => {
           const Icon = card.icon;
           return (
-            <Card key={card.label} className="summary-card" glass>
-              <div className="summary-card__header">
+            <div key={card.label} className="leave-summary-card">
+              <div className="leave-summary-header">
                 <div>
-                  <span className="summary-card__label">{card.label}</span>
-                  <p className="summary-card__subtitle">{card.subtitle}</p>
+                  <p className="leave-summary-label">{card.label}</p>
+                  <p className="leave-summary-subtitle">{card.subtitle}</p>
                 </div>
-                <span className={`summary-card__icon summary-card__icon--${card.tone}`}>
-                  <Icon size={20} />
-                </span>
+                <div className={`leave-summary-icon-wrapper leave-icon-${card.tone === 'blue' ? 'blue' : card.tone === 'green' ? 'green' : 'purple'}`}>
+                  <Icon size={28} />
+                </div>
               </div>
-              <div className={`summary-card__value summary-card__value--${card.tone}`}>{card.value}</div>
-              <div className="summary-card__change">{card.change}</div>
-            </Card>
+              <div className={`leave-summary-value leave-value-${card.tone === 'blue' ? 'blue' : card.tone === 'green' ? 'green' : 'purple'}`}>{card.value}</div>
+              <p className="leave-summary-trend">{card.change}</p>
+            </div>
           );
         })}
       </div>
@@ -242,109 +254,110 @@ const AdminImportPage = () => {
         />
       )}
 
-      {/* Side-by-side import forms */}
-      <div style={{ display: "flex", gap: 24, marginTop: 24, flexWrap: "wrap" }}>
-        <Card className="table-card" glass style={{ flex: 1, minWidth: 340 }}>
-          <div className="table-header-bar">
-            <h3>Import Users</h3>
-            <span className="table-count">{userFile ? userFile.name : "Belum ada file dipilih"}</span>
-          </div>
-          <div className="table-card-inner">
-            <form className="crud-form" onSubmit={handleImportUsers}>
-              <div className="crud-form-grid">
-                <label className="crud-form-full">
-                  File Users
-                  <input
-                    className="crud-input"
-                    type="file"
-                    accept=".xlsx,.xls,.csv"
-                    onChange={(event) => setUserFile(event.target.files?.[0] || null)}
-                  />
-                  <span className="crud-note">Gunakan template resmi agar struktur kolom sesuai dengan backend.</span>
-                </label>
-                <label className="crud-form-full">
-                  Role Users
-                  <select
-                    className="crud-input"
-                    value={userRole}
-                    onChange={e => setUserRole(e.target.value)}
-                  >
-                    <option value="employee">employee</option>
-                    <option value="admin">admin</option>
-                    <option value="super_admin">super_admin</option>
-                  </select>
-                  <span className="crud-note">Pilih role user yang akan diimport.</span>
-                </label>
-              </div>
-              <div className="crud-actions">
-                <Button type="submit" variant="primary" size="md" disabled={submittingUsers}>
-                  <Users size={16} />
-                  {submittingUsers ? "Mengimpor..." : "Import Users"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="md"
-                  onClick={() => {
-                    setUserFile(null);
-                    setUserImportResult(null);
-                  }}
-                  disabled={submittingUsers}
-                >
-                  <RefreshCw size={16} />
-                  Reset
-                </Button>
-              </div>
-              {userImportResult !== null && (
-                <pre className="crud-response">{userImportResult}</pre>
-              )}
-            </form>
-          </div>
-        </Card>
-        <Card className="table-card" glass style={{ flex: 1, minWidth: 340 }}>
-          <div className="table-header-bar">
-            <h3>Import Employees</h3>
-            <span className="table-count">{employeeFile ? employeeFile.name : "Belum ada file dipilih"}</span>
-          </div>
-          <div className="table-card-inner">
-            <form className="crud-form" onSubmit={handleImportEmployees}>
-              <div className="crud-form-grid">
-                <label className="crud-form-full">
-                  File Employees
-                  <input
-                    className="crud-input"
-                    type="file"
-                    accept=".xlsx,.xls,.csv"
-                    onChange={(event) => setEmployeeFile(event.target.files?.[0] || null)}
-                  />
-                  <span className="crud-note">Pastikan data employee sudah mengikuti format field pada template import.</span>
-                </label>
-              </div>
-              <div className="crud-actions">
-                <Button type="submit" variant="primary" size="md" disabled={submittingEmployees}>
-                  <Upload size={16} />
-                  {submittingEmployees ? "Mengimpor..." : "Import Employees"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="md"
-                  onClick={() => {
-                    setEmployeeFile(null);
-                    setEmployeeImportResult(null);
-                  }}
-                  disabled={submittingEmployees}
-                >
-                  <RefreshCw size={16} />
-                  Reset
-                </Button>
-              </div>
-              {employeeImportResult !== null && (
-                <pre className="crud-response">{employeeImportResult}</pre>
-              )}
-            </form>
-          </div>
-        </Card>
+      <div className="white-unified-wrapper">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1.5rem' }}>
+          <Card glass style={{ padding: 0 }}>
+            <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ margin: 0 }}>Import Users</h3>
+              <span style={{ fontSize: '0.85rem', color: '#64748b' }}>{userFile ? userFile.name : "Belum ada file dipilih"}</span>
+            </div>
+            <div style={{ padding: '1.5rem' }}>
+              <form onSubmit={handleImportUsers}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem' }}>File Users</label>
+                    <input
+                      type="file"
+                      accept=".xlsx,.xls,.csv"
+                      onChange={(event) => setUserFile(event.target.files?.[0] || null)}
+                      style={{ width: '100%', padding: '0.75rem', borderRadius: '12px', border: '1px solid #e2e8f0' }}
+                    />
+                    <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', color: '#64748b' }}>Gunakan template resmi agar struktur kolom sesuai dengan backend.</p>
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem' }}>Role Users</label>
+                    <select
+                      value={userRole}
+                      onChange={e => setUserRole(e.target.value)}
+                      style={{ width: '100%', padding: '0.75rem', borderRadius: '12px', border: '1px solid #e2e8f0' }}
+                    >
+                      <option value="employee">employee</option>
+                      <option value="admin">admin</option>
+                      <option value="super_admin">super_admin</option>
+                    </select>
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+                    <Button type="submit" variant="primary" size="md" disabled={submittingUsers}>
+                      <Users size={16} />
+                      {submittingUsers ? "Mengimpor..." : "Import Users"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="md"
+                      onClick={() => {
+                        setUserFile(null);
+                        setUserImportResult(null);
+                      }}
+                      disabled={submittingUsers}
+                    >
+                      <RefreshCw size={16} />
+                      Reset
+                    </Button>
+                  </div>
+                  {userImportResult !== null && (
+                    <pre style={{ margin: 0, padding: '1rem', background: '#f8fafc', borderRadius: '12px', fontSize: '0.8rem', overflow: 'auto' }}>{userImportResult}</pre>
+                  )}
+                </div>
+              </form>
+            </div>
+          </Card>
+
+          <Card glass style={{ padding: 0 }}>
+            <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ margin: 0 }}>Import Employees</h3>
+              <span style={{ fontSize: '0.85rem', color: '#64748b' }}>{employeeFile ? employeeFile.name : "Belum ada file dipilih"}</span>
+            </div>
+            <div style={{ padding: '1.5rem' }}>
+              <form onSubmit={handleImportEmployees}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem' }}>File Employees</label>
+                    <input
+                      type="file"
+                      accept=".xlsx,.xls,.csv"
+                      onChange={(event) => setEmployeeFile(event.target.files?.[0] || null)}
+                      style={{ width: '100%', padding: '0.75rem', borderRadius: '12px', border: '1px solid #e2e8f0' }}
+                    />
+                    <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', color: '#64748b' }}>Pastikan data employee sudah mengikuti format field pada template import.</p>
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+                    <Button type="submit" variant="primary" size="md" disabled={submittingEmployees}>
+                      <Upload size={16} />
+                      {submittingEmployees ? "Mengimpor..." : "Import Employees"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="md"
+                      onClick={() => {
+                        setEmployeeFile(null);
+                        setEmployeeImportResult(null);
+                      }}
+                      disabled={submittingEmployees}
+                    >
+                      <RefreshCw size={16} />
+                      Reset
+                    </Button>
+                  </div>
+                  {employeeImportResult !== null && (
+                    <pre style={{ margin: 0, padding: '1rem', background: '#f8fafc', borderRadius: '12px', fontSize: '0.8rem', overflow: 'auto' }}>{employeeImportResult}</pre>
+                  )}
+                </div>
+              </form>
+            </div>
+          </Card>
+        </div>
       </div>
     </div>
   );

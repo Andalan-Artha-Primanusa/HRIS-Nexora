@@ -67,23 +67,12 @@
   --cr-border: rgba(37, 99, 235, 0.14);
 
   padding: 1.5rem;
-  background: var(--surface);
-  border-radius: 24px;
-  position: relative;
+  background: transparent;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  font-family: "Poppins", sans-serif !important;
 }
 
 .crud-page::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  border-radius: inherit;
-  border: 1px solid rgba(37, 99, 235, 0.12);
+  display: none;
 }
 
 /* ============================================ */
@@ -96,10 +85,7 @@
   align-items: center;
   gap: 1.25rem;
   padding: 1.35rem 1.5rem;
-  border-radius: 18px;
-  border: 1px solid var(--cr-border);
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.08);
+  background: transparent;
 }
 
 .page-header-title {
@@ -157,11 +143,11 @@
 .summary-card {
   padding: 1.35rem;
   border-radius: 18px;
-  background: linear-gradient(135deg, #ffffff 0%, #f8faff 100%);
-  border: 1px solid rgba(37, 99, 235, 0.12);
-  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.08);
+  background: transparent;
+  border: none;
+  box-shadow: none;
   overflow: hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: none;
   position: relative;
   min-height: 178px;
   display: flex;
@@ -170,21 +156,13 @@
 }
 
 .summary-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: -40px;
-  width: 200px;
-  height: 200px;
-  background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%);
-  border-radius: 50%;
-  pointer-events: none;
+  display: none;
 }
 
 .summary-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.15);
-  border-color: #93c5fd;
+  transform: none;
+  box-shadow: none;
+  border-color: transparent;
 }
 
 .summary-card__header {

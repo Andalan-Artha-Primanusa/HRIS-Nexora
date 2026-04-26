@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Wallet, CheckCircle, Users, TrendingUp, RefreshCw, BarChart3, PieChart as PieIcon } from 'lucide-react';
+import { Wallet, CheckCircle, Users, TrendingUp, RefreshCw, BarChart3, PieChart as PieIcon, DollarSign } from 'lucide-react';
 import { BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 import './ReportsDashboardPage.css';
 
 type Rec = Record<string, unknown>;
@@ -95,21 +97,25 @@ const ReportsPayrollPage: React.FC = () => {
 
   return (
     <div className="reports-dashboard">
-      <Card className="reports-hero-card" glass>
-        <div className="reports-hero-copy">
-          <p className="reports-badge">Analytics & Reporting</p>
-          <h1 className="reports-title">Analitik Data Payroll</h1>
-          <p className="reports-subtitle">
-            Dashboard analisis data <strong>payroll yang telah diproses</strong>. 
-            Lacak tren nominal gaji, status pembayaran per periode, dan distribusi pengeluaran 
-            departemen berdasarkan data historis sistem.
-          </p>
-        </div>
-        <div className="reports-actions">
-          <Button variant="primary" size="md" onClick={()=>void load()} disabled={loading}>
-            <RefreshCw size={18} className={loading ? 'animate-spin' : ''} style={{ marginRight: '8px' }} />
-            {loading ? 'Menyegarkan...' : 'Segarkan Analitik'}
-          </Button>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Wallet size={16} />
+              <span>Analitik</span>
+            </div>
+            <h1 className="hero-title">Analitik Data Payroll</h1>
+            <p className="hero-subtitle">
+              Dashboard analisis data payroll yang telah diproses.
+              Lacak tren nominal gaji, status pembayaran per periode, dan distribusi pengeluaran.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => void load()} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+          </div>
         </div>
       </Card>
 
@@ -131,11 +137,62 @@ const ReportsPayrollPage: React.FC = () => {
 
       {error && <p className="reports-error">{error}</p>}
 
-      <div className="reports-metrics-grid">
-        <MetricCard label="Total Records" sub="Seluruh entri" value={String(filteredRecords.length)} tone="blue" icon={BarChart3}/>
-        <MetricCard label="Gaji Bersih" sub="Akumulasi periode ini" value={fmtRp(totalNet)} tone="cyan" icon={Wallet}/>
-        <MetricCard label="Dibayar" sub="Status Paid/Approved" value={String(paid)} tone="green" icon={CheckCircle}/>
-        <MetricCard label="Karyawan" sub="Jumlah penerima unik" value={String(uniqueEmps)} tone="red" icon={Users}/>
+      <div className="leave-requests-wrapper">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Total Records</p>
+              <p className="leave-summary-subtitle">Seluruh entri</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-blue">
+              <BarChart3 size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-blue">{filteredRecords.length}</div>
+          <p className="leave-summary-trend">Total Records</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Gaji Bersih</p>
+              <p className="leave-summary-subtitle">Akumulasi periode ini</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-cyan">
+              <DollarSign size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-cyan">{fmtRp(totalNet)}</div>
+          <p className="leave-summary-trend">Total Gaji</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Dibayar</p>
+              <p className="leave-summary-subtitle">Status Paid/Approved</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-green">
+              <CheckCircle size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-green">{paid}</div>
+          <p className="leave-summary-trend">Payroll Dibayar</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Karyawan</p>
+              <p className="leave-summary-subtitle">Jumlah penerima unik</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-red">
+              <Users size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-red">{uniqueEmps}</div>
+          <p className="leave-summary-trend">Karyawan</p>
+        </div>
       </div>
 
       <div className="reports-charts-section">

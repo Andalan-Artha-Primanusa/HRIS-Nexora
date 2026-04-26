@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Users, UserCheck, UserMinus, UserPlus, Briefcase, RefreshCw, BarChart3, PieChart as PieIcon, TrendingUp } from 'lucide-react';
+import { Users, UserCheck, UserMinus, UserPlus, Briefcase, RefreshCw, BarChart3, PieChart as PieIcon, TrendingUp, UserCircle } from 'lucide-react';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 import './ReportsDashboardPage.css';
 
 type Rec = Record<string, unknown>;
@@ -94,23 +96,85 @@ const ReportsEmployeePage: React.FC = () => {
 
   return (
     <div className="reports-dashboard">
-      <Card className="reports-hero-card" glass>
-        <div className="reports-hero-copy">
-          <p className="reports-badge">Laporan &amp; Analitik</p>
-          <h1 className="reports-title">Laporan SDM (Human Capital)</h1>
-          <p className="reports-subtitle">Analisis demografi karyawan, distribusi departemen, pertumbuhan headcount, dan status kepegawaian.</p>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <UserCircle size={16} />
+              <span>Laporan & Analitik</span>
+            </div>
+            <h1 className="hero-title">Laporan SDM (Human Capital)</h1>
+            <p className="hero-subtitle">
+              Analisis demografi karyawan, distribusi departemen, pertumbuhan headcount, dan status kepegawaian.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => void load()} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+          </div>
         </div>
-        <div className="reports-actions"><Button variant="outline" size="md" onClick={()=>void load()} disabled={loading}><RefreshCw size={16}/>{loading?'Memuat...':'Segarkan'}</Button></div>
       </Card>
+
       {error && <p className="reports-error">{error}</p>}
 
-      <div className="reports-metrics-grid">
-        <MetricCard label="Total Karyawan" sub="Semua database" value={String(total)} tone="blue" icon={Users}/>
-        <MetricCard label="Karyawan Aktif" sub="Status bekerja" value={String(active)} tone="green" icon={UserCheck}/>
-        <MetricCard label="Masa Percobaan" sub="Probation/Pending" value={String(probation)} tone="orange" icon={UserPlus}/>
-        <MetricCard label="Resigned/Non-Aktif" sub="Riwayat keluar" value={String(inactive)} tone="red" icon={UserMinus}/>
-        <MetricCard label="Total Departemen" sub="Unit kerja aktif" value={String(deptData.length)} tone="purple" icon={Briefcase}/>
-        <MetricCard label="Pertumbuhan Bln Ini" sub="Karyawan baru" value={String(growthData.slice(-1)[0]?.value || 0)} tone="cyan" icon={TrendingUp}/>
+      <div className="leave-requests-wrapper">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Total Karyawan</p>
+              <p className="leave-summary-subtitle">Semua database</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-blue">
+              <Users size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-blue">{total}</div>
+          <p className="leave-summary-trend">Total Karyawan</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Karyawan Aktif</p>
+              <p className="leave-summary-subtitle">Status bekerja</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-green">
+              <UserCheck size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-green">{active}</div>
+          <p className="leave-summary-trend">Karyawan Aktif</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Masa Percobaan</p>
+              <p className="leave-summary-subtitle">Probation/Pending</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-orange">
+              <UserPlus size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-orange">{probation}</div>
+          <p className="leave-summary-trend">Masa Percobaan</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Resigned / Non-Aktif</p>
+              <p className="leave-summary-subtitle">Riwayat keluar</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-red">
+              <UserMinus size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-red">{inactive}</div>
+          <p className="leave-summary-trend">Non-Aktif</p>
+        </div>
       </div>
 
       <div className="reports-charts-section">

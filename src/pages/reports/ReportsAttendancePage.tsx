@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { BarChart3, Clock, TrendingUp, Users, RefreshCw, Activity, CheckCircle, XCircle } from 'lucide-react';
+import { BarChart3, Clock, TrendingUp, Users, RefreshCw, Activity, CheckCircle, XCircle, CalendarDays } from 'lucide-react';
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -7,6 +7,8 @@ import {
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 import './ReportsDashboardPage.css';
 
 type Rec = Record<string, unknown>;
@@ -143,35 +145,85 @@ const ReportsAttendancePage: React.FC = () => {
 
   return (
     <div className="reports-dashboard">
-      <Card className="reports-hero-card" glass>
-        <div className="reports-hero-copy">
-          <p className="reports-badge">Laporan & Analitik</p>
-          <h1 className="reports-title">Laporan Absensi</h1>
-          <p className="reports-subtitle">Analisis kehadiran, ketidakhadiran, dan keterlambatan karyawan secara visual.</p>
-        </div>
-        <div className="reports-actions">
-          <Button variant="outline" size="md" onClick={() => void load()} disabled={loading}>
-            <RefreshCw size={16} />{loading ? 'Memuat...' : 'Segarkan'}
-          </Button>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <CalendarDays size={16} />
+              <span>Laporan & Analitik</span>
+            </div>
+            <h1 className="hero-title">Laporan Absensi</h1>
+            <p className="hero-subtitle">
+              Analisis kehadiran, ketidakhadiran, dan keterlambatan karyawan secara visual.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => void load()} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+          </div>
         </div>
       </Card>
 
       {error && <p className="reports-error">{error}</p>}
 
-      <div className="reports-metrics-grid">
-        {metrics.map(m => {
-          const Icon = m.icon;
-          return (
-            <Card key={m.label} className="report-metric-card" glass>
-              <div className="report-metric-header">
-                <div><span className="report-metric-label">{m.label}</span><p className="report-metric-sublabel">{m.sub}</p></div>
-                <span className={`report-metric-icon report-metric-icon--${m.tone}`}><Icon size={20} /></span>
-              </div>
-              <div className="report-metric-value">{m.value}</div>
-              <div className="report-metric-change neutral">Live data</div>
-            </Card>
-          );
-        })}
+      <div className="leave-requests-wrapper">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Total Catatan</p>
+              <p className="leave-summary-subtitle">Semua records</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-blue">
+              <Activity size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-blue">{records.length}</div>
+          <p className="leave-summary-trend">Total Absensi</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Hadir</p>
+              <p className="leave-summary-subtitle">Total hadir</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-green">
+              <CheckCircle size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-green">{present}</div>
+          <p className="leave-summary-trend">Hadir</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Absen</p>
+              <p className="leave-summary-subtitle">Tidak hadir</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-red">
+              <XCircle size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-red">{absent}</div>
+          <p className="leave-summary-trend">Absen</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Terlambat</p>
+              <p className="leave-summary-subtitle">Late check-in</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-orange">
+              <Clock size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-orange">{late}</div>
+          <p className="leave-summary-trend">Terlambat</p>
+        </div>
       </div>
 
       <div className="reports-charts-section">

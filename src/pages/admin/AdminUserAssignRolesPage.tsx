@@ -5,8 +5,9 @@ import { Button } from "@/shared/ui/Button";
 import { Alert } from "@/shared/ui/Alert";
 import { assignRolesToUser, getAllUsers, getAllRoles } from "@/features/admin/api/admin.service";
 import type { Role } from "@/shared/types/rbac.types";
-import { Search, Users, ShieldCheck, CheckSquare, Square } from "lucide-react";
+import { Search, Users, ShieldCheck, CheckSquare, Square, ChevronLeft, Shield } from "lucide-react";
 import "./AdminCrudPages.css";
+import "../dashboard/overview/OverviewPage.css";
 
 interface UserListItem {
   id: number;
@@ -120,15 +121,26 @@ const AdminUserAssignRolesPage = () => {
 
   return (
     <div className="crud-page">
-      <div className="crud-header">
-        <div>
-          <h1>👥 Manajemen Peran Pengguna</h1>
-          <p>Pilih karyawan berdasarkan ID atau Nama untuk menyesuaikan hak akses mereka.</p>
+      <Card className="hero-card" style={{ marginBottom: '2rem' }}>
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Shield size={16} />
+              <span>Security Center</span>
+            </div>
+            <h1 className="hero-title">Manajemen Peran Pengguna</h1>
+            <p className="hero-subtitle">
+              Pilih karyawan berdasarkan ID atau Nama untuk menyesuaikan hak akses mereka.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button type="button" className="btn-outline" onClick={() => navigate("/admin/users")}>
+              <ChevronLeft size={16} style={{ marginRight: '8px' }} />
+              Kembali
+            </button>
+          </div>
         </div>
-        <Button variant="outline" size="md" onClick={() => navigate("/admin/users")}>
-          ← Kembali ke Users
-        </Button>
-      </div>
+      </Card>
 
       {statusMessage && (
         <Alert 
@@ -139,59 +151,64 @@ const AdminUserAssignRolesPage = () => {
         />
       )}
 
-      <div className="crud-content-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.5fr) minmax(0, 1fr)', gap: '1.5rem', alignItems: 'start' }}>
+      <div className="crud-content-grid" style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '2rem', alignItems: 'start' }}>
         
-        <Card className="crud-card" glass style={{ height: 'fit-content' }}>
-          <div className="crud-card-header" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 style={{ margin: 0 }}><Users size={20} style={{ marginRight: '8px' }} /> 1. Pilih Karyawan</h2>
-            <div className="search-box" style={{ maxWidth: '250px', background: 'rgba(255,255,255,0.7)', border: '1px solid var(--border)', borderRadius: '8px', padding: '0.4rem 0.8rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Search size={16} color="var(--primary)" />
+        {/* Section 1: User Selection */}
+        <Card glass style={{ padding: '2rem', borderRadius: '32px', height: 'fit-content', border: '1px solid rgba(255,255,255,0.2)' }}>
+          <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+            <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '12px', fontSize: '1.25rem', fontWeight: 800, color: '#1e3a8a' }}>
+              <Users size={24} color="#2563eb" /> 1. Pilih Karyawan
+            </h3>
+            <div style={{ position: 'relative', flex: 1, maxWidth: '300px' }}>
+              <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
               <input 
                 type="text" 
                 placeholder="Cari ID atau Nama..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ border: 'none', background: 'transparent', outline: 'none', fontSize: '0.85rem', width: '100%' }}
+                style={{ width: '100%', padding: '12px 16px 12px 42px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '0.9rem', color: '#0f172a', transition: 'all 0.2s', boxSizing: 'border-box' }}
               />
             </div>
           </div>
 
-          <div className="crud-table-wrap" style={{ maxHeight: '500px', overflowY: 'auto' }}>
-            <table className="crud-table">
-              <thead>
+          <div style={{ maxHeight: '600px', overflowY: 'auto', borderRadius: '16px', border: '1px solid #f1f5f9' }}>
+            <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0 }}>
+              <thead style={{ position: 'sticky', top: 0, zIndex: 10, background: '#f8fafc' }}>
                 <tr>
-                  <th style={{ width: '80px' }}>ID</th>
-                  <th>Karyawan</th>
-                  <th>Peran Saat Ini</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', borderBottom: '1px solid #f1f5f9' }}>ID</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', borderBottom: '1px solid #f1f5f9' }}>Karyawan</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', borderBottom: '1px solid #f1f5f9' }}>Peran Saat Ini</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan={3} style={{ textAlign: 'center', padding: '2rem' }}>Memuat data...</td></tr>
+                  <tr><td colSpan={3} style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>Memuat data...</td></tr>
                 ) : filteredUsers.length === 0 ? (
-                  <tr><td colSpan={3} style={{ textAlign: 'center', padding: '2rem' }}>Tidak ada karyawan ditemukan.</td></tr>
+                  <tr><td colSpan={3} style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>Tidak ada karyawan ditemukan.</td></tr>
                 ) : filteredUsers.map((u) => (
                   <tr 
                     key={u.id} 
                     onClick={() => handleSelectUser(u)}
                     style={{ 
                       cursor: 'pointer', 
-                      backgroundColor: selectedUser?.id === u.id ? 'rgba(37, 99, 235, 0.1)' : 'transparent',
-                      borderLeft: selectedUser?.id === u.id ? '4px solid var(--primary)' : 'none'
+                      backgroundColor: selectedUser?.id === u.id ? '#eff6ff' : 'transparent',
+                      transition: 'all 0.2s'
                     }}
                   >
-                    <td><span className="cell-id">#{u.id}</span></td>
-                    <td>
-                      <div style={{ fontWeight: 600 }}>{u.name}</div>
-                      <div style={{ fontSize: '0.75rem', opacity: 0.7 }}>{u.email}</div>
+                    <td style={{ padding: '1.25rem 1rem', borderBottom: '1px solid #f1f5f9' }}>
+                      <span style={{ fontWeight: 800, color: '#2563eb' }}>#{u.id}</span>
                     </td>
-                    <td>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                    <td style={{ padding: '1.25rem 1rem', borderBottom: '1px solid #f1f5f9' }}>
+                      <div style={{ fontWeight: 700, color: '#1e293b' }}>{u.name}</div>
+                      <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{u.email}</div>
+                    </td>
+                    <td style={{ padding: '1.25rem 1rem', borderBottom: '1px solid #f1f5f9' }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                         {u.role_names.length > 0 ? u.role_names.map((rn, idx) => (
-                          <span key={idx} style={{ padding: '2px 8px', borderRadius: '4px', backgroundColor: 'var(--primary-lighter)', color: 'var(--primary)', fontSize: '0.7rem', fontWeight: 600 }}>
+                          <span key={idx} style={{ padding: '4px 10px', borderRadius: '8px', backgroundColor: '#dbeafe', color: '#1e40af', fontSize: '0.75rem', fontWeight: 700 }}>
                             {rn}
                           </span>
-                        )) : <span style={{ color: '#999', fontSize: '0.75rem' }}>-</span>}
+                        )) : <span style={{ color: '#94a3b8', fontSize: '0.8rem' }}>-</span>}
                       </div>
                     </td>
                   </tr>
@@ -201,23 +218,25 @@ const AdminUserAssignRolesPage = () => {
           </div>
         </Card>
 
-        <div id="assignment-section">
-          <Card className="crud-card" glass style={{ opacity: selectedUser ? 1 : 0.6, pointerEvents: selectedUser ? 'auto' : 'none', transition: 'all 0.3s ease' }}>
-            <h2><ShieldCheck size={20} style={{ marginRight: '8px' }} /> 2. Sesuaikan Peran</h2>
+        <div id="assignment-section" style={{ position: 'relative' }}>
+          <Card glass style={{ padding: '2rem', borderRadius: '32px', opacity: selectedUser ? 1 : 0.6, pointerEvents: selectedUser ? 'auto' : 'none', transition: 'all 0.3s ease', border: '1px solid rgba(255,255,255,0.2)' }}>
+            <h3 style={{ margin: '0 0 2rem', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '1.25rem', fontWeight: 800, color: '#1e3a8a' }}>
+              <ShieldCheck size={24} color="#2563eb" /> 2. Sesuaikan Peran
+            </h3>
             
             {selectedUser && (
-              <div style={{ marginBottom: '1.2rem', padding: '0.8rem', borderRadius: '8px', backgroundColor: 'var(--primary-lighter)', border: '1px solid var(--primary-light)' }}>
-                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--primary)' }}>KARYAWAN TERPILIH</div>
-                <div style={{ fontSize: '1rem', fontWeight: 700 }}>{selectedUser.name} <span style={{ opacity: 0.6, fontSize: '0.85rem' }}>(#{selectedUser.id})</span></div>
+              <div style={{ marginBottom: '2rem', padding: '1.25rem', borderRadius: '16px', background: '#eff6ff', border: '1px solid #dbeafe' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#1e40af', textTransform: 'uppercase', marginBottom: '4px' }}>Karyawan Terpilih</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1e293b' }}>{selectedUser.name} <span style={{ opacity: 0.6, fontSize: '0.9rem', fontWeight: 600 }}>(#{selectedUser.id})</span></div>
               </div>
             )}
 
-            <div className="crud-table-wrap">
-              <table className="crud-table">
-                <thead>
+            <div style={{ borderRadius: '16px', border: '1px solid #f1f5f9', overflow: 'hidden', marginBottom: '2rem' }}>
+              <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0 }}>
+                <thead style={{ background: '#f8fafc' }}>
                   <tr>
-                    <th style={{ width: '50px' }}>Pilih</th>
-                    <th>Nama Peran</th>
+                    <th style={{ padding: '1rem', width: '60px', textAlign: 'center', fontSize: '0.75rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', borderBottom: '1px solid #f1f5f9' }}>Pilih</th>
+                    <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', borderBottom: '1px solid #f1f5f9' }}>Nama Peran</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -225,19 +244,21 @@ const AdminUserAssignRolesPage = () => {
                     <tr 
                       key={role.id} 
                       onClick={() => handleToggleRole(role.id)}
-                      style={{ cursor: 'pointer' }}
+                      style={{ cursor: 'pointer', transition: 'all 0.2s', backgroundColor: selectedRoleIds.includes(role.id) ? '#f8fafc' : 'transparent' }}
                     >
-                      <td style={{ textAlign: 'center' }}>
+                      <td style={{ padding: '1.25rem 1rem', textAlign: 'center', borderBottom: '1px solid #f1f5f9' }}>
                         {selectedRoleIds.includes(role.id) ? (
-                          <CheckSquare size={20} color="var(--primary)" />
+                          <div style={{ width: '24px', height: '24px', background: '#2563eb', borderRadius: '6px', display: 'grid', placeItems: 'center', margin: '0 auto' }}>
+                            <CheckSquare size={16} color="white" />
+                          </div>
                         ) : (
-                          <Square size={20} color="#cbd5e1" />
+                          <div style={{ width: '24px', height: '24px', border: '2px solid #cbd5e1', borderRadius: '6px', margin: '0 auto' }} />
                         )}
                       </td>
-                      <td>
-                        <div style={{ fontWeight: 600 }}>{role.display_name || role.name}</div>
-                        <div style={{ fontSize: '0.75rem', opacity: 0.7 }}>{role.name}</div>
-                        {role.id === 1 && <span style={{ fontSize: '0.7rem', color: '#ef4444', fontWeight: 700 }}>🔒 HANYA SUPER ADMIN</span>}
+                      <td style={{ padding: '1.25rem 1rem', borderBottom: '1px solid #f1f5f9' }}>
+                        <div style={{ fontWeight: 700, color: '#1e293b' }}>{role.display_name || role.name}</div>
+                        <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{role.name}</div>
+                        {role.id === 1 && <span style={{ display: 'inline-block', marginTop: '4px', fontSize: '0.7rem', color: '#ef4444', fontWeight: 800, background: '#fef2f2', padding: '2px 8px', borderRadius: '4px' }}>🔒 HANYA SUPER ADMIN</span>}
                       </td>
                     </tr>
                   ))}
@@ -245,12 +266,13 @@ const AdminUserAssignRolesPage = () => {
               </table>
             </div>
 
-            <div className="crud-actions" style={{ marginTop: '1.5rem', justifyContent: 'flex-end' }}>
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
               <Button 
                 variant="outline" 
                 size="md" 
                 onClick={() => setSelectedUser(null)}
                 disabled={isAssigning}
+                style={{ borderRadius: '14px', fontWeight: 700, padding: '0 1.5rem', height: '48px' }}
               >
                 Batal
               </Button>
@@ -259,16 +281,18 @@ const AdminUserAssignRolesPage = () => {
                 size="md" 
                 onClick={() => void handleAssignRoles()}
                 disabled={isAssigning || !selectedUser || selectedRoleIds.length === 0}
+                style={{ borderRadius: '14px', fontWeight: 800, padding: '0 2rem', height: '48px', boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)' }}
               >
                 {isAssigning ? "Menyimpan..." : "✓ Simpan Peran"}
               </Button>
             </div>
             
             {!selectedUser && (
-              <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(1px)', zIndex: 10 }}>
-                <div style={{ textAlign: 'center', padding: '1rem', borderRadius: '8px', backgroundColor: 'white', border: '1px solid var(--border)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
-                  <Users size={32} color="#94a3b8" style={{ marginBottom: '8px' }} />
-                  <div style={{ fontWeight: 600, color: '#64748b' }}>Silakan pilih karyawan terlebih dahulu</div>
+              <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(2px)', zIndex: 10, borderRadius: '32px' }}>
+                <div style={{ textAlign: 'center', padding: '2.5rem', borderRadius: '24px', backgroundColor: 'white', border: '1px solid #f1f5f9', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}>
+                  <Users size={48} color="#cbd5e1" style={{ marginBottom: '1rem' }} />
+                  <div style={{ fontWeight: 800, color: '#64748b', fontSize: '1.1rem' }}>Silakan pilih karyawan terlebih dahulu</div>
+                  <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '0.5rem' }}>Pilih dari daftar di sebelah kiri untuk menyesuaikan peran.</div>
                 </div>
               </div>
             )}

@@ -50,4 +50,14 @@ export const workforceService = {
     const response = await api.put(`/workforce/overtime-rules/${id}`, data);
     return response.data;
   },
+
+  // Compliance
+  getComplianceStats: async () => {
+    const response = await api.get('/workforce/compliance/stats');
+    return response.data;
+  },
+  getComplianceDocuments: async () => {
+    const response = await api.get('/workforce/compliance/documents');
+    return response.data;
+  }
 };

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { GitBranch, Plus, RefreshCw, Trash2, Edit, ChevronRight, User, Search } from 'lucide-react';
+import { GitBranch, Plus, RefreshCw, Workflow, User } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
-import { Button } from '@/shared/ui/Button';
 import { organizationService } from '@/features/organization/api/organization.service';
 import { ApprovalFlowModal } from '@/features/organization/components/ApprovalFlowModal';
+import { getAllRoles } from '@/features/admin/api/admin.service';
 import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 
 const ApprovalFlowPage: React.FC = () => {
   const [flows, setFlows] = useState<any[]>([]);
@@ -12,28 +14,14 @@ const ApprovalFlowPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [moduleFilter, setModuleFilter] = useState('all');
-
-  const parseSteps = (steps: any) => {
-    if (typeof steps === 'string') {
-      try {
-        return JSON.parse(steps);
-      } catch (e) {
-        return [];
-      }
-    }
-    return Array.isArray(steps) ? steps : [];
-  };
+  const [roles, setRoles] = useState<any[]>([]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
       const data = await organizationService.getApprovalFlows();
       const rawFlows = Array.isArray(data) ? data : data.data || [];
-      const processedFlows = rawFlows.map((f: any) => ({
-        ...f,
-        steps: parseSteps(f.steps)
-      }));
-      setFlows(processedFlows);
+      setFlows(rawFlows);
     } catch (err) {
       console.error(err);
     } finally {
@@ -41,8 +29,18 @@ const ApprovalFlowPage: React.FC = () => {
     }
   };
 
+  const fetchRoles = async () => {
+    try {
+      const res = await getAllRoles();
+      setRoles(res.items || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     fetchData();
+    fetchRoles();
   }, []);
 
   const handleSave = async (data: any) => {
@@ -60,32 +58,119 @@ const ApprovalFlowPage: React.FC = () => {
     return matchesSearch && matchesModule;
   });
 
+  const getRoleName = (roleId: number) => {
+    const role = roles.find(r => r.id === roleId);
+    return role?.display_name || role?.name || `Role #${roleId}`;
+  };
+
+  const renderSteps = (steps: any[]) => {
+    if (!steps || steps.length === 0) {
+      return <span style={{ color: '#94a3b8', fontSize: '13px' }}>No steps</span>;
+    }
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        {steps.map((step, idx) => (
+          <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+            {/* Dot + Line connector */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '32px', flexShrink: 0 }}>
+              <div style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                background: '#eff6ff',
+                border: '2px solid #bfdbfe',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 1,
+              }}>
+                <User size={14} color="#1d4ed8" />
+              </div>
+              {idx < steps.length - 1 && (
+                <div style={{
+                  width: '2px',
+                  flex: 1,
+                  minHeight: '20px',
+                  background: '#bfdbfe',
+                  margin: '2px 0',
+                }} />
+              )}
+            </div>
+
+            {/* Step content card */}
+            <div style={{
+              background: '#f8faff',
+              border: '0.5px solid #bfdbfe',
+              borderRadius: '10px',
+              padding: '10px 16px',
+              flex: 1,
+              marginBottom: idx < steps.length - 1 ? '12px' : 0,
+            }}>
+              <p style={{ fontSize: '11px', color: '#3b82f6', fontWeight: 600, margin: '0 0 2px 0' }}>
+                Step {idx + 1}
+              </p>
+              <p style={{ fontSize: '13px', fontWeight: 600, color: '#1e40af', margin: 0 }}>
+                {getRoleName(step.role_id)}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="crud-page">
-      <div className="crud-header">
-        <div>
-          <span className="reimb-badge reimb-badge-admin">System Configuration</span>
-          <h1>Approval Flows</h1>
-          <p>Define multi-level approval workflows for organizational modules.</p>
-        </div>
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-            <input 
-              type="text" 
-              placeholder="Search flows..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ 
-                padding: '10px 16px 10px 40px', borderRadius: '12px', border: '1px solid #e2e8f0', 
-                fontSize: '0.9rem', width: '240px', outline: 'none', background: 'white' 
-              }}
-            />
-            <Search size={18} color="#94a3b8" style={{ position: 'absolute', left: '14px' }} />
+      {/* ===== HERO CARD (tidak diubah) ===== */}
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Workflow size={16} />
+              <span>System Configuration</span>
+            </div>
+            <h1 className="hero-title">Approval Flows</h1>
+            <p className="hero-subtitle">
+              Define multi-level approval workflows for organizational modules.
+            </p>
           </div>
-          <select 
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={fetchData}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            </button>
+            <button className="btn-primary" onClick={() => setIsModalOpen(true)}>
+              <Plus size={16} />
+              New Flow
+            </button>
+          </div>
+        </div>
+      </Card>
+
+      {/* ===== FILTER BAR ===== */}
+      <div style={{
+        background: 'white',
+        borderRadius: '16px',
+        padding: '16px 20px',
+        border: '0.5px solid #e2e8f0',
+        marginBottom: '20px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+      }}>
+        <h3 style={{ fontSize: '13px', fontWeight: 500, color: '#1e293b', margin: 0 }}>Filters</h3>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <input
+            type="text"
+            placeholder="Search flows..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="search-input"
+          />
+          <select
             value={moduleFilter}
             onChange={(e) => setModuleFilter(e.target.value)}
-            style={{ padding: '10px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '0.9rem', outline: 'none', background: 'white' }}
+            className="form-input"
           >
             <option value="all">All Modules</option>
             <option value="assignment_letter">Assignment Letters</option>
@@ -93,105 +178,125 @@ const ApprovalFlowPage: React.FC = () => {
             <option value="reimbursement">Reimbursements</option>
             <option value="overtime">Overtime</option>
           </select>
-          <div style={{ width: '1px', height: '24px', background: '#e2e8f0', margin: '0 4px' }}></div>
-          <Button variant="ghost" onClick={fetchData}>
-            <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
-          </Button>
-          <Button variant="primary" onClick={() => setIsModalOpen(true)}>
-            <Plus size={18} style={{ marginRight: '8px' }} />
-            New Flow
-          </Button>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))', gap: '2rem', marginTop: '2.5rem' }}>
-        {filteredFlows.length === 0 && !loading ? (
-          <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '6rem', background: 'rgba(255,255,255,0.4)', borderRadius: '32px', border: '2px dashed #cbd5e1', backdropFilter: 'blur(10px)' }}>
-             <div style={{ padding: '24px', background: '#f8fafc', borderRadius: '50%', width: 'fit-content', margin: '0 auto 1.5rem' }}>
-                <GitBranch size={48} color="#94a3b8" style={{ opacity: 0.5 }} />
-             </div>
-             <h3 style={{ color: '#1e293b', fontSize: '1.25rem', fontWeight: 700 }}>No approval flows found</h3>
-             <p style={{ color: '#64748b', maxWidth: '400px', margin: '0.5rem auto 2rem' }}>Try adjusting your filters or search query.</p>
-             <Button variant="primary" onClick={() => { setSearchQuery(''); setModuleFilter('all'); }}>Clear Filters</Button>
+      {/* ===== CONTENT AREA ===== */}
+      {loading ? (
+        <div style={{
+          background: 'white',
+          borderRadius: '16px',
+          padding: '40px',
+          border: '0.5px solid #e2e8f0',
+          textAlign: 'center',
+          color: '#94a3b8',
+        }}>
+          <p>Loading...</p>
+        </div>
+      ) : filteredFlows.length === 0 ? (
+        <div style={{
+          background: 'white',
+          borderRadius: '16px',
+          padding: '40px',
+          border: '0.5px solid #e2e8f0',
+          textAlign: 'center',
+          color: '#94a3b8',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '12px',
+        }}>
+          <GitBranch size={48} style={{ opacity: 0.3 }} />
+          <p>No approval flows found</p>
+        </div>
+      ) : (
+        <div>
+          {/* Count badge */}
+          <div style={{ marginBottom: '12px', paddingLeft: '4px' }}>
+            <span style={{
+              display: 'inline-block',
+              background: '#eff6ff',
+              color: '#1d4ed8',
+              fontSize: '12px',
+              fontWeight: 500,
+              padding: '3px 10px',
+              borderRadius: '20px',
+            }}>
+              {filteredFlows.length} flows
+            </span>
           </div>
-        ) : filteredFlows.map((flow) => (
-          <Card key={flow.id} glass style={{ padding: '0', borderRadius: '28px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02)' }}>
-            <div style={{ padding: '1.75rem', background: 'linear-gradient(to bottom right, rgba(255,255,255,0.8), rgba(255,255,255,0.4))' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                 <div>
-                    <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#1e293b', letterSpacing: '-0.02em' }}>{flow.name}</h3>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px' }}>
-                       <span style={{ 
-                         padding: '4px 10px', background: '#e0e7ff', color: '#4338ca', borderRadius: '8px', 
-                         fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase' 
-                       }}>
-                         {flow.module?.replace('_', ' ')}
-                       </span>
-                       <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>ID: #{flow.id}</span>
-                    </div>
-                 </div>
-                 <div style={{ display: 'flex', gap: '8px' }}>
-                   <Button variant="ghost" size="sm" style={{ width: '36px', height: '36px', padding: 0, borderRadius: '10px' }}><Edit size={16} /></Button>
-                   <Button variant="ghost" size="sm" style={{ width: '36px', height: '36px', padding: 0, borderRadius: '10px', color: '#ef4444', background: '#fef2f2' }}><Trash2 size={16} /></Button>
-                 </div>
+
+          {/* Flow cards */}
+          {filteredFlows.map((flow) => (
+            <div
+              key={flow.id}
+              style={{
+                background: 'white',
+                borderRadius: '16px',
+                padding: '20px 24px',
+                border: '0.5px solid #e2e8f0',
+                marginBottom: '14px',
+              }}
+            >
+              {/* Card header */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                marginBottom: '20px',
+              }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <span style={{ fontSize: '11px', color: '#64748b' }}>#{flow.id}</span>
+                  <h4 style={{ fontSize: '15px', fontWeight: 500, color: '#1e293b', margin: 0 }}>
+                    {flow.name}
+                  </h4>
+                  <span style={{
+                    display: 'inline-block',
+                    background: '#eff6ff',
+                    color: '#1d4ed8',
+                    fontSize: '11px',
+                    fontWeight: 500,
+                    padding: '2px 8px',
+                    borderRadius: '6px',
+                    width: 'fit-content',
+                  }}>
+                    {flow.module}
+                  </span>
+                </div>
+                <span style={{
+                  fontSize: '12px',
+                  fontWeight: 500,
+                  padding: '4px 12px',
+                  borderRadius: '20px',
+                  background: flow.is_active ? '#dcfce7' : '#f1f5f9',
+                  color: flow.is_active ? '#166534' : '#64748b',
+                }}>
+                  {flow.is_active ? 'Active' : 'Inactive'}
+                </span>
               </div>
 
-              <div style={{ position: 'relative', paddingLeft: '12px' }}>
-                 {/* Vertical Connector Line */}
-                 <div style={{ position: 'absolute', left: '23px', top: '20px', bottom: '20px', width: '2px', background: 'linear-gradient(to bottom, #6366f1, #e2e8f0)', opacity: 0.3 }}></div>
-
-                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                    {flow.steps?.map((step: any, index: number) => (
-                      <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', position: 'relative', zIndex: 1 }}>
-                         <div style={{ 
-                           width: '24px', height: '24px', borderRadius: '50%', 
-                           background: '#6366f1', color: 'white', display: 'flex', 
-                           alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 800,
-                           boxShadow: '0 0 0 4px rgba(99, 102, 241, 0.1)'
-                         }}>
-                           {index + 1}
-                         </div>
-                         <div style={{ 
-                           flex: 1, padding: '0.85rem 1.25rem', background: 'white', 
-                           borderRadius: '16px', border: '1px solid #f1f5f9', 
-                           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                           boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
-                         }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                               <div style={{ padding: '8px', background: '#f8fafc', borderRadius: '10px' }}>
-                                  <User size={14} color="#6366f1" />
-                               </div>
-                               <div>
-                                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#334155' }}>
-                                    {typeof step.role === 'object' && step.role !== null
-                                      ? (step.role.display_name || step.role.name || `Role ${step.role_id}`)
-                                      : `Role ${step.role_id}`}
-                                  </div>
-                                  <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Level {index + 1} Approver</div>
-                               </div>
-                            </div>
-                            <ChevronRight size={14} color="#cbd5e1" />
-                         </div>
-                      </div>
-                    ))}
-                 </div>
-              </div>
-
-              <div style={{ marginTop: '2rem', paddingTop: '1.25rem', borderTop: '1px solid rgba(226,232,240,0.5)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }}></div>
-                    <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>Active Workflow</span>
-                 </div>
-                 <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Last updated: {flow.updated_at?.split('T')[0] || 'Recently'}</span>
-              </div>
+              {/* Steps section */}
+              <p style={{
+                fontSize: '11px',
+                fontWeight: 500,
+                color: '#94a3b8',
+                letterSpacing: '0.04em',
+                textTransform: 'uppercase',
+                marginBottom: '14px',
+                margin: '0 0 14px 0',
+              }}>
+                Approval Steps
+              </p>
+              {renderSteps(flow.steps)}
             </div>
-          </Card>
-        ))}
-      </div>
-      <ApprovalFlowModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onSave={handleSave} 
+          ))}
+        </div>
+      )}
+
+      <ApprovalFlowModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSave}
       />
     </div>
   );

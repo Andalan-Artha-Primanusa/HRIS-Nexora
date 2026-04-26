@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Settings, DollarSign, Clock, ShieldCheck, RefreshCw } from 'lucide-react';
+import { Plus, Clock, RefreshCw, Edit, Trash2, DollarSign, Search, Timer } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { workforceService } from '@/features/workforce/api/workforce.service';
+import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 
 const OvertimeRulesPage: React.FC = () => {
   const navigate = useNavigate();
@@ -14,9 +17,11 @@ const OvertimeRulesPage: React.FC = () => {
     setLoading(true);
     try {
       const data = await workforceService.getOvertimeRules();
-      setRules(Array.isArray(data) ? data : data.data || []);
+      const rulesArray = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+      setRules(rulesArray);
     } catch (err) {
       console.error(err);
+      setRules([]);
     } finally {
       setLoading(false);
     }
@@ -26,62 +31,147 @@ const OvertimeRulesPage: React.FC = () => {
     fetchData();
   }, []);
 
+  const activeRules = rules.filter(r => r.status === 'active');
+
   return (
     <div className="crud-page">
-      <div className="crud-header">
-        <div>
-          <span className="reimb-badge reimb-badge-admin">Workforce</span>
-          <h1>Overtime Rules</h1>
-          <p>Configure overtime multipliers, caps, and eligibility policies.</p>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Timer size={16} />
+              <span>Workforce</span>
+            </div>
+            <h1 className="hero-title">Aturan Lembur</h1>
+            <p className="hero-subtitle">
+              Konfigurasi pengganda gaji dan batasan jam lembur.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={fetchData} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+            <button className="btn-primary" onClick={() => navigate('/workforce/overtime-rules/create')}>
+              <Plus size={16} />
+              Buat Aturan
+            </button>
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <Button variant="ghost" onClick={fetchData} disabled={loading}>
-            <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
-          </Button>
-          <Button variant="primary" onClick={() => navigate('/workforce/overtime-rules/create')}>
-            <Plus size={18} style={{ marginRight: '8px' }} />
-            New Rule
-          </Button>
+      </Card>
+
+      <div className="leave-requests-wrapper">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Aturan Aktif</p>
+              <p className="leave-summary-subtitle">Total aturan</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-green">
+              <Clock size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-green">{activeRules.length}</div>
+          <p className="leave-summary-trend">Aturan Aktif</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Rata-rata</p>
+              <p className="leave-summary-subtitle">Multiplier</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-blue">
+              <DollarSign size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-blue">1.5x</div>
+          <p className="leave-summary-trend">Multiplier</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Max Hours/Day</p>
+              <p className="leave-summary-subtitle">Batas harian</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-orange">
+              <Timer size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-orange">4h</div>
+          <p className="leave-summary-trend">Jam Harian</p>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem' }}>
-        {loading ? (
-          <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '3rem' }}>Loading...</div>
-        ) : rules.length === 0 ? (
-          <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '3rem' }}>No overtime rules configured.</div>
-        ) : rules.map((rule) => (
-          <Card key={rule.id} glass style={{ padding: '1.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-               <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#1e3a8a' }}>{rule.name}</h3>
-               <Settings size={18} color="#64748b" />
+      <div className="white-unified-wrapper">
+        <div className="wuw-header">
+          <div className="wuw-header-top">
+            <div className="wuw-title-area">
+              <h3>Daftar Kebijakan Lembur</h3>
+              <span className="wuw-count-badge">{rules.length} Total</span>
             </div>
+            <div className="search-box">
+              <Search size={18} />
+              <input type="text" placeholder="Search..." />
+            </div>
+          </div>
+        </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
-               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.9rem' }}>
-                  <div style={{ padding: '6px', background: '#eff6ff', borderRadius: '6px' }}><DollarSign size={16} color="#2563eb" /></div>
-                  <span>Multiplier: <strong>{rule.multiplier}x</strong></span>
-               </div>
-               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.9rem' }}>
-                  <div style={{ padding: '6px', background: '#fef2f2', borderRadius: '6px' }}><Clock size={16} color="#ef4444" /></div>
-                  <span>Max Hours: <strong>{rule.max_hours_per_day}h / day</strong></span>
-               </div>
-               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.9rem' }}>
-                  <div style={{ padding: '6px', background: '#f0fdf4', borderRadius: '6px' }}><ShieldCheck size={16} color="#10b981" /></div>
-                  <span>Eligibility: <strong>{rule.eligibility || 'All Staff'}</strong></span>
-               </div>
-            </div>
-
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
-               <Button variant="outline" style={{ flex: 1 }} onClick={() => navigate(`/workforce/overtime-rules/edit/${rule.id}`)}>Edit</Button>
-               <Button variant="ghost" style={{ color: '#ef4444' }}>Delete</Button>
-            </div>
-          </Card>
-        ))}
+        <div className="wuw-table-area">
+          <div className="table-wrap">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Kebijakan</th>
+                  <th>Multiplier</th>
+                  <th>Batas Harian</th>
+                  <th>Kelayakan</th>
+                  <th>Status</th>
+                  <th style={{ textAlign: 'right' }}>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr><td colSpan={6} style={{ textAlign: 'center', padding: '3rem' }}>Loading...</td></tr>
+                ) : rules.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
+                      <Clock size={48} style={{ opacity: 0.3, marginBottom: '1rem' }} />
+                      <p>Belum ada aturan lembur.</p>
+                    </td>
+                  </tr>
+                ) : rules.map((rule) => (
+                  <tr key={rule.id}>
+                    <td>
+                      <div className="cell-stacked">
+                        <span className="cell-name-text">{rule.name}</span>
+                        <span className="cell-email">CODE: {rule.code || 'OT-DFT'}</span>
+                      </div>
+                    </td>
+                    <td><span style={{ fontWeight: 700, color: '#16a34a' }}>{rule.multiplier}x</span></td>
+                    <td>{rule.max_hours_per_day || 0} Jam</td>
+                    <td>{rule.eligibility || 'Semua Staff'}</td>
+                    <td>
+                      <span className={`status-badge ${(rule.status || 'active') === 'active' ? 'status-active' : 'status-default'}`}>
+                        {rule.status || 'Active'}
+                      </span>
+                    </td>
+                    <td style={{ textAlign: 'right' }}>
+                      <div className="action-btn-group">
+                        <Button variant="ghost" size="sm" onClick={() => navigate(`/workforce/overtime-rules/edit/${rule.id}`)}><Edit size={16} /></Button>
+                        <Button variant="ghost" size="sm" danger><Trash2 size={16} /></Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
 export default OvertimeRulesPage;
-

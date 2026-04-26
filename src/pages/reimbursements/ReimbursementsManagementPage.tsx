@@ -397,70 +397,60 @@ const ReimbursementsManagementPage = () => {
                             (item.status === 'pending' || item.status === 'submitted') ? <span style={{ color: '#f59e0b', background: '#fffbeb', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 600 }}>PENDING</span> :
                              <span style={{ color: '#64748b', background: '#f8fafc', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 600 }}>DRAFT</span>}
                         </td>
-                        <td>
-                           <div className="cell-actions">
-                             {(item.status === 'pending' || item.status === 'submitted') && (
-                               <>
-                                 <Button
-                                   variant="outline"
-                                   size="sm"
-                                   onClick={() => void handleAction(String(item.id)+'_app', () => approveReimbursement(String(item.id), { note: "Approved from Ledger" }), "Berhasil disetujui")}
-                                   disabled={actionLoading === String(item.id)+'_app'}
-                                   title="Approve"
-                                   style={{ color: '#10b981', borderColor: '#10b981' }}
-                                 >
-                                   <Check size={14} />
-                                 </Button>
-                                 <Button
-                                   variant="outline"
-                                   size="sm"
-                                   onClick={() => {
-                                      const reason = window.prompt("Alasan penolakan:");
-                                      if (reason !== null) {
-                                        void handleAction(String(item.id)+'_rej', () => rejectReimbursement(String(item.id), { note: reason || "Ditolak oleh Admin" }), "Pengajuan ditolak");
-                                      }
-                                   }}
-                                   disabled={actionLoading === String(item.id)+'_rej'}
-                                   title="Reject"
-                                   style={{ color: '#ef4444', borderColor: '#ef4444' }}
-                                 >
-                                   <X size={14} />
-                                 </Button>
-                               </>
-                             )}
-                             {item.status === 'approved' && (
-                               <Button
-                                 variant="outline"
-                                 size="sm"
-                                 onClick={() => void handleAction(String(item.id)+'_paid', () => markReimbursementAsPaid(String(item.id)), "Status diubah menjadi PAID")}
-                                 disabled={actionLoading === String(item.id)+'_paid'}
-                                 title="Tandai Sudah Ditransfer (Mark Paid)"
-                                 style={{ color: '#2563eb', borderColor: '#2563eb' }}
-                               >
-                                 <DollarSign size={15} />
-                               </Button>
-                             )}
-                             <Button
-                                 variant="outline"
-                                 size="sm"
-                                 onClick={() => handleEdit(item)}
-                                 title="Edit Ledger"
-                                 style={{ color: '#64748b', borderColor: '#e2e8f0' }}
+<td>
+                            <div className="action-btn-group">
+                              {(item.status === 'pending' || item.status === 'submitted') && (
+                                <>
+                                  <button
+                                    className="action-btn action-btn-success"
+                                    onClick={() => void handleAction(String(item.id)+'_app', () => approveReimbursement(String(item.id), { note: "Approved from Ledger" }), "Berhasil disetujui")}
+                                    disabled={actionLoading === String(item.id)+'_app'}
+                                    title="Approve"
+                                  >
+                                    <Check size={16} />
+                                  </button>
+                                  <button
+                                    className="action-btn action-btn-delete"
+                                    onClick={() => {
+                                       const reason = window.prompt("Alasan penolakan:");
+                                       if (reason !== null) {
+                                         void handleAction(String(item.id)+'_rej', () => rejectReimbursement(String(item.id), { note: reason || "Ditolak oleh Admin" }), "Pengajuan ditolak");
+                                       }
+                                    }}
+                                    disabled={actionLoading === String(item.id)+'_rej'}
+                                    title="Reject"
+                                  >
+                                    <X size={16} />
+                                  </button>
+                                </>
+                              )}
+                              {item.status === 'approved' && (
+                                <button
+                                  className="action-btn action-btn-edit"
+                                  onClick={() => void handleAction(String(item.id)+'_paid', () => markReimbursementAsPaid(String(item.id)), "Status diubah menjadi PAID")}
+                                  disabled={actionLoading === String(item.id)+'_paid'}
+                                  title="Tandai Sudah Ditransfer (Mark Paid)"
+                                >
+                                  <DollarSign size={16} />
+                                </button>
+                              )}
+                              <button
+                                  className="action-btn action-btn-edit"
+                                  onClick={() => handleEdit(item)}
+                                  title="Edit Ledger"
                               >
-                                <Edit size={15} />
-                             </Button>
-                             <Button
-                                 variant="outline"
-                                 size="sm"
-                                 onClick={() => void handleDelete(String(item.id))}
-                                 disabled={actionLoading === String(item.id)+'_del'}
-                                 title="Hapus Permanen"
-                                 style={{ color: '#ef4444', borderColor: '#ef4444' }}
+                                <Edit size={16} />
+                             </button>
+                             <button
+                                  className="action-btn action-btn-delete"
+                                  onClick={() => void handleDelete(String(item.id))}
+                                  disabled={actionLoading === String(item.id)+'_del'}
+                                  title="Hapus Permanen"
                               >
-                                 <Trash2 size={15} />
-                             </Button>
-                           </div>
-                        </td>
+                                 <Trash2 size={16} />
+                             </button>
+                            </div>
+                         </td>
                       </tr>
                     );
                   })}

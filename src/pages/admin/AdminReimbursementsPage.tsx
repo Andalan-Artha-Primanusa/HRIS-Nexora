@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Plus, RefreshCw, Filter, Search, BarChart3 } from 'lucide-react';
+import { Plus, RefreshCw, Filter, Search, BarChart3, Wallet, Receipt } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
@@ -21,6 +21,8 @@ import { ReimbursementStats } from '../../features/reimbursement/components/Reim
 import type { ReimbursementItem } from '../../features/reimbursement/types/reimbursement.types';
 import '../../features/reimbursement/Reimbursement.css';
 import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 
 const AdminReimbursementsPage: React.FC = () => {
   const [items, setItems] = useState<ReimbursementItem[]>([]);
@@ -155,22 +157,30 @@ const AdminReimbursementsPage: React.FC = () => {
 
   return (
     <div className="reimbursement-container">
-      <div className="reimb-header">
-        <div className="reimb-title-section">
-          <span className="reimb-badge reimb-badge-admin">Admin Center</span>
-          <h1>Reimbursement Management</h1>
-          <p>Review, approve, and manage company-wide reimbursement claims.</p>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Wallet size={16} />
+              <span>Pusat Admin</span>
+            </div>
+            <h1 className="hero-title">Pengelolaan Imbalan</h1>
+            <p className="hero-subtitle">
+              Tinjau, setujui, dan kelola klaim imbalan di seluruh perusahaan.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={fetchData} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+            <button className="btn-primary" onClick={handleOpenCreate}>
+              <Plus size={16} />
+              Entri Baru
+            </button>
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <Button variant="ghost" onClick={fetchData} disabled={loading}>
-            <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
-          </Button>
-          <Button variant="primary" onClick={handleOpenCreate}>
-            <Plus size={18} style={{ marginRight: '8px' }} />
-            New Entry
-          </Button>
-        </div>
-      </div>
+      </Card>
 
       {stats && <ReimbursementStats stats={stats} />}
 

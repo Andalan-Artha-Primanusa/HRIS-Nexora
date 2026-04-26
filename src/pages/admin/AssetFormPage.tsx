@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save, Box, Calendar, Hash, Tag, Info, Truck, DollarSign } from 'lucide-react';
+import { ArrowLeft, Save, Box, Package, Plus } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { Alert } from '@/shared/ui/Alert';
 import { assetService } from '@/features/assets/api/asset.service';
 import '@/shared/styles/CrudPage.css';
 
@@ -13,6 +14,7 @@ const AssetFormPage: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [formData, setFormData] = useState({
     code: '',
     name: '',
@@ -69,51 +71,106 @@ const AssetFormPage: React.FC = () => {
   if (fetching) return <div style={{ padding: '4rem', textAlign: 'center', color: '#64748b' }}>Loading asset details...</div>;
 
   return (
-    <div className="crud-page" style={{ maxWidth: '1100px', margin: '0 auto' }}>
-      <div className="crud-header" style={{ marginBottom: '2.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-           <button 
-             onClick={() => navigate('/inventory/assets')}
-             style={{ 
-               background: 'rgba(255, 255, 255, 0.5)', 
-               border: '1px solid rgba(226, 232, 240, 0.8)',
-               padding: '10px',
-               borderRadius: '12px',
-               cursor: 'pointer',
-               display: 'flex',
-               alignItems: 'center',
-               transition: 'all 0.2s'
-             }}
-             onMouseOver={(e) => e.currentTarget.style.transform = 'translateX(-4px)'}
-             onMouseOut={(e) => e.currentTarget.style.transform = 'translateX(0)'}
-           >
-              <ArrowLeft size={20} color="#64748b" />
-           </button>
-           <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                <span className="reimb-badge reimb-badge-admin" style={{ margin: 0 }}>Inventory</span>
-                <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>/</span>
-                <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 500 }}>Asset Management</span>
-              </div>
-              <h1 style={{ fontSize: '1.85rem', fontWeight: 700, letterSpacing: '-0.02em', color: '#1e293b' }}>
-                {isEdit ? 'Update Asset Info' : 'Register New Asset'}
-              </h1>
-           </div>
+    <div className="crud-page">
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Package size={16} />
+              <span>Inventory</span>
+            </div>
+            <h1 className="hero-title">{isEdit ? 'Edit Asset' : 'Tambah Asset'}</h1>
+            <p className="hero-subtitle">
+              {isEdit ? 'Ubah informasi aset.' : 'Daftarkan aset baru perusahaan.'}
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => navigate('/inventory/assets')}>
+              <ArrowLeft size={16} />
+              Kembali
+            </button>
+          </div>
+        </div>
+      </Card>
+
+      {errorMessage && (
+        <Alert type="error" message={errorMessage} onClose={() => setErrorMessage("")} dismissible />
+      )}
+
+      <div className="white-unified-wrapper">
+        <div className="form-grid">
+          <Card className="table-card" glass>
+            <div className="table-header-bar">
+              <h3>Informasi Aset</h3>
+              <span className="table-count">Formulir</span>
+            </div>
+            <div className="table-card-inner">
+              <form className="crud-form" onSubmit={handleSubmit}>
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label>Kode Aset</label>
+                    <input name="code" value={formData.code} onChange={handleChange} className="form-input" placeholder="Kode aset" />
+                  </div>
+                  <div className="form-group">
+                    <label>Nama Aset</label>
+                    <input name="name" value={formData.name} onChange={handleChange} className="form-input" placeholder="Nama aset" />
+                  </div>
+                  <div className="form-group">
+                    <label>Kategori</label>
+                    <select name="category" value={formData.category} onChange={handleChange} className="form-input">
+                      <option value="Electronics">Electronics</option>
+                      <option value="Furniture">Furniture</option>
+                      <option value="Vehicle">Vehicle</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Merek</label>
+                    <input name="brand" value={formData.brand} onChange={handleChange} className="form-input" placeholder="Merek" />
+                  </div>
+                  <div className="form-group">
+                    <label>Model</label>
+                    <input name="model" value={formData.model} onChange={handleChange} className="form-input" placeholder="Model" />
+                  </div>
+                  <div className="form-group">
+                    <label>Nomor Seri</label>
+                    <input name="serial_number" value={formData.serial_number} onChange={handleChange} className="form-input" placeholder="Nomor seri" />
+                  </div>
+                  <div className="form-group">
+                    <label>Kondisi</label>
+                    <select name="condition" value={formData.condition} onChange={handleChange} className="form-input">
+                      <option value="new">Baru</option>
+                      <option value="good">Baik</option>
+                      <option value="fair">Cukup</option>
+                      <option value="poor">Buruk</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Status</label>
+                    <select name="status" value={formData.status} onChange={handleChange} className="form-input">
+                      <option value="available">Tersedia</option>
+                      <option value="in_use">Digunakan</option>
+                      <option value="maintenance">Maintenance</option>
+                      <option value="retired">Retired</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="form-actions">
+                  <Button variant="primary" type="submit" disabled={loading}>
+                    <Save size={16} />
+                    {loading ? 'Menyimpan...' : 'Simpan'}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </Card>
         </div>
       </div>
+    </div>
+  );
+};
 
-      <form onSubmit={handleSubmit}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '2rem', alignItems: 'start' }}>
-           
-           {/* Left Column: Core Info */}
-           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-              <Card glass style={{ padding: '2.5rem', borderRadius: '24px' }}>
-                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '2rem' }}>
-                    <div style={{ padding: '10px', background: 'linear-gradient(135deg, #3b82f6, #2563eb)', borderRadius: '12px', color: 'white', boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)' }}>
-                      <Box size={22} />
-                    </div>
-                    <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 600, color: '#1e293b' }}>Asset Identification</h3>
-                 </div>
+export default AssetFormPage;
 
                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                     <div className="form-group" style={{ gridColumn: '1 / -1' }}>

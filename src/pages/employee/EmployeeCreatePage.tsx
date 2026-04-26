@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { Alert } from "@/shared/ui/Alert";
-import { Briefcase } from "lucide-react";
+import { Briefcase, Users, ChevronLeft } from "lucide-react";
 import { api } from "@/shared/api/httpClient";
 import { createEmployee } from "@/features/employee/api/employee.service";
 import { getAllLocations } from "@/features/location/api/location.service";
@@ -13,6 +13,7 @@ import type { EmployeeCreatePayload } from "@/features/employee/types/employee.t
 import EmployeeForm, { DEFAULT_FORM } from "./components/EmployeeForm";
 import type { EmployeeFormState } from "./components/EmployeeForm";
 import "@/shared/styles/CrudPage.css";
+import "../dashboard/overview/OverviewPage.css";
 
 const EmployeeCreatePage = () => {
   const navigate = useNavigate();
@@ -94,18 +95,24 @@ const EmployeeCreatePage = () => {
 
   return (
     <div className="crud-page">
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">People Center</span>
-          <h1>Tambah Karyawan</h1>
-          <p>Input data jabatan dan penempatan karyawan baru</p>
+      <Card className="hero-card" style={{ marginBottom: '2rem' }}>
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Users size={16} />
+              <span>People Center</span>
+            </div>
+            <h1 className="hero-title">Tambah Karyawan</h1>
+            <p className="hero-subtitle">Input data jabatan dan penempatan karyawan baru</p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => navigate("/employees")} disabled={loading}>
+              <ChevronLeft size={18} />
+              Kembali ke Daftar
+            </button>
+          </div>
         </div>
-        <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={() => navigate("/employees")} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
-            Kembali ke Daftar
-          </Button>
-        </div>
-      </div>
+      </Card>
 
       {statusMessage && (
         <Alert

@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, RefreshCw, MapPin, ChevronLeft, ChevronRight, Edit2 } from 'lucide-react';
+import { Plus, Calendar, RefreshCw, Edit, Trash2, ShieldCheck, CalendarDays } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
-import { api } from '@/shared/api/httpClient';
+import { workforceService } from '@/features/workforce/api/workforce.service';
+import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 
 const HolidayCalendarPage: React.FC = () => {
   const navigate = useNavigate();
@@ -13,11 +16,12 @@ const HolidayCalendarPage: React.FC = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await api.get('/workforce/holidays');
-      const data = response.data?.data || response.data || [];
-      setHolidays(Array.isArray(data) ? data : []);
+      const data = await workforceService.getHolidays();
+      const holidaysArray = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+      setHolidays(holidaysArray);
     } catch (err) {
       console.error(err);
+      setHolidays([]);
     } finally {
       setLoading(false);
     }
@@ -29,134 +33,117 @@ const HolidayCalendarPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <div className="crud-header">
-        <div>
-          <span className="reimb-badge reimb-badge-admin">Workforce Policy</span>
-          <h1>Holiday Calendar 2026</h1>
-          <p>Manage national holidays and company-specific off-days.</p>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <CalendarDays size={16} />
+              <span>Workforce</span>
+            </div>
+            <h1 className="hero-title">Kalender Libur</h1>
+            <p className="hero-subtitle">
+              Kelola hari libur nasional dan kebijakan libur perusahaan.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={fetchData} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+            <button className="btn-primary" onClick={() => navigate('/workforce/holidays/create')}>
+              <Plus size={16} />
+              Tambah Libur
+            </button>
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <Button variant="ghost" onClick={fetchData} disabled={loading}>
-            <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
-          </Button>
-          <Button variant="primary" onClick={() => navigate('/workforce/holidays/create')}>
-            <Plus size={18} style={{ marginRight: '8px' }} />
-            Add Holiday
-          </Button>
+      </Card>
+
+      <div className="leave-requests-wrapper">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Total Libur</p>
+              <p className="leave-summary-subtitle">Tahun ini</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-red">
+              <Calendar size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-red">{holidays.length}</div>
+          <p className="leave-summary-trend">Total Libur</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Libur Terdekat</p>
+              <p className="leave-summary-subtitle">Akan datang</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-orange">
+              <Calendar size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-orange">-</div>
+          <p className="leave-summary-trend">Next Holiday</p>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '1.5rem' }}>
-        <Card glass style={{ padding: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-            <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#1e3a8a' }}>April 2026</h2>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <Button variant="ghost" size="sm"><ChevronLeft size={20} /></Button>
-              <Button variant="ghost" size="sm"><ChevronRight size={20} /></Button>
+      <div className="white-unified-wrapper">
+        <div className="wuw-header">
+          <div className="wuw-header-top">
+            <div className="wuw-title-area">
+              <h3>Daftar Hari Libur</h3>
+              <span className="wuw-count-badge">{holidays.length} Total</span>
             </div>
           </div>
+        </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '1px', background: '#e2e8f0', border: '1px solid #e2e8f0', borderRadius: '12px', overflow: 'hidden' }}>
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-              <div key={day} style={{ padding: '0.75rem', textAlign: 'center', background: '#f8fafc', fontSize: '0.75rem', fontWeight: 700, color: '#64748b' }}>
-                {day}
-              </div>
-            ))}
-            {Array.from({ length: 35 }).map((_, i) => {
-              const day = i - 2; 
-              const isHoliday = [1, 2, 10, 15].includes(day);
-              return (
-                <div key={i} style={{ 
-                  height: '100px', 
-                  padding: '0.5rem', 
-                  background: 'white', 
-                  fontSize: '0.9rem', 
-                  color: (i % 7 === 0) ? '#ef4444' : '#1e293b',
-                  opacity: (day < 1 || day > 30) ? 0.3 : 1,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '4px'
-                }}>
-                  <span style={{ fontWeight: isHoliday ? 700 : 400 }}>{day > 0 && day <= 30 ? day : ''}</span>
-                  {isHoliday && (
-                    <div style={{ 
-                      fontSize: '0.65rem', 
-                      background: '#fee2e2', 
-                      color: '#ef4444', 
-                      padding: '2px 4px', 
-                      borderRadius: '4px',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis'
-                    }}>
-                      National Holiday
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+        <div className="wuw-table-area">
+          <div className="table-wrap">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Hari Libur</th>
+                  <th>Tanggal</th>
+                  <th>Tipe</th>
+                  <th>Berulang</th>
+                  <th>Status</th>
+                  <th style={{ textAlign: 'right' }}>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr><td colSpan={6} style={{ textAlign: 'center', padding: '3rem' }}>Loading...</td></tr>
+                ) : holidays.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
+                      <Calendar size={48} style={{ opacity: 0.3, marginBottom: '1rem' }} />
+                      <p>Belum ada kalender libur.</p>
+                    </td>
+                  </tr>
+                ) : holidays.map((h) => (
+                  <tr key={h.id}>
+                    <td>
+                      <div className="cell-stacked">
+                        <span className="cell-name-text">{h.name}</span>
+                        <span className="cell-email">{h.description || '-'}</span>
+                      </div>
+                    </td>
+                    <td>{h.date ? new Date(h.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}</td>
+                    <td><span style={{ fontWeight: 600, color: '#1e40af' }}>{h.type || '-'}</span></td>
+                    <td>{h.is_recurring ? 'YA' : 'TIDAK'}</td>
+                    <td><span className="status-badge status-active">ACTIVE</span></td>
+                    <td style={{ textAlign: 'right' }}>
+                      <div className="action-btn-group">
+                        <Button variant="ghost" size="sm" onClick={() => navigate(`/workforce/holidays/edit/${h.id}`)}><Edit size={16} /></Button>
+                        <Button variant="ghost" size="sm" danger><Trash2 size={16} /></Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </Card>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <Card glass style={{ padding: '1.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-               <h3 style={{ margin: 0, fontSize: '1rem', color: '#1e3a8a' }}>Upcoming Holidays</h3>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {holidays.length === 0 ? (
-                [
-                  { id: 1, name: 'Idul Fitri 1447H', date: 'March 20, 2026', color: '#ef4444', day: 20 },
-                  { id: 2, name: 'Good Friday', date: 'April 3, 2026', color: '#ef4444', day: 3 },
-                  { id: 3, name: 'Labor Day', date: 'May 1, 2026', color: '#ef4444', day: 1 },
-                ].map((h, i) => (
-                  <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'center', padding: '0.75rem', background: '#f8fafc', borderRadius: '10px', position: 'relative' }}>
-                    <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '1px solid #e2e8f0' }}>
-                      <span style={{ fontSize: '0.65rem', fontWeight: 700, color: h.color }}>APR</span>
-                      <span style={{ fontSize: '0.9rem', fontWeight: 800 }}>{h.day}</span>
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{h.name}</div>
-                      <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{h.date}</div>
-                    </div>
-                    <Button variant="ghost" size="sm" onClick={() => navigate(`/workforce/holidays/edit/${h.id}`)}>
-                      <Edit2 size={14} />
-                    </Button>
-                  </div>
-                ))
-              ) : (
-                holidays.map((h) => (
-                  <div key={h.id} style={{ display: 'flex', gap: '12px', alignItems: 'center', padding: '0.75rem', background: '#f8fafc', borderRadius: '10px' }}>
-                    <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '1px solid #e2e8f0' }}>
-                      <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#ef4444' }}>HOL</span>
-                      <span style={{ fontSize: '0.9rem', fontWeight: 800 }}>{new Date(h.date).getDate()}</span>
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{h.name}</div>
-                      <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{h.date}</div>
-                    </div>
-                    <Button variant="ghost" size="sm" onClick={() => navigate(`/workforce/holidays/edit/${h.id}`)}>
-                      <Edit2 size={14} />
-                    </Button>
-                  </div>
-                ))
-              )}
-            </div>
-          </Card>
-
-          <Card glass style={{ padding: '1.5rem' }}>
-            <h3 style={{ margin: '0 0 1rem', fontSize: '1rem', color: '#1e3a8a' }}>Location Policies</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <MapPin size={16} color="#64748b" />
-                <span style={{ fontSize: '0.85rem' }}>Jakarta Office: <strong>Standard</strong></span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <MapPin size={16} color="#64748b" />
-                <span style={{ fontSize: '0.85rem' }}>Remote: <strong>Regional Specific</strong></span>
-              </div>
-            </div>
-          </Card>
         </div>
       </div>
     </div>
@@ -164,4 +151,3 @@ const HolidayCalendarPage: React.FC = () => {
 };
 
 export default HolidayCalendarPage;
-

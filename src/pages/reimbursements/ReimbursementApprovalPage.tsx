@@ -239,27 +239,23 @@ const ReimbursementApprovalPage = () => {
                           </div>
                         </td>
                         <td>
-                          <div className="cell-actions">
-                            <Button
-                              variant="outline"
-                              size="sm"
+                          <div className="action-btn-group">
+                            <button
+                              className="action-btn action-btn-success"
                               onClick={() => void handleApprove(item.id)}
                               disabled={actionLoading === String(item.id)}
                               title="Approve Reimburse"
-                              style={{ color: '#10b981', borderColor: '#10b981' }}
                             >
-                              <Check size={15} />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
+                              <Check size={16} />
+                            </button>
+                            <button
+                              className="action-btn action-btn-delete"
                               onClick={() => void handleReject(item.id)}
                               disabled={actionLoading === String(item.id)}
                               title="Reject Reimburse"
-                              style={{ color: '#ef4444', borderColor: '#ef4444' }}
                             >
-                              <X size={15} />
-                            </Button>
+                              <X size={16} />
+                            </button>
                           </div>
                         </td>
                       </tr>

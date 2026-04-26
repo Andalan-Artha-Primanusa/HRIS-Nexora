@@ -1,6 +1,5 @@
 import React from 'react';
 import { BarChart3, Clock3, CircleCheckBig, CircleX } from 'lucide-react';
-import { Card } from '@/shared/ui/Card';
 
 interface LeaveSummaryProps {
   stats: {
@@ -12,24 +11,24 @@ interface LeaveSummaryProps {
 }
 
 const StatCard: React.FC<{ label: string; value: number | string; sub: string; tone: string; icon: any }> = ({ label, value, sub, tone, icon: Icon }) => (
-  <Card className="summary-card" glass>
-    <div className="summary-card__header">
+  <div className="leave-summary-card">
+    <div className="leave-summary-header">
       <div>
-        <span className="summary-card__label">{label}</span>
-        <p className="summary-card__subtitle">{sub}</p>
+        <p className="leave-summary-label">{label}</p>
+        <p className="leave-summary-subtitle">{sub}</p>
       </div>
-      <span className={`summary-card__icon summary-card__icon--${tone}`}>
-        <Icon size={20} />
-      </span>
+      <div className={`leave-summary-icon-wrapper leave-icon-${tone}`}>
+        <Icon size={28} />
+      </div>
     </div>
-    <div className={`summary-card__value summary-card__value--${tone}`}>{value}</div>
-    <div className="summary-card__change">Data Periode Ini</div>
-  </Card>
+    <div className={`leave-summary-value leave-value-${tone}`}>{value}</div>
+    <p className="leave-summary-trend">Data periode ini</p>
+  </div>
 );
 
 export const LeaveSummary: React.FC<LeaveSummaryProps> = ({ stats }) => {
   return (
-    <div className="summary-grid" style={{ marginBottom: '2rem' }}>
+    <div className="leave-requests-wrapper">
       <StatCard label="Total Pengajuan" value={stats.total} sub="Request cuti terdaftar" tone="blue" icon={BarChart3} />
       <StatCard label="Menunggu" value={stats.pending} sub="Perlu ditinjau" tone="orange" icon={Clock3} />
       <StatCard label="Disetujui" value={stats.approved} sub="Status final" tone="green" icon={CircleCheckBig} />

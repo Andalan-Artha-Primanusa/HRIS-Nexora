@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { Alert } from "@/shared/ui/Alert";
-import { Briefcase } from "lucide-react";
+import { Briefcase, Users, ChevronLeft } from "lucide-react";
 import { api } from "@/shared/api/httpClient";
 import { getEmployeeDetail, updateEmployee } from "@/features/employee/api/employee.service";
 import { getAllLocations } from "@/features/location/api/location.service";
@@ -13,6 +13,7 @@ import type { EmployeeUpdatePayload } from "@/features/employee/types/employee.t
 import EmployeeForm, { DEFAULT_FORM } from "./components/EmployeeForm";
 import type { EmployeeFormState } from "./components/EmployeeForm";
 import "@/shared/styles/CrudPage.css";
+import "../dashboard/overview/OverviewPage.css";
 
 const EmployeeEditPage = () => {
   const navigate = useNavigate();
@@ -138,18 +139,24 @@ const EmployeeEditPage = () => {
 
   return (
     <div className="crud-page">
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">People Center</span>
-          <h1>Update Data Karyawan</h1>
-          <p>Perbarui informasi karyawan: ID {updateForm.id || routeEmployeeId}</p>
+      <Card className="hero-card" style={{ marginBottom: '2rem' }}>
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Users size={16} />
+              <span>People Center</span>
+            </div>
+            <h1 className="hero-title">Update Data Karyawan</h1>
+            <p className="hero-subtitle">Perbarui informasi karyawan: ID {updateForm.id || routeEmployeeId}</p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => navigate("/employees")} disabled={loading}>
+              <ChevronLeft size={18} />
+              Kembali ke Daftar
+            </button>
+          </div>
         </div>
-        <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={() => navigate("/employees")} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
-            Kembali ke Daftar
-          </Button>
-        </div>
-      </div>
+      </Card>
 
       {statusMessage && (
         <Alert

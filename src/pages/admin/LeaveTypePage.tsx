@@ -3,46 +3,44 @@ import {
   Plus, 
   Search, 
   Calendar,
-  Info,
-  CheckCircle,
-  XCircle,
   Edit,
   Trash2,
   RefreshCw,
   FileText,
-  Settings,
-  ShieldCheck
+  ShieldCheck,
+  CalendarDays
 } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
+import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
+import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 import './AdminLeavePages.css';
 
-interface LeavePolicy {
+interface LeaveType {
   id: number;
   name: string;
-  policy_code: string;
-  entitlement_type: string;
-  entitlement_value: number;
-  max_carryover_days: number;
+  code: string;
+  description: string;
   is_paid: boolean;
-  active: boolean;
+  is_active: boolean;
   created_at?: string;
 }
 
 const LeaveTypePage: React.FC = () => {
-  const [policies, setPolicies] = useState<LeavePolicy[]>([]);
+  const [types, setTypes] = useState<LeaveType[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const fetchPolicies = async () => {
+  const fetchTypes = async () => {
     setLoading(true);
-    console.log('Fetching policies from /leave-policies...');
+    console.log('Fetching leave types from /leave-types...');
     try {
-      const response = await api.get('/leave-policies');
-      console.log('Leave Policies Response Raw:', response);
+      const response = await api.get('/leave-types');
+      console.log('Leave Types Response Raw:', response);
       
       let data = response.data;
-      // Handle Laravel/Custom API response structures
       if (data && typeof data === 'object') {
         if (Array.isArray(data.data)) data = data.data;
         else if (data.data && Array.isArray(data.data.data)) data = data.data.data;
@@ -50,203 +48,262 @@ const LeaveTypePage: React.FC = () => {
         else if (data.status === 'success' && Array.isArray(data.data)) data = data.data;
       }
       
-      setPolicies(Array.isArray(data) ? data : []);
+      setTypes(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error('Error fetching leave policies:', error);
-      setPolicies([]);
+      console.error('Error fetching leave types:', error);
+      setTypes([]);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchPolicies();
+    fetchTypes();
   }, []);
 
-  const filteredPolicies = policies.filter(p => 
-    p.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.policy_code?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredTypes = types.filter(t => 
+    t.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    t.code?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    <div className="admin-leave-page">
-      <div className="admin-leave-header">
-        <div>
-          <span className="policy-badge policy-badge-paid" style={{ marginBottom: '1rem', background: 'linear-gradient(135deg, #2563eb, #1e40af)', color: 'white', border: 'none' }}>
-            <Settings size={14} /> Master Data
-          </span>
-          <h1>Leave Types & Policies</h1>
-          <p>Configure leave categories, entitlement rules, and company leave policies.</p>
-        </div>
-        <div style={{ display: 'flex', gap: '1rem' }}>
-           <button onClick={() => { window.alert('Refreshing list...'); fetchPolicies(); }} className="btn-refresh" style={{ 
-              padding: '10px', 
-              borderRadius: '12px', 
-              border: '1px solid #e2e8f0', 
-              background: 'white',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-            <RefreshCw size={20} className={loading ? 'animate-spin' : ''} color="#64748b" />
-          </button>
-          <button className="btn-add-policy" onClick={() => console.log('Add New Type clicked')}>
-            <Plus size={20} />
-            Add New Type
-          </button>
-        </div>
-      </div>
-
-      <div style={{ marginBottom: '2rem', display: 'flex', gap: '1rem' }}>
-        <div style={{ position: 'relative', flex: 1 }}>
-          <Search size={20} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-          <input 
-            type="text" 
-            placeholder="Search leave types or codes..." 
-            className="search-input"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '12px 12px 12px 48px',
-              borderRadius: '14px',
-              border: '1px solid #e2e8f0',
-              background: 'white',
-              fontSize: '0.95rem',
-              outline: 'none',
-              transition: 'all 0.2s'
-            }}
-          />
-        </div>
-      </div>
-
-      <Card glass style={{ padding: '0', borderRadius: '24px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
-        <div className="table-responsive">
-          <table className="leave-type-table">
-            <thead>
-              <tr>
-                <th>Leave Type</th>
-                <th>Code</th>
-                <th>Entitlement</th>
-                <th>Carryover</th>
-                <th>Status</th>
-                <th style={{ textAlign: 'right' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={6} style={{ textAlign: 'center', padding: '4rem' }}>
-                    <RefreshCw size={32} className="animate-spin" color="#2563eb" />
-                    <p style={{ marginTop: '1rem', color: '#64748b' }}>Loading configurations...</p>
-                  </td>
-                </tr>
-              ) : filteredPolicies.length === 0 ? (
-                <tr>
-                  <td colSpan={6} style={{ textAlign: 'center', padding: '4rem', color: '#94a3b8' }}>
-                    No leave types found.
-                  </td>
-                </tr>
-              ) : filteredPolicies.map((policy) => (
-                <tr key={policy.id} className="leave-policy-row">
-                  <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ 
-                        width: '40px', 
-                        height: '40px', 
-                        borderRadius: '12px', 
-                        background: policy.is_paid ? '#eff6ff' : '#fff1f2', 
-                        color: policy.is_paid ? '#2563eb' : '#e11d48',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}>
-                        <Calendar size={20} />
-                      </div>
-                      <div>
-                        <div style={{ fontWeight: 700, color: '#1e293b' }}>{policy.name}</div>
-                        <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Updated {new Date().toLocaleDateString()}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <span className="policy-code">{policy.policy_code}</span>
-                  </td>
-                  <td>
-                    <div>
-                      <span className="entitlement-value">{policy.entitlement_value}</span>
-                      <span className="entitlement-unit">Days / Year</span>
-                    </div>
-                    <div style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'capitalize' }}>
-                      {policy.entitlement_type || 'fixed'} Allotment
-                    </div>
-                  </td>
-                  <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#475569', fontWeight: 500 }}>
-                      <Info size={14} color="#94a3b8" />
-                      {policy.max_carryover_days} Days Max
-                    </div>
-                  </td>
-                  <td>
-                    <span className={`policy-badge ${policy.is_paid ? 'policy-badge-paid' : 'policy-badge-unpaid'}`}>
-                      {policy.is_paid ? <CheckCircle size={12} /> : <XCircle size={12} />}
-                      {policy.is_paid ? 'Paid Leave' : 'Unpaid Leave'}
-                    </span>
-                  </td>
-                  <td style={{ textAlign: 'right' }}>
-                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                      <button style={{ padding: '8px', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'white', color: '#64748b', cursor: 'pointer' }}>
-                        <Edit size={16} />
-                      </button>
-                      <button style={{ padding: '8px', borderRadius: '8px', border: '1px solid #fee2e2', background: '#fff1f2', color: '#e11d48', cursor: 'pointer' }}>
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <div className="crud-page">
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <CalendarDays size={16} />
+              <span>Master Data</span>
+            </div>
+            <h1 className="hero-title">Daftar Jenis Cuti</h1>
+            <p className="hero-subtitle">
+              Kelola kategori cuti utama (Tahunan, Sakit, dsb) untuk seluruh perusahaan.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={fetchTypes} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+            <button className="btn-primary" onClick={() => window.location.href = '/leave/type/create'}>
+              <Plus size={16} />
+              Tambah Jenis Cuti
+            </button>
+          </div>
         </div>
       </Card>
-      
-      <div style={{ marginTop: '2rem', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem' }}>
-        <Card glass style={{ padding: '1.5rem', borderRadius: '20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1rem' }}>
-            <div style={{ padding: '8px', borderRadius: '10px', background: '#f0fdf4', color: '#16a34a' }}>
-              <ShieldCheck size={20} />
-            </div>
-            <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>Auto-Renewal</h3>
-          </div>
-          <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', lineHeight: 1.5 }}>
-            Leave balances are automatically reset and updated based on policy cycles.
-          </p>
-        </Card>
-        
-        <Card glass style={{ padding: '1.5rem', borderRadius: '20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1rem' }}>
-            <div style={{ padding: '8px', borderRadius: '10px', background: '#eff6ff', color: '#2563eb' }}>
-              <FileText size={20} />
-            </div>
-            <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>Prorated Logic</h3>
-          </div>
-          <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', lineHeight: 1.5 }}>
-            New employees receive prorated leave amounts based on their join date.
-          </p>
-        </Card>
 
-        <Card glass style={{ padding: '1.5rem', borderRadius: '20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1rem' }}>
-            <div style={{ padding: '8px', borderRadius: '10px', background: '#fff7ed', color: '#ea580c' }}>
-              <Calendar size={20} />
+      <div className="leave-requests-wrapper">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Total Jenis</p>
+              <p className="leave-summary-subtitle">Semua kategori</p>
             </div>
-            <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>Carryover Rules</h3>
+            <div className="leave-summary-icon-wrapper leave-icon-blue">
+              <Calendar size={28} />
+            </div>
           </div>
-          <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', lineHeight: 1.5 }}>
-            Unused leave can be carried over to the next period as per policy limits.
+          <div className="leave-summary-value leave-value-blue">{types.length}</div>
+          <p className="leave-summary-trend">Jenis Cuti</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Paid Leave</p>
+              <p className="leave-summary-subtitle">Cuti berbayar</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-green">
+              <ShieldCheck size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-green">{types.filter(t => t.is_paid).length}</div>
+          <p className="leave-summary-trend">Paid</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Unpaid Leave</p>
+              <p className="leave-summary-subtitle">Cuti tidak berbayar</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-orange">
+              <CalendarDays size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-orange">{types.filter(t => !t.is_paid).length}</div>
+          <p className="leave-summary-trend">Unpaid</p>
+        </div>
+      </div>
+
+      <div className="white-unified-wrapper">
+        <div className="wuw-header">
+          <div className="wuw-header-top">
+            <div className="wuw-title-area">
+              <h3>Daftar Jenis Cuti</h3>
+            </div>
+            <div className="search-box">
+              <Search size={18} />
+              <input 
+                type="text" 
+                placeholder="Cari berdasarkan nama atau kode..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="wuw-table-area">
+          <Card glass style={{ padding: '0', borderRadius: '24px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+            <div className="table-responsive">
+              <table className="leave-type-table">
+              <thead>
+                <tr>
+                  <th>Nama Cuti</th>
+                  <th>Kode</th>
+                  <th>Deskripsi</th>
+                  <th>Tipe Pembayaran</th>
+                  <th>Status</th>
+                  <th style={{ textAlign: 'right' }}>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan={6} style={{ textAlign: 'center', padding: '4rem' }}>
+                      <RefreshCw size={32} className="animate-spin" color="#2563eb" />
+                      <p style={{ marginTop: '1rem', color: '#64748b' }}>Memuat data...</p>
+                    </td>
+                  </tr>
+                ) : filteredTypes.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} style={{ textAlign: 'center', padding: '4rem', color: '#94a3b8' }}>
+                      Belum ada jenis cuti yang terdaftar.
+                    </td>
+                  </tr>
+                ) : filteredTypes.map((type) => (
+                  <tr key={type.id} className="leave-policy-row">
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ 
+                          width: '40px', 
+                          height: '40px', 
+                          borderRadius: '12px', 
+                          background: type.is_paid ? '#eff6ff' : '#fff1f2', 
+                          color: type.is_paid ? '#2563eb' : '#e11d48',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <Calendar size={20} />
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 700, color: '#1e293b' }}>{type.name}</div>
+                          <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Terdaftar pada {type.created_at ? new Date(type.created_at).toLocaleDateString() : '-'}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span className="policy-code">{type.code}</span>
+                    </td>
+                    <td style={{ maxWidth: '250px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {type.description || '-'}
+                    </td>
+                    <td>
+                      <span className={`policy-badge ${type.is_paid ? 'policy-badge-paid' : 'policy-badge-unpaid'}`}>
+                        {type.is_paid ? 'Paid' : 'Unpaid'}
+                      </span>
+                    </td>
+                    <td>
+                      <span style={{ 
+                        padding: '4px 12px', 
+                        borderRadius: '20px', 
+                        fontSize: '0.75rem', 
+                        fontWeight: 700,
+                        background: type.is_active ? '#dcfce7' : '#f1f5f9',
+                        color: type.is_active ? '#16a34a' : '#64748b'
+                      }}>
+                        {type.is_active ? 'ACTIVE' : 'INACTIVE'}
+                      </span>
+                    </td>
+                    <td style={{ textAlign: 'right' }}>
+                      <div className="action-btn-group">
+                        <button 
+                          className="action-btn action-btn-edit" 
+                          onClick={() => window.location.href = `/leave/type/edit/${type.id}`}
+                          title="Edit Jenis Cuti"
+                        >
+                          <Edit size={16} />
+                        </button>
+                        <button 
+                          className="action-btn action-btn-delete" 
+                          onClick={() => {
+                            if (window.confirm('Hapus jenis cuti ini?')) {
+                              void api.delete(`/leave-types/${type.id}`).then(() => void fetchTypes());
+                            }
+                          }}
+                          title="Hapus Jenis Cuti"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            </div>
+            </Card>
+        </div>
+      </div>
+
+      <div className="leave-requests-wrapper">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Auto-Renewal</p>
+              <p className="leave-summary-subtitle">Otomatis diperpanjang</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-green">
+              <ShieldCheck size={28} />
+            </div>
+          </div>
+          <p className="leave-summary-trend" style={{ fontSize: '0.85rem', lineHeight: 1.5 }}>
+            Saldo cuti otomatis direset dan diperbarui berdasarkan siklus kebijakan.
           </p>
-        </Card>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Prorated Logic</p>
+              <p className="leave-summary-subtitle">Perhitungan proporsional</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-blue">
+              <FileText size={28} />
+            </div>
+          </div>
+          <p className="leave-summary-trend" style={{ fontSize: '0.85rem', lineHeight: 1.5 }}>
+            Karyawan baru menerima jumlah cuti proporsional berdasarkan tanggal masuk.
+          </p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Carryover Rules</p>
+              <p className="leave-summary-subtitle">Aturan carryover</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-orange">
+              <Calendar size={28} />
+            </div>
+          </div>
+          <p className="leave-summary-trend" style={{ fontSize: '0.85rem', lineHeight: 1.5 }}>
+            Sisa cuti dapat dibawa ke periode berikutnya sesuai batas kebijakan.
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -115,6 +115,37 @@ const AuthLayout = ({ title, subtitle, children, footer }: AuthLayoutProps) => {
           </header>
           {children}
           {footer}
+          
+          <div style={{ 
+            marginTop: '1.5rem',
+            paddingTop: '1.5rem',
+            borderTop: '1px solid var(--border-color)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.5rem',
+            opacity: 0.8
+          }}>
+            <img 
+              src="/foto-berkemah.png"
+              alt="Berkemah Team"
+              style={{ 
+                width: '160px',
+                height: '140px',
+                objectFit: 'cover',
+                borderRadius: '8px'
+              }} 
+            />
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                Powered by
+              </span>
+              <span style={{ fontSize: '0.9rem', fontWeight: 900, color: 'var(--primary-color)' }}>
+                Berkemah Team
+              </span>
+            </div>
+          </div>
         </div>
       </section>
     </div>

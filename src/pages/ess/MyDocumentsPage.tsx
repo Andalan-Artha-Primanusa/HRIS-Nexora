@@ -17,6 +17,8 @@ import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { documentService } from '@/features/employee/api/document.service';
 import type { EmployeeDocument } from '@/features/employee/types/document.types';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 import '@/pages/ess/EssPages.css';
 
 const MyDocumentsPage: React.FC = () => {
@@ -81,54 +83,86 @@ const MyDocumentsPage: React.FC = () => {
 
   return (
     <div className="ess-page">
-      <div className="ess-header">
-        <div className="ess-header-copy">
-          <span className="ess-badge">Document Management</span>
-          <h1>My Documents</h1>
-          <p>Access your official documents, certificates, and employment records.</p>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <FileText size={16} />
+              <span>Layanan Mandiri</span>
+            </div>
+            <h1 className="hero-title">Dokumen Saya</h1>
+            <p className="hero-subtitle">
+              Akses dokumen resmi, sertifikat, dan catatan pekerjaan Anda.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={fetchDocuments} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+            <button className="btn-primary" onClick={() => {}}>
+              <Upload size={16} />
+              Unggah Dokumen
+            </button>
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <Button variant="outline" onClick={fetchDocuments} style={{ gap: '8px' }}>
-            <RefreshCw size={18} className={loading ? 'animate-spin' : ''} /> Refresh
-          </Button>
-          <Button variant="primary" style={{ gap: '8px' }}>
-            <Upload size={18} /> Upload Document
-          </Button>
-        </div>
-      </div>
+      </Card>
 
-      <div className="ess-summary-grid" style={{ marginTop: '1rem' }}>
-        <div className="ess-summary-card">
-          <div className="ess-summary-header">
-            <span className="ess-summary-label">Total Files</span>
-            <div className="ess-summary-icon ess-summary-icon--blue"><FileText size={20} /></div>
+      <div className="leave-requests-wrapper">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Total File</p>
+              <p className="leave-summary-subtitle">Seluruh dokumen</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-blue">
+              <FileText size={28} />
+            </div>
           </div>
-          <div className="ess-summary-value">{stats.total}</div>
-          <div className="ess-summary-subtitle">All managed documents</div>
+          <div className="leave-summary-value leave-value-blue">{stats.total}</div>
+          <p className="leave-summary-trend">Total Dokumen</p>
         </div>
-        <div className="ess-summary-card">
-          <div className="ess-summary-header">
-            <span className="ess-summary-label">Verified</span>
-            <div className="ess-summary-icon ess-summary-icon--green"><CheckCircle size={20} /></div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Terverifikasi</p>
+              <p className="leave-summary-subtitle">Disetujui HR</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-green">
+              <CheckCircle size={28} />
+            </div>
           </div>
-          <div className="ess-summary-value">{stats.approved}</div>
-          <div className="ess-summary-subtitle">Approved by HR</div>
+          <div className="leave-summary-value leave-value-green">{stats.approved}</div>
+          <p className="leave-summary-trend">Dokumen Disetujui</p>
         </div>
-        <div className="ess-summary-card">
-          <div className="ess-summary-header">
-            <span className="ess-summary-label">Pending</span>
-            <div className="ess-summary-icon ess-summary-icon--orange"><Clock size={20} /></div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Menunggu</p>
+              <p className="leave-summary-subtitle">Menunggu tinjauan</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-orange">
+              <Clock size={28} />
+            </div>
           </div>
-          <div className="ess-summary-value">{stats.pending}</div>
-          <div className="ess-summary-subtitle">Awaiting review</div>
+          <div className="leave-summary-value leave-value-orange">{stats.pending}</div>
+          <p className="leave-summary-trend">Menunggu Tinjauan</p>
         </div>
-        <div className="ess-summary-card">
-          <div className="ess-summary-header">
-            <span className="ess-summary-label">Expiring Soon</span>
-            <div className="ess-summary-icon ess-summary-icon--red"><AlertCircle size={20} /></div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Kadaluarsa Soon</p>
+              <p className="leave-summary-subtitle">Segera kadaluarsa</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-red">
+              <AlertCircle size={28} />
+            </div>
           </div>
-          <div className="ess-summary-value">{stats.expiring}</div>
-          <div className="ess-summary-subtitle">Next 30 days</div>
+          <div className="leave-summary-value leave-value-red">{stats.expiring}</div>
+          <p className="leave-summary-trend">Segera Kadaluarsa</p>
         </div>
       </div>
 
@@ -201,13 +235,48 @@ const MyDocumentsPage: React.FC = () => {
                 <div className="doc-footer">
                   {getStatusBadge(doc.status)}
                   <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    style={{ color: '#2563eb', gap: '6px' }}
-                    onClick={() => window.open(doc.file_url, '_blank')}
-                  >
-                    <Download size={16} /> Download
-                  </Button>
+  variant="ghost" 
+  size="sm" 
+  style={{ color: '#2563eb', gap: '6px' }}
+  onClick={async () => {
+    try {
+      const token = localStorage.getItem('token');
+
+      const filename = doc.file_url.split('/').pop();
+
+      const res = await fetch(
+        `https://moccasin-crab-693879.hostingersite.com/api/documents/${filename}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // 🔥 INI YANG KAMU TANYA (debug response)
+      if (!res.ok) {
+        const text = await res.text();
+        console.log("ERROR RESPONSE:", text);
+        throw new Error("Download gagal");
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename || "file.pdf";
+      a.click();
+
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      alert("Gagal download file");
+    }
+  }}
+>
+  <Download size={16} /> Download
+</Button>
                 </div>
               </div>
             ))}

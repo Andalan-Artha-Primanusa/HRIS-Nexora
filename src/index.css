@@ -90,9 +90,6 @@ body,
 body {
   font-family: var(--font-family);
   background-color: var(--background-color);
-  background-image: radial-gradient(circle at 10% 6%, rgba(29, 98, 240, 0.12), transparent 30rem),
-    radial-gradient(circle at 92% 0%, rgba(14, 165, 233, 0.12), transparent 24rem),
-    linear-gradient(180deg, #f4f8ff 0%, #f0f5ff 50%, #edf4ff 100%);
   color: var(--gray-800);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -104,10 +101,8 @@ a {
 }
 
 .glass-effect {
-  background: rgba(255, 255, 255, 0.68);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: var(--white);
+  border: 1px solid var(--gray-200);
 }
 
 .text-primary {
@@ -186,16 +181,6 @@ h6 {
   display: flex;
   min-height: 100vh;
   overflow: hidden;
-  position: relative;
-}
-
-.dashboard-layout::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(circle at 8% 12%, rgba(59, 130, 246, 0.04), transparent 26rem),
-    radial-gradient(circle at 92% 96%, rgba(14, 165, 233, 0.08), transparent 30rem);
 }
 
 .dashboard-sidebar {
@@ -221,20 +206,11 @@ h6 {
   position: relative;
 }
 
-.dashboard-main::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, transparent 16%);
-}
-
 .dashboard-header {
   height: var(--header-height);
   padding: 0 1.75rem;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.86));
-  border-bottom: 1px solid rgba(198, 211, 227, 0.8);
-  backdrop-filter: blur(8px);
+  background: var(--white);
+  border-bottom: 1px solid var(--gray-200);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -350,3 +326,165 @@ h6 {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(71, 85, 105, 0.65);
 }
+
+/* ─── Global Design Tokens: Standardized Action Buttons ─── */
+.action-btn-group {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.action-btn {
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  outline: none;
+  background: white;
+  color: #2563eb;
+}
+
+.action-btn:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+}
+
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.action-btn-edit {
+  color: #2563eb;
+  background: white;
+  border-color: #e2e8f0;
+}
+
+.action-btn-edit:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.action-btn-delete {
+  color: #2563eb;
+  background: white;
+  border-color: #e2e8f0;
+}
+
+.action-btn-delete:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.action-btn-view {
+  color: #2563eb;
+  background: white;
+  border-color: #e2e8f0;
+}
+
+.action-btn-view:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.action-btn-secondary {
+  color: #2563eb;
+  background: white;
+  border-color: #e2e8f0;
+}
+
+.action-btn-secondary:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.action-btn-success {
+  color: #2563eb;
+  background: white;
+  border-color: #e2e8f0;
+}
+
+.action-btn-success:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.action-btn {
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  outline: none;
+}
+
+.action-btn-edit {
+  color: #2563eb;
+  background: #eff6ff;
+}
+
+.action-btn-edit:hover {
+  background: #dbeafe;
+  border-color: #bfdbfe;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+}
+
+.action-btn-delete {
+  color: #e11d48;
+  background: #fff1f2;
+}
+
+.action-btn-delete:hover {
+  background: #ffe4e6;
+  border-color: #fecdd3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.12);
+}
+
+.action-btn-view {
+  color: #0891b2;
+  background: #ecfeff;
+}
+
+.action-btn-view:hover {
+  background: #cffafe;
+  border-color: #a5f3fc;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(8, 145, 178, 0.12);
+}
+
+.action-btn-secondary {
+  color: #7c3aed;
+  background: #f5f3ff;
+}
+
+.action-btn-secondary:hover {
+  background: #ede9fe;
+  border-color: #ddd6fe;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.12);
+}
+
+.action-btn-success {
+  color: #16a34a;
+  background: #dcfce7;
+}
+
+.action-btn-success:hover {
+  background: #bbf7d0;
+  border-color: #86efac;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.12);
+}
+

@@ -3,7 +3,9 @@ import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { Alert } from '@/shared/ui/Alert';
 import { api } from '@/shared/api/httpClient';
-import { CheckCircle2, MapPin } from 'lucide-react';
+import { CheckCircle2, MapPin, Clock, LogOut } from 'lucide-react';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 import './AttendancePages.css';
 
 const AttendanceCheckOutPage = () => {
@@ -77,14 +79,30 @@ const AttendanceCheckOutPage = () => {
     }
   };
 
-  return (
-    <div className="attendance-page">
-      <div className="attendance-page-header">
-        <div>
-          <span className="attendance-badge">Check Out</span>
-          <h1>Attendance Check Out</h1>
-          <p>Lokasi akan secara otomatis ditangkap dari GPS perangkat Anda.</p>
+return (
+    <div className="crud-page attendance-page">
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <LogOut size={16} />
+              <span>Kehadiran</span>
+            </div>
+            <h1 className="hero-title">Absensi Check Out</h1>
+            <p className="hero-subtitle">
+              Lokasi akan secara otomatis ditangkap dari GPS perangkat Anda.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={detectGPS}>
+              <Clock size={16} />
+              Deteksi Lokasi
+            </button>
+          </div>
         </div>
+      </Card>
+
+<Card className="attendance-form-card" glass>
         <div className="attendance-status-card">
           <CheckCircle2 size={22} />
           <div>
@@ -92,9 +110,6 @@ const AttendanceCheckOutPage = () => {
             <strong>{status}</strong>
           </div>
         </div>
-      </div>
-
-      <Card className="attendance-form-card" glass>
         {alertMessage && (
           <Alert 
             type={alertType} 

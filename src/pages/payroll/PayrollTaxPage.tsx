@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, Search, Download, RefreshCw } from 'lucide-react';
+import { ShieldCheck, Search, RefreshCw, DollarSign, Users } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { Badge } from '@/shared/ui/Badge';
 import { payrollService, toSafeArray } from '@/features/payroll/api/payroll.service';
-import './PayrollDetailedPages.css';
+import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 
 const formatCurrency = (value: number | string) => {
   const num = typeof value === 'string' ? parseFloat(value) : value;
@@ -52,122 +54,151 @@ const PayrollTaxPage: React.FC = () => {
   }), { pph21: 0, bpjs: 0, records: 0 });
 
   return (
-    <div className="payroll-detailed-page">
-      <Card className="detailed-hero-card" glass>
-        <div className="detailed-hero-copy">
-          <span className="detailed-badge">Compliance & Legal</span>
-          <h1>Laporan Pajak & BPJS</h1>
-          <p>Ringkasan potongan PPh21 dan iuran BPJS karyawan per periode penggajian.</p>
-        </div>
-        <div className="detailed-hero-icon">
-          <ShieldCheck size={72} color="#0ea5e9" />
+    <div className="crud-page">
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <ShieldCheck size={16} />
+              <span>Pusat Payroll</span>
+            </div>
+            <h1 className="hero-title">Laporan Pajak & BPJS</h1>
+            <p className="hero-subtitle">
+              Ringkasan potongan PPh21 dan iuran BPJS karyawan per periode penggajian.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => void loadData()} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+            <button className="btn-primary" onClick={() => window.location.href = '/payroll'}>
+              Kelola Payroll
+            </button>
+          </div>
         </div>
       </Card>
 
-      <div className="detailed-stats-grid">
-        <Card className="mini-stat-card" glass>
-          <span className="stat-label">Total PPh21</span>
-          <span className="stat-value">{formatCurrency(totals.pph21)}</span>
-          <Badge variant="info">Akumulasi</Badge>
-        </Card>
-        <Card className="mini-stat-card" glass>
-          <span className="stat-label">Total Iuran BPJS</span>
-          <span className="stat-value">{formatCurrency(totals.bpjs)}</span>
-          <Badge variant="warning">Kesehatan & TK</Badge>
-        </Card>
-        <Card className="mini-stat-card" glass>
-          <span className="stat-label">Jumlah Entri</span>
-          <span className="stat-value">{totals.records}</span>
-          <Badge variant="default">Records</Badge>
-        </Card>
-      </div>
-
-      <div className="detailed-actions-bar">
-        <div className="search-box">
-          <Search size={18} />
-          <input 
-            type="text" 
-            placeholder="Cari karyawan atau kode..." 
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-        <div className="action-buttons">
-          <Button variant="outline" size="md" onClick={() => void loadData()} disabled={loading}>
-            <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
-          </Button>
-          <Button variant="primary" size="md">
-            <Download size={18} style={{ marginRight: '8px' }} />
-            Ekspor Data
-          </Button>
-        </div>
-      </div>
-
       {error && (
-        <Card className="detailed-error-card" glass>
+        <Card className="crud-card" glass>
           <p>⚠️ {error}</p>
         </Card>
       )}
 
-      <Card className="detailed-table-card" glass>
-        <div className="table-header">
-          <h2>Data Kontribusi Pajak & BPJS</h2>
-          <Badge variant="info">{filteredData.length} Records</Badge>
+      <div className="summary-grid">
+        <Card className="metric-card">
+          <div className="metric-header">
+            <div>
+              <span className="metric-label">Total PPh21</span>
+              <p className="metric-subtitle">Akumulasi</p>
+            </div>
+            <span className="metric-icon metric-icon--blue">
+              <DollarSign size={22} />
+            </span>
+          </div>
+          <div className="metric-value" style={{ color: '#2563eb' }}>{formatCurrency(totals.pph21)}</div>
+          <div className="summary-card-change">Potongan pajak</div>
+        </Card>
+
+        <Card className="metric-card">
+          <div className="metric-header">
+            <div>
+              <span className="metric-label">Total Iuran BPJS</span>
+              <p className="metric-subtitle">Kesehatan & TK</p>
+            </div>
+            <span className="metric-icon metric-icon--orange">
+              <ShieldCheck size={22} />
+            </span>
+          </div>
+          <div className="metric-value" style={{ color: '#f59e0b' }}>{formatCurrency(totals.bpjs)}</div>
+          <div className="summary-card-change">Iuran BPJS</div>
+        </Card>
+
+        <Card className="metric-card">
+          <div className="metric-header">
+            <div>
+              <span className="metric-label">Jumlah Entri</span>
+              <p className="metric-subtitle">Records</p>
+            </div>
+            <span className="metric-icon metric-icon--green">
+              <Users size={22} />
+            </span>
+          </div>
+          <div className="metric-value" style={{ color: '#10b981' }}>{totals.records}</div>
+          <div className="summary-card-change">Total records</div>
+        </Card>
+      </div>
+
+      <div className="white-unified-wrapper">
+        <div className="wuw-header">
+          <div className="wuw-header-top">
+            <div className="wuw-title-area">
+              <h3>Data Kontribusi Pajak & BPJS</h3>
+              <span className="wuw-count-badge">{filteredData.length} Records</span>
+            </div>
+            <div className="search-box">
+              <Search size={18} />
+              <input 
+                type="text" 
+                placeholder="Cari karyawan atau kode..." 
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+          </div>
         </div>
 
-        <div className="ui-table-overflow">
-          <table className="premium-table">
-            <thead>
-              <tr>
-                <th>Karyawan</th>
-                <th>Periode</th>
-                <th>Gaji Pokok</th>
-                <th>PPh21</th>
-                <th>BPJS Kesehatan</th>
-                <th>BPJS TK</th>
-                <th>Total Potongan</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
+        <div className="wuw-table-area">
+          <div className="table-wrap">
+            <table className="data-table">
+              <thead>
                 <tr>
-                  <td colSpan={7} className="text-center py-10">Memuat data...</td>
+                  <th>Karyawan</th>
+                  <th>Periode</th>
+                  <th>Gaji Pokok</th>
+                  <th>PPh21</th>
+                  <th>BPJS Kesehatan</th>
+                  <th>BPJS TK</th>
+                  <th>Total Potongan</th>
                 </tr>
-              ) : filteredData.length > 0 ? (
-                filteredData.map((item) => (
-                  <tr key={item.id}>
-                    <td>
-                      <div className="employee-cell">
-                        <div className="emp-avatar" style={{ 
-                          background: 'linear-gradient(135deg, #0ea5e920 0%, #0ea5e940 100%)', 
-                          color: '#0369a1',
-                          boxShadow: 'inset 0 0 0 1px rgba(14, 165, 233, 0.1)'
-                        }}>
-                          {(item.employee?.user?.name || 'U')[0]}
-                        </div>
-                        <div className="emp-info">
-                          <span className="emp-name" style={{ color: '#0f172a' }}>{item.employee?.user?.name || 'Unknown'}</span>
-                          <span className="emp-code" style={{ letterSpacing: '0.05em' }}>{item.employee?.employee_code || item.employee_id}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td><Badge variant="default" style={{ fontWeight: 600 }}>{item.period}</Badge></td>
-                    <td style={{ fontWeight: 500, color: '#475569' }}>{formatCurrency(item.basic_salary)}</td>
-                    <td style={{ color: '#e11d48', fontWeight: 600 }}>{formatCurrency(item.pph21)}</td>
-                    <td style={{ color: '#ea580c', fontWeight: 500 }}>{formatCurrency(item.bpjs_kesehatan)}</td>
-                    <td style={{ color: '#ea580c', fontWeight: 500 }}>{formatCurrency(item.bpjs_ketenagakerjaan)}</td>
-                    <td style={{ fontWeight: 800, color: '#1e293b', fontSize: '1.05rem' }}>{formatCurrency(item.total_deduction)}</td>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan={7} className="text-center py-10">Memuat data...</td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={7} className="text-center py-10">Tidak ada data ditemukan.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                ) : filteredData.length > 0 ? (
+                  filteredData.map((item) => (
+                    <tr key={item.id}>
+                      <td>
+                        <div className="cell-name">
+                          <div className="cell-avatar">
+                            {(item.employee?.user?.name || 'U')[0]}
+                          </div>
+                          <div className="cell-stacked">
+                            <span className="cell-name-text">{item.employee?.user?.name || 'Unknown'}</span>
+                            <span className="cell-stacked__sub">{item.employee?.employee_code || item.employee_id}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td><Badge variant="default">{item.period}</Badge></td>
+                      <td style={{ fontWeight: 500 }}>{formatCurrency(item.basic_salary)}</td>
+                      <td style={{ color: '#e11d48', fontWeight: 600 }}>{formatCurrency(item.pph21)}</td>
+                      <td>{formatCurrency(item.bpjs_kesehatan)}</td>
+                      <td>{formatCurrency(item.bpjs_ketenagakerjaan)}</td>
+                      <td style={{ fontWeight: 800 }}>{formatCurrency(item.total_deduction)}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={7} className="text-center py-10">Tidak ada data ditemukan.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </Card>
+      </div>
     </div>
   );
 };

@@ -2,9 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
-import { BarChart3, CheckCircle2, Receipt, Wallet, FileText, Download, Printer } from "lucide-react";
+import { BarChart3, CheckCircle2, Receipt, Wallet, FileText, Download, Printer, RefreshCw } from "lucide-react";
 import { getMyPayroll, getMyPayrollDetail, exportMyPayrollPdf } from "@/features/ess/api/ess.service";
 import type { GenericApiItem } from "@/features/ess/types/ess.types";
+import "@/pages/dashboard/overview/OverviewPage.css";
+import "@/pages/payroll/PayrollShared.css";
 import "./EssPages.css";
 
 const MyPayrollPage = () => {
@@ -100,35 +102,83 @@ const MyPayrollPage = () => {
 
   return (
     <div className="ess-page">
-      <div className="ess-header">
-        <div className="ess-header-copy">
-          <p className="ess-badge">ESS Payroll</p>
-          <h1>Riwayat Gaji Saya</h1>
-          <p>Lihat dan unduh slip gaji bulanan Anda dengan aman.</p>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Wallet size={16} />
+              <span>Layanan Mandiri</span>
+            </div>
+            <h1 className="hero-title">Riwayat Gaji Saya</h1>
+            <p className="hero-subtitle">
+              Lihat dan unduh slip gaji bulanan Anda dengan aman.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => void loadPayroll()} disabled={loading}>
+              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+              Segarkan
+            </button>
+          </div>
         </div>
-        <Button variant="outline" size="md" onClick={() => void loadPayroll()} disabled={loading}>
-          Segarkan
-        </Button>
-      </div>
+      </Card>
 
-      <div className="ess-summary-grid">
-        {summaryCards.map((card) => {
-          const Icon = card.icon;
-          return (
-            <Card key={card.label} className="ess-summary-card" glass>
-              <div className="ess-summary-header">
-                <div>
-                  <span className="ess-summary-label">{card.label}</span>
-                  <p className="ess-summary-subtitle">{card.subtitle}</p>
-                </div>
-                <span className={`ess-summary-icon ess-summary-icon--${card.tone}`}>
-                  <Icon size={18} />
-                </span>
-              </div>
-              <div className="ess-summary-value">{card.value}</div>
-            </Card>
-          );
-        })}
+      <div className="leave-requests-wrapper">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Total Slip</p>
+              <p className="leave-summary-subtitle">Seluruh riwayat payroll</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-blue">
+              <BarChart3 size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-blue">{items.length}</div>
+          <p className="leave-summary-trend">Total Slip Gaji</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Sudah Dibayar</p>
+              <p className="leave-summary-subtitle">Slip yang telah cair</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-green">
+              <CheckCircle2 size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-green">{items.filter((item) => String(item.status ?? "").toLowerCase() === "paid").length}</div>
+          <p className="leave-summary-trend">Slip Terbayar</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Periode Aktif</p>
+              <p className="leave-summary-subtitle">Rentang waktu</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-orange">
+              <Receipt size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-orange">{new Set(items.map((item) => String(item.period ?? ""))).size}</div>
+          <p className="leave-summary-trend">Periode</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Total Gaji Bersih</p>
+              <p className="leave-summary-subtitle">Akumulasi</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-red">
+              <Wallet size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-red">{formatCurrency(items.reduce((sum, item) => sum + (Number(item.net_salary || item.take_home_pay) || 0), 0))}</div>
+          <p className="leave-summary-trend">Total</p>
+        </div>
       </div>
 
       <Card className="ess-card" glass>

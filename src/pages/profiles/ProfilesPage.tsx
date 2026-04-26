@@ -11,24 +11,16 @@ import {
   Heart,
   GraduationCap,
   CreditCard,
-  Clock,
-  FileText,
   Shield,
-  CheckCircle2,
   Building2,
-  Mail,
-  Calendar,
-  Phone,
-  Layers,
-  Map,
   Search,
-  Filter,
-  ChevronDown,
+  RefreshCw,
 } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { Badge } from "@/shared/ui/Badge";
+import { Alert } from "@/shared/ui/Alert";
 import { useProfiles } from "@/features/profile/hooks/useProfiles";
 import type { Profile, ProfilePayload } from "@/features/profile/types/profile.types";
 import "./ProfilesPage.css";
@@ -600,6 +592,7 @@ const ProfilesPage = () => {
 
   // Filter & Search states
   const [searchText, setSearchText] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [selectedPosition, setSelectedPosition] = useState("");
@@ -731,7 +724,7 @@ const ProfilesPage = () => {
       },
     ],
     [paginatedProfiles.length, profiles.length, sortedProfiles.length, uniqueDepartments.length, uniquePositions.length]
-  );
+);
 
   // Reset pagination when filters change
   useEffect(() => {
@@ -752,7 +745,6 @@ const ProfilesPage = () => {
     }
 
     void loadProfiles();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAddPage, isViewPage, isUpdatePage]);
 
   useEffect(() => {
@@ -780,8 +772,147 @@ const ProfilesPage = () => {
     };
 
     void loadDetail();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isViewPage, isUpdatePage, routeProfileId]);
+
+  // View Page
+  if (isViewPage) {
+    const profile = selectedProfile;
+    return (
+      <div className="crud-page">
+        <Card className="hero-card">
+          <div className="hero-card-inner">
+            <div className="hero-content">
+              <div className="hero-badge">
+                <User size={16} />
+                <span>HR Management</span>
+              </div>
+              <h1 className="hero-title">Detail Profil</h1>
+              <p className="hero-subtitle">
+                Lihat informasi lengkap profil karyawan.
+              </p>
+            </div>
+            <div className="hero-actions">
+              <button className="btn-outline" onClick={() => navigate("/profiles")}>
+                Kembali
+              </button>
+              <button className="btn-primary" onClick={() => navigate(`/profiles/update/${routeProfileId}`)}>
+                <Pencil size={16} />
+                Edit
+              </button>
+            </div>
+          </div>
+        </Card>
+
+        <div className="white-unified-wrapper">
+          <Card className="table-card" glass>
+            <div className="table-header-bar">
+              <h3>Data Profil</h3>
+              <span className="table-count">ID: {profile?.id}</span>
+            </div>
+            <div className="table-card-inner">
+              <div className="detail-view">
+                <div className="detail-row">
+                  <span className="detail-label">Nama</span>
+                  <span className="detail-value">{profile?.user?.name || '-'}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="detail-label">Email</span>
+                  <span className="detail-value">{profile?.user?.email || '-'}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="detail-label">Telepon</span>
+                  <span className="detail-value">{profile?.phone || '-'}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="detail-label">Alamat</span>
+                  <span className="detail-value">{profile?.address || '-'}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="detail-label">Departemen</span>
+                  <span className="detail-value">{profile?.employee?.department || '-'}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="detail-label">Jabatan</span>
+                  <span className="detail-value">{profile?.employee?.position || '-'}</span>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // Update Page
+  if (isUpdatePage) {
+    return (
+      <div className="crud-page">
+        <Card className="hero-card">
+          <div className="hero-card-inner">
+            <div className="hero-content">
+              <div className="hero-badge">
+                <User size={16} />
+                <span>HR Management</span>
+              </div>
+              <h1 className="hero-title">Edit Profil</h1>
+              <p className="hero-subtitle">
+                Ubah informasi profil karyawan.
+              </p>
+            </div>
+            <div className="hero-actions">
+              <button className="btn-outline" onClick={() => navigate("/profiles")} disabled={loading}>
+                Batal
+              </button>
+            </div>
+          </div>
+        </Card>
+
+        {errorMessage && (
+          <Alert type="error" message={errorMessage} onClose={() => {}} dismissible />
+        )}
+
+        <div className="white-unified-wrapper">
+          <div className="form-grid">
+            <Card className="table-card" glass>
+              <div className="table-header-bar">
+                <h3>Edit Profil</h3>
+                <span className="table-count">Formulir</span>
+              </div>
+              <div className="table-card-inner">
+                <div className="crud-form">
+                  <div className="form-grid">
+                    <div className="form-group">
+                      <label>Telepon</label>
+                      <input
+                        type="text"
+                        value={updateForm.phone}
+                        onChange={(e) => handleUpdateChange('phone', e.target.value)}
+                        className="form-input"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Alamat</label>
+                      <input
+                        type="text"
+                        value={updateForm.address}
+                        onChange={(e) => handleUpdateChange('address', e.target.value)}
+                        className="form-input"
+                      />
+                    </div>
+                  </div>
+                  <div className="form-actions">
+                    <Button variant="primary" onClick={() => void handleUpdate()} disabled={loading}>
+                      Simpan Perubahan
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleCreateChange = (key: keyof ProfileFormState, value: string) => {
     setCreateForm((prev) => ({ ...prev, [key]: value }));
@@ -903,716 +1034,197 @@ const ProfilesPage = () => {
 
   if (isAddPage) {
     return (
-      <div className="profiles-page crud-page">
-        <div className="profiles-list-header" style={{ borderBottom: "2px solid #e2e8f0", paddingBottom: "20px" }}>
-          <div className="profiles-list-title">
-            <h1 style={{ color: "var(--color-primary)", marginBottom: "4px" }}>👤 Tambah Profil Baru</h1>
-            <p style={{ color: "var(--color-text-secondary)", fontSize: "0.9rem" }}>Lengkapi informasi profil karyawan secara detail</p>
-          </div>
-          <Button variant="outline" size="md" onClick={() => navigate("/profiles")} disabled={loading}>
-            Kembali ke Daftar
-          </Button>
-        </div>
-
-        <Card className="profiles-status-card" glass>
-          <div className="profiles-status-row">
-            <Badge variant={errorMessage ? "danger" : "info"}>{statusMessage}</Badge>
-          </div>
-          {validationMessage && <p className="profiles-message profiles-message--error">{validationMessage}</p>}
-          {errorMessage && <p className="profiles-message profiles-message--error">{errorMessage}</p>}
-        </Card>
-
-        {FIELD_GROUPS.map((group) => (
-          <Card key={group.title} className="profiles-panel" glass style={{ marginBottom: "1.5rem" }}>
-            <div className="profiles-panel-header" style={{ marginBottom: "20px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <div style={{ color: "var(--color-primary)" }}>{group.icon}</div>
-                <h2 style={{ color: "var(--color-primary)", margin: 0 }}>{group.title}</h2>
+      <div className="crud-page">
+        <Card className="hero-card">
+          <div className="hero-card-inner">
+            <div className="hero-content">
+              <div className="hero-badge">
+                <User size={16} />
+                <span>HR Management</span>
               </div>
+              <h1 className="hero-title">Tambah Profil Baru</h1>
+              <p className="hero-subtitle">
+                Lengkapi informasi profil karyawan.
+              </p>
             </div>
-            <div className="profiles-form-grid">
-              {group.fields.map((field) => (
-                <label key={field} className="profiles-form-group">
-                  <span style={{ color: "var(--color-primary)", fontWeight: "700", fontSize: "0.75rem" }}>{field.replace(/_/g, " ").toUpperCase()}</span>
-                  {field === "gender" ? (
-                    <select
-                      value={createForm[field]}
-                      onChange={(event) => handleCreateChange(field, event.target.value)}
-                      className="profiles-input"
-                    >
-                      <option value="">Pilih gender</option>
-                      <option value="male">Laki-laki</option>
-                      <option value="female">Perempuan</option>
-                      <option value="other">Lainnya</option>
-                    </select>
-                  ) : field === "marital_status" ? (
-                    <select
-                      value={createForm[field]}
-                      onChange={(event) => handleCreateChange(field, event.target.value)}
-                      className="profiles-input"
-                    >
-                      <option value="">Pilih status pernikahan</option>
-                      <option value="single">Single</option>
-                      <option value="married">Married</option>
-                      <option value="divorced">Divorced</option>
-                      <option value="widowed">Widowed</option>
-                    </select>
-                  ) : (
-                    <input
-                      value={createForm[field]}
-                      onChange={(event) => handleCreateChange(field, event.target.value)}
-                      placeholder={`Masukkan ${field.replace(/_/g, " ")}`}
-                      className="profiles-input"
-                      type={field === "birth_date" ? "date" : field.includes("phone") ? "tel" : "text"}
-                    />
-                  )}
-                </label>
-              ))}
-            </div>
-          </Card>
-        ))}
-
-        <div className="profiles-actions" style={{ justifyContent: "flex-end", marginTop: "1rem" }}>
-          <Button variant="outline" size="md" onClick={() => navigate("/profiles")} disabled={loading}>
-            Batal
-          </Button>
-          <Button variant="primary" size="md" onClick={() => void handleCreate()} disabled={loading}>
-            <Plus size={16} />
-            Simpan Profil
-          </Button>
-        </div>
-        <ErrorModal errors={validationErrors} isOpen={isErrorModalOpen} onClose={() => setIsErrorModalOpen(false)} />
-      </div>
-    );
-  }
-
-  if (isViewPage) {
-    return (
-      <div className="profiles-page crud-page">
-        <div className="profiles-list-header" style={{ borderBottom: "2px solid #e2e8f0", paddingBottom: "20px" }}>
-          <div className="profiles-list-title">
-            <h1 style={{ color: "var(--color-primary)", marginBottom: "4px" }}>📋 Detail Profil</h1>
-            <p style={{ color: "var(--color-text-secondary)", fontSize: "0.9rem" }}>Melihat informasi lengkap karyawan</p>
-          </div>
-          <div className="profiles-list-actions">
-            <Button
-              variant="outline"
-              size="md"
-              className="edit-profile-btn"
-              onClick={() => navigate(`/profiles/update/${routeProfileId ?? ""}`)}
-              disabled={loading || !routeProfileId}
-            >
-              <Pencil size={14} />
-              Edit Profil
-            </Button>
-            <Button variant="outline" size="md" onClick={() => navigate("/profiles")} disabled={loading}>
-              Kembali
-            </Button>
-          </div>
-        </div>
-
-        <div className="profile-view-container">
-          <div className="profile-header-new">
-            <div className="profile-header-gradient"></div>
-            <div className="profile-header-content">
-              <div className="profile-avatar-large">
-                {selectedProfile?.user?.name ? selectedProfile.user.name.charAt(0).toUpperCase() : "P"}
-              </div>
-              <div className="profile-header-row">
-                <div className="profile-header-info-new">
-                  <div className="profile-name-badge">
-                    <h1>{selectedProfile?.user?.name ? selectedProfile.user.name : "User Profile"}</h1>
-                    <span className="verified-badge"><CheckCircle2 size={14}/> Verified Profile</span>
-                  </div>
-                  <p className="start-date-text">
-                    <Calendar size={14}/> Start Date: {selectedProfile?.employee?.hire_date ? formatDate(selectedProfile.employee.hire_date) : "N/A"}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="profile-new-cards">
-            {/* Profile details */}
-            <Card className="profile-details-card" glass>
-              <div className="card-header-flex">
-                <h3>Profile details</h3>
-                <Button variant="ghost" size="sm" className="edit-btn-small" onClick={() => navigate(`/profiles/update/${routeProfileId ?? ""}`)}>
-                  <Pencil size={14}/> Edit
-                </Button>
-              </div>
-              <div className="profile-details-grid">
-                <div className="detail-item-new">
-                  <div className="detail-icon-wrap"><User size={20}/></div>
-                  <div className="detail-text-wrap">
-                    <span className="detail-label-new">Full Name</span>
-                    <span className="detail-value-new">{asDisplay(selectedProfile?.user?.name)}</span>
-                  </div>
-                </div>
-                <div className="detail-item-new">
-                  <div className="detail-icon-wrap"><Mail size={20}/></div>
-                  <div className="detail-text-wrap">
-                    <span className="detail-label-new">Email</span>
-                    <span className="detail-value-new">{asDisplay(selectedProfile?.user?.email)}</span>
-                  </div>
-                </div>
-                <div className="detail-item-new">
-                  <div className="detail-icon-wrap"><Calendar size={20}/></div>
-                  <div className="detail-text-wrap">
-                    <span className="detail-label-new">Date of birth</span>
-                    <span className="detail-value-new">{formatDate(selectedProfile?.birth_date)}</span>
-                  </div>
-                </div>
-                <div className="detail-item-new">
-                  <div className="detail-icon-wrap"><Layers size={20}/></div>
-                  <div className="detail-text-wrap">
-                    <span className="detail-label-new">Profile ID</span>
-                    <span className="detail-value-new">{asDisplay(selectedProfile?.id)}</span>
-                  </div>
-                </div>
-                <div className="detail-item-new">
-                  <div className="detail-icon-wrap"><Phone size={20}/></div>
-                  <div className="detail-text-wrap">
-                    <span className="detail-label-new">Phone</span>
-                    <span className="detail-value-new">{asDisplay(selectedProfile?.phone)}</span>
-                  </div>
-                </div>
-                <div className="detail-item-new">
-                  <div className="detail-icon-wrap"><Layers size={20}/></div>
-                  <div className="detail-text-wrap">
-                    <span className="detail-label-new">User ID</span>
-                    <span className="detail-value-new">{asDisplay(selectedProfile?.user_id)}</span>
-                  </div>
-                </div>
-                <div className="detail-item-new">
-                  <div className="detail-icon-wrap"><FileText size={20}/></div>
-                  <div className="detail-text-wrap">
-                    <span className="detail-label-new">Gender</span>
-                    <span className="detail-value-new">{toTitle(selectedProfile?.gender)}</span>
-                  </div>
-                </div>
-                <div className="detail-item-new">
-                  <div className="detail-icon-wrap"><Map size={20}/></div>
-                  <div className="detail-text-wrap">
-                    <span className="detail-label-new">Nationality</span>
-                    <span className="detail-value-new">{asDisplay(selectedProfile?.nationality)}</span>
-                  </div>
-                </div>
-                <div className="detail-item-new">
-                  <div className="detail-icon-wrap"><CreditCard size={20}/></div>
-                  <div className="detail-text-wrap">
-                    <span className="detail-label-new">ID Number</span>
-                    <span className="detail-value-new">{asDisplay(selectedProfile?.id_number)}</span>
-                  </div>
-                </div>
-                <div className="detail-item-new">
-                  <div className="detail-icon-wrap"><MapPin size={20}/></div>
-                  <div className="detail-text-wrap">
-                    <span className="detail-label-new">Address</span>
-                    <span className="detail-value-new">{asDisplay(selectedProfile?.address)}</span>
-                  </div>
-                </div>
-                <div className="detail-item-new">
-                  <div className="detail-icon-wrap"><Building2 size={20}/></div>
-                  <div className="detail-text-wrap">
-                    <span className="detail-label-new">Created At</span>
-                    <span className="detail-value-new">{formatDate(selectedProfile?.created_at)}</span>
-                  </div>
-                </div>
-              </div>
-            </Card>
-
-            {/* Collection Data Sections */}
-            <div className="profile-card-sections profile-card-sections--stack">
-              <SectionCard icon={<User size={18} />} title="Personal Information" items={detailSections?.personalInfo ?? null} />
-              <SectionCard icon={<MapPin size={18} />} title="Address Information" items={detailSections?.addressInfo ?? null} />
-              <SectionCard icon={<Building2 size={18} />} title="Employee Information" items={detailSections?.employeeInfo ?? null} />
-              <SectionCard icon={<Heart size={18} />} title="Emergency Contact" items={detailSections?.emergencyInfo ?? null} />
-              <SectionCard icon={<CreditCard size={18} />} title="Bank Information" items={detailSections?.bankInfo ?? null} />
-              <SectionCard icon={<GraduationCap size={18} />} title="Education Information" items={detailSections?.educationInfo ?? null} />
-
-              {/* Role and Permission */}
-              <SectionCard icon={<Shield size={18} />} title="Role and Permission" items={null}>
-                <div className="profile-card-grid">
-                  <div className="profile-card-item">
-                    <span className="profile-card-label">Roles</span>
-                    <span className="profile-card-value">{detailSections?.roleNames}</span>
-                  </div>
-                  <div className="profile-card-item">
-                    <span className="profile-card-label">User Roles</span>
-                    <span className="profile-card-value">{detailSections?.userRoleNames}</span>
-                  </div>
-                  <div className="profile-card-item">
-                    <span className="profile-card-label">Permissions</span>
-                    <span className="profile-card-value">{detailSections?.permissionNames}</span>
-                  </div>
-                </div>
-              </SectionCard>
-
-              <SectionCard icon={<FileText size={18} />} title="System Information" items={detailSections?.systemInfo ?? null} />
-
-              {/* Attendances */}
-              <SectionCard icon={<Clock size={18} />} title="Attendances" items={null}>
-                {Array.isArray(selectedProfile?.attendances) && selectedProfile.attendances.length > 0 ? (
-                  <div className="profile-collection-list">
-                    {selectedProfile.attendances.slice(0, 5).map((attendance: any, index: number) => (
-                      <div key={`${attendance.id ?? index}-attendance`} className="profile-collection-item">
-                        <span className="info-label">{formatDate(attendance.check_in)}</span>
-                        <span className="info-value">
-                          Check In: {attendance.check_in ? new Date(attendance.check_in).toLocaleTimeString("id-ID") : "-"}
-                        </span>
-                        {attendance.check_out && (
-                          <span className="info-value">
-                            Check Out: {new Date(attendance.check_out).toLocaleTimeString("id-ID")}
-                          </span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="activity-placeholder">Belum ada data attendance.</p>
-                )}
-              </SectionCard>
-
-              {/* Leaves */}
-              <SectionCard icon={<Heart size={18} />} title="Leaves" items={null}>
-                {Array.isArray(selectedProfile?.leaves) && selectedProfile.leaves.length > 0 ? (
-                  <div className="profile-collection-list">
-                    {selectedProfile.leaves.slice(0, 5).map((leave: any, index: number) => (
-                      <div key={`${leave.id ?? index}-leave`} className="profile-collection-item">
-                        <span className="info-label">{toTitle(leave.type)}</span>
-                        <span className="info-value">
-                          {formatDate(leave.start_date)} - {formatDate(leave.end_date)} ({asDisplay(leave.total_days)} hari)
-                        </span>
-                        <span className="info-meta">Status: {toTitle(leave.status)}</span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="activity-placeholder">Belum ada data leave.</p>
-                )}
-              </SectionCard>
-
-              {/* KPIs */}
-              <SectionCard icon={<FileText size={18} />} title="KPIs" items={null}>
-                {Array.isArray(selectedProfile?.kpis) && selectedProfile.kpis.length > 0 ? (
-                  <div className="profile-collection-list">
-                    {selectedProfile.kpis.slice(0, 5).map((kpi: any, index: number) => (
-                      <div key={`${kpi.id ?? index}-kpi`} className="profile-collection-item">
-                        <span className="info-label">{asDisplay(kpi.name)}</span>
-                        <span className="info-value">{asDisplay(kpi.target)} - {asDisplay(kpi.achievement)}</span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="activity-placeholder">Belum ada data KPI.</p>
-                )}
-              </SectionCard>
-
-              {/* Reimbursements */}
-              <SectionCard icon={<CreditCard size={18} />} title="Reimbursements" items={null}>
-                {Array.isArray(selectedProfile?.reimbursements) && selectedProfile.reimbursements.length > 0 ? (
-                  <div className="profile-collection-list">
-                    {selectedProfile.reimbursements.slice(0, 5).map((reimbursement: any, index: number) => (
-                      <div key={`${reimbursement.id ?? index}-reimbursement`} className="profile-collection-item">
-                        <span className="info-label">{asDisplay(reimbursement.title)}</span>
-                        <span className="info-value">
-                          {formatCurrency(reimbursement.amount)} - {toTitle(reimbursement.category)}
-                        </span>
-                        <span className="info-meta">
-                          {formatDate(reimbursement.expense_date)} | Status: {toTitle(reimbursement.status)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="activity-placeholder">Belum ada data reimbursement.</p>
-                )}
-              </SectionCard>
-
-              {/* Payrolls */}
-              <SectionCard icon={<CreditCard size={18} />} title="Payrolls" items={null}>
-                {Array.isArray(selectedProfile?.payrolls) && selectedProfile.payrolls.length > 0 ? (
-                  <div className="profile-collection-list">
-                    {selectedProfile.payrolls.slice(0, 5).map((payroll: any, index: number) => (
-                      <div key={`${payroll.id ?? index}-payroll`} className="profile-collection-item">
-                        <span className="info-label">{formatDate(payroll.period_start)}</span>
-                        <span className="info-value">{formatCurrency(payroll.gross_salary)}</span>
-                        <span className="info-meta">Status: {toTitle(payroll.status)}</span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="activity-placeholder">Belum ada data payroll.</p>
-                )}
-              </SectionCard>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (isUpdatePage) {
-    return (
-      <div className="profiles-page crud-page">
-        <div className="profiles-list-header" style={{ borderBottom: "2px solid #e2e8f0", paddingBottom: "20px" }}>
-          <div className="profiles-list-title">
-            <h1 style={{ color: "var(--color-primary)", marginBottom: "4px" }}>✏️ Perbarui Profil</h1>
-            <p style={{ color: "var(--color-text-secondary)", fontSize: "0.9rem" }}>Perbarui informasi profil karyawan yang sudah ada</p>
-          </div>
-          <Button variant="outline" size="md" onClick={() => navigate("/profiles")} disabled={loading}>
-            Kembali ke Daftar
-          </Button>
-        </div>
-
-        <Card className="profiles-status-card" glass>
-          <div className="profiles-status-row">
-            <Badge variant={errorMessage ? "danger" : "info"}>{statusMessage}</Badge>
-          </div>
-          {validationMessage && <p className="profiles-message profiles-message--error">{validationMessage}</p>}
-          {errorMessage && <p className="profiles-message profiles-message--error">{errorMessage}</p>}
-        </Card>
-
-        {FIELD_GROUPS.map((group) => (
-          <Card key={group.title} className="profiles-panel" glass style={{ marginBottom: "1.5rem" }}>
-            <div className="profiles-panel-header" style={{ marginBottom: "20px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <div style={{ color: "var(--color-primary)" }}>{group.icon}</div>
-                <h2 style={{ color: "var(--color-primary)", margin: 0 }}>{group.title}</h2>
-              </div>
-            </div>
-            <div className="profiles-form-grid">
-              {group.fields.map((field) => (
-                <label key={field} className="profiles-form-group">
-                  <span style={{ color: "var(--color-primary)", fontWeight: "700", fontSize: "0.75rem" }}>{field.replace(/_/g, " ").toUpperCase()}</span>
-                  {field === "gender" ? (
-                    <select
-                      value={updateForm[field]}
-                      onChange={(event) => handleUpdateChange(field, event.target.value)}
-                      className="profiles-input"
-                    >
-                      <option value="">Pilih gender</option>
-                      <option value="male">Laki-laki</option>
-                      <option value="female">Perempuan</option>
-                      <option value="other">Lainnya</option>
-                    </select>
-                  ) : field === "marital_status" ? (
-                    <select
-                      value={updateForm[field]}
-                      onChange={(event) => handleUpdateChange(field, event.target.value)}
-                      className="profiles-input"
-                    >
-                      <option value="">Pilih status pernikahan</option>
-                      <option value="single">Single</option>
-                      <option value="married">Married</option>
-                      <option value="divorced">Divorced</option>
-                      <option value="widowed">Widowed</option>
-                    </select>
-                  ) : (
-                    <input
-                      value={updateForm[field]}
-                      onChange={(event) => handleUpdateChange(field, event.target.value)}
-                      placeholder={`Masukkan ${field.replace(/_/g, " ")}`}
-                      className="profiles-input"
-                      type={field === "birth_date" ? "date" : field.includes("phone") ? "tel" : field === "graduation_year" ? "number" : "text"}
-                    />
-                  )}
-                </label>
-              ))}
-            </div>
-          </Card>
-        ))}
-
-        <div className="profiles-actions" style={{ justifyContent: "flex-end", marginTop: "1rem" }}>
-          <Button variant="outline" size="md" onClick={() => navigate("/profiles")} disabled={loading}>
-            Batal
-          </Button>
-          <Button variant="primary" size="md" onClick={() => void handleUpdate()} disabled={loading}>
-            <Pencil size={16} />
-            Perbarui Profil
-          </Button>
-        </div>
-        <ErrorModal errors={validationErrors} isOpen={isErrorModalOpen} onClose={() => setIsErrorModalOpen(false)} />
-      </div>
-    );
-  }
-
-  return (
-    <div className="profiles-page">
-      {/* Header - Title Section */}
-      <div className="profiles-list-header">
-        <div className="profiles-list-title">
-          <span className="profiles-page-badge">People Center</span>
-          <h1>Profiles Overview</h1>
-          <p>Kelola data profil dan informasi kepegawaian dengan tampilan yang rapi, konsisten, dan mudah dibaca.</p>
-        </div>
-        <div className="profiles-list-actions">
-          <Button
-            variant="primary"
-            size="md"
-            onClick={() => navigate("/profiles/add")}
-            disabled={loading}
-          >
-            <Plus size={16} />
-            Tambah Karyawan
-          </Button>
-          <Button
-            variant="outline"
-            size="md"
-            onClick={() => void loadProfiles()}
-            disabled={loading}
-          >
-            Segarkan
-          </Button>
-        </div>
-      </div>
-
-      <div className="profiles-summary-grid">
-        {profileSummaryCards.map((card) => {
-          const Icon = card.icon;
-
-          return (
-            <Card key={card.label} className="profiles-summary-card" glass>
-              <div className="profiles-summary-header">
-                <div>
-                  <span className="profiles-summary-label">{card.label}</span>
-                  <p className="profiles-summary-subtitle">{card.subtitle}</p>
-                </div>
-                <span className={`profiles-summary-icon profiles-summary-icon--${card.tone}`}>
-                  <Icon size={20} />
-                </span>
-              </div>
-              <div className="profiles-summary-value">{card.value}</div>
-              <div className="profiles-summary-change">{card.change}</div>
-            </Card>
-          );
-        })}
-      </div>
-
-      {/* Unified Table & Control Section */}
-      <Card className="table-card" glass>
-        <div className="table-header-bar">
-          <h3>Data Profil Karyawan</h3>
-          <span className="table-count">Menampilkan {paginatedProfiles.length} dari {sortedProfiles.length} data (Total: {profiles.length})</span>
-        </div>
-
-        <div className="table-card-inner" style={{ paddingBottom: '1.5rem' }}>
-          <div className="control-bar">
-            {/* Search Box */}
-            <div className="search-box">
-              <Search size={18} />
-              <input
-                type="text"
-                placeholder="Cari nama, ID, atau kode karyawan..."
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                className="search-input"
-              />
-            </div>
-
-            {/* Quick Controls */}
-            <div className="quick-controls">
-              {/* Sort Dropdown */}
-              <div className="control-group">
-                <select
-                  value={sortBy}
-                  onChange={(e) =>
-                    setSortBy(e.target.value as "id" | "name" | "hire_date")
-                  }
-                  className="sort-select"
-                >
-                  <option value="name">Urutkan: Nama</option>
-                  <option value="id">Urutkan: ID</option>
-                  <option value="hire_date">Urutkan: Tanggal Bergabung</option>
-                </select>
-                <button
-                  className="sort-order-btn"
-                  onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-                  title={sortOrder === "asc" ? "Naik" : "Turun"}
-                >
-                  {sortOrder === "asc" ? "↑" : "↓"}
-                </button>
-              </div>
-
-              {/* Filter Button */}
-              <button
-                className={`filter-btn ${showFilters ? "active" : ""}`}
-                onClick={() => setShowFilters(!showFilters)}
-              >
-                <Filter size={18} />
-                <span>Filter</span>
-                <ChevronDown
-                  size={14}
-                  style={{
-                    transform: showFilters ? "rotate(180deg)" : "",
-                    transition: "transform 0.3s ease",
-                  }}
-                />
+            <div className="hero-actions">
+              <button className="btn-outline" onClick={() => navigate("/profiles")} disabled={loading}>
+                Kembali
               </button>
-
-              {/* Clear Filters Button */}
-              {(searchText || selectedDepartment || selectedPosition) && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={clearFilters}
-                >
-                  Bersihkan
-                </Button>
-              )}
             </div>
           </div>
+        </Card>
 
-          {/* Filter Panel - Collapsible */}
-          {showFilters && (
-            <div className="filter-panel" style={{ marginTop: '1rem' }}>
-              <div className="filter-row">
-                {/* Department Filter */}
-                <div className="filter-group">
-                  <label>Departemen</label>
-                  <select
-                    value={selectedDepartment}
-                    onChange={(e) => setSelectedDepartment(e.target.value)}
-                    className="filter-select"
-                  >
-                    <option value="">Semua Departemen</option>
-                    {uniqueDepartments.map((dept) => (
-                      <option key={dept} value={dept}>
-                        {dept}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+        {errorMessage && (
+          <Alert type="error" message={errorMessage} onClose={() => {}} dismissible />
+        )}
 
-                {/* Position Filter */}
-                <div className="filter-group">
-                  <label>Jabatan</label>
-                  <select
-                    value={selectedPosition}
-                    onChange={(e) => setSelectedPosition(e.target.value)}
-                    className="filter-select"
-                  >
-                    <option value="">Semua Jabatan</option>
-                    {uniquePositions.map((pos) => (
-                      <option key={pos} value={pos}>
-                        {pos}
-                      </option>
-                    ))}
-                  </select>
+        <div className="white-unified-wrapper">
+          <div className="form-grid">
+            <Card className="table-card" glass>
+              <div className="table-header-bar">
+                <h3>Data Profil</h3>
+                <span className="table-count">Formulir</span>
+              </div>
+              <div className="table-card-inner">
+                <div className="crud-form">
+                  {FIELD_GROUPS.map((group) => (
+                    <div key={group.title} className="form-section">
+                      <h4>{group.title}</h4>
+                      <div className="form-grid">
+                        {group.fields.map((field) => (
+                          <div key={field} className="form-group">
+                            <label>{field.replace(/_/g, ' ').toUpperCase()}</label>
+                            {field === "gender" ? (
+                              <select
+                                value={createForm[field]}
+                                onChange={(event) => handleCreateChange(field, event.target.value)}
+                                className="form-input"
+                              >
+                                <option value="">Pilih</option>
+                                <option value="male">Laki-laki</option>
+                                <option value="female">Perempuan</option>
+                              </select>
+                            ) : field === "marital_status" ? (
+                              <select
+                                value={createForm[field]}
+                                onChange={(event) => handleCreateChange(field, event.target.value)}
+                                className="form-input"
+                              >
+                                <option value="">Pilih</option>
+                                <option value="single">Single</option>
+                                <option value="married">Married</option>
+                              </select>
+                            ) : (
+                              <input
+                                type="text"
+                                value={createForm[field]}
+                                onChange={(event) => handleCreateChange(field, event.target.value)}
+                                className="form-input"
+                                placeholder={field.replace(/_/g, ' ')}
+                              />
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                  <div className="form-actions">
+                    <Button variant="primary" onClick={() => void handleCreate()} disabled={loading}>
+                      <Plus size={16} />
+                      Simpan Profil
+                    </Button>
+                  </div>
                 </div>
               </div>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Main List Page
+  return (
+    <div className="crud-page">
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <User size={16} />
+              <span>HR Management</span>
             </div>
-          )}
+            <h1 className="hero-title">Kelola Profil Karyawan</h1>
+            <p className="hero-subtitle">
+              Kelola profil dan data karyawan perusahaan.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => void loadProfiles()}>
+              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+            </button>
+            <button className="btn-primary" onClick={() => navigate('/profiles/add')}>
+              <Plus size={16} />
+              Tambah Profil
+            </button>
+          </div>
+        </div>
+      </Card>
+
+      {errorMessage && (
+        <Alert type="error" message={errorMessage} onClose={() => {}} dismissible />
+      )}
+
+      <div className="white-unified-wrapper">
+        <div className="wuw-header">
+          <div className="wuw-header-top">
+            <div className="wuw-title-area">
+              <h3>Daftar Karyawan</h3>
+              <span className="wuw-count-badge">{profiles.length} karyawan</span>
+            </div>
+          </div>
         </div>
 
-        {/* Table - Main Content */}
-        <div className="table-wrap">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>ID / Kode</th>
-                <th>Nama Karyawan</th>
-                <th>Departemen</th>
-                <th>Jabatan</th>
-                <th>Tanggal Bergabung</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedProfiles.length > 0 ? (
-                paginatedProfiles.map((p) => (
-                  <tr key={p.id}>
-                    <td>
-                      <div className="cell-id">{p.employee?.employee_code || "N/A"}</div>
-                      <div className="cell-sub">#{p.id}</div>
-                    </td>
-                    <td>
-                      <div className="cell-name">
-                        <div className="cell-avatar">
-                          {p.user?.name?.charAt(0).toUpperCase() || "P"}
-                        </div>
-                        <span className="cell-name-text">{p.user?.name || "Unknown"}</span>
-                      </div>
-                    </td>
-                    <td>{p.employee?.department || "-"}</td>
-                    <td>{p.employee?.position || "-"}</td>
-                    <td>{p.employee?.hire_date ? formatDate(p.employee.hire_date) : "-"}</td>
-                    <td>
-                      <div className="cell-actions">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => navigate(`/profiles/view/${p.id}`)}
-                          title="View Details"
-                          style={{ borderColor: "#3b82f6", color: "#3b82f6" }}
-                        >
-                          <Eye size={15} />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => navigate(`/profiles/update/${p.id}`)}
-                          title="Edit Profile"
-                          style={{ borderColor: "#f59e0b", color: "#f59e0b" }}
-                        >
-                          <Pencil size={15} />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => void handleDelete(String(p.id))}
-                          title="Delete Profile"
-                          style={{ color: "#ef4444", borderColor: "#ef4444" }}
-                        >
-                          <Trash2 size={15} />
-                        </Button>
-                      </div>
+        <div className="table-card">
+          <div className="table-card-inner">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Profil</th>
+                  <th>ID</th>
+                  <th>Departemen</th>
+                  <th>Jabatan</th>
+                  <th>Bergabung</th>
+                  <th className="th-center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan={6} style={{ textAlign: 'center', padding: '3rem' }}>
+                      Memuat...
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={6}>
-                    <div className="submenu-table-empty">
-                      Tidak ada data karyawan yang ditemukan.
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination bar */}
-        {totalPages > 1 && (
-          <div className="pagination-container" style={{ padding: '1rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(148, 163, 184, 0.25)' }}>
-            <div className="pagination-info">
-              Halaman <strong>{currentPage}</strong> dari <strong>{totalPages}</strong>
-            </div>
-            <div className="pagination-controls" style={{ display: "flex", gap: "8px" }}>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                disabled={currentPage === 1}
-              >
-                ← Sebelumnya
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                disabled={currentPage === totalPages}
-              >
-                Selanjutnya →
-              </Button>
-            </div>
+                ) : profiles.length > 0 ? (
+                  profiles.map((p: any) => (
+                    <tr key={p.id}>
+                      <td>
+                        <div className="cell-name">
+                          <span className="cell-name-text">{p.user?.name || 'Unknown'}</span>
+                        </div>
+                      </td>
+                      <td><span className="cell-tag">{p.employee?.employee_id || p.id}</span></td>
+                      <td>{p.employee?.department || '-'}</td>
+                      <td>{p.employee?.position || '-'}</td>
+                      <td>{p.employee?.hire_date ? formatDate(p.employee.hire_date) : '-'}</td>
+                      <td className="td-center">
+                        <button className="btn-icon" onClick={() => navigate(`/profiles/view/${p.id}`)} title="View">
+                          <Eye size={16} />
+                        </button>
+                        <button className="btn-icon" onClick={() => navigate(`/profiles/update/${p.id}`)} title="Edit">
+                          <Pencil size={16} />
+                        </button>
+                        <button className="btn-icon btn-danger" onClick={() => void handleDelete(String(p.id))} title="Delete">
+                          <Trash2 size={16} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={6}>
+                      <div className="empty-state">Tidak ada data.</div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
-        )}
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };
 
 export default ProfilesPage;
+                      

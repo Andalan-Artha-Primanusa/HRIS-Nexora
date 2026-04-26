@@ -6,8 +6,10 @@ import { Alert } from "@/shared/ui/Alert";
 import { Tabs } from "@/shared/ui/Tabs";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { ROLES } from "@/shared/types/rbac.types";
-import { BellRing, Eye, Mail, RefreshCw, ScrollText, Send, ShieldAlert } from "lucide-react";
+import { BellRing, Eye, Mail, RefreshCw, ScrollText, Send, ShieldAlert, Shield } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
+import "@/pages/dashboard/overview/OverviewPage.css";
+import "@/pages/payroll/PayrollShared.css";
 import "./AdminCrudPages.css";
 import {
   createAdminEmailNotification,
@@ -70,18 +72,25 @@ const AdminEmailNotificationsPage = () => {
   if (!hasAdminAccess(user)) {
     return (
       <div className="crud-page">
-        <div className="page-header">
-          <div className="page-header-title">
-            <span className="page-badge">Admin Center</span>
-            <h1><ShieldAlert size={22} style={{ display: "inline", verticalAlign: "middle", marginRight: 8 }} />Akses Ditolak</h1>
-            <p>Anda tidak memiliki izin untuk mengakses halaman ini.</p>
-          </div>
-        </div>
-        <Card className="table-card" glass>
-          <div className="table-card-inner">
-            <p>Silakan hubungi Administrator untuk mendapatkan akses.</p>
+        <Card className="hero-card">
+          <div className="hero-card-inner">
+            <div className="hero-content">
+              <div className="hero-badge">
+                <Shield size={16} />
+                <span>Admin Center</span>
+              </div>
+              <h1 className="hero-title">Akses Ditolak</h1>
+              <p className="hero-subtitle">
+                Anda tidak memiliki izin untuk mengakses halaman ini.
+              </p>
+            </div>
           </div>
         </Card>
+        <div className="white-unified-wrapper">
+          <Card glass style={{ padding: '2rem', textAlign: 'center' }}>
+            <p>Silakan hubungi Administrator untuk mendapatkan akses.</p>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -503,46 +512,57 @@ const AdminEmailNotificationsPage = () => {
 
   return (
     <div className="crud-page">
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">Admin Center</span>
-          <h1>Email Notifications</h1>
-          <p>Kelola email notification, template, dan pantau log delivery email.</p>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Mail size={16} />
+              <span>Admin Center</span>
+            </div>
+            <h1 className="hero-title">Email Notifications</h1>
+            <p className="hero-subtitle">
+              Kelola email notification, template, dan pantau log delivery email.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => void loadData()} disabled={loading}>
+              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+              {loading ? "Memuat..." : "Segarkan"}
+            </button>
+          </div>
         </div>
-        <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={() => void loadData()} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
-            <RefreshCw size={16} />
-            {loading ? "Memuat..." : "Segarkan"}
-          </Button>
-        </div>
-      </div>
+      </Card>
 
       {statusMessage && <Alert type={alertType} message={statusMessage} onClose={() => setStatusMessage("")} dismissible />}
 
-      <div className="summary-grid">
+      <div className="leave-requests-wrapper">
         {summaryCards.map((card) => (
-          <Card key={card.label} className="summary-card" glass>
-            <div className="summary-card__header">
+          <div key={card.label} className="leave-summary-card">
+            <div className="leave-summary-header">
               <div>
-                <span className="summary-card__label">{card.label}</span>
-                <p className="summary-card__subtitle">{card.subtitle}</p>
+                <p className="leave-summary-label">{card.label}</p>
+                <p className="leave-summary-subtitle">{card.subtitle}</p>
               </div>
-              <span className={card.iconClass}>{card.icon}</span>
+              <div className="leave-summary-icon-wrapper leave-icon-blue">
+                {card.icon}
+              </div>
             </div>
-            <div className={card.valueClass}>{card.value}</div>
-            <div className="summary-card__change">Operational snapshot</div>
-          </Card>
+            <div className="leave-summary-value leave-value-blue">{card.value}</div>
+            <p className="leave-summary-trend">Operational snapshot</p>
+          </div>
         ))}
       </div>
 
-      <Tabs
-        tabs={[
-          { id: "send", label: "📨 Kirim Email", content: sendEmailTab },
-          { id: "templates", label: "📄 Email Templates", content: emailTemplatesTab },
-          { id: "logs", label: "📋 Email Logs", content: emailLogsTab },
-        ]}
-        defaultSelected="send"
-      />
+      <div className="white-unified-wrapper">
+        <Tabs
+          tabs={[
+            { id: "send", label: "📨 Kirim Email", content: sendEmailTab },
+            { id: "templates", label: "📄 Email Templates", content: emailTemplatesTab },
+            { id: "logs", label: "📋 Email Logs", content: emailLogsTab },
+          ]}
+          defaultSelected="send"
+        />
+      </div>
     </div>
   );
 };

@@ -75,12 +75,12 @@ const getCountFromPayload = (raw: unknown): number => {
 
 export const KpiCards: React.FC = () => {
   const [kpiData, setKpiData] = useState<KpiCardItem[]>([
-    { title: 'Total Employees', value: '-', trend: 'Loading...', icon: Users, color: 'blue' },
-    { title: 'Present Today', value: '-', trend: 'Loading...', icon: UserCheck, color: 'green' },
-    { title: 'Pending Leaves', value: '-', trend: 'Loading...', icon: CalendarOff, color: 'orange' },
-    { title: 'Pending Reimbursements', value: '-', trend: 'Loading...', icon: Clock, color: 'red' },
-    { title: 'Avg. Performance', value: '-', trend: 'Loading...', icon: Target, color: 'purple' },
-    { title: 'Attendance Rate', value: '-', trend: 'Loading...', icon: TrendingDown, color: 'teal' },
+    { title: 'Total Karyawan', value: '-', trend: 'Memuat...', icon: Users, color: 'blue' },
+    { title: 'Hadir Hari Ini', value: '-', trend: 'Memuat...', icon: UserCheck, color: 'green' },
+    { title: 'Cuti Menunggu', value: '-', trend: 'Memuat...', icon: CalendarOff, color: 'orange' },
+    { title: 'Reimbursement', value: '-', trend: 'Memuat...', icon: Clock, color: 'red' },
+    { title: 'Rata-rata KPI', value: '-', trend: 'Memuat...', icon: Target, color: 'purple' },
+    { title: 'Tingkat Kehadiran', value: '-', trend: 'Memuat...', icon: TrendingDown, color: 'teal' },
   ]);
 
   useEffect(() => {
@@ -113,44 +113,44 @@ export const KpiCards: React.FC = () => {
 
       setKpiData([
         {
-          title: 'Total Employees',
+          title: 'Total Karyawan',
           value: String(employeesCount),
-          trend: 'Employee records',
+          trend: 'Data karyawan tersimpan',
           icon: Users,
           color: 'blue',
         },
         {
-          title: 'Present Today',
+          title: 'Hadir Hari Ini',
           value: String(presentTodayCount),
-          trend: `${attendanceRate}% attendance`,
+          trend: `${attendanceRate}% tingkat kehadiran`,
           icon: UserCheck,
           color: 'green',
         },
         {
-          title: 'Pending Leaves',
+          title: 'Cuti Menunggu',
           value: String(pendingLeavesCount),
-          trend: 'Need approval',
+          trend: 'Butuh persetujuan',
           icon: CalendarOff,
           color: 'orange',
         },
         {
-          title: 'Pending Reimbursements',
+          title: 'Reimbursement',
           value: String(pendingReimbursementsCount),
-          trend: 'Need review',
+          trend: 'Butuh peninjauan',
           icon: Clock,
           color: 'red',
         },
         {
-          title: 'Avg. Performance',
+          title: 'Rata-rata KPI',
           value: `${avgKpiScore.toFixed(1)}%`,
-          trend: `${kpiItems.length} KPI records tracked`,
+          trend: `${kpiItems.length} rekaman KPI ditrack`,
           icon: Target,
           color: 'purple',
         },
         {
-          title: 'Attendance Rate',
+          title: 'Tingkat Kehadiran',
           value: `${attendanceRate}%`,
-          trend: 'Based on today attendance',
+          trend: 'Berdasarkan kehadiran hari ini',
           icon: TrendingDown,
           color: 'teal',
         },
@@ -172,7 +172,7 @@ export const KpiCards: React.FC = () => {
                 <h3 className="kpi-value">{kpi.value}</h3>
               </div>
               <div className={`kpi-icon-wrapper color-${kpi.color}`}>
-                <Icon size={24} />
+                <Icon size={28} />
               </div>
             </div>
             <p className="kpi-trend">{kpi.trend}</p>

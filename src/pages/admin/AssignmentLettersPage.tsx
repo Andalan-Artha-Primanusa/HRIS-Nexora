@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, RefreshCw, FileText, Calendar, MapPin, User, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Plus, RefreshCw, FileText, Calendar, MapPin, User, CheckCircle, XCircle, Clock, BookTemplate } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { legalService } from '@/features/legal/api/legal.service';
 import { AssignmentLetterModal } from '@/features/legal/components/AssignmentLetterModal';
 import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 
 const AssignmentLettersPage: React.FC = () => {
   const [letters, setLetters] = useState<any[]>([]);
@@ -88,22 +90,30 @@ const AssignmentLettersPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <div className="crud-header">
-        <div>
-          <span className="reimb-badge reimb-badge-admin">Legal & Compliance</span>
-          <h1>Surat Tugas</h1>
-          <p>Manage and approve employee assignment letters (Official Duty).</p>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <BookTemplate size={16} />
+              <span>Legal & Kepatuhan</span>
+            </div>
+            <h1 className="hero-title">Surat Tugas</h1>
+            <p className="hero-subtitle">
+              Kelola dan setujui surat penugasan karyawan (Tugas Resmi).
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={fetchData} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+            <button className="btn-primary" onClick={() => setIsModalOpen(true)}>
+              <Plus size={16} />
+              Permintaan Surat Tugas
+            </button>
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <Button variant="ghost" onClick={fetchData}>
-            <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
-          </Button>
-          <Button variant="primary" onClick={() => setIsModalOpen(true)}>
-            <Plus size={18} style={{ marginRight: '8px' }} />
-            Request Surat Tugas
-          </Button>
-        </div>
-      </div>
+      </Card>
 
       <div className="crud-content" style={{ marginTop: '1rem' }}>
         {loading ? (
