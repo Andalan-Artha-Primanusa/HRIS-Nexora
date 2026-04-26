@@ -5,7 +5,8 @@ import { Button } from '@/shared/ui/Button';
 import { Alert } from '@/shared/ui/Alert';
 import { createLeaveRequest } from '@/features/leave/api/leave.service';
 import type { LeaveCreatePayload } from '@/features/leave/types/leave.types';
-import { ArrowLeft } from 'lucide-react';
+import { Calendar, ChevronLeft } from 'lucide-react';
+import '../dashboard/overview/OverviewPage.css';
 import './LeavePages.css';
 
 const CreateLeavePage = () => {
@@ -95,15 +96,24 @@ const CreateLeavePage = () => {
   return (
     <div className="leave-page">
       {/* Header */}
-      <div className="leave-header">
-        <button className="leave-back-button" onClick={handleCancel} aria-label="Kembali">
-          <ArrowLeft size={20} />
-        </button>
-        <div>
-          <h1>Buat Pengajuan Cuti</h1>
-          <p>Ajukan pengajuan cuti baru dengan informasi yang lengkap</p>
+      <Card className="hero-card" style={{ marginBottom: '2rem' }}>
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Calendar size={16} />
+              <span>Leave Center</span>
+            </div>
+            <h1 className="hero-title">Buat Pengajuan Cuti</h1>
+            <p className="hero-subtitle">Ajukan pengajuan cuti baru dengan informasi yang lengkap</p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={handleCancel} disabled={loading}>
+              <ChevronLeft size={18} />
+              Kembali
+            </button>
+          </div>
         </div>
-      </div>
+      </Card>
 
       {/* Form Card */}
       <Card className="leave-card" glass>

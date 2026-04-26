@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save, Calendar, BookOpen, Clock, Globe, Users } from 'lucide-react';
+import { ArrowLeft, Save, Calendar, BookOpen, Clock, Globe, Users, ChevronLeft } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { trainingService } from '@/features/training/api/training.service';
 import '@/shared/styles/CrudPage.css';
+import '../dashboard/overview/OverviewPage.css';
 
 const TrainingFormPage: React.FC = () => {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ const TrainingFormPage: React.FC = () => {
   const isEdit = !!id;
 
   const [loading, setLoading] = useState(false);
-  const [fetching, setFetching] = useState(false);
+  const [fetching, setFetching] = useState(false); 
   const [formData, setFormData] = useState<{
     title: string;
     description: string;
@@ -77,18 +78,24 @@ const TrainingFormPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <div className="crud-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-           <Button variant="ghost" onClick={() => navigate('/training/programs')}>
-              <ArrowLeft size={20} />
-           </Button>
-           <div>
-              <span className="reimb-badge reimb-badge-admin">Training</span>
-              <h1>{isEdit ? 'Edit Training Program' : 'Develop New Program'}</h1>
-              <p>Design curricula, set schedules, and manage enrollments.</p>
-           </div>
+      <Card className="hero-card" style={{ marginBottom: '2rem' }}>
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <BookOpen size={16} />
+              <span>Training Center</span>
+            </div>
+            <h1 className="hero-title">{isEdit ? 'Edit Training Program' : 'Develop New Program'}</h1>
+            <p className="hero-subtitle">Design curricula, set schedules, and manage enrollments.</p>
+          </div>
+          <div className="hero-actions">
+            <button type="button" className="btn-outline" onClick={() => navigate('/training/programs')} disabled={loading}>
+              <ChevronLeft size={18} />
+              Back
+            </button>
+          </div>
         </div>
-      </div>
+      </Card>
 
       <form onSubmit={handleSubmit}>
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem' }}>

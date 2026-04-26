@@ -141,7 +141,7 @@ const CreateLocationPage = () => {
 
   return (
     <div className="crud-page">
-      <Card className="hero-card">
+      <Card className="hero-card" style={{ marginBottom: '2rem' }}>
         <div className="hero-card-inner">
           <div className="hero-content">
             <div className="hero-badge">
@@ -154,212 +154,204 @@ const CreateLocationPage = () => {
             </p>
           </div>
           <div className="hero-actions">
-            <button className="btn-outline" onClick={handleCancel}>
-              <ArrowLeft size={16} />
+            <button type="button" className="btn-outline" onClick={handleCancel} disabled={loading}>
+              <ArrowLeft size={16} style={{ marginRight: '8px' }} />
               Kembali
             </button>
-            <button className="btn-primary" onClick={() => void handleCreateLocation()} disabled={loading}>
-              <Save size={16} />
-              {loading ? 'Menyimpan...' : 'Simpan Lokasi'}
-            </button>
           </div>
         </div>
       </Card>
 
-      <div className="white-unified-wrapper" style={{ maxWidth: '800px', margin: '0 auto' }}>
-        {alertMessage && (
-          <Alert 
-            type={alertType} 
-            message={alertMessage}
-            onClose={() => setAlertMessage('')}
-            dismissible
-          />
-        )}
+      <form onSubmit={(e) => { e.preventDefault(); void handleCreateLocation(); }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
+          
+          {/* Left Column - Form Fields */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            <Card glass style={{ padding: '2.5rem', borderRadius: '32px' }}>
+              <h3 style={{ margin: '0 0 2rem', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '1.25rem', fontWeight: 800, color: '#1e3a8a' }}>
+                 <MapPin size={24} color="#2563eb" /> Detail Lokasi
+              </h3>
+              
+              {alertMessage && (
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <Alert 
+                    type={alertType} 
+                    message={alertMessage}
+                    onClose={() => setAlertMessage('')}
+                    dismissible
+                  />
+                </div>
+              )}
 
-        <form className="location-form" onSubmit={(e) => { e.preventDefault(); void handleCreateLocation(); }}>
-          {/* Nama Lokasi */}
-          <div className="location-form-group">
-            <label htmlFor="name" className="location-label">
-              Nama Lokasi
-              <span className="location-required">*</span>
-            </label>
-            <input
-              id="name"
-              type="text"
-              name="name"
-              className="location-input"
-              value={formData.name}
-              onChange={handleInputChange}
-              placeholder="Contoh: Office Jakarta Pusat, Warehouse Bandung"
-              disabled={loading}
-            />
-            <p className="location-hint">Berikan nama yang deskriptif untuk lokasi ini</p>
-          </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                {/* Nama Lokasi */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', gridColumn: '1 / -1' }}>
+                  <label style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b' }}>
+                    Nama Lokasi <span style={{ color: '#ef4444' }}>*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    placeholder="Contoh: Office Jakarta Pusat, Warehouse Bandung"
+                    required
+                    disabled={loading}
+                    style={{ width: '100%', padding: '0 16px', height: '50px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '1rem', color: '#0f172a', transition: 'all 0.2s', boxSizing: 'border-box' }}
+                  />
+                  <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Berikan nama yang deskriptif untuk lokasi ini</span>
+                </div>
 
-          {/* Departemen */}
-          <div className="location-form-group">
-            <label htmlFor="department" className="location-label">
-              Departemen
-              <span className="location-required">*</span>
-            </label>
-            <select
-              id="department"
-              name="department"
-              className="location-input"
-              value={formData.department}
-              onChange={handleInputChange}
-              disabled={loading}
-              style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}
-            >
-              <option value="">Pilih Departemen</option>
-              {departments.map((dept) => (
-                <option key={dept} value={dept}>
-                  {dept}
-                </option>
-              ))}
-              <option value="All Departments">All Departments (Global)</option>
-            </select>
-            <p className="location-hint">Pilih departemen yang memiliki akses ke lokasi ini</p>
-          </div>
+                {/* Departemen */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', gridColumn: '1 / -1' }}>
+                  <label style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b' }}>
+                    Departemen <span style={{ color: '#ef4444' }}>*</span>
+                  </label>
+                  <select
+                    name="department"
+                    value={formData.department}
+                    onChange={handleInputChange}
+                    required
+                    disabled={loading}
+                    style={{ width: '100%', padding: '0 16px', height: '50px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '1rem', color: '#0f172a', transition: 'all 0.2s', boxSizing: 'border-box' }}
+                  >
+                    <option value="">Pilih Departemen</option>
+                    {departments.map((dept) => (
+                      <option key={dept} value={dept}>{dept}</option>
+                    ))}
+                    <option value="All Departments">All Departments (Global)</option>
+                  </select>
+                  <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Pilih departemen yang memiliki akses ke lokasi ini</span>
+                </div>
 
-          {/* GPS Coordinates */}
-          <div className="location-form-row">
-            <div className="location-form-group location-form-group-half">
-              <label htmlFor="latitude" className="location-label">
-                <MapPin size={16} />
-                Latitude
-                <span className="location-required">*</span>
-              </label>
-              <div className="location-input-wrapper">
-                <input
-                  id="latitude"
-                  type="text"
-                  name="latitude"
-                  className="location-input"
-                  value={formData.latitude}
-                  onChange={handleInputChange}
-                  placeholder="-6.200000"
-                  disabled
-                />
-                {locationDetected && (
-                  <span className="location-badge location-badge-success">
-                    Terdeteksi
-                  </span>
-                )}
+                {/* Latitude */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <label style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <MapPin size={16} /> Latitude <span style={{ color: '#ef4444' }}>*</span>
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type="text"
+                      name="latitude"
+                      value={formData.latitude}
+                      onChange={handleInputChange}
+                      placeholder="-6.200000"
+                      disabled
+                      style={{ width: '100%', padding: '0 16px', height: '50px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#f8fafc', fontSize: '1rem', color: '#0f172a', transition: 'all 0.2s', boxSizing: 'border-box' }}
+                    />
+                    {locationDetected && (
+                      <span style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: '#dcfce7', color: '#166534', padding: '4px 8px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 700 }}>
+                        Terdeteksi
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Longitude */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <label style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <MapPin size={16} /> Longitude <span style={{ color: '#ef4444' }}>*</span>
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type="text"
+                      name="longitude"
+                      value={formData.longitude}
+                      onChange={handleInputChange}
+                      placeholder="106.816666"
+                      disabled
+                      style={{ width: '100%', padding: '0 16px', height: '50px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#f8fafc', fontSize: '1rem', color: '#0f172a', transition: 'all 0.2s', boxSizing: 'border-box' }}
+                    />
+                    {locationDetected && (
+                      <span style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: '#dcfce7', color: '#166534', padding: '4px 8px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 700 }}>
+                        Terdeteksi
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Radius */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', gridColumn: '1 / -1' }}>
+                  <label style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b' }}>
+                    Radius Absensi <span style={{ color: '#ef4444' }}>*</span>
+                  </label>
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <input
+                      type="number"
+                      name="radius"
+                      value={formData.radius}
+                      onChange={handleInputChange}
+                      placeholder="100"
+                      min="1"
+                      required
+                      disabled={loading}
+                      style={{ flex: 1, padding: '0 16px', height: '50px', borderRadius: '12px 0 0 12px', border: '1px solid #cbd5e1', borderRight: 'none', background: '#fff', fontSize: '1rem', color: '#0f172a', transition: 'all 0.2s', boxSizing: 'border-box' }}
+                    />
+                    <div style={{ height: '50px', display: 'flex', alignItems: 'center', padding: '0 20px', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '0 12px 12px 0', fontSize: '0.9rem', fontWeight: 600, color: '#475569', boxSizing: 'border-box' }}>
+                      meter
+                    </div>
+                  </div>
+                  <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Jarak maksimal karyawan dari lokasi untuk check-in</span>
+                </div>
               </div>
-            </div>
+            </Card>
+          </div>
 
-            <div className="location-form-group location-form-group-half">
-              <label htmlFor="longitude" className="location-label">
-                <MapPin size={16} />
-                Longitude
-                <span className="location-required">*</span>
-              </label>
-              <div className="location-input-wrapper">
-                <input
-                  id="longitude"
-                  type="text"
-                  name="longitude"
-                  className="location-input"
-                  value={formData.longitude}
-                  onChange={handleInputChange}
-                  placeholder="106.816666"
-                  disabled
-                />
-                {locationDetected && (
-                  <span className="location-badge location-badge-success">
-                    Terdeteksi
-                  </span>
-                )}
+          {/* Right Column - Preview & Actions */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            <Card glass style={{ padding: '2rem', borderRadius: '28px' }}>
+              <h3 style={{ margin: '0 0 1.5rem', fontSize: '1.1rem', fontWeight: 800, color: '#1e3a8a' }}>Preview Lokasi</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                <div>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '4px' }}>Nama</div>
+                  <div style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b' }}>{formData.name || '—'}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '4px' }}>Departemen</div>
+                  <div style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b' }}>{formData.department || '—'}</div>
+                </div>
+                <div style={{ display: 'flex', gap: '2rem' }}>
+                  <div>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '4px' }}>Latitude</div>
+                    <div style={{ fontSize: '0.95rem', fontWeight: 600, color: '#1e293b' }}>{formData.latitude ? parseFloat(formData.latitude).toFixed(6) : '—'}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '4px' }}>Longitude</div>
+                    <div style={{ fontSize: '0.95rem', fontWeight: 600, color: '#1e293b' }}>{formData.longitude ? parseFloat(formData.longitude).toFixed(6) : '—'}</div>
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '4px' }}>Radius</div>
+                  <div style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b' }}>{formData.radius} m</div>
+                </div>
               </div>
+
+              {formData.latitude && formData.longitude && (
+                <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid #e2e8f0' }}>
+                  <a
+                    href={`https://maps.google.com/?q=${formData.latitude},${formData.longitude}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', background: '#eff6ff', color: '#2563eb', borderRadius: '12px', fontWeight: 700, textDecoration: 'none' }}
+                  >
+                    Buka di Google Maps →
+                  </a>
+                </div>
+              )}
+            </Card>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+               <Button type="submit" variant="primary" size="lg" disabled={loading} style={{ width: '100%', height: '60px', borderRadius: '20px', fontWeight: 800, fontSize: '1.1rem', boxShadow: '0 10px 20px rgba(37, 99, 235, 0.2)' }}>
+                  <Save size={20} style={{ marginRight: '10px' }} />
+                  {loading ? 'Menyimpan...' : 'Buat Lokasi'}
+               </Button>
+               <Button type="button" onClick={handleCancel} style={{ width: '100%', height: '54px', borderRadius: '20px', fontWeight: 700, background: '#f1f5f9', color: '#475569', border: '1px solid #cbd5e1' }}>
+                  Batalkan
+               </Button>
             </div>
-          </div>
-
-          {/* Radius */}
-          <div className="location-form-group">
-            <label htmlFor="radius" className="location-label">
-              Radius Absensi
-              <span className="location-required">*</span>
-            </label>
-            <div className="location-input-wrapper">
-              <input
-                id="radius"
-                type="number"
-                name="radius"
-                className="location-input"
-                value={formData.radius}
-                onChange={handleInputChange}
-                placeholder="100"
-                min="1"
-                disabled={loading}
-              />
-              <span className="location-unit">meter</span>
-            </div>
-            <p className="location-hint">Jarak maksimal karyawan dari lokasi untuk check-in</p>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="location-form-actions">
-            <Button 
-              variant="primary"
-              size="lg"
-              onClick={handleCreateLocation}
-              disabled={loading}
-            >
-              {loading ? 'Membuat...' : 'Buat Lokasi'}
-            </Button>
-            <Button
-              variant="secondary"
-              size="lg"
-              onClick={handleCancel}
-              disabled={loading}
-            >
-              Batal
-            </Button>
-</div>
-        </form>
-      </div>
-
-      <Card className="location-info-card" glass>
-        <h3 className="location-info-title">Preview Lokasi</h3>
-        <div className="location-info-grid">
-          <div className="location-info-item">
-            <span className="location-info-label">Nama</span>
-            <span className="location-info-value">{formData.name || '—'}</span>
-          </div>
-          <div className="location-info-item">
-            <span className="location-info-label">Departemen</span>
-            <span className="location-info-value">{formData.department || '—'}</span>
-          </div>
-          <div className="location-info-item">
-            <span className="location-info-label">Latitude</span>
-            <span className="location-info-value">
-              {formData.latitude ? parseFloat(formData.latitude).toFixed(6) : '—'}
-            </span>
-          </div>
-          <div className="location-info-item">
-            <span className="location-info-label">Longitude</span>
-            <span className="location-info-value">
-              {formData.longitude ? parseFloat(formData.longitude).toFixed(6) : '—'}
-            </span>
-          </div>
-          <div className="location-info-item">
-            <span className="location-info-label">Radius</span>
-            <span className="location-info-value">{formData.radius} m</span>
           </div>
         </div>
-
-        {formData.latitude && formData.longitude && (
-          <a
-            href={`https://maps.google.com/?q=${formData.latitude},${formData.longitude}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="location-maps-link"
-          >
-            Buka di Google Maps →
-          </a>
-        )}
-      </Card>
+      </form>
     </div>
   );
 };

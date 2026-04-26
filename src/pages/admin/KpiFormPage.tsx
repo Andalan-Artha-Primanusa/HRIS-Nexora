@@ -9,7 +9,8 @@ import {
   Calendar, 
   Target, 
   FileText,
-  RefreshCw
+  RefreshCw,
+  ChevronLeft
 } from "lucide-react";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { 
@@ -19,6 +20,7 @@ import {
 } from "@/features/admin/api/kpi.service";
 import { getAllEmployees } from "@/features/employee/api/employee.service";
 import "@/shared/styles/CrudPage.css";
+import "../dashboard/overview/OverviewPage.css";
 
 const KpiFormPage = () => {
   const { id } = useParams();
@@ -107,19 +109,24 @@ const KpiFormPage = () => {
 
   return (
     <div className="crud-page">
-      <div className="page-header" style={{ marginBottom: 32 }}>
-        <div className="page-header-title">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16 }}>
-            <span style={{ cursor: 'pointer' }} onClick={() => navigate("/")}>Beranda</span>
-            <span>/</span>
-            <span style={{ cursor: 'pointer' }} onClick={() => navigate("/kpis")}>Manajemen KPI</span>
-            <span>/</span>
-            <span style={{ color: 'var(--primary-color)', fontWeight: 600 }}>{isEdit ? "Ubah KPI" : "Buat Baru"}</span>
+      <Card className="hero-card" style={{ marginBottom: '2rem' }}>
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Target size={16} />
+              <span>Manajemen KPI</span>
+            </div>
+            <h1 className="hero-title">{isEdit ? "Ubah KPI Karyawan" : "Buat KPI Baru"}</h1>
+            <p className="hero-subtitle">{isEdit ? "Perbarui target dan pencapaian kinerja karyawan." : "Tentukan indikator kinerja utama untuk karyawan baru."}</p>
           </div>
-          <h1>{isEdit ? "Ubah KPI Karyawan" : "Buat KPI Baru"}</h1>
-          <p>{isEdit ? "Perbarui target dan pencapaian kinerja karyawan." : "Tentukan indikator kinerja utama untuk karyawan baru."}</p>
+          <div className="hero-actions">
+            <button type="button" className="btn-outline" onClick={() => navigate("/kpis")} disabled={loading}>
+              <ChevronLeft size={18} />
+              Kembali
+            </button>
+          </div>
         </div>
-      </div>
+      </Card>
 
       {statusMessage && <Alert type={alertType} message={statusMessage} onClose={() => setStatusMessage("")} dismissible />}
 

@@ -1,7 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Alert } from "@/shared/ui/Alert";
-import { ChevronLeft, Loader2 } from "lucide-react";
+import { ChevronLeft, Loader2, Tag } from "lucide-react";
+import { Card } from "@/shared/ui/Card";
+import "../dashboard/overview/OverviewPage.css";
 import { getWorkScheduleDetail, updateWorkSchedule } from "@/features/work-schedule/api/work-schedule.service";
 import WorkScheduleForm, { type WorkScheduleFormState } from "./components/WorkScheduleForm";
 import "./WorkScheduleFormContainer.css";
@@ -72,17 +74,27 @@ const WorkScheduleEditPage = () => {
   }
 
   return (
-    <div className="work-schedule-form-container">
-      <div className="work-schedule-form-header">
-        <button className="work-schedule-back-button" onClick={() => navigate("/work-schedules")}>
-          <ChevronLeft size={24} />
-        </button>
-        <div className="work-schedule-header-text">
-          <span className="work-schedule-page-badge">Workforce Center</span>
-          <h1>Edit Jadwal Kerja</h1>
-          <p>Ubah pengaturan shift kerja yang sudah ada.</p>
+    <div className="crud-page">
+      <Card className="hero-card" style={{ marginBottom: '2rem' }}>
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Tag size={16} />
+              <span>Workforce Center</span>
+            </div>
+            <h1 className="hero-title">Edit Jadwal Kerja</h1>
+            <p className="hero-subtitle">
+              Ubah pengaturan shift kerja yang sudah ada.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button type="button" className="btn-outline" onClick={() => navigate("/work-schedules")} disabled={loading}>
+              <ChevronLeft size={16} style={{ marginRight: '8px' }} />
+              Kembali
+            </button>
+          </div>
         </div>
-      </div>
+      </Card>
 
       {statusMessage && (
         <Alert

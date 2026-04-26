@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save, Calendar, MapPin, Info, CheckCircle2, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Save, Calendar, MapPin, Info, CheckCircle2, RefreshCw, ChevronLeft } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { workforceService } from '@/features/workforce/api/workforce.service';
 import './AdminWorkforcePages.css';
+import '../dashboard/overview/OverviewPage.css';
 
 const HolidayFormPage: React.FC = () => {
   const navigate = useNavigate();
@@ -65,20 +66,24 @@ const HolidayFormPage: React.FC = () => {
 
   return (
     <div className="admin-workforce-page">
-      <div className="workforce-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-           <Button variant="ghost" onClick={() => navigate('/workforce/holidays')} style={{ borderRadius: '16px', width: '48px', height: '48px', padding: 0 }}>
-              <ArrowLeft size={24} />
-           </Button>
-           <div>
-              <span className="workforce-badge badge-holiday">
-                <Calendar size={14} /> {isEdit ? 'Update Policy' : 'New Configuration'}
-              </span>
-              <h1>{isEdit ? 'Edit Hari Libur' : 'Tambah Hari Libur'}</h1>
-              <p>Konfigurasi hari libur nasional atau khusus perusahaan untuk otomatisasi jadwal kerja.</p>
-           </div>
+      <Card className="hero-card" style={{ marginBottom: '2rem' }}>
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Calendar size={16} />
+              <span>{isEdit ? 'Update Policy' : 'New Configuration'}</span>
+            </div>
+            <h1 className="hero-title">{isEdit ? 'Edit Hari Libur' : 'Tambah Hari Libur'}</h1>
+            <p className="hero-subtitle">Konfigurasi hari libur nasional atau khusus perusahaan untuk otomatisasi jadwal kerja.</p>
+          </div>
+          <div className="hero-actions">
+            <button type="button" className="btn-outline" onClick={() => navigate('/workforce/holidays')} disabled={loading}>
+              <ChevronLeft size={18} />
+              Kembali
+            </button>
+          </div>
         </div>
-      </div>
+      </Card>
 
       <form onSubmit={handleSubmit}>
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
@@ -87,27 +92,27 @@ const HolidayFormPage: React.FC = () => {
                  <h3 style={{ margin: '0 0 2rem', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '1.25rem', fontWeight: 800, color: '#1e3a8a' }}>
                     <Calendar size={24} color="#2563eb" /> Informasi Libur
                  </h3>
-                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-                    <div className="workforce-input-group" style={{ gridColumn: '1 / -1' }}>
-                       <label>Nama Hari Libur</label>
-                       <input name="name" value={formData.name} onChange={handleChange} className="workforce-input" required placeholder="Contoh: Idul Fitri 1447H" />
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', gridColumn: '1 / -1' }}>
+                       <label style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b' }}>Nama Hari Libur</label>
+                       <input name="name" value={formData.name} onChange={handleChange} required placeholder="Contoh: Idul Fitri 1447H" style={{ width: '100%', padding: '0 16px', height: '50px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '1rem', color: '#0f172a', transition: 'all 0.2s', boxSizing: 'border-box' }} />
                     </div>
-                    <div className="workforce-input-group">
-                       <label>Tanggal</label>
-                       <input name="date" type="date" value={formData.date} onChange={handleChange} className="workforce-input" required />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                       <label style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b' }}>Tanggal</label>
+                       <input name="date" type="date" value={formData.date} onChange={handleChange} required style={{ width: '100%', padding: '0 16px', height: '50px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '1rem', color: '#0f172a', transition: 'all 0.2s', boxSizing: 'border-box' }} />
                     </div>
-                    <div className="workforce-input-group">
-                       <label>Tipe Libur</label>
-                       <select name="type" value={formData.type} onChange={handleChange} className="workforce-input">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                       <label style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b' }}>Tipe Libur</label>
+                       <select name="type" value={formData.type} onChange={handleChange} style={{ width: '100%', padding: '0 16px', height: '50px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '1rem', color: '#0f172a', transition: 'all 0.2s', boxSizing: 'border-box' }}>
                           <option>National Holiday</option>
                           <option>Company Holiday</option>
                           <option>Regional Holiday</option>
                           <option>Other</option>
                        </select>
                     </div>
-                    <div className="workforce-input-group" style={{ gridColumn: '1 / -1' }}>
-                       <label>Deskripsi (Opsional)</label>
-                       <textarea name="description" value={formData.description} onChange={handleChange} className="workforce-input" rows={4} placeholder="Detail singkat mengenai hari libur ini..." />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', gridColumn: '1 / -1' }}>
+                       <label style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b' }}>Deskripsi (Opsional)</label>
+                       <textarea name="description" value={formData.description} onChange={handleChange} rows={4} placeholder="Detail singkat mengenai hari libur ini..." style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '1rem', color: '#0f172a', transition: 'all 0.2s', resize: 'vertical', boxSizing: 'border-box' }} />
                     </div>
                  </div>
               </Card>
@@ -160,7 +165,7 @@ const HolidayFormPage: React.FC = () => {
                     {loading ? <RefreshCw className="animate-spin" /> : <Save size={20} style={{ marginRight: '10px' }} />}
                     {loading ? 'Menyimpan...' : (isEdit ? 'Simpan Perubahan' : 'Terbitkan Libur')}
                  </Button>
-                 <Button type="button" variant="ghost" onClick={() => navigate('/workforce/holidays')} style={{ width: '100%', height: '54px', borderRadius: '20px', fontWeight: 700 }}>
+                 <Button type="button" onClick={() => navigate('/workforce/holidays')} style={{ width: '100%', height: '54px', borderRadius: '20px', fontWeight: 700, background: '#f1f5f9', color: '#475569', border: '1px solid #cbd5e1' }}>
                     Batalkan
                  </Button>
               </div>

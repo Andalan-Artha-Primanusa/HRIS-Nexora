@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Database, UserX, FileText, Plus, AlertCircle, Trash2, Edit, Save, ArrowLeft } from 'lucide-react';
+import { ShieldCheck, Database, UserX, FileText, Plus, AlertCircle, Trash2, Edit, Save, ArrowLeft, ChevronLeft } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { useNavigate } from 'react-router-dom';
 import './AdminWorkforcePages.css';
+import '../dashboard/overview/OverviewPage.css';
 
 const ComplianceSettingsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -11,18 +12,24 @@ const ComplianceSettingsPage: React.FC = () => {
 
   return (
     <div className="admin-workforce-page">
-      <div className="workforce-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          <Button variant="ghost" onClick={() => navigate('/compliance/overview')} style={{ borderRadius: '16px', width: '48px', height: '48px', padding: 0 }}>
-             <ArrowLeft size={24} />
-          </Button>
-          <div>
-            <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Governance Controls</span>
-            <h1>Konfigurasi Kepatuhan</h1>
-            <p>Kelola kebijakan retensi data dan permintaan privasi karyawan sesuai dengan regulasi perlindungan data.</p>
+      <Card className="hero-card" style={{ marginBottom: '2rem' }}>
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <ShieldCheck size={16} />
+              <span>Governance Controls</span>
+            </div>
+            <h1 className="hero-title">Konfigurasi Kepatuhan</h1>
+            <p className="hero-subtitle">Kelola kebijakan retensi data dan permintaan privasi karyawan sesuai dengan regulasi perlindungan data.</p>
+          </div>
+          <div className="hero-actions">
+            <button type="button" className="btn-outline" onClick={() => navigate('/compliance/overview')}>
+              <ChevronLeft size={18} />
+              Kembali
+            </button>
           </div>
         </div>
-      </div>
+      </Card>
 
       <div style={{ display: 'flex', gap: '1rem' }}>
          <Button 
@@ -44,7 +51,7 @@ const ComplianceSettingsPage: React.FC = () => {
       </div>
 
       {activeTab === 'retention' ? (
-        <div className="workforce-grid">
+        <div className="workforce-grid" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
            {[
              { name: 'Payroll Records', period: '10 Tahun', category: 'Finance', icon: <FileText size={24} />, color: '#2563eb' },
              { name: 'Employee Contracts', period: 'Permanen', category: 'Legal', icon: <ShieldCheck size={24} />, color: '#10b981' },
