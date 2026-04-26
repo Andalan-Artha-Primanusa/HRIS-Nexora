@@ -72,9 +72,6 @@ const PayrollTaxPage: React.FC = () => {
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan
             </button>
-            <button className="btn-primary" onClick={() => window.location.href = '/payroll'}>
-              Kelola Payroll
-            </button>
           </div>
         </div>
       </Card>

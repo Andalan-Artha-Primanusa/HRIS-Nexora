@@ -117,6 +117,36 @@ export const removePermissionFromRole = async (id: string, permissionId: number)
 };
 
 /**
+ * Create a new role
+ */
+export const createRole = async (payload: { name: string; description?: string }) => {
+  const response = await api.post("/admin/roles", payload);
+  return {
+    data: extractPayload(response.data),
+    raw: response.data,
+  };
+};
+
+/**
+ * Update an existing role
+ */
+export const updateRole = async (id: string | number, payload: { name: string; description?: string }) => {
+  const response = await api.put(`/admin/roles/${id}`, payload);
+  return {
+    data: extractPayload(response.data),
+    raw: response.data,
+  };
+};
+
+/**
+ * Delete a role
+ */
+export const deleteRole = async (id: string | number) => {
+  const response = await api.delete(`/admin/roles/${id}`);
+  return { raw: response.data };
+};
+
+/**
  * Get all permissions
  */
 export const getAllPermissions = async (page = 1, perPage = 50) => {

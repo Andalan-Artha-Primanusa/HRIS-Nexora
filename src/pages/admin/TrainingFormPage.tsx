@@ -185,11 +185,24 @@ const TrainingFormPage: React.FC = () => {
               </Card>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                 <Button type="submit" variant="primary" size="lg" disabled={loading} style={{ width: '100%', height: '54px' }}>
+                 <Button type="submit" variant="primary" size="lg" disabled={loading} style={{ width: '100%', height: '54px', borderRadius: '12px' }}>
                     <Save size={18} style={{ marginRight: '8px' }} />
                     {loading ? 'Saving...' : 'Save Program'}
                  </Button>
-                 <Button type="button" variant="ghost" onClick={() => navigate('/training/programs')} style={{ width: '100%' }}>
+                 <Button 
+                   type="button" 
+                   variant="ghost" 
+                   onClick={() => navigate('/training/programs')} 
+                   style={{ 
+                     width: '100%', 
+                     height: '50px', 
+                     borderRadius: '12px', 
+                     background: '#f1f5f9', 
+                     color: '#475569', 
+                     border: '1px solid #cbd5e1', 
+                     fontWeight: 600 
+                   }}
+                 >
                     Cancel
                  </Button>
               </div>

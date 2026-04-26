@@ -44,6 +44,7 @@ const AdminNotificationsPage = lazy(() => import("../../pages/admin/AdminNotific
 const AdminEmailNotificationsPage = lazy(() => import("../../pages/admin/AdminEmailNotificationsPage"));
 const AdminAuditLogsPage = lazy(() => import("../../pages/admin/AdminAuditLogsPage"));
 const AdminImportPage = lazy(() => import("../../pages/admin/AdminImportPage"));
+const AdminRoleFormPage = lazy(() => import("../../pages/admin/AdminRoleFormPage"));
 const AdminBiometricDevicesPage = lazy(() => import("../../pages/admin/AdminBiometricDevicesPage"));
 const LeaveRequestsPage = lazy(() => import("../../pages/leave/LeaveRequestsPage"));
 const CreateLeavePage = lazy(() => import("../../pages/leave/CreateLeavePage"));
@@ -631,6 +632,14 @@ export const router = createBrowserRouter([
           {
             index: true,
             element: <AdminRolesPage />,
+          },
+          {
+            path: "create",
+            element: <AdminRoleFormPage />,
+          },
+          {
+            path: "edit/:id",
+            element: <AdminRoleFormPage />,
           },
         ],
       },

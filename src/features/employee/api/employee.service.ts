@@ -269,3 +269,15 @@ export async function completeOffboarding(id: string | number): Promise<void> {
     handleApiError(error, `Failed to complete offboarding for employee ${id}`);
   }
 }
+// Export as a service object for easier usage in components
+export const employeeService = {
+  getEmployees: getAllEmployees,
+  getEmployeeDetail,
+  createEmployee,
+  updateEmployee,
+  deleteEmployee,
+  startOnboarding,
+  completeOnboarding,
+  startOffboarding,
+  completeOffboarding,
+};

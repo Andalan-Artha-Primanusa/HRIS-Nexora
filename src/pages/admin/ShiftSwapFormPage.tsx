@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save, AlertCircle, Calendar, User, Clock, ArrowLeftRight, CheckCircle2 } from 'lucide-react';
+import { 
+  ArrowLeft, Save, AlertCircle, Calendar, User, Clock, 
+  ArrowLeftRight, CheckCircle2, RefreshCw, ChevronLeft,
+  Info, ShieldCheck, HelpCircle
+} from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
 import { workforceService } from '@/features/workforce/api/workforce.service';
-import { employeeService } from '@/features/employees/api/employee.service';
+import { employeeService } from '@/features/employee/api/employee.service';
 import './AdminWorkforcePages.css';
+import '../dashboard/overview/OverviewPage.css';
 
 const ShiftSwapFormPage: React.FC = () => {
   const navigate = useNavigate();
@@ -55,184 +60,201 @@ const ShiftSwapFormPage: React.FC = () => {
     }
   };
 
+  const getEmployeeName = (id: string | number) => {
+    const emp = employees.find(e => String(e.id) === String(id));
+    return emp ? emp.full_name : 'Belum dipilih';
+  };
+
   return (
-    <div className="admin-workforce-page">
-      <div className="workforce-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          <Button variant="ghost" onClick={() => navigate('/workforce/shift-swaps')} style={{ borderRadius: '16px', width: '48px', height: '48px', padding: 0 }}>
-             <ArrowLeft size={24} />
-          </Button>
-          <div>
-            <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#ea580c', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Operational Flexibility</span>
-            <h1>{isEdit ? 'Ubah Request Tukar' : 'Request Tukar Shift Baru'}</h1>
-            <p>Ajukan penukaran jadwal kerja antar karyawan dengan verifikasi otomatis konflik jadwal.</p>
+    <div className="crud-page">
+      <Card className="hero-card" style={{ marginBottom: '2rem' }}>
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <ArrowLeftRight size={16} />
+              <span>Manajemen Jadwal</span>
+            </div>
+            <h1 className="hero-title">{isEdit ? 'Edit Tukar Shift' : 'Tukar Shift Baru'}</h1>
+            <p className="hero-subtitle">
+              Kelola penukaran jadwal kerja antar karyawan dengan verifikasi otomatis.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button type="button" className="btn-outline" onClick={() => navigate('/workforce/shift-swaps')} disabled={saving}>
+              <ChevronLeft size={18} />
+              Kembali
+            </button>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <Button variant="outline" size="md" onClick={() => navigate('/workforce/shift-swaps')} style={{ borderRadius: '14px' }}>
-            Batal
-          </Button>
-          <Button variant="primary" size="md" onClick={handleSubmit} disabled={saving} style={{ borderRadius: '14px', boxShadow: '0 10px 20px rgba(37, 99, 235, 0.2)' }}>
-            {saving ? <RefreshCw className="animate-spin" size={20} /> : <Save size={20} style={{ marginRight: '8px' }} />}
-            Simpan Request
-          </Button>
-        </div>
-      </div>
+      </Card>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '2.5rem' }}>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <Card glass style={{ padding: '2.5rem', borderRadius: '32px' }}>
-            <h3 style={{ margin: '0 0 2rem', fontSize: '1.25rem', fontWeight: 900, color: '#1e3a8a' }}>Detail Penukaran</h3>
-            
-            <div className="wf-form-grid">
-              <div className="wf-form-group">
-                <label className="wf-label">Pemohon (Requester)</label>
-                <div style={{ position: 'relative' }}>
-                  <User size={18} style={{ position: 'absolute', left: '16px', top: '18px', color: '#94a3b8' }} />
-                  <select 
-                    className="wf-input" 
-                    style={{ paddingLeft: '48px' }}
-                    value={formData.requester_id}
-                    onChange={(e) => setFormData({ ...formData, requester_id: e.target.value })}
-                    required
-                  >
-                    <option value="">Pilih Karyawan</option>
-                    {employees.map(emp => (
-                      <option key={emp.id} value={emp.id}>{emp.full_name} ({emp.position})</option>
-                    ))}
-                  </select>
+      <form onSubmit={handleSubmit}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '2rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            <Card glass style={{ padding: '2.5rem', borderRadius: '32px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '2rem' }}>
+                <div style={{ padding: '10px', background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', borderRadius: '12px', color: 'white' }}>
+                  <ArrowLeftRight size={22} />
                 </div>
+                <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: '#1e3a8a' }}>Informasi Penukaran</h3>
               </div>
 
-              <div className="wf-form-group">
-                <label className="wf-label">Target Penukaran</label>
-                <div style={{ position: 'relative' }}>
-                  <User size={18} style={{ position: 'absolute', left: '16px', top: '18px', color: '#94a3b8' }} />
-                  <select 
-                    className="wf-input" 
-                    style={{ paddingLeft: '48px' }}
-                    value={formData.target_employee_id}
-                    onChange={(e) => setFormData({ ...formData, target_employee_id: e.target.value })}
-                    required
-                  >
-                    <option value="">Pilih Karyawan</option>
-                    {employees.map(emp => (
-                      <option key={emp.id} value={emp.id}>{emp.full_name} ({emp.position})</option>
-                    ))}
-                  </select>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                <div className="form-group">
+                  <label style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b', marginBottom: '8px', display: 'block' }}>Pemohon (Requester)</label>
+                  <div style={{ position: 'relative' }}>
+                    <User size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                    <select 
+                      value={formData.requester_id}
+                      onChange={(e) => setFormData({ ...formData, requester_id: e.target.value })}
+                      required
+                      style={{ width: '100%', height: '50px', padding: '0 16px 0 48px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '1rem', color: '#0f172a', boxSizing: 'border-box' }}
+                    >
+                      <option value="">Pilih Karyawan</option>
+                      {employees.map(emp => (
+                        <option key={emp.id} value={emp.id}>{emp.full_name} ({emp.position || 'No Position'})</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-              </div>
 
-              <div className="wf-form-group">
-                <label className="wf-label">Tanggal Shift</label>
-                <div style={{ position: 'relative' }}>
-                  <Calendar size={18} style={{ position: 'absolute', left: '16px', top: '18px', color: '#94a3b8' }} />
-                  <input 
-                    type="date" 
-                    className="wf-input" 
-                    style={{ paddingLeft: '48px' }}
-                    value={formData.shift_date}
-                    onChange={(e) => setFormData({ ...formData, shift_date: e.target.value })}
-                    required
+                <div className="form-group">
+                  <label style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b', marginBottom: '8px', display: 'block' }}>Target Penukaran</label>
+                  <div style={{ position: 'relative' }}>
+                    <User size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                    <select 
+                      value={formData.target_employee_id}
+                      onChange={(e) => setFormData({ ...formData, target_employee_id: e.target.value })}
+                      required
+                      style={{ width: '100%', height: '50px', padding: '0 16px 0 48px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '1rem', color: '#0f172a', boxSizing: 'border-box' }}
+                    >
+                      <option value="">Pilih Karyawan</option>
+                      {employees.map(emp => (
+                        <option key={emp.id} value={emp.id}>{emp.full_name} ({emp.position || 'No Position'})</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b', marginBottom: '8px', display: 'block' }}>Tanggal Shift</label>
+                  <div style={{ position: 'relative' }}>
+                    <Calendar size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                    <input 
+                      type="date" 
+                      value={formData.shift_date}
+                      onChange={(e) => setFormData({ ...formData, shift_date: e.target.value })}
+                      required
+                      style={{ width: '100%', height: '50px', padding: '0 16px 0 48px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '1rem', color: '#0f172a', boxSizing: 'border-box' }}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b', marginBottom: '8px', display: 'block' }}>Shift Kerja</label>
+                  <div style={{ position: 'relative' }}>
+                    <Clock size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                    <select 
+                      value={formData.shift_name}
+                      onChange={(e) => setFormData({ ...formData, shift_name: e.target.value })}
+                      required
+                      style={{ width: '100%', height: '50px', padding: '0 16px 0 48px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '1rem', color: '#0f172a', boxSizing: 'border-box' }}
+                    >
+                      <option value="Pagi">Shift Pagi (08:00 - 16:00)</option>
+                      <option value="Sore">Shift Sore (16:00 - 00:00)</option>
+                      <option value="Malam">Shift Malam (00:00 - 08:00)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                  <label style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b', marginBottom: '8px', display: 'block' }}>Alasan Penukaran</label>
+                  <textarea 
+                    value={formData.reason}
+                    onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
+                    placeholder="Berikan alasan mengapa penukaran ini diperlukan..."
+                    style={{ width: '100%', padding: '16px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '1rem', color: '#0f172a', minHeight: '120px', resize: 'vertical', boxSizing: 'border-box' }}
                   />
                 </div>
               </div>
+            </Card>
 
-              <div className="wf-form-group">
-                <label className="wf-label">Shift Kerja</label>
-                <div style={{ position: 'relative' }}>
-                  <Clock size={18} style={{ position: 'absolute', left: '16px', top: '18px', color: '#94a3b8' }} />
-                  <select 
-                    className="wf-input" 
-                    style={{ paddingLeft: '48px' }}
-                    value={formData.shift_name}
-                    onChange={(e) => setFormData({ ...formData, shift_name: e.target.value })}
-                    required
-                  >
-                    <option value="Pagi">Shift Pagi (08:00 - 16:00)</option>
-                    <option value="Sore">Shift Sore (16:00 - 00:00)</option>
-                    <option value="Malam">Shift Malam (00:00 - 08:00)</option>
-                  </select>
+            <Card style={{ padding: '2rem', background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)', border: 'none', borderRadius: '24px' }}>
+              <div style={{ display: 'flex', gap: '16px' }}>
+                <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb', flexShrink: 0 }}>
+                  <ShieldCheck size={24} />
+                </div>
+                <div>
+                  <h4 style={{ margin: '0 0 4px', fontSize: '1.1rem', fontWeight: 800, color: '#1e3a8a' }}>Validasi Otomatis Aktif</h4>
+                  <p style={{ margin: 0, fontSize: '0.9rem', color: '#1e40af', opacity: 0.8, lineHeight: 1.5 }}>
+                    Sistem akan secara otomatis memeriksa konflik jadwal, masa istirahat minimal (11 jam), dan kuota shift sebelum pengajuan dikirimkan ke supervisor.
+                  </p>
                 </div>
               </div>
-            </div>
+            </Card>
+          </div>
 
-            <div className="wf-form-group" style={{ marginTop: '1.5rem' }}>
-              <label className="wf-label">Alasan Penukaran</label>
-              <textarea 
-                className="wf-input" 
-                style={{ height: '120px', padding: '16px', resize: 'none' }}
-                placeholder="Jelaskan alasan penukaran shift (opsional)..."
-                value={formData.reason}
-                onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-              ></textarea>
-            </div>
-          </Card>
-        </form>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          <Card glass style={{ padding: '2.5rem', borderRadius: '32px' }}>
-            <h3 style={{ margin: '0 0 1.5rem', fontSize: '1.2rem', fontWeight: 900, color: '#1e3a8a' }}>Review Penukaran</h3>
-            
-            <div style={{ padding: '2rem', background: '#f8fafc', borderRadius: '24px', position: 'relative', overflow: 'hidden' }}>
-               <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', opacity: 0.05 }}>
-                  <ArrowLeftRight size={150} />
-               </div>
-               
-               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', position: 'relative', zIndex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                     <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'white', display: 'grid', placeItems: 'center', border: '1px solid #e2e8f0' }}>
-                        <User size={20} color="#2563eb" />
-                     </div>
-                     <div>
-                        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>PEMOHON</div>
-                        <div style={{ fontWeight: 800, color: '#1e293b' }}>
-                          {employees.find(e => e.id == formData.requester_id)?.full_name || 'Belum dipilih'}
-                        </div>
-                     </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            <Card glass style={{ padding: '2rem', borderRadius: '32px' }}>
+              <h3 style={{ margin: '0 0 1.5rem', fontSize: '1.1rem', fontWeight: 800, color: '#1e3a8a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <HelpCircle size={18} /> Preview Request
+              </h3>
+              
+              <div style={{ padding: '1.5rem', background: '#f8fafc', borderRadius: '24px', border: '1px solid #e2e8f0', position: 'relative' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#2563eb', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 800 }}>A</div>
+                    <div>
+                      <p style={{ margin: 0, fontSize: '0.7rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Dari Pemohon</p>
+                      <p style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#1e293b' }}>{getEmployeeName(formData.requester_id)}</p>
+                    </div>
                   </div>
 
-                  <div style={{ marginLeft: '12px', borderLeft: '2px dashed #cbd5e1', height: '30px' }}></div>
-
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                     <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'white', display: 'grid', placeItems: 'center', border: '1px solid #e2e8f0' }}>
-                        <User size={20} color="#ea580c" />
-                     </div>
-                     <div>
-                        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>TARGET</div>
-                        <div style={{ fontWeight: 800, color: '#1e293b' }}>
-                          {employees.find(e => e.id == formData.target_employee_id)?.full_name || 'Belum dipilih'}
-                        </div>
-                     </div>
+                  <div style={{ display: 'flex', justifyContent: 'center', padding: '0.5rem 0' }}>
+                    <div style={{ padding: '6px 12px', background: 'white', borderRadius: '20px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '0.75rem', fontWeight: 700 }}>
+                      <ArrowLeftRight size={14} /> TUKAR DENGAN
+                    </div>
                   </div>
-               </div>
-            </div>
 
-            <div style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#16a34a', fontSize: '0.9rem', fontWeight: 700 }}>
-                  <CheckCircle2 size={18} />
-                  <span>Conflict validation passed</span>
-               </div>
-               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#16a34a', fontSize: '0.9rem', fontWeight: 700 }}>
-                  <CheckCircle2 size={18} />
-                  <span>Sufficient rest period verified</span>
-               </div>
-            </div>
-          </Card>
-
-          <Card glass style={{ padding: '2rem', borderRadius: '32px', background: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)', border: 'none' }}>
-             <div style={{ display: 'flex', gap: '1rem' }}>
-                <AlertCircle size={24} color="#ea580c" />
-                <div>
-                   <h4 style={{ margin: '0 0 4px', color: '#9a3412', fontWeight: 800 }}>Informasi Penting</h4>
-                   <p style={{ margin: 0, fontSize: '0.85rem', color: '#9a3412', opacity: 0.8, lineHeight: 1.5 }}>
-                      Setiap penukaran shift harus disetujui oleh Supervisor atau Admin Workforce sebelum jadwal diperbarui secara otomatis di sistem kehadiran.
-                   </p>
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#ea580c', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 800 }}>B</div>
+                    <div>
+                      <p style={{ margin: 0, fontSize: '0.7rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Target Karyawan</p>
+                      <p style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#1e293b' }}>{getEmployeeName(formData.target_employee_id)}</p>
+                    </div>
+                  </div>
                 </div>
-             </div>
-          </Card>
+              </div>
+
+              <div style={{ marginTop: '1.5rem', padding: '1rem', background: '#f0fdf4', borderRadius: '16px', border: '1px solid #dcfce7', display: 'flex', alignItems: 'center', gap: '10px', color: '#166534' }}>
+                <CheckCircle2 size={18} />
+                <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>Validasi Konflik: AMAN</span>
+              </div>
+            </Card>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <Button 
+                type="submit" 
+                variant="primary" 
+                size="lg" 
+                disabled={saving} 
+                style={{ width: '100%', height: '60px', borderRadius: '20px', fontWeight: 800, fontSize: '1.1rem', boxShadow: '0 10px 20px rgba(37, 99, 235, 0.2)' }}
+                onClick={handleSubmit}
+              >
+                {saving ? <RefreshCw className="animate-spin" style={{ marginRight: '10px' }} /> : <Save size={20} style={{ marginRight: '10px' }} />}
+                {saving ? 'Menyimpan...' : 'Simpan Request'}
+              </Button>
+              <Button 
+                type="button" 
+                onClick={() => navigate('/workforce/shift-swaps')} 
+                style={{ width: '100%', height: '54px', borderRadius: '20px', fontWeight: 700, background: '#f1f5f9', color: '#475569', border: '1px solid #cbd5e1' }}
+              >
+                Batalkan
+              </Button>
+            </div>
+          </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 };

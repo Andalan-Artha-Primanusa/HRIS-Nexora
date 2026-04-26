@@ -170,7 +170,7 @@ const LeavePolicyFormPage: React.FC = () => {
                   onChange={handleChange} 
                   required 
                   placeholder="Contoh: Kebijakan Cuti Tahunan 2026"
-                  style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
+                  style={{ width: '100%', height: '50px', padding: '0 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '1rem', color: '#0f172a', boxSizing: 'border-box' }}
                 />
               </div>
 
@@ -182,7 +182,7 @@ const LeavePolicyFormPage: React.FC = () => {
                   value={formData.year} 
                   onChange={handleChange} 
                   required 
-                  style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
+                  style={{ width: '100%', height: '50px', padding: '0 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '1rem', color: '#0f172a', boxSizing: 'border-box' }}
                 />
               </div>
 
@@ -194,7 +194,7 @@ const LeavePolicyFormPage: React.FC = () => {
                   value={formData.entitlement_value} 
                   onChange={handleChange} 
                   required 
-                  style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
+                  style={{ width: '100%', height: '50px', padding: '0 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '1rem', color: '#0f172a', boxSizing: 'border-box' }}
                 />
               </div>
 
@@ -206,7 +206,7 @@ const LeavePolicyFormPage: React.FC = () => {
                   value={formData.max_carryover_days} 
                   onChange={handleChange} 
                   required 
-                  style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
+                  style={{ width: '100%', height: '50px', padding: '0 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '1rem', color: '#0f172a', boxSizing: 'border-box' }}
                 />
               </div>
 
@@ -216,7 +216,7 @@ const LeavePolicyFormPage: React.FC = () => {
                   name="entitlement_type" 
                   value={formData.entitlement_type} 
                   onChange={handleChange} 
-                  style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
+                  style={{ width: '100%', height: '50px', padding: '0 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '1rem', color: '#0f172a', boxSizing: 'border-box' }}
                 >
                   <option value="fixed">Fixed</option>
                   <option value="prorated">Prorated</option>
@@ -230,7 +230,7 @@ const LeavePolicyFormPage: React.FC = () => {
                   name="is_paid" 
                   value={formData.is_paid} 
                   onChange={handleChange} 
-                  style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
+                  style={{ width: '100%', height: '50px', padding: '0 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '1rem', color: '#0f172a', boxSizing: 'border-box' }}
                 >
                   <option value="true">Paid</option>
                   <option value="false">Unpaid</option>
@@ -243,7 +243,7 @@ const LeavePolicyFormPage: React.FC = () => {
                   name="active" 
                   value={formData.active} 
                   onChange={handleChange} 
-                  style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
+                  style={{ width: '100%', height: '50px', padding: '0 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '1rem', color: '#0f172a', boxSizing: 'border-box' }}
                 >
                   <option value="true">Aktif</option>
                   <option value="false">Non-Aktif</option>
@@ -271,17 +271,17 @@ const LeavePolicyFormPage: React.FC = () => {
             )}
 
             <div style={{ marginTop: '2.5rem', display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-              <Button variant="ghost" type="button" onClick={() => navigate('/leave/policy')}>
-                Batal
-              </Button>
-              <Button variant="primary" type="submit" disabled={loading} style={{ background: '#7c3aed' }}>
-                {loading ? 'Processing...' : (
-                  <>
-                    <Save size={18} />
-                    {isEdit ? 'Save Policy Changes' : 'Publish New Policy'}
-                  </>
-                )}
-              </Button>
+               <Button variant="ghost" type="button" onClick={() => navigate('/leave/policy')} style={{ background: '#f1f5f9', color: '#475569', border: '1px solid #cbd5e1', borderRadius: '12px', height: '48px', padding: '0 24px', fontWeight: 600 }}>
+                 Batal
+               </Button>
+               <Button variant="primary" type="submit" disabled={loading} style={{ background: '#7c3aed', height: '48px', padding: '0 24px', borderRadius: '12px', fontWeight: 700, gap: '8px' }}>
+                 {loading ? 'Processing...' : (
+                   <>
+                     <Save size={18} />
+                     {isEdit ? 'Save Policy Changes' : 'Publish New Policy'}
+                   </>
+                 )}
+               </Button>
             </div>
           </Card>
 

@@ -152,7 +152,7 @@ const LeaveTypeFormPage: React.FC = () => {
                     onChange={handleChange} 
                     required 
                     placeholder="Contoh: Cuti Tahunan, Cuti Sakit"
-                    style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
+                    style={{ width: '100%', height: '50px', padding: '0 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '1rem', color: '#0f172a', boxSizing: 'border-box' }}
                   />
                 </div>
 
@@ -165,7 +165,7 @@ const LeaveTypeFormPage: React.FC = () => {
                     onChange={handleChange} 
                     required 
                     placeholder="Contoh: AL, SL, ML"
-                    style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
+                    style={{ width: '100%', height: '50px', padding: '0 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '1rem', color: '#0f172a', boxSizing: 'border-box' }}
                   />
                 </div>
 
@@ -175,7 +175,7 @@ const LeaveTypeFormPage: React.FC = () => {
                     name="is_paid" 
                     value={formData.is_paid} 
                     onChange={handleChange} 
-                    style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
+                    style={{ width: '100%', height: '50px', padding: '0 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '1rem', color: '#0f172a', boxSizing: 'border-box' }}
                   >
                     <option value="true">Berbayar (Paid)</option>
                     <option value="false">Tidak Berbayar (Unpaid)</option>
@@ -189,7 +189,7 @@ const LeaveTypeFormPage: React.FC = () => {
                     value={formData.description} 
                     onChange={handleChange} 
                     placeholder="Berikan keterangan singkat mengenai jenis cuti ini..."
-                    style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '0.95rem', resize: 'vertical' }}
+                    style={{ width: '100%', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '1rem', color: '#0f172a', resize: 'vertical', boxSizing: 'border-box' }}
                     rows={4}
                   />
                 </div>
@@ -200,7 +200,7 @@ const LeaveTypeFormPage: React.FC = () => {
                     name="is_active" 
                     value={formData.is_active} 
                     onChange={handleChange} 
-                    style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
+                    style={{ width: '100%', height: '50px', padding: '0 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '1rem', color: '#0f172a', boxSizing: 'border-box' }}
                   >
                     <option value="true">Aktif</option>
                     <option value="false">Non-Aktif</option>
@@ -227,10 +227,10 @@ const LeaveTypeFormPage: React.FC = () => {
               )}
 
               <div style={{ marginTop: '2.5rem', display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-                <Button variant="ghost" type="button" onClick={() => navigate('/leave/type')}>
+                <Button variant="ghost" type="button" onClick={() => navigate('/leave/type')} style={{ background: '#f1f5f9', color: '#475569', border: '1px solid #cbd5e1', borderRadius: '12px', height: '48px', padding: '0 24px', fontWeight: 600 }}>
                   Batal
                 </Button>
-                <Button variant="primary" type="submit" disabled={loading}>
+                <Button variant="primary" type="submit" disabled={loading} style={{ height: '48px', padding: '0 24px', borderRadius: '12px', fontWeight: 700, gap: '8px' }}>
                   {loading ? 'Menyimpan...' : (
                     <>
                       <Save size={18} />

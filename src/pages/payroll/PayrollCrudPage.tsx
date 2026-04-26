@@ -208,7 +208,7 @@ const PayrollCrudPage = () => {
               Sync
             </button>
             {view === 'list' && (
-              <button className="btn-primary" onClick={openCreateForm} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.25rem', borderRadius: '10px', border: 'none', background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', color: '#fff', fontSize: '0.9rem', fontWeight: '600', fontFamily: "'Poppins', sans-serif", cursor: 'pointer' }}>
+              <button className="btn-primary" onClick={openCreateForm} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.25rem', borderRadius: '10px', border: '1px solid #cbd5e1', background: '#fff', color: '#2563eb', fontSize: '0.9rem', fontWeight: '600', fontFamily: "'Poppins', sans-serif", cursor: 'pointer' }}>
                 <Plus size={16} />
                 Tambah Payroll
               </button>
@@ -402,9 +402,10 @@ const PayrollCrudPage = () => {
                   borderRadius: '12px', 
                   minWidth: '200px', 
                   fontWeight: '700',
-                  background: mode === 'delete' ? '#ef4444' : 'var(--primary)',
+                  background: mode === 'delete' ? '#ef4444' : '#2563eb',
                   color: 'white',
-                  border: 'none'
+                  border: 'none',
+                  boxShadow: mode === 'delete' ? '0 4px 12px rgba(239, 68, 68, 0.2)' : '0 4px 12px rgba(37, 99, 235, 0.2)'
                 }}
               >
                 {loading ? "Memproses..." : mode === "create" ? "Buat Payroll" : mode === "edit" ? "Simpan Perubahan" : "Hapus Permanen"}

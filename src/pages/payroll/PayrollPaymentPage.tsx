@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { BarChart3, CreditCard, FileText, ShieldCheck, RefreshCw, CheckCircle, DollarSign } from "lucide-react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
@@ -14,6 +15,7 @@ import "@/pages/payroll/PayrollShared.css";
 import "./PayrollPaymentPage.css";
 
 const PayrollPaymentPage = () => {
+  const navigate = useNavigate();
   const [payrollId, setPayrollId] = useState("");
   const [selectedPayroll, setSelectedPayroll] = useState<PayrollItem | null>(null);
   const [employees, setEmployees] = useState<EmployeeItem[]>([]);
@@ -201,7 +203,7 @@ const PayrollPaymentPage = () => {
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan
             </button>
-            <button className="btn-primary" onClick={() => window.location.href = '/payroll'}>
+            <button className="btn-primary" onClick={() => navigate('/payroll/crud')} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.25rem', borderRadius: '10px', border: '1px solid #cbd5e1', background: '#fff', color: '#2563eb', fontSize: '0.9rem', fontWeight: '600', fontFamily: "'Poppins', sans-serif", cursor: 'pointer' }}>
               Kelola Payroll
             </button>
           </div>
