@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { BarChart3, Plus, Pencil, Trash2, ArrowLeft, RefreshCw, AlertCircle, Info, UserCircle } from "lucide-react";
+import { Plus, Pencil, Trash2, ArrowLeft, RefreshCw, AlertCircle, Info, UserCircle, LayoutDashboard, Clock, CheckCircle } from "lucide-react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
@@ -7,8 +7,9 @@ import { payrollService, toSafeArray } from "@/features/payroll/api/payroll.serv
 import { getAllEmployees } from "@/features/employee/api/employee.service";
 import type { PayrollCreatePayload, PayrollUpdatePayload, PayrollItem } from "@/features/payroll/types/payroll.types";
 import type { EmployeeItem } from "@/features/employee/types/employee.types";
-import "../admin/AdminCrudPages.css";
-import "./PayrollCrudPage.css";
+import "@/shared/styles/CrudPage.css";
+import "@/pages/dashboard/overview/OverviewPage.css";
+import "@/pages/payroll/PayrollShared.css";
 
 type PayrollFormState = {
   id: string;
@@ -182,41 +183,42 @@ const PayrollCrudPage = () => {
         size="md"
       >
         <div style={{ padding: "16px 0", whiteSpace: "pre-wrap" }}>
-          <p style={{ margin: 0, lineHeight: "1.6", color: "var(--color-text-primary)" }}>
+          <p style={{ margin: 0, lineHeight: "1.6", color: "#1e293b" }}>
             {errorModal.message}
           </p>
         </div>
       </Modal>
 
-      <Card className="crud-header-card" glass>
-        <div className="crud-header">
-          <div className="crud-header-copy">
-            <p className="crud-page-badge">Payroll Operations</p>
-            <div className="crud-header-title-row">
-              <span className="crud-header-icon">
-                <BarChart3 size={24} />
-              </span>
-              <h1>Kelola Payroll</h1>
+      {/* Header - Same style as Dashboard */}
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <LayoutDashboard size={16} />
+              <span>Operasi Penggajian</span>
             </div>
-            <p>Administer employee payroll records with precision. Create, update, or remove entries with a streamlined workflow.</p>
+            <h1 className="hero-title">Kelola Payroll</h1>
+            <p className="hero-subtitle">
+              Administer employee payroll records with precision. Create, update, or remove entries with a streamlined workflow.
+            </p>
           </div>
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <Button variant="outline" size="lg" onClick={() => void loadData()} disabled={loading} style={{ color: 'white', borderColor: 'rgba(255,255,255,0.2)' }}>
-              <RefreshCw className={loading ? "animate-spin" : ""} size={18} style={{ marginRight: '8px' }} />
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => void loadData()} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Sync
-            </Button>
+            </button>
             {view === 'list' && (
-              <Button variant="primary" size="lg" onClick={openCreateForm} style={{ background: 'var(--primary)', border: 'none', fontWeight: '700' }}>
-                <Plus size={20} style={{ marginRight: '8px' }} />
+              <button className="btn-primary" onClick={openCreateForm} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.25rem', borderRadius: '10px', border: 'none', background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', color: '#fff', fontSize: '0.9rem', fontWeight: '600', fontFamily: "'Poppins', sans-serif", cursor: 'pointer' }}>
+                <Plus size={16} />
                 Tambah Payroll
-              </Button>
+              </button>
             )}
           </div>
         </div>
       </Card>
 
       {message && message.type === "success" && (
-        <Card className="crud-card" glass style={{ borderLeft: '4px solid #10b981', background: 'rgba(16, 185, 129, 0.05)' }}>
+        <Card style={{ borderLeft: '4px solid #10b981', background: 'rgba(16, 185, 129, 0.05)', padding: '1rem', borderRadius: '12px', marginBottom: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <AlertCircle color="#10b981" size={20} />
             <p style={{ color: "#065f46", margin: 0, fontWeight: "600" }}>{message.text}</p>
@@ -224,53 +226,64 @@ const PayrollCrudPage = () => {
         </Card>
       )}
 
-      {view === "list" ? (
-        <Card className="crud-card" glass>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-            <h2>Daftar Payroll Karyawan</h2>
-            <p style={{ fontSize: '0.875rem', color: '#64748b' }}>Total {payrolls.length} entri ditemukan</p>
-          </div>
-          <div className="crud-table-wrap">
-            <table className="crud-table">
-              <thead>
-                <tr>
-                  <th>Karyawan</th>
-                  <th>Periode</th>
-                  <th>Gaji Pokok</th>
-                  <th>Tunjangan</th>
-                  <th>Bonus</th>
-                  <th>Take Home Pay</th>
-                  <th style={{ textAlign: 'center' }}>Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {payrolls.length > 0 ? (
-                  payrolls.map((payroll) => (
-                    <tr key={payroll.id} className={selectedPayrollId === String(payroll.id) ? "is-selected" : ""}>
-                      <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <UserCircle size={32} color="#94a3b8" />
-                          <div style={{ fontWeight: '700' }}>{getEmployeeName(String(payroll.employee_id))}</div>
-                        </div>
-                      </td>
-                      <td>
-                        <div style={{ fontWeight: '500', color: '#64748b' }}>
-                          {new Date(payroll.period + '-01').toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}
-                        </div>
-                      </td>
-                      <td>Rp {Number(payroll.basic_salary || 0).toLocaleString("id-ID")}</td>
-                      <td>Rp {Number(payroll.allowance || 0).toLocaleString("id-ID")}</td>
-                      <td style={{ color: '#10b981', fontWeight: '600' }}>Rp {Number(payroll.bonus || 0).toLocaleString("id-ID")}</td>
-                      <td style={{ fontWeight: '800', color: 'var(--primary)' }}>Rp {Number(payroll.take_home_pay || 0).toLocaleString("id-ID")}</td>
-                      <td style={{ textAlign: 'center' }}>
-                        <button onClick={() => selectPayroll(payroll, "edit")} className="crud-inline-button crud-inline-button--primary" title="Edit">
-                          <Pencil size={16} />
-                        </button>
-                        <button onClick={() => selectPayroll(payroll, "delete")} className="crud-inline-button crud-inline-button--danger" title="Delete">
-                          <Trash2 size={16} />
-                        </button>
-                      </td>
-                    </tr>
+      {view === "list" && (
+        <>
+          <Card className="analytics-title-card">
+            <div className="analytics-title-inner">
+              <div className="analytics-icon">
+                <LayoutDashboard size={24} />
+              </div>
+              <div>
+                <h2 className="analytics-title">Daftar Payroll Karyawan</h2>
+                <p className="analytics-subtitle">{payrolls.length} Total</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="crud-table-card">
+            <div className="crud-table-wrap">
+              <table className="crud-table">
+                <thead>
+                  <tr>
+                    <th>Karyawan</th>
+                    <th>Periode</th>
+                    <th>Gaji Pokok</th>
+                    <th>Tunjangan</th>
+                    <th>Bonus</th>
+                    <th>Take Home Pay</th>
+                    <th style={{ textAlign: 'center' }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {payrolls.length > 0 ? (
+                    payrolls.map((payroll) => (
+                      <tr key={payroll.id} className={selectedPayrollId === String(payroll.id) ? "is-selected" : ""}>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <UserCircle size={32} color="#94a3b8" />
+                            <div style={{ fontWeight: '700' }}>{getEmployeeName(String(payroll.employee_id))}</div>
+                          </div>
+                        </td>
+                        <td>
+                          <div style={{ fontWeight: '500', color: '#64748b' }}>
+                            {new Date(payroll.period + '-01').toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}
+                          </div>
+                        </td>
+                        <td>Rp {Number(payroll.basic_salary || 0).toLocaleString("id-ID")}</td>
+                        <td>Rp {Number(payroll.allowance || 0).toLocaleString("id-ID")}</td>
+                        <td style={{ color: '#10b981', fontWeight: '600' }}>Rp {Number(payroll.bonus || 0).toLocaleString("id-ID")}</td>
+                        <td style={{ fontWeight: '800', color: 'var(--primary)' }}>Rp {Number(payroll.take_home_pay || 0).toLocaleString("id-ID")}</td>
+                        <td style={{ textAlign: 'center' }}>
+                          <div className="action-btn-group" style={{ justifyContent: 'center' }}>
+                            <button onClick={() => selectPayroll(payroll, "edit")} className="action-btn action-btn-edit" title="Edit">
+                              <Pencil size={16} />
+                            </button>
+                            <button onClick={() => selectPayroll(payroll, "delete")} className="action-btn action-btn-delete" title="Delete">
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
                   ))
                 ) : (
                   <tr>
@@ -279,13 +292,15 @@ const PayrollCrudPage = () => {
                 )}
               </tbody>
             </table>
-          </div>
-        </Card>
-      ) : (
-        <div className="form-view-container">
+            </div>
+          </Card>
+        </>
+      )}
+
+        {view === "form" && (
           <Card className="crud-card" glass>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2.5rem' }}>
-              <button onClick={handleBack} className="crud-inline-button" style={{ border: '1px solid #e2e8f0' }}>
+              <button onClick={handleBack} className="action-btn" style={{ background: '#f1f5f9', color: '#64748b' }}>
                 <ArrowLeft size={18} />
               </button>
               <h2 style={{ marginBottom: 0 }}>
@@ -396,7 +411,6 @@ const PayrollCrudPage = () => {
               </Button>
             </div>
           </Card>
-        </div>
       )}
     </div>
   );

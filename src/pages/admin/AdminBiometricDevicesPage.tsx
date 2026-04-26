@@ -245,23 +245,23 @@ const AdminBiometricDevicesPage = () => {
                         </td>
                         <td className="cell-date">{String(lastSync)}</td>
                         <td className="td-center">
-                          <div className="cell-actions">
-                            <Button
-                              variant="ghost"
-                              size="sm"
+                          <div className="action-btn-group">
+                            <button
+                              className="action-btn action-btn-edit"
                               onClick={() => navigate(`/admin/biometric-devices/edit/${deviceId}`)}
+                              title="Edit"
                             >
-                              <Edit2 size={15} />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
+                              <Edit2 size={16} />
+                            </button>
+                            <button
+                              className="action-btn"
                               onClick={() => void handleSync(device)}
                               disabled={syncingId === deviceId}
+                              title="Sync"
+                              style={{ background: '#f1f5f9', color: '#64748b' }}
                             >
-                              <RefreshCw size={15} />
-                              {syncingId === deviceId ? "Sync..." : "Sync"}
-                            </Button>
+                              <RefreshCw size={16} className={syncingId === deviceId ? 'animate-spin' : ''} />
+                            </button>
                           </div>
                         </td>
                       </tr>

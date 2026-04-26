@@ -145,7 +145,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
     <aside className={clsx('dashboard-sidebar', collapsed && 'collapsed')}>
       <div className="sidebar-logo">
         <img
-          src="/logo-mahya.png"
+          src="/logo-mahya2.png"
           alt="MAHYA Logo"
           className={clsx('company-logo', collapsed && 'collapsed')}
         />

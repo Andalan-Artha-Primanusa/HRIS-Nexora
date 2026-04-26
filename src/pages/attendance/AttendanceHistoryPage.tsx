@@ -4,8 +4,10 @@ import { Button } from '@/shared/ui/Button';
 import { Alert } from '@/shared/ui/Alert';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
-import { CalendarDays, CheckCircle2, Clock, RefreshCw, XCircle } from 'lucide-react';
+import { CalendarDays, CheckCircle2, Clock, RefreshCw, XCircle, Clock4 } from 'lucide-react';
 import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 
 interface AttendanceRecord {
   date?: string;
@@ -83,22 +85,28 @@ const AttendanceHistoryPage = () => {
     return 'draft';
   };
 
-  return (
+return (
     <div className="crud-page">
-      {/* Header */}
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">History</span>
-          <h1>Attendance History</h1>
-          <p>Riwayat kehadiran Anda, termasuk check-in dan check-out setiap hari.</p>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <CalendarDays size={16} />
+              <span>Kehadiran</span>
+            </div>
+            <h1 className="hero-title">Riwayat Kehadiran</h1>
+            <p className="hero-subtitle">
+              Riwayat kehadiran Anda, termasuk check-in dan check-out setiap hari.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => void loadHistory()} disabled={loading}>
+              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+              Segarkan
+            </button>
+          </div>
         </div>
-        <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={() => void loadHistory()} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
-            <RefreshCw size={16} />
-            {loading ? 'Memuat...' : 'Segarkan'}
-          </Button>
-        </div>
-      </div>
+      </Card>
 
       {alertMessage && (
         <Alert

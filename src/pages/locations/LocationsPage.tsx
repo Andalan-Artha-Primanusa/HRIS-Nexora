@@ -5,8 +5,10 @@ import { Button } from '@/shared/ui/Button';
 import { Alert } from '@/shared/ui/Alert';
 import { getAllLocations, deleteLocation } from '@/features/location/api/location.service';
 import type { LocationItem } from '@/features/location/types/location.types';
-import { BarChart3, MapPin, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react';
+import { BarChart3, MapPin, Pencil, Plus, RefreshCw, Trash2, MapPinned } from 'lucide-react';
 import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 import './LocationsPage.css';
 
 const LocationsPage = () => {
@@ -60,77 +62,61 @@ const LocationsPage = () => {
     void loadLocations();
   }, []);
 
-  const summaryCards = [
-    {
-      label: 'Total Lokasi',
-      subtitle: 'Semua lokasi terdaftar',
-      value: String(locations.length),
-      change: 'Data lokasi aktif',
-      tone: 'blue' as const,
-      icon: BarChart3,
-    },
-    {
-      label: 'Dengan Koordinat',
-      subtitle: 'Latitude dan longitude valid',
-      value: String(withCoordinateCount),
-      change: 'Lokasi siap dipakai absensi',
-      tone: 'green' as const,
-      icon: MapPin,
-    },
-  ];
-
   return (
     <div className="crud-page">
-      {/* Header */}
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">Location Center</span>
-          <h1>Location Management</h1>
-          <p>Kelola lokasi absensi dan radius untuk setiap tempat kerja dengan tampilan yang rapi, konsisten, dan mudah dipindai.</p>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <MapPinned size={16} />
+              <span>Location Center</span>
+            </div>
+            <h1 className="hero-title">Location Management</h1>
+            <p className="hero-subtitle">
+              Kelola lokasi absensi dan radius untuk setiap tempat kerja.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => void loadLocations()} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              {loading ? 'Memuat...' : 'Segarkan'}
+            </button>
+            <button className="btn-primary" onClick={() => navigate('/locations/create')} disabled={loading}>
+              <Plus size={16} />
+              Buat Lokasi Baru
+            </button>
+          </div>
         </div>
-        <div className="page-header-actions">
-          <Button
-            variant="primary"
-            size="md"
-            onClick={() => navigate('/locations/create')}
-            disabled={loading}
-          >
-            <Plus size={16} />
-            Buat Lokasi Baru
-          </Button>
-          <Button
-            variant="outline"
-            size="md"
-            onClick={() => void loadLocations()}
-            disabled={loading}
-            style={{ borderColor: "#2563eb", color: "#2563eb" }}
-          >
-            <RefreshCw size={16} />
-            {loading ? 'Memuat...' : 'Segarkan'}
-          </Button>
-        </div>
-      </div>
+      </Card>
 
-      {/* Summary Cards */}
-      <div className="summary-grid">
-        {summaryCards.map((card) => {
-          const Icon = card.icon;
-          return (
-            <Card key={card.label} className="summary-card" glass>
-              <div className="summary-card__header">
-                <div>
-                  <span className="summary-card__label">{card.label}</span>
-                  <p className="summary-card__subtitle">{card.subtitle}</p>
-                </div>
-                <span className={`summary-card__icon summary-card__icon--${card.tone}`}>
-                  <Icon size={20} />
-                </span>
-              </div>
-              <div className={`summary-card__value summary-card__value--${card.tone}`}>{card.value}</div>
-              <div className="summary-card__change">{card.change}</div>
-            </Card>
-          );
-        })}
+      <div className="leave-requests-wrapper">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Total Lokasi</p>
+              <p className="leave-summary-subtitle">Semua lokasi terdaftar</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-blue">
+              <BarChart3 size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-blue">{locations.length}</div>
+          <p className="leave-summary-trend">Data lokasi aktif</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Dengan Koordinat</p>
+              <p className="leave-summary-subtitle">Latitude dan longitude valid</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-green">
+              <MapPin size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-green">{withCoordinateCount}</div>
+          <p className="leave-summary-trend">Lokasi siap absensi</p>
+        </div>
       </div>
 
       {alertMessage && (
@@ -142,98 +128,97 @@ const LocationsPage = () => {
         />
       )}
 
-      {/* Table */}
-      <Card className="table-card" glass>
-        <div className="table-header-bar">
-          <h3>Data Lokasi</h3>
-          <span className="table-count">{locations.length} lokasi</span>
+      <div className="white-unified-wrapper">
+        <div className="wuw-header">
+          <div className="wuw-header-top">
+            <div className="wuw-title-area">
+              <h3>Data Lokasi</h3>
+              <span className="wuw-count-badge">{locations.length} lokasi</span>
+            </div>
+          </div>
         </div>
 
-        {locations.length > 0 ? (
-          <div className="table-wrap">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Nama Lokasi</th>
-                  <th>Departemen</th>
-                  <th>Latitude</th>
-                  <th>Longitude</th>
-                  <th>Radius</th>
-                  <th className="th-center">Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {locations.map((location, idx) => {
-                  const loc = location as any;
-                  return (
-                    <tr key={String(loc.id ?? idx)}>
-                      <td>
-                        <div className="cell-name">
-                          <div className="cell-avatar">
-                            <MapPin size={14} />
+        <div className="wuw-table-area">
+          {locations.length > 0 ? (
+            <div className="table-wrap">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Nama Lokasi</th>
+                    <th>Departemen</th>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                    <th>Radius</th>
+                    <th className="th-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {locations.map((location, idx) => {
+                    const loc = location as any;
+                    return (
+                      <tr key={String(loc.id ?? idx)}>
+                        <td>
+                          <div className="cell-name">
+                            <div className="cell-avatar">
+                              <MapPin size={14} />
+                            </div>
+                            <span className="cell-name-text">{loc.name || "N/A"}</span>
                           </div>
-                          <span className="cell-name-text">{loc.name || "N/A"}</span>
-                        </div>
-                      </td>
-                      <td>
-                        <span className="cell-tag" style={{ backgroundColor: '#f0f4ff', color: '#1e40af' }}>
-                          {String(loc.department || 'All Departments')}
-                        </span>
-                      </td>
-                      <td>{parseFloat(String(loc.latitude || 0)).toFixed(6)}</td>
-                      <td>{parseFloat(String(loc.longitude || 0)).toFixed(6)}</td>
-                      <td><span className="cell-tag">{String(loc.radius || 0)}m</span></td>
-                      <td>
-                        <div className="cell-actions">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => navigate(`/locations/edit/${loc.id}`)}
-                            disabled={loading || deleteConfirm === String(loc.id)}
-                            title="Edit"
-                          >
-                            <Pencil size={15} />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              if (deleteConfirm === String(loc.id)) {
-                                void handleDelete(String(loc.id));
-                              } else {
-                                setDeleteConfirm(String(loc.id));
-                              }
-                            }}
-                            disabled={loading}
-                            style={{ color: deleteConfirm === String(loc.id) ? '#ef4444' : undefined }}
-                            title="Hapus"
-                          >
-                            <Trash2 size={15} />
-                          </Button>
-                          {deleteConfirm === String(loc.id) && (
-                            <span style={{ fontSize: '0.8rem', color: '#ef4444', display: 'flex', alignItems: 'center' }}>
-                              Hapus?{' '}
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setDeleteConfirm(null)}
-                                disabled={loading}
-                                style={{ padding: '0 0.5rem' }}
-                              >
-                                Batal
-                              </Button>
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div className="table-card-inner">
+                        </td>
+                        <td>
+                          <span className="cell-tag" style={{ backgroundColor: '#f0f4ff', color: '#1e40af' }}>
+                            {String(loc.department || 'All Departments')}
+                          </span>
+                        </td>
+                        <td>{parseFloat(String(loc.latitude || 0)).toFixed(6)}</td>
+                        <td>{parseFloat(String(loc.longitude || 0)).toFixed(6)}</td>
+                        <td><span className="cell-tag">{String(loc.radius || 0)}m</span></td>
+                        <td>
+                          <div className="action-btn-group">
+                            <button
+                              className="action-btn action-btn-edit"
+                              onClick={() => navigate(`/locations/edit/${loc.id}`)}
+                              disabled={loading || deleteConfirm === String(loc.id)}
+                              title="Edit"
+                            >
+                              <Pencil size={16} />
+                            </button>
+                            <button
+                              className="action-btn action-btn-delete"
+                              onClick={() => {
+                                if (deleteConfirm === String(loc.id)) {
+                                  void handleDelete(String(loc.id));
+                                } else {
+                                  setDeleteConfirm(String(loc.id));
+                                }
+                              }}
+                              disabled={loading}
+                              title="Hapus"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                            {deleteConfirm === String(loc.id) && (
+                              <span style={{ fontSize: '0.8rem', color: '#ef4444', display: 'flex', alignItems: 'center' }}>
+                                Hapus?{' '}
+                                <button
+                                  className="action-btn"
+                                  onClick={() => setDeleteConfirm(null)}
+                                  disabled={loading}
+                                  style={{ padding: '4px 8px', fontSize: '0.75rem', background: '#f1f5f9', color: '#64748b' }}
+                                >
+                                  Batal
+                                </button>
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : (
             <div className="empty-state">
               <MapPin size={32} style={{ opacity: 0.4 }} />
               <p>Belum ada lokasi. Buat lokasi baru untuk memulai.</p>
@@ -246,9 +231,9 @@ const LocationsPage = () => {
                 Buat Lokasi Pertama
               </Button>
             </div>
-          </div>
-        )}
-      </Card>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

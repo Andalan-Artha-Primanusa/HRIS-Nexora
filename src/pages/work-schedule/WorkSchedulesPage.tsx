@@ -6,16 +6,78 @@ import { Alert } from "@/shared/ui/Alert";
 import { getAllWorkSchedules, deleteWorkSchedule } from "@/features/work-schedule/api/work-schedule.service";
 import type { WorkScheduleItem } from "@/features/work-schedule/types/work-schedule.types";
 import { 
+  Activity,
   Clock, 
   Pencil, 
   Plus, 
   RefreshCw, 
   Trash2, 
   CalendarDays,
-  Timer
+  Timer,
+  TrendingUp
 } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
 import "./WorkSchedulesPage.css";
+
+const parseTimeToMinutes = (time?: string) => {
+  if (!time) {
+    return null;
+  }
+
+  const [hour, minute] = time.split(":").map(Number);
+  if (!Number.isFinite(hour) || !Number.isFinite(minute)) {
+    return null;
+  }
+
+  return hour * 60 + minute;
+};
+
+const formatDuration = (minutes: number | null) => {
+  if (minutes === null || minutes <= 0) {
+    return "-";
+  }
+
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+
+  if (remainingMinutes === 0) {
+    return `${hours} Jam`;
+  }
+
+  return `${hours}j ${remainingMinutes}m`;
+};
+
+const calculateShiftDuration = (schedule: WorkScheduleItem) => {
+  const checkIn = parseTimeToMinutes(schedule.check_in_time);
+  const checkOut = parseTimeToMinutes(schedule.check_out_time);
+
+  if (checkIn === null || checkOut === null) {
+    return null;
+  }
+
+  return checkOut >= checkIn ? checkOut - checkIn : checkOut + 24 * 60 - checkIn;
+};
+
+const formatEarliestTime = (schedules: WorkScheduleItem[]) => {
+  const times = schedules
+    .map((schedule) => parseTimeToMinutes(schedule.check_in_time))
+    .filter((time): time is number => time !== null)
+    .sort((first, second) => first - second);
+
+  if (times.length === 0) {
+    return "-";
+  }
+
+  const earliest = times[0];
+  const hour = String(Math.floor(earliest / 60)).padStart(2, "0");
+  const minute = String(earliest % 60).padStart(2, "0");
+
+  return `${hour}:${minute}`;
+};
+
+const getErrorMessage = (error: unknown, fallback: string) => {
+  return error instanceof Error ? error.message : fallback;
+};
 
 const WorkSchedulesPage = () => {
   const navigate = useNavigate();
@@ -25,14 +87,17 @@ const WorkSchedulesPage = () => {
   const [statusType, setStatusType] = useState<"success" | "error" | "info">("info");
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | number | null>(null);
 
-  const loadSchedules = async () => {
+  const loadSchedules = async (options: { clearMessage?: boolean } = {}) => {
+    const { clearMessage = true } = options;
     setLoading(true);
-    setStatusMessage("");
+    if (clearMessage) {
+      setStatusMessage("");
+    }
     try {
       const result = await getAllWorkSchedules();
       setSchedules(result.items);
-    } catch (err: any) {
-      setStatusMessage(err.message || "Gagal memuat jadwal kerja");
+    } catch (error) {
+      setStatusMessage(getErrorMessage(error, "Gagal memuat jadwal kerja"));
       setStatusType("error");
     } finally {
       setLoading(false);
@@ -46,9 +111,9 @@ const WorkSchedulesPage = () => {
       setStatusMessage("Jadwal kerja berhasil dihapus");
       setStatusType("success");
       setDeleteConfirmId(null);
-      await loadSchedules();
-    } catch (err: any) {
-      setStatusMessage(err.message || "Gagal menghapus jadwal kerja");
+      await loadSchedules({ clearMessage: false });
+    } catch (error) {
+      setStatusMessage(getErrorMessage(error, "Gagal menghapus jadwal kerja"));
       setStatusType("error");
     } finally {
       setLoading(false);
@@ -58,6 +123,17 @@ const WorkSchedulesPage = () => {
   useEffect(() => {
     void loadSchedules();
   }, []);
+
+  const totalDuration = schedules.reduce((total, schedule) => {
+    const duration = calculateShiftDuration(schedule);
+    return duration === null ? total : total + duration;
+  }, 0);
+  const schedulesWithDuration = schedules.filter((schedule) => calculateShiftDuration(schedule) !== null).length;
+  const averageDuration = schedulesWithDuration > 0 ? Math.round(totalDuration / schedulesWithDuration) : null;
+  const averageGracePeriod =
+    schedules.length > 0
+      ? Math.round(schedules.reduce((total, schedule) => total + Number(schedule.grace_period || 0), 0) / schedules.length)
+      : 0;
 
   const summaryCards = [
     {
@@ -69,62 +145,82 @@ const WorkSchedulesPage = () => {
       icon: Clock,
     },
     {
-      label: "Jam Kerja Standar",
-      subtitle: "Rata-rata durasi",
-      value: "9 Jam",
-      change: "Termasuk istirahat",
+      label: "Rata-rata Durasi",
+      subtitle: "Durasi shift terjadwal",
+      value: formatDuration(averageDuration),
+      change: schedulesWithDuration > 0 ? `${schedulesWithDuration} shift terhitung` : "Belum ada durasi",
       tone: "green" as const,
       icon: CalendarDays,
+    },
+    {
+      label: "Grace Period",
+      subtitle: "Rata-rata toleransi",
+      value: `${averageGracePeriod} mnt`,
+      change: "Batas keterlambatan",
+      tone: "orange" as const,
+      icon: Timer,
+    },
+    {
+      label: "Jam Masuk Awal",
+      subtitle: "Shift paling pagi",
+      value: formatEarliestTime(schedules),
+      change: schedules.length > 0 ? "Berdasarkan jam masuk" : "Belum ada jadwal",
+      tone: "purple" as const,
+      icon: TrendingUp,
     },
   ];
 
   return (
-    <div className="crud-page">
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">Workforce Center</span>
-          <h1>Manajemen Jadwal Kerja</h1>
-          <p>Kelola shift, jam masuk, jam pulang, dan toleransi keterlambatan karyawan.</p>
+    <div className="crud-page work-schedules-page">
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Activity size={16} />
+              <span>Workforce Center</span>
+            </div>
+            <h1 className="hero-title">Manajemen Jadwal Kerja</h1>
+            <p className="hero-subtitle">
+              Kelola shift, jam masuk, jam pulang, dan toleransi keterlambatan karyawan dalam satu tampilan.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button
+              className="btn-outline"
+              onClick={() => void loadSchedules()}
+              disabled={loading}
+            >
+              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+              {loading ? "Memuat..." : "Segarkan"}
+            </button>
+            <button
+              className="btn-primary"
+              onClick={() => navigate("/work-schedules/add")}
+              disabled={loading}
+            >
+              <Plus size={16} />
+              Buat Jadwal Baru
+            </button>
+          </div>
         </div>
-        <div className="page-header-actions">
-          <Button
-            variant="primary"
-            size="md"
-            onClick={() => navigate("/work-schedules/add")}
-            disabled={loading}
-          >
-            <Plus size={16} />
-            Buat Jadwal Baru
-          </Button>
-          <Button
-            variant="outline"
-            size="md"
-            onClick={() => void loadSchedules()}
-            disabled={loading}
-            style={{ borderColor: "#2563eb", color: "#2563eb" }}
-          >
-            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-            {loading ? "Memuat..." : "Segarkan"}
-          </Button>
-        </div>
-      </div>
+      </Card>
 
       <div className="summary-grid">
         {summaryCards.map((card) => {
           const Icon = card.icon;
           return (
-            <Card key={card.label} className="summary-card" glass>
-              <div className="summary-card__header">
+            <Card key={card.label} className="metric-card">
+              <div className="metric-header">
                 <div>
-                  <span className="summary-card__label">{card.label}</span>
-                  <p className="summary-card__subtitle">{card.subtitle}</p>
+                  <span className="metric-label">{card.label}</span>
+                  <p className="metric-subtitle">{card.subtitle}</p>
                 </div>
-                <span className={`summary-card__icon summary-card__icon--${card.tone}`}>
-                  <Icon size={20} />
+                <span className={`metric-icon metric-icon--${card.tone}`}>
+                  <Icon size={24} />
                 </span>
               </div>
-              <div className={`summary-card__value summary-card__value--${card.tone}`}>{card.value}</div>
-              <div className="summary-card__change">{card.change}</div>
+              <div className="metric-value">{card.value}</div>
+              <div className="metric-change">{card.change}</div>
             </Card>
           );
         })}
@@ -139,13 +235,30 @@ const WorkSchedulesPage = () => {
         />
       )}
 
-      <Card className="table-card" glass>
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <CalendarDays size={24} />
+          </div>
+          <div>
+            <h2 className="analytics-title">Daftar Shift & Jadwal</h2>
+            <p className="analytics-subtitle">Pantau konfigurasi jam kerja yang digunakan karyawan.</p>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="table-card work-table-card">
         <div className="table-header-bar">
-          <h3>Daftar Shift & Jadwal</h3>
+          <h3>Data Jadwal Kerja</h3>
           <span className="table-count">{schedules.length} jadwal</span>
         </div>
 
-        {schedules.length > 0 ? (
+        {loading && schedules.length === 0 ? (
+          <div className="empty-state work-empty-state">
+            <Clock size={48} />
+            <p>Memuat jadwal kerja...</p>
+          </div>
+        ) : schedules.length > 0 ? (
           <div className="table-wrap">
             <table className="data-table">
               <thead>
@@ -179,26 +292,25 @@ const WorkSchedulesPage = () => {
                       </span>
                     </td>
                     <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <Timer size={14} style={{ color: '#64748b' }} />
-                        <span style={{ fontWeight: 600, color: '#1e293b' }}>
+                      <div className="grace-period-cell">
+                        <Timer size={14} />
+                        <span>
                           {schedule.grace_period} menit
                         </span>
                       </div>
                     </td>
                     <td>
-                      <div className="cell-actions">
-                        <Button
-                          variant="outline"
-                          size="sm"
+                      <div className="action-btn-group">
+                        <button
+                          className="action-btn action-btn-edit"
                           onClick={() => navigate(`/work-schedules/edit/${schedule.id}`)}
                           disabled={loading}
+                          title="Edit"
                         >
-                          <Pencil size={15} />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
+                          <Pencil size={16} />
+                        </button>
+                        <button
+                          className="action-btn action-btn-delete"
                           onClick={() => {
                             if (deleteConfirmId === schedule.id) {
                               void handleDelete(schedule.id);
@@ -207,22 +319,20 @@ const WorkSchedulesPage = () => {
                             }
                           }}
                           disabled={loading}
-                          style={{ color: deleteConfirmId === schedule.id ? '#ef4444' : undefined }}
+                          title="Hapus"
                         >
-                          <Trash2 size={15} />
-                        </Button>
+                          <Trash2 size={16} />
+                        </button>
                         {deleteConfirmId === schedule.id && (
-                          <span style={{ fontSize: '0.8rem', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span className="delete-confirm">
                             Yakin?
-                            <Button
-                              variant="ghost"
-                              size="sm"
+                            <button
+                              className="delete-confirm__cancel"
                               onClick={() => setDeleteConfirmId(null)}
                               disabled={loading}
-                              style={{ padding: '0 4px', fontSize: '0.8rem', color: '#64748b' }}
                             >
                               Batal
-                            </Button>
+                            </button>
                           </span>
                         )}
                       </div>
@@ -233,14 +343,13 @@ const WorkSchedulesPage = () => {
             </table>
           </div>
         ) : (
-          <div className="empty-state">
-            <Clock size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
+          <div className="empty-state work-empty-state">
+            <Clock size={48} />
             <p>Belum ada jadwal kerja yang terdaftar.</p>
             <Button
               variant="primary"
               size="md"
               onClick={() => navigate("/work-schedules/add")}
-              style={{ marginTop: '1rem' }}
             >
               <Plus size={16} />
               Buat Jadwal Pertama

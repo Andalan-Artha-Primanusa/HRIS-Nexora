@@ -8,6 +8,12 @@ import {
   RefreshCw,
   PieChart as PieChartIcon,
   Activity,
+  CheckCircle,
+  XCircle,
+  TrendingUp,
+  FileText,
+  DollarSign,
+  Clock3,
 } from 'lucide-react';
 import {
   BarChart,
@@ -27,6 +33,8 @@ import {
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 import './ReportsDashboardPage.css';
 
 type DashboardRecord = Record<string, unknown>;
@@ -219,44 +227,86 @@ const ReportsDashboardPage: React.FC = () => {
 
   return (
     <div className="reports-dashboard">
-      <Card className="reports-hero-card" glass>
-        <div className="reports-hero-copy">
-          <p className="reports-badge">HR Intelligence</p>
-          <h1 className="reports-title">Pusat Analitik HR</h1>
-          <p className="reports-subtitle">
-            Dashboard ringkasan analitik lintas departemen. Pantau tren kehadiran, 
-            status cuti, performa payroll, dan klaim pengeluaran secara visual dan real-time.
-          </p>
-        </div>
-        <div className="reports-actions">
-          <Button variant="primary" size="md" onClick={() => void loadData()} disabled={loading}>
-            <RefreshCw size={18} className={loading ? 'animate-spin' : ''} style={{ marginRight: '8px' }} />
-            {loading ? 'Menyinkronkan...' : 'Sinkronisasi Data'}
-          </Button>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <BarChart3 size={16} />
+              <span>Pusat Analitik</span>
+            </div>
+            <h1 className="hero-title">Pusat Analitik HR</h1>
+            <p className="hero-subtitle">
+              Dashboard ringkasan analitik lintas departemen. Pantau tren kehadiran,
+              status cuti, performa payroll, dan klaim pengeluaran secara visual dan real-time.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => void loadData()} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              {loading ? 'Menyinkronkan...' : 'Sinkronisasi Data'}
+            </button>
+          </div>
         </div>
       </Card>
 
       {error && <p className="reports-error">{error}</p>}
 
-      <div className="reports-metrics-grid">
-        {summaryCards.map(card => {
-          const Icon = card.icon;
-          return (
-            <Card key={card.label} className="report-metric-card" glass>
-              <div className="report-metric-header">
-                <div>
-                  <span className="report-metric-label">{card.label}</span>
-                  <p className="report-metric-sublabel">{card.sub}</p>
-                </div>
-                <span className={`report-metric-icon report-metric-icon--${card.tone}`}>
-                  <Icon size={22} />
-                </span>
-              </div>
-              <div className="report-metric-value">{card.value}</div>
-              <div className="report-metric-change neutral">Live HR Data</div>
-            </Card>
-          );
-        })}
+      <div className="leave-requests-wrapper">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Total Karyawan</p>
+              <p className="leave-summary-subtitle">{activeEmployees} aktif</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-blue">
+              <Users size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-blue">{totalEmployees}</div>
+          <p className="leave-summary-trend">Karyawan Terdaftar</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Kehadiran Hari Ini</p>
+              <p className="leave-summary-subtitle">{presentToday} hadir</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-green">
+              <CheckCircle size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-green">{attendanceRate}%</div>
+          <p className="leave-summary-trend">Tingkat Kehadiran</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Cuti Tertunda</p>
+              <p className="leave-summary-subtitle">{leaveRecords.length} total cuti</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-orange">
+              <CalendarDays size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-orange">{pendingLeaves}</div>
+          <p className="leave-summary-trend">Cuti Tertunda</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Payroll Diproses</p>
+              <p className="leave-summary-subtitle">{payrollRecords.length} records</p>
+            </div>
+            <div className="leave-summary-icon-wrapper" style={{ background: '#f5f3ff' }}>
+              <Wallet size={28} color="#8b5cf6" />
+            </div>
+          </div>
+          <div className="leave-summary-value" style={{ color: '#8b5cf6' }}>{payrollRate}%</div>
+          <p className="leave-summary-trend">Payroll Diproses</p>
+        </div>
       </div>
 
       <div className="reports-charts-grid">

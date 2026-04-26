@@ -3,10 +3,11 @@ import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { Alert } from '@/shared/ui/Alert';
 import { api } from '@/shared/api/httpClient';
-import { CheckCircle2, MapPin, Building2 } from 'lucide-react';
+import { CheckCircle2, MapPin, Building2, Clock, LogIn } from 'lucide-react';
 import type { LocationItem } from '@/features/location/types/location.types';
 import { getAllLocations } from '@/features/location/api/location.service';
-// import { useAuthStore } from '@/app/store/auth.store';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 import './AttendancePages.css';
 
 const AttendanceCheckInPage = () => {
@@ -149,19 +150,33 @@ const AttendanceCheckInPage = () => {
   };
 
   return (
-    <div className="attendance-page">
-      <div className="attendance-page-header">
-        <div>
-          <span className="attendance-badge">Check In</span>
-          <h1>Attendance Check In</h1>
-          <p>Pilih lokasi kerja Anda dan sistem akan memvalidasi posisi GPS Anda.</p>
-        </div>
-        <div className="attendance-status-card">
-          <CheckCircle2 size={22} />
-          <div>
-            <p>Lokasi Terdeteksi</p>
-            <strong>{status}</strong>
+    <div className="crud-page attendance-page">
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <LogIn size={16} />
+              <span>Kehadiran</span>
+            </div>
+            <h1 className="hero-title">Absensi Check In</h1>
+            <p className="hero-subtitle">
+              Pilih lokasi kerja Anda dan sistem akan memvalidasi posisi GPS Anda.
+            </p>
           </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={detectGPS}>
+              <Clock size={16} />
+              Deteksi Lokasi
+            </button>
+          </div>
+        </div>
+      </Card>
+
+      <div className="attendance-status-card">
+        <CheckCircle2 size={22} />
+        <div>
+          <p>Lokasi Terdeteksi</p>
+          <strong>{status}</strong>
         </div>
       </div>
 

@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
-import { BarChart3, CreditCard, FileText, ShieldCheck } from "lucide-react";
+import { BarChart3, CreditCard, FileText, ShieldCheck, RefreshCw, CheckCircle, DollarSign } from "lucide-react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
+import { PayrollStatusBadge } from "@/shared/ui/PayrollStatusBadge";
 import { payrollService, toSafeArray } from "@/features/payroll/api/payroll.service";
 import { getAllEmployees } from "@/features/employee/api/employee.service";
 import type { PayrollItem } from "@/features/payroll/types/payroll.types";
 import type { EmployeeItem } from "@/features/employee/types/employee.types";
-import "../admin/AdminCrudPages.css";
+import "@/shared/styles/CrudPage.css";
+import "@/pages/dashboard/overview/OverviewPage.css";
+import "@/pages/payroll/PayrollShared.css";
 import "./PayrollPaymentPage.css";
 
 const PayrollPaymentPage = () => {
@@ -181,49 +184,72 @@ const PayrollPaymentPage = () => {
         </div>
       </Modal>
 
-      <Card className="payroll-payment-hero" glass>
-        <div className="crud-header payroll-payment-header">
-          <div className="crud-header-copy">
-            <p className="crud-page-badge">Payroll Center</p>
-            <div className="crud-header-title-row">
-              <span className="crud-header-icon"><CreditCard size={18} /></span>
-              <h1>Pembayaran Payroll</h1>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <CreditCard size={16} />
+              <span>Pusat Payroll</span>
             </div>
-            <p>Tandai payroll yang sudah dibayarkan kepada karyawan dengan tampilan yang rapi, konsisten, dan mudah dipindai.</p>
+            <h1 className="hero-title">Pembayaran Payroll</h1>
+            <p className="hero-subtitle">
+              Tandai payroll yang sudah dibayarkan kepada karyawan.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => window.location.reload()} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+            <button className="btn-primary" onClick={() => window.location.href = '/payroll'}>
+              Kelola Payroll
+            </button>
           </div>
         </div>
       </Card>
 
-      <div className="payroll-payment-summary-grid">
+      <div className="summary-grid">
         {summaryCards.map((card) => {
           const Icon = card.icon;
 
           return (
-            <Card key={card.label} className="payroll-payment-summary-card" glass>
-              <div className="payroll-payment-summary-header">
+            <Card key={card.label} className="metric-card">
+              <div className="metric-header">
                 <div>
-                  <span className="payroll-payment-summary-label">{card.label}</span>
-                  <p className="payroll-payment-summary-subtitle">{card.subtitle}</p>
+                  <span className="metric-label">{card.label}</span>
+                  <p className="metric-subtitle">{card.subtitle}</p>
                 </div>
-                <span className={`payroll-payment-summary-icon payroll-payment-summary-icon--${card.tone}`}>
-                  <Icon size={18} />
+                <span className={`metric-icon metric-icon--${card.tone}`}>
+                  <Icon size={22} />
                 </span>
               </div>
-              <div className="payroll-payment-summary-value">{card.value}</div>
-              <div className="payroll-payment-summary-change">{card.change}</div>
+              <div className="metric-value" style={{ color: card.tone === 'orange' ? '#f59e0b' : card.tone === 'blue' ? '#2563eb' : card.tone === 'green' ? '#10b981' : '#8b5cf6' }}>{card.value}</div>
+              <div className="summary-card-change">{card.change}</div>
             </Card>
           );
         })}
       </div>
 
       {message && message.type === "success" && (
-        <Card className="crud-card payroll-payment-message" glass>
-          <p>{message.text}</p>
+        <Card className="message-card">
+          <CheckCircle size={20} style={{ color: '#10b981', marginRight: '8px' }} />
+          <span>{message.text}</span>
         </Card>
       )}
 
-      <Card className="crud-card payroll-payment-card" glass>
-        <h2>Pilih Payroll untuk Tandai Dibayar</h2>
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <DollarSign size={24} />
+          </div>
+          <div>
+            <h2 className="analytics-title">Pembayaran Payroll</h2>
+            <p className="analytics-subtitle">Pilih payroll untuk tandai dibayar</p>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="crud-table-card">
         <div className="payroll-payment-input-grid">
           <div className="payroll-payment-input-panel">
             <label>
@@ -283,9 +309,7 @@ const PayrollPaymentPage = () => {
         {selectedPayroll && (
           <div className="payroll-payment-modal-container">
             <div className="payroll-payment-status-wrap" style={{ marginBottom: '1.5rem' }}>
-              <span className="payroll-status-pill" style={{ backgroundColor: getStatusColor(selectedPayroll.status) }}>
-                {getStatusLabel(selectedPayroll.status)}
-              </span>
+              <PayrollStatusBadge status={selectedPayroll.status || 'pending'} size="lg" />
             </div>
 
             <div className="payroll-payment-detail-grid">

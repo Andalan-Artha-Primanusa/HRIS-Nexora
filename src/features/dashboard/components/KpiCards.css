@@ -32,12 +32,14 @@
 }
 
 .kpi-icon-wrapper {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-md);
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
 }
 
 .kpi-trend {
@@ -49,9 +51,27 @@
 }
 
 /* Icon Colors */
-.color-blue { background-color: var(--primary-blue-light); color: var(--primary-blue); }
-.color-green { background-color: var(--status-success-bg); color: var(--status-success); }
-.color-orange { background-color: var(--status-warning-bg); color: var(--status-warning); }
-.color-red { background-color: var(--status-danger-bg); color: var(--status-danger); }
-.color-purple { background-color: #F3E8FF; color: #9333EA; }
-.color-teal { background-color: #CCFBF1; color: #14B8A6; }
+.color-blue { 
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); 
+  color: #1d4ed8; 
+}
+.color-green { 
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); 
+  color: #059669; 
+}
+.color-orange { 
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); 
+  color: #d97706; 
+}
+.color-red { 
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); 
+  color: #dc2626; 
+}
+.color-purple { 
+  background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%); 
+  color: #7c3aed; 
+}
+.color-teal { 
+  background: linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%); 
+  color: #0d9488; 
+}

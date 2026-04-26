@@ -72,32 +72,32 @@ export const LeaveTable: React.FC<LeaveTableProps> = ({ items, onView, onApprove
                   </span>
                 </td>
                 <td>
-                  <div className="cell-actions">
-                    <Button variant="ghost" size="sm" onClick={() => onView(item)} title="Lihat Detail">
-                      <Eye size={18} color="#8b5cf6" />
-                    </Button>
+                  <div className="action-btn-group">
+                    <button className="action-btn action-btn-view" onClick={() => onView(item)} title="Lihat Detail">
+                      <Eye size={16} />
+                    </button>
                     
                     {isAdmin && status === 'pending' && (
                       <>
-                        <Button variant="ghost" size="sm" onClick={() => onApprove?.(String(item.id))} title="Setujui">
-                          <Check size={18} color="#10b981" />
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => onReject?.(String(item.id))} title="Tolak">
-                          <X size={18} color="#ef4444" />
-                        </Button>
+                        <button className="action-btn action-btn-success" onClick={() => onApprove?.(String(item.id))} title="Setujui">
+                          <Check size={16} />
+                        </button>
+                        <button className="action-btn action-btn-delete" onClick={() => onReject?.(String(item.id))} title="Tolak">
+                          <X size={16} />
+                        </button>
                       </>
                     )}
 
                     {!isAdmin && status === 'pending' && onEdit && (
-                       <Button variant="ghost" size="sm" onClick={() => onEdit(String(item.id))} title="Edit">
-                         <Pencil size={18} color="#2563eb" />
-                       </Button>
+                       <button className="action-btn action-btn-edit" onClick={() => onEdit(String(item.id))} title="Edit">
+                         <Pencil size={16} />
+                       </button>
                     )}
 
                     {onDelete && (
-                       <Button variant="ghost" size="sm" onClick={() => onDelete(String(item.id))} title="Hapus">
-                         <Trash2 size={18} color="#ef4444" />
-                       </Button>
+                       <button className="action-btn action-btn-delete" onClick={() => onDelete(String(item.id))} title="Hapus">
+                         <Trash2 size={16} />
+                       </button>
                     )}
                   </div>
                 </td>

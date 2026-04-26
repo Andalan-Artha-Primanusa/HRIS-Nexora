@@ -27,8 +27,13 @@ import {
   Briefcase,
   FileText,
   TrendingUp,
+  Users,
+  UserCheck,
+  CalendarOff,
+  Building2,
 } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
+import "@/pages/dashboard/overview/OverviewPage.css";
 import "./EmployeesPage.css";
 
 
@@ -162,34 +167,34 @@ const EmployeesPage = () => {
   const employeeSummaryCards = useMemo(
     () => [
       {
-        label: "Total Employees",
-        subtitle: "Semua data karyawan",
+        label: "Total Karyawan",
+        subtitle: "Seluruh data karyawan",
         value: String(items.length),
-        change: "Seluruh data yang tersimpan",
+        change: "Data tersimpan di sistem",
         tone: "blue" as const,
-        icon: Briefcase,
+        icon: Users,
       },
       {
-        label: "Filtered Results",
-        subtitle: "Hasil pencarian saat ini",
+        label: "Hasil Filter",
+        subtitle: "Karyawan sesuai pencarian",
         value: String(sortedEmployees.length),
-        change: `${paginatedEmployees.length} data di halaman ini`,
+        change: `${paginatedEmployees.length} data per halaman`,
         tone: "green" as const,
         icon: Search,
       },
       {
-        label: "Departments",
-        subtitle: "Departemen unik yang aktif",
+        label: "Departemen",
+        subtitle: "Departemen yang aktif",
         value: String(uniqueDepartments.length),
-        change: "Distribusi struktur kerja",
+        change: "Struktur organisasi",
         tone: "orange" as const,
-        icon: Briefcase,
+        icon: Building2,
       },
       {
-        label: "Positions",
-        subtitle: "Jabatan unik yang tersedia",
+        label: "Jabatan",
+        subtitle: "Posisi yang tersedia",
         value: String(uniquePositions.length),
-        change: "Lapisan peran organisasi",
+        change: "Peran dalam organisasi",
         tone: "purple" as const,
         icon: Briefcase,
       },
@@ -332,156 +337,146 @@ const EmployeesPage = () => {
 
   return (
     <div className="crud-page">
-      {/* Header */}
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">People Center</span>
-          <h1>Daftar Karyawan</h1>
-          <p>Kelola jabatan, departemen, dan gaji karyawan dalam tampilan yang lebih rapi dan konsisten.</p>
+      {/* Header - Same style as Dashboard */}
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Briefcase size={16} />
+              <span>Pusat Karyawan</span>
+            </div>
+            <h1 className="hero-title">Daftar Karyawan</h1>
+            <p className="hero-subtitle">Kelola jabatan, departemen, dan data karyawan dalam tampilan yang rapi dan konsisten.</p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => void loadEmployees()}>
+              Segarkan
+            </button>
+            {canManageEmployees && (
+              <button className="btn-primary" onClick={() => navigate("/employees/add")}>
+                Tambah Karyawan
+              </button>
+            )}
+          </div>
         </div>
-        <div className="page-header-actions">
-          {/* Redundant buttons removed in favor of integrated wrapper actions */}
-        </div>
-      </div>
+      </Card>
 
       {/* Summary Cards */}
-      <div className="summary-grid">
+      <div className="employee-summary-wrapper">
         {employeeSummaryCards.map((card) => {
           const Icon = card.icon;
 
           return (
-            <Card key={card.label} className="summary-card" glass>
-              <div className="summary-card__header">
+            <div key={card.label} className="employee-summary-card">
+              <div className="employee-summary-header">
                 <div>
-                  <span className="summary-card__label">{card.label}</span>
-                  <p className="summary-card__subtitle">{card.subtitle}</p>
+                  <p className="employee-summary-label">{card.label}</p>
+                  <p className="employee-summary-subtitle">{card.subtitle}</p>
                 </div>
-                <span className={`summary-card__icon summary-card__icon--${card.tone}`}>
-                  <Icon size={20} />
-                </span>
+                <div className={`employee-summary-icon-wrapper employee-icon-${card.tone}`}>
+                  <Icon size={28} />
+                </div>
               </div>
-              <div className={`summary-card__value summary-card__value--${card.tone}`}>{card.value}</div>
-              <div className="summary-card__change">{card.change}</div>
-            </Card>
+              <div className={`employee-summary-value employee-value-${card.tone}`}>{card.value}</div>
+              <p className="employee-summary-trend">{card.change}</p>
+            </div>
           );
         })}
       </div>
 
-      {/* Elyra-Inspired Open Header Section */}
-      <div className="white-unified-wrapper">
-        <div className="wuw-header">
-          {/* Top Section: Title & Primary Action */}
-          <div className="wuw-header-top">
-            <div className="wuw-title-area">
-              <h3>Daftar Karyawan</h3>
-              <span className="wuw-count-badge">{items.length} Total</span>
-            </div>
-            <div className="wuw-actions-area">
-              <Button
-                variant="outline"
-                size="md"
-                onClick={() => void loadEmployees()}
-                disabled={loading}
-                className="btn-pill btn-refresh"
+      {/* Analytics Title Card */}
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <Users size={24} />
+          </div>
+          <div>
+            <h2 className="analytics-title">Daftar Karyawan</h2>
+            <p className="analytics-subtitle">Kelola dan lihat semua karyawan</p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Control Section */}
+      <Card className="control-section-card">
+        <div className="control-section-inner">
+          {/* Tabs */}
+          <div className="elyra-tabs">
+            {(["Semua", "Aktif", "Probation", "Resigned"] as const).map((tab) => (
+              <button
+                key={tab}
+                className={`elyra-tab ${activeTab === tab ? "active" : ""}`}
+                onClick={() => setActiveTab(tab)}
               >
-                <RefreshCw size={18} />
-                <span>Segarkan</span>
-              </Button>
-              {canManageEmployees && (
-                <Button
-                  variant="primary"
-                  size="md"
-                  onClick={() => navigate("/employees/add")}
-                  disabled={loading}
-                  className="btn-pill btn-add-employee"
-                >
-                  <Plus size={20} />
-                  <span>Tambah Karyawan</span>
-                </Button>
-              )}
-            </div>
+                {tab}
+              </button>
+            ))}
           </div>
 
-          {/* Bottom Section: Segmented Tabs & Search Tools */}
-          <div className="wuw-header-bottom">
-            <div className="elyra-tabs">
-              {(["Semua", "Aktif", "Probation", "Resigned"] as const).map((tab) => (
-                <button
-                  key={tab}
-                  className={`elyra-tab ${activeTab === tab ? "active" : ""}`}
-                  onClick={() => setActiveTab(tab)}
-                >
-                  {tab}
-                </button>
-              ))}
+          {/* Search & Filter */}
+          <div className="control-actions">
+            <div className="search-box">
+              <div className="search-icon-inside"><Search size={18} /></div>
+              <input
+                type="text"
+                placeholder="Cari karyawan..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="search-input-pill"
+              />
             </div>
-
-            <div className="wuw-actions-area">
-              <div className="search-box">
-                <div className="search-icon-inside"><Search size={18} /></div>
-                <input
-                  type="text"
-                  placeholder="Cari karyawan..."
-                  value={searchText}
-                  onChange={(e) => setSearchText(e.target.value)}
-                  className="search-input-pill"
-                />
-              </div>
-              <button 
-                className={`filter-btn-rounded ${showFilters ? "active" : ""}`}
-                onClick={() => setShowFilters(!showFilters)}
-              >
-                <Filter size={18} />
-                <span>Filter</span>
-              </button>
-            </div>
+            <button 
+              className={`filter-btn-rounded ${showFilters ? "active" : ""}`}
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <Filter size={18} />
+              <span>Filter</span>
+            </button>
           </div>
         </div>
 
-        {/* Filter Panel (Integrated Dropdown) */}
+        {/* Filter Panel */}
         {showFilters && (
-          <div className="wuw-controls filter-panel-wrapper">
-            <div className="filter-panel-premium">
-              <div className="filter-row">
-                <div className="filter-group">
-                  <label>Departemen</label>
-                  <select
-                    value={selectedDepartment}
-                    onChange={(e) => setSelectedDepartment(e.target.value)}
-                    className="filter-select-premium"
-                  >
-                    <option value="">Semua Departemen</option>
-                    {uniqueDepartments.map((dept) => (
-                      <option key={dept} value={dept}>{dept}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="filter-group">
-                  <label>Jabatan</label>
-                  <select
-                    value={selectedPosition}
-                    onChange={(e) => setSelectedPosition(e.target.value)}
-                    className="filter-select-premium"
-                  >
-                    <option value="">Semua Jabatan</option>
-                    {uniquePositions.map((pos) => (
-                      <option key={pos} value={pos}>{pos}</option>
-                    ))}
-                  </select>
-                </div>
-                {(searchText || selectedDepartment || selectedPosition || activeTab !== "Semua") && (
-                  <div className="filter-group-reset">
-                    <Button variant="ghost" size="sm" onClick={clearFilters} className="btn-reset">
-                      Reset Filter
-                    </Button>
-                  </div>
-                )}
+          <div className="filter-dropdown">
+            <div className="filter-row">
+              <div className="filter-group">
+                <label>Departemen</label>
+                <select
+                  value={selectedDepartment}
+                  onChange={(e) => setSelectedDepartment(e.target.value)}
+                  className="filter-select-premium"
+                >
+                  <option value="">Semua Departemen</option>
+                  {uniqueDepartments.map((dept) => (
+                    <option key={dept} value={dept}>{dept}</option>
+                  ))}
+                </select>
               </div>
+              <div className="filter-group">
+                <label>Jabatan</label>
+                <select
+                  value={selectedPosition}
+                  onChange={(e) => setSelectedPosition(e.target.value)}
+                  className="filter-select-premium"
+                >
+                  <option value="">Semua Jabatan</option>
+                  {uniquePositions.map((pos) => (
+                    <option key={pos} value={pos}>{pos}</option>
+                  ))}
+                </select>
+              </div>
+              {(searchText || selectedDepartment || selectedPosition || activeTab !== "Semua") && (
+                <button className="btn-clear-filter" onClick={clearFilters}>
+                  Hapus Filter
+                </button>
+              )}
             </div>
           </div>
         )}
+      </Card>
 
-        {/* Integrated Table Area */}
+{/* Table Section */}
+      <div className="table-section">
         <div className="wuw-table-area">
           {loading && <LoadingState message="Memuat karyawan..." />}
           {!loading && errorMessage && (
@@ -505,11 +500,11 @@ const EmployeesPage = () => {
                 <table className="data-table">
                   <thead>
                     <tr>
-                      <th style={{ width: '400px' }}>Anggota Tim</th>
+                      <th style={{ width: '400px' }}>Nama Karyawan</th>
                       <th>Departemen</th>
                       <th>Jabatan</th>
                       <th>Lokasi</th>
-                      <th>Detail Bergabung</th>
+                      <th>Tanggal Bergabung</th>
                       <th className="th-center">Status</th>
                       <th className="th-center" style={{ width: '120px' }}>Aksi</th>
                     </tr>
@@ -522,7 +517,6 @@ const EmployeesPage = () => {
                             <div className="cell-avatar">
                               {item.user?.name ? item.user.name.charAt(0).toUpperCase() : String(item.id || 'E').charAt(0).toUpperCase()}
                             </div>
-
                             <div className="cell-stacked">
                               <span className="cell-name-text">{item.user?.name || "Unknown"}</span>
                               <span className="cell-stacked__sub">{item.employee_code || item.id}</span>
@@ -532,63 +526,41 @@ const EmployeesPage = () => {
                         <td><span style={{ color: '#475569', fontWeight: 600 }}>{item.department || "-"}</span></td>
                         <td><span style={{ color: '#64748b', fontWeight: 500 }}>{item.position || "-"}</span></td>
                         <td>
-                          <span className="badge-soft badge-soft--blue" style={{ borderRadius: '999px' }}>
+                          <span className="badge-soft badge-soft--blue">
                             {allLocations.find(l => String(l.id) === String(item.location_id))?.name || "Remote"}
                           </span>
                         </td>
                         <td>
                           <div className="cell-stacked">
                             <span className="cell-stacked__main" style={{ fontSize: '0.85rem' }}>{item.hire_date ? formatDateTime(item.hire_date) : "-"}</span>
-                            <span className="cell-stacked__sub">Join Date</span>
+                            <span className="cell-stacked__sub">Tanggal Masuk</span>
                           </div>
                         </td>
                         <td className="td-center">
                           <span className={`badge-soft badge-soft--${
                             item.status === "active" ? "green" : 
                             item.status === "pending" ? "orange" : "red"
-                          }`} style={{ borderRadius: '999px' }}>
+                          }`}>
                             {item.status === "active" ? "Aktif" : 
                              item.status === "pending" ? "Probation" : "Resigned"}
                           </span>
                         </td>
                         <td className="td-center">
-                          <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'center' }}>
-                            <Button
-                              variant="ghost"
-                              size="sm"
+                          <div className="action-btn-group">
+                            <button
+                              className="action-btn action-btn-edit"
                               onClick={() => navigate(`/employees/update/${item.id}`)}
-                              style={{ color: '#2563eb', padding: '0.4rem' }}
-                              title="Edit Profil"
+                              title="Edit"
                             >
                               <Pencil size={16} />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => navigate(`/legal/letters?employee=${item.id}`)}
-                              style={{ color: '#8b5cf6', padding: '0.4rem' }}
-                              title="Buat Surat"
-                            >
-                              <FileText size={16} />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => navigate(`/performance/summary?employee=${item.id}`)}
-                              style={{ color: '#10b981', padding: '0.4rem' }}
-                              title="Kenaikan Jabatan"
-                            >
-                              <TrendingUp size={16} />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
+                            </button>
+                            <button
+                              className="action-btn action-btn-delete"
                               onClick={() => void deleteExistingEmployee(String(item.id))}
-                              style={{ color: '#ef4444', padding: '0.4rem' }}
                               title="Hapus"
                             >
                               <Trash2 size={16} />
-                            </Button>
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -597,34 +569,35 @@ const EmployeesPage = () => {
                 </table>
               </div>
 
-              {/* Pagination (Elyra Style) */}
-              <div className="pagination" style={{ padding: '2.5rem', background: '#ffffff', borderTop: 'none', borderBottomLeftRadius: '32px', borderBottomRightRadius: '32px' }}>
-                <div className="pagination__info">
-                  <span style={{ color: '#94a3b8', fontSize: '0.9rem', fontWeight: 600 }}>
-                    Menampilkan <strong>{paginatedEmployees.length}</strong> data dari <strong>{sortedEmployees.length}</strong> karyawan
-                  </span>
+              {/* Pagination */}
+              <div className="table-pagination">
+                <div className="pagination-info">
+                  Menampilkan <strong>{paginatedEmployees.length}</strong> dari <strong>{sortedEmployees.length}</strong> karyawan
                 </div>
-                <div className="pagination__controls" style={{ gap: '0.75rem' }}>
-                  <Button
-                    variant="outline"
-                    size="md"
+                <div className="pagination-controls">
+                  <button
+                    className="pagination-btn"
                     onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
-                    className="btn-pill"
-                    style={{ height: '40px', background: '#ffffff', borderColor: '#e2e8f0', color: '#1e293b' }}
                   >
-                    Prev
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="md"
+                    ‹
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  <button
+                    className="pagination-btn"
                     onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                     disabled={currentPage === totalPages}
-                    className="btn-pill"
-                    style={{ height: '40px', background: '#ffffff', borderColor: '#e2e8f0', color: '#1e293b' }}
                   >
-                    Next
-                  </Button>
+                    ›
+</button>
                 </div>
               </div>
             </>

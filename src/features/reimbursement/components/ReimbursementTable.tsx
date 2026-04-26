@@ -1,4 +1,5 @@
 import React from 'react';
+import { Eye, Pencil, Send, Trash2 } from 'lucide-react';
 import type { ReimbursementItem } from '../types/reimbursement.types';
 
 interface ReimbursementTableProps {
@@ -99,22 +100,22 @@ export const ReimbursementTable: React.FC<ReimbursementTableProps> = ({
                   </span>
                 </td>
                 <td style={{ textAlign: 'right' }}>
-                  <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                  <div className="action-btn-group">
                     <button 
                       title="View Details" 
                       onClick={() => onView(item)}
-                      style={{ width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '10px', border: '1px solid #ede9fe', background: '#f5f3ff', cursor: 'pointer' }}
+                      className="action-btn action-btn-view"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                      <Eye size={16} />
                     </button>
                     
                     {item.status.toLowerCase() === 'draft' && onEdit && (
                       <button 
                         title="Edit" 
                         onClick={() => onEdit(item)}
-                        style={{ width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '10px', border: '1px solid #dbeafe', background: '#eff6ff', cursor: 'pointer' }}
+                        className="action-btn action-btn-edit"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                        <Pencil size={16} />
                       </button>
                     )}
                     
@@ -122,9 +123,9 @@ export const ReimbursementTable: React.FC<ReimbursementTableProps> = ({
                       <button 
                         title="Submit" 
                         onClick={() => onSubmit(item)}
-                        style={{ width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '10px', border: '1px solid #dbeafe', background: '#eff6ff', cursor: 'pointer' }}
+                        className="action-btn action-btn-success"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                        <Send size={16} />
                       </button>
                     )}
                     
@@ -132,9 +133,9 @@ export const ReimbursementTable: React.FC<ReimbursementTableProps> = ({
                       <button 
                         title="Delete" 
                         onClick={() => onDelete(item)}
-                        style={{ width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '10px', border: '1px solid #fee2e2', background: '#fef2f2', cursor: 'pointer' }}
+                        className="action-btn action-btn-delete"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                        <Trash2 size={16} />
                       </button>
                     )}
                   </div>

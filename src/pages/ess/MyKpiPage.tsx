@@ -12,9 +12,12 @@ import {
   Calendar,
   Eye,
   X,
-  User
+  User,
+  TrendingUp
 } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
+import "@/pages/dashboard/overview/OverviewPage.css";
+import "@/pages/payroll/PayrollShared.css";
 import "./EssPages.css";
 import { getMyKpi, submitMyKpi } from "@/features/ess/api/ess.service";
 
@@ -126,29 +129,69 @@ const MyKpiPage = () => {
 
   return (
     <div className="crud-page">
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">Layanan Mandiri</span>
-          <h1>Performa Saya (KPI)</h1>
-          <p>Pantau target kinerja dan ajukan pencapaian Anda.</p>
-        </div>
-      </div>
-
-      <div className="summary-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 24, marginBottom: 32 }}>
-        <Card glass style={{ padding: 20 }}>
-          <div style={{ fontSize: 12, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: 8 }}>Total KPI</div>
-          <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)' }}>{stats.total}</div>
-        </Card>
-        <Card glass style={{ padding: 20 }}>
-          <div style={{ fontSize: 12, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <CheckCircle2 size={14} color="#10b981" /> Disetujui
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Target size={16} />
+              <span>Layanan Mandiri</span>
+            </div>
+            <h1 className="hero-title">Performa Saya (KPI)</h1>
+            <p className="hero-subtitle">
+              Pantau target kinerja dan ajukan pencapaian Anda.
+            </p>
           </div>
-          <div style={{ fontSize: 24, fontWeight: 700, color: '#10b981' }}>{stats.approved}</div>
-        </Card>
-        <Card glass style={{ padding: 20 }}>
-          <div style={{ fontSize: 12, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: 8 }}>Rata-rata Skor</div>
-          <div style={{ fontSize: 24, fontWeight: 700, color: '#8b5cf6' }}>{stats.avgScore.toFixed(1)}%</div>
-        </Card>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={loadData} disabled={loading}>
+              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+              Segarkan
+            </button>
+          </div>
+        </div>
+      </Card>
+
+      <div className="leave-requests-wrapper">
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Total KPI</p>
+              <p className="leave-summary-subtitle">KPI Anda</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-blue">
+              <Target size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-blue">{stats.total}</div>
+          <p className="leave-summary-trend">Total KPI</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Disetujui</p>
+              <p className="leave-summary-subtitle">KPI yang disetujui</p>
+            </div>
+            <div className="leave-summary-icon-wrapper leave-icon-green">
+              <CheckCircle2 size={28} />
+            </div>
+          </div>
+          <div className="leave-summary-value leave-value-green">{stats.approved}</div>
+          <p className="leave-summary-trend">KPI Disetujui</p>
+        </div>
+
+        <div className="leave-summary-card">
+          <div className="leave-summary-header">
+            <div>
+              <p className="leave-summary-label">Rata-rata Skor</p>
+              <p className="leave-summary-subtitle">Skor kinerja</p>
+            </div>
+            <div className="leave-summary-icon-wrapper" style={{ background: '#f5f3ff' }}>
+              <TrendingUp size={28} color="#8b5cf6" />
+            </div>
+          </div>
+          <div className="leave-summary-value" style={{ color: '#8b5cf6' }}>{stats.avgScore.toFixed(1)}%</div>
+          <p className="leave-summary-trend">Skor Rata-rata</p>
+        </div>
       </div>
 
       <div className="table-controls" style={{ display: 'flex', gap: 16, marginBottom: 24, alignItems: 'center' }}>

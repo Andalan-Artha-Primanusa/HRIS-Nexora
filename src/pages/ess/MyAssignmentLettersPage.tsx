@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, FileText, Calendar, MapPin, Clock, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
+import { Plus, FileText, Calendar, MapPin, Clock, CheckCircle, XCircle, RefreshCw, BookTemplate } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { legalService } from '@/features/legal/api/legal.service';
 import { AssignmentLetterModal } from '@/features/legal/components/AssignmentLetterModal';
 import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 
 const MyAssignmentLettersPage: React.FC = () => {
   const [letters, setLetters] = useState<any[]>([]);
@@ -58,31 +60,30 @@ const MyAssignmentLettersPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <div className="crud-header" style={{ marginBottom: '2.5rem' }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-            <span className="reimb-badge reimb-badge-ess" style={{ margin: 0 }}>Employee Self Service</span>
-            <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>•</span>
-            <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 500 }}>{letters.length} Letters</span>
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <BookTemplate size={16} />
+              <span>Employee Self Service</span>
+            </div>
+            <h1 className="hero-title">Surat Tugas Saya</h1>
+            <p className="hero-subtitle">
+              Lihat surat tugas resmi Anda dan status persetujuannya.
+            </p>
           </div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 800, letterSpacing: '-0.02em', color: '#1e293b', marginBottom: '0.5rem' }}>
-            My Assignment Letters
-          </h1>
-          <p style={{ color: '#64748b', fontSize: '1rem' }}>View your official duty letters and their approval status.</p>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={fetchData} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+            <button className="btn-primary" onClick={() => setIsModalOpen(true)}>
+              <Plus size={16} />
+              Permintaan Surat
+            </button>
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <Button variant="ghost" onClick={fetchData} style={{ padding: '11px', borderRadius: '12px' }}>
-            <RefreshCw size={19} className={loading ? 'animate-spin' : ''} />
-          </Button>
-          <Button
-            variant="primary"
-            onClick={() => setIsModalOpen(true)}
-            style={{ padding: '0 20px', height: '46px', borderRadius: '12px', fontWeight: 600, boxShadow: '0 4px 12px rgba(37,99,235,0.2)' }}
-          >
-            <Plus size={19} style={{ marginRight: '8px' }} /> Request Letter
-          </Button>
-        </div>
-      </div>
+      </Card>
 
       {loading ? (
         <div style={{ textAlign: 'center', padding: '5rem', color: '#94a3b8' }}>

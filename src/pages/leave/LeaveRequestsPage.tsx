@@ -1,16 +1,17 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/shared/ui/Card';
-import { Button } from '@/shared/ui/Button';
 import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { getAllLeaves, deleteLeaveRequest, approveLeave, rejectLeave } from '@/features/leave/api/leave.service';
 import type { LeaveItem } from '@/features/leave/types/leave.types';
 import { LeaveSummary } from '@/features/leave/components/LeaveSummary';
 import { LeaveTable } from '@/features/leave/components/LeaveTable';
 import { LeaveDetailModal } from '@/features/leave/components/LeaveDetailModal';
-import { Plus, RefreshCw, Search, Filter } from 'lucide-react';
+import { Plus, RefreshCw, Search, Filter, Calendar } from 'lucide-react';
 import { showToast } from '@/shared/ui/toast';
 import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import './LeaveShared.css';
 
 const LeaveRequestsPage = () => {
   const navigate = useNavigate();
@@ -110,81 +111,95 @@ const LeaveRequestsPage = () => {
 
   return (
     <div className="crud-page">
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">Leave Admin</span>
-          <h1>Manajemen Pengajuan Cuti</h1>
-          <p>Kelola permohonan izin dan cuti karyawan dalam satu dashboard terpadu.</p>
+      {/* Header - Same style as Dashboard */}
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Calendar size={16} />
+              <span>Pusat Cuti</span>
+            </div>
+            <h1 className="hero-title">Manajemen Pengajuan Cuti</h1>
+            <p className="hero-subtitle">Kelola permohonan izin dan cuti karyawan dalam satu dashboard terpadu.</p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={() => void loadLeaves()}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+            <button className="btn-primary" onClick={() => navigate('/leave/requests/create')}>
+              <Plus size={16} />
+              Buat Request
+            </button>
+          </div>
         </div>
-        <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={() => void loadLeaves()} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
-            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-            {loading ? "Memuat..." : "Segarkan"}
-          </Button>
-          <Button variant="primary" size="md" onClick={() => navigate('/leave/requests/create')}>
-            <Plus size={16} />
-            Buat Request
-          </Button>
-        </div>
-      </div>
+      </Card>
 
       <LeaveSummary stats={stats} />
 
-      <Card className="table-card" glass>
-        <div className="table-header-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, minWidth: '300px' }}>
-            <div className="search-box" style={{ flex: 1 }}>
-              <Search size={18} />
+      {/* Analytics Title Card */}
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <Calendar size={24} />
+          </div>
+          <div>
+            <h2 className="analytics-title">Daftar Pengajuan Cuti</h2>
+            <p className="analytics-subtitle">Kelola semua pengajuan cuti karyawan</p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Control Section */}
+      <Card className="control-section-card">
+        <div className="control-section-inner">
+          <div className="control-actions">
+            <div className="search-box">
+              <div className="search-icon-inside"><Search size={18} /></div>
               <input
                 type="text"
-                placeholder="Cari nama atau ID karyawan..."
+                placeholder="Cari nama atau ID..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="search-input"
+                className="search-input-pill"
               />
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Filter size={18} color="#64748b" />
-              <select 
-                className="form-control" 
-                style={{ padding: '0.5rem', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.85rem' }}
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-              >
-                <option value="">Semua Status</option>
-                <option value="pending">Pending</option>
-                <option value="approved">Approved</option>
-                <option value="rejected">Rejected</option>
-              </select>
-            </div>
           </div>
-          <span className="table-count" style={{ fontSize: '0.85rem', color: '#64748b' }}>
-            Menampilkan <strong>{filteredItems.length}</strong> pengajuan
-          </span>
+          <select 
+            className="control-select"
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+          >
+            <option value="">Semua Status</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+          </select>
         </div>
-
-        {loading && items.length === 0 ? (
-          <div className="table-card-inner"><LoadingState message="Memuat data cuti..." /></div>
-        ) : filteredItems.length === 0 ? (
-          <div className="table-card-inner">
-            <EmptyState
-              icon=""
-              title="Tidak ada pengajuan"
-              message="Tidak ada data pengajuan cuti yang sesuai."
-            />
-          </div>
-        ) : (
-          <LeaveTable 
-            items={filteredItems} 
-            onView={handleOpenDetail}
-            onApprove={handleApprove}
-            onReject={handleReject}
-            onEdit={(id) => navigate(`/leave/requests/edit/${id}`)}
-            onDelete={handleDelete}
-            isAdmin={true}
-          />
-        )}
       </Card>
+
+      {/* Table Section */}
+      <div className="table-section">
+        <div className="table-wrap">
+          {loading && items.length === 0 ? (
+            <LoadingState message="Memuat data cuti..." />
+          ) : filteredItems.length === 0 ? (
+            <div className="empty-state">
+              <EmptyState title="Tidak ada pengajuan" message="Tidak ada data pengajuan cuti yang sesuai." />
+            </div>
+          ) : (
+            <LeaveTable 
+              items={filteredItems} 
+              onView={handleOpenDetail}
+              onApprove={handleApprove}
+              onReject={handleReject}
+              onEdit={(id) => navigate(`/leave/requests/edit/${id}`)}
+              onDelete={handleDelete}
+              isAdmin={true}
+            />
+          )}
+        </div>
+      </div>
 
       <LeaveDetailModal 
         isOpen={isDetailModalOpen}

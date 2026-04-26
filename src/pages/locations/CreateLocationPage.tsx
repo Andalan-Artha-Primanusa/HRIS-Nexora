@@ -5,7 +5,10 @@ import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { Alert } from '@/shared/ui/Alert';
 import { createLocation } from '@/features/location/api/location.service';
-import { MapPin, ArrowLeft } from 'lucide-react';
+import { MapPin, ArrowLeft, Save, MapPinned } from 'lucide-react';
+import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/payroll/PayrollShared.css';
 import './LocationForm.css';
 
 const CreateLocationPage = () => {
@@ -137,21 +140,33 @@ const CreateLocationPage = () => {
   };
 
   return (
-    <div className="location-form-container">
-      {/* Header */}
-      <div className="location-form-header">
-        <button className="location-back-button" onClick={handleCancel} aria-label="Kembali">
-          <ArrowLeft size={20} />
-        </button>
-        <div>
-          <p className="location-page-badge">Location Center</p>
-          <h1>Buat Lokasi Baru</h1>
-          <p>Tambahkan lokasi absensi dengan koordinat GPS dan radius secara rapi dan konsisten.</p>
+    <div className="crud-page">
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <MapPinned size={16} />
+              <span>Location Center</span>
+            </div>
+            <h1 className="hero-title">Buat Lokasi Baru</h1>
+            <p className="hero-subtitle">
+              Tambahkan lokasi absensi dengan koordinat GPS dan radius.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-outline" onClick={handleCancel}>
+              <ArrowLeft size={16} />
+              Kembali
+            </button>
+            <button className="btn-primary" onClick={() => void handleCreateLocation()} disabled={loading}>
+              <Save size={16} />
+              {loading ? 'Menyimpan...' : 'Simpan Lokasi'}
+            </button>
+          </div>
         </div>
-      </div>
+      </Card>
 
-      {/* Form Card */}
-      <Card className="location-form-card" glass>
+      <div className="white-unified-wrapper" style={{ maxWidth: '800px', margin: '0 auto' }}>
         {alertMessage && (
           <Alert 
             type={alertType} 
@@ -345,7 +360,8 @@ const CreateLocationPage = () => {
             Buka di Google Maps →
           </a>
         )}
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 };
