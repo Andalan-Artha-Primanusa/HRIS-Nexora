@@ -3,7 +3,7 @@ import { Card } from "@/shared/ui/Card";
 import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { approveLeave, getPendingLeaves, rejectLeave } from "@/features/leave/api/leave.service";
 import type { LeaveItem } from "@/features/leave/types/leave.types";
-import { BarChart3, Check, CircleCheckBig, CircleX, Clock3, RefreshCw, Calendar, CheckCircle, XCircle } from "lucide-react";
+import { BarChart3, Check, CircleCheckBig, CircleX, Clock3, RefreshCw, Calendar, CheckCircle, XCircle, X } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "./LeaveShared.css";
@@ -246,7 +246,7 @@ const LeaveApprovalPage = () => {
                   <th>Tanggal</th>
                   <th>Hari</th>
                   <th>Alasan</th>
-                  <th className="th-center">Aksi</th>
+                  <th className="th-center" style={{ width: '160px' }}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -266,7 +266,7 @@ const LeaveApprovalPage = () => {
                           <span className="cell-name-text">{getEmployeeName(leave)}</span>
                         </div>
                       </td>
-                      <td><span className="status-badge status-badge--blue">{getLeaveTypeLabel(leave.type)}</span></td>
+                      <td><span className="badge-soft badge-soft--blue">{getLeaveTypeLabel(leave.type)}</span></td>
                       <td>
                         <div style={{ fontWeight: 600 }}>{formatDate(leave.start_date)}</div>
                         <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>hingga {formatDate(leave.end_date)}</div>
@@ -275,7 +275,7 @@ const LeaveApprovalPage = () => {
                       <td style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {getSafeString(leave.reason)}
                       </td>
-                      <td>
+                      <td className="td-center">
                         <div className="action-btn-group">
                           <button 
                             className="action-btn action-btn-approve" 
@@ -283,7 +283,7 @@ const LeaveApprovalPage = () => {
                             disabled={actionLoading === String(leave.id)}
                             title="Setujui"
                           >
-                            <CheckCircle size={16} />
+                            <Check size={16} />
                           </button>
                           <button 
                             className="action-btn action-btn-reject" 
@@ -291,7 +291,7 @@ const LeaveApprovalPage = () => {
                             disabled={actionLoading === String(leave.id)}
                             title="Tolak"
                           >
-                            <XCircle size={16} />
+                            <X size={16} />
                           </button>
                         </div>
                       </td>

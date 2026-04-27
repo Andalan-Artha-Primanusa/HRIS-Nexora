@@ -240,6 +240,35 @@
   border-bottom: none;
 }
 
+/* Badge Soft Overrides to match EmployeesPage */
+.badge-soft {
+  display: inline-flex;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-soft--blue {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.badge-soft--green {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.badge-soft--orange {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.badge-soft--red {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
 /* Status Badges */
 .status-badge {
   display: inline-flex;
@@ -275,18 +304,25 @@
   color: #1d4ed8;
 }
 
+.td-center {
+  text-align: center;
+}
+
 /* Action Buttons */
 .action-btn-group {
   display: flex;
   gap: 0.5rem;
   justify-content: center;
+  align-items: center;
 }
 
 .action-btn {
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  border: none;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #2563eb;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -294,44 +330,32 @@
   transition: all 0.2s ease;
 }
 
-.action-btn-view {
-  background: #dbeafe;
+.action-btn:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
   color: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
 }
 
-.action-btn-view:hover {
-  background: #2563eb;
-  color: #ffffff;
-}
-
-.action-btn-approve {
-  background: #d1fae5;
-  color: #059669;
-}
-
-.action-btn-approve:hover {
-  background: #059669;
-  color: #ffffff;
-}
-
-.action-btn-reject {
-  background: #fee2e2;
-  color: #dc2626;
-}
-
-.action-btn-reject:hover {
-  background: #dc2626;
-  color: #ffffff;
-}
-
+.action-btn-view,
+.action-btn-edit,
+.action-btn-approve,
+.action-btn-reject,
 .action-btn-delete {
-  background: #fee2e2;
-  color: #ef4444;
+  background: #ffffff !important;
+  color: #2563eb !important;
+  border: 1px solid #e2e8f0 !important;
 }
 
+.action-btn-view:hover,
+.action-btn-edit:hover,
+.action-btn-approve:hover,
+.action-btn-reject:hover,
 .action-btn-delete:hover {
-  background: #ef4444;
-  color: #ffffff;
+  background: #eff6ff !important;
+  color: #2563eb !important;
+  border-color: #bfdbfe !important;
 }
 
 /* Empty State */

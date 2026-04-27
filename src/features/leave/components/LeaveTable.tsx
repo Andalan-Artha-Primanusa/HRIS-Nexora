@@ -38,8 +38,8 @@ export const LeaveTable: React.FC<LeaveTableProps> = ({ items, onView, onApprove
             <th>Tipe Cuti</th>
             <th>Periode</th>
             <th>Durasi</th>
-            <th>Status</th>
-            <th className="th-center">Aksi</th>
+            <th className="th-center">Status</th>
+            <th className="th-center" style={{ width: '160px' }}>Aksi</th>
           </tr>
         </thead>
         <tbody>
@@ -58,7 +58,7 @@ export const LeaveTable: React.FC<LeaveTableProps> = ({ items, onView, onApprove
                     </div>
                   </div>
                 </td>
-                <td><span className="cell-tag">{getLeaveTypeLabel(item.type)}</span></td>
+                <td><span className="badge-soft badge-soft--blue">{getLeaveTypeLabel(item.type)}</span></td>
                 <td>
                   <div className="cell-stacked">
                     <span className="cell-stacked__main">{formatDate(item.start_date)}</span>
@@ -66,12 +66,12 @@ export const LeaveTable: React.FC<LeaveTableProps> = ({ items, onView, onApprove
                   </div>
                 </td>
                 <td><strong>{item.total_days || 1}</strong> Hari</td>
-                <td>
-                  <span className={`badge-soft badge-soft--${status === 'approved' ? 'green' : status === 'rejected' ? 'red' : 'orange'}`} style={{ borderRadius: '999px' }}>
+                <td className="td-center">
+                  <span className={`badge-soft badge-soft--${status === 'approved' ? 'green' : status === 'rejected' ? 'red' : 'orange'}`}>
                     {status.charAt(0).toUpperCase() + status.slice(1)}
                   </span>
                 </td>
-                <td>
+                <td className="td-center">
                   <div className="action-btn-group">
                     <button className="action-btn action-btn-view" onClick={() => onView(item)} title="Lihat Detail">
                       <Eye size={16} />
@@ -79,10 +79,10 @@ export const LeaveTable: React.FC<LeaveTableProps> = ({ items, onView, onApprove
                     
                     {isAdmin && status === 'pending' && (
                       <>
-                        <button className="action-btn action-btn-success" onClick={() => onApprove?.(String(item.id))} title="Setujui">
+                        <button className="action-btn action-btn-approve" onClick={() => onApprove?.(String(item.id))} title="Setujui">
                           <Check size={16} />
                         </button>
-                        <button className="action-btn action-btn-delete" onClick={() => onReject?.(String(item.id))} title="Tolak">
+                        <button className="action-btn action-btn-reject" onClick={() => onReject?.(String(item.id))} title="Tolak">
                           <X size={16} />
                         </button>
                       </>
