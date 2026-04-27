@@ -312,10 +312,9 @@ const PayrollApprovePage = () => {
                             setSelectedPayroll(p);
                             setSelectedPayrollId(String(p.id));
                           }}
-                          className="action-btn action-btn-edit"
+                          className="action-btn action-btn-success"
                           disabled={loading}
                           title="Approve payroll"
-                          style={{ background: '#10b981', color: '#fff' }}
                         >
                           <FileCheck size={14} />
                         </button>
@@ -389,7 +388,7 @@ const PayrollApprovePage = () => {
                 Batal
               </Button>
               <Button
-                variant="primary"
+                variant="success"
                 size="md"
                 onClick={() => void handleApprove()}
                 disabled={loading || (selectedPayroll.status !== "draft" && selectedPayroll.status !== "pending")}

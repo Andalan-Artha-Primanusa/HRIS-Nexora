@@ -377,7 +377,7 @@ const AdminKpiPage = () => {
                     <th>Period</th>
                     <th>Progress</th>
                     <th>Status</th>
-                    <th style={{ textAlign: 'right' }}>Actions</th>
+                    <th style={{ textAlign: 'right', fontSize: '0.75rem', letterSpacing: '0.05em' }}>ACTIONS</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -415,13 +415,37 @@ const AdminKpiPage = () => {
                       </td>
                       <td><span className={getStatusClass(kpi.status)}>{kpi.status}</span></td>
                       <td style={{ textAlign: 'right' }}>
-                        <div className="action-btn-group">
-                          <Button variant="ghost" size="sm" onClick={() => handleViewDetail(kpi)}><Eye size={16} /></Button>
+                        <div className="action-btn-group" style={{ justifyContent: 'flex-end' }}>
+                          <button 
+                            className="action-btn action-btn-view" 
+                            onClick={() => handleViewDetail(kpi)}
+                            title="Lihat Detail"
+                          >
+                            <Eye size={16} />
+                          </button>
                           {kpi.status === 'submitted' && (
-                            <Button variant="ghost" size="sm" onClick={() => handleApprove(kpi.id)}><CheckCircle2 size={16} /></Button>
+                            <button 
+                              className="action-btn action-btn-success" 
+                              onClick={() => handleApprove(kpi.id)}
+                              title="Setujui"
+                            >
+                              <CheckCircle2 size={16} />
+                            </button>
                           )}
-                          <Button variant="ghost" size="sm" onClick={() => handleEdit(kpi)}><FileText size={16} /></Button>
-                          <Button variant="ghost" size="sm" danger onClick={() => handleDelete(kpi.id)}><Trash2 size={16} /></Button>
+                          <button 
+                            className="action-btn action-btn-edit" 
+                            onClick={() => handleEdit(kpi)}
+                            title="Edit"
+                          >
+                            <FileText size={16} />
+                          </button>
+                          <button 
+                            className="action-btn action-btn-delete" 
+                            onClick={() => handleDelete(kpi.id)}
+                            title="Hapus"
+                          >
+                            <Trash2 size={16} />
+                          </button>
                         </div>
                       </td>
                     </tr>

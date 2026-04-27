@@ -590,19 +590,35 @@
   transform: none;
 }
 
-.action-approve,
-.action-reject {
+.action-approve {
   background: white;
   color: #2563eb;
   border: 1px solid #e2e8f0;
 }
 
-.action-approve:hover:not(:disabled),
-.action-reject:hover:not(:disabled) {
+.action-reject,
+.action-btn-delete,
+.action-btn-reject {
+  background: #fff1f2;
+  color: #e11d48;
+  border: 1px solid #fecdd3;
+}
+
+.action-approve:hover:not(:disabled) {
   background: #eff6ff;
   border-color: #bfdbfe;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+}
+
+.action-reject:hover:not(:disabled),
+.action-btn-delete:hover:not(:disabled),
+.action-btn-reject:hover:not(:disabled) {
+  background: #ffe4e6;
+  border-color: #fda4af;
+  color: #be123c;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.12);
 }
 
 .leave-summary-grid {
