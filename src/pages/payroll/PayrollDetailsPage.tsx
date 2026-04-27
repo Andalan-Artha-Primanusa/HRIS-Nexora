@@ -13,10 +13,37 @@ import "@/pages/dashboard/overview/OverviewPage.css";
 import "@/pages/payroll/PayrollShared.css";
 import "./PayrollDetailsPage.css";
 
-const asDisplay = (value: unknown) => {
+const asDisplay = (value: unknown, column?: string) => {
   if (value === null || value === undefined) return "-";
   if (typeof value === "object") return JSON.stringify(value);
-  return String(value);
+  
+  const strValue = String(value);
+
+  // 1. Format Dates (created_at, updated_at, or ISO strings)
+  if (column?.includes("_at") || strValue.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)) {
+    try {
+      const date = new Date(strValue);
+      if (!isNaN(date.getTime())) {
+        return new Intl.DateTimeFormat("id-ID", {
+          dateStyle: "medium",
+          timeStyle: "short",
+        }).format(date);
+      }
+    } catch (e) {
+      // fallback to string
+    }
+  }
+
+  // 2. Format Currency (amount)
+  if (column === "amount" || (typeof value === "number" && !column?.includes("id"))) {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(Number(value));
+  }
+
+  return strValue;
 };
 
 const getColumns = (items: PayrollDetail[]) => {
@@ -36,10 +63,10 @@ const PayrollDetailsPage = () => {
   const defaultType = location.pathname.includes("/deduction") ? "deduction" : "allowance";
 
   const [items, setItems] = useState<PayrollDetail[]>([]);
-  const [payrollId, setPayrollId] = useState("1");
+  const [payrollId, setPayrollId] = useState("");
   const [detailId, setDetailId] = useState("");
   const [detailType, setDetailType] = useState(defaultType);
-  const [detailName, setDetailName] = useState(defaultType === "deduction" ? "Tax" : "Housing Allowance");
+  const [detailDescription, setDetailDescription] = useState(defaultType === "deduction" ? "Tax" : "Housing Allowance");
   const [detailAmount, setDetailAmount] = useState(defaultType === "deduction" ? "500000" : "2000000");
   const [allPayrolls, setAllPayrolls] = useState<PayrollItem[]>([]);
   const [allEmployees, setAllEmployees] = useState<EmployeeItem[]>([]);
@@ -156,17 +183,23 @@ const PayrollDetailsPage = () => {
   const loadPayrollDetails = async () => {
     const id = requirePayrollId();
     if (!id) {
-      showErrorModal("Validasi", "Masukkan Payroll ID terlebih dahulu");
+      // Don't show error if it's just the initial load or nothing selected
       return;
     }
 
     setLoading(true);
 
     try {
-      const result = await payrollService.getPayrollDetails(id);
-      const safeData = toSafeArray(result);
-      setItems(safeData);
-      setManageItems(JSON.parse(JSON.stringify(safeData))); // Deep copy for editing
+      // We use getPayrollDetail(id) because the backend already includes 'details' in the main payroll response
+      const result = await payrollService.getPayrollDetail(id);
+      
+      // If result is wrapped in { data: ... }
+      const payrollData = result.data || result;
+      const safeDetails = toSafeArray(payrollData.details || []);
+      
+      setItems(safeDetails);
+      setManageItems(JSON.parse(JSON.stringify(safeDetails))); // Deep copy for editing
+      setStatusMessage(`Berhasil memuat ${safeDetails.length} komponen`);
     } catch (error: unknown) {
       const errorText = error instanceof Error ? error.message : "Gagal memuat detail";
       showErrorModal("Error Muat Detail", errorText);
@@ -187,9 +220,9 @@ const PayrollDetailsPage = () => {
     try {
       const details = bulkRows.map(row => ({
         type: row.type,
-        name: row.name,
+        description: row.name, // Mapping UI 'name' to backend 'description'
         amount: Number(row.amount) || 0
-      })).filter(d => d.name.trim() !== "");
+      })).filter(d => d.description.trim() !== "");
 
       if (details.length === 0) {
         showErrorModal("Validasi", "Isi minimal satu nama komponen");
@@ -224,7 +257,7 @@ const PayrollDetailsPage = () => {
     try {
       await payrollService.updatePayrollDetail(id, {
         type: detailType,
-        name: detailName,
+        description: detailDescription,
         amount: Number(detailAmount) || 0,
       });
       setStatusMessage("Detail berhasil diupdate");
@@ -260,13 +293,13 @@ const PayrollDetailsPage = () => {
 
   useEffect(() => {
     setDetailType(defaultType);
-    setDetailName(defaultType === "deduction" ? "Tax" : "Housing Allowance");
+    setDetailDescription(defaultType === "deduction" ? "Tax" : "Housing Allowance");
     setDetailAmount(defaultType === "deduction" ? "500000" : "2000000");
   }, [defaultType]);
 
   useEffect(() => {
     void fetchMetadata();
-    void loadPayrollDetails();
+    // Removed automatic loadPayrollDetails() to prevent 404 on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -300,9 +333,6 @@ const PayrollDetailsPage = () => {
             <button className="btn-outline" onClick={() => void loadPayrollDetails()} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan
-            </button>
-            <button className="btn-primary" onClick={() => window.location.href = '/payroll'}>
-              Kelola Payroll
             </button>
           </div>
         </div>
@@ -388,7 +418,7 @@ const PayrollDetailsPage = () => {
                         {column === "type" && "Tipe"}
                         {column === "description" && "Nama"}
                         {column === "amount" && "Jumlah"}
-                        {!["id", "payroll_id", "type", "name", "amount"].includes(column) && column}
+                        {!["id", "payroll_id", "type", "name", "amount", "description"].includes(column) && column}
                       </th>
                     ))}
                   </tr>
@@ -399,7 +429,7 @@ const PayrollDetailsPage = () => {
                       <tr key={String(item.id ?? index)}>
                         {columns.map((column) => (
                           <td key={`${String(item.id ?? index)}-${column}`}>
-                            {asDisplay((item as Record<string, unknown>)[column])}
+                            {asDisplay((item as Record<string, unknown>)[column], column)}
                           </td>
                         ))}
                       </tr>
@@ -548,7 +578,7 @@ const PayrollDetailsPage = () => {
                       const item = manageItems.find(i => String(i.id) === id);
                       if (item) {
                         setDetailType(item.type || "allowance");
-                        setDetailName(item.description || "");
+                        setDetailDescription(item.description || "");
                         setDetailAmount(String(item.amount));
                       }
                     }}
@@ -579,8 +609,8 @@ const PayrollDetailsPage = () => {
                       <strong>Nama Komponen</strong>
                       <input
                         className="crud-input"
-                        value={detailName}
-                        onChange={(event) => setDetailName(event.target.value)}
+                        value={detailDescription}
+                        onChange={(event) => setDetailDescription(event.target.value)}
                       />
                     </label>
                     <label>
