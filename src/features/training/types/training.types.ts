@@ -2,14 +2,16 @@ export interface TrainingProgram {
   id: string | number;
   title: string;
   description: string;
-  category: string;
   provider: string;
+  mode: string;
   start_date: string;
   end_date: string;
-  status: 'draft' | 'active' | 'completed' | 'cancelled';
-  capacity: number;
-  enrolled_count: number;
-  image_url?: string;
+  budget: number;
+  status: string;
+  category?: string;
+  duration?: string;
+  enrolled_count?: number;
+  completion_rate?: number;
 }
 
 export interface Competency {

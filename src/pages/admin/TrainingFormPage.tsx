@@ -41,8 +41,36 @@ const TrainingFormPage: React.FC = () => {
       const fetchTraining = async () => {
         setFetching(true);
         try {
-          const data = await trainingService.getTraining(id);
-          setFormData(data.data || data);
+          const data = await trainingService.getProgram(id);
+          const trainingData = data.data || data;
+          // Map API response to formData structure
+          // Convert duration from hours to readable format (e.g. 8 -> "8 Hours", 16 -> "2 Days")
+          let durationDisplay = '';
+          if (trainingData.duration !== undefined && trainingData.duration !== null) {
+            const hours = parseInt(trainingData.duration);
+            if (!isNaN(hours)) {
+              if (hours >= 8 && hours % 8 === 0) {
+                const days = hours / 8;
+                durationDisplay = `${days} Day${days > 1 ? 's' : ''}`;
+              } else {
+                durationDisplay = `${hours} Hour${hours !== 1 ? 's' : ''}`;
+              }
+            } else {
+              durationDisplay = trainingData.duration.toString();
+            }
+          }
+          
+          setFormData({
+            title: trainingData.title || '',
+            description: trainingData.description || '',
+            category: trainingData.category || 'Technical',
+            provider: trainingData.provider || 'Internal',
+            duration: durationDisplay,
+            start_date: trainingData.start_date || '',
+            end_date: trainingData.end_date || '',
+            max_participants: trainingData.enrolled_count || 0,
+            status: trainingData.status as 'draft' | 'active' | 'completed' | 'cancelled' || 'active'
+          });
         } catch (err) {
           console.error(err);
         } finally {
@@ -53,22 +81,57 @@ const TrainingFormPage: React.FC = () => {
     }
   }, [id, isEdit]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      if (isEdit) {
-        await trainingService.updateTraining(id, formData);
-      } else {
-        await trainingService.createTraining(formData);
-      }
-      navigate('/training/programs');
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            // Map formData to match the working Postman payload structure exactly
+            // Based on the successful request: title, mode, description, provider, start_date, end_date, budget, status
+            
+            // Determine mode from duration field
+            // If duration contains "hour" or "jam" (Indonesian for hour), treat as online, else offline
+            const mode = formData.duration?.toLowerCase().includes('hour') || 
+                         formData.duration?.toLowerCase().includes('jam') 
+                         ? 'online' 
+                         : 'offline';
+            
+            // Calculate budget: if max_participants is set, use that * 100000, otherwise default to 1000000
+            const budget = formData.max_participants && formData.max_participants > 0 
+                ? formData.max_participants * 100000 
+                : 1000000;
+            
+            const apiData = {
+                title: formData.title.trim(),
+                mode: mode,
+                description: formData.description.trim(),
+                provider: (formData.provider || 'Internal').trim(),
+                start_date: formData.start_date,
+                end_date: formData.end_date,
+                budget: budget,
+                status: formData.status.toLowerCase().trim()
+            };
+            
+            // Log the data being sent for debugging
+            console.log('Submitting training data:', apiData);
+            
+            if (isEdit) {
+                await trainingService.updateProgram(id, apiData);
+            } else {
+                await trainingService.createProgram(apiData);
+            }
+            navigate('/training/programs');
+        } catch (err: any) {
+            console.error('Error details:', err.response?.data || err.message || err);
+            // Show more detailed validation errors
+            if (err.response?.data?.errors) {
+                console.error('Validation errors:', err.response.data.errors);
+            } else if (err.response?.data?.message) {
+                console.error('Error message:', err.response.data.message);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

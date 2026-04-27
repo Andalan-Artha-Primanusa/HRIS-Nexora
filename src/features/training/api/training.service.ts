@@ -13,28 +13,24 @@ export const trainingService = {
     const response = await api.get(`/training/programs/${id}`);
     return response.data;
   },
-  getTraining: async (id: string | number) => {
-    const response = await api.get(`/training/programs/${id}`);
-    return response.data;
-  },
   createProgram: async (data: Partial<TrainingProgram>) => {
     const response = await api.post('/training/programs', data);
     return response.data;
   },
-  createTraining: async (data: Partial<TrainingProgram>) => {
-    const response = await api.post('/training/programs', data);
+  updateProgram: async (id: string | number, data: Partial<TrainingProgram>) => {
+    const response = await api.put(`/training/programs/${id}`, data);
     return response.data;
   },
-  updateTraining: async (id: string | number, data: Partial<TrainingProgram>) => {
-    const response = await api.put(`/training/programs/${id}`, data);
+  deleteProgram: async (id: string | number) => {
+    const response = await api.delete(`/training/programs/${id}`);
     return response.data;
   },
   enrollInProgram: async (id: string | number) => {
     const response = await api.post(`/training/programs/${id}/enroll`);
     return response.data;
   },
-  getEnrollments: async () => {
-    const response = await api.get('/training/enrollments');
+  completeTraining: async (id: string | number) => {
+    const response = await api.put(`/training/enrollments/${id}/complete`);
     return response.data;
   },
 
