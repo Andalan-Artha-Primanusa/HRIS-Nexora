@@ -546,7 +546,6 @@ const EmployeesPage = () => {
                           </span>
                         </td>
                         <td className="td-center">
-<<<<<<< HEAD
                           <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'center' }}>
                             <EditAction 
                               onClick={() => navigate(`/employees/update/${item.id}`)}
@@ -570,23 +569,6 @@ const EmployeesPage = () => {
                               onClick={() => void deleteExistingEmployee(String(item.id))}
                               title="Hapus"
                             />
-=======
-                          <div className="action-btn-group">
-                            <button
-                              className="action-btn action-btn-edit"
-                              onClick={() => navigate(`/employees/update/${item.id}`)}
-                              title="Edit"
-                            >
-                              <Pencil size={16} />
-                            </button>
-                            <button
-                              className="action-btn action-btn-delete"
-                              onClick={() => void deleteExistingEmployee(String(item.id))}
-                              title="Hapus"
-                            >
-                              <Trash2 size={16} />
-                            </button>
->>>>>>> 9f2dac40ac6478c4ba3fb5ca62f4611699743dd0
                           </div>
                         </td>
                       </tr>

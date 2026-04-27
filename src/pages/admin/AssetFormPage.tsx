@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save, Box, Package, Plus } from 'lucide-react';
+import { 
+  ArrowLeft, Save, Box, Package, Plus, 
+  Tag, Hash, Info, Truck, DollarSign, Calendar 
+} from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { Alert } from '@/shared/ui/Alert';
@@ -35,7 +38,11 @@ const AssetFormPage: React.FC = () => {
         setFetching(true);
         try {
           const data = await assetService.getAsset(id);
-          setFormData(data.data || data);
+          const result = data.data || data;
+          setFormData({
+            ...result,
+            purchase_price: Number(result.purchase_price) || 0
+          });
         } catch (err) {
           console.error(err);
         } finally {
@@ -97,80 +104,17 @@ const AssetFormPage: React.FC = () => {
         <Alert type="error" message={errorMessage} onClose={() => setErrorMessage("")} dismissible />
       )}
 
-      <div className="white-unified-wrapper">
-        <div className="form-grid">
-          <Card className="table-card" glass>
-            <div className="table-header-bar">
-              <h3>Informasi Aset</h3>
-              <span className="table-count">Formulir</span>
-            </div>
-            <div className="table-card-inner">
-              <form className="crud-form" onSubmit={handleSubmit}>
-                <div className="form-grid">
-                  <div className="form-group">
-                    <label>Kode Aset</label>
-                    <input name="code" value={formData.code} onChange={handleChange} className="form-input" placeholder="Kode aset" />
-                  </div>
-                  <div className="form-group">
-                    <label>Nama Aset</label>
-                    <input name="name" value={formData.name} onChange={handleChange} className="form-input" placeholder="Nama aset" />
-                  </div>
-                  <div className="form-group">
-                    <label>Kategori</label>
-                    <select name="category" value={formData.category} onChange={handleChange} className="form-input">
-                      <option value="Electronics">Electronics</option>
-                      <option value="Furniture">Furniture</option>
-                      <option value="Vehicle">Vehicle</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label>Merek</label>
-                    <input name="brand" value={formData.brand} onChange={handleChange} className="form-input" placeholder="Merek" />
-                  </div>
-                  <div className="form-group">
-                    <label>Model</label>
-                    <input name="model" value={formData.model} onChange={handleChange} className="form-input" placeholder="Model" />
-                  </div>
-                  <div className="form-group">
-                    <label>Nomor Seri</label>
-                    <input name="serial_number" value={formData.serial_number} onChange={handleChange} className="form-input" placeholder="Nomor seri" />
-                  </div>
-                  <div className="form-group">
-                    <label>Kondisi</label>
-                    <select name="condition" value={formData.condition} onChange={handleChange} className="form-input">
-                      <option value="new">Baru</option>
-                      <option value="good">Baik</option>
-                      <option value="fair">Cukup</option>
-                      <option value="poor">Buruk</option>
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label>Status</label>
-                    <select name="status" value={formData.status} onChange={handleChange} className="form-input">
-                      <option value="available">Tersedia</option>
-                      <option value="in_use">Digunakan</option>
-                      <option value="maintenance">Maintenance</option>
-                      <option value="retired">Retired</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="form-actions">
-                  <Button variant="primary" type="submit" disabled={loading}>
-                    <Save size={16} />
-                    {loading ? 'Menyimpan...' : 'Simpan'}
-                  </Button>
-                </div>
-              </form>
-            </div>
-          </Card>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default AssetFormPage;
+      <form className="crud-form" onSubmit={handleSubmit}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '2.5rem', alignItems: 'start' }}>
+           {/* Left Column: Core Info */}
+           <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+              <Card glass style={{ padding: '2.5rem', borderRadius: '24px' }}>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '2rem' }}>
+                    <div style={{ padding: '10px', background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', borderRadius: '12px', color: 'white', boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)' }}>
+                      <Box size={22} />
+                    </div>
+                    <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 600, color: '#1e293b' }}>Basic Information</h3>
+                 </div>
 
                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                     <div className="form-group" style={{ gridColumn: '1 / -1' }}>

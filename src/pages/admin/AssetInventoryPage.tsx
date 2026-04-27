@@ -299,54 +299,16 @@ const AssetInventoryPage: React.FC = () => {
                           View Assignment
                         </button>
                       )}
-                      <button
+                      <EditAction
                         onClick={() => navigate(`/inventory/assets/edit/${asset.id}`)}
-                        style={{
-                          width: '38px', height: '38px',
-                          borderRadius: '10px',
-                          background: '#f8fafc',
-                          border: '0.5px solid #e2e8f0',
-                          color: '#475569',
-                          cursor: 'pointer',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        }}
-                      >
-                        <Pencil size={15} />
-                      </button>
-                      <button
+                        title="Edit Asset"
+                      />
+                      <DeleteAction
                         onClick={() => handleDelete(asset.id, asset.name)}
                         disabled={deletingId === asset.id}
-                        style={{
-                          width: '38px', height: '38px',
-                          borderRadius: '10px',
-                          background: '#fef2f2',
-                          border: '0.5px solid #fecaca',
-                          color: '#ef4444',
-                          cursor: deletingId === asset.id ? 'not-allowed' : 'pointer',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          opacity: deletingId === asset.id ? 0.5 : 1,
-                        }}
-                      >
-<<<<<<< HEAD
-                        View Assignment
-                      </Button>
-                    )}
-                    <EditAction
-                      onClick={() => navigate(`/inventory/assets/edit/${asset.id}`)}
-                      title="Edit Asset"
-                      style={{ flex: 1, height: '42px', borderRadius: '10px' }}
-                    />
-                    <DeleteAction
-                      onClick={() => handleDelete(asset.id, asset.name)}
-                      disabled={deletingId === asset.id}
-                      style={{ height: '42px', width: '42px', borderRadius: '10px' }}
-                      title="Delete Asset"
-                    />
-=======
-                        <Trash2 size={15} />
-                      </button>
+                        title="Delete Asset"
+                      />
                     </div>
->>>>>>> 9f2dac40ac6478c4ba3fb5ca62f4611699743dd0
                   </div>
                 );
               })}

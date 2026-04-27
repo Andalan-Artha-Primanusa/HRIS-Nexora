@@ -302,26 +302,12 @@ const WorkSchedulesPage = () => {
                       </div>
                     </td>
                     <td>
-<<<<<<< HEAD
                       <div className="cell-actions">
                         <EditAction
                           onClick={() => navigate(`/work-schedules/edit/${schedule.id}`)}
                           disabled={loading}
                         />
                         <DeleteAction
-=======
-                      <div className="action-btn-group">
-                        <button
-                          className="action-btn action-btn-edit"
-                          onClick={() => navigate(`/work-schedules/edit/${schedule.id}`)}
-                          disabled={loading}
-                          title="Edit"
-                        >
-                          <Pencil size={16} />
-                        </button>
-                        <button
-                          className="action-btn action-btn-delete"
->>>>>>> 9f2dac40ac6478c4ba3fb5ca62f4611699743dd0
                           onClick={() => {
                             if (deleteConfirmId === schedule.id) {
                               void handleDelete(schedule.id);
@@ -330,15 +316,8 @@ const WorkSchedulesPage = () => {
                             }
                           }}
                           disabled={loading}
-<<<<<<< HEAD
                           className={deleteConfirmId === schedule.id ? 'active' : ''}
                         />
-=======
-                          title="Hapus"
-                        >
-                          <Trash2 size={16} />
-                        </button>
->>>>>>> 9f2dac40ac6478c4ba3fb5ca62f4611699743dd0
                         {deleteConfirmId === schedule.id && (
                           <span className="delete-confirm">
                             Yakin?

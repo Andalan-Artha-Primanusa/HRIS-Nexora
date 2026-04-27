@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import './Form.css';
 
 /* ========================================
@@ -205,17 +205,20 @@ Select.displayName = 'Select';
 
 export const Checkbox = React.forwardRef<HTMLInputElement, FormCheckboxProps>(
   ({ label, required, className, ...props }, ref) => {
+    const defaultId = useId();
+    const id = props.id || defaultId;
+
     return (
       <div className={`ui-checkbox-item ${className || ''}`}>
         <input
           ref={ref}
           type="checkbox"
           className="ui-checkbox"
-          id={props.id || `checkbox-${Math.random()}`}
+          id={id}
           {...props}
         />
         {label && (
-          <label htmlFor={props.id || `checkbox-${Math.random()}`} className={`${required ? 'ui-label--required' : ''}`}>
+          <label htmlFor={id} className={`${required ? 'ui-label--required' : ''}`}>
             {label}
           </label>
         )}
@@ -275,17 +278,20 @@ export const CheckboxGroup: React.FC<FormCheckboxGroupProps> = ({
 
 export const Radio = React.forwardRef<HTMLInputElement, FormRadioProps>(
   ({ label, required, className, ...props }, ref) => {
+    const defaultId = useId();
+    const id = props.id || defaultId;
+
     return (
       <div className={`ui-radio-item ${className || ''}`}>
         <input
           ref={ref}
           type="radio"
           className="ui-radio"
-          id={props.id || `radio-${Math.random()}`}
+          id={id}
           {...props}
         />
         {label && (
-          <label htmlFor={props.id || `radio-${Math.random()}`} className={`${required ? 'ui-label--required' : ''}`}>
+          <label htmlFor={id} className={`${required ? 'ui-label--required' : ''}`}>
             {label}
           </label>
         )}
@@ -307,7 +313,7 @@ export const RadioGroup: React.FC<FormRadioGroupProps> = ({
   value = '',
   onChange,
 }) => {
-  const groupName = `radio-group-${Math.random()}`;
+  const groupName = useId();
 
   return (
     <div className="ui-form-group">
