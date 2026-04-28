@@ -259,6 +259,18 @@
   border: none;
 }
 
+.action-btn-success {
+  background: #dcfce7 !important;
+  color: #16a34a !important;
+  border-color: #bbf7d0 !important;
+}
+
+.action-btn-success:hover {
+  background: #16a34a !important;
+  color: #ffffff !important;
+  border-color: #16a34a !important;
+}
+
 @media (max-width: 900px) {
   .crud-page {
     padding: 1rem;

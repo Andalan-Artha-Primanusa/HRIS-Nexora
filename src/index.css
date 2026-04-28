@@ -417,74 +417,76 @@ h6 {
 }
 
 .action-btn {
-  padding: 8px;
+  width: 36px;
+  height: 36px;
   border-radius: 10px;
-  border: 1px solid transparent;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #2563eb;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   outline: none;
 }
 
-.action-btn-edit {
-  color: #2563eb;
-  background: #eff6ff;
-}
-
-.action-btn-edit:hover {
-  background: #dbeafe;
-  border-color: #bfdbfe;
+.action-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.action-btn-delete {
-  color: #e11d48;
-  background: #fff1f2;
-}
-
-.action-btn-delete:hover {
-  background: #ffe4e6;
-  border-color: #fecdd3;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.12);
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .action-btn-view {
-  color: #0891b2;
-  background: #ecfeff;
+  color: #0891b2 !important;
+  background: #ecfeff !important;
+  border-color: #cffafe !important;
 }
 
 .action-btn-view:hover {
-  background: #cffafe;
-  border-color: #a5f3fc;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(8, 145, 178, 0.12);
+  background: #0891b2 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(8, 145, 178, 0.25) !important;
 }
 
-.action-btn-secondary {
-  color: #7c3aed;
-  background: #f5f3ff;
+.action-btn-edit {
+  color: #2563eb !important;
+  background: #eff6ff !important;
+  border-color: #dbeafe !important;
 }
 
-.action-btn-secondary:hover {
-  background: #ede9fe;
-  border-color: #ddd6fe;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.12);
+.action-btn-edit:hover {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25) !important;
 }
 
 .action-btn-success {
-  color: #16a34a;
-  background: #dcfce7;
+  color: #16a34a !important;
+  background: #dcfce7 !important;
+  border-color: #bbf7d0 !important;
 }
 
 .action-btn-success:hover {
-  background: #bbf7d0;
-  border-color: #86efac;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.12);
+  background: #16a34a !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25) !important;
+}
+
+.action-btn-delete {
+  color: #e11d48 !important;
+  background: #fff1f2 !important;
+  border-color: #fecdd3 !important;
+}
+
+.action-btn-delete:hover {
+  background: #e11d48 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.25) !important;
 }
 

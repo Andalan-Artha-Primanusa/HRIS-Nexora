@@ -1,17 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeftRight, Plus, CheckCircle2, XCircle, RefreshCw, Calendar, ArrowRight, Search, ArrowLeftRightIcon } from 'lucide-react';
+import { Plus, CheckCircle2, XCircle, RefreshCw, Calendar, Search, ArrowLeftRight } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { workforceService } from '@/features/workforce/api/workforce.service';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
-import '@/pages/payroll/PayrollShared.css';
 
 const ShiftSwapsPage: React.FC = () => {
   const navigate = useNavigate();
   const [swaps, setSwaps] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [searchText, setSearchText] = useState("");
+  const [activeTab, setActiveTab] = useState<"Semua" | "Pending" | "Approved" | "Rejected">("Semua");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
 
   const fetchData = async () => {
     setLoading(true);
@@ -31,18 +36,57 @@ const ShiftSwapsPage: React.FC = () => {
     fetchData();
   }, []);
 
-  const pendingSwaps = swaps.filter(s => s.status === 'pending');
-  const approvedSwaps = swaps.filter(s => s.status === 'approved');
-  const rejectedSwaps = swaps.filter(s => s.status === 'rejected');
+  const filteredSwaps = useMemo(() => {
+    return swaps.filter((swap: any) => {
+      const requester = String(swap?.requester?.full_name || '').toLowerCase();
+      const target = String(swap?.target?.full_name || '').toLowerCase();
+      const query = searchText.toLowerCase();
+      const matchSearch = requester.includes(query) || target.includes(query);
 
-  const getStatusBadge = (status: string) => {
-    const statusMap: Record<string, { class: string; label: string }> = {
-      pending: { class: 'status-pending', label: 'Pending' },
-      approved: { class: 'status-active', label: 'Approved' },
-      rejected: { class: 'status-danger', label: 'Rejected' },
-    };
-    return statusMap[status?.toLowerCase()] || { class: 'status-default', label: status };
+      let statusMatch = true;
+      if (activeTab === "Pending") statusMatch = swap.status === 'pending';
+      else if (activeTab === "Approved") statusMatch = swap.status === 'approved';
+      else if (activeTab === "Rejected") statusMatch = swap.status === 'rejected';
+
+      return matchSearch && statusMatch;
+    });
+  }, [swaps, searchText, activeTab]);
+
+  const paginatedSwaps = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredSwaps.slice(startIndex, startIndex + pageSize);
+  }, [filteredSwaps, currentPage, pageSize]);
+
+  const totalPages = Math.ceil(filteredSwaps.length / pageSize);
+
+  const summaryStats = useMemo(() => {
+    const total = swaps.length;
+    const pending = swaps.filter((s: any) => s.status === 'pending').length;
+    const approved = swaps.filter((s: any) => s.status === 'approved').length;
+    const rejected = swaps.filter((s: any) => s.status === 'rejected').length;
+
+    return [
+      { label: "Total Tukar", subtitle: "Seluruh penukaran", value: total, tone: "blue" as const },
+      { label: "Pending", subtitle: "Menunggu persetujuan", value: pending, tone: "orange" as const },
+      { label: "Disetujui", subtitle: "Penukaran disetujui", value: approved, tone: "green" as const },
+      { label: "Ditolak", subtitle: "Penukaran ditolak", value: rejected, tone: "red" as const },
+    ];
+  }, [swaps]);
+
+  const handleApprove = async (id: string | number) => {
+    if (window.confirm('Setujui penukaran shift ini?')) {
+      try {
+        await workforceService.approveShiftSwap(id);
+        fetchData();
+      } catch (error) {
+        console.error('Failed to approve shift swap:', error);
+      }
+    }
   };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText, activeTab]);
 
   return (
     <div className="crud-page">
@@ -71,142 +115,196 @@ const ShiftSwapsPage: React.FC = () => {
         </div>
       </Card>
 
-      <div className="leave-requests-wrapper">
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Pending</p>
-              <p className="leave-summary-subtitle">Menunggu persetujuan</p>
+      <div className="employee-summary-wrapper">
+        {summaryStats.map((card: any) => {
+          const Icon = card.tone === "blue" ? ArrowLeftRight : card.tone === "green" ? CheckCircle2 : card.tone === "orange" ? Calendar : XCircle;
+          return (
+            <div key={card.label} className="employee-summary-card">
+              <div className="employee-summary-header">
+                <div>
+                  <p className="employee-summary-label">{card.label}</p>
+                  <p className="employee-summary-subtitle">{card.subtitle}</p>
+                </div>
+                <div className={`employee-summary-icon-wrapper employee-icon-${card.tone}`}>
+                  <Icon size={28} />
+                </div>
+              </div>
+              <div className={`employee-summary-value employee-value-${card.tone}`}>{card.value}</div>
+              <p className="employee-summary-trend">{card.subtitle}</p>
             </div>
-            <div className="leave-summary-icon-wrapper leave-icon-orange">
-              <ArrowLeftRight size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-orange">{pendingSwaps.length}</div>
-          <p className="leave-summary-trend">Menunggu</p>
-        </div>
-
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Disetujui</p>
-              <p className="leave-summary-subtitle">Disetujui hari ini</p>
-            </div>
-            <div className="leave-summary-icon-wrapper leave-icon-green">
-              <CheckCircle2 size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-green">{approvedSwaps.length}</div>
-          <p className="leave-summary-trend">Disetujui</p>
-        </div>
-
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Ditolak</p>
-              <p className="leave-summary-subtitle">Ditolak</p>
-            </div>
-            <div className="leave-summary-icon-wrapper leave-icon-red">
-              <XCircle size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-red">{rejectedSwaps.length}</div>
-          <p className="leave-summary-trend">Ditolak</p>
-        </div>
-
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Total Tukar</p>
-              <p className="leave-summary-subtitle">Semua penukaran</p>
-            </div>
-            <div className="leave-summary-icon-wrapper leave-icon-blue">
-              <Calendar size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-blue">{swaps.length}</div>
-          <p className="leave-summary-trend">Total Tukar</p>
-        </div>
+          );
+        })}
       </div>
 
-      <div className="white-unified-wrapper">
-        <div className="wuw-header">
-          <div className="wuw-header-top">
-            <div className="wuw-title-area">
-              <h3>Riwayat Penukaran Shift</h3>
-              <span className="wuw-count-badge">{swaps.length} Total</span>
-            </div>
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <ArrowLeftRight size={24} />
+          </div>
+          <div>
+            <h2 className="analytics-title">Riwayat Penukaran Shift</h2>
+            <p className="analytics-subtitle">Kelola dan lihat semua penukaran shift</p>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="control-section-card">
+        <div className="control-section-inner">
+          <div className="elyra-tabs">
+            {["Semua", "Pending", "Approved", "Rejected"].map((tab) => (
+              <button
+                key={tab}
+                className={`elyra-tab ${activeTab === tab ? "active" : ""}`}
+                onClick={() => setActiveTab(tab as "Semua" | "Pending" | "Approved" | "Rejected")}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          <div className="control-actions">
             <div className="search-box">
-              <Search size={18} />
-              <input type="text" placeholder="Search..." />
+              <div className="search-icon-inside"><Search size={18} /></div>
+              <input
+                type="text"
+                placeholder="Cari penukaran..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="search-input-pill"
+              />
             </div>
           </div>
         </div>
+      </Card>
 
+      <div className="table-section">
         <div className="wuw-table-area">
-          <div className="table-wrap">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Requester</th>
-                  <th style={{ textAlign: 'center' }}></th>
-                  <th>Target</th>
-                  <th>Tanggal & Shift</th>
-                  <th>Status</th>
-                  <th style={{ textAlign: 'right' }}>Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr><td colSpan={6} style={{ textAlign: 'center', padding: '3rem' }}>Loading...</td></tr>
-                ) : swaps.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
-                      <ArrowLeftRight size={48} style={{ opacity: 0.3, marginBottom: '1rem' }} />
-                      <p>Belum ada data penukaran.</p>
-                    </td>
-                  </tr>
-                ) : swaps.map((swap) => {
-                  const statusInfo = getStatusBadge(swap.status);
-                  return (
-                    <tr key={swap.id}>
-                      <td>
-                        <div className="cell-stacked">
-                          <span className="cell-name-text">{swap.requester?.full_name || 'N/A'}</span>
-                          <span className="cell-email">{swap.requester_shift_name}</span>
-                        </div>
-                      </td>
-                      <td style={{ textAlign: 'center' }}>
-                        <ArrowRight size={20} color="#94a3b8" />
-                      </td>
-                      <td>
-                        <div className="cell-stacked">
-                          <span className="cell-name-text">{swap.target?.full_name || 'N/A'}</span>
-                          <span className="cell-email">{swap.target_shift_name}</span>
-                        </div>
-                      </td>
-                      <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <Calendar size={16} color="#3b82f6" />
-                          {swap.shift_date ? new Date(swap.shift_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long' }) : '-'}
-                        </div>
-                        <div className="cell-email">{swap.shift_name}</div>
-                      </td>
-                      <td>
-                        <span className={`status-badge ${statusInfo.class}`}>{statusInfo.label}</span>
-                      </td>
-                      <td style={{ textAlign: 'right' }}>
-                        <div className="action-btn-group">
-                          <Button variant="ghost" size="sm"><CheckCircle2 size={16} /></Button>
-                          <Button variant="ghost" size="sm" danger><XCircle size={16} /></Button>
-                        </div>
-                      </td>
+          {loading && <LoadingState message="Memuat penukaran shift..." />}
+
+          {!loading && paginatedSwaps.length === 0 && (
+            <div style={{ padding: '5rem 0' }}>
+              <EmptyState
+                title="Belum Ada Penukaran"
+                message={searchText || activeTab !== "Semua"
+                  ? "Tidak ada penukaran yang sesuai dengan kriteria Anda."
+                  : "Belum ada penukaran shift yang dibuat. Buat request pertama untuk memulai."}
+                actionLabel="Request Baru"
+                onAction={() => navigate('/workforce/shift-swaps/create')}
+              />
+            </div>
+          )}
+
+          {!loading && paginatedSwaps.length > 0 && (
+            <>
+              <div className="table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: '200px' }}>Requester</th>
+                      <th style={{ textAlign: 'center' }}></th>
+                      <th style={{ width: '200px' }}>Target</th>
+                      <th>Tanggal & Shift</th>
+                      <th className="th-center">Status</th>
+                      <th className="th-center" style={{ width: '140px' }}>Aksi</th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                  </thead>
+                  <tbody>
+                    {paginatedSwaps.map((swap: any) => {
+                      const statusClass = swap.status === 'approved' ? 'status-badge--approved' :
+                        swap.status === 'pending' ? 'status-badge--pending' : 'status-badge--draft';
+                      const statusLabel = swap.status === 'approved' ? 'Approved' :
+                        swap.status === 'pending' ? 'Pending' : 'Rejected';
+
+                      return (
+                        <tr key={swap.id}>
+                          <td>
+                            <div className="cell-name">
+                              <div className="cell-avatar">
+                                {swap.requester?.full_name ? swap.requester.full_name.charAt(0).toUpperCase() : "R"}
+                              </div>
+                              <div className="cell-stacked">
+                                <span className="cell-name-text">{swap.requester?.full_name || 'N/A'}</span>
+                                <span className="cell-stacked__sub">{swap.requester_shift_name}</span>
+                              </div>
+                            </div>
+                          </td>
+                          <td style={{ textAlign: 'center' }}>
+                            <ArrowLeftRight size={20} color="#94a3b8" />
+                          </td>
+                          <td>
+                            <div className="cell-name">
+                              <div className="cell-avatar">
+                                {swap.target?.full_name ? swap.target.full_name.charAt(0).toUpperCase() : "T"}
+                              </div>
+                              <div className="cell-stacked">
+                                <span className="cell-name-text">{swap.target?.full_name || 'N/A'}</span>
+                                <span className="cell-stacked__sub">{swap.target_shift_name}</span>
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <Calendar size={16} color="#3b82f6" />
+                              {swap.shift_date ? new Date(swap.shift_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long' }) : '-'}
+                            </div>
+                            <div className="cell-email">{swap.shift_name}</div>
+                          </td>
+                          <td className="td-center">
+                            <span className={`status-badge ${statusClass}`}>{statusLabel}</span>
+                          </td>
+                          <td className="td-center">
+                            <div className="action-btn-group">
+                              {swap.status === 'pending' && (
+                                <button
+                                  className="action-btn"
+                                  style={{ color: '#10b981' }}
+                                  onClick={() => handleApprove(swap.id)}
+                                  title="Setujui"
+                                >
+                                  <CheckCircle2 size={16} />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="table-pagination">
+                <div className="pagination-info">
+                  Menampilkan <strong>{paginatedSwaps.length}</strong> dari <strong>{filteredSwaps.length}</strong> penukaran
+                </div>
+                <div className="pagination-controls">
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    ‹
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    ›
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

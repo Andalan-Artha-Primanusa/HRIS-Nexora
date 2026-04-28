@@ -2,12 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
-import { BarChart3, CheckCircle2, Receipt, Wallet, FileText, Download, Printer, RefreshCw } from "lucide-react";
+import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
+import { BarChart3, CheckCircle2, Receipt, Wallet, FileText, Download, Printer, RefreshCw, Search, Eye } from "lucide-react";
 import { getMyPayroll, getMyPayrollDetail, exportMyPayrollPdf } from "@/features/ess/api/ess.service";
 import type { GenericApiItem } from "@/features/ess/types/ess.types";
+import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
-import "@/pages/payroll/PayrollShared.css";
-import "./EssPages.css";
 
 const MyPayrollPage = () => {
   const [items, setItems] = useState<GenericApiItem[]>([]);
@@ -16,42 +16,13 @@ const MyPayrollPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
 
-  const summaryCards = useMemo(() => {
-    const paidCount = items.filter((item) => String(item.status ?? "").toLowerCase() === "paid").length;
-    const totalNetSalary = items.reduce((sum, item) => sum + (Number(item.net_salary || item.take_home_pay) || 0), 0);
-    const uniquePeriods = new Set(items.map((item) => String(item.period ?? "")).filter(Boolean));
+  // Search & Filter
+  const [searchText, setSearchText] = useState("");
+  const [activeTab, setActiveTab] = useState<"Semua" | "Paid" | "Pending" | "Draft">("Semua");
 
-    return [
-      {
-        label: "Total Slip",
-        subtitle: "Seluruh riwayat payroll",
-        value: String(items.length),
-        tone: "blue" as const,
-        icon: BarChart3,
-      },
-      {
-        label: "Sudah Dibayar",
-        subtitle: "Slip yang telah cair",
-        value: String(paidCount),
-        tone: "green" as const,
-        icon: CheckCircle2,
-      },
-      {
-        label: "Periode",
-        subtitle: "Rentang waktu aktif",
-        value: String(uniquePeriods.size),
-        tone: "orange" as const,
-        icon: Receipt,
-      },
-      {
-        label: "Total Gaji Bersih",
-        subtitle: "Akumulasi pendapatan",
-        value: `Rp ${totalNetSalary.toLocaleString("id-ID")}`,
-        tone: "red" as const,
-        icon: Wallet,
-      },
-    ];
-  }, [items]);
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
 
   const loadPayroll = async () => {
     setLoading(true);
@@ -64,6 +35,56 @@ const MyPayrollPage = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    void loadPayroll();
+  }, []);
+
+  const summaryStats = useMemo(() => {
+    const paidCount = items.filter((item) => String(item.status ?? "").toLowerCase() === "paid").length;
+    const totalNetSalary = items.reduce((sum, item) => sum + (Number(item.net_salary || item.take_home_pay) || 0), 0);
+    const uniquePeriods = new Set(items.map((item) => String(item.period ?? "")).filter(Boolean));
+    const pendingCount = items.filter((item) => String(item.status ?? "").toLowerCase() === "pending").length;
+
+    return [
+      { label: "Total Slip", subtitle: "Seluruh riwayat payroll", value: String(items.length), tone: "blue" as const },
+      { label: "Sudah Dibayar", subtitle: "Slip yang telah cair", value: String(paidCount), tone: "green" as const },
+      { label: "Pending", subtitle: "Menunggu pembayaran", value: String(pendingCount), tone: "orange" as const },
+      { label: "Total Gaji Bersih", subtitle: "Akumulasi pendapatan", value: `Rp ${totalNetSalary.toLocaleString("id-ID")}`, tone: "red" as const },
+    ];
+  }, [items]);
+
+  const filteredItems = useMemo(() => {
+    return items.filter((item) => {
+      const period = String(item.period || '').toLowerCase();
+      const query = searchText.toLowerCase();
+      const matchSearch = period.includes(query);
+
+      let statusMatch = true;
+      if (activeTab === "Paid") statusMatch = String(item.status ?? "").toLowerCase() === "paid";
+      else if (activeTab === "Pending") statusMatch = String(item.status ?? "").toLowerCase() === "pending";
+      else if (activeTab === "Draft") statusMatch = String(item.status ?? "").toLowerCase() === "draft";
+
+      return matchSearch && statusMatch;
+    });
+  }, [items, searchText, activeTab]);
+
+  const paginatedItems = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredItems.slice(startIndex, startIndex + pageSize);
+  }, [filteredItems, currentPage, pageSize]);
+
+  const totalPages = Math.ceil(filteredItems.length / pageSize);
+
+  const clearFilters = () => {
+    setSearchText("");
+    setActiveTab("Semua");
+    setCurrentPage(1);
+  };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText, activeTab]);
 
   const handleViewSlip = async (id: string) => {
     setDetailLoading(true);
@@ -94,14 +115,11 @@ const MyPayrollPage = () => {
     }
   };
 
-  useEffect(() => {
-    void loadPayroll();
-  }, []);
-
   const formatCurrency = (val: any) => `Rp ${Number(val || 0).toLocaleString("id-ID")}`;
 
   return (
-    <div className="ess-page">
+    <div className="crud-page">
+      {/* Header */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -123,113 +141,185 @@ const MyPayrollPage = () => {
         </div>
       </Card>
 
-      <div className="leave-requests-wrapper">
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Total Slip</p>
-              <p className="leave-summary-subtitle">Seluruh riwayat payroll</p>
-            </div>
-            <div className="leave-summary-icon-wrapper leave-icon-blue">
-              <BarChart3 size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-blue">{items.length}</div>
-          <p className="leave-summary-trend">Total Slip Gaji</p>
-        </div>
+      {/* Summary Cards */}
+      <div className="employee-summary-wrapper">
+        {summaryStats.map((card) => {
+          const Icon = card.tone === "blue" ? BarChart3 : card.tone === "green" ? CheckCircle2 : card.tone === "orange" ? Receipt : Wallet;
 
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Sudah Dibayar</p>
-              <p className="leave-summary-subtitle">Slip yang telah cair</p>
+          return (
+            <div key={card.label} className="employee-summary-card">
+              <div className="employee-summary-header">
+                <div>
+                  <p className="employee-summary-label">{card.label}</p>
+                  <p className="employee-summary-subtitle">{card.subtitle}</p>
+                </div>
+                <div className={`employee-summary-icon-wrapper employee-icon-${card.tone}`}>
+                  <Icon size={28} />
+                </div>
+              </div>
+              <div className={`employee-summary-value employee-value-${card.tone}`}>{card.value}</div>
+              <p className="employee-summary-trend">{card.subtitle}</p>
             </div>
-            <div className="leave-summary-icon-wrapper leave-icon-green">
-              <CheckCircle2 size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-green">{items.filter((item) => String(item.status ?? "").toLowerCase() === "paid").length}</div>
-          <p className="leave-summary-trend">Slip Terbayar</p>
-        </div>
-
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Periode Aktif</p>
-              <p className="leave-summary-subtitle">Rentang waktu</p>
-            </div>
-            <div className="leave-summary-icon-wrapper leave-icon-orange">
-              <Receipt size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-orange">{new Set(items.map((item) => String(item.period ?? ""))).size}</div>
-          <p className="leave-summary-trend">Periode</p>
-        </div>
-
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Total Gaji Bersih</p>
-              <p className="leave-summary-subtitle">Akumulasi</p>
-            </div>
-            <div className="leave-summary-icon-wrapper leave-icon-red">
-              <Wallet size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-red">{formatCurrency(items.reduce((sum, item) => sum + (Number(item.net_salary || item.take_home_pay) || 0), 0))}</div>
-          <p className="leave-summary-trend">Total</p>
-        </div>
+          );
+        })}
       </div>
 
-      <Card className="ess-card" glass>
-        <h2>Daftar Slip Gaji</h2>
-        <div className="ess-table-wrap">
-          <table className="ess-table">
-            <thead>
-              <tr>
-                <th>Periode</th>
-                <th>Gaji Pokok</th>
-                <th>Gaji Bersih</th>
-                <th>Status</th>
-                <th style={{ textAlign: 'right' }}>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.length > 0 ? (
-                items.map((item) => (
-                  <tr key={String(item.id)}>
-                    <td style={{ fontWeight: 600 }}>{String(item.period || '-')}</td>
-                    <td>{formatCurrency(item.basic_salary)}</td>
-                    <td style={{ color: '#10b981', fontWeight: 700 }}>{formatCurrency(item.take_home_pay || item.net_salary)}</td>
-                    <td>
-                      <span className={`ess-status-badge ess-status-badge--${String(item.status).toLowerCase()}`}>
-                        {String(item.status).toUpperCase()}
-                      </span>
-                    </td>
-                    <td style={{ textAlign: 'right' }}>
-                      {String(item.status).toLowerCase() === 'paid' ? (
-                        <Button variant="ghost" size="sm" onClick={() => handleViewSlip(String(item.id))}>
-                          <FileText size={16} style={{ marginRight: '6px' }} />
-                          Lihat Slip
-                        </Button>
-                      ) : (
-                        <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Menunggu Pembayaran</span>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={5} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
-                    Belum ada riwayat slip gaji.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+      {/* Analytics Title Card */}
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <Receipt size={24} />
+          </div>
+          <div>
+            <h2 className="analytics-title">Daftar Slip Gaji</h2>
+            <p className="analytics-subtitle">Riwayat gaji dan pendapatan Anda</p>
+          </div>
         </div>
       </Card>
 
+      {/* Control Section */}
+      <Card className="control-section-card">
+        <div className="control-section-inner">
+          <div className="search-filter-group">
+            <div className="search-input-wrapper">
+              <Search size={18} className="search-icon" />
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Cari periode..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+              />
+              {searchText && (
+                <button className="clear-search-btn" onClick={() => setSearchText("")}>×</button>
+              )}
+            </div>
+            <Button variant="outline" size="sm" onClick={clearFilters} disabled={!searchText && activeTab === "Semua"}>
+              <RefreshCw size={14} />
+              Reset
+            </Button>
+          </div>
+
+          <div className="tabs-container">
+            {(["Semua", "Paid", "Pending", "Draft"] as const).map((tab) => (
+              <button
+                key={tab}
+                className={`tab-button ${activeTab === tab ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab}
+                {tab !== "Semua" && (
+                  <span className="tab-count">
+                    {tab === "Paid"
+                      ? items.filter((item) => String(item.status ?? "").toLowerCase() === "paid").length
+                      : tab === "Pending"
+                      ? items.filter((item) => String(item.status ?? "").toLowerCase() === "pending").length
+                      : items.filter((item) => String(item.status ?? "").toLowerCase() === "draft").length}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      </Card>
+
+      {/* Data Table */}
+      <Card className="data-table-card">
+        <div className="data-table-header">
+          <h3 className="data-table-title">
+            Daftar Slip Gaji
+            <span className="data-table-count">{filteredItems.length} ditemukan</span>
+          </h3>
+        </div>
+
+        {loading ? (
+          <LoadingState message="Memuat data slip gaji..." />
+        ) : filteredItems.length === 0 ? (
+          <EmptyState
+            icon={<Receipt size={48} />}
+            title="Tidak ada slip gaji ditemukan"
+            message={searchText || activeTab !== "Semua" ? "Coba ubah kata kunci atau filter" : "Belum ada riwayat slip gaji"}
+          />
+        ) : (
+          <>
+            <div className="table-wrap">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Periode</th>
+                    <th>Gaji Pokok</th>
+                    <th>Gaji Bersih</th>
+                    <th>Status</th>
+                    <th style={{ textAlign: 'right' }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedItems.map((item) => (
+                    <tr key={String(item.id)}>
+                      <td style={{ fontWeight: 600 }}>{String(item.period || '-')}</td>
+                      <td>{formatCurrency(item.basic_salary)}</td>
+                      <td style={{ color: '#10b981', fontWeight: 700 }}>{formatCurrency(item.take_home_pay || item.net_salary)}</td>
+                      <td>
+                        <span className={`status-badge status-${String(item.status).toLowerCase()}`}>
+                          {String(item.status).toUpperCase()}
+                        </span>
+                      </td>
+                      <td style={{ textAlign: 'right' }}>
+                        {String(item.status).toLowerCase() === 'paid' ? (
+                          <Button variant="ghost" size="sm" onClick={() => handleViewSlip(String(item.id))}>
+                            <Eye size={16} style={{ marginRight: '6px' }} />
+                            Lihat Slip
+                          </Button>
+                        ) : (
+                          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Menunggu Pembayaran</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="table-pagination">
+                <div className="pagination-info">
+                  Menampilkan {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, filteredItems.length)} dari {filteredItems.length}
+                </div>
+                <div className="pagination-controls">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(prev => prev - 1)}
+                  >
+                    Sebelumnya
+                  </Button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    <button
+                      key={page}
+                      className={`pagination-page-btn ${currentPage === page ? 'active' : ''}`}
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(prev => prev + 1)}
+                  >
+                    Selanjutnya
+                  </Button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </Card>
+
+      {/* Modal for Slip Details */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -313,7 +403,7 @@ const MyPayrollPage = () => {
                 <span className="thp-label">TAKE HOME PAY (GAJI BERSIH)</span>
                 <span className="thp-value">{formatCurrency(selectedSlip.take_home_pay || selectedSlip.net_salary)}</span>
               </div>
-              
+
               <div className="slip-actions">
                 <Button variant="outline" size="md" onClick={() => window.print()}>
                   <Printer size={16} style={{ marginRight: '8px' }} /> Cetak
@@ -323,7 +413,7 @@ const MyPayrollPage = () => {
                 </Button>
               </div>
             </div>
-            
+
             <p className="slip-disclaimer">
               * Slip gaji ini dihasilkan secara otomatis oleh sistem HRIS dan merupakan dokumen sah perusahaan.
             </p>
@@ -335,4 +425,3 @@ const MyPayrollPage = () => {
 };
 
 export default MyPayrollPage;
-

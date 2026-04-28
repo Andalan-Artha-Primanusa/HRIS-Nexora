@@ -1,14 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, RefreshCw, GraduationCap, Calendar, Users, BookOpen, Search, Clock, Award, Edit, Trash2, BookTemplate, CheckCircle } from 'lucide-react';
+import { Plus, RefreshCw, GraduationCap, Calendar, Users, BookOpen, Search, Filter, Clock, Award, Edit, Trash2, BookTemplate, CheckCircle, TrendingUp } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { trainingService } from '@/features/training/api/training.service';
 import type { TrainingProgram } from '@/features/training/types/training.types';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
-import '@/pages/payroll/PayrollShared.css';
 import './TrainingProgramsPage.css';
+
+const formatDateTime = (input: string) => {
+  const date = new Date(input);
+  if (Number.isNaN(date.getTime())) return input;
+  return new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(date);
+};
 
 const TrainingProgramsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -16,11 +22,20 @@ const TrainingProgramsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Filter & Pagination State
+  const [activeTab, setActiveTab] = useState<"Semua" | "Active" | "Draft" | "Completed" | "Cancelled">("Semua");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [showFilters, setShowFilters] = useState(false);
+
   const fetchData = async () => {
     setLoading(true);
     try {
       const data = await trainingService.getPrograms();
-      const programsArray = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+      let programsArray: any[] = [];
+      if (Array.isArray(data)) programsArray = data;
+      else if (Array.isArray(data?.data)) programsArray = data.data;
+      else if (Array.isArray(data?.data?.data)) programsArray = data.data.data;
       setPrograms(programsArray);
     } catch (error) {
       console.error('Error fetching programs:', error);
@@ -29,28 +44,82 @@ const TrainingProgramsPage: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useEffect(() => { fetchData(); }, []);
 
-  const filteredPrograms = programs.filter(p => 
-    p.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.category?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter Logic
+  const filteredPrograms = useMemo(() => {
+    return programs.filter(p => {
+      const searchStr = searchQuery.toLowerCase();
+      const textMatch = (p.title || p.nama || '')?.toLowerCase().includes(searchStr) ||
+                        (p.category || '')?.toLowerCase().includes(searchStr);
+      
+      let statusMatch = true;
+      if (activeTab === "Active") statusMatch = p.status === 'active';
+      else if (activeTab === "Draft") statusMatch = p.status === 'draft';
+      else if (activeTab === "Completed") statusMatch = p.status === 'completed';
+      else if (activeTab === "Cancelled") statusMatch = p.status === 'cancelled';
+      
+      return textMatch && statusMatch;
+    });
+  }, [programs, searchQuery, activeTab]);
 
-  const activePrograms = programs.filter(p => p.status === 'active').length;
-  const totalEnrolled = programs.reduce((sum, p) => sum + (p.enrolled_count || 0), 0);
+  // Sort by title
+  const sortedPrograms = useMemo(() => {
+    return [...filteredPrograms].sort((a, b) => {
+      const valA = (a.title || '').toLowerCase();
+      const valB = (b.title || '').toLowerCase();
+      return valA < valB ? -1 : valA > valB ? 1 : 0;
+    });
+  }, [filteredPrograms]);
 
-  const getCategoryColor = (category: string) => {
-    const colors: Record<string, string> = {
-      technical: '#3b82f6',
-      soft_skills: '#8b5cf6',
-      leadership: '#f59e0b',
-      compliance: '#ef4444',
-      safety: '#10b981',
-      other: '#64748b',
-    };
-    return colors[category?.toLowerCase()] || colors.other;
+  // Paginate
+  const paginatedPrograms = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return sortedPrograms.slice(startIndex, startIndex + pageSize);
+  }, [sortedPrograms, currentPage, pageSize]);
+
+  const totalPages = Math.ceil(sortedPrograms.length / pageSize);
+
+  // Summary Cards
+  const summaryCards = useMemo(() => [
+    {
+      label: "Total Program",
+      subtitle: "Seluruh program pelatihan",
+      value: String(programs.length),
+      change: "Program Pelatihan",
+      tone: "blue" as const,
+      icon: GraduationCap,
+    },
+    {
+      label: "Hasil Filter",
+      subtitle: "Program sesuai pencarian",
+      value: String(sortedPrograms.length),
+      change: `${paginatedPrograms.length} data per halaman`,
+      tone: "green" as const,
+      icon: Search,
+    },
+    {
+      label: "Aktif",
+      subtitle: "Program yang sedang aktif",
+      value: String(programs.filter(p => p.status === 'active').length),
+      change: "Program Aktif",
+      tone: "orange" as const,
+      icon: CheckCircle,
+    },
+    {
+      label: "Kategori",
+      subtitle: "Kategori pelatihan",
+      value: String(new Set(programs.map(p => p.category).filter(Boolean)).size),
+      change: "Jenis pelatihan",
+      tone: "purple" as const,
+      icon: BookTemplate,
+    },
+  ], [programs, sortedPrograms.length, paginatedPrograms.length]);
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setActiveTab("Semua");
+    setCurrentPage(1);
   };
 
   const handleDelete = async (id: number, e: React.MouseEvent) => {
@@ -65,8 +134,9 @@ const TrainingProgramsPage: React.FC = () => {
     }
   };
 
-return (
+  return (
     <div className="crud-page training-page">
+      {/* Header */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -92,138 +162,212 @@ return (
         </div>
       </Card>
 
-      <div className="leave-requests-wrapper">
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Total Program</p>
-              <p className="leave-summary-subtitle">Seluruh program pelatihan</p>
+      {/* Summary Cards */}
+      <div className="training-summary-wrapper">
+        {summaryCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <div key={card.label} className="training-summary-card">
+              <div className="training-summary-header">
+                <div>
+                  <p className="training-summary-label">{card.label}</p>
+                  <p className="training-summary-subtitle">{card.subtitle}</p>
+                </div>
+                <div className={`training-summary-icon-wrapper training-icon-${card.tone}`}>
+                  <Icon size={28} />
+                </div>
+              </div>
+              <div className={`training-summary-value training-value-${card.tone}`}>{card.value}</div>
+              <p className="training-summary-trend">{card.change}</p>
             </div>
-            <div className="leave-summary-icon-wrapper leave-icon-blue">
-              <GraduationCap size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-blue">{programs.length}</div>
-          <p className="leave-summary-trend">Program Pelatihan</p>
-        </div>
-
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Aktif</p>
-              <p className="leave-summary-subtitle">Program yang sedang aktif</p>
-            </div>
-            <div className="leave-summary-icon-wrapper leave-icon-green">
-              <CheckCircle size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-green">{activePrograms}</div>
-          <p className="leave-summary-trend">Program Aktif</p>
-        </div>
-
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Terdaftar</p>
-              <p className="leave-summary-subtitle">Total peserta</p>
-            </div>
-            <div className="leave-summary-icon-wrapper leave-icon-orange">
-              <Users size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-orange">{totalEnrolled}</div>
-          <p className="leave-summary-trend">Karyawan Terdaftar</p>
-        </div>
+          );
+        })}
       </div>
 
-      <div className="white-unified-wrapper">
-        <div className="wuw-header">
-          <div className="wuw-header-top">
-            <div className="wuw-title-area">
-              <h3>Program List</h3>
-              <span className="wuw-count-badge">{filteredPrograms.length} programs</span>
-            </div>
+      {/* Analytics Title Card */}
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <BookOpen size={24} />
+          </div>
+          <div>
+            <h2 className="analytics-title">Daftar Program</h2>
+            <p className="analytics-subtitle">Kelola dan lihat semua program pelatihan</p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Control Section */}
+      <Card className="control-section-card">
+        <div className="control-section-inner">
+          {/* Tabs */}
+          <div className="elyra-tabs">
+            {(["Semua", "Active", "Draft", "Completed", "Cancelled"] as const).map((tab) => (
+              <button
+                key={tab}
+                className={`elyra-tab ${activeTab === tab ? "active" : ""}`}
+                onClick={() => { setActiveTab(tab); setCurrentPage(1); }}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          {/* Search & Filter */}
+          <div className="control-actions">
             <div className="search-box">
-              <Search size={18} />
-              <input 
-                type="text" 
-                placeholder="Search programs..." 
+              <div className="search-icon-inside"><Search size={18} /></div>
+              <input
+                type="text"
+                placeholder="Cari program..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+                className="search-input-pill"
               />
             </div>
+            <button
+              className={`filter-btn-rounded ${showFilters ? "active" : ""}`}
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <Filter size={18} />
+              <span>Filter</span>
+            </button>
           </div>
         </div>
 
+        {/* Filter Panel */}
+        {showFilters && (
+          <div className="filter-dropdown">
+            <div className="filter-row">
+              {(searchQuery || activeTab !== "Semua") && (
+                <button className="btn-clear-filter" onClick={clearFilters}>
+                  Hapus Filter
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </Card>
+
+      {/* Table Section */}
+      <div className="table-section">
         <div className="wuw-table-area">
-          {loading ? (
-            <div className="loading-state">
-              <RefreshCw size={32} className="animate-spin" />
-              <p>Loading programs...</p>
+          {loading && <LoadingState message="Memuat program..." />}
+
+          {!loading && paginatedPrograms.length === 0 && (
+            <div style={{ padding: '5rem 0' }}>
+              <EmptyState
+                title="Pencarian Kosong"
+                message="Kami tidak menemukan program yang sesuai dengan kriteria Anda."
+                actionLabel="Bersihkan Filter"
+                onAction={clearFilters}
+              />
             </div>
-          ) : filteredPrograms.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-icon">
-                <GraduationCap size={48} />
+          )}
+
+          {!loading && paginatedPrograms.length > 0 && (
+            <>
+              <div className="table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: '400px' }}>Nama Program</th>
+                      <th>Kategori</th>
+                      <th>Mode</th>
+                      <th>Provider</th>
+                      <th>Tanggal Mulai</th>
+                      <th className="th-center">Status</th>
+                      <th className="th-center" style={{ width: '120px' }}>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedPrograms.map((program) => (
+                      <tr key={program.id}>
+                        <td>
+                          <div className="cell-name">
+                            <div className="cell-avatar">
+                              {(program.title || 'P').charAt(0).toUpperCase()}
+                            </div>
+                            <div className="cell-stacked">
+                              <span className="cell-name-text">{program.title || program.nama}</span>
+                              <span className="cell-stacked__sub">{program.description || 'No description'}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td><span style={{ color: '#475569', fontWeight: 600 }}>{program.category || "-"}</span></td>
+                        <td><span className="badge-soft badge-soft--blue">{program.mode || "-"}</span></td>
+                        <td><span style={{ color: '#64748b', fontWeight: 500 }}>{program.provider || "-"}</span></td>
+                        <td>
+                          <div className="cell-stacked">
+                            <span className="cell-stacked__main" style={{ fontSize: '0.85rem' }}>{program.start_date ? formatDateTime(program.start_date) : "-"}</span>
+                            <span className="cell-stacked__sub">Mulai</span>
+                          </div>
+                        </td>
+                        <td className="td-center">
+                          <span className={`badge-soft badge-soft--${
+                            program.status === "active" ? "green" : 
+                            program.status === "draft" ? "yellow" : 
+                            program.status === "completed" ? "blue" : "red"
+                          }`}>
+                            {program.status || "draft"}
+                          </span>
+                        </td>
+                        <td className="td-center">
+                          <div className="action-btn-group">
+                            <button
+                              className="action-btn action-btn-edit"
+                              onClick={() => navigate(`/training/programs/edit/${program.id}`)}
+                              title="Edit"
+                            >
+                              <Edit size={16} />
+                            </button>
+                            <button
+                              className="action-btn action-btn-delete"
+                              onClick={(e) => handleDelete(program.id, e)}
+                              title="Hapus"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-              <h4>No programs found</h4>
-              <p>Create your first training program to get started.</p>
-              <Button variant="primary" onClick={() => navigate('/training/programs/create')}>
-                <Plus size={16} /> Create Program
-              </Button>
-            </div>
-          ) : (
-            <div className="program-grid">
-              {filteredPrograms.map((program) => (
-                <Card key={program.id} className="program-card" glass>
-                  <div className="program-header">
-                    <div 
-                      className="program-icon"
-                      style={{ background: `${getCategoryColor(program.category)}20`, color: getCategoryColor(program.category) }}
+
+              {/* Pagination */}
+              <div className="table-pagination">
+                <div className="pagination-info">
+                  Menampilkan <strong>{paginatedPrograms.length}</strong> dari <strong>{sortedPrograms.length}</strong> program
+                </div>
+                <div className="pagination-controls">
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    ‹
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
+                      onClick={() => setCurrentPage(page)}
                     >
-                      <BookOpen size={20} />
-                    </div>
-                    <div className="program-info">
-                      <h4>{program.title}</h4>
-                      <span className="program-category" style={{ color: getCategoryColor(program.category) }}>
-                        {program.category || 'Other'}
-                      </span>
-                    </div>
-                    <span className={`program-status ${program.status === 'active' ? 'active' : 'inactive'}`}>
-                      {program.status === 'active' ? 'Active' : 'Inactive'}
-                    </span>
-                  </div>
-                  
-                  <p className="program-description">{program.description || 'No description provided.'}</p>
-                  
-                  <div className="program-meta">
-                    <div className="meta-item">
-                      <Clock size={14} />
-                      <span>{program.duration || '0'} hours</span>
-                    </div>
-                    <div className="meta-item">
-                      <Users size={14} />
-                      <span>{program.enrolled_count || 0} enrolled</span>
-                    </div>
-                    {program.completion_rate && (
-                      <div className="meta-item">
-                        <Award size={14} />
-                        <span>{program.completion_rate}% completion</span>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="program-actions">
-                    <Button variant="ghost" size="sm" onClick={() => navigate(`/training/programs/edit/${program.id}`)}>
-                      <Edit size={16} /> Edit
-                    </Button>
-                    <Button variant="ghost" size="sm" danger onClick={(e) => handleDelete(program.id, e)}>
-                      <Trash2 size={16} /> Delete
-                    </Button>
-                  </div>
-                </Card>
-              ))}
-            </div>
+                      {page}
+                    </button>
+                  ))}
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    ›
+                  </button>
+                </div>
+              </div>
+            </>
           )}
         </div>
       </div>

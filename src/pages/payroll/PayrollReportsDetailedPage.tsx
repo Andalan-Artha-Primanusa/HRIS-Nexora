@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Search, RefreshCw, FileText, DollarSign, Receipt, Users } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Search, RefreshCw, FileText, DollarSign, Receipt, Users, Eye } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { Badge } from '@/shared/ui/Badge';
+import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { payrollService, toSafeArray } from '@/features/payroll/api/payroll.service';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
-import '@/pages/payroll/PayrollShared.css';
 
 const formatCurrency = (value: number | string) => {
   const num = typeof value === 'string' ? parseFloat(value) : value;
@@ -20,7 +20,14 @@ const formatCurrency = (value: number | string) => {
 const PayrollReportsDetailedPage: React.FC = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
+
+  // Search & Filter
+  const [searchText, setSearchText] = useState("");
+  const [activeTab, setActiveTab] = useState<"Semua" | "Pending" | "Approved">("Semua");
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
 
   const loadData = async () => {
     setLoading(true);
@@ -38,21 +45,55 @@ const PayrollReportsDetailedPage: React.FC = () => {
     void loadData();
   }, []);
 
-  const filteredData = data.filter(item => {
-    const empName = item.employee?.user?.name || '';
-    const empCode = item.employee?.employee_code || '';
-    return empName.toLowerCase().includes(search.toLowerCase()) || 
-           empCode.toLowerCase().includes(search.toLowerCase());
-  });
+  const filteredData = useMemo(() => {
+    return data.filter(item => {
+      const empName = (item.employee?.user?.name || '').toLowerCase();
+      const empCode = (item.employee?.employee_code || '').toLowerCase();
+      const query = searchText.toLowerCase();
+      const matchSearch = empName.includes(query) || empCode.includes(query);
 
-  const totals = data.reduce((acc, curr) => ({
-    thp: acc.thp + (parseFloat(curr.take_home_pay) || 0),
-    deductions: acc.deductions + (parseFloat(curr.total_deduction) || 0),
-    records: acc.records + 1
-  }), { thp: 0, deductions: 0, records: 0 });
+      let statusMatch = true;
+      if (activeTab === "Pending") statusMatch = item.status === 'pending';
+      else if (activeTab === "Approved") statusMatch = item.status === 'approved';
+
+      return matchSearch && statusMatch;
+    });
+  }, [data, searchText, activeTab]);
+
+  const paginatedData = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredData.slice(startIndex, startIndex + pageSize);
+  }, [filteredData, currentPage, pageSize]);
+
+  const totalPages = Math.ceil(filteredData.length / pageSize);
+
+  const summaryStats = useMemo(() => {
+    const totals = data.reduce((acc, curr) => ({
+      thp: acc.thp + (parseFloat(curr.take_home_pay) || 0),
+      deductions: acc.deductions + (parseFloat(curr.total_deduction) || 0),
+      records: acc.records + 1
+    }), { thp: 0, deductions: 0, records: 0 });
+
+    return [
+      { label: "Total Take Home Pay", subtitle: "Akumulasi", value: formatCurrency(totals.thp), tone: "blue" as const },
+      { label: "Total Potongan", subtitle: "Deductions", value: formatCurrency(totals.deductions), tone: "orange" as const },
+      { label: "Total Records", subtitle: "Jumlah entri", value: totals.records, tone: "green" as const },
+    ];
+  }, [data]);
+
+  const clearFilters = () => {
+    setSearchText("");
+    setActiveTab("Semua");
+    setCurrentPage(1);
+  };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText, activeTab]);
 
   return (
     <div className="crud-page">
+      {/* Header */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -74,120 +115,177 @@ const PayrollReportsDetailedPage: React.FC = () => {
         </div>
       </Card>
 
-      <div className="summary-grid">
-        <Card className="metric-card">
-          <div className="metric-header">
-            <div>
-              <span className="metric-label">Total Take Home Pay</span>
-              <p className="metric-subtitle">Net Disbursement</p>
-            </div>
-            <span className="metric-icon metric-icon--green">
-              <DollarSign size={22} />
-            </span>
-          </div>
-          <div className="metric-value" style={{ color: '#10b981' }}>{formatCurrency(totals.thp)}</div>
-          <div className="summary-card-change">Total THP</div>
-        </Card>
+      {/* Summary Cards */}
+      <div className="employee-summary-wrapper">
+        {summaryStats.map((card) => {
+          const Icon = card.tone === "blue" ? DollarSign : card.tone === "green" ? Users : Receipt;
 
-        <Card className="metric-card">
-          <div className="metric-header">
-            <div>
-              <span className="metric-label">Total Potongan</span>
-              <p className="metric-subtitle">Total Deductions</p>
+          return (
+            <div key={card.label} className="employee-summary-card">
+              <div className="employee-summary-header">
+                <div>
+                  <p className="employee-summary-label">{card.label}</p>
+                  <p className="employee-summary-subtitle">{card.subtitle}</p>
+                </div>
+                <div className={`employee-summary-icon-wrapper employee-icon-${card.tone}`}>
+                  <Icon size={28} />
+                </div>
+              </div>
+              <div className={`employee-summary-value employee-value-${card.tone}`}>{card.value}</div>
+              <p className="employee-summary-trend">{card.subtitle}</p>
             </div>
-            <span className="metric-icon metric-icon--red">
-              <Receipt size={22} />
-            </span>
-          </div>
-          <div className="metric-value" style={{ color: '#ef4444' }}>{formatCurrency(totals.deductions)}</div>
-          <div className="summary-card-change">Potongan seluruh karyawan</div>
-        </Card>
-
-        <Card className="metric-card">
-          <div className="metric-header">
-            <div>
-              <span className="metric-label">Jumlah Entri</span>
-              <p className="metric-subtitle">Processed</p>
-            </div>
-            <span className="metric-icon metric-icon--blue">
-              <Users size={22} />
-            </span>
-          </div>
-          <div className="metric-value" style={{ color: '#2563eb' }}>{totals.records}</div>
-          <div className="summary-card-change">Total records</div>
-        </Card>
+          );
+        })}
       </div>
 
-      <div className="white-unified-wrapper">
-        <div className="wuw-header">
-          <div className="wuw-header-top">
-            <div className="wuw-title-area">
-              <h3>Laporan Payroll</h3>
-              <span className="wuw-count-badge">{filteredData.length} Records</span>
-            </div>
+      {/* Analytics Title Card */}
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <FileText size={24} />
+          </div>
+          <div>
+            <h2 className="analytics-title">Daftar Laporan Payroll</h2>
+            <p className="analytics-subtitle">Kelola dan lihat semua data payroll</p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Control Section */}
+      <Card className="control-section-card">
+        <div className="control-section-inner">
+          {/* Tabs */}
+          <div className="elyra-tabs">
+            {["Semua", "Pending", "Approved"].map((tab) => (
+              <button
+                key={tab}
+                className={`elyra-tab ${activeTab === tab ? "active" : ""}`}
+                onClick={() => setActiveTab(tab as "Semua" | "Pending" | "Approved")}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          {/* Search */}
+          <div className="control-actions">
             <div className="search-box">
-              <Search size={18} />
-              <input 
-                type="text" 
-                placeholder="Cari karyawan..." 
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
+              <div className="search-icon-inside"><Search size={18} /></div>
+              <input
+                type="text"
+                placeholder="Cari karyawan atau kode..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="search-input-pill"
               />
             </div>
           </div>
         </div>
+      </Card>
 
+      {/* Table Section */}
+      <div className="table-section">
         <div className="wuw-table-area">
-          <div className="table-wrap">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Karyawan</th>
-                  <th>Periode</th>
-                  <th>Gaji Pokok</th>
-                  <th>Tunjangan</th>
-                  <th>Bonus</th>
-                  <th>Potongan</th>
-                  <th>THP</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td colSpan={8} className="text-center py-10">Memuat data...</td>
-                  </tr>
-                ) : filteredData.length > 0 ? (
-                  filteredData.map((item) => (
-                    <tr key={item.id}>
-                      <td>
-                        <div className="cell-name">
-                          <div className="cell-avatar">
-                            {(item.employee?.user?.name || 'U')[0]}
-                          </div>
-                          <div className="cell-stacked">
-                            <span className="cell-name-text">{item.employee?.user?.name || 'Unknown'}</span>
-                            <span className="cell-stacked__sub">{item.employee?.employee_code || item.employee_id}</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td>{item.period}</td>
-                      <td>{formatCurrency(item.basic_salary)}</td>
-                      <td>{formatCurrency(item.allowance)}</td>
-                      <td style={{ color: '#10b981' }}>{formatCurrency(item.bonus)}</td>
-                      <td style={{ color: '#ef4444' }}>{formatCurrency(item.total_deduction)}</td>
-                      <td style={{ fontWeight: 800, color: '#2563eb' }}>{formatCurrency(item.take_home_pay)}</td>
-                      <td><Badge variant={item.status === 'paid' ? 'success' : 'warning'}>{item.status}</Badge></td>
+          {loading && <LoadingState message="Memuat laporan payroll..." />}
+
+          {!loading && paginatedData.length === 0 && (
+            <div style={{ padding: '5rem 0' }}>
+              <EmptyState
+                title="Belum Ada Data"
+                message={searchText || activeTab !== "Semua"
+                  ? "Tidak ada data yang sesuai dengan kriteria Anda."
+                  : "Belum ada data payroll yang dibuat."}
+                actionLabel="Segarkan"
+                onAction={() => void loadData()}
+              />
+            </div>
+          )}
+
+          {!loading && paginatedData.length > 0 && (
+            <>
+              <div className="table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: '250px' }}>Karyawan</th>
+                      <th>Periode</th>
+                      <th>Gaji Pokok</th>
+                      <th>Tunjangan</th>
+                      <th>Lembur</th>
+                      <th>Take Home Pay</th>
+                      <th>Potongan</th>
+                      <th className="th-center" style={{ width: '120px' }}>Aksi</th>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={8} className="text-center py-10">Tidak ada data ditemukan.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                  </thead>
+                  <tbody>
+                    {paginatedData.map((item) => (
+                      <tr key={item.id}>
+                        <td>
+                          <div className="cell-name">
+                            <div className="cell-avatar">
+                              {(item.employee?.user?.name || 'U')[0].toUpperCase()}
+                            </div>
+                            <div className="cell-stacked">
+                              <span className="cell-name-text">{item.employee?.user?.name || 'Unknown'}</span>
+                              <span className="cell-stacked__sub">{item.employee?.employee_code || item.employee_id}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td><Badge variant="default">{item.period}</Badge></td>
+                        <td style={{ fontWeight: 500 }}>{formatCurrency(item.basic_salary)}</td>
+                        <td>{formatCurrency(item.allowances || 0)}</td>
+                        <td>{formatCurrency(item.overtime_pay || 0)}</td>
+                        <td style={{ fontWeight: 700, color: '#16a34a' }}>{formatCurrency(item.take_home_pay)}</td>
+                        <td style={{ color: '#e11d48', fontWeight: 600 }}>{formatCurrency(item.total_deduction)}</td>
+                        <td className="td-center">
+                          <div className="action-btn-group">
+                            <button
+                              className="action-btn action-btn-edit"
+                              title="Lihat Detail"
+                            >
+                              <Eye size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              <div className="table-pagination">
+                <div className="pagination-info">
+                  Menampilkan <strong>{paginatedData.length}</strong> dari <strong>{filteredData.length}</strong> data
+                </div>
+                <div className="pagination-controls">
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    ‹
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    ›
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

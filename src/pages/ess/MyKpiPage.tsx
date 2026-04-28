@@ -1,23 +1,23 @@
 import { useEffect, useMemo, useState } from "react";
+import { api } from "@/shared/api/httpClient";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
-import { Alert } from "@/shared/ui/Alert";
+import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { getErrorMessage } from "@/shared/api/errorHandler";
-import { 
-  Target, 
-  Send, 
+import {
+  Target,
+  Send,
   Search,
-  RefreshCw, 
-  CheckCircle2, 
+  RefreshCw,
+  CheckCircle2,
   Calendar,
   Eye,
-  X,
-  User,
-  TrendingUp
+  TrendingUp,
+  Filter,
+  Pencil
 } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
-import "@/pages/payroll/PayrollShared.css";
 import "./EssPages.css";
 import { getMyKpi, submitMyKpi } from "@/features/ess/api/ess.service";
 
@@ -32,11 +32,6 @@ type KPIItem = {
   period?: string;
   created_at: string;
   updated_at: string;
-  employee?: {
-    user: {
-      name: string;
-    }
-  }
 };
 
 const formatDate = (value?: string) => {
@@ -57,14 +52,18 @@ const MyKpiPage = () => {
   const [kpis, setKpis] = useState<KPIItem[]>([]);
   const [showDetail, setShowDetail] = useState(false);
   const [selectedKpi, setSelectedKpi] = useState<KPIItem | null>(null);
-  
+
   // Search & Filter
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [searchText, setSearchText] = useState("");
+  const [activeTab, setActiveTab] = useState<"Semua" | "Draft" | "Submitted" | "Approved">("Semua");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
   const [alertType, setAlertType] = useState<"success" | "error" | "info">("info");
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
 
   const loadData = async () => {
     setLoading(true);
@@ -86,23 +85,31 @@ const MyKpiPage = () => {
 
   const filteredKpis = useMemo(() => {
     return kpis.filter(kpi => {
-      const matchSearch = kpi.title.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchStatus = statusFilter === "all" || kpi.status === statusFilter;
-      return matchSearch && matchStatus;
+      const matchSearch = kpi.title.toLowerCase().includes(searchText.toLowerCase());
+      let statusMatch = true;
+      if (activeTab === "Draft") statusMatch = kpi.status === "draft";
+      else if (activeTab === "Submitted") statusMatch = kpi.status === "submitted";
+      else if (activeTab === "Approved") statusMatch = kpi.status === "approved";
+      return matchSearch && statusMatch;
     });
-  }, [kpis, searchTerm, statusFilter]);
+  }, [kpis, searchText, activeTab]);
+
+  const paginatedKpis = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredKpis.slice(startIndex, startIndex + pageSize);
+  }, [filteredKpis, currentPage, pageSize]);
+
+  const totalPages = Math.ceil(filteredKpis.length / pageSize);
 
   const stats = useMemo(() => {
     const total = kpis.length;
     const approved = kpis.filter(k => k.status === 'approved').length;
     const avgScore = total > 0 ? kpis.reduce((acc, k) => acc + k.score, 0) / total : 0;
-    const bestKpi = kpis.length > 0 ? [...kpis].sort((a, b) => b.score - a.score)[0] : null;
 
-    return { 
-      total, 
-      approved, 
-      avgScore,
-      bestScore: bestKpi ? `${bestKpi.score.toFixed(1)}%` : "—"
+    return {
+      total,
+      approved,
+      avgScore: avgScore.toFixed(1)
     };
   }, [kpis]);
 
@@ -127,8 +134,19 @@ const MyKpiPage = () => {
     }
   };
 
+  const clearFilters = () => {
+    setSearchText("");
+    setActiveTab("Semua");
+    setCurrentPage(1);
+  };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText, activeTab]);
+
   return (
     <div className="crud-page">
+      {/* Header */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -150,193 +168,282 @@ const MyKpiPage = () => {
         </div>
       </Card>
 
-      <div className="leave-requests-wrapper">
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
+      {/* Summary Cards */}
+      <div className="employee-summary-wrapper">
+        <div className="employee-summary-card">
+          <div className="employee-summary-header">
             <div>
-              <p className="leave-summary-label">Total KPI</p>
-              <p className="leave-summary-subtitle">KPI Anda</p>
+              <p className="employee-summary-label">Total KPI</p>
+              <p className="employee-summary-subtitle">KPI Anda</p>
             </div>
-            <div className="leave-summary-icon-wrapper leave-icon-blue">
+            <div className="employee-summary-icon-wrapper employee-icon-blue">
               <Target size={28} />
             </div>
           </div>
-          <div className="leave-summary-value leave-value-blue">{stats.total}</div>
-          <p className="leave-summary-trend">Total KPI</p>
+          <div className="employee-summary-value employee-value-blue">{stats.total}</div>
+          <p className="employee-summary-trend">Total KPI</p>
         </div>
 
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
+        <div className="employee-summary-card">
+          <div className="employee-summary-header">
             <div>
-              <p className="leave-summary-label">Disetujui</p>
-              <p className="leave-summary-subtitle">KPI yang disetujui</p>
+              <p className="employee-summary-label">Disetujui</p>
+              <p className="employee-summary-subtitle">KPI yang disetujui</p>
             </div>
-            <div className="leave-summary-icon-wrapper leave-icon-green">
+            <div className="employee-summary-icon-wrapper employee-icon-green">
               <CheckCircle2 size={28} />
             </div>
           </div>
-          <div className="leave-summary-value leave-value-green">{stats.approved}</div>
-          <p className="leave-summary-trend">KPI Disetujui</p>
+          <div className="employee-summary-value employee-value-green">{stats.approved}</div>
+          <p className="employee-summary-trend">KPI Disetujui</p>
         </div>
 
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
+        <div className="employee-summary-card">
+          <div className="employee-summary-header">
             <div>
-              <p className="leave-summary-label">Rata-rata Skor</p>
-              <p className="leave-summary-subtitle">Skor kinerja</p>
+              <p className="employee-summary-label">Rata-rata Skor</p>
+              <p className="employee-summary-subtitle">Skor kinerja</p>
             </div>
-            <div className="leave-summary-icon-wrapper" style={{ background: '#f5f3ff' }}>
+            <div className="employee-summary-icon-wrapper" style={{ background: '#f5f3ff' }}>
               <TrendingUp size={28} color="#8b5cf6" />
             </div>
           </div>
-          <div className="leave-summary-value" style={{ color: '#8b5cf6' }}>{stats.avgScore.toFixed(1)}%</div>
-          <p className="leave-summary-trend">Skor Rata-rata</p>
+          <div className="employee-summary-value" style={{ color: '#8b5cf6' }}>{stats.avgScore}%</div>
+          <p className="employee-summary-trend">Skor Rata-rata</p>
         </div>
       </div>
 
-      <div className="table-controls" style={{ display: 'flex', gap: 16, marginBottom: 24, alignItems: 'center' }}>
-        <div className="search-box" style={{ flex: 1, position: 'relative' }}>
-          <Search style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} size={16} />
-          <input 
-            className="form-input" 
-            placeholder="Cari judul KPI..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ paddingLeft: 36, width: '100%', marginBottom: 0 }}
-          />
-        </div>
-        <select 
-          className="form-input" 
-          value={statusFilter} 
-          onChange={(e) => setStatusFilter(e.target.value)}
-          style={{ width: 160, marginBottom: 0 }}
-        >
-          <option value="all">Semua Status</option>
-          <option value="draft">Draft</option>
-          <option value="submitted">Submitted</option>
-          <option value="approved">Approved</option>
-        </select>
-        <Button variant="outline" onClick={loadData} disabled={loading}>
-          <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-        </Button>
-      </div>
-
-      {statusMessage && <Alert type={alertType} message={statusMessage} onClose={() => setStatusMessage("")} dismissible />}
-
-      {loading ? (
-        <div className="kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 24 }}>
-          {Array(3).fill(0).map((_, i) => (
-            <Card key={i} glass style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.5 }}>
-              <RefreshCw size={24} className="animate-spin" />
-            </Card>
-          ))}
-        </div>
-      ) : filteredKpis.length === 0 ? (
-        <Card glass style={{ padding: '60px 20px', textAlign: 'center' }}>
-          <div style={{ opacity: 0.3, marginBottom: 16 }}>
-            <Target size={48} style={{ margin: '0 auto' }} />
+      {/* Analytics Title Card */}
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <Target size={24} />
           </div>
-          <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>Belum Ada KPI</h3>
-          <p style={{ color: 'var(--text-secondary)', maxWidth: 400, margin: '0 auto' }}>
-            {searchTerm || statusFilter !== "all" 
-              ? "Tidak ada KPI yang sesuai dengan kriteria pencarian Anda." 
-              : "Anda belum memiliki KPI yang ditugaskan. Silakan hubungi manajer atau HR Anda."}
-          </p>
-          {(searchTerm || statusFilter !== "all") && (
-            <Button variant="ghost" style={{ marginTop: 16 }} onClick={() => { setSearchTerm(""); setStatusFilter("all"); }}>
-              Reset Filter
-            </Button>
-          )}
-        </Card>
-      ) : (
-        <div className="kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 24 }}>
-          {filteredKpis.map((kpi) => (
-            <Card key={kpi.id} glass className="kpi-card" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16, transition: 'transform 0.2s', cursor: 'default' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <span className={getStatusClass(kpi.status)}>{kpi.status}</span>
-                <div className="kpi-card__period" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-secondary)' }}>
-                  <Calendar size={14} /> {kpi.period || "—"}
-                </div>
-              </div>
-              
-              <div>
-                <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 4, lineHeight: 1.4 }}>{kpi.title}</h3>
-                <p style={{ fontSize: 13, color: 'var(--text-secondary)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                  {kpi.description || "Tidak ada deskripsi tersedia."}
-                </p>
-              </div>
+          <div>
+            <h2 className="analytics-title">Daftar KPI</h2>
+            <p className="analytics-subtitle">Kelola dan lihat semua KPI Anda</p>
+          </div>
+        </div>
+      </Card>
 
-              <div style={{ marginTop: 'auto' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 8 }}>
-                  <span style={{ color: 'var(--text-secondary)' }}>Progres Capaian</span>
-                  <span style={{ fontWeight: 600, color: '#8b5cf6' }}>{kpi.score.toFixed(1)}%</span>
-                </div>
-                <div style={{ width: '100%', height: 8, background: 'rgba(0,0,0,0.05)', borderRadius: 4, overflow: 'hidden' }}>
-                  <div style={{ 
-                    width: `${Math.min(kpi.score, 100)}%`, 
-                    height: '100%', 
-                    background: kpi.score >= 100 ? '#10b981' : kpi.score >= 75 ? '#8b5cf6' : kpi.score >= 50 ? '#f59e0b' : '#ef4444',
-                    borderRadius: 4,
-                    transition: 'width 1s ease-in-out'
-                  }} />
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginTop: 8, color: 'var(--text-secondary)' }}>
-                  <span>{kpi.achievement.toLocaleString()} / {kpi.target.toLocaleString()} tercapai</span>
-                  <span>Update: {formatDate(kpi.updated_at)}</span>
-                </div>
-              </div>
+      {/* Control Section */}
+      <Card className="control-section-card">
+        <div className="control-section-inner">
+          {/* Tabs */}
+          <div className="elyra-tabs">
+            {(["Semua", "Draft", "Submitted", "Approved"] as const).map((tab) => (
+              <button
+                key={tab}
+                className={`elyra-tab ${activeTab === tab ? "active" : ""}`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
 
-              <div style={{ display: 'flex', gap: 12, paddingTop: 16, borderTop: '1px solid rgba(0,0,0,0.05)' }}>
-                <Button variant="ghost" size="sm" style={{ flex: 1 }} onClick={() => handleViewDetail(kpi)}>
-                  <Eye size={14} /> Detail
-                </Button>
-                {kpi.status === 'draft' && (
-                  <Button variant="primary" size="sm" style={{ flex: 1.5 }} onClick={() => handleSubmitKpi(kpi.id)} loading={submitting}>
-                    <Send size={14} /> Ajukan
-                  </Button>
-                )}
-              </div>
-            </Card>
-          ))}
+          {/* Search */}
+          <div className="control-actions">
+            <div className="search-box">
+              <div className="search-icon-inside"><Search size={18} /></div>
+              <input
+                type="text"
+                placeholder="Cari KPI..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="search-input-pill"
+              />
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      {/* Status Message */}
+      {statusMessage && (
+        <div className={`alert alert-${alertType}`} style={{ marginBottom: 24 }}>
+          <span>{statusMessage}</span>
+          <button onClick={() => setStatusMessage("")} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer' }}>×</button>
         </div>
       )}
+
+      {/* Table Section */}
+      <div className="table-section">
+        <div className="wuw-table-area">
+          {loading && <LoadingState message="Memuat KPI..." />}
+
+          {!loading && paginatedKpis.length === 0 && (
+            <div style={{ padding: '5rem 0' }}>
+              <EmptyState
+                title="Belum Ada KPI"
+                message={searchText || activeTab !== "Semua"
+                  ? "Tidak ada KPI yang sesuai dengan kriteria Anda."
+                  : "Anda belum memiliki KPI yang ditugaskan. Silakan hubungi manajer atau HR Anda."}
+                actionLabel="Bersihkan Filter"
+                onAction={clearFilters}
+              />
+            </div>
+          )}
+
+          {!loading && paginatedKpis.length > 0 && (
+            <>
+              <div className="table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: '400px' }}>Judul KPI</th>
+                      <th>Periode</th>
+                      <th>Target</th>
+                      <th>Pencapaian</th>
+                      <th>Skor</th>
+                      <th className="th-center">Status</th>
+                      <th className="th-center" style={{ width: '120px' }}>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedKpis.map((kpi) => (
+                      <tr key={kpi.id}>
+                        <td>
+                          <div className="cell-name">
+                            <div className="cell-avatar">
+                              {kpi.title ? kpi.title.charAt(0).toUpperCase() : "K"}
+                            </div>
+                            <div className="cell-stacked">
+                              <span className="cell-name-text">{kpi.title}</span>
+                              <span className="cell-stacked__sub">{kpi.description || "Tidak ada deskripsi"}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="cell-stacked">
+                            <span className="cell-stacked__main" style={{ fontSize: '0.85rem' }}>{kpi.period || "—"}</span>
+                            <span className="cell-stacked__sub">Periode</span>
+                          </div>
+                        </td>
+                        <td>
+                          <span style={{ color: '#475569', fontWeight: 600 }}>{kpi.target.toLocaleString()}</span>
+                        </td>
+                        <td>
+                          <span style={{ color: '#64748b', fontWeight: 500 }}>{kpi.achievement.toLocaleString()}</span>
+                        </td>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <div style={{ width: 60, height: 6, background: 'rgba(0,0,0,0.05)', borderRadius: 3, overflow: 'hidden' }}>
+                              <div style={{
+                                width: `${Math.min(kpi.score, 100)}%`,
+                                height: '100%',
+                                background: kpi.score >= 100 ? '#10b981' : kpi.score >= 75 ? '#8b5cf6' : kpi.score >= 50 ? '#f59e0b' : '#ef4444',
+                                borderRadius: 3
+                              }} />
+                            </div>
+                            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#8b5cf6' }}>{kpi.score.toFixed(1)}%</span>
+                          </div>
+                        </td>
+                        <td className="td-center">
+                          <span className={getStatusClass(kpi.status)}>
+                            {kpi.status === "approved" ? "Approved" :
+                              kpi.status === "submitted" ? "Submitted" : "Draft"}
+                          </span>
+                        </td>
+                        <td className="td-center">
+                          <div className="action-btn-group">
+                            <button
+                              className="action-btn action-btn-edit"
+                              onClick={() => handleViewDetail(kpi)}
+                              title="Detail"
+                            >
+                              <Eye size={16} />
+                            </button>
+                            {kpi.status === 'draft' && (
+                              <button
+                                className="action-btn action-btn-edit"
+                                onClick={() => handleSubmitKpi(kpi.id)}
+                                title="Ajukan"
+                                disabled={submitting}
+                              >
+                                <Send size={16} />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              <div className="table-pagination">
+                <div className="pagination-info">
+                  Menampilkan <strong>{paginatedKpis.length}</strong> dari <strong>{filteredKpis.length}</strong> KPI
+                </div>
+                <div className="pagination-controls">
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    ‹
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    ›
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Detail Modal */}
       {showDetail && selectedKpi && (
         <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }}>
           <Card className="detail-modal" glass style={{ width: '90%', maxWidth: 600, padding: 0, overflow: 'hidden' }}>
-            <div className="table-header-bar" style={{ padding: '16px 24px', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
-              <h3>Detail KPI</h3>
-              <Button variant="ghost" size="sm" onClick={() => setShowDetail(false)}><X size={18} /></Button>
+            <div className="table-header-bar" style={{ padding: '16px 24px', borderBottom: '1px solid rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ margin: 0 }}>Detail KPI</h3>
+              <Button variant="ghost" size="sm" onClick={() => setShowDetail(false)}>×</Button>
             </div>
             <div style={{ padding: 24 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-                <div className="cell-avatar" style={{ width: 48, height: 48, fontSize: 20 }}><User size={24} /></div>
-                <div>
-                  <h4 style={{ margin: 0, fontSize: 18 }}>KPI Saya</h4>
-                  <span className="cell-sub">Periode: {selectedKpi.period}</span>
-                </div>
-              </div>
-
               <div style={{ background: 'rgba(0,0,0,0.02)', padding: 20, borderRadius: 12, marginBottom: 20 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-                  <h5 style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>Objektif KPI</h5>
-                  <span className={getStatusClass(selectedKpi.status)}>{selectedKpi.status}</span>
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: 18 }}>{selectedKpi.title}</h4>
+                    <span className="cell-sub">Periode: {selectedKpi.period || "—"}</span>
+                  </div>
+                  <span className={getStatusClass(selectedKpi.status)}>
+                    {selectedKpi.status === "approved" ? "Approved" :
+                      selectedKpi.status === "submitted" ? "Submitted" : "Draft"}
+                  </span>
                 </div>
-                <p style={{ margin: 0, fontSize: 16, fontWeight: 600, color: 'var(--text-primary)' }}>{selectedKpi.title}</p>
-                {selectedKpi.description && <p style={{ marginTop: 12, fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{selectedKpi.description}</p>}
+                {selectedKpi.description && (
+                  <p style={{ marginTop: 12, fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{selectedKpi.description}</p>
+                )}
               </div>
 
-              <div className="summary-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 20 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 20 }}>
                 <div style={{ textAlign: 'center', padding: 12, background: 'rgba(0,0,0,0.02)', borderRadius: 8 }}>
-                  <span style={{ display: 'block', fontSize: 10, color: 'var(--text-secondary)', marginBottom: 4 }}>TARGET</span>
+                  <span style={{ display: 'block', fontSize: 10, color: 'var(--text-secondary)', marginBottom: 4, textTransform: 'uppercase' }}>Target</span>
                   <span style={{ fontSize: 16, fontWeight: 700 }}>{selectedKpi.target.toLocaleString()}</span>
                 </div>
                 <div style={{ textAlign: 'center', padding: 12, background: 'rgba(0,0,0,0.02)', borderRadius: 8 }}>
-                  <span style={{ display: 'block', fontSize: 10, color: 'var(--text-secondary)', marginBottom: 4 }}>PENCAPAIAN</span>
+                  <span style={{ display: 'block', fontSize: 10, color: 'var(--text-secondary)', marginBottom: 4, textTransform: 'uppercase' }}>Pencapaian</span>
                   <span style={{ fontSize: 16, fontWeight: 700 }}>{selectedKpi.achievement.toLocaleString()}</span>
                 </div>
                 <div style={{ textAlign: 'center', padding: 12, background: 'rgba(0,0,0,0.02)', borderRadius: 8 }}>
-                  <span style={{ display: 'block', fontSize: 10, color: 'var(--text-secondary)', marginBottom: 4 }}>SKOR</span>
-                  <span style={{ fontSize: 16, fontWeight: 700, color: selectedKpi.score >= 100 ? '#10b981' : '#3b82f6' }}>{selectedKpi.score.toFixed(1)}%</span>
+                  <span style={{ display: 'block', fontSize: 10, color: 'var(--text-secondary)', marginBottom: 4, textTransform: 'uppercase' }}>Skor</span>
+                  <span style={{ fontSize: 16, fontWeight: 700, color: selectedKpi.score >= 100 ? '#10b981' : '#8b5cf6' }}>{selectedKpi.score.toFixed(1)}%</span>
                 </div>
               </div>
 

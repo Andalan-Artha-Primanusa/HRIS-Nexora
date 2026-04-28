@@ -33,19 +33,19 @@ export const TrainingCard: React.FC<TrainingCardProps> = ({ program, onViewDetai
       </div>
       
       <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <h3 style={{ margin: '0 0 0.5rem', fontSize: '1.1rem', color: '#1e3a8a' }}>{program.title}</h3>
+        <h3 style={{ margin: '0 0 0.5rem', fontSize: '1.1rem', color: '#1e3a8a' }}>{program.title || program.nama}</h3>
         <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '1.25rem', flex: 1 }}>
-          {program.description?.length > 100 ? program.description.substring(0, 100) + '...' : program.description}
+          {(program.description || program.deskripsi)?.length > 100 ? (program.description || program.deskripsi).substring(0, 100) + '...' : (program.description || program.deskripsi)}
         </p>
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.25rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: '#475569' }}>
-            <Calendar size={14} />
-            {new Date(program.start_date).toLocaleDateString()} - {new Date(program.end_date).toLocaleDateString()}
+              <Calendar size={14} />
+              {program.start_date ? `${new Date(program.start_date).toLocaleDateString()} - ${new Date(program.end_date || program.start_date).toLocaleDateString()}` : (program.jadwal ? new Date(program.jadwal).toLocaleDateString() : 'N/A')}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: '#475569' }}>
             <Users size={14} />
-            {program.enrolled_count} / {program.capacity} Enrolled
+              {program.enrolled_count || 0} / {program.capacity || '-'} Enrolled
           </div>
         </div>
 

@@ -1,34 +1,38 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, RefreshCw, User, Calendar, MapPin, Box, FileText, Package, Handshake } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Plus, RefreshCw, Handshake, Search, Filter, User, Calendar, MapPin, Box, FileText, TrendingUp, CheckCircle, XCircle, Trash2, Eye } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { assetService } from '@/features/assets/api/asset.service';
 import { AssignAssetModal } from '@/features/assets/components/AssignAssetModal';
 import { ReturnAssetModal } from '@/features/assets/components/ReturnAssetModal';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
-import '@/pages/payroll/PayrollShared.css';
+import './AssetAssignmentsPage.css';
+
+const formatDateTime = (input: string) => {
+  if (!input) return 'N/A';
+  const date = new Date(input);
+  if (Number.isNaN(date.getTime())) return input;
+  return new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(date);
+};
 
 const AssetAssignmentsPage: React.FC = () => {
+  const navigate = useNavigate();
   const [assignments, setAssignments] = useState<any[]>([]);
   const [assets, setAssets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Filter & Pagination State
+  const [activeTab, setActiveTab] = useState<"Semua" | "Active" | "Returned">("Semua");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [showFilters, setShowFilters] = useState(false);
+  const [showAssignModal, setShowAssignModal] = useState(false);
   const [returnTarget, setReturnTarget] = useState<{ id: string | number; name: string } | null>(null);
   const [returning, setReturning] = useState(false);
-
-  const extract = (res: any): any[] => {
-    if (Array.isArray(res)) return res;
-    if (res && typeof res === 'object') {
-      if (Array.isArray(res.data)) return res.data;
-      if (Array.isArray(res.items)) return res.items;
-      if (res.data && typeof res.data === 'object') {
-        if (Array.isArray(res.data.items)) return res.data.items;
-        if (Array.isArray(res.data.data)) return res.data.data;
-      }
-    }
-    return [];
-  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -37,10 +41,31 @@ const AssetAssignmentsPage: React.FC = () => {
         assetService.getAssignments(),
         assetService.getAssets(),
       ]);
-      setAssignments(extract(assignmentsRes));
-      setAssets(extract(assetsRes));
-    } catch (err) {
-      console.error(err);
+
+      // Extract assignments
+      let assignmentsArray: any[] = [];
+      if (assignmentsRes?.data?.data && Array.isArray(assignmentsRes.data.data)) {
+        assignmentsArray = assignmentsRes.data.data;
+      } else if (assignmentsRes?.data && Array.isArray(assignmentsRes.data)) {
+        assignmentsArray = assignmentsRes.data;
+      } else if (Array.isArray(assignmentsRes)) {
+        assignmentsArray = assignmentsRes;
+      }
+
+      // Extract assets
+      let assetsArray: any[] = [];
+      if (assetsRes?.data?.data && Array.isArray(assetsRes.data.data)) {
+        assetsArray = assetsRes.data.data;
+      } else if (assetsRes?.data && Array.isArray(assetsRes.data)) {
+        assetsArray = assetsRes.data;
+      } else if (Array.isArray(assetsRes)) {
+        assetsArray = assetsRes;
+      }
+
+      setAssignments(assignmentsArray);
+      setAssets(assetsArray);
+    } catch (error) {
+      console.error('Failed to fetch assignments:', error);
       setAssignments([]);
       setAssets([]);
     } finally {
@@ -50,13 +75,89 @@ const AssetAssignmentsPage: React.FC = () => {
 
   useEffect(() => { fetchData(); }, []);
 
-  const handleAssign = async (formData: any) => {
-    await assetService.assignAsset(formData.asset_id, {
-      employee_id: formData.employee_id,
-      assignment_note: formData.assignment_note,
-      assigned_at: formData.assigned_at,
+  // Filter Logic
+  const filteredAssignments = useMemo(() => {
+    return assignments.filter((assignment) => {
+      const searchStr = searchQuery.toLowerCase();
+      const assetName = (assignment.asset?.name || '').toLowerCase();
+      const employeeName = (
+        assignment.employee?.user?.name ||
+        assignment.employee?.full_name ||
+        assignment.employee?.name ||
+        ''
+      ).toLowerCase();
+      const assetCode = (assignment.asset?.code || '').toLowerCase();
+
+      const textMatch = assetName.includes(searchStr) ||
+                       employeeName.includes(searchStr) ||
+                       assetCode.includes(searchStr);
+
+      const isReturned = !!assignment.returned_at;
+      let statusMatch = true;
+      if (activeTab === "Active") statusMatch = !isReturned;
+      else if (activeTab === "Returned") statusMatch = isReturned;
+
+      return textMatch && statusMatch;
     });
-    fetchData();
+  }, [assignments, searchQuery, activeTab]);
+
+  // Sort by assigned date (newest first)
+  const sortedAssignments = useMemo(() => {
+    return [...filteredAssignments].sort((a, b) => {
+      const dateA = new Date(a.assigned_at || a.assignment_date || a.created_at || 0).getTime();
+      const dateB = new Date(b.assigned_at || b.assignment_date || b.created_at || 0).getTime();
+      return dateB - dateA;
+    });
+  }, [filteredAssignments]);
+
+  // Paginate
+  const paginatedAssignments = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return sortedAssignments.slice(startIndex, startIndex + pageSize);
+  }, [sortedAssignments, currentPage, pageSize]);
+
+  const totalPages = Math.ceil(sortedAssignments.length / pageSize);
+
+  // Summary Cards
+  const summaryCards = useMemo(() => [
+    {
+      label: "Total Penugasan",
+      subtitle: "Seluruh penugasan aset",
+      value: String(assignments.length),
+      change: "Data penugasan",
+      tone: "blue" as const,
+      icon: Handshake,
+    },
+    {
+      label: "Hasil Filter",
+      subtitle: "Penugasan sesuai pencarian",
+      value: String(sortedAssignments.length),
+      change: `${paginatedAssignments.length} data per halaman`,
+      tone: "green" as const,
+      icon: Search,
+    },
+    {
+      label: "Aktif",
+      subtitle: "Penugasan yang sedang berlangsung",
+      value: String(assignments.filter(a => !a.returned_at).length),
+      change: "Dalam penggunaan",
+      tone: "orange" as const,
+      icon: CheckCircle,
+    },
+    {
+      label: "Dikembalikan",
+      subtitle: "Penugasan yang sudah selesai",
+      value: String(assignments.filter(a => !!a.returned_at).length),
+      change: "Sudah kembali",
+      tone: "purple" as const,
+      icon: XCircle,
+    },
+  ], [assignments, sortedAssignments.length, paginatedAssignments.length]);
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setActiveTab("Semua");
+    setCurrentPage(1);
   };
 
   const handleReturn = async (data: { return_note: string; returned_at: string; condition: string }) => {
@@ -66,15 +167,24 @@ const AssetAssignmentsPage: React.FC = () => {
       await assetService.returnAsset(returnTarget.id, data);
       setReturnTarget(null);
       fetchData();
-    } catch (err) {
-      console.error('Failed to return asset', err);
+    } catch (error) {
+      console.error('Failed to return asset:', error);
     } finally {
       setReturning(false);
     }
   };
 
+  const getStatusBadge = (assignment: any) => {
+    const isReturned = !!assignment.returned_at;
+    if (isReturned) {
+      return <span className="badge-soft badge-soft--gray">Dikembalikan</span>;
+    }
+    return <span className="badge-soft badge-soft--green">Aktif</span>;
+  };
+
   return (
-    <div className="crud-page">
+    <div className="crud-page assignments-page">
+      {/* Header */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -92,7 +202,7 @@ const AssetAssignmentsPage: React.FC = () => {
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan
             </button>
-            <button className="btn-primary" onClick={() => setIsAssignModalOpen(true)}>
+            <button className="btn-primary" onClick={() => setShowAssignModal(true)}>
               <Plus size={16} />
               Buat Penugasan
             </button>
@@ -100,92 +210,257 @@ const AssetAssignmentsPage: React.FC = () => {
         </div>
       </Card>
 
-      {loading ? (
-        <div style={{ textAlign: 'center', padding: '5rem', color: '#64748b' }}>
-          <RefreshCw size={40} className="animate-spin" style={{ marginBottom: '1rem', opacity: 0.4 }} />
-          <p>Loading assignments...</p>
-        </div>
-      ) : assignments.length === 0 ? (
-        <Card glass style={{ textAlign: 'center', padding: '5rem' }}>
-          <Box size={48} color="#cbd5e1" style={{ marginBottom: '1rem' }} />
-          <h3 style={{ color: '#475569' }}>No active assignments</h3>
-          <p style={{ color: '#94a3b8' }}>Create an assignment to start tracking company property.</p>
-        </Card>
-      ) : (
-        <div className="white-unified-wrapper">
-          <div className="wuw-header">
-            <div className="wuw-header-top">
-              <div className="wuw-title-area">
-                <h3>Active Assignments</h3>
-                <span className="wuw-count-badge">{assignments.length} Total</span>
+      {/* Summary Cards */}
+      <div className="assign-summary-wrapper">
+        {summaryCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <div key={card.label} className="assign-summary-card">
+              <div className="assign-summary-header">
+                <div>
+                  <p className="assign-summary-label">{card.label}</p>
+                  <p className="assign-summary-subtitle">{card.subtitle}</p>
+                </div>
+                <div className={`assign-summary-icon-wrapper assign-icon-${card.tone}`}>
+                  <Icon size={28} />
+                </div>
               </div>
+              <div className={`assign-summary-value assign-value-${card.tone}`}>{card.value}</div>
+              <p className="assign-summary-trend">{card.change}</p>
             </div>
+          );
+        })}
+      </div>
+
+      {/* Analytics Title Card */}
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <Handshake size={24} />
           </div>
-
-          <div className="wuw-table-area">
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '1.5rem' }}>
-              {assignments.map((assignment) => {
-                const isReturned = !!assignment.returned_at;
-                return (
-                  <Card key={assignment.id} glass style={{ padding: '1.75rem', borderRadius: '24px', border: '1px solid rgba(226,232,240,0.5)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
-                      <div style={{ display: 'flex', gap: '14px' }}>
-                        <div style={{ padding: '12px', background: 'linear-gradient(135deg, #f5f3ff, #ede9fe)', borderRadius: '14px', color: '#8b5cf6' }}>
-                          <Box size={22} />
-                        </div>
-                        <div>
-                          <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#1e293b' }}>
-                            {assignment.asset?.name || 'Unknown Asset'}
-                          </h3>
-                          <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '2px' }}>
-                            S/N: {assignment.asset?.serial_number || 'N/A'}
-                          </div>
-                        </div>
-                      </div>
-                      <span style={{ padding: '6px 14px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', background: isReturned ? '#dcfce7' : '#fef3c7', color: isReturned ? '#16a34a' : '#d97706' }}>
-                        {isReturned ? 'Returned' : 'Active'}
-                      </span>
-                    </div>
-
-                    <div style={{ background: 'rgba(248,250,252,0.6)', borderRadius: '16px', padding: '1.25rem', marginBottom: '1.5rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.875rem' }}>
-                        <User size={15} color="#94a3b8" />
-                        <span style={{ color: '#64748b', minWidth: '80px' }}>Assignee</span>
-                        <span style={{ fontWeight: 600, color: '#1e293b' }}>
-                          {assignment.employee?.user?.name || assignment.employee?.full_name || assignment.employee?.name || 'Unknown'}
-                        </span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.875rem', marginTop: '0.5rem' }}>
-                        <Calendar size={15} color="#94a3b8" />
-                        <span style={{ color: '#64748b', minWidth: '80px' }}>Assigned</span>
-                        <span style={{ fontWeight: 600, color: '#1e293b' }}>
-                          {assignment.assigned_at || assignment.assignment_date || assignment.created_at?.split('T')[0] || 'N/A'}
-                        </span>
-                      </div>
-                      {assignment.location && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.875rem', marginTop: '0.5rem' }}>
-                          <MapPin size={15} color="#94a3b8" />
-                          <span style={{ color: '#64748b', minWidth: '80px' }}>Location</span>
-                          <span style={{ fontWeight: 600, color: '#1e293b' }}>{assignment.location?.name || 'N/A'}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {!isReturned && (
-                      <Button variant="outline" style={{ width: '100%', height: '44px', borderRadius: '12px', fontWeight: 600 }} onClick={() => setReturnTarget({ id: assignment.id, name: assignment.asset?.name || 'Asset' })}>
-                        Process Return
-                      </Button>
-                    )}
-                  </Card>
-                );
-              })}
-            </div>
+          <div>
+            <h2 className="analytics-title">Daftar Penugasan</h2>
+            <p className="analytics-subtitle">Kelola dan lihat semua penugasan aset</p>
           </div>
         </div>
-      )}
+      </Card>
 
-      <AssignAssetModal isOpen={isAssignModalOpen} onClose={() => setIsAssignModalOpen(false)} onSave={handleAssign} assets={assets.filter(a => a.status?.toLowerCase() === 'available')} />
-      <ReturnAssetModal isOpen={!!returnTarget} onClose={() => setReturnTarget(null)} onConfirm={handleReturn} assetName={returnTarget?.name} loading={returning} />
+      {/* Control Section */}
+      <Card className="control-section-card">
+        <div className="control-section-inner">
+          {/* Tabs */}
+          <div className="elyra-tabs">
+            {(["Semua", "Active", "Returned"] as const).map((tab) => (
+              <button
+                key={tab}
+                className={`elyra-tab ${activeTab === tab ? "active" : ""}`}
+                onClick={() => { setActiveTab(tab); setCurrentPage(1); }}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          {/* Search & Filter */}
+          <div className="control-actions">
+            <div className="search-box">
+              <div className="search-icon-inside"><Search size={18} /></div>
+              <input
+                type="text"
+                placeholder="Cari penugasan..."
+                value={searchQuery}
+                onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+                className="search-input-pill"
+              />
+            </div>
+            <button
+              className={`filter-btn-rounded ${showFilters ? "active" : ""}`}
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <Filter size={18} />
+              <span>Filter</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Filter Panel */}
+        {showFilters && (
+          <div className="filter-dropdown">
+            <div className="filter-row">
+              {(searchQuery || activeTab !== "Semua") && (
+                <button className="btn-clear-filter" onClick={clearFilters}>
+                  Hapus Filter
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </Card>
+
+      {/* Table Section */}
+      <div className="table-section">
+        <div className="wuw-table-area">
+          {loading && <LoadingState message="Memuat penugasan..." />}
+
+          {!loading && paginatedAssignments.length === 0 && (
+            <div style={{ padding: '5rem 0' }}>
+              <EmptyState
+                title="Pencarian Kosong"
+                message="Kami tidak menemukan penugasan yang sesuai dengan kriteria Anda."
+                actionLabel="Bersihkan Filter"
+                onAction={clearFilters}
+              />
+            </div>
+          )}
+
+          {!loading && paginatedAssignments.length > 0 && (
+            <>
+              <div className="table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: '400px' }}>Penugasan</th>
+                      <th>Karyawan</th>
+                      <th>Tanggal Pinjam</th>
+                      <th>Tanggal Kembali</th>
+                      <th className="th-center">Status</th>
+                      <th className="th-center" style={{ width: '120px' }}>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedAssignments.map((assignment) => {
+                      const employeeName = assignment.employee?.user?.name ||
+                                          assignment.employee?.full_name ||
+                                          assignment.employee?.name ||
+                                          'Unknown';
+                      const assetName = assignment.asset?.name || 'Unknown Asset';
+                      const assetCode = assignment.asset?.code || 'NO-CODE';
+
+                      return (
+                        <tr key={assignment.id}>
+                          <td>
+                            <div className="cell-name">
+                              <div className="cell-avatar">
+                                <Box size={20} />
+                              </div>
+                              <div className="cell-stacked">
+                                <span className="cell-name-text">{assetName}</span>
+                                <span className="cell-stacked__sub">{assetCode}</span>
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <div className="cell-stacked">
+                              <span className="cell-stacked__main">{employeeName}</span>
+                              <span className="cell-stacked__sub">
+                                {assignment.employee?.user?.email || ''}
+                              </span>
+                            </div>
+                          </td>
+                          <td>
+                            <div className="cell-stacked">
+                              <span className="cell-stacked__main" style={{ fontSize: '0.85rem' }}>
+                                {formatDateTime(assignment.assigned_at || assignment.assignment_date || assignment.created_at)}
+                              </span>
+                              <span className="cell-stacked__sub">Tanggal pinjam</span>
+                            </div>
+                          </td>
+                          <td>
+                            <div className="cell-stacked">
+                              <span className="cell-stacked__main" style={{ fontSize: '0.85rem' }}>
+                                {assignment.returned_at ? formatDateTime(assignment.returned_at) : '-'}
+                              </span>
+                              <span className="cell-stacked__sub">Tanggal kembali</span>
+                            </div>
+                          </td>
+                          <td className="td-center">
+                            {getStatusBadge(assignment)}
+                          </td>
+                          <td className="td-center">
+                            <div className="action-btn-group">
+                              {!assignment.returned_at && (
+                                <button
+                                  className="action-btn action-btn-return"
+                                  onClick={() => setReturnTarget({ 
+                                    id: assignment.id, 
+                                    name: assignment.asset?.name || 'Asset' 
+                                  })}
+                                  title="Proses Pengembalian"
+                                >
+                                  <CheckCircle size={16} />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              <div className="table-pagination">
+                <div className="pagination-info">
+                  Menampilkan <strong>{paginatedAssignments.length}</strong> dari <strong>{sortedAssignments.length}</strong> penugasan
+                </div>
+                <div className="pagination-controls">
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    ‹
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    ›
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Assign Modal */}
+      <AssignAssetModal 
+        isOpen={showAssignModal} 
+        onClose={() => setShowAssignModal(false)} 
+        onSave={async (formData: any) => {
+          await assetService.assignAsset(formData.asset_id, {
+            employee_id: formData.employee_id,
+            assignment_note: formData.assignment_note,
+            assigned_at: formData.assigned_at,
+          });
+          setShowAssignModal(false);
+          fetchData();
+        }}
+        assets={assets.filter(a => a.status?.toLowerCase() === 'available')}
+      />
+
+      {/* Return Modal */}
+      {returnTarget && (
+        <ReturnAssetModal 
+          isOpen={!!returnTarget} 
+          onClose={() => setReturnTarget(null)} 
+          onConfirm={handleReturn}
+          assetName={returnTarget.name}
+          loading={returning}
+        />
+      )}
     </div>
   );
 };

@@ -1,20 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, RefreshCw, GraduationCap, Calendar, Users, Search, CheckCircle, Clock, XCircle, User, BookOpen, TrendingUp, BookTemplate, PlusCircle } from 'lucide-react';
+import { Plus, RefreshCw, GraduationCap, Calendar, Users, Search, CheckCircle, Clock, XCircle, BookOpen, TrendingUp } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { trainingService } from '@/features/training/api/training.service';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
-import '@/pages/payroll/PayrollShared.css';
-import './TrainingEnrollmentsPage.css';
 
 const TrainingEnrollmentsPage: React.FC = () => {
   const navigate = useNavigate();
   const [enrollments, setEnrollments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+
+  // Search & Filter
+  const [searchText, setSearchText] = useState("");
+  const [activeTab, setActiveTab] = useState<"Semua" | "Pending" | "In Progress" | "Completed" | "Cancelled">("Semua");
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
 
   const fetchData = async () => {
     setLoading(true);
@@ -33,41 +38,74 @@ const TrainingEnrollmentsPage: React.FC = () => {
     fetchData();
   }, []);
 
-  const filteredEnrollments = enrollments.filter(e => {
-    const matchesSearch = 
-      e.program?.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      e.employee?.user?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      e.employee_name?.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'all' || e.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
-  });
+  const summaryStats = useMemo(() => {
+    const total = enrollments.length;
+    const completed = enrollments.filter(e => e.status === 'completed').length;
+    const inProgress = enrollments.filter(e => e.status === 'in_progress' || e.status === 'ongoing').length;
+    const pending = enrollments.filter(e => e.status === 'pending').length;
 
-  const completedCount = enrollments.filter(e => e.status === 'completed').length;
-  const inProgressCount = enrollments.filter(e => e.status === 'in_progress' || e.status === 'ongoing').length;
-  const pendingCount = enrollments.filter(e => e.status === 'pending').length;
+    return [
+      { label: "Total Pendaftaran", subtitle: "Seluruh pendaftaran", value: total, tone: "blue" as const },
+      { label: "Sedang Berlangsung", subtitle: "Pelatihan aktif", value: inProgress, tone: "orange" as const },
+      { label: "Selesai", subtitle: "Pelatihan selesai", value: completed, tone: "green" as const },
+      { label: "Pending", subtitle: "Menunggu persetujuan", value: pending, tone: "red" as const },
+    ];
+  }, [enrollments]);
 
-  const getStatusStyle = (status: string) => {
+  const filteredEnrollments = useMemo(() => {
+    return enrollments.filter((e: any) => {
+      const programTitle = String(e.program?.title || e.training_title || '').toLowerCase();
+      const employeeName = String(e.employee?.user?.name || e.employee_name || '').toLowerCase();
+      const query = searchText.toLowerCase();
+      const matchSearch = programTitle.includes(query) || employeeName.includes(query);
+
+      let statusMatch = true;
+      if (activeTab === "Pending") statusMatch = e.status === 'pending';
+      else if (activeTab === "In Progress") statusMatch = e.status === 'in_progress' || e.status === 'ongoing';
+      else if (activeTab === "Completed") statusMatch = e.status === 'completed';
+      else if (activeTab === "Cancelled") statusMatch = e.status === 'cancelled' || e.status === 'dropped';
+
+      return matchSearch && statusMatch;
+    });
+  }, [enrollments, searchText, activeTab]);
+
+  const paginatedEnrollments = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredEnrollments.slice(startIndex, startIndex + pageSize);
+  }, [filteredEnrollments, currentPage, pageSize]);
+
+  const totalPages = Math.ceil(filteredEnrollments.length / pageSize);
+
+  const clearFilters = () => {
+    setSearchText("");
+    setActiveTab("Semua");
+    setCurrentPage(1);
+  };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText, activeTab]);
+
+  const getStatusBadge = (status: string) => {
     switch (status?.toLowerCase()) {
-      case 'completed': return { icon: CheckCircle, color: '#10b981', bg: '#ecfdf5', label: 'Completed' };
-      case 'in_progress': case 'ongoing': return { icon: Clock, color: '#f59e0b', bg: '#fffbeb', label: 'In Progress' };
-      case 'cancelled': case 'dropped': return { icon: XCircle, color: '#ef4444', bg: '#fef2f2', label: 'Cancelled' };
-      case 'pending': return { icon: Clock, color: '#64748b', bg: '#f1f5f9', label: 'Pending' };
-      default: return { icon: Clock, color: '#64748b', bg: '#f1f5f9', label: status || 'Unknown' };
+      case 'completed':
+        return <span className="status-badge status-active">COMPLETED</span>;
+      case 'in_progress':
+      case 'ongoing':
+        return <span className="status-badge status-pending">IN PROGRESS</span>;
+      case 'pending':
+        return <span className="status-badge status-pending">PENDING</span>;
+      case 'cancelled':
+      case 'dropped':
+        return <span className="status-badge status-danger">CANCELLED</span>;
+      default:
+        return <span className="status-badge status-pending">{status?.toUpperCase() || 'UNKNOWN'}</span>;
     }
   };
 
-  const statusFilters = [
-    { key: 'all', label: 'All' },
-    { key: 'pending', label: 'Pending' },
-    { key: 'in_progress', label: 'In Progress' },
-    { key: 'completed', label: 'Completed' },
-    { key: 'cancelled', label: 'Cancelled' },
-  ];
-
   return (
-    <div className="crud-page enrollments-page">
+    <div className="crud-page">
+      {/* Header */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -89,159 +127,199 @@ const TrainingEnrollmentsPage: React.FC = () => {
         </div>
       </Card>
 
-      <div className="leave-requests-wrapper">
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Total Pendaftaran</p>
-              <p className="leave-summary-subtitle">Seluruh pendaftaran pelatihan</p>
-            </div>
-            <div className="leave-summary-icon-wrapper leave-icon-blue">
-              <Users size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-blue">{enrollments.length}</div>
-          <p className="leave-summary-trend">Pendaftaran</p>
-        </div>
+      {/* Summary Cards */}
+      <div className="employee-summary-wrapper">
+        {summaryStats.map((card) => {
+          const Icon = card.tone === "blue" ? Users : card.tone === "orange" ? Clock : card.tone === "green" ? CheckCircle : TrendingUp;
 
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Sedang Berlangsung</p>
-              <p className="leave-summary-subtitle">Pelatihan aktif</p>
+          return (
+            <div key={card.label} className="employee-summary-card">
+              <div className="employee-summary-header">
+                <div>
+                  <p className="employee-summary-label">{card.label}</p>
+                  <p className="employee-summary-subtitle">{card.subtitle}</p>
+                </div>
+                <div className={`employee-summary-icon-wrapper employee-icon-${card.tone}`}>
+                  <Icon size={28} />
+                </div>
+              </div>
+              <div className={`employee-summary-value employee-value-${card.tone}`}>{card.value}</div>
+              <p className="employee-summary-trend">{card.subtitle}</p>
             </div>
-            <div className="leave-summary-icon-wrapper leave-icon-orange">
-              <Clock size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-orange">{inProgressCount}</div>
-          <p className="leave-summary-trend">Sedang Berlangsung</p>
-        </div>
-
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Selesai</p>
-              <p className="leave-summary-subtitle">Pelatihan selesai</p>
-            </div>
-            <div className="leave-summary-icon-wrapper leave-icon-green">
-              <CheckCircle size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-green">{completedCount}</div>
-          <p className="leave-summary-trend">Pelatihan Selesai</p>
-        </div>
+          );
+        })}
       </div>
 
-      <div className="white-unified-wrapper">
-        <div className="wuw-header">
-          <div className="wuw-header-top">
-            <div className="wuw-title-area">
-              <h3>Enrollment List</h3>
-              <span className="wuw-count-badge">{filteredEnrollments.length} enrollments</span>
-            </div>
-            <div className="header-actions">
-              <div className="search-box">
-                <Search size={18} />
-                <input 
-                  type="text" 
-                  placeholder="Search enrollments..." 
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-            </div>
+      {/* Analytics Title Card */}
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <BookOpen size={24} />
           </div>
-          <div className="status-filters">
-            {statusFilters.map(filter => (
+          <div>
+            <h2 className="analytics-title">Daftar Pendaftaran</h2>
+            <p className="analytics-subtitle">Kelola pendaftaran pelatihan karyawan</p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Control Section */}
+      <Card className="control-section-card">
+        <div className="control-section-inner">
+          <div className="search-filter-group">
+            <div className="search-input-wrapper">
+              <Search size={18} className="search-icon" />
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Cari program atau nama karyawan..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+              />
+              {searchText && (
+                <button className="clear-search-btn" onClick={() => setSearchText("")}>×</button>
+              )}
+            </div>
+            <Button variant="outline" size="sm" onClick={clearFilters} disabled={!searchText && activeTab === "Semua"}>
+              <RefreshCw size={14} />
+              Reset
+            </Button>
+          </div>
+
+          <div className="tabs-container">
+            {(["Semua", "Pending", "In Progress", "Completed", "Cancelled"] as const).map((tab) => (
               <button
-                key={filter.key}
-                className={`status-filter ${statusFilter === filter.key ? 'active' : ''}`}
-                onClick={() => setStatusFilter(filter.key)}
+                key={tab}
+                className={`tab-button ${activeTab === tab ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab)}
               >
-                {filter.label}
+                {tab}
+                {tab !== "Semua" && (
+                  <span className="tab-count">
+                    {tab === "Pending"
+                      ? enrollments.filter(e => e.status === 'pending').length
+                      : tab === "In Progress"
+                      ? enrollments.filter(e => e.status === 'in_progress' || e.status === 'ongoing').length
+                      : tab === "Completed"
+                      ? enrollments.filter(e => e.status === 'completed').length
+                      : enrollments.filter(e => e.status === 'cancelled' || e.status === 'dropped').length}
+                  </span>
+                )}
               </button>
             ))}
           </div>
         </div>
+      </Card>
 
-        <div className="wuw-table-area">
-          {loading ? (
-            <div className="loading-state">
-              <RefreshCw size={32} className="animate-spin" />
-              <p>Loading enrollments...</p>
-            </div>
-          ) : filteredEnrollments.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-icon">
-                <GraduationCap size={48} />
-              </div>
-              <h4>No enrollments found</h4>
-              <p>Enroll employees in training programs to get started.</p>
-            </div>
-          ) : (
-            <div className="enrollment-grid">
-              {filteredEnrollments.map((enrollment) => {
-                const statusStyle = getStatusStyle(enrollment.status);
-                const StatusIcon = statusStyle.icon;
-                return (
-                  <Card key={enrollment.id} className="enrollment-card" glass>
-                    <div className="enrollment-header">
-                      <div className="enrollment-icon">
-                        <BookOpen size={20} />
-                      </div>
-                      <div className="enrollment-info">
-                        <h4>{enrollment.program?.title || enrollment.training_title || 'Training Program'}</h4>
-                        <div className="enrollment-employee">
-                          <User size={14} />
-                          <span>{enrollment.employee?.user?.name || enrollment.employee_name || 'Employee'}</span>
-                        </div>
-                      </div>
-                      <span 
-                        className="enrollment-status"
-                        style={{ background: statusStyle.bg, color: statusStyle.color }}
-                      >
-                        <StatusIcon size={12} />
-                        {statusStyle.label}
-                      </span>
-                    </div>
-                    
-                    <div className="enrollment-details">
-                      <div className="detail-item">
-                        <Calendar size={14} />
-                        <span>Start: {enrollment.start_date || 'N/A'}</span>
-                      </div>
-                      {enrollment.completion_date && (
-                        <div className="detail-item">
-                          <CheckCircle size={14} />
-                          <span>Completed: {enrollment.completion_date}</span>
-                        </div>
-                      )}
-                      {enrollment.progress !== undefined && (
-                        <div className="progress-item">
-                          <div className="progress-bar">
-                            <div 
-                              className="progress-fill" 
-                              style={{ width: `${enrollment.progress}%` }}
-                            />
-                          </div>
-                          <span className="progress-text">{enrollment.progress}%</span>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="enrollment-actions">
-                      <Button variant="ghost" size="sm">
-                        View Details
-                      </Button>
-                    </div>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
+      {/* Data Table */}
+      <Card className="data-table-card">
+        <div className="data-table-header">
+          <h3 className="data-table-title">
+            Daftar Pendaftaran Pelatihan
+            <span className="data-table-count">{filteredEnrollments.length} ditemukan</span>
+          </h3>
         </div>
-      </div>
+
+        {loading ? (
+          <LoadingState message="Memuat data pendaftaran..." />
+        ) : filteredEnrollments.length === 0 ? (
+          <EmptyState
+            icon={<GraduationCap size={48} />}
+            title="Tidak ada pendaftaran ditemukan"
+            message={searchText || activeTab !== "Semua" ? "Coba ubah kata kunci atau filter" : "Belum ada data pendaftaran pelatihan"}
+          />
+        ) : (
+          <>
+            <div className="table-wrap">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Program Pelatihan</th>
+                    <th>Karyawan</th>
+                    <th>Tanggal Mulai</th>
+                    <th>Status</th>
+                    <th>Progress</th>
+                    <th style={{ textAlign: 'right' }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedEnrollments.map((enrollment) => (
+                    <tr key={enrollment.id}>
+                      <td>
+                        <div className="cell-stacked">
+                          <span className="cell-name-text">{enrollment.program?.title || enrollment.program?.nama || enrollment.training_title || 'Training Program'}</span>
+                          <span className="cell-email">{enrollment.program?.description || '-'}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <div className="cell-stacked">
+                          <span className="cell-name-text">{enrollment.employee?.user?.name || enrollment.employee_name || 'Employee'}</span>
+                          <span className="cell-email">{enrollment.employee?.employee_code || '-'}</span>
+                        </div>
+                      </td>
+                      <td>{enrollment.start_date || 'N/A'}</td>
+                      <td>{getStatusBadge(enrollment.status)}</td>
+                      <td>
+                        {enrollment.progress !== undefined ? (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div style={{ width: '60px', height: '6px', background: '#e2e8f0', borderRadius: '3px', overflow: 'hidden' }}>
+                              <div style={{ width: `${enrollment.progress}%`, height: '100%', background: '#10b981', borderRadius: '3px' }} />
+                            </div>
+                            <span style={{ fontSize: '0.85rem', color: '#64748b' }}>{enrollment.progress}%</span>
+                          </div>
+                        ) : '-'}
+                      </td>
+                      <td style={{ textAlign: 'right' }}>
+                        <div className="action-btn-group">
+                          <Button variant="ghost" size="sm" onClick={() => navigate(`/training/programs`)}>
+                            <BookOpen size={16} />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="table-pagination">
+                <div className="pagination-info">
+                  Menampilkan {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, filteredEnrollments.length)} dari {filteredEnrollments.length}
+                </div>
+                <div className="pagination-controls">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(prev => prev - 1)}
+                  >
+                    Sebelumnya
+                  </Button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    <button
+                      key={page}
+                      className={`pagination-page-btn ${currentPage === page ? 'active' : ''}`}
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(prev => prev + 1)}
+                  >
+                    Selanjutnya
+                  </Button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </Card>
     </div>
   );
 };

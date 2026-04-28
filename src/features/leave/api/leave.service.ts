@@ -89,6 +89,15 @@ export const getPendingLeaves = async () => {
   };
 };
 
+export const getLeaveRequests = async (params?: { status?: string }) => {
+  const query = params?.status ? `?status=${params.status}` : "";
+  const response = await api.get(`/leaves${query}`);
+  return {
+    items: extractArrayPayload(response.data),
+    raw: response.data,
+  };
+};
+
 export const approveLeave = async (id: string, payload: LeaveDecisionPayload) => {
   const response = await api.put(`/leaves/${id}/approve`, payload);
   return { raw: response.data };

@@ -1,17 +1,9 @@
 export interface TrainingProgram {
   id: string | number;
-  title: string;
-  description: string;
-  provider: string;
-  mode: string;
-  start_date: string;
-  end_date: string;
-  budget: number;
+  nama: string;
+  deskripsi: string;
+  jadwal: string;
   status: string;
-  category?: string;
-  duration?: string;
-  enrolled_count?: number;
-  completion_rate?: number;
 }
 
 export interface Competency {

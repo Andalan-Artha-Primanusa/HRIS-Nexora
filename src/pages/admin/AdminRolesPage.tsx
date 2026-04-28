@@ -191,23 +191,23 @@ if (!canViewRoles) {
                       </span>
                     </td>
                     <td style={{ padding: '1.25rem 1rem', borderBottom: '1px solid #f1f5f9', textAlign: 'right' }}>
-                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                        <button 
-                          onClick={() => navigate(`/admin/roles/edit/${role.id}`)}
-                          style={{ padding: '8px', borderRadius: '10px', border: '1px solid #e2e8f0', background: '#fff', color: '#64748b', transition: 'all 0.2s', cursor: 'pointer' }}
-                          title="Edit Role"
-                        >
-                          <Edit size={16} />
-                        </button>
-                        <button 
-                          onClick={() => void handleDelete(role.id, role.name)}
-                          style={{ padding: '8px', borderRadius: '10px', border: '1px solid #fee2e2', background: '#fff', color: '#ef4444', transition: 'all 0.2s', cursor: 'pointer' }}
-                          title="Hapus Role"
-                          disabled={role.id === 1 || role.name === 'admin' || role.name === 'super_admin'}
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
+                        <div className="action-btn-group" style={{ justifyContent: 'flex-end' }}>
+                          <button 
+                            className="action-btn action-btn-edit"
+                            onClick={() => navigate(`/admin/roles/edit/${role.id}`)}
+                            title="Edit Role"
+                          >
+                            <Edit size={16} />
+                          </button>
+                          <button 
+                            className="action-btn action-btn-delete"
+                            onClick={() => void handleDelete(role.id, role.name)}
+                            title="Hapus Role"
+                            disabled={role.id === 1 || role.name === 'admin' || role.name === 'super_admin'}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
                     </td>
                   </tr>
                 ))}

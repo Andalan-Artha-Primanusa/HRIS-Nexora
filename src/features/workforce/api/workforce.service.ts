@@ -18,6 +18,10 @@ export const workforceService = {
     const response = await api.put(`/workforce/holidays/${id}`, data);
     return response.data;
   },
+  deleteHoliday: async (id: string | number) => {
+    const response = await api.delete(`/workforce/holidays/${id}`);
+    return response.data;
+  },
 
   // Shift Swaps
   getShiftSwaps: async () => {
@@ -48,6 +52,10 @@ export const workforceService = {
   },
   updateOvertimeRule: async (id: string | number, data: any) => {
     const response = await api.put(`/workforce/overtime-rules/${id}`, data);
+    return response.data;
+  },
+  deleteOvertimeRule: async (id: string | number) => {
+    const response = await api.delete(`/workforce/overtime-rules/${id}`);
     return response.data;
   },
 

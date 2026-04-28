@@ -1,56 +1,66 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Laptop, Plus, RefreshCw, Monitor, Smartphone, Briefcase,
-  Search, Trash2, Pencil, Package, PackageOpen, ArrowRight,
-  Filter, Tag, User, Calendar, CheckCircle2, AlertCircle,
-  XCircle, Clock
-} from 'lucide-react';
+import { Plus, RefreshCw, Package, Search, Filter, Laptop, Monitor, Smartphone, Briefcase, Calendar, User, Tag, Trash2, Pencil, CheckCircle2, AlertCircle, XCircle, TrendingUp, Clock } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { assetService } from '@/features/assets/api/asset.service';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
-import '@/pages/payroll/PayrollShared.css';
+import './AssetInventoryPage.css';
 
-const STATUS_FILTERS = [
-  { id: 'All', label: 'Semua Aset', icon: Package },
-  { id: 'available', label: 'Tersedia', icon: CheckCircle2 },
-  { id: 'assigned', label: 'Digunakan', icon: User },
-  { id: 'maintenance', label: 'Maintenance', icon: AlertCircle },
-  { id: 'retired', label: 'Retired', icon: XCircle },
-];
+const formatDateTime = (input: string) => {
+  if (!input) return 'N/A';
+  const date = new Date(input);
+  if (Number.isNaN(date.getTime())) return input;
+  return new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(date);
+};
+
+const getAssetIcon = (category: string) => {
+  const c = category?.toLowerCase() || '';
+  if (c.includes('laptop') || c.includes('macbook') || c.includes('electronics')) return Laptop;
+  if (c.includes('mobile') || c.includes('phone') || c.includes('smartphone')) return Smartphone;
+  if (c.includes('monitor') || c.includes('display')) return Monitor;
+  return Briefcase;
+};
 
 const AssetInventoryPage: React.FC = () => {
   const navigate = useNavigate();
   const [assets, setAssets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeStatus, setActiveStatus] = useState('All');
-  const [deletingId, setDeletingId] = useState<string | number | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const extractArray = (res: any): any[] => {
-    if (Array.isArray(res)) return res;
-    if (res && typeof res === 'object') {
-      if (Array.isArray(res.data)) return res.data;
-      if (Array.isArray(res.items)) return res.items;
-      if (Array.isArray(res.results)) return res.results;
-      if (res.data && typeof res.data === 'object') {
-        if (Array.isArray(res.data.items)) return res.data.items;
-        if (Array.isArray(res.data.data)) return res.data.data;
-      }
-    }
-    return [];
-  };
+  // Filter & Pagination State
+  const [activeTab, setActiveTab] = useState<"Semua" | "Available" | "Assigned" | "Maintenance" | "Retired">("Semua");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [showFilters, setShowFilters] = useState(false);
 
-  const fetchData = async (status?: string) => {
+  const fetchData = async () => {
     setLoading(true);
     try {
-      const params = status && status !== 'All' ? { status } : undefined;
-      const response = await assetService.getAssets(params);
-      setAssets(extractArray(response));
-    } catch (err) {
-      console.error(err);
+      const response = await assetService.getAssets();
+      
+      // assetService.getAssets() returns api.get('/assets').data
+      // So response = { success, message, data: { current_page, data: [...], total } }
+      // The assets array is in response.data.data
+      let assetsArray: any[] = [];
+      
+      if (response?.data?.data && Array.isArray(response.data.data)) {
+        // Paginated response structure
+        assetsArray = response.data.data;
+      } else if (response?.data && Array.isArray(response.data)) {
+        // Direct array in response.data
+        assetsArray = response.data;
+      } else if (Array.isArray(response)) {
+        // Direct array response
+        assetsArray = response;
+      }
+      
+      console.log('Assets loaded:', assetsArray.length, 'items');
+      setAssets(assetsArray);
+    } catch (error) {
+      console.error('Failed to fetch assets:', error);
       setAssets([]);
     } finally {
       setLoading(false);
@@ -58,65 +68,116 @@ const AssetInventoryPage: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchData(activeStatus);
-  }, [activeStatus]);
+    fetchData();
+  }, []);
+
+  // Filter Logic
+  const filteredAssets = useMemo(() => {
+    return assets.filter(asset => {
+      const searchStr = searchQuery.toLowerCase();
+      const nameMatch = asset.name?.toLowerCase().includes(searchStr);
+      const codeMatch = asset.code?.toLowerCase().includes(searchStr);
+      const serialMatch = asset.serial_number?.toLowerCase().includes(searchStr);
+      const brandMatch = asset.brand?.toLowerCase().includes(searchStr);
+      const textMatch = nameMatch || codeMatch || serialMatch || brandMatch;
+
+      let statusMatch = true;
+      if (activeTab === "Available") statusMatch = asset.status?.toLowerCase() === 'available';
+      else if (activeTab === "Assigned") statusMatch = asset.status?.toLowerCase() === 'assigned';
+      else if (activeTab === "Maintenance") statusMatch = asset.status?.toLowerCase() === 'maintenance';
+      else if (activeTab === "Retired") statusMatch = asset.status?.toLowerCase() === 'retired';
+
+      return textMatch && statusMatch;
+    });
+  }, [assets, searchQuery, activeTab]);
+
+  // Sort by purchase date (newest first)
+  const sortedAssets = useMemo(() => {
+    return [...filteredAssets].sort((a, b) => {
+      const dateA = new Date(a.purchase_date || 0).getTime();
+      const dateB = new Date(b.purchase_date || 0).getTime();
+      return dateB - dateA;
+    });
+  }, [filteredAssets]);
+
+  // Paginate
+  const paginatedAssets = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return sortedAssets.slice(startIndex, startIndex + pageSize);
+  }, [sortedAssets, currentPage, pageSize]);
+
+  const totalPages = Math.ceil(sortedAssets.length / pageSize);
+
+  // Summary Cards
+  const summaryCards = useMemo(() => [
+    {
+      label: "Total Aset",
+      subtitle: "Seluruh aset perusahaan",
+      value: String(assets.length),
+      change: "Data aset tersimpan",
+      tone: "blue" as const,
+      icon: Package,
+    },
+    {
+      label: "Hasil Filter",
+      subtitle: "Aset sesuai pencarian",
+      value: String(sortedAssets.length),
+      change: `${paginatedAssets.length} data per halaman`,
+      tone: "green" as const,
+      icon: Search,
+    },
+    {
+      label: "Tersedia",
+      subtitle: "Aset yang tersedia",
+      value: String(assets.filter(a => a.status?.toLowerCase() === 'available').length),
+      change: "Siap digunakan",
+      tone: "orange" as const,
+      icon: CheckCircle2,
+    },
+    {
+      label: "Digunakan",
+      subtitle: "Aset yang sedang digunakan",
+      value: String(assets.filter(a => a.status?.toLowerCase() === 'assigned').length),
+      change: "Dalam penggunaan",
+      tone: "purple" as const,
+      icon: User,
+    },
+  ], [assets, sortedAssets.length, paginatedAssets.length]);
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setActiveTab("Semua");
+    setCurrentPage(1);
+  };
 
   const handleDelete = async (id: string | number, name: string) => {
     if (!window.confirm(`Hapus aset "${name}"? Tindakan ini tidak dapat dibatalkan.`)) return;
-    setDeletingId(id);
     try {
       await assetService.deleteAsset(id);
-      setAssets(prev => prev.filter(a => a.id !== id));
-    } catch (err) {
-      console.error('Failed to delete asset', err);
-    } finally {
-      setDeletingId(null);
+      fetchData();
+    } catch (error) {
+      console.error('Failed to delete asset:', error);
     }
   };
 
-  const getAssetIcon = (category: string) => {
-    const c = category?.toLowerCase() || '';
-    if (c.includes('laptop') || c.includes('macbook') || c.includes('electronics')) return <Laptop size={22} />;
-    if (c.includes('mobile') || c.includes('phone') || c.includes('smartphone')) return <Smartphone size={22} />;
-    if (c.includes('monitor') || c.includes('display')) return <Monitor size={22} />;
-    return <Briefcase size={22} />;
+  const getStatusBadge = (status: string) => {
+    const statusMap: Record<string, { label: string; class: string }> = {
+      'available': { label: 'Tersedia', class: 'badge-soft--green' },
+      'assigned': { label: 'Digunakan', class: 'badge-soft--blue' },
+      'maintenance': { label: 'Maintenance', class: 'badge-soft--yellow' },
+      'retired': { label: 'Retired', class: 'badge-soft--gray' },
+    };
+    const info = statusMap[status?.toLowerCase()] || { label: status, class: 'badge-soft--gray' };
+    return (
+      <span className={`badge-soft ${info.class}`}>
+        {info.label}
+      </span>
+    );
   };
-
-  const getStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case 'available':   return { bg: '#dcfce7', color: '#166534', border: '#bbf7d0' };
-      case 'assigned':    return { bg: '#eff6ff', color: '#1d4ed8', border: '#dbeafe' };
-      case 'maintenance': return { bg: '#fff7ed', color: '#c2410c', border: '#ffedd5' };
-      case 'retired':     return { bg: '#f1f5f9', color: '#475569', border: '#e2e8f0' };
-      default:            return { bg: '#f8fafc', color: '#64748b', border: '#f1f5f9' };
-    }
-  };
-
-  const formatDate = (dateStr: string) => {
-    if (!dateStr) return 'N/A';
-    try {
-      const date = new Date(dateStr);
-      return new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }).format(date);
-    } catch (e) {
-      return dateStr;
-    }
-  };
-
-  const filteredAssets = assets.filter(asset =>
-    asset.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    asset.code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    asset.serial_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    asset.brand?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const stats = [
-    { label: 'Total Aset', value: assets.length, color: '#2563eb', icon: Package },
-    { label: 'Tersedia', value: assets.filter(a => a.status?.toLowerCase() === 'available').length, color: '#10b981', icon: CheckCircle2 },
-    { label: 'Digunakan', value: assets.filter(a => a.status?.toLowerCase() === 'assigned').length, color: '#8b5cf6', icon: User },
-  ];
 
   return (
-    <div className="crud-page">
+    <div className="crud-page asset-page">
+      {/* Header */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -130,9 +191,9 @@ const AssetInventoryPage: React.FC = () => {
             </p>
           </div>
           <div className="hero-actions">
-            <button className="btn-outline" onClick={() => fetchData(activeStatus)} disabled={loading}>
+            <button className="btn-outline" onClick={() => fetchData()} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-              Refresh
+              Segarkan
             </button>
             <button className="btn-primary" onClick={() => navigate('/inventory/assets/create')}>
               <Plus size={16} />
@@ -142,243 +203,216 @@ const AssetInventoryPage: React.FC = () => {
         </div>
       </Card>
 
-      <div className="summary-grid" style={{ marginBottom: '2rem' }}>
-        {stats.map((stat, idx) => {
-          const Icon = stat.icon;
+      {/* Summary Cards */}
+      <div className="asset-summary-wrapper">
+        {summaryCards.map((card) => {
+          const Icon = card.icon;
           return (
-            <Card key={idx} className="metric-card" style={{ padding: '1.5rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ 
-                  width: '48px', height: '48px', 
-                  borderRadius: '14px', 
-                  background: `${stat.color}15`, 
-                  color: stat.color,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center'
-                }}>
-                  <Icon size={24} />
-                </div>
+            <div key={card.label} className="asset-summary-card">
+              <div className="asset-summary-header">
                 <div>
-                  <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', fontWeight: 500 }}>{stat.label}</p>
-                  <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, color: '#1e293b' }}>{stat.value}</h3>
+                  <p className="asset-summary-label">{card.label}</p>
+                  <p className="asset-summary-subtitle">{card.subtitle}</p>
+                </div>
+                <div className={`asset-summary-icon-wrapper asset-icon-${card.tone}`}>
+                  <Icon size={28} />
                 </div>
               </div>
-            </Card>
+              <div className={`asset-summary-value asset-value-${card.tone}`}>{card.value}</div>
+              <p className="asset-summary-trend">{card.change}</p>
+            </div>
           );
         })}
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', gap: '2rem' }}>
-        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }} className="no-scrollbar">
-          {STATUS_FILTERS.map(filter => {
-            const Icon = filter.icon;
-            const isActive = activeStatus === filter.id;
-            return (
+      {/* Analytics Title Card */}
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <Package size={24} />
+          </div>
+          <div>
+            <h2 className="analytics-title">Daftar Aset</h2>
+            <p className="analytics-subtitle">Kelola dan lihat semua aset perusahaan</p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Control Section */}
+      <Card className="control-section-card">
+        <div className="control-section-inner">
+          {/* Tabs */}
+          <div className="elyra-tabs">
+            {(["Semua", "Available", "Assigned", "Maintenance", "Retired"] as const).map((tab) => (
               <button
-                key={filter.id}
-                onClick={() => setActiveStatus(filter.id)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '10px 18px',
-                  borderRadius: '12px',
-                  border: '1px solid',
-                  borderColor: isActive ? '#2563eb' : '#e2e8f0',
-                  background: isActive ? '#eff6ff' : 'white',
-                  color: isActive ? '#1d4ed8' : '#64748b',
-                  fontSize: '0.9rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  whiteSpace: 'nowrap'
-                }}
+                key={tab}
+                className={`elyra-tab ${activeTab === tab ? "active" : ""}`}
+                onClick={() => { setActiveTab(tab); setCurrentPage(1); }}
               >
-                <Icon size={16} />
-                {filter.label}
+                {tab}
               </button>
-            );
-          })}
+            ))}
+          </div>
+
+          {/* Search & Filter */}
+          <div className="control-actions">
+            <div className="search-box">
+              <div className="search-icon-inside"><Search size={18} /></div>
+              <input
+                type="text"
+                placeholder="Cari aset..."
+                value={searchQuery}
+                onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+                className="search-input-pill"
+              />
+            </div>
+            <button
+              className={`filter-btn-rounded ${showFilters ? "active" : ""}`}
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <Filter size={18} />
+              <span>Filter</span>
+            </button>
+          </div>
         </div>
 
-        <div style={{ position: 'relative', width: '350px' }}>
-          <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-          <input
-            type="text"
-            placeholder="Cari nama, kode, atau brand..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '12px 16px 12px 48px',
-              borderRadius: '14px',
-              border: '1px solid #e2e8f0',
-              fontSize: '0.95rem',
-              outline: 'none',
-              boxSizing: 'border-box',
-              background: 'white',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
-            }}
-          />
+        {/* Filter Panel */}
+        {showFilters && (
+          <div className="filter-dropdown">
+            <div className="filter-row">
+              {(searchQuery || activeTab !== "Semua") && (
+                <button className="btn-clear-filter" onClick={clearFilters}>
+                  Hapus Filter
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </Card>
+
+      {/* Table Section */}
+      <div className="table-section">
+        <div className="wuw-table-area">
+          {loading && <LoadingState message="Memuat aset..." />}
+
+          {!loading && paginatedAssets.length === 0 && (
+            <div style={{ padding: '5rem 0' }}>
+              <EmptyState
+                title="Pencarian Kosong"
+                message="Kami tidak menemukan aset yang sesuai dengan kriteria Anda."
+                actionLabel="Bersihkan Filter"
+                onAction={clearFilters}
+              />
+            </div>
+          )}
+
+          {!loading && paginatedAssets.length > 0 && (
+            <>
+              <div className="table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: '400px' }}>Aset</th>
+                      <th>Kode</th>
+                      <th>Kategori</th>
+                      <th>Brand</th>
+                      <th>Tanggal Beli</th>
+                      <th className="th-center">Status</th>
+                      <th className="th-center" style={{ width: '120px' }}>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedAssets.map((asset) => {
+                      const IconComponent = getAssetIcon(asset.category);
+                      const holderName = asset.current_holder?.user?.name ||
+                                        asset.current_holder?.full_name ||
+                                        asset.current_holder?.name ||
+                                        'Tersedia di Gudang';
+                      return (
+                        <tr key={asset.id}>
+                          <td>
+                            <div className="cell-name">
+                              <div className="cell-avatar">
+                                <IconComponent size={20} />
+                              </div>
+                              <div className="cell-stacked">
+                                <span className="cell-name-text">{asset.name}</span>
+                                <span className="cell-stacked__sub">{asset.serial_number || 'No SN'}</span>
+                              </div>
+                            </div>
+                          </td>
+                          <td><span style={{ color: '#475569', fontWeight: 600 }}>{asset.code || "-"}</span></td>
+                          <td><span className="badge-soft badge-soft--purple">{asset.category || "-"}</span></td>
+                          <td><span style={{ color: '#64748b', fontWeight: 500 }}>{asset.brand || "-"}</span></td>
+                          <td>
+                            <div className="cell-stacked">
+                              <span className="cell-stacked__main" style={{ fontSize: '0.85rem' }}>{formatDateTime(asset.purchase_date)}</span>
+                              <span className="cell-stacked__sub">Tanggal beli</span>
+                            </div>
+                          </td>
+                          <td className="td-center">
+                            {getStatusBadge(asset.status)}
+                          </td>
+                          <td className="td-center">
+                            <div className="action-btn-group">
+                              <button
+                                className="action-btn action-btn-edit"
+                                onClick={() => navigate(`/inventory/assets/edit/${asset.id}`)}
+                                title="Edit"
+                              >
+                                <Pencil size={16} />
+                              </button>
+                              <button
+                                className="action-btn action-btn-delete"
+                                onClick={() => handleDelete(asset.id, asset.name)}
+                                title="Hapus"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              <div className="table-pagination">
+                <div className="pagination-info">
+                  Menampilkan <strong>{paginatedAssets.length}</strong> dari <strong>{sortedAssets.length}</strong> aset
+                </div>
+                <div className="pagination-controls">
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    ‹
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    ›
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
-
-      {loading ? (
-        <div style={{ textAlign: 'center', padding: '10rem 0', color: '#94a3b8' }}>
-          <RefreshCw size={48} className="animate-spin" style={{ opacity: 0.2, marginBottom: '1rem' }} />
-          <p style={{ fontWeight: 500 }}>Memuat data inventaris...</p>
-        </div>
-      ) : filteredAssets.length === 0 ? (
-        <Card glass style={{ textAlign: 'center', padding: '6rem 2rem', borderRadius: '32px' }}>
-          <div style={{ 
-            width: '80px', height: '80px', 
-            background: '#f8fafc', 
-            borderRadius: '50%', 
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto 1.5rem',
-            color: '#cbd5e1'
-          }}>
-            <Package size={40} />
-          </div>
-          <h3 style={{ fontSize: '1.25rem', color: '#1e293b', marginBottom: '8px' }}>Tidak ada aset ditemukan</h3>
-          <p style={{ color: '#64748b', maxWidth: '400px', margin: '0 auto' }}>
-            Kami tidak menemukan aset yang sesuai dengan kriteria pencarian atau filter Anda.
-          </p>
-          <Button 
-            variant="outline" 
-            style={{ marginTop: '2rem', borderRadius: '12px' }}
-            onClick={() => { setSearchTerm(''); setActiveStatus('All'); }}
-          >
-            Reset Filter
-          </Button>
-        </Card>
-      ) : (
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', 
-          gap: '1.5rem' 
-        }}>
-          {filteredAssets.map((asset) => {
-            const statusStyle = getStatusColor(asset.status);
-            const holderName =
-              asset.current_holder?.user?.name ||
-              asset.current_holder?.full_name ||
-              asset.current_holder?.name ||
-              'Tersedia di Gudang';
-
-            return (
-              <Card 
-                key={asset.id} 
-                className="asset-card"
-                style={{ 
-                  borderRadius: '24px', 
-                  padding: '24px', 
-                  transition: 'transform 0.2s, box-shadow 0.2s',
-                  border: '1px solid #f1f5f9',
-                  background: 'white',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '20px'
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div style={{ 
-                    width: '56px', height: '56px', 
-                    borderRadius: '16px', 
-                    background: '#f1f5f9', 
-                    color: '#334155',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.05)'
-                  }}>
-                    {getAssetIcon(asset.category)}
-                  </div>
-                  <span style={{ 
-                    padding: '6px 12px', 
-                    borderRadius: '20px', 
-                    fontSize: '0.75rem', 
-                    fontWeight: 800, 
-                    textTransform: 'uppercase',
-                    background: statusStyle.bg,
-                    color: statusStyle.color,
-                    border: `1px solid ${statusStyle.border}`
-                  }}>
-                    {asset.status}
-                  </span>
-                </div>
-
-                <div>
-                  <h4 style={{ margin: '0 0 4px', fontSize: '1.1rem', fontWeight: 700, color: '#0f172a' }}>{asset.name}</h4>
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                    <Tag size={12} style={{ color: '#94a3b8' }} />
-                    <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 500 }}>{asset.code || 'NO-CODE'}</span>
-                    <span style={{ color: '#cbd5e1' }}>•</span>
-                    <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 500 }}>{asset.brand || 'No Brand'}</span>
-                  </div>
-                </div>
-
-                <div style={{ 
-                  background: '#f8fafc', 
-                  borderRadius: '16px', 
-                  padding: '16px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '12px'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <Calendar size={14} style={{ color: '#94a3b8' }} />
-                    <div style={{ flex: 1 }}>
-                      <p style={{ margin: 0, fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>Tgl Beli</p>
-                      <p style={{ margin: 0, fontSize: '0.9rem', color: '#334155', fontWeight: 600 }}>{formatDate(asset.purchase_date)}</p>
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <User size={14} style={{ color: '#94a3b8' }} />
-                    <div style={{ flex: 1 }}>
-                      <p style={{ margin: 0, fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>Pemegang</p>
-                      <p style={{ margin: 0, fontSize: '0.9rem', color: '#334155', fontWeight: 600 }}>{holderName}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', gap: '10px', marginTop: 'auto' }}>
-                  <button 
-                    onClick={() => navigate(`/inventory/assets/edit/${asset.id}`)}
-                    style={{ 
-                      flex: 1, 
-                      height: '44px', 
-                      borderRadius: '12px', 
-                      background: '#fff', 
-                      border: '1px solid #e2e8f0',
-                      color: '#475569',
-                      fontSize: '0.9rem',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
-                    }}
-                  >
-                    <Pencil size={14} /> Edit
-                  </button>
-                  <button 
-                    onClick={() => handleDelete(asset.id, asset.name)}
-                    disabled={deletingId === asset.id}
-                    style={{ 
-                      width: '44px', height: '44px', 
-                      borderRadius: '12px', 
-                      background: '#fff', 
-                      border: '1px solid #fee2e2',
-                      color: '#ef4444',
-                      cursor: deletingId === asset.id ? 'not-allowed' : 'pointer',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      opacity: deletingId === asset.id ? 0.5 : 1
-                    }}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              </Card>
-            );
-          })}
-        </div>
-      )}
     </div>
   );
 };

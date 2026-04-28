@@ -1,17 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { FileText, Search, RefreshCw, Calendar, BookTemplate, Plus } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { FileText, Search, RefreshCw, Calendar, BookTemplate, Plus, Users, CheckCircle2 } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { getAllEmployees } from '@/features/employee/api/employee.service';
 import { legalService } from '@/features/legal/api/legal.service';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
-import '@/pages/payroll/PayrollShared.css';
 
 const EmploymentLettersPage: React.FC = () => {
   const [employees, setEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+
+  // Search & Filter
+  const [searchText, setSearchText] = useState("");
+  const [activeTab, setActiveTab] = useState<"Semua" | "Has Letter" | "No Letter">("Semua");
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -29,6 +36,51 @@ const EmploymentLettersPage: React.FC = () => {
     fetchEmployees();
   }, []);
 
+  const summaryStats = useMemo(() => {
+    const total = employees.length;
+    const withLetters = employees.filter(emp => emp.has_letter || emp.letter_count > 0).length;
+    const withoutLetters = total - withLetters;
+
+    return [
+      { label: "Total Karyawan", subtitle: "Seluruh karyawan", value: total, tone: "blue" as const },
+      { label: "Memiliki Surat", subtitle: "Sudah ada surat", value: withLetters, tone: "green" as const },
+      { label: "Belum Ada Surat", subtitle: "Perlu dibuatkan", value: withoutLetters, tone: "orange" as const },
+    ];
+  }, [employees]);
+
+  const filteredEmployees = useMemo(() => {
+    return employees.filter((emp) => {
+      const fullName = String(emp?.full_name || '').toLowerCase();
+      const employeeId = String(emp?.employee_id || emp?.employee_code || '').toLowerCase();
+      const department = String(emp?.department || '').toLowerCase();
+      const query = searchText.toLowerCase();
+      const matchSearch = fullName.includes(query) || employeeId.includes(query) || department.includes(query);
+
+      let letterMatch = true;
+      if (activeTab === "Has Letter") letterMatch = emp.has_letter || emp.letter_count > 0;
+      else if (activeTab === "No Letter") letterMatch = !emp.has_letter && !emp.letter_count;
+
+      return matchSearch && letterMatch;
+    });
+  }, [employees, searchText, activeTab]);
+
+  const paginatedEmployees = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredEmployees.slice(startIndex, startIndex + pageSize);
+  }, [filteredEmployees, currentPage, pageSize]);
+
+  const totalPages = Math.ceil(filteredEmployees.length / pageSize);
+
+  const clearFilters = () => {
+    setSearchText("");
+    setActiveTab("Semua");
+    setCurrentPage(1);
+  };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText, activeTab]);
+
   const handleGenerate = async (id: string | number, type: 'experience' | 'employment') => {
     try {
       if (type === 'experience') {
@@ -42,15 +94,9 @@ const EmploymentLettersPage: React.FC = () => {
     }
   };
 
-  const filteredEmployees = employees.filter(emp => {
-    const fullName = String(emp?.full_name || '').toLowerCase();
-    const employeeId = String(emp?.employee_id || '').toLowerCase();
-    const query = searchQuery.toLowerCase();
-    return fullName.includes(query) || employeeId.includes(query);
-  });
-
   return (
     <div className="crud-page">
+      {/* Header */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -72,166 +118,260 @@ const EmploymentLettersPage: React.FC = () => {
         </div>
       </Card>
 
-      <Card glass style={{ padding: '0', overflow: 'hidden', border: '1px solid var(--cr-border)' }}>
-        <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--cr-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.3)' }}>
-          <div style={{ position: 'relative', width: '400px' }}>
-            <Search size={18} color="#94a3b8" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
-            <input 
-              type="text" 
-              className="form-control" 
-              placeholder="Cari karyawan berdasarkan nama atau ID..." 
-              style={{ 
-                paddingLeft: '44px', 
-                width: '100%',
-                borderRadius: '12px',
-                border: '1px solid #e2e8f0',
-                height: '45px',
-                fontSize: '0.95rem'
-              }}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+      {/* Summary Cards */}
+      <div className="employee-summary-wrapper">
+        {summaryStats.map((card) => {
+          const Icon = card.tone === "blue" ? Users : card.tone === "green" ? CheckCircle2 : FileText;
+
+          return (
+            <div key={card.label} className="employee-summary-card">
+              <div className="employee-summary-header">
+                <div>
+                  <p className="employee-summary-label">{card.label}</p>
+                  <p className="employee-summary-subtitle">{card.subtitle}</p>
+                </div>
+                <div className={`employee-summary-icon-wrapper employee-icon-${card.tone}`}>
+                  <Icon size={28} />
+                </div>
+              </div>
+              <div className={`employee-summary-value employee-value-${card.tone}`}>{card.value}</div>
+              <p className="employee-summary-trend">{card.subtitle}</p>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Analytics Title Card */}
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <FileText size={24} />
           </div>
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
-             <Button variant="outline" onClick={() => {}} style={{ borderRadius: '10px' }}>
-              <FileText size={18} style={{ marginRight: '8px' }} />
-              Queue
+          <div>
+            <h2 className="analytics-title">Daftar Karyawan</h2>
+            <p className="analytics-subtitle">Kelola surat pekerjaan karyawan</p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Control Section */}
+      <Card className="control-section-card">
+        <div className="control-section-inner">
+          <div className="search-filter-group">
+            <div className="search-input-wrapper">
+              <Search size={18} className="search-icon" />
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Cari karyawan berdasarkan nama, ID, atau departemen..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+              />
+              {searchText && (
+                <button className="clear-search-btn" onClick={() => setSearchText("")}>×</button>
+              )}
+            </div>
+            <Button variant="outline" size="sm" onClick={clearFilters} disabled={!searchText && activeTab === "Semua"}>
+              <RefreshCw size={14} />
+              Reset
             </Button>
           </div>
+
+          <div className="tabs-container">
+            {(["Semua", "Has Letter", "No Letter"] as const).map((tab) => (
+              <button
+                key={tab}
+                className={`tab-button ${activeTab === tab ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab}
+                {tab !== "Semua" && (
+                  <span className="tab-count">
+                    {tab === "Has Letter"
+                      ? employees.filter(emp => emp.has_letter || emp.letter_count > 0).length
+                      : employees.filter(emp => !emp.has_letter && !emp.letter_count).length}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      </Card>
+
+      {/* Data Table */}
+      <Card className="data-table-card">
+        <div className="data-table-header">
+          <h3 className="data-table-title">
+            Daftar Karyawan
+            <span className="data-table-count">{filteredEmployees.length} ditemukan</span>
+          </h3>
         </div>
 
-        <div className="crud-table-wrap" style={{ margin: '0' }}>
-          <table className="crud-table">
-            <thead>
-              <tr style={{ background: '#f8fafc' }}>
-                <th style={{ padding: '1.25rem 1.5rem' }}>Employee</th>
-                <th>Department</th>
-                <th>Position</th>
-                <th>Join Date</th>
-                <th style={{ textAlign: 'right', paddingRight: '1.5rem' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={5} style={{ textAlign: 'center', padding: '4rem' }}>
-                    <div className="animate-spin" style={{ marginBottom: '1rem' }}>
-                      <RefreshCw size={24} color="#2563eb" />
-                    </div>
-                    Loading employees...
-                  </td>
-                </tr>
-              ) : filteredEmployees.length === 0 ? (
-                <tr>
-                  <td colSpan={5} style={{ textAlign: 'center', padding: '4rem', color: '#94a3b8' }}>
-                    No employees found matching your search.
-                  </td>
-                </tr>
-              ) : filteredEmployees.map((emp) => (
-                <tr key={emp.id} style={{ transition: 'all 0.2s' }}>
-                  <td style={{ padding: '1.25rem 1.5rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ 
-                        width: '40px', 
-                        height: '40px', 
-                        borderRadius: '12px', 
-                        background: 'linear-gradient(135deg, #2563eb, #4f46e5)',
-                        color: 'white',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontWeight: 700,
-                        fontSize: '0.9rem',
-                        boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)'
-                      }}>
-                        {(emp.full_name || 'U').charAt(0).toUpperCase()}
-                      </div>
-                      <div>
-                        <div style={{ fontWeight: 600, color: '#1e293b', fontSize: '0.95rem' }}>
-                          {emp.full_name || emp.user?.name || emp.name || 'Unknown Employee'}
+        {loading ? (
+          <LoadingState message="Memuat data karyawan..." />
+        ) : filteredEmployees.length === 0 ? (
+          <EmptyState
+            icon={<Users size={48} />}
+            title="Tidak ada karyawan ditemukan"
+            message={searchText || activeTab !== "Semua" ? "Coba ubah kata kunci atau filter" : "Belum ada data karyawan"}
+          />
+        ) : (
+          <>
+            <div className="table-wrap">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Karyawan</th>
+                    <th>Department</th>
+                    <th>Position</th>
+                    <th>Join Date</th>
+                    <th style={{ textAlign: 'right' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedEmployees.map((emp) => (
+                    <tr key={emp.id}>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '12px',
+                            background: 'linear-gradient(135deg, #2563eb, #4f46e5)',
+                            color: 'white',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: 700,
+                            fontSize: '0.9rem',
+                            boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)'
+                          }}>
+                            {(emp.full_name || 'U').charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <div style={{ fontWeight: 600, color: '#1e293b', fontSize: '0.95rem' }}>
+                              {emp.full_name || emp.user?.name || emp.name || 'Unknown Employee'}
+                            </div>
+                            <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{emp.employee_id || emp.employee_code || '#' + emp.id}</div>
+                          </div>
                         </div>
-                        <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{emp.employee_id || emp.employee_code || '#'+emp.id}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <span style={{ 
-                      padding: '4px 10px', 
-                      background: '#f1f5f9', 
-                      borderRadius: '6px', 
-                      fontSize: '0.85rem',
-                      color: '#475569',
-                      fontWeight: 500
-                    }}>
-                      {emp.department || 'N/A'}
-                    </span>
-                  </td>
-                  <td>
-                    <div style={{ fontSize: '0.9rem', color: '#334155' }}>{emp.designation || emp.position || 'N/A'}</div>
-                  </td>
-                  <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem', color: '#64748b' }}>
-                      <Calendar size={14} />
-                      {emp.hire_date ? new Date(emp.hire_date).toLocaleDateString('id-ID', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric'
-                      }) : '-'}
-                    </div>
-                  </td>
-                  <td style={{ paddingRight: '1.5rem' }}>
-                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                      <button 
-                        className="btn-action-generate"
-                        onClick={() => handleGenerate(emp.id, 'employment')}
-                        title="Generate Surat Keterangan Kerja"
-                        style={{
-                          padding: '8px 12px',
-                          borderRadius: '8px',
-                          border: '1px solid #e2e8f0',
-                          background: 'white',
-                          color: '#2563eb',
+                      </td>
+                      <td>
+                        <span style={{
+                          padding: '4px 10px',
+                          background: '#f1f5f9',
+                          borderRadius: '6px',
                           fontSize: '0.85rem',
-                          fontWeight: 600,
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s'
-                        }}
-                      >
-                        <FileText size={14} />
-                        Suket Kerja
-                      </button>
-                      <button 
-                        className="btn-action-generate"
-                        onClick={() => handleGenerate(emp.id, 'experience')}
-                        title="Generate Surat Pengalaman Kerja (Paklaring)"
-                        style={{
-                          padding: '8px 12px',
-                          borderRadius: '8px',
-                          border: '1px solid #e2e8f0',
-                          background: 'white',
-                          color: '#059669',
-                          fontSize: '0.85rem',
-                          fontWeight: 600,
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s'
-                        }}
-                      >
-                        <FileText size={14} />
-                        Paklaring
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                          color: '#475569',
+                          fontWeight: 500
+                        }}>
+                          {emp.department || 'N/A'}
+                        </span>
+                      </td>
+                      <td>
+                        <div style={{ fontSize: '0.9rem', color: '#334155' }}>{emp.designation || emp.position || 'N/A'}</div>
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem', color: '#64748b' }}>
+                          <Calendar size={14} />
+                          {emp.hire_date ? new Date(emp.hire_date).toLocaleDateString('id-ID', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric'
+                          }) : '-'}
+                        </div>
+                      </td>
+                      <td style={{ textAlign: 'right' }}>
+                        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                          <button
+                            className="btn-action-generate"
+                            onClick={() => handleGenerate(emp.id, 'employment')}
+                            title="Generate Surat Keterangan Kerja"
+                            style={{
+                              padding: '8px 12px',
+                              borderRadius: '8px',
+                              border: '1px solid #e2e8f0',
+                              background: 'white',
+                              color: '#2563eb',
+                              fontSize: '0.85rem',
+                              fontWeight: 600,
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s'
+                            }}
+                          >
+                            <FileText size={14} />
+                            Suket Kerja
+                          </button>
+                          <button
+                            className="btn-action-generate"
+                            onClick={() => handleGenerate(emp.id, 'experience')}
+                            title="Generate Surat Pengalaman Kerja (Paklaring)"
+                            style={{
+                              padding: '8px 12px',
+                              borderRadius: '8px',
+                              border: '1px solid #e2e8f0',
+                              background: 'white',
+                              color: '#059669',
+                              fontSize: '0.85rem',
+                              fontWeight: 600,
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s'
+                            }}
+                          >
+                            <FileText size={14} />
+                            Paklaring
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="table-pagination">
+                <div className="pagination-info">
+                  Menampilkan {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, filteredEmployees.length)} dari {filteredEmployees.length}
+                </div>
+                <div className="pagination-controls">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(prev => prev - 1)}
+                  >
+                    Sebelumnya
+                  </Button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    <button
+                      key={page}
+                      className={`pagination-page-btn ${currentPage === page ? 'active' : ''}`}
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(prev => prev + 1)}
+                  >
+                    Selanjutnya
+                  </Button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </Card>
     </div>
   );

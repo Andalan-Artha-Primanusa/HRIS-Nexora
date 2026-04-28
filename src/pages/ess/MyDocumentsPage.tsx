@@ -1,37 +1,42 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   FileText, 
   Search, 
   Download, 
   Upload, 
   Clock, 
-  CheckCircle, 
+  CheckCircle2, 
   XCircle, 
   AlertCircle,
-  Calendar,
   Shield,
   RefreshCw,
-  FileBadge
+  FileBadge,
+  Eye
 } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { documentService } from '@/features/employee/api/document.service';
 import type { EmployeeDocument } from '@/features/employee/types/document.types';
+import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
-import '@/pages/payroll/PayrollShared.css';
-import '@/pages/ess/EssPages.css';
 
 const MyDocumentsPage: React.FC = () => {
   const [documents, setDocuments] = useState<EmployeeDocument[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState<string>('all');
+
+  // Search & Filter
+  const [searchText, setSearchText] = useState("");
+  const [activeTab, setActiveTab] = useState<"Semua" | "contract" | "letter" | "identity" | "pending" | "approved">("Semua");
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
 
   const fetchDocuments = async () => {
     setLoading(true);
     try {
       const response = await documentService.getMyDocuments();
-      // Extract array from Laravel pagination
       const data = response.data?.data || response.data || [];
       setDocuments(data);
     } catch (err) {
@@ -45,26 +50,53 @@ const MyDocumentsPage: React.FC = () => {
     fetchDocuments();
   }, []);
 
-  const filteredDocuments = documents.filter(doc => {
-    const matchesSearch = doc.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         doc.document_type.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTab = activeTab === 'all' || doc.category === activeTab || doc.document_type === activeTab;
-    return matchesSearch && matchesTab;
-  });
+  const filteredDocuments = useMemo(() => {
+    return documents.filter(doc => {
+      const title = String(doc?.title || '').toLowerCase();
+      const type = String(doc?.document_type || '').toLowerCase();
+      const query = searchText.toLowerCase();
+      const matchSearch = title.includes(query) || type.includes(query);
 
-  const getStatusBadge = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'approved':
-        return <span className="status-pill status-approved"><CheckCircle size={14} /> Approved</span>;
-      case 'pending':
-        return <span className="status-pill status-pending"><Clock size={14} /> Pending Review</span>;
-      case 'rejected':
-        return <span className="status-pill status-rejected"><XCircle size={14} /> Rejected</span>;
-      case 'expired':
-        return <span className="status-pill status-expired"><AlertCircle size={14} /> Expired</span>;
-      default:
-        return <span className="status-pill">{status}</span>;
-    }
+      let statusMatch = true;
+      if (activeTab === "contract" || activeTab === "letter" || activeTab === "identity") {
+        statusMatch = doc.document_type?.toLowerCase() === activeTab;
+      } else if (activeTab === "pending") {
+        statusMatch = doc.status === 'pending';
+      } else if (activeTab === "approved") {
+        statusMatch = doc.status === 'approved';
+      }
+
+      return matchSearch && statusMatch;
+    });
+  }, [documents, searchText, activeTab]);
+
+  const paginatedDocuments = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredDocuments.slice(startIndex, startIndex + pageSize);
+  }, [filteredDocuments, currentPage, pageSize]);
+
+  const totalPages = Math.ceil(filteredDocuments.length / pageSize);
+
+  const summaryStats = useMemo(() => {
+    const total = documents.length;
+    const approved = documents.filter(d => d.status === 'approved').length;
+    const pending = documents.filter(d => d.status === 'pending').length;
+    const expiring = documents.filter(d => d.expires_at && new Date(d.expires_at) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)).length;
+
+    return [
+      { label: "Total File", subtitle: "Seluruh dokumen", value: total, tone: "blue" as const },
+      { label: "Terverifikasi", subtitle: "Disetujui HR", value: approved, tone: "green" as const },
+      { label: "Menunggu", subtitle: "Menunggu tinjauan", value: pending, tone: "orange" as const },
+      { label: "Kadaluarsa Soon", subtitle: "Segera kadaluarsa", value: expiring, tone: "red" as const },
+    ];
+  }, [documents]);
+
+  const getStatusClass = (status?: string) => {
+    const normalized = String(status || "").toLowerCase();
+    if (normalized === "approved") return "status-badge status-badge--approved";
+    if (normalized === "pending" || normalized === "submitted") return "status-badge status-badge--pending";
+    if (normalized === "rejected") return "status-badge status-badge--draft";
+    return "status-badge status-badge--draft";
   };
 
   const getDocIcon = (type: string) => {
@@ -74,15 +106,47 @@ const MyDocumentsPage: React.FC = () => {
     return <FileText size={24} />;
   };
 
-  const stats = {
-    total: documents.length,
-    approved: documents.filter(d => d.status === 'approved').length,
-    pending: documents.filter(d => d.status === 'pending').length,
-    expiring: documents.filter(d => d.expires_at && new Date(d.expires_at) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)).length
+  const handleDownload = async (doc: EmployeeDocument) => {
+    try {
+      const token = localStorage.getItem('token');
+      const filename = doc.file_url.split('/').pop();
+      const res = await fetch(
+        `https://moccasin-crab-693879.hostingersite.com/api/documents/${filename}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      
+      if (!res.ok) throw new Error("Download gagal");
+      
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename || "file.pdf";
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      alert("Gagal download file");
+    }
   };
 
+  const clearFilters = () => {
+    setSearchText("");
+    setActiveTab("Semua");
+    setCurrentPage(1);
+  };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText, activeTab]);
+
   return (
-    <div className="ess-page">
+    <div className="crud-page">
+      {/* Header */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -108,267 +172,205 @@ const MyDocumentsPage: React.FC = () => {
         </div>
       </Card>
 
-      <div className="leave-requests-wrapper">
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Total File</p>
-              <p className="leave-summary-subtitle">Seluruh dokumen</p>
-            </div>
-            <div className="leave-summary-icon-wrapper leave-icon-blue">
-              <FileText size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-blue">{stats.total}</div>
-          <p className="leave-summary-trend">Total Dokumen</p>
-        </div>
+      {/* Summary Cards */}
+      <div className="employee-summary-wrapper">
+        {summaryStats.map((card) => {
+          const Icon = card.tone === "blue" ? FileText : card.tone === "green" ? CheckCircle2 : card.tone === "orange" ? Clock : AlertCircle;
 
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Terverifikasi</p>
-              <p className="leave-summary-subtitle">Disetujui HR</p>
-            </div>
-            <div className="leave-summary-icon-wrapper leave-icon-green">
-              <CheckCircle size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-green">{stats.approved}</div>
-          <p className="leave-summary-trend">Dokumen Disetujui</p>
-        </div>
-
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Menunggu</p>
-              <p className="leave-summary-subtitle">Menunggu tinjauan</p>
-            </div>
-            <div className="leave-summary-icon-wrapper leave-icon-orange">
-              <Clock size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-orange">{stats.pending}</div>
-          <p className="leave-summary-trend">Menunggu Tinjauan</p>
-        </div>
-
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Kadaluarsa Soon</p>
-              <p className="leave-summary-subtitle">Segera kadaluarsa</p>
-            </div>
-            <div className="leave-summary-icon-wrapper leave-icon-red">
-              <AlertCircle size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-red">{stats.expiring}</div>
-          <p className="leave-summary-trend">Segera Kadaluarsa</p>
-        </div>
-      </div>
-
-      <Card glass style={{ marginTop: '1.5rem', padding: '1.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', gap: '1rem', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            {['all', 'contract', 'letter', 'identity'].map(tab => (
-              <Button 
-                key={tab}
-                variant={activeTab === tab ? 'primary' : 'ghost'}
-                size="sm"
-                onClick={() => setActiveTab(tab)}
-                style={{ textTransform: 'capitalize', borderRadius: '10px' }}
-              >
-                {tab}
-              </Button>
-            ))}
-          </div>
-          <div style={{ position: 'relative', flex: 1, maxWidth: '300px' }}>
-            <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-            <input 
-              type="text" 
-              placeholder="Search documents..." 
-              className="ess-input"
-              style={{ width: '100%', paddingLeft: '40px' }}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-        </div>
-
-        {loading ? (
-          <div style={{ textAlign: 'center', padding: '3rem' }}>
-            <RefreshCw size={32} className="animate-spin" style={{ color: '#2563eb', marginBottom: '1rem' }} />
-            <p style={{ color: '#64748b' }}>Loading documents...</p>
-          </div>
-        ) : filteredDocuments.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '4rem', background: 'rgba(248, 250, 252, 0.5)', borderRadius: '16px', border: '1px dashed #e2e8f0' }}>
-            <FileText size={48} style={{ color: '#cbd5e1', marginBottom: '1rem' }} />
-            <h3 style={{ color: '#475569', marginBottom: '0.5rem' }}>No documents found</h3>
-            <p style={{ color: '#94a3b8' }}>Try adjusting your search or filters.</p>
-          </div>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
-            {filteredDocuments.map(doc => (
-              <div key={doc.id} className="doc-card">
-                <div className="doc-card-header">
-                  <div className={`doc-icon-wrap ${doc.document_type.includes('contract') ? 'icon-shield' : 'icon-file'}`}>
-                    {getDocIcon(doc.document_type)}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <h4 className="doc-title">{doc.title}</h4>
-                    <span className="doc-type-label">{doc.document_type.replace('_', ' ')}</span>
-                  </div>
+          return (
+            <div key={card.label} className="employee-summary-card">
+              <div className="employee-summary-header">
+                <div>
+                  <p className="employee-summary-label">{card.label}</p>
+                  <p className="employee-summary-subtitle">{card.subtitle}</p>
                 </div>
-                
-                <div className="doc-meta">
-                  <div className="meta-item">
-                    <Calendar size={14} />
-                    <span>Updated: {new Date(doc.updated_at).toLocaleDateString()}</span>
-                  </div>
-                  {doc.expires_at && (
-                    <div className={`meta-item ${new Date(doc.expires_at) < new Date() ? 'text-red' : ''}`}>
-                      <AlertCircle size={14} />
-                      <span>Expires: {new Date(doc.expires_at).toLocaleDateString()}</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="doc-footer">
-                  {getStatusBadge(doc.status)}
-                  <Button 
-  variant="ghost" 
-  size="sm" 
-  style={{ color: '#2563eb', gap: '6px' }}
-  onClick={async () => {
-    try {
-      const token = localStorage.getItem('token');
-
-      const filename = doc.file_url.split('/').pop();
-
-      const res = await fetch(
-        `https://moccasin-crab-693879.hostingersite.com/api/documents/${filename}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      // 🔥 INI YANG KAMU TANYA (debug response)
-      if (!res.ok) {
-        const text = await res.text();
-        console.log("ERROR RESPONSE:", text);
-        throw new Error("Download gagal");
-      }
-
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename || "file.pdf";
-      a.click();
-
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error(err);
-      alert("Gagal download file");
-    }
-  }}
->
-  <Download size={16} /> Download
-</Button>
+                <div className={`employee-summary-icon-wrapper employee-icon-${card.tone}`}>
+                  <Icon size={28} />
                 </div>
               </div>
-            ))}
+              <div className={`employee-summary-value employee-value-${card.tone}`}>{card.value}</div>
+              <p className="employee-summary-trend">{card.subtitle}</p>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Analytics Title Card */}
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <FileText size={24} />
           </div>
-        )}
+          <div>
+            <h2 className="analytics-title">Daftar Dokumen</h2>
+            <p className="analytics-subtitle">Kelola dan lihat semua dokumen Anda</p>
+          </div>
+        </div>
       </Card>
 
-      <style>{`
-        .status-pill {
-          display: inline-flex;
-          align-items: center;
-          gap: 4px;
-          padding: 4px 10px;
-          border-radius: 8px;
-          font-size: 0.75rem;
-          font-weight: 700;
-          background: #f1f5f9;
-          color: #64748b;
-        }
-        .status-approved { background: #dcfce7; color: #15803d; }
-        .status-pending { background: #fef3c7; color: #b45309; }
-        .status-rejected { background: #fee2e2; color: #b91c1c; }
-        .status-expired { background: #f1f5f9; color: #b91c1c; border: 1px solid #fee2e2; }
+      {/* Control Section */}
+      <Card className="control-section-card">
+        <div className="control-section-inner">
+          {/* Tabs */}
+          <div className="elyra-tabs">
+            {["Semua", "contract", "letter", "identity", "pending", "approved"].map((tab) => (
+              <button
+                key={tab}
+                className={`elyra-tab ${activeTab === tab ? "active" : ""}`}
+                onClick={() => setActiveTab(tab as "Semua" | "contract" | "letter" | "identity" | "pending" | "approved")}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </button>
+            ))}
+          </div>
 
-        .doc-card {
-          background: #ffffff;
-          border: 1px solid rgba(226, 232, 240, 0.8);
-          border-radius: 16px;
-          padding: 1.25rem;
-          transition: all 0.2s ease;
-        }
-        .doc-card:hover {
-          border-color: #2563eb;
-          box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.1);
-          transform: translateY(-2px);
-        }
-        .doc-card-header {
-          display: flex;
-          gap: 12px;
-          margin-bottom: 1rem;
-        }
-        .doc-icon-wrap {
-          width: 48px;
-          height: 48px;
-          border-radius: 12px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .icon-file { background: #eff6ff; color: #2563eb; }
-        .icon-shield { background: #f0fdf4; color: #16a34a; }
-        
-        .doc-title {
-          margin: 0;
-          font-size: 0.95rem;
-          font-weight: 700;
-          color: #1e293b;
-          display: -webkit-box;
-          -webkit-line-clamp: 1;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-        .doc-type-label {
-          font-size: 0.75rem;
-          color: #94a3b8;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          font-weight: 600;
-        }
-        .doc-meta {
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-          margin-bottom: 1.25rem;
-        }
-        .meta-item {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-size: 0.8rem;
-          color: #64748b;
-        }
-        .text-red { color: #dc2626; }
+          {/* Search */}
+          <div className="control-actions">
+            <div className="search-box">
+              <div className="search-icon-inside"><Search size={18} /></div>
+              <input
+                type="text"
+                placeholder="Cari dokumen..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="search-input-pill"
+              />
+            </div>
+          </div>
+        </div>
+      </Card>
 
-        .doc-footer {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding-top: 1rem;
-          border-top: 1px solid #f1f5f9;
-        }
-      `}</style>
+      {/* Table Section */}
+      <div className="table-section">
+        <div className="wuw-table-area">
+          {loading && <LoadingState message="Memuat dokumen..." />}
+
+          {!loading && paginatedDocuments.length === 0 && (
+            <div style={{ padding: '5rem 0' }}>
+              <EmptyState
+                title="Belum Ada Dokumen"
+                message={searchText || activeTab !== "Semua"
+                  ? "Tidak ada dokumen yang sesuai dengan kriteria Anda."
+                  : "Anda belum memiliki dokumen. Unggah dokumen pertama untuk memulai."}
+                actionLabel="Unggah Dokumen"
+                onAction={() => {}}
+              />
+            </div>
+          )}
+
+          {!loading && paginatedDocuments.length > 0 && (
+            <>
+              <div className="table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: '300px' }}>Dokumen</th>
+                      <th>Tipe</th>
+                      <th>Tanggal Update</th>
+                      <th>Kadaluarsa</th>
+                      <th className="th-center">Status</th>
+                      <th className="th-center" style={{ width: '120px' }}>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedDocuments.map((doc) => (
+                      <tr key={doc.id}>
+                        <td>
+                          <div className="cell-name">
+                            <div className="cell-avatar">
+                              {getDocIcon(doc.document_type)}
+                            </div>
+                            <div className="cell-stacked">
+                              <span className="cell-name-text">{doc.title}</span>
+                              <span className="cell-stacked__sub">{doc.document_type.replace('_', ' ')}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <span className="badge-soft badge-soft--blue">{doc.document_type.replace('_', ' ')}</span>
+                        </td>
+                        <td>
+                          <div className="cell-stacked">
+                            <span className="cell-stacked__main" style={{ fontSize: '0.85rem' }}>{new Date(doc.updated_at).toLocaleDateString("id-ID", { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                            <span className="cell-stacked__sub">Terakhir diubah</span>
+                          </div>
+                        </td>
+                        <td>
+                          {doc.expires_at ? (
+                            <div className="cell-stacked">
+                              <span className={`cell-stacked__main" style={{ fontSize: '0.85rem', color: new Date(doc.expires_at) < new Date() ? '#dc2626' : '#475569' }}>{new Date(doc.expires_at).toLocaleDateString("id-ID", { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                              <span className="cell-stacked__sub">{new Date(doc.expires_at) < new Date() ? 'Kadaluarsa' : 'Berlaku'}</span>
+                            </div>
+                          ) : (
+                            <span style={{ color: '#94a3b8' }}>-</span>
+                          )}
+                        </td>
+                        <td className="td-center">
+                          <span className={getStatusClass(doc.status)}>
+                            {doc.status === "approved" ? "Approved" : 
+                              doc.status === "pending" ? "Pending" : 
+                                doc.status === "rejected" ? "Rejected" : doc.status}
+                          </span>
+                        </td>
+                        <td className="td-center">
+                          <div className="action-btn-group">
+                            <button
+                              className="action-btn action-btn-edit"
+                              onClick={() => handleDownload(doc)}
+                              title="Download"
+                            >
+                              <Download size={16} />
+                            </button>
+                            <button
+                              className="action-btn action-btn-edit"
+                              onClick={() => {}}
+                              title="Lihat Detail"
+                            >
+                              <Eye size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              <div className="table-pagination">
+                <div className="pagination-info">
+                  Menampilkan <strong>{paginatedDocuments.length}</strong> dari <strong>{filteredDocuments.length}</strong> dokumen
+                </div>
+                <div className="pagination-controls">
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    ‹
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    ›
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

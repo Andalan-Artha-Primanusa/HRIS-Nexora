@@ -1,12 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Card } from "@/shared/ui/Card";
+import { Button } from "@/shared/ui/Button";
 import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
-import { approveLeave, getPendingLeaves, rejectLeave } from "@/features/leave/api/leave.service";
+import { approveLeave, getLeaveRequests, rejectLeave } from "@/features/leave/api/leave.service";
 import type { LeaveItem } from "@/features/leave/types/leave.types";
-import { BarChart3, Check, CircleCheckBig, CircleX, Clock3, RefreshCw, Calendar, CheckCircle, XCircle } from "lucide-react";
-import "@/shared/styles/CrudPage.css";
-import "@/pages/dashboard/overview/OverviewPage.css";
-import "./LeaveShared.css";
+import { RefreshCw, Check, X, Clock3, CheckCircle2, XCircle, Search } from "lucide-react";
+import { showToast } from "@/shared/ui/toast";
+import '@/shared/styles/CrudPage.css';
+import '@/pages/dashboard/overview/OverviewPage.css';
 
 const formatDate = (dateString: string | undefined) => {
   if (!dateString) return "-";
@@ -33,7 +34,6 @@ const getLeaveTypeLabel = (type: string | undefined) => {
 };
 
 const getEmployeeName = (leave: any) => {
-  // Try different possible paths to get employee name
   if (typeof leave.employee === "string") return leave.employee;
   if (typeof leave.employee_name === "string") return leave.employee_name;
   if (leave.employee?.name) return leave.employee.name;
@@ -43,111 +43,134 @@ const getEmployeeName = (leave: any) => {
   return "-";
 };
 
-const getSafeString = (value: any) => {
-  if (typeof value === "string") return value;
-  if (typeof value === "number") return String(value);
-  if (value === null || value === undefined) return "-";
-  return "-";
-};
-
 const LeaveApprovalPage = () => {
   const [items, setItems] = useState<LeaveItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  const leaveSummaryCards = [
-    {
-      label: "Pending Requests",
-      subtitle: "Pengajuan yang menunggu aksi",
-      value: String(items.length),
-      change: "Prioritas review hari ini",
-      tone: "blue" as const,
-      icon: BarChart3,
-    },
-    {
-      label: "Ready to Review",
-      subtitle: "Daftar yang dapat diproses",
-      value: String(items.length > 0 ? items.length : 0),
-      change: "Approve atau reject dengan cepat",
-      tone: "orange" as const,
-      icon: Clock3,
-    },
-    {
-      label: "Approved Today",
-      subtitle: "Aksi yang selesai hari ini",
-      value: "0",
-      change: "Update mengikuti aksi terbaru",
-      tone: "green" as const,
-      icon: CircleCheckBig,
-    },
-    {
-      label: "Rejected Today",
-      subtitle: "Aksi penolakan hari ini",
-      value: "0",
-      change: "Status final penolakan",
-      tone: "red" as const,
-      icon: CircleX,
-    },
-  ];
+  // Search & Filter
+  const [searchText, setSearchText] = useState("");
+  const [activeTab, setActiveTab] = useState<"Semua" | "Pending" | "Approved" | "Rejected">("Semua");
 
-  const loadPending = async () => {
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
+
+  const loadData = async () => {
     setLoading(true);
-
     try {
-      const result = await getPendingLeaves();
-      setItems(result.items);
+      const result = await getLeaveRequests({});
+      const raw = result.items || [];
+      setItems(raw);
     } catch (error: unknown) {
-      // Handle error silently
+      console.error("Failed to load leaves:", error);
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    void loadData();
+  }, []);
+
+  const filteredItems = useMemo(() => {
+    return items.filter(item => {
+      const empName = getEmployeeName(item).toLowerCase();
+      const query = searchText.toLowerCase();
+      const matchSearch = empName.includes(query);
+
+      let statusMatch = true;
+      if (activeTab === "Pending") statusMatch = item.status === 'pending' || item.status === 'submitted';
+      else if (activeTab === "Approved") statusMatch = item.status === 'approved';
+      else if (activeTab === "Rejected") statusMatch = item.status === 'rejected';
+
+      return matchSearch && statusMatch;
+    });
+  }, [items, searchText, activeTab]);
+
+  const paginatedItems = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredItems.slice(startIndex, startIndex + pageSize);
+  }, [filteredItems, currentPage, pageSize]);
+
+  const totalPages = Math.ceil(filteredItems.length / pageSize);
+
+  const summaryStats = useMemo(() => {
+    const pending = items.filter(i => i.status === 'pending' || i.status === 'submitted').length;
+    const approved = items.filter(i => i.status === 'approved').length;
+    const rejected = items.filter(i => i.status === 'rejected').length;
+
+    return [
+      { label: "Pending", subtitle: "Menunggu persetujuan", value: pending, tone: "blue" as const },
+      { label: "Disetujui", subtitle: "Pengajuan disetujui", value: approved, tone: "green" as const },
+      { label: "Ditolak", subtitle: "Pengajuan ditolak", value: rejected, tone: "red" as const },
+    ];
+  }, [items]);
+
   const handleApprove = async (leaveId: string | number) => {
     setActionLoading(String(leaveId));
-
     try {
-      await approveLeave(String(leaveId), { note: "Approved" });
-      await loadPending();
+      await approveLeave(String(leaveId), { note: "Disetujui" });
+      await loadData();
+      showToast("Pengajuan disetujui", "success");
     } catch (error: unknown) {
-      // Handle error silently
+      console.error("Failed to approve:", error);
     } finally {
       setActionLoading(null);
     }
   };
 
   const handleReject = async (leaveId: string | number) => {
-    setActionLoading(String(leaveId));
+    const reason = window.prompt("Berikan alasan penolakan untuk karyawan:");
+    if (reason === null) return;
 
+    setActionLoading(String(leaveId));
     try {
-      await rejectLeave(String(leaveId), { note: "Rejected" });
-      await loadPending();
+      await rejectLeave(String(leaveId), { note: reason || "Ditolak tanpa alasan" });
+      await loadData();
+      showToast("Pengajuan ditolak", "success");
     } catch (error: unknown) {
-      // Handle error silently
+      console.error("Failed to reject:", error);
     } finally {
       setActionLoading(null);
     }
   };
 
+  const clearFilters = () => {
+    setSearchText("");
+    setActiveTab("Semua");
+    setCurrentPage(1);
+  };
+
   useEffect(() => {
-    void loadPending();
-  }, []);
+    setCurrentPage(1);
+  }, [searchText, activeTab]);
+
+  const getStatusClass = (status?: string) => {
+    const normalized = String(status || "").toLowerCase();
+    if (normalized === "approved") return "status-badge status-badge--approved";
+    if (normalized === "submitted" || normalized === "pending") return "status-badge status-badge--pending";
+    if (normalized === "rejected") return "status-badge status-badge--draft";
+    return "status-badge status-badge--draft";
+  };
 
   return (
     <div className="crud-page">
-      {/* Header - Same style as Dashboard */}
+      {/* Header */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
             <div className="hero-badge">
-              <Calendar size={16} />
-              <span>Pusat Persetujuan</span>
+              <Clock3 size={16} />
+              <span>Leave Center</span>
             </div>
-            <h1 className="hero-title">Persetujuan Cuti</h1>
-            <p className="hero-subtitle">Review dan setujui atau tolak pengajuan cuti yang menunggu.</p>
+            <h1 className="hero-title">Leave Approval</h1>
+            <p className="hero-subtitle">
+              Review and approve/reject pending employee leave requests securely.
+            </p>
           </div>
           <div className="hero-actions">
-            <button className="btn-outline" onClick={() => void loadPending()}>
+            <button className="btn-outline" onClick={() => void loadData()} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan
             </button>
@@ -156,150 +179,204 @@ const LeaveApprovalPage = () => {
       </Card>
 
       {/* Summary Cards */}
-      <div className="leave-approval-wrapper">
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Menunggu</p>
-              <p className="leave-summary-subtitle">Pengajuan yang menunggu aksi</p>
-            </div>
-            <div className="leave-summary-icon-wrapper leave-icon-blue">
-              <BarChart3 size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-blue">{items.length}</div>
-          <p className="leave-summary-trend">Prioritas review hari ini</p>
-        </div>
+      <div className="employee-summary-wrapper">
+        {summaryStats.map((card) => {
+          const Icon = card.tone === "blue" ? Clock3 : card.tone === "green" ? CheckCircle2 : XCircle;
 
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Siap Diproses</p>
-              <p className="leave-summary-subtitle">Daftar yang dapat diproses</p>
+          return (
+            <div key={card.label} className="employee-summary-card">
+              <div className="employee-summary-header">
+                <div>
+                  <p className="employee-summary-label">{card.label}</p>
+                  <p className="employee-summary-subtitle">{card.subtitle}</p>
+                </div>
+                <div className={`employee-summary-icon-wrapper employee-icon-${card.tone}`}>
+                  <Icon size={28} />
+                </div>
+              </div>
+              <div className={`employee-summary-value employee-value-${card.tone}`}>{card.value}</div>
+              <p className="employee-summary-trend">{card.subtitle}</p>
             </div>
-            <div className="leave-summary-icon-wrapper leave-icon-orange">
-              <Clock3 size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-orange">{items.length}</div>
-          <p className="leave-summary-trend">Approve atau reject</p>
-        </div>
-
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Disetujui</p>
-              <p className="leave-summary-subtitle">Aksi yang selesai</p>
-            </div>
-            <div className="leave-summary-icon-wrapper leave-icon-green">
-              <CircleCheckBig size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-green">0</div>
-          <p className="leave-summary-trend">Update mengikuti aksi terbaru</p>
-        </div>
-
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Ditolak</p>
-              <p className="leave-summary-subtitle">Aksi penolakan</p>
-            </div>
-            <div className="leave-summary-icon-wrapper leave-icon-red">
-              <CircleX size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-red">0</div>
-          <p className="leave-summary-trend">Status final penolakan</p>
-        </div>
+          );
+        })}
       </div>
 
       {/* Analytics Title Card */}
       <Card className="analytics-title-card">
         <div className="analytics-title-inner">
           <div className="analytics-icon">
-            <Calendar size={24} />
+            <Clock3 size={24} />
           </div>
           <div>
-            <h2 className="analytics-title">Pengajuan Menunggu</h2>
-            <p className="analytics-subtitle">{items.length} pengajuan cuti menunggu persetujuan</p>
+            <h2 className="analytics-title">Daftar Pengajuan Cuti</h2>
+            <p className="analytics-subtitle">Kelola dan lihat semua pengajuan cuti karyawan</p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Control Section */}
+      <Card className="control-section-card">
+        <div className="control-section-inner">
+          {/* Tabs */}
+          <div className="elyra-tabs">
+            {["Semua", "Pending", "Approved", "Rejected"].map((tab) => (
+              <button
+                key={tab}
+                className={`elyra-tab ${activeTab === tab ? "active" : ""}`}
+                onClick={() => setActiveTab(tab as "Semua" | "Pending" | "Approved" | "Rejected")}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          {/* Search */}
+          <div className="control-actions">
+            <div className="search-box">
+              <div className="search-icon-inside"><Search size={18} /></div>
+              <input
+                type="text"
+                placeholder="Cari karyawan..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="search-input-pill"
+              />
+            </div>
           </div>
         </div>
       </Card>
 
       {/* Table Section */}
       <div className="table-section">
-        <div className="table-wrap">
-          {loading && <LoadingState message="Memuat data pengajuan cuti..." />}
-          {!loading && items.length === 0 && (
-            <div className="empty-state">
-              <EmptyState title="Tidak ada pengajuan" message="Tidak ada pengajuan cuti yang menunggu persetujuan." />
+        <div className="wuw-table-area">
+          {loading && <LoadingState message="Memuat pengajuan cuti..." />}
+
+          {!loading && paginatedItems.length === 0 && (
+            <div style={{ padding: '5rem 0' }}>
+              <EmptyState
+                title="Belum Ada Pengajuan"
+                message={searchText || activeTab !== "Semua"
+                  ? "Tidak ada pengajuan yang sesuai dengan kriteria Anda."
+                  : "Tidak ada pengajuan cuti yang perlu disetujui."}
+                actionLabel="Segarkan"
+                onAction={() => void loadData()}
+              />
             </div>
           )}
-          {!loading && items.length > 0 && (
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Karyawan</th>
-                  <th>Tipe Cuti</th>
-                  <th>Tanggal</th>
-                  <th>Hari</th>
-                  <th>Alasan</th>
-                  <th className="th-center">Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((item, index) => {
-                  const leave = item as any;
-                  return (
-                    <tr key={String(leave.id ?? index)}>
-                      <td>
-                        <span style={{ fontWeight: 700, color: '#1e293b' }}>{index + 1}</span>
-                        <span style={{ display: 'block', fontSize: '0.75rem', color: '#94a3b8' }}>ID: {leave.id}</span>
-                      </td>
-                      <td>
-                        <div className="cell-name">
-                          <div className="cell-avatar">
-                            {getEmployeeName(leave).charAt(0).toUpperCase()}
-                          </div>
-                          <span className="cell-name-text">{getEmployeeName(leave)}</span>
-                        </div>
-                      </td>
-                      <td><span className="status-badge status-badge--blue">{getLeaveTypeLabel(leave.type)}</span></td>
-                      <td>
-                        <div style={{ fontWeight: 600 }}>{formatDate(leave.start_date)}</div>
-                        <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>hingga {formatDate(leave.end_date)}</div>
-                      </td>
-                      <td><strong>{getSafeString(leave.total_days) || "1"}</strong> hari</td>
-                      <td style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {getSafeString(leave.reason)}
-                      </td>
-                      <td>
-                        <div className="action-btn-group">
-                          <button 
-                            className="action-btn action-btn-approve" 
-                            onClick={() => void handleApprove(leave.id)}
-                            disabled={actionLoading === String(leave.id)}
-                            title="Setujui"
-                          >
-                            <CheckCircle size={16} />
-                          </button>
-                          <button 
-                            className="action-btn action-btn-reject" 
-                            onClick={() => void handleReject(leave.id)}
-                            disabled={actionLoading === String(leave.id)}
-                            title="Tolak"
-                          >
-                            <XCircle size={16} />
-                          </button>
-                        </div>
-                      </td>
+
+          {!loading && paginatedItems.length > 0 && (
+            <>
+              <div className="table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: '250px' }}>Karyawan</th>
+                      <th>Tipe Cuti</th>
+                      <th>Tanggal</th>
+                      <th>Hari</th>
+                      <th>Alasan</th>
+                      <th className="th-center">Status</th>
+                      <th className="th-center" style={{ width: '140px' }}>Aksi</th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                  </thead>
+                  <tbody>
+                    {paginatedItems.map((item: any, index) => (
+                      <tr key={String(item.id ?? index)}>
+                        <td>
+                          <div className="cell-name">
+                            <div className="cell-avatar">
+                              {getEmployeeName(item).charAt(0).toUpperCase()}
+                            </div>
+                            <div className="cell-stacked">
+                              <span className="cell-name-text">{getEmployeeName(item)}</span>
+                              <span className="cell-stacked__sub">{item.employee?.employee_code || item.id}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <span className="badge-soft badge-soft--blue">{getLeaveTypeLabel(item.type)}</span>
+                        </td>
+                        <td>
+                          <div className="cell-stacked">
+                            <span className="cell-stacked__main" style={{ fontSize: '0.85rem' }}>{formatDate(item.start_date)}</span>
+                            <span className="cell-stacked__sub">hingga {formatDate(item.end_date)}</span>
+                          </div>
+                        </td>
+                        <td>
+                          <span style={{ fontWeight: 700, color: '#1e293b' }}>{item.total_days || 1} hari</span>
+                        </td>
+                        <td style={{ maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {item.reason || "-"}
+                        </td>
+                        <td className="td-center">
+                          <span className={getStatusClass(item.status)}>
+                            {item.status === "approved" ? "Approved" :
+                              item.status === "submitted" || item.status === "pending" ? "Pending" : "Rejected"}
+                          </span>
+                        </td>
+                        <td className="td-center">
+                          <div className="action-btn-group">
+                            {item.status === 'pending' || item.status === 'submitted' ? (
+                              <>
+                                <button
+                                  className="action-btn"
+                                  style={{ color: '#10b981' }}
+                                  onClick={() => handleApprove(item.id)}
+                                  disabled={actionLoading === String(item.id)}
+                                  title="Setujui"
+                                >
+                                  <Check size={16} />
+                                </button>
+                                <button
+                                  className="action-btn action-btn-delete"
+                                  onClick={() => handleReject(item.id)}
+                                  disabled={actionLoading === String(item.id)}
+                                  title="Tolak"
+                                >
+                                  <X size={16} />
+                                </button>
+                              </>
+                            ) : null}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              <div className="table-pagination">
+                <div className="pagination-info">
+                  Menampilkan <strong>{paginatedItems.length}</strong> dari <strong>{filteredItems.length}</strong> pengajuan
+                </div>
+                <div className="pagination-controls">
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    ‹
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    ›
+                  </button>
+                </div>
+              </div>
+            </>
           )}
         </div>
       </div>

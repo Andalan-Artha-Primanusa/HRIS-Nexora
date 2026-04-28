@@ -1,17 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Clock, RefreshCw, Edit, Trash2, DollarSign, Search, Timer } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { workforceService } from '@/features/workforce/api/workforce.service';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
-import '@/pages/payroll/PayrollShared.css';
 
 const OvertimeRulesPage: React.FC = () => {
   const navigate = useNavigate();
   const [rules, setRules] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [searchText, setSearchText] = useState("");
+  const [activeTab, setActiveTab] = useState<"Semua" | "Active" | "Inactive">("Semua");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
 
   const fetchData = async () => {
     setLoading(true);
@@ -31,7 +36,56 @@ const OvertimeRulesPage: React.FC = () => {
     fetchData();
   }, []);
 
-  const activeRules = rules.filter(r => r.status === 'active');
+  const filteredRules = useMemo(() => {
+    return rules.filter((rule: any) => {
+      const name = String(rule?.name || '').toLowerCase();
+      const code = String(rule?.code || '').toLowerCase();
+      const query = searchText.toLowerCase();
+      const matchSearch = name.includes(query) || code.includes(query);
+
+      let statusMatch = true;
+      if (activeTab === "Active") statusMatch = rule.status === 'active';
+      else if (activeTab === "Inactive") statusMatch = rule.status === 'inactive';
+
+      return matchSearch && statusMatch;
+    });
+  }, [rules, searchText, activeTab]);
+
+  const paginatedRules = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredRules.slice(startIndex, startIndex + pageSize);
+  }, [filteredRules, currentPage, pageSize]);
+
+  const totalPages = Math.ceil(filteredRules.length / pageSize);
+
+  const summaryStats = useMemo(() => {
+    const total = rules.length;
+    const active = rules.filter((r: any) => r.status === 'active').length;
+    const avgMultiplier = rules.length > 0
+      ? (rules.reduce((acc: number, r: any) => acc + (r.multiplier || 0), 0) / rules.length).toFixed(1)
+      : "0";
+
+    return [
+      { label: "Total Aturan", subtitle: "Seluruh aturan", value: total, tone: "blue" as const },
+      { label: "Aturan Aktif", subtitle: "Aturan yang aktif", value: active, tone: "green" as const },
+      { label: "Rata-rata", subtitle: "Multiplier rata-rata", value: `${avgMultiplier}x`, tone: "purple" as const },
+    ];
+  }, [rules]);
+
+  const handleDelete = async (id: string | number) => {
+    if (window.confirm('Apakah Anda yakin ingin menghapus aturan ini?')) {
+      try {
+        await workforceService.deleteOvertimeRule(id);
+        fetchData();
+      } catch (error) {
+        console.error('Failed to delete overtime rule:', error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText, activeTab]);
 
   return (
     <div className="crud-page">
@@ -60,114 +114,183 @@ const OvertimeRulesPage: React.FC = () => {
         </div>
       </Card>
 
-      <div className="leave-requests-wrapper">
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Aturan Aktif</p>
-              <p className="leave-summary-subtitle">Total aturan</p>
+      <div className="employee-summary-wrapper">
+        {summaryStats.map((card: any) => {
+          const Icon = card.tone === "blue" ? Clock : card.tone === "green" ? DollarSign : Timer;
+          return (
+            <div key={card.label} className="employee-summary-card">
+              <div className="employee-summary-header">
+                <div>
+                  <p className="employee-summary-label">{card.label}</p>
+                  <p className="employee-summary-subtitle">{card.subtitle}</p>
+                </div>
+                <div className={`employee-summary-icon-wrapper employee-icon-${card.tone}`}>
+                  <Icon size={28} />
+                </div>
+              </div>
+              <div className={`employee-summary-value employee-value-${card.tone}`}>{card.value}</div>
+              <p className="employee-summary-trend">{card.subtitle}</p>
             </div>
-            <div className="leave-summary-icon-wrapper leave-icon-green">
-              <Clock size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-green">{activeRules.length}</div>
-          <p className="leave-summary-trend">Aturan Aktif</p>
-        </div>
-
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Rata-rata</p>
-              <p className="leave-summary-subtitle">Multiplier</p>
-            </div>
-            <div className="leave-summary-icon-wrapper leave-icon-blue">
-              <DollarSign size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-blue">1.5x</div>
-          <p className="leave-summary-trend">Multiplier</p>
-        </div>
-
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Max Hours/Day</p>
-              <p className="leave-summary-subtitle">Batas harian</p>
-            </div>
-            <div className="leave-summary-icon-wrapper leave-icon-orange">
-              <Timer size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-orange">4h</div>
-          <p className="leave-summary-trend">Jam Harian</p>
-        </div>
+          );
+        })}
       </div>
 
-      <div className="white-unified-wrapper">
-        <div className="wuw-header">
-          <div className="wuw-header-top">
-            <div className="wuw-title-area">
-              <h3>Daftar Kebijakan Lembur</h3>
-              <span className="wuw-count-badge">{rules.length} Total</span>
-            </div>
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <Clock size={24} />
+          </div>
+          <div>
+            <h2 className="analytics-title">Daftar Kebijakan Lembur</h2>
+            <p className="analytics-subtitle">Kelola dan lihat semua aturan lembur</p>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="control-section-card">
+        <div className="control-section-inner">
+          <div className="elyra-tabs">
+            {["Semua", "Active", "Inactive"].map((tab) => (
+              <button
+                key={tab}
+                className={`elyra-tab ${activeTab === tab ? "active" : ""}`}
+                onClick={() => setActiveTab(tab as "Semua" | "Active" | "Inactive")}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          <div className="control-actions">
             <div className="search-box">
-              <Search size={18} />
-              <input type="text" placeholder="Search..." />
+              <div className="search-icon-inside"><Search size={18} /></div>
+              <input
+                type="text"
+                placeholder="Cari kebijakan..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="search-input-pill"
+              />
             </div>
           </div>
         </div>
+      </Card>
 
+      <div className="table-section">
         <div className="wuw-table-area">
-          <div className="table-wrap">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Kebijakan</th>
-                  <th>Multiplier</th>
-                  <th>Batas Harian</th>
-                  <th>Kelayakan</th>
-                  <th>Status</th>
-                  <th style={{ textAlign: 'right' }}>Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr><td colSpan={6} style={{ textAlign: 'center', padding: '3rem' }}>Loading...</td></tr>
-                ) : rules.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
-                      <Clock size={48} style={{ opacity: 0.3, marginBottom: '1rem' }} />
-                      <p>Belum ada aturan lembur.</p>
-                    </td>
-                  </tr>
-                ) : rules.map((rule) => (
-                  <tr key={rule.id}>
-                    <td>
-                      <div className="cell-stacked">
-                        <span className="cell-name-text">{rule.name}</span>
-                        <span className="cell-email">CODE: {rule.code || 'OT-DFT'}</span>
-                      </div>
-                    </td>
-                    <td><span style={{ fontWeight: 700, color: '#16a34a' }}>{rule.multiplier}x</span></td>
-                    <td>{rule.max_hours_per_day || 0} Jam</td>
-                    <td>{rule.eligibility || 'Semua Staff'}</td>
-                    <td>
-                      <span className={`status-badge ${(rule.status || 'active') === 'active' ? 'status-active' : 'status-default'}`}>
-                        {rule.status || 'Active'}
-                      </span>
-                    </td>
-                    <td style={{ textAlign: 'right' }}>
-                      <div className="action-btn-group">
-                        <Button variant="ghost" size="sm" onClick={() => navigate(`/workforce/overtime-rules/edit/${rule.id}`)}><Edit size={16} /></Button>
-                        <Button variant="ghost" size="sm" danger><Trash2 size={16} /></Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {loading && <LoadingState message="Memuat aturan lembur..." />}
+
+          {!loading && paginatedRules.length === 0 && (
+            <div style={{ padding: '5rem 0' }}>
+              <EmptyState
+                title="Belum Ada Aturan"
+                message={searchText || activeTab !== "Semua"
+                  ? "Tidak ada aturan yang sesuai dengan kriteria Anda."
+                  : "Belum ada aturan lembur yang dibuat. Buat aturan pertama untuk memulai."}
+                actionLabel="Buat Aturan"
+                onAction={() => navigate('/workforce/overtime-rules/create')}
+              />
+            </div>
+          )}
+
+          {!loading && paginatedRules.length > 0 && (
+            <>
+              <div className="table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: '300px' }}>Kebijakan</th>
+                      <th>Multiplier</th>
+                      <th>Batas Harian</th>
+                      <th>Kelayakan</th>
+                      <th className="th-center">Status</th>
+                      <th className="th-center" style={{ width: '120px' }}>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedRules.map((rule: any) => (
+                      <tr key={rule.id}>
+                        <td>
+                          <div className="cell-name">
+                            <div className="cell-avatar">
+                              {rule.name ? rule.name.charAt(0).toUpperCase() : "R"}
+                            </div>
+                            <div className="cell-stacked">
+                              <span className="cell-name-text">{rule.name}</span>
+                              <span className="cell-stacked__sub">CODE: {rule.code || 'OT-DFT'}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <span style={{ fontWeight: 700, color: '#16a34a' }}>{rule.multiplier}x</span>
+                        </td>
+                        <td>
+                          <span style={{ color: '#475569', fontWeight: 600 }}>{rule.max_hours_per_day || 0} Jam</span>
+                        </td>
+                        <td>
+                          <span style={{ color: '#64748b', fontWeight: 500 }}>{rule.eligibility || 'Semua Staff'}</span>
+                        </td>
+                        <td className="td-center">
+                          <span className={`status-badge ${rule.status === 'active' ? 'status-badge--approved' : 'status-badge--draft'}`}>
+                            {rule.status || 'Active'}
+                          </span>
+                        </td>
+                        <td className="td-center">
+                          <div className="action-btn-group">
+                            <button
+                              className="action-btn action-btn-edit"
+                              onClick={() => navigate(`/workforce/overtime-rules/edit/${rule.id}`)}
+                              title="Edit"
+                            >
+                              <Edit size={16} />
+                            </button>
+                            <button
+                              className="action-btn action-btn-delete"
+                              onClick={() => handleDelete(rule.id)}
+                              title="Hapus"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="table-pagination">
+                <div className="pagination-info">
+                  Menampilkan <strong>{paginatedRules.length}</strong> dari <strong>{filteredRules.length}</strong> aturan
+                </div>
+                <div className="pagination-controls">
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    ‹
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    ›
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

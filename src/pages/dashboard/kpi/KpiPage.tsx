@@ -1,20 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
-import { FileText, Target, Users, ShieldCheck } from 'lucide-react';
+import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import {
   approveKpi,
   createKpi,
   deleteKpi,
   getAllKpis,
-  getKpiDetail,
-  getKpisByEmployee,
-  getMyKpis,
   submitMyKpi,
   updateKpi,
 } from '@/features/dashboard/api/kpi.service';
-import './KpiPage.css';
+import { Target, Users, ShieldCheck, RefreshCw, Trash2, Edit, Check, X, FileText } from 'lucide-react';
+import { showToast } from '@/shared/ui/toast';
+import '@/shared/styles/CrudPage.css';
 
 type KpiStatus = 'draft' | 'submitted' | 'approved';
 
@@ -36,83 +34,182 @@ type KpiRecord = {
   [key: string]: unknown;
 };
 
-const KPI_STATUS_OPTIONS: KpiStatus[] = ['draft', 'submitted', 'approved'];
+const DEFAULT_FORM = {
+  id: '',
+  employee_id: '',
+  title: '',
+  description: '',
+  target: '',
+  achievement: '',
+  period: '',
+};
 
 const KpiPage = () => {
-  const location = useLocation();
-  const path = location.pathname;
-  const isMyKpi = path === '/my/kpi';
-
-  const [kpis, setKpis] = useState<KpiRecord[]>([]);
-  const [formState, setFormState] = useState<KpiRecord>({
-    id: '',
-    employee_id: '',
-    title: '',
-    description: '',
-    target: '',
-    achievement: '',
-    period: '',
-  });
-  const [searchEmployee, setSearchEmployee] = useState('');
-  const [responseText, setResponseText] = useState('');
-  const [statusMessage, setStatusMessage] = useState('Ready to call KPI endpoints');
+  const [items, setItems] = useState<KpiRecord[]>([]);
   const [loading, setLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [filterStatus, setFilterStatus] = useState('');
 
-  const pageTitle = useMemo(() => (isMyKpi ? 'My KPI' : 'KPI Management'), [isMyKpi]);
-  const pageSubtitle = useMemo(
-    () =>
-      isMyKpi
-        ? 'Lihat dan submit KPI pribadi Anda sesuai endpoint API my/kpi.'
-        : 'Kelola KPI perusahaan: daftar, buat, update, approve, dan hapus.',
-    [isMyKpi]
-  );
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [form, setForm] = useState(DEFAULT_FORM);
+
+  const [allItemsRaw, setAllItemsRaw] = useState<KpiRecord[]>([]);
+
+  const summaryCards = useMemo(() => {
+    const source = allItemsRaw.length > 0 ? allItemsRaw : items;
+    const totalKpi = source.length;
+    const approvedCount = source.filter(i => String(i.status).toLowerCase() === 'approved').length;
+    const submittedCount = source.filter(i => String(i.status).toLowerCase() === 'submitted').length;
+    const draftCount = source.filter(i => String(i.status).toLowerCase() === 'draft').length;
+    const avgScore = totalKpi > 0 
+      ? source.reduce((sum, i) => sum + (Number(i.score) || 0), 0) / totalKpi 
+      : 0;
+    return [
+      {
+        label: "Total KPIs",
+        subtitle: "Semua target kinerja",
+        value: String(totalKpi),
+        change: "Keseluruhan",
+        tone: "blue" as const,
+        icon: Target,
+      },
+      {
+        label: "Submitted",
+        subtitle: "Menunggu approval",
+        value: String(submittedCount),
+        change: "Belum diapprove",
+        tone: "orange" as const,
+        icon: FileText,
+      },
+      {
+        label: "Approved",
+        subtitle: "Sudah disetujui",
+        value: String(approvedCount),
+        change: "Selesai review",
+        tone: "green" as const,
+        icon: ShieldCheck,
+      },
+      {
+        label: "Avg Score",
+        subtitle: "Rata-rata pencapaian",
+        value: avgScore > 0 ? `${avgScore.toFixed(1)}%` : "-",
+        change: "Performance indicator",
+        tone: "purple" as const,
+        icon: Users,
+      },
+    ];
+  }, [items, allItemsRaw]);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const result = await getAllKpis();
+      const raw = (result.items || []) as KpiRecord[];
+      setAllItemsRaw(raw);
+      
+      if (!filterStatus) {
+        setItems(raw);
+      } else {
+        const filtered = raw.filter(i => {
+          const s = String(i.status).toLowerCase();
+          const f = filterStatus.toLowerCase();
+          return s === f;
+        });
+        setItems(filtered);
+      }
+    } catch (error: any) {
+      showToast(error.message || "Gagal memuat data dari server.", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateOrUpdate = async () => {
+    if (!form.employee_id || !form.title || !form.target || !form.period) return;
+    setActionLoading("form");
+    try {
+      if (form.id) {
+        const payload = {
+          title: form.title,
+          description: form.description,
+          target: Number(form.target),
+          achievement: form.achievement ? Number(form.achievement) : undefined,
+          period: form.period,
+        };
+        await updateKpi(form.id, payload);
+      } else {
+        const payload = {
+          employee_id: Number(form.employee_id),
+          title: form.title,
+          description: form.description,
+          target: Number(form.target),
+          period: form.period,
+        };
+        await createKpi(payload);
+      }
+      setIsFormOpen(false);
+      setForm(DEFAULT_FORM);
+      await loadData();
+      showToast("Data berhasil disimpan", "success");
+    } catch (error: any) {
+      showToast(error.message || "Simpan data gagal", "error");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleAction = async (actionId: string, actionFn: () => Promise<any>, successMsg: string) => {
+    setActionLoading(actionId);
+    try {
+      await actionFn();
+      await loadData();
+      showToast(successMsg, "success");
+    } catch (error: any) {
+      showToast(error.message || "Aksi gagal", "error");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if(!window.confirm('Hapus permanen KPI ini?')) return;
+    setActionLoading(id + '_del');
+    try {
+      await deleteKpi(id);
+      await loadData();
+      showToast("Data dihapus", "success");
+    } catch (error: any) {
+      showToast(error.message || "Gagal menghapus", "error");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleEdit = (item: KpiRecord) => {
+    setForm({
+      id: String(item.id),
+      employee_id: String(item.employee_id),
+      title: String(item.title),
+      description: String(item.description || ""),
+      target: String(item.target),
+      achievement: String(item.achievement || ""),
+      period: String(item.period),
+    });
+    setIsFormOpen(true);
+  };
+
+  const handleApprove = async (id: string) => {
+    await handleAction(id + '_app', () => approveKpi(id), "KPI berhasil diapprove");
+  };
+
+  const handleSubmitKpi = async (id: string) => {
+    await handleAction(id + '_sub', () => submitMyKpi(id), "KPI berhasil disubmit untuk review");
+  };
 
   useEffect(() => {
-    setResponseText('');
-    setStatusMessage('Ready to call KPI endpoints');
-    if (isMyKpi) {
-      void loadMyKpis();
-    } else {
-      void loadKpis();
-    }
-  }, [isMyKpi]);
-
-  const formatResponse = (payload: unknown) => {
-    setResponseText(typeof payload === 'string' ? payload : JSON.stringify(payload, null, 2));
-  };
-
-  const getErrorMessage = (error: any, fallback: string) => {
-    const message = error?.response?.data?.message;
-    const errors = error?.response?.data?.errors;
-    if (typeof message === 'string' && message.trim()) {
-      return message;
-    }
-
-    if (errors && typeof errors === 'object') {
-      const firstError = Object.values(errors).find((value) => Array.isArray(value) && value.length > 0) as string[] | undefined;
-      if (firstError?.[0]) {
-        return firstError[0];
-      }
-    }
-
-    return fallback;
-  };
-
-  const validateAction = (action: string) => {
-    if (['detail', 'update', 'delete', 'approve', 'submit'].includes(action) && !String(formState.id ?? '').trim()) {
-      return 'KPI ID wajib diisi.';
-    }
-
-    if (action === 'create') {
-      if (!String(formState.employee_id ?? '').trim()) return 'Employee ID wajib diisi.';
-      if (!String(formState.title ?? '').trim()) return 'Title wajib diisi.';
-      if (!String(formState.period ?? '').trim()) return 'Period wajib diisi.';
-      const target = Number(formState.target);
-      if (Number.isNaN(target) || target <= 0) return 'Target harus berupa angka lebih dari 0.';
-    }
-
-    return null;
-  };
+    void loadData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterStatus]);
 
   const formatCellValue = (value: unknown) => {
     if (value === null || value === undefined || value === '') return '-';
@@ -127,345 +224,231 @@ const KpiPage = () => {
     return String(value);
   };
 
+  const getEmployeeName = (item: any) => {
+    if (item.employee?.name) return item.employee.name;
+    if (item.user?.name) return item.user.name;
+    if (item.employee_name) return item.employee_name;
+    return `EMP-${String(item.employee_id).padStart(3, '0')}`;
+  };
+
   const getStatusChipClass = (statusValue: unknown) => {
     const status = String(statusValue ?? '').toLowerCase();
-    if (status === 'approved') return 'kpi-status-chip kpi-status-chip--approved';
-    if (status === 'submitted') return 'kpi-status-chip kpi-status-chip--submitted';
-    return 'kpi-status-chip kpi-status-chip--draft';
+    if (status === 'approved') return 'cell-status cell-status--success';
+    if (status === 'submitted') return 'cell-status cell-status--warning';
+    return 'cell-status cell-status--neutral';
   };
-
-  const handleFieldChange = (key: keyof KpiRecord, value: string) => {
-    setFormState((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const loadKpis = async () => {
-    setLoading(true);
-    setStatusMessage('Memuat semua KPI...');
-    setResponseText('');
-
-    try {
-      const result = await getAllKpis();
-      const payload = result.items;
-      formatResponse(payload);
-      setKpis(Array.isArray(payload) ? payload : []);
-      setStatusMessage('Semua KPI berhasil dimuat.');
-    } catch (error: any) {
-      setStatusMessage('Gagal memuat KPI.');
-      formatResponse(error.response?.data ?? error.message ?? 'Unexpected error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadMyKpis = async () => {
-    setLoading(true);
-    setStatusMessage('Memuat KPI saya...');
-    setResponseText('');
-
-    try {
-      const result = await getMyKpis();
-      const payload = result.items;
-      formatResponse(payload);
-      setKpis(Array.isArray(payload) ? payload : []);
-      setStatusMessage('KPI pribadi berhasil dimuat.');
-    } catch (error: any) {
-      setStatusMessage('Gagal memuat KPI saya.');
-      formatResponse(error.response?.data ?? error.message ?? 'Unexpected error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadKpisByEmployee = async () => {
-    if (!searchEmployee) return;
-    setLoading(true);
-    setStatusMessage('Mencari KPI berdasarkan employee_id...');
-    setResponseText('');
-
-    try {
-      const result = await getKpisByEmployee(searchEmployee);
-      const payload = result.items.length > 0 ? result.items : [result.payload];
-      formatResponse(payload);
-      setKpis(payload as KpiRecord[]);
-      setStatusMessage('KPI per employee berhasil dimuat.');
-    } catch (error: any) {
-      setStatusMessage('Gagal memuat KPI per employee.');
-      formatResponse(error.response?.data ?? error.message ?? 'Unexpected error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSubmit = async (action: string) => {
-    const validationMessage = validateAction(action);
-    if (validationMessage) {
-      setStatusMessage(validationMessage);
-      return;
-    }
-
-    setLoading(true);
-    setResponseText('');
-    setStatusMessage('Mengirim request...');
-
-    try {
-      let result;
-      switch (action) {
-        case 'create':
-          result = await createKpi({
-            employee_id: Number(formState.employee_id),
-            title: String(formState.title ?? ''),
-            description: formState.description,
-            target: Number(formState.target),
-            period: String(formState.period ?? ''),
-          });
-          break;
-        case 'detail':
-          result = await getKpiDetail(String(formState.id));
-          break;
-        case 'update':
-          result = await updateKpi(String(formState.id), {
-            title: formState.title,
-            description: formState.description,
-            period: formState.period,
-            target: Number(formState.target),
-            achievement: formState.achievement ? Number(formState.achievement) : undefined,
-          });
-          break;
-        case 'delete':
-          result = await deleteKpi(String(formState.id));
-          break;
-        case 'approve':
-          result = await approveKpi(String(formState.id));
-          break;
-        case 'submit':
-          result = await submitMyKpi(String(formState.id));
-          break;
-        default:
-          result = { payload: { message: 'Action not configured' } };
-      }
-
-      formatResponse((result as { raw?: unknown; payload?: unknown }).raw ?? result);
-      setStatusMessage('Request berhasil.');
-      if (isMyKpi) {
-        void loadMyKpis();
-      } else {
-        void loadKpis();
-      }
-    } catch (error: any) {
-      setStatusMessage(getErrorMessage(error, 'Request gagal.'));
-      formatResponse(error.response?.data ?? error.message ?? 'Unexpected error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const tableColumns = kpis.length > 0 ? Object.keys(kpis[0]) : ['ID', 'Employee', 'Title', 'Target', 'Status'];
 
   return (
-    <div className="kpi-page">
-      <div className="kpi-header">
-        <div>
-          <div className="kpi-badge">
-            <Target size={18} />
-            <span>{pageTitle}</span>
-          </div>
-          <h1>{pageTitle}</h1>
-          <p>{pageSubtitle}</p>
+    <div className="crud-page">
+      {/* Header */}
+      <div className="page-header">
+        <div className="page-header-title">
+          <span className="page-badge">KPI Management</span>
+          <h1>Key Performance Indicators</h1>
+          <p>Kelola target dan pencapaian KPI karyawan.</p>
         </div>
-        <div className="kpi-header-actions">
-          <Button variant="outline" size="md" onClick={() => (isMyKpi ? void loadMyKpis() : void loadKpis())} disabled={loading}>
-            Refresh List
+        <div className="page-header-actions">
+          <Button variant="outline" size="md" onClick={() => void loadData()} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
+            <RefreshCw size={16} />
+            {loading ? "Memuat..." : "Segarkan"}
           </Button>
-          {!isMyKpi && (
-            <Button variant="primary" size="md" onClick={() => void handleSubmit('create')} disabled={loading}>
-              Create KPI
-            </Button>
-          )}
+          <Button variant="primary" size="md" onClick={() => { setForm(DEFAULT_FORM); setIsFormOpen(!isFormOpen); }}>
+            Buat KPI Baru
+          </Button>
         </div>
       </div>
 
-      <div className="kpi-actions-grid">
-        {!isMyKpi ? (
-          <Card className="kpi-card" glass>
-            <div className="kpi-card-title">
-              <Users size={18} />
-              <span>Search KPI by Employee</span>
-            </div>
-            <div className="kpi-form-row">
-              <input
-                value={searchEmployee}
-                onChange={(e) => setSearchEmployee(e.target.value)}
-                placeholder="employee_id"
-              />
-              <Button variant="secondary" size="md" onClick={loadKpisByEmployee} disabled={loading || !searchEmployee}>
-                Search
-              </Button>
-            </div>
-          </Card>
-        ) : null}
+      {/* Summary Cards */}
+      <div className="summary-grid">
+        {summaryCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <Card key={card.label} className="summary-card" glass>
+              <div className="summary-card__header">
+                <div>
+                  <span className="summary-card__label">{card.label}</span>
+                  <p className="summary-card__subtitle">{card.subtitle}</p>
+                </div>
+                <span className={`summary-card__icon summary-card__icon--${card.tone}`}>
+                  <Icon size={20} />
+                </span>
+              </div>
+              <div className={`summary-card__value summary-card__value--${card.tone}`}>{card.value}</div>
+              <div className="summary-card__change">{card.change}</div>
+            </Card>
+          );
+        })}
+      </div>
 
-        <Card className="kpi-card" glass>
-          <div className="kpi-card-title">
-            <FileText size={18} />
-            <span>{isMyKpi ? 'Submit KPI for Review' : 'KPI Detail / Actions'}</span>
-          </div>
-
-          {!isMyKpi && (
-            <p className="kpi-hint">
-              Status flow: {KPI_STATUS_OPTIONS.join(' -> ')}. Score dihitung otomatis oleh backend: (achievement / target) * 100.
-            </p>
-          )}
-
-          <div className="kpi-form-grid">
-            <label>
-              KPI ID
-              <input
-                value={String(formState.id ?? '')}
-                onChange={(e) => handleFieldChange('id', e.target.value)}
-                placeholder="id"
-              />
-            </label>
-
-            {!isMyKpi && (
-              <>
-                <label>
-                  Title
-                  <input
-                    value={formState.title ?? ''}
-                    onChange={(e) => handleFieldChange('title', e.target.value)}
-                    placeholder="title"
-                  />
-                </label>
-                <label>
-                  Target
-                  <input
-                    value={String(formState.target ?? '')}
-                    onChange={(e) => handleFieldChange('target', e.target.value)}
-                    placeholder="target"
-                  />
-                </label>
-                <label>
-                  Period
-                  <input
-                    value={String(formState.period ?? '')}
-                    onChange={(e) => handleFieldChange('period', e.target.value)}
-                    placeholder="Q1 2026"
-                  />
-                </label>
-                <label className="kpi-full-width">
-                  Description
-                  <input
-                    value={formState.description ?? ''}
-                    onChange={(e) => handleFieldChange('description', e.target.value)}
-                    placeholder="description"
-                  />
-                </label>
-                <label>
-                  Achievement
-                  <input
-                    value={String(formState.achievement ?? '')}
-                    onChange={(e) => handleFieldChange('achievement', e.target.value)}
-                    placeholder="achievement"
-                  />
-                </label>
-              </>
-            )}
-
-            {isMyKpi ? (
-              <label>
-                Submit KPI ID
-                <input
-                  value={String(formState.id ?? '')}
-                  onChange={(e) => handleFieldChange('id', e.target.value)}
-                  placeholder="id"
-                />
-              </label>
-            ) : (
-              <label>
-                Employee ID
-                <input
-                  value={String(formState.employee_id ?? '')}
-                  onChange={(e) => handleFieldChange('employee_id', e.target.value)}
-                  placeholder="employee_id"
-                />
-              </label>
-            )}
-          </div>
-
-          <div className="kpi-action-buttons">
-            {isMyKpi ? (
-              <Button variant="primary" size="md" onClick={() => void handleSubmit('submit')} disabled={loading || !formState.id}>
-                Submit KPI
-              </Button>
-            ) : (
-              <>
-                <Button variant="primary" size="md" onClick={() => void handleSubmit('detail')} disabled={loading || !formState.id}>
-                  Get Detail
-                </Button>
-                <Button variant="secondary" size="md" onClick={() => void handleSubmit('update')} disabled={loading || !formState.id}>
-                  Update KPI
-                </Button>
-                <Button variant="secondary" size="md" onClick={() => void handleSubmit('approve')} disabled={loading || !formState.id}>
-                  Approve KPI
-                </Button>
-                <Button variant="ghost" size="md" onClick={() => void handleSubmit('delete')} disabled={loading || !formState.id}>
-                  Delete KPI
-                </Button>
-              </>
-            )}
+      {/* Form Overlay */}
+      {isFormOpen && (
+        <Card className="table-card" glass style={{ marginBottom: "1.5rem" }}>
+           <div className="table-header-bar">
+             <h3>{form.id ? "Ubah KPI" : "Buat KPI Baru"}</h3>
+           </div>
+           <div className="table-card-inner">
+             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>ID Karyawan</label>
+                  <input style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none' }} value={form.employee_id} onChange={(e) => setForm(f => ({...f, employee_id: e.target.value}))} placeholder="Misal: 1" disabled={!!form.id} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>Periode</label>
+                  <input style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none' }} value={form.period} onChange={(e) => setForm(f => ({...f, period: e.target.value}))} placeholder="Q1 2026" />
+                </div>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>Judul KPI</label>
+                  <input style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none' }} value={form.title} onChange={(e) => setForm(f => ({...f, title: e.target.value}))} placeholder="Target penjualan bulanan" />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>Target</label>
+                  <input style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none' }} type="number" value={form.target} onChange={(e) => setForm(f => ({...f, target: e.target.value}))} placeholder="100" />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>Achievement (Opsional)</label>
+                  <input style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none' }} type="number" value={form.achievement} onChange={(e) => setForm(f => ({...f, achievement: e.target.value}))} placeholder="85" />
+                </div>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>Deskripsi</label>
+                  <textarea style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', minHeight: '80px' }} value={form.description} onChange={(e) => setForm(f => ({...f, description: e.target.value}))} placeholder="Deskripsi detail target KPI..." />
+                </div>
+             </div>
+             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem', gap: '0.75rem' }}>
+                 <Button variant="ghost" onClick={() => setIsFormOpen(false)}>Batal</Button>
+                 <Button variant="primary" onClick={() => void handleCreateOrUpdate()} disabled={actionLoading === "form"}>Simpan Data KPI</Button>
+             </div>
           </div>
         </Card>
-      </div>
+      )}
 
-      <Card className="kpi-table-card" glass>
-        <div className="kpi-table-header">
-          <div>
-            <h2>{isMyKpi ? 'My KPI List' : 'All KPI List'}</h2>
-            <p>Data ditarik langsung dari API.</p>
+      {/* Table */}
+      <Card className="table-card" glass>
+        <div className="table-header-bar">
+          <h3>Master KPI List</h3>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <select style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', border: '1px solid #cbd5e1', outline: 'none', background: '#fff', fontSize: '0.85rem' }} value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+              <option value="">Semua Status</option>
+              <option value="draft">Draft</option>
+              <option value="submitted">Submitted</option>
+              <option value="approved">Approved</option>
+            </select>
+            <span className="table-count">{items.length} records</span>
           </div>
-          <Button variant="secondary" size="sm" onClick={() => (isMyKpi ? void loadMyKpis() : void loadKpis())} disabled={loading}>
-            Refresh
-          </Button>
         </div>
 
-        <div className="ui-table-overflow">
-          <table className="ui-table">
-            <thead>
-              <tr>
-                {tableColumns.map((column) => (
-                  <th key={column}>{column}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {kpis.map((item, index) => (
-                <tr key={`${item.id ?? index}`}>
-                  {tableColumns.map((column) => (
-                    <td key={`${item.id ?? index}-${column}`}>
-                      {column.toLowerCase() === 'status' ? (
-                        <span className={getStatusChipClass((item as any)[column])}>{formatCellValue((item as any)[column])}</span>
-                      ) : (
-                        formatCellValue((item as any)[column])
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
+        {loading && <div className="table-card-inner"><LoadingState message="Memuat database KPI..." /></div>}
+        {!loading && items.length === 0 && (
+          <div className="table-card-inner">
+            <EmptyState
+              icon=""
+              title="Tidak ada data"
+              message="Belum ada target KPI yang tercatat."
+            />
+          </div>
+        )}
 
-      <Card className="kpi-response-card" glass>
-        <div className="kpi-response-header">
-          <ShieldCheck size={18} />
-          <span>API Response</span>
-        </div>
-        <pre className="kpi-response">{responseText || 'Response akan tampil di sini.'}</pre>
-        <div className="kpi-response-status">
-          <span>{statusMessage}</span>
-          {loading && <span className="kpi-loading">Loading…</span>}
-        </div>
+        {!loading && items.length > 0 && (
+          <div className="table-card-inner">
+            <div className="table-wrap">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>EMPLOYEE</th>
+                    <th>PERIODE</th>
+                    <th>TARGET KPI</th>
+                    <th>ACHIEVEMENT</th>
+                    <th>SCORE</th>
+                    <th>STATUS</th>
+                    <th className="th-center">AKSI</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map((item, index) => {
+                    return (
+                      <tr key={String(item.id ?? index)}>
+                        <td>
+                          <div className="cell-id">{index + 1}</div>
+                          <div className="cell-sub">ID: {item.id}</div>
+                        </td>
+                        <td>
+                          <div className="cell-name">
+                            <div className="cell-avatar">
+                              {getEmployeeName(item).charAt(0).toUpperCase()}
+                            </div>
+                            <span className="cell-name-text">{getEmployeeName(item)}</span>
+                          </div>
+                        </td>
+                        <td>
+                          <span className="cell-tag">{String(item.period)}</span>
+                        </td>
+                        <td>
+                          <div className="cell-date">{String(item.title)}</div>
+                          <div style={{ fontWeight: 700, color: '#0f172a', marginTop: '3px' }}>Target: {Number(item.target).toLocaleString('id-ID')}</div>
+                        </td>
+                        <td>
+                           <span style={{ fontWeight: 600 }}>{item.achievement ? Number(item.achievement).toLocaleString('id-ID') : '-'}</span>
+                        </td>
+                        <td>
+                           <span style={{ 
+                             fontWeight: 700, 
+                             color: Number(item.score) >= 100 ? '#10b981' : Number(item.score) >= 70 ? '#f59e0b' : '#ef4444' 
+                           }}>
+                             {item.score ? `${item.score}%` : '-'}
+                           </span>
+                        </td>
+                        <td>
+                           <span className={getStatusChipClass(item.status)}>
+                             {String(item.status).toUpperCase()}
+                           </span>
+                        </td>
+<td>
+                            <div className="action-btn-group">
+                              {item.status === 'draft' && (
+                                <button
+                                  className="action-btn action-btn-success"
+                                  onClick={() => void handleSubmitKpi(String(item.id))}
+                                  disabled={actionLoading === String(item.id)+'_sub'}
+                                  title="Submit for Review"
+                                >
+                                  <FileText size={16} />
+                                </button>
+                              )}
+                              {item.status === 'submitted' && (
+                                <button
+                                  className="action-btn action-btn-success"
+                                  onClick={() => void handleApprove(String(item.id))}
+                                  disabled={actionLoading === String(item.id)+'_app'}
+                                  title="Approve"
+                                >
+                                  <Check size={16} />
+                                </button>
+                              )}
+                              <button
+                                  className="action-btn action-btn-edit"
+                                  onClick={() => handleEdit(item)}
+                                  title="Edit KPI"
+                              >
+                                <Edit size={16} />
+                             </button>
+                             <button
+                                  className="action-btn action-btn-delete"
+                                  onClick={() => void handleDelete(String(item.id))}
+                                  disabled={actionLoading === String(item.id)+'_del'}
+                                  title="Hapus Permanen"
+                             >
+                                <Trash2 size={16} />
+                             </button>
+                            </div>
+                         </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </Card>
     </div>
   );
