@@ -125,7 +125,7 @@ const AssetAssignmentsPage = lazy(() => import("../../pages/admin/AssetAssignmen
 const AssignmentLettersPage = lazy(() => import("../../pages/admin/AssignmentLettersPage.tsx"));
 const MyAssetsPage = lazy(() => import("../../pages/ess/MyAssetsPage.tsx"));
 const MyAssignmentLettersPage = lazy(() => import("../../pages/ess/MyAssignmentLettersPage.tsx"));
-const MyDocumentsPage = lazy(() => import("../../pages/ess/MyDocumentsPage.tsx"));
+// const MyDocumentsPage = lazy(() => import("../../pages/ess/MyDocumentsPage.tsx"));
 const ShiftSwapFormPage = lazy(() => import("../../pages/admin/ShiftSwapFormPage.tsx"));
 
 
@@ -364,7 +364,7 @@ export const router = createBrowserRouter([
       {
         path: "/my/documents",
         element: <DashboardLayout />,
-        children: [{ index: true, element: <MyDocumentsPage /> }],
+        children: [{ index: true, element: <div>My Documents - Maintenance</div> }],
       },
       {
         path: "/my/payroll",

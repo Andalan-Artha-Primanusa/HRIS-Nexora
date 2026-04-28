@@ -72,14 +72,14 @@ export const TaxCalculator: React.FC<TaxCalculatorProps> = ({ income, setIncome,
                   <div className="label">Total PKP</div>
                   <div className="value">{formatCurrency(income)}</div>
                </div>
-               <div className="tax-stat-box highlight-red">
-                  <div className="label">Total Pajak</div>
-                  <div className="value">{formatCurrency(result.total_tax || 0)}</div>
-               </div>
-               <div className="tax-stat-box highlight-green">
-                  <div className="label">Take Home Pay</div>
-                  <div className="value">{formatCurrency(income - (result.total_tax || 0))}</div>
-               </div>
+                <div className="tax-stat-box highlight-red">
+                   <div className="label">Total Pajak</div>
+                   <div className="value">{formatCurrency(result.tax || result.total_tax || 0)}</div>
+                </div>
+                <div className="tax-stat-box highlight-green">
+                   <div className="label">Take Home Pay</div>
+                   <div className="value">{formatCurrency(income - (result.tax || result.total_tax || 0))}</div>
+                </div>
             </div>
 
             <div className="tax-table-container">
