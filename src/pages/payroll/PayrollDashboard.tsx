@@ -37,7 +37,7 @@ import {
 } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
-import "./PayrollDashboard.css";
+import "./PayrollListPage.css";
 
 const PayrollDashboard: React.FC = () => {
   const [payrollItems, setPayrollItems] = useState<PayrollItem[]>([]);
@@ -204,7 +204,8 @@ const PayrollDashboard: React.FC = () => {
     const period = new Date().toISOString().slice(0, 7); // YYYY-MM format
 
     try {
-      await payrollService.generateMonthlyPayroll(period);
+      // Use generatePayroll with new API format
+      await payrollService.generatePayroll({ periode: period });
       // Reload data
       await loadPayrollData();
     } catch (err) {
@@ -255,62 +256,62 @@ const PayrollDashboard: React.FC = () => {
         </div>
       </Card>
 
-      {/* Summary Cards */}
-      <div className="leave-requests-wrapper">
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
+      {/* Summary Cards - Same style as Employees Page */}
+      <div className="payroll-summary-wrapper">
+        <div className="payroll-summary-card">
+          <div className="payroll-summary-header">
             <div>
-              <p className="leave-summary-label">Total Record</p>
-              <p className="leave-summary-subtitle">Seluruh riwayat payroll</p>
+              <p className="payroll-summary-label">Total Record</p>
+              <p className="payroll-summary-subtitle">Seluruh riwayat payroll</p>
             </div>
-            <div className="leave-summary-icon-wrapper leave-icon-blue">
+            <div className="payroll-summary-icon-wrapper payroll-icon-blue">
               <FileText size={28} />
             </div>
           </div>
-          <div className="leave-summary-value leave-value-blue">{totalPayroll}</div>
-          <p className="leave-summary-trend">Seluruh Riwayat</p>
+          <div className="payroll-summary-value payroll-value-blue">{totalPayroll}</div>
+          <p className="payroll-summary-trend">Seluruh Riwayat</p>
         </div>
 
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
+        <div className="payroll-summary-card">
+          <div className="payroll-summary-header">
             <div>
-              <p className="leave-summary-label">Selesai Diproses</p>
-              <p className="leave-summary-subtitle">Status paid/approved</p>
+              <p className="payroll-summary-label">Selesai Diproses</p>
+              <p className="payroll-summary-subtitle">Status paid/approved</p>
             </div>
-            <div className="leave-summary-icon-wrapper leave-icon-green">
+            <div className="payroll-summary-icon-wrapper payroll-icon-green">
               <CheckCircle2 size={28} />
             </div>
           </div>
-          <div className="leave-summary-value leave-value-green">{totalProcessed}</div>
-          <p className="leave-summary-trend">{totalPayroll > 0 ? `${((totalProcessed / totalPayroll) * 100).toFixed(1)}%` : "0%"} Tuntas</p>
+          <div className="payroll-summary-value payroll-value-green">{totalProcessed}</div>
+          <p className="payroll-summary-trend">{totalPayroll > 0 ? `${((totalProcessed / totalPayroll) * 100).toFixed(1)}%` : "0%"} Tuntas</p>
         </div>
 
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
+        <div className="payroll-summary-card">
+          <div className="payroll-summary-header">
             <div>
-              <p className="leave-summary-label">Menunggu</p>
-              <p className="leave-summary-subtitle">Status pending/draft</p>
+              <p className="payroll-summary-label">Menunggu</p>
+              <p className="payroll-summary-subtitle">Status pending/draft</p>
             </div>
-            <div className="leave-summary-icon-wrapper leave-icon-orange">
+            <div className="payroll-summary-icon-wrapper payroll-icon-orange">
               <Clock3 size={28} />
             </div>
           </div>
-          <div className="leave-summary-value leave-value-orange">{totalPending}</div>
-          <p className="leave-summary-trend">Butuh Review</p>
+          <div className="payroll-summary-value payroll-value-orange">{totalPending}</div>
+          <p className="payroll-summary-trend">Butuh Review</p>
         </div>
 
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
+        <div className="payroll-summary-card">
+          <div className="payroll-summary-header">
             <div>
-              <p className="leave-summary-label">Rata-rata / Bulan</p>
-              <p className="leave-summary-subtitle">Estimasi volume</p>
+              <p className="payroll-summary-label">Rata-rata / Bulan</p>
+              <p className="payroll-summary-subtitle">Estimasi volume</p>
             </div>
-            <div className="leave-summary-icon-wrapper leave-icon-purple">
+            <div className="payroll-summary-icon-wrapper payroll-icon-purple">
               <TrendingUp size={28} />
             </div>
           </div>
-          <div className="leave-summary-value leave-value-purple">{averagePayroll}</div>
-          <p className="leave-summary-trend">Estimasi Volume</p>
+          <div className="payroll-summary-value payroll-value-purple">{averagePayroll}</div>
+          <p className="payroll-summary-trend">Estimasi Volume</p>
         </div>
       </div>
 

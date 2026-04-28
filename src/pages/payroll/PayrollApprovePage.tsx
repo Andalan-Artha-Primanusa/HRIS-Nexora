@@ -11,7 +11,7 @@ import type { PayrollItem } from "@/features/payroll/types/payroll.types";
 import type { EmployeeItem } from "@/features/employee/types/employee.types";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
-import "@/pages/payroll/PayrollShared.css";
+import "./PayrollListPage.css";
 import "./PayrollApprovePage.css";
 
 const PayrollApprovePage = () => {
@@ -59,7 +59,7 @@ const PayrollApprovePage = () => {
     setSelectedPayroll(payroll);
   };
 
-  // Approve payroll
+  // Approve payroll - uses POST /api/payroll/{id}/approve
   const handleApprove = async () => {
     if (!selectedPayroll) {
       showErrorModal("Validasi", "Pilih payroll untuk disetujui terlebih dahulu");
@@ -85,19 +85,53 @@ const PayrollApprovePage = () => {
     setLoading(true);
     try {
       console.log("Approving payroll ID:", selectedPayroll.id);
-      // Extract numeric ID if prefixed (e.g., "P003" -> "3")
-      const payrollId = String(selectedPayroll.id).replace(/^[A-Z]+/, "").replace(/^0+/, "") || selectedPayroll.id;
+      const payrollId = String(selectedPayroll.id);
+      // Use the service directly - POST /api/payroll/{id}/approve
       await payrollService.approvePayroll(payrollId);
       
       setMessage({ type: "success", text: `Payroll ID ${selectedPayroll.id} berhasil disetujui` });
       setSelectedPayrollId("");
       setSelectedPayroll(null);
       
-      // Refresh from server - this will update the list in real-time
       await loadData();
     } catch (error) {
       const errorText = error instanceof Error ? error.message : "Gagal menyetujui payroll";
       showErrorModal("Error Approve", errorText);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Reject payroll - uses POST /api/payroll/{id}/reject
+  const handleReject = async () => {
+    if (!selectedPayroll) {
+      showErrorModal("Validasi", "Pilih payroll untuk ditolak terlebih dahulu");
+      return;
+    }
+
+    if (selectedPayroll.status === "rejected") {
+      showErrorModal("Sudah Ditolak", `Payroll ini sudah memiliki status: ${selectedPayroll.status}`);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const payrollId = String(selectedPayroll.id);
+      const reason = prompt("Masukkan alasan penolakan:", "Data tidak valid");
+      if (!reason) {
+        setLoading(false);
+        return;
+      }
+      await payrollService.rejectPayroll(payrollId, reason);
+      
+      setMessage({ type: "success", text: `Payroll ID ${selectedPayroll.id} ditolak` });
+      setSelectedPayrollId("");
+      setSelectedPayroll(null);
+      
+      await loadData();
+    } catch (error) {
+      const errorText = error instanceof Error ? error.message : "Gagal menolak payroll";
+      showErrorModal("Error Reject", errorText);
     } finally {
       setLoading(false);
     }
@@ -216,24 +250,24 @@ const PayrollApprovePage = () => {
         </div>
       </Card>
 
-      <div className="summary-grid">
+      {/* Summary Cards - Same style as Employees Page */}
+      <div className="payroll-summary-wrapper">
         {summaryCards.map((card) => {
           const Icon = card.icon;
-
           return (
-            <Card key={card.label} className="metric-card">
-              <div className="metric-header">
+            <div key={card.label} className="payroll-summary-card">
+              <div className="payroll-summary-header">
                 <div>
-                  <span className="metric-label">{card.label}</span>
-                  <p className="metric-subtitle">{card.subtitle}</p>
+                  <p className="payroll-summary-label">{card.label}</p>
+                  <p className="payroll-summary-subtitle">{card.subtitle}</p>
                 </div>
-                <span className={`metric-icon metric-icon--${card.tone}`}>
-                  <Icon size={22} />
-                </span>
+                <div className={`payroll-summary-icon-wrapper payroll-icon-${card.tone}`}>
+                  <Icon size={28} />
+                </div>
               </div>
-              <div className="metric-value" style={{ color: card.tone === 'orange' ? '#f59e0b' : card.tone === 'blue' ? '#2563eb' : card.tone === 'green' ? '#10b981' : '#8b5cf6' }}>{card.value}</div>
-              <div className="summary-card-change">{card.change}</div>
-            </Card>
+              <div className={`payroll-summary-value payroll-value-${card.tone}`}>{card.value}</div>
+              <p className="payroll-summary-trend">{card.change}</p>
+            </div>
           );
         })}
       </div>
@@ -246,20 +280,16 @@ const PayrollApprovePage = () => {
         </Card>
       )}
 
-      <Card className="analytics-title-card">
-        <div className="analytics-title-inner">
-          <div className="analytics-icon">
-            <Clock3 size={24} />
-          </div>
-          <div>
-            <h2 className="analytics-title">Menunggu Persetujuan</h2>
-            <p className="analytics-subtitle">{pendingPayrolls.length} payroll</p>
-          </div>
+      {/* Data Table */}
+      <Card className="data-table-card">
+        <div className="data-table-header">
+          <h3 className="data-table-title">
+            Menunggu Persetujuan
+            <span className="data-table-count">{pendingPayrolls.length} payroll</span>
+          </h3>
         </div>
-      </Card>
 
-      <Card className="crud-table-card">
-        <div className="crud-table-wrap">
+        <div className="table-wrap">
           <table className="crud-table">
             <thead>
               <tr>

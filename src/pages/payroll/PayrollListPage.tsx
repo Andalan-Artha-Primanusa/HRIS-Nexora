@@ -1,25 +1,26 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card } from "@/shared/ui/Card";
 import { Modal } from "@/shared/ui/Modal";
-import { ArrowDown, ArrowUp, Briefcase, ChevronDown, Filter, RefreshCw, Search, Download, Wallet, FileText, CheckCircle2, Clock3, XCircle, TrendingUp } from "lucide-react";
+import { ArrowDown, ArrowUp, Briefcase, Filter, RefreshCw, Search, ChevronDown } from "lucide-react";
 import { payrollService, toSafeArray } from "@/features/payroll/api/payroll.service";
 import { getAllEmployees } from "@/features/employee/api/employee.service";
 import { PayrollStatusBadge } from "@/shared/ui/PayrollStatusBadge";
 import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import type { PayrollItem } from "@/features/payroll/types/payroll.types";
 import type { EmployeeItem } from "@/features/employee/types/employee.types";
-import { useDataState } from "@/features/payroll/hooks/usePayrollState";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
-import "./PayrollShared.css";
+import "./PayrollListPage.css";
 
 interface PayrollWithEmployeeName extends PayrollItem {
   employeeName?: string;
 }
 
 const PayrollListPage: React.FC = () => {
-  const payrollState = useDataState<PayrollWithEmployeeName>([]);
+  const [items, setItems] = useState<PayrollWithEmployeeName[]>([]);
   const [employees, setEmployees] = useState<EmployeeItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [errorModal, setErrorModal] = useState<{ isOpen: boolean; title: string; message: string }>({
     isOpen: false,
     title: "",
@@ -41,39 +42,20 @@ const PayrollListPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Load data
-  const loadData = async () => {
-    payrollState.setLoading();
-
-    try {
-      const [payrollData, employeeData] = await Promise.all([
-        payrollService.getPayrollList(),
-        getAllEmployees(),
-      ]);
-
-      const safePayrollData = toSafeArray(payrollData);
-      const safeEmployeeData = Array.isArray(employeeData) ? employeeData : toSafeArray(employeeData);
-
-      setEmployees(safeEmployeeData);
-
-      const enrichedPayroll = safePayrollData.map((payroll: any) => {
-        const employee = safeEmployeeData.find(
-          (emp: any) => String(emp.id) === String(payroll.employee_id)
-        );
-        return {
-          ...payroll,
-          employeeName: getEmployeeName(employee),
-        };
-      });
-
-      payrollState.setSuccess(enrichedPayroll);
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Failed to load payroll data";
-      payrollState.setError(errorMessage);
-      console.error("Load error:", err);
-    }
-  };
+  // Normalize API fields
+  const normalizePayroll = (payroll: any): any => ({
+    ...payroll,
+    basic_salary: payroll.basic_salary ?? payroll.gaji_pokok ?? 0,
+    allowance: payroll.allowance ?? payroll.tunjangan ?? 0,
+    bonus: payroll.bonus ?? payroll.lembur ?? payroll.bonus_khusus ?? 0,
+    deduction: payroll.deduction ?? payroll.potongan ?? 0,
+    tax: payroll.tax ?? payroll.pajak ?? 0,
+    take_home_pay: payroll.take_home_pay ?? payroll.gaji_bersih ?? payroll.net_salary ?? 0,
+    net_salary: payroll.net_salary ?? payroll.gaji_bersih ?? payroll.take_home_pay ?? 0,
+    status: payroll.status ?? payroll.status_approval ?? payroll.status_pembayaran ?? 'draft',
+    period: payroll.period ?? payroll.periode ?? '',
+    employee_id: payroll.employee_id ?? payroll.karyawan_id ?? payroll.employee?.id ?? '',
+  });
 
   const getEmployeeName = (emp: any): string => {
     if (emp?.user?.name && typeof emp.user.name === "string") return emp.user.name;
@@ -85,18 +67,18 @@ const PayrollListPage: React.FC = () => {
 
   const employeesWithNames = useMemo(() => {
     return employees
-      .map((emp: any) => ({ id: emp.id, name: getEmployeeName(emp) }))
-      .filter((emp) => emp.name && emp.name.trim() !== "")
-      .sort((a, b) => a.name.localeCompare(b.name));
+      .map((i: any) => ({ id: i.id, name: getEmployeeName(i) }))
+      .filter((i: any) => i.name && i.name.trim() !== "")
+      .sort((a: any, b: any) => a.name.localeCompare(b.name));
   }, [employees]);
 
   const uniquePeriods = useMemo(() => {
     const periods = new Set<string>();
-    payrollState.data.forEach((item: any) => {
+    items.forEach((item: any) => {
       if (item.period) periods.add(item.period);
     });
     return Array.from(periods).sort().reverse();
-  }, [payrollState.data]);
+  }, [items]);
 
   const uniqueStatuses = useMemo(() => {
     const statuses = new Set<string>();
@@ -104,14 +86,15 @@ const PayrollListPage: React.FC = () => {
     statuses.add("pending");
     statuses.add("approved");
     statuses.add("paid");
-    payrollState.data.forEach((item: any) => {
+    items.forEach((item: any) => {
       if (item.status) statuses.add(item.status);
     });
     return Array.from(statuses).sort();
-  }, [payrollState.data]);
+  }, [items]);
 
+  // Filter, Sort, Paginate
   const filteredItems = useMemo(() => {
-    let filtered = payrollState.data;
+    let filtered = items;
     if (searchText.trim()) {
       const search = searchText.toLowerCase();
       filtered = filtered.filter((item: any) =>
@@ -130,7 +113,7 @@ const PayrollListPage: React.FC = () => {
       filtered = filtered.filter((item: any) => item.status === selectedStatus);
     }
     return filtered;
-  }, [payrollState.data, searchText, selectedEmployeeId, selectedPeriod, selectedStatus]);
+  }, [items, searchText, selectedEmployeeId, selectedPeriod, selectedStatus]);
 
   const sortedItems = useMemo(() => {
     const sorted = [...filteredItems];
@@ -147,8 +130,8 @@ const PayrollListPage: React.FC = () => {
           compareB = b.period || "";
           break;
         case "total":
-          compareA = (a.allowance || 0) + (a.bonus || 0);
-          compareB = (b.allowance || 0) + (b.bonus || 0);
+          compareA = (Number(a.basic_salary) || 0) + (Number(a.allowance) || 0) + (Number(a.bonus) || 0);
+          compareB = (Number(b.basic_salary) || 0) + (Number(b.allowance) || 0) + (Number(b.bonus) || 0);
           break;
         case "id":
         default:
@@ -180,43 +163,49 @@ const PayrollListPage: React.FC = () => {
     setSortOrder("desc");
   };
 
-  const handleExportCSV = () => {
-    if (sortedItems.length === 0) return;
-    
-    const headers = ["ID", "Employee", "Period", "Basic Salary", "Allowance", "Bonus", "Deduction", "Net Salary", "Status"];
-    const rows = sortedItems.map((item: any) => [
-      item.id,
-      item.employeeName,
-      item.period,
-      item.basic_salary,
-      item.allowance,
-      item.bonus,
-      item.total_deduction,
-      item.take_home_pay || item.net_salary,
-      item.status
-    ]);
-    
-    const csvContent = "data:text/csv;charset=utf-8," 
-      + headers.join(",") + "\n"
-      + rows.map(e => e.join(",")).join("\n");
-      
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `Payroll_Report_${new Date().toISOString().slice(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const loadData = async () => {
+    setLoading(true);
+    setErrorMessage(null);
+
+    try {
+      const [payrollData, employeeData] = await Promise.all([
+        payrollService.getPayrollList(),
+        getAllEmployees()
+      ]);
+
+      const safePayrollData = toSafeArray(payrollData).map(normalizePayroll);
+      const safeEmployeeData = Array.isArray(employeeData) ? employeeData : toSafeArray(employeeData);
+
+      setEmployees(safeEmployeeData);
+
+      const enrichedPayroll = safePayrollData.map((payroll: any) => {
+        const employee = safeEmployeeData.find(
+          (emp: any) => String(emp.id) === String(payroll.employee_id)
+        );
+        return {
+          ...payroll,
+          employeeName: getEmployeeName(employee),
+        };
+      });
+
+      setItems(enrichedPayroll);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to load payroll data";
+      setErrorMessage(errorMessage);
+      console.error("Load error:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const formatCurrency = (value: number) => `Rp ${(value || 0).toLocaleString("id-ID")}`;
 
   const payrollSummaryCards = useMemo(() => [
-    { label: "Total Payroll", subtitle: "Semua data payroll", value: String(payrollState.data.length), change: "Seluruh data yang tersimpan", tone: "blue" as const, icon: Briefcase },
+    { label: "Total Payroll", subtitle: "Semua data payroll", value: String(items.length), change: "Seluruh data yang tersimpan", tone: "blue" as const, icon: Briefcase },
     { label: "Filtered Results", subtitle: "Hasil pencarian saat ini", value: String(sortedItems.length), change: `${paginatedItems.length} data di halaman ini`, tone: "green" as const, icon: Search },
     { label: "Unique Periods", subtitle: "Periode gaji yang tersedia", value: String(uniquePeriods.length), change: "Distribusi periode payroll", tone: "orange" as const, icon: Briefcase },
     { label: "Status Variants", subtitle: "Variasi status payroll", value: String(uniqueStatuses.length), change: "Tracking status pembayaran", tone: "purple" as const, icon: Briefcase },
-  ], [payrollState.data.length, sortedItems.length, paginatedItems.length, uniquePeriods.length, uniqueStatuses.length]);
+  ], [items.length, sortedItems.length, paginatedItems.length, uniquePeriods.length, uniqueStatuses.length]);
 
   useEffect(() => { void loadData(); }, []);
 
@@ -234,228 +223,233 @@ const PayrollListPage: React.FC = () => {
         </div>
       </Modal>
 
-      {/* Header - Same style as Dashboard */}
+      {/* Header - Same style as Employees Page */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
             <div className="hero-badge">
-              <Wallet size={16} />
-              <span>Pusat Penggajian</span>
+              <Briefcase size={16} />
+              <span>Manajemen Payroll</span>
             </div>
             <h1 className="hero-title">Daftar Payroll</h1>
             <p className="hero-subtitle">
-              Kelola data payroll karyawan dengan tampilan yang rapi, konsisten, dan mudah dipindai.
+              Lihat dan kelola seluruh data payroll karyawan dalam tampilan yang rapi dan konsisten.
             </p>
           </div>
           <div className="hero-actions">
-            <button className="btn-outline" onClick={handleExportCSV} disabled={sortedItems.length === 0} style={{ borderColor: "#10b981", color: "#10b981" }}>
-              <Download size={16} />
-              Ekspor CSV
-            </button>
-            <button className="btn-outline" onClick={() => void loadData()} disabled={payrollState.isLoading}>
-              <RefreshCw size={16} className={payrollState.isLoading ? 'animate-spin' : ''} />
-              Segarkan
+            <button className="btn-outline" onClick={() => void loadData()} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Sync Data
             </button>
           </div>
         </div>
       </Card>
 
-      {/* Summary Cards - New style */}
-      <div className="leave-requests-wrapper">
+      {/* Summary Cards */}
+      <div className="payroll-summary-wrapper">
         {payrollSummaryCards.map((card) => {
           const Icon = card.icon;
           return (
-            <div key={card.label} className="leave-summary-card">
-              <div className="leave-summary-header">
+            <div key={card.label} className="payroll-summary-card">
+              <div className="payroll-summary-header">
                 <div>
-                  <p className="leave-summary-label">{card.label}</p>
-                  <p className="leave-summary-subtitle">{card.subtitle}</p>
+                  <p className="payroll-summary-label">{card.label}</p>
+                  <p className="payroll-summary-subtitle">{card.subtitle}</p>
                 </div>
-                <div className={`leave-summary-icon-wrapper ${card.tone === 'blue' ? 'leave-icon-blue' : card.tone === 'green' ? 'leave-icon-green' : card.tone === 'orange' ? 'leave-icon-orange' : card.tone === 'red' ? 'leave-icon-red' : 'leave-icon-purple'}`}>
+                <div className={`payroll-summary-icon-wrapper payroll-icon-${card.tone}`}>
                   <Icon size={28} />
                 </div>
               </div>
-              <div className={`leave-summary-value ${card.tone === 'blue' ? 'leave-value-blue' : card.tone === 'green' ? 'leave-value-green' : card.tone === 'orange' ? 'leave-value-orange' : card.tone === 'red' ? 'leave-value-red' : 'leave-value-purple'}`}>{card.value}</div>
-              <p className="leave-summary-trend">{card.change}</p>
+              <div className={`payroll-summary-value payroll-value-${card.tone}`}>{card.value}</div>
+              <p className="payroll-summary-trend">{card.change}</p>
             </div>
           );
         })}
       </div>
 
-      {/* Table Section - New styling */}
-      <Card className="analytics-title-card">
-        <div className="analytics-title-inner">
-          <div className="analytics-icon">
-            <FileText size={24} />
-          </div>
-          <div>
-            <h2 className="analytics-title">Data Payroll</h2>
-            <p className="analytics-subtitle">{paginatedItems.length} dari {sortedItems.length} data</p>
-          </div>
+      {/* Data Table Card */}
+      <Card className="data-table-card">
+        <div className="data-table-header">
+          <h3 className="data-table-title">
+            Daftar Payroll
+            <span className="data-table-count">{sortedItems.length} ditemukan</span>
+          </h3>
         </div>
-      </Card>
 
-      <div className="crud-table-section">
-      <Card className="crud-table-card">
         <div className="control-bar">
-            <div className="search-box">
-              <Search size={18} />
-              <input
-                type="text"
-                placeholder="Cari nama karyawan, ID payroll, atau ID karyawan..."
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                className="search-input"
-              />
-            </div>
-
-            <div className="quick-controls">
-              <div className="control-group">
-                <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} className="sort-select">
-                  <option value="period">Urutkan: Periode</option>
-                  <option value="employee">Urutkan: Karyawan</option>
-                  <option value="total">Urutkan: Total</option>
-                  <option value="id">Urutkan: ID</option>
-                </select>
-                <button className="sort-order-btn" onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}>
-                  {sortOrder === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />}
-                </button>
-              </div>
-
-              <button className={`filter-btn ${showFilters ? "active" : ""}`} onClick={() => setShowFilters(!showFilters)}>
-                <Filter size={18} />
-                <span>Filter</span>
-                <ChevronDown size={14} style={{ transform: showFilters ? "rotate(180deg)" : "", transition: "transform 0.3s ease" }} />
-              </button>
-
-              {(searchText || selectedEmployeeId || selectedPeriod || selectedStatus) && (
-                <button className="btn-clear" onClick={clearFilters}>
-                  Bersihkan
-                </button>
-              )}
-            </div>
-          </div>
-
-          {showFilters && (
-            <div className="filter-panel" style={{ marginTop: '1rem' }}>
-              <div className="filter-row">
-                <div className="filter-group">
-                  <label>Karyawan</label>
-                  <select value={selectedEmployeeId} onChange={(e) => setSelectedEmployeeId(e.target.value)} className="filter-select">
-                    <option value="">Semua Karyawan ({employeesWithNames.length})</option>
-                    {employeesWithNames.map((emp: any) => (
-                      <option key={emp.id} value={String(emp.id)}>{emp.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="filter-group">
-                  <label>Periode</label>
-                  <select value={selectedPeriod} onChange={(e) => setSelectedPeriod(e.target.value)} className="filter-select">
-                    <option value="">Semua Periode</option>
-                    {uniquePeriods.map((period: string) => (
-                      <option key={period} value={period}>{period}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="filter-group">
-                  <label>Status</label>
-                  <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)} className="filter-select">
-                    <option value="">Semua Status</option>
-                    {uniqueStatuses.map((status: string) => (
-                      <option key={status} value={status}>
-                        {status === "draft" && "Draft"}
-                        {status === "pending" && "Menunggu"}
-                        {status === "approved" && "Disetujui"}
-                        {status === "paid" && "Sudah Dibayar"}
-                        {status === "rejected" && "Ditolak"}
-                        {!["draft", "pending", "approved", "paid", "rejected"].includes(status) &&
-                          status.charAt(0).toUpperCase() + status.slice(1)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-          )}
-        </Card>
-
-        {payrollState.isLoading && <div className="table-card-inner"><LoadingState message="Memuat data payroll..." /></div>}
-        {payrollState.isError && (
-          <div className="table-card-inner">
-            <ErrorState message="Gagal memuat data payroll" error={payrollState.error || undefined} onRetry={loadData} />
-          </div>
-        )}
-        {payrollState.isEmpty && (
-          <div className="table-card-inner">
-            <EmptyState
-              icon=""
-              title="Tidak ada data"
-              message="Tidak ada payroll yang sesuai dengan filter yang dipilih"
-              actionLabel={searchText || selectedEmployeeId || selectedPeriod || selectedStatus ? "Bersihkan Filter" : undefined}
-              onAction={searchText || selectedEmployeeId || selectedPeriod || selectedStatus ? clearFilters : undefined}
+          <div className="search-box">
+            <Search size={18} />
+            <input
+              type="text"
+              placeholder="Cari nama karyawan, ID payroll, atau ID karyawan..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              className="search-input"
             />
           </div>
+
+          <div className="quick-controls">
+            <div className="control-group">
+              <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} className="sort-select">
+                <option value="period">Urutkan: Periode</option>
+                <option value="employee">Urutkan: Karyawan</option>
+                <option value="total">Urutkan: Total</option>
+                <option value="id">Urutkan: ID</option>
+              </select>
+              <button className="sort-order-btn" onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}>
+                {sortOrder === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />}
+              </button>
+            </div>
+
+            <button className={`filter-btn ${showFilters ? "active" : ""}`} onClick={() => setShowFilters(!showFilters)}>
+              <Filter size={18} />
+              <span>Filter</span>
+              <ChevronDown size={14} style={{ transform: showFilters ? "rotate(180deg)" : "", transition: "transform 0.3s ease" }} />
+            </button>
+
+            {(searchText || selectedEmployeeId || selectedPeriod || selectedStatus) && (
+              <button className="btn-clear" onClick={clearFilters}>
+                Bersihkan
+              </button>
+            )}
+          </div>
+        </div>
+
+        {showFilters && (
+          <div className="filter-panel">
+            <div className="filter-row">
+              <div className="filter-group">
+                <label>Karyawan</label>
+                <select value={selectedEmployeeId} onChange={(e) => setSelectedEmployeeId(e.target.value)} className="filter-select">
+                  <option value="">Semua Karyawan ({employeesWithNames.length})</option>
+                  {employeesWithNames.map((emp: any) => (
+                    <option key={emp.id} value={String(emp.id)}>{emp.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="filter-group">
+                <label>Periode</label>
+                <select value={selectedPeriod} onChange={(e) => setSelectedPeriod(e.target.value)} className="filter-select">
+                  <option value="">Semua Periode</option>
+                  {uniquePeriods.map((period: string) => (
+                    <option key={period} value={period}>{period}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="filter-group">
+                <label>Status</label>
+                <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)} className="filter-select">
+                  <option value="">Semua Status</option>
+                  {uniqueStatuses.map((status: string) => (
+                    <option key={status} value={status}>
+                      {status === "draft" && "Draft"}
+                      {status === "pending" && "Menunggu"}
+                      {status === "approved" && "Disetujui"}
+                      {status === "paid" && "Sudah Dibayar"}
+                      {status === "rejected" && "Ditolak"}
+                      {!["draft", "pending", "approved", "paid", "rejected"].includes(status) &&
+                        status.charAt(0).toUpperCase() + status.slice(1)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
         )}
 
-        {payrollState.isSuccess && paginatedItems.length > 0 && (
-          <div className="crud-table-wrap">
-            <table className="crud-table">
-              <thead>
-                <tr>
-                  <th>ID Payroll</th>
-                  <th>Nama Karyawan</th>
-                  <th>Periode</th>
-                  <th className="th-right">Gaji Pokok</th>
-                  <th className="th-right">Gaji Bersih</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedItems.map((item: any, index) => (
-                  <tr key={`${item.id}-${index}`}>
-                    <td className="crud-table-id">
-                      <div>{item.id || "N/A"}</div>
-                      <div className="crud-table-sub">EMP: {item.employee_id}</div>
-                    </td>
-                    <td className="crud-table-name">
-                      <div className="crud-table-avatar">
-                        {item.employeeName ? item.employeeName.charAt(0).toUpperCase() : String(item.employee_id || 'P').charAt(0).toUpperCase()}
-                      </div>
-                      <span>{item.employeeName || `ID: ${item.employee_id}`}</span>
-                    </td>
-                    <td><span className="crud-table-tag">{item.period || "-"}</span></td>
-                    <td className="crud-table-amount">
-                      {formatCurrency(item.basic_salary || 0)} <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 'normal' }}>Basic</span>
-                    </td>
-                    <td className="crud-table-amount crud-table-amount-green">
-                      {formatCurrency(item.take_home_pay || item.net_salary || 0)} <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 'normal' }}>Net</span>
-                    </td>
-                    <td>
-                      <PayrollStatusBadge status={item.status} size="md" />
-                    </td>
+        {loading && <LoadingState message="Memuat data payroll..." />}
+        {errorMessage && (
+          <ErrorState message="Gagal memuat data payroll" error={errorMessage} onRetry={loadData} />
+        )}
+
+        {!loading && !errorMessage && sortedItems.length === 0 && (
+          <EmptyState
+            icon=""
+            title="Tidak ada data"
+            message="Tidak ada payroll yang sesuai dengan filter yang dipilih"
+            actionLabel={searchText || selectedEmployeeId || selectedPeriod || selectedStatus ? "Bersihkan Filter" : undefined}
+            onAction={searchText || selectedEmployeeId || selectedPeriod || selectedStatus ? clearFilters : undefined}
+          />
+        )}
+
+        {!loading && !errorMessage && sortedItems.length > 0 && (
+          <>
+            <div className="table-wrap">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>ID Payroll</th>
+                    <th>Nama Karyawan</th>
+                    <th>Periode</th>
+                    <th className="th-right">Gaji Pokok</th>
+                    <th className="th-right">Gaji Bersih</th>
+                    <th>Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                </thead>
+                <tbody>
+                  {paginatedItems.map((item: any, index) => (
+                    <tr key={`${item.id}-${index}`}>
+                      <td className="crud-table-id">
+                        <div>{item.id || "N/A"}</div>
+                        <div className="crud-table-sub">EMP: {item.employee_id}</div>
+                      </td>
+                      <td className="crud-table-name">
+                        <div className="crud-table-avatar">
+                          {item.employeeName ? item.employeeName.charAt(0).toUpperCase() : String(item.employee_id || 'P').charAt(0).toUpperCase()}
+                        </div>
+                        <span>{item.employeeName || `ID: ${item.employee_id}`}</span>
+                      </td>
+                      <td><span className="crud-table-tag">{item.period || "-"}</span></td>
+                      <td className="crud-table-amount">
+                        {formatCurrency(item.basic_salary || 0)} <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 'normal' }}>Basic</span>
+                      </td>
+                      <td className="crud-table-amount crud-table-amount-green">
+                        {formatCurrency(item.take_home_pay || item.net_salary || 0)} <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 'normal' }}>Net</span>
+                      </td>
+                      <td>
+                        <PayrollStatusBadge status={item.status} size="md" />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-        {payrollState.isSuccess && paginatedItems.length > 0 && totalPages > 1 && (
-          <div className="pagination">
-            <div className="pagination__info">
-              Halaman <strong>{currentPage}</strong> dari <strong>{totalPages}</strong>
-            </div>
-            <div className="pagination__controls">
-              <button className="btn-outline" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1}>
-                ← Prev
-              </button>
-              <button className="btn-outline" onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages}>
-                Next →
-              </button>
-            </div>
-          </div>
+            {totalPages > 1 && (
+              <div className="table-pagination">
+                <div className="pagination-info">
+                  Menampilkan {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, sortedItems.length)} dari {sortedItems.length}
+                </div>
+                <div className="pagination-controls">
+                  <button 
+                    className="pagination-btn" 
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(prev => prev - 1)}
+                  >
+                    ← Sebelumnya
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    <button
+                      key={page}
+                      className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  <button 
+                    className="pagination-btn" 
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(prev => prev + 1)}
+                  >
+                    Selanjutnya →
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
         )}
-      </div>
+      </Card>
     </div>
   );
 };

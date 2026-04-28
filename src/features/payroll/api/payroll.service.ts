@@ -42,7 +42,13 @@ export const payrollService = {
     return response.data;
   },
 
-  // POST /api/payroll/generate/monthly  (bulk generate for all employees)
+  // POST /api/payroll/generate/monthly (generate payroll for period)
+  generatePayroll: async (payload: { period: string; employee_ids?: number[] }) => {
+    const response = await api.post('/payroll/generate/monthly', payload);
+    return response.data;
+  },
+
+  // Backward compatibility
   generateMonthlyPayroll: async (period: string) => {
     const response = await api.post('/payroll/generate/monthly', { period });
     return response.data;
@@ -54,7 +60,7 @@ export const payrollService = {
     return response.data;
   },
 
-  // GET /api/payroll/{id}/slip
+  // GET /api/payroll/{id}/slip (Admin view slip)
   getPayrollSlip: async (id: string | number) => {
     const response = await api.get(`/payroll/${id}/slip`);
     return response.data;
@@ -73,8 +79,14 @@ export const payrollService = {
   },
 
   // ── Admin: Workflow (draft → approved → paid) ───────────
-  // POST /api/payroll/{id}/approve
+  // POST /api/payroll/{id}/approve (approve single payroll per API)
   approvePayroll: async (id: string | number) => {
+    const response = await api.post(`/payroll/${id}/approve`);
+    return response.data;
+  },
+
+  // Backward compat: approve single payroll (same as above)
+  approvePayrollSingle: async (id: string | number) => {
     const response = await api.post(`/payroll/${id}/approve`);
     return response.data;
   },
@@ -82,6 +94,12 @@ export const payrollService = {
   // POST /api/payroll/{id}/pay
   processPayment: async (id: string | number) => {
     const response = await api.post(`/payroll/${id}/pay`);
+    return response.data;
+  },
+
+  // POST /api/payroll/{id}/reject
+  rejectPayroll: async (id: string | number, reason: string) => {
+    const response = await api.post(`/payroll/${id}/reject`, { reason });
     return response.data;
   },
 
@@ -125,12 +143,12 @@ export const payrollService = {
 
   // ── ESS Endpoints (My Payroll) ──────────────────────────
   // GET /api/my/payroll
-  getMyPayroll: async () => {
-    const response = await api.get('/my/payroll');
+  getMyPayroll: async (params?: any) => {
+    const response = await api.get('/my/payroll', { params });
     return response.data;
   },
 
-  // GET /api/my/payroll/{id}/slip
+  // GET /api/my/payroll/{id}/slip  (get salary slip for employee - matches API)
   getMySlip: async (id: string | number) => {
     const response = await api.get(`/my/payroll/${id}/slip`);
     return response.data;
@@ -158,11 +176,18 @@ export const getPayrollDetail = async (id: string | number) => payrollService.ge
 export const createPayroll = async (payload: any) => payrollService.createPayroll(payload);
 export const updatePayroll = async (id: string | number, payload: any) => payrollService.updatePayroll(id, payload);
 export const deletePayroll = async (id: string | number) => payrollService.deletePayroll(id);
-export const approvePayroll = async (id: string | number) => payrollService.approvePayroll(id);
+
+// Updated: approvePayroll now expects array of IDs (matches API docs)
+export const approvePayroll = async (ids: (string | number)[] | string | number) => {
+  const payrollIds = Array.isArray(ids) ? ids : [ids];
+  return payrollService.approvePayroll(payrollIds);
+};
+
 export const markPayrollAsPaid = async (id: string | number) => payrollService.processPayment(id);
 
-export const generateMonthlyPayroll = async (payload: { period: string }) => {
-  return payrollService.generateMonthlyPayroll(payload.period);
+// Updated: generateMonthlyPayroll now uses /api/payroll/generate
+export const generateMonthlyPayroll = async (payload: { period: string; karyawan_ids?: number[] }) => {
+    return payrollService.generatePayroll({ period: payload.period, karyawan_ids: payload.karyawan_ids });
 };
 
 // Payroll detail sub-items (backward compat)

@@ -11,7 +11,7 @@ import type { PayrollItem } from "@/features/payroll/types/payroll.types";
 import type { EmployeeItem } from "@/features/employee/types/employee.types";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
-import "@/pages/payroll/PayrollShared.css";
+import "./PayrollListPage.css";
 import "./PayrollPaymentPage.css";
 
 const PayrollPaymentPage = () => {

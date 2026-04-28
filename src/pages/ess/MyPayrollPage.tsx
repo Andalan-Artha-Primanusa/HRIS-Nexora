@@ -4,7 +4,7 @@ import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
 import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { BarChart3, CheckCircle2, Receipt, Wallet, FileText, Download, Printer, RefreshCw, Search, Eye } from "lucide-react";
-import { getMyPayroll, getMyPayrollDetail, exportMyPayrollPdf } from "@/features/ess/api/ess.service";
+import { getMyPayroll, getMyPayrollSlip, exportMyPayrollPdf } from "@/features/ess/api/ess.service";
 import type { GenericApiItem } from "@/features/ess/types/ess.types";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
@@ -42,9 +42,9 @@ const MyPayrollPage = () => {
 
   const summaryStats = useMemo(() => {
     const paidCount = items.filter((item) => String(item.status ?? "").toLowerCase() === "paid").length;
-    const totalNetSalary = items.reduce((sum, item) => sum + (Number(item.net_salary || item.take_home_pay) || 0), 0);
+    const totalNetSalary = items.reduce((sum, item) => sum + (Number(item.take_home_pay || item.net_salary) || 0), 0);
     const uniquePeriods = new Set(items.map((item) => String(item.period ?? "")).filter(Boolean));
-    const pendingCount = items.filter((item) => String(item.status ?? "").toLowerCase() === "pending").length;
+    const pendingCount = items.filter((item) => String(item.status ?? "").toLowerCase() === "pending" || String(item.status ?? "").toLowerCase() === "draft").length;
 
     return [
       { label: "Total Slip", subtitle: "Seluruh riwayat payroll", value: String(items.length), tone: "blue" as const },
@@ -58,11 +58,12 @@ const MyPayrollPage = () => {
     return items.filter((item) => {
       const period = String(item.period || '').toLowerCase();
       const query = searchText.toLowerCase();
-      const matchSearch = period.includes(query);
+      const matchSearch = period.includes(query) || 
+        (item.employee?.user?.name && item.employee.user.name.toLowerCase().includes(query));
 
       let statusMatch = true;
       if (activeTab === "Paid") statusMatch = String(item.status ?? "").toLowerCase() === "paid";
-      else if (activeTab === "Pending") statusMatch = String(item.status ?? "").toLowerCase() === "pending";
+      else if (activeTab === "Pending") statusMatch = ["pending", "draft"].includes(String(item.status ?? "").toLowerCase());
       else if (activeTab === "Draft") statusMatch = String(item.status ?? "").toLowerCase() === "draft";
 
       return matchSearch && statusMatch;
@@ -90,7 +91,8 @@ const MyPayrollPage = () => {
     setDetailLoading(true);
     setIsModalOpen(true);
     try {
-      const result = await getMyPayrollDetail(id);
+      // Use getMyPayrollSlip to match API docs: GET /api/my/payroll/{id}/slip
+      const result = await getMyPayrollSlip(id);
       setSelectedSlip(result.payload);
     } catch (error) {
       console.error("Failed to load slip details:", error);
@@ -331,7 +333,7 @@ const MyPayrollPage = () => {
             <div className="animate-spin" style={{ margin: '0 auto 1rem' }}><Receipt size={32} color="#2563eb" /></div>
             <p>Memuat rincian slip gaji...</p>
           </div>
-        ) : selectedSlip && (
+        ) : selectedSlip && selectedSlip.summary && (
           <div className="digital-slip">
             <div className="digital-slip-header">
               <div className="digital-slip-brand">
@@ -342,58 +344,64 @@ const MyPayrollPage = () => {
                 </div>
               </div>
               <div className="digital-slip-status">
-                <span className="status-badge-paid">PAID</span>
+                <span className={`status-badge-${String(selectedSlip.status || 'draft').toLowerCase()}`}>
+                  {String(selectedSlip.status || 'DRAFT').toUpperCase()}
+                </span>
               </div>
             </div>
+
+            {/* Employee Info */}
+            {selectedSlip.employee && (
+              <div className="slip-employee-info" style={{ marginBottom: '1.5rem', padding: '1rem', background: '#f8fafc', borderRadius: '8px' }}>
+                <p style={{ margin: 0 }}><strong>{selectedSlip.employee.name}</strong></p>
+                <p style={{ margin: 0, fontSize: '0.875rem', color: '#64748b' }}>
+                  {selectedSlip.employee.employee_code} - {selectedSlip.employee.position} - {selectedSlip.employee.department}
+                </p>
+              </div>
+            )}
 
             <div className="digital-slip-grid">
               <div className="slip-section">
                 <h4>PENERIMAAN</h4>
                 <div className="slip-row">
                   <span>Gaji Pokok</span>
-                  <span>{formatCurrency(selectedSlip.basic_salary)}</span>
+                  <span>{formatCurrency(selectedSlip.summary.basic_salary)}</span>
                 </div>
-                {selectedSlip.allowance > 0 && (
+                {selectedSlip.summary.allowance > 0 && (
                   <div className="slip-row">
                     <span>Tunjangan</span>
-                    <span>{formatCurrency(selectedSlip.allowance)}</span>
+                    <span>{formatCurrency(selectedSlip.summary.allowance)}</span>
                   </div>
                 )}
-                {selectedSlip.bonus > 0 && (
+                {selectedSlip.summary.bonus > 0 && (
                   <div className="slip-row">
                     <span>Bonus</span>
-                    <span>{formatCurrency(selectedSlip.bonus)}</span>
+                    <span>{formatCurrency(selectedSlip.summary.bonus)}</span>
                   </div>
                 )}
                 <div className="slip-row slip-row--total">
-                  <span>Total Pendapatan Kotor</span>
-                  <span>{formatCurrency(Number(selectedSlip.basic_salary) + Number(selectedSlip.allowance || 0) + Number(selectedSlip.bonus || 0))}</span>
+                  <span>Total Pendapatan Kotor (Gross)</span>
+                  <span>{formatCurrency(selectedSlip.summary.gross_pay)}</span>
                 </div>
               </div>
 
               <div className="slip-section">
                 <h4>POTONGAN</h4>
                 <div className="slip-row">
-                  <span>PPh21 (Pajak)</span>
-                  <span style={{ color: '#ef4444' }}>- {formatCurrency(selectedSlip.pph21)}</span>
-                </div>
-                <div className="slip-row">
                   <span>BPJS Kesehatan</span>
-                  <span style={{ color: '#ef4444' }}>- {formatCurrency(selectedSlip.bpjs_health)}</span>
+                  <span style={{ color: '#ef4444' }}>- {formatCurrency(selectedSlip.summary.bpjs_kesehatan)}</span>
                 </div>
                 <div className="slip-row">
                   <span>BPJS Ketenagakerjaan</span>
-                  <span style={{ color: '#ef4444' }}>- {formatCurrency(selectedSlip.bpjs_employment)}</span>
+                  <span style={{ color: '#ef4444' }}>- {formatCurrency(selectedSlip.summary.bpjs_ketenagakerjaan)}</span>
                 </div>
-                {selectedSlip.total_deduction > (Number(selectedSlip.pph21 || 0) + Number(selectedSlip.bpjs_health || 0) + Number(selectedSlip.bpjs_employment || 0)) && (
-                  <div className="slip-row">
-                    <span>Potongan Lainnya</span>
-                    <span style={{ color: '#ef4444' }}>- {formatCurrency(selectedSlip.total_deduction - (Number(selectedSlip.pph21 || 0) + Number(selectedSlip.bpjs_health || 0) + Number(selectedSlip.bpjs_employment || 0)))}</span>
-                  </div>
-                )}
+                <div className="slip-row">
+                  <span>PPh21 (Pajak)</span>
+                  <span style={{ color: '#ef4444' }}>- {formatCurrency(selectedSlip.summary.pph21)}</span>
+                </div>
                 <div className="slip-row slip-row--total">
                   <span>Total Potongan</span>
-                  <span style={{ color: '#ef4444' }}>- {formatCurrency(selectedSlip.total_deduction)}</span>
+                  <span style={{ color: '#ef4444' }}>- {formatCurrency(selectedSlip.summary.total_deduction)}</span>
                 </div>
               </div>
             </div>
@@ -401,7 +409,7 @@ const MyPayrollPage = () => {
             <div className="digital-slip-footer">
               <div className="thp-box">
                 <span className="thp-label">TAKE HOME PAY (GAJI BERSIH)</span>
-                <span className="thp-value">{formatCurrency(selectedSlip.take_home_pay || selectedSlip.net_salary)}</span>
+                <span className="thp-value">{formatCurrency(selectedSlip.summary.take_home_pay)}</span>
               </div>
 
               <div className="slip-actions">

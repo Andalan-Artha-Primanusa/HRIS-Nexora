@@ -1,10 +1,11 @@
 /**
  * Payroll Item - Core payroll record
+ * Matches API: GET /api/payroll
  */
 export interface PayrollItem {
   id: string | number;
   employee_id: string | number;
-  period: string; // Format: "2026-04"
+  period: string;
   basic_salary?: string | number;
   allowance?: number | string;
   bonus?: number | string;
@@ -21,7 +22,6 @@ export interface PayrollItem {
   updated_at?: string;
   approved_at?: string;
   paid_at?: string;
-  notes?: string;
   employee?: EmployeeItemExpanded;
   details?: PayrollDetail[];
 }
@@ -32,11 +32,45 @@ export interface PayrollItem {
 export interface PayrollDetail {
   id?: string | number;
   payroll_id?: string | number;
+  name?: string;
   description?: string;
   amount?: string | number;
-  type?: "deduction" | "allowance" | "benefit";
+  type?: "deduction" | "allowance";
   created_at?: string;
   updated_at?: string;
+}
+
+/**
+ * Payroll Slip (Slip Gaji) - GET /api/my/payroll/{id}/slip
+ */
+export interface PayrollSlip {
+  id: string | number;
+  period: string;
+  status: string;
+  employee: {
+    id: number;
+    employee_code: string;
+    name: string;
+    email: string;
+    department: string;
+    position: string;
+  };
+  summary: {
+    basic_salary: number;
+    allowance: number;
+    bonus: number;
+    gross_pay: number;
+    additional_allowances: number;
+    additional_deductions: number;
+    bpjs_kesehatan: number;
+    bpjs_ketenagakerjaan: number;
+    pph21: number;
+    total_deduction: number;
+    take_home_pay: number;
+  };
+  earnings: Array<{ name: string; amount: number }>;
+  deductions: Array<{ name: string; amount: number }>;
+  details: PayrollDetail[];
 }
 
 /**
@@ -105,7 +139,22 @@ export interface PayrollUpdatePayload {
 }
 
 /**
- * Generate Monthly Payroll Payload
+ * Generate Monthly Payroll Payload - POST /api/payroll/generate/monthly
+ */
+export interface PayrollGeneratePayload {
+  period: string;
+  employee_ids?: number[];
+}
+
+/**
+ * Approve Payroll Payload (matches API docs)
+ */
+export interface PayrollApprovePayload {
+  payroll_ids: (string | number)[];
+}
+
+/**
+ * Generate Monthly Payroll Payload (legacy support)
  */
 export interface PayrollGenerateMonthlyPayload {
   period: string;

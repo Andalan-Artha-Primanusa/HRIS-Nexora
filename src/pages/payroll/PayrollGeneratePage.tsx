@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { BarChart3, CalendarDays, CheckCircle2, RefreshCw, Zap, Clock, Wallet, LayoutDashboard, FileText, CheckCircle, XCircle } from "lucide-react";
+import { BarChart3, CalendarDays, CheckCircle2, RefreshCw, Zap, Clock, Wallet, LayoutDashboard, FileText } from "lucide-react";
 import { Card } from "@/shared/ui/Card";
 import { Modal } from "@/shared/ui/Modal";
+import { PayrollStatusBadge } from "@/shared/ui/PayrollStatusBadge";
 import {
   generateMonthlyPayroll,
   getAllPayroll,
@@ -10,34 +11,20 @@ import {
 import type { PayrollItem } from "@/features/payroll/types/payroll.types";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
-import "@/pages/payroll/PayrollShared.css";
+import "./PayrollListPage.css";
 
-const asDisplay = (value: unknown) => {
-  if (value === null || value === undefined) return "-";
-  if (typeof value === "object") return JSON.stringify(value);
-  return String(value);
-};
-
-const getColumns = () => {
-  return [
-    "id",
-    "employee_id",
-    "period",
-    "basic_salary",
-    "allowance",
-    "bonus",
-    "bpjs_kesehatan",
-    "bpjs_ketenagakerjaan",
-    "pph21",
-    "total_deduction",
-    "take_home_pay",
-    "status"
-  ];
+const formatCurrency = (value: unknown): string => {
+  const num = typeof value === 'string' ? parseFloat(value) : Number(value);
+  if (isNaN(num)) return "Rp 0";
+  return `Rp ${num.toLocaleString('id-ID')}`;
 };
 
 const PayrollGeneratePage = () => {
   const [items, setItems] = useState<PayrollItem[]>([]);
-  const [period, setPeriod] = useState("2026-04");
+  const [period, setPeriod] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [errorModal, setErrorModal] = useState<{ isOpen: boolean; title: string; message: string }>({
@@ -50,22 +37,34 @@ const PayrollGeneratePage = () => {
     setErrorModal({ isOpen: true, title, message });
   };
 
-  const columns = useMemo(() => getColumns(), []);
+  const columns = useMemo(() => [
+    { key: "id", label: "ID" },
+    { key: "employee_id", label: "Karyawan" },
+      { key: "period", label: "Period" },
+    { key: "basic_salary", label: "Gaji Pokok" },
+    { key: "allowance", label: "Tunjangan" },
+    { key: "bonus", label: "Bonus" },
+    { key: "total_deduction", label: "Potongan" },
+    { key: "take_home_pay", label: "Gaji Bersih" },
+    { key: "status", label: "Status" },
+  ], []);
+
   const summaryCards = useMemo(() => {
     const paidCount = items.filter((item) => String(item.status).toLowerCase() === "paid").length;
-    const pendingCount = items.filter((item) => String(item.status).toLowerCase() === "pending").length;
+    const pendingCount = items.filter((item) => ["pending", "draft"].includes(String(item.status).toLowerCase())).length;
+    const totalPayroll = items.reduce((sum, item) => sum + (Number(item.take_home_pay) || 0), 0);
 
     return [
       {
         label: "Total Payroll",
         subtitle: "Semua data payroll",
         value: String(items.length),
-        change: "Entri terdaftar",
+        change: `${formatCurrency(totalPayroll)} total`,
         tone: "blue" as const,
         icon: LayoutDashboard,
       },
       {
-        label: "Pending",
+        label: "Draft/Pending",
         subtitle: "Menunggu proses",
         value: String(pendingCount),
         change: "Perlu approval",
@@ -93,10 +92,10 @@ const PayrollGeneratePage = () => {
 
   const loadPayroll = async () => {
     setLoading(true);
-
     try {
       const result = await getAllPayroll();
-      setItems(toSafeArray(result));
+      const normalized = toSafeArray(result);
+      setItems(normalized);
     } catch (error: unknown) {
       const errorText = error instanceof Error ? error.message : "Gagal memuat payroll";
       showErrorModal("Error Muat Data", errorText);
@@ -110,9 +109,7 @@ const PayrollGeneratePage = () => {
       showErrorModal("Validasi", "Pilih periode terlebih dahulu");
       return;
     }
-
     setLoading(true);
-
     try {
       await generateMonthlyPayroll({ period });
       setMessage({ type: "success", text: `Payroll berhasil di-generate untuk periode ${period}` });
@@ -127,8 +124,49 @@ const PayrollGeneratePage = () => {
 
   useEffect(() => {
     void loadPayroll();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const renderCell = (item: any, columnKey: string) => {
+    const value = item[columnKey];
+    
+    switch (columnKey) {
+      case "id":
+        return <span className="cell-id">#{value}</span>;
+      
+      case "employee_id":
+        return (
+          <div style={{ fontWeight: '600', whiteSpace: 'nowrap' }}>
+            {item.employee?.user?.name || `EMP-${String(value).padStart(3, '0')}`}
+          </div>
+        );
+      
+      case "period":
+        return (
+          <span className="crud-table-tag">{value || '-'}</span>
+        );
+      
+      case "basic_salary":
+      case "allowance":
+      case "bonus":
+      case "total_deduction":
+      case "take_home_pay":
+        return (
+          <span style={{ 
+            color: columnKey === 'take_home_pay' ? '#6366f1' : columnKey === 'total_deduction' ? '#f43f5e' : 'inherit',
+            fontWeight: columnKey === 'take_home_pay' ? '700' : '500',
+            whiteSpace: 'nowrap'
+          }}>
+            {formatCurrency(value)}
+          </span>
+        );
+      
+      case "status":
+        return <PayrollStatusBadge status={value} size="sm" />;
+      
+      default:
+        return <span>{String(value ?? '-')}</span>;
+    }
+  };
 
   return (
     <div className="crud-page">
@@ -143,7 +181,7 @@ const PayrollGeneratePage = () => {
         </div>
       </Modal>
 
-      {/* Header - Same style as Dashboard */}
+      {/* Header */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -174,23 +212,23 @@ const PayrollGeneratePage = () => {
         </Card>
       )}
 
-      {/* Summary Cards - New style */}
-      <div className="leave-requests-wrapper">
+      {/* Summary Cards */}
+      <div className="payroll-summary-wrapper">
         {summaryCards.map((card) => {
           const Icon = card.icon;
           return (
-            <div key={card.label} className="leave-summary-card">
-              <div className="leave-summary-header">
+            <div key={card.label} className="payroll-summary-card">
+              <div className="payroll-summary-header">
                 <div>
-                  <p className="leave-summary-label">{card.label}</p>
-                  <p className="leave-summary-subtitle">{card.subtitle}</p>
+                  <p className="payroll-summary-label">{card.label}</p>
+                  <p className="payroll-summary-subtitle">{card.subtitle}</p>
                 </div>
-                <div className={`leave-summary-icon-wrapper ${card.tone === 'blue' ? 'leave-icon-blue' : card.tone === 'green' ? 'leave-icon-green' : card.tone === 'orange' ? 'leave-icon-orange' : 'leave-icon-purple'}`}>
+                <div className={`payroll-summary-icon-wrapper payroll-icon-${card.tone}`}>
                   <Icon size={28} />
                 </div>
               </div>
-              <div className={`leave-summary-value ${card.tone === 'blue' ? 'leave-value-blue' : card.tone === 'green' ? 'leave-value-green' : card.tone === 'orange' ? 'leave-value-orange' : 'leave-value-purple'}`}>{card.value}</div>
-              <p className="leave-summary-trend">{card.change}</p>
+              <div className={`payroll-summary-value payroll-value-${card.tone}`}>{card.value}</div>
+              <p className="payroll-summary-trend">{card.change}</p>
             </div>
           );
         })}
@@ -204,12 +242,13 @@ const PayrollGeneratePage = () => {
           </div>
           <div>
             <h2 className="analytics-title">Generate Payroll</h2>
-            <p className="analytics-subtitle">{items.length} Total</p>
+            <p className="analytics-subtitle">{items.length} Total Records</p>
           </div>
         </div>
       </Card>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1.5rem', alignItems: 'start' }}>
+        {/* Configuration Card */}
         <Card className="crud-table-card">
           <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem', fontWeight: '700', color: '#1e293b' }}>Konfigurasi Batch</h3>
           <div style={{ display: 'grid', gap: '1rem' }}>
@@ -238,95 +277,47 @@ const PayrollGeneratePage = () => {
           </p>
         </Card>
 
+        {/* Payroll List Card */}
         <Card className="crud-table-card">
           <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem', fontWeight: '700', color: '#1e293b' }}>Daftar Payroll Terbaru</h3>
-          <div className="crud-table-wrap" style={{ border: 'none', boxShadow: 'none' }}>
-            <table className="crud-table">
-                <thead>
-                  <tr>
-                    {columns.map((column) => (
-                      <th key={column}>
-                        {column === "id" && "ID"}
-                        {column === "employee_id" && "Karyawan"}
-                        {column === "period" && "Periode"}
-                        {column === "basic_salary" && "Gaji Pokok"}
-                        {column === "allowance" && "Tunjangan"}
-                        {column === "bonus" && "Bonus"}
-                        {column === "bpjs_kesehatan" && "BPJS Kes"}
-                        {column === "bpjs_ketenagakerjaan" && "BPJS TK"}
-                        {column === "pph21" && "PPH21"}
-                        {column === "total_deduction" && "Potongan"}
-                        {column === "take_home_pay" && "THP"}
-                        {column === "status" && "Status"}
-                        {!["id", "employee_id", "period", "basic_salary", "allowance", "bonus", "bpjs_kesehatan", "bpjs_ketenagakerjaan", "pph21", "total_deduction", "take_home_pay", "status"].includes(column) ? column : null}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {items.length > 0 ? (
-                    items.slice(0, 10).map((item, index) => (
-                      <tr key={String(item.id ?? index)}>
-                        {columns.map((column) => {
-                          const record = item as unknown as Record<string, unknown>;
-
-                          return (
-                            <td key={`${String(item.id ?? index)}-${column}`}>
-                              {column === 'id' ? (
-                                <span className="cell-id">#{asDisplay(record[column])}</span>
-
-                              ) : column === 'employee_id' ? (
-                                <div style={{ fontWeight: '600', whiteSpace: 'nowrap' }}>
-                                  {record.employee && typeof record.employee === 'object' && (record.employee as any).user ? (record.employee as any).user.name : `EMP-${String(record[column]).padStart(3, '0')}`}
-                                </div>
-
-                              ) : column === 'period' ? (
-                                <div style={{ whiteSpace: 'nowrap' }}>
-                                  {record[column]
-                                    ? new Date(String(record[column]) + "-01").toLocaleDateString('id-ID', {
-                                        month: 'short',
-                                        year: 'numeric',
-                                      })
-                                    : '-'}
-                                </div>
-
-                              ) : ['basic_salary', 'allowance', 'bonus', 'bpjs_kesehatan', 'bpjs_ketenagakerjaan', 'pph21', 'total_deduction', 'take_home_pay'].includes(column) ? (
-                                <span style={{ 
-                                  color: column === 'take_home_pay' ? '#6366f1' : column === 'total_deduction' || column.startsWith('bpjs') || column === 'pph21' ? '#f43f5e' : 'inherit', 
-                                  fontWeight: column === 'take_home_pay' ? '700' : '500',
-                                  whiteSpace: 'nowrap'
-                                }}>
-                                  {`Rp ${Number(record[column] || 0).toLocaleString('id-ID')}`}
-                                </span>
-
-                              ) : column === 'status' ? (
-                                <span className={`status-badge status-badge--${String(record[column]).toLowerCase()}`}>
-                                  <div className="status-dot" style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'currentColor' }} />
-                                  {asDisplay(record[column])}
-                                </span>
-
-                              ) : (
-                                asDisplay(record[column])
-                              )}
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    ))
-                  ) : (
+          {loading ? (
+            <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>Memuat data...</div>
+          ) : items.length > 0 ? (
+            <>
+              <div className="crud-table-wrap" style={{ border: 'none', boxShadow: 'none', overflowX: 'auto' }}>
+                <table className="crud-table">
+                  <thead>
                     <tr>
-                      <td colSpan={columns.length} className="payroll-generate-empty-row">Tidak ada data payroll yang ditemukan.</td>
+                      {columns.map((col) => (
+                        <th key={col.key}>{col.label}</th>
+                      ))}
                     </tr>
-                  )}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {items.slice(0, 10).map((item, index) => (
+                      <tr key={String(item.id ?? index)}>
+                        {columns.map((col) => (
+                          <td key={`${String(item.id ?? index)}-${col.key}`}>
+                            {renderCell(item, col.key)}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {items.length > 10 && (
+                <p style={{ marginTop: '1rem', fontSize: '0.85rem', color: '#64748b', textAlign: 'right' }}>
+                  Menampilkan 10 data terbaru dari total {items.length} records.
+                </p>
+              )}
+            </>
+          ) : (
+            <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>
+              Tidak ada data payroll yang ditemukan.
             </div>
-            {items.length > 10 && (
-              <p style={{ marginTop: '1rem', fontSize: '0.85rem', color: '#64748b', textAlign: 'right' }}>
-                Menampilkan 10 data terbaru dari total {items.length} records.
-              </p>
-            )}
-          </Card>
+          )}
+        </Card>
       </div>
     </div>
   );

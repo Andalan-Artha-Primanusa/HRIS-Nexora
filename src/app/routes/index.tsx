@@ -66,6 +66,7 @@ const ReportsLeavePage = lazy(() => import("../../pages/reports/ReportsLeavePage
 const ReportsPayrollPage = lazy(() => import("../../pages/reports/ReportsPayrollPage"));
 const PayrollTaxBPJSPage = lazy(() => import("../../pages/payroll/PayrollTaxPage"));
 const PayrollReportsDetailedPage = lazy(() => import("../../pages/payroll/PayrollReportsDetailedPage"));
+const PayrollSlipPage = lazy(() => import("../../pages/payroll/PayrollSlipPage"));
 const ReportsAssetsPage = lazy(() => import("../../pages/reports/ReportsAssetsPage"));
 const ReportsEmployeePage = lazy(() => import("../../pages/reports/ReportsEmployeePage"));
 const WorkSchedulesPage = lazy(() => import("../../pages/work-schedule/WorkSchedulesPage"));
@@ -946,6 +947,11 @@ export const router = createBrowserRouter([
         path: "/payroll/reports",
         element: <DashboardLayout />,
         children: [{ index: true, element: <PayrollReportsDetailedPage /> }],
+      },
+      {
+        path: "/payroll/:id/slip",
+        element: <DashboardLayout />,
+        children: [{ index: true, element: <PayrollSlipPage /> }],
       },
       {
         path: "/reports/dashboard-summary",

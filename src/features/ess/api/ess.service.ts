@@ -87,6 +87,7 @@ export const submitMyReimbursement = async (id: string) => {
 
 export const getMyPayroll = async () => {
   const response = await api.get("/my/payroll");
+  // API returns { success, message, data: [...] }
   return {
     items: extractArrayPayload(response.data),
     raw: response.data,
@@ -95,6 +96,15 @@ export const getMyPayroll = async () => {
 
 export const getMyPayrollDetail = async (id: string) => {
   const response = await api.get(`/my/payroll/${id}`);
+  return {
+    payload: extractPayload(response.data),
+    raw: response.data,
+  };
+};
+
+export const getMyPayrollSlip = async (id: string) => {
+  // API returns { success, message, data: { id, period, status, employee, summary, earnings, deductions } }
+  const response = await api.get(`/my/payroll/${id}/slip`);
   return {
     payload: extractPayload(response.data),
     raw: response.data,

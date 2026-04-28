@@ -215,167 +215,194 @@ const AdminImportPage = () => {
         })}
       </div>
 
-      {/* Analytics Title Card */}
-      <Card className="analytics-title-card">
-        <div className="analytics-title-inner">
-          <div className="analytics-icon">
-            <UploadCloud size={24} />
-          </div>
-          <div>
-            <h2 className="analytics-title">Download Template Import</h2>
-            <p className="analytics-subtitle">Siapkan file sesuai contoh</p>
-          </div>
-        </div>
-      </Card>
-
-      {/* Download Templates Section */}
-      <div className="card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
-        <Card glass style={{ padding: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', gap: '1rem', flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <Button
-                variant="outline"
-                size="md"
-                onClick={handleDownloadUserTemplate}
-                style={{ borderColor: "#2563eb", color: "#2563eb" }}
-              >
-                <Download size={16} style={{ marginRight: 8 }} />
-                Template User
-              </Button>
-              <Button
-                variant="outline"
-                size="md"
-                onClick={handleDownloadEmployeeTemplate}
-                style={{ borderColor: "#059669", color: "#059669" }}
-              >
-                <Download size={16} style={{ marginRight: 8 }} />
-                Template Employee
-              </Button>
-            </div>
-          </div>
-          <p style={{ color: '#64748b', fontSize: '0.9rem' }}>
-            Silakan unduh template berikut sesuai kebutuhan. Pastikan file yang diupload sudah mengikuti struktur kolom pada template.
-          </p>
-        </Card>
-      </div>
-
       {/* Alert Message */}
       {alertMessage && (
-        <div className={`alert alert-${alertType}`} style={{ marginBottom: 24 }}>
-          <span>{alertMessage}</span>
-          <button onClick={clearAlert} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', fontSize: 18 }}>×</button>
-        </div>
+        <Alert
+          type={alertType}
+          message={alertMessage}
+          onClose={clearAlert}
+        />
       )}
 
-      {/* Import Users Section */}
-      <Card className="control-section-card" style={{ marginBottom: '1.5rem' }}>
-        <div className="control-section-inner" style={{ flexDirection: 'column', gap: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      {/* Import Section */}
+      <div className="import-grid">
+        {/* Download Templates Card */}
+        <Card className="import-template-card">
+          <div className="import-card-header">
+            <div className="import-card-icon icon-blue">
+              <FileText size={24} />
+            </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#1e293b' }}>Import Users</h3>
-              <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>{userFile ? userFile.name : "Belum ada file dipilih"}</span>
+              <h3 className="import-card-title">Template Import</h3>
+              <p className="import-card-subtitle">Unduh format yang sesuai</p>
+            </div>
+          </div>
+          <div className="import-template-buttons">
+            <Button
+              variant="outline"
+              size="md"
+              onClick={handleDownloadUserTemplate}
+              className="template-btn-blue"
+            >
+              <Download size={16} />
+              Template User
+            </Button>
+            <Button
+              variant="outline"
+              size="md"
+              onClick={handleDownloadEmployeeTemplate}
+              className="template-btn-green"
+            >
+              <Download size={16} />
+              Template Employee
+            </Button>
+          </div>
+          <p className="import-card-note">
+            Pastikan file mengikuti struktur kolom pada template untuk menghindari error saat import.
+          </p>
+        </Card>
+
+        {/* Import Users Card */}
+        <Card className="import-form-card">
+          <div className="import-card-header">
+            <div className="import-card-icon icon-purple">
+              <Users size={24} />
+            </div>
+            <div>
+              <h3 className="import-card-title">Import Users</h3>
+              <p className="import-card-subtitle">
+                {userFile ? userFile.name : "Pilih file CSV/Excel"}
+              </p>
             </div>
           </div>
 
-          <form onSubmit={handleImportUsers}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem' }}>File Users</label>
+          <form onSubmit={handleImportUsers} className="import-form">
+            <div className="form-group">
+              <label>File Users</label>
+              <div className={`file-upload-area ${userFile ? 'file-selected' : ''}`}>
                 <input
                   type="file"
                   accept=".xlsx,.xls,.csv"
                   onChange={(event) => setUserFile(event.target.files?.[0] || null)}
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: '12px', border: '1px solid #e2e8f0' }}
+                  id="user-file-input"
+                  className="file-input-hidden"
                 />
-                <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', color: '#64748b' }}>Gunakan template resmi agar struktur kolom sesuai dengan backend.</p>
+                <label htmlFor="user-file-input" className="file-upload-label">
+                  <Upload size={20} />
+                  <span>{userFile ? "Ganti File" : "Pilih File"}</span>
+                </label>
               </div>
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem' }}>Role Users</label>
-                <select
-                  value={userRole}
-                  onChange={(e) => setUserRole(e.target.value)}
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: '12px', border: '1px solid #e2e8f0' }}
-                >
-                  <option value="employee">employee</option>
-                  <option value="admin">admin</option>
-                  <option value="super_admin">super_admin</option>
-                </select>
-              </div>
-              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
-                <Button type="submit" variant="primary" size="md" disabled={submittingUsers}>
-                  <Users size={16} />
-                  {submittingUsers ? "Mengimport..." : "Import Users"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="md"
-                  onClick={() => {
-                    setUserFile(null);
-                    setUserImportResult(null);
-                  }}
-                  disabled={submittingUsers}
-                >
-                  <RefreshCw size={16} />
-                  Reset
-                </Button>
-              </div>
-              {userImportResult !== null && (
-                <pre style={{ margin: 0, padding: '1rem', background: '#f8fafc', borderRadius: '12px', fontSize: '0.8rem', overflow: 'auto' }}>{userImportResult}</pre>
-              )}
+            </div>
+
+            <div className="form-group">
+              <label>Role Users</label>
+              <select
+                value={userRole}
+                onChange={(e) => setUserRole(e.target.value)}
+                className="crud-input"
+              >
+                <option value="employee">Employee</option>
+                <option value="admin">Admin</option>
+                <option value="super_admin">Super Admin</option>
+              </select>
+            </div>
+
+            <div className="form-actions">
+              <Button type="submit" variant="primary" size="md" disabled={submittingUsers || !userFile}>
+                <Users size={16} />
+                {submittingUsers ? "Mengimport..." : "Import Users"}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="md"
+                onClick={() => {
+                  setUserFile(null);
+                  setUserImportResult(null);
+                }}
+                disabled={submittingUsers}
+              >
+                <RefreshCw size={16} />
+                Reset
+              </Button>
             </div>
           </form>
-        </div>
-      </Card>
 
-      {/* Import Employees Section */}
-      <Card className="control-section-card">
-        <div className="control-section-inner" style={{ flexDirection: 'column', gap: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          {userImportResult !== null && (
+            <div className="import-result">
+              <div className="import-result-header">
+                <CheckCircle2 size={16} />
+                <span>Hasil Import</span>
+              </div>
+              <pre className="crud-response">{userImportResult}</pre>
+            </div>
+          )}
+        </Card>
+
+        {/* Import Employees Card */}
+        <Card className="import-form-card">
+          <div className="import-card-header">
+            <div className="import-card-icon icon-green">
+              <UploadCloud size={24} />
+            </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#1e293b' }}>Import Employees</h3>
-              <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>{employeeFile ? employeeFile.name : "Belum ada file dipilih"}</span>
+              <h3 className="import-card-title">Import Employees</h3>
+              <p className="import-card-subtitle">
+                {employeeFile ? employeeFile.name : "Pilih file CSV/Excel"}
+              </p>
             </div>
           </div>
 
-          <form onSubmit={handleImportEmployees}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem' }}>File Employees</label>
+          <form onSubmit={handleImportEmployees} className="import-form">
+            <div className="form-group">
+              <label>File Employees</label>
+              <div className={`file-upload-area ${employeeFile ? 'file-selected' : ''}`}>
                 <input
                   type="file"
                   accept=".xlsx,.xls,.csv"
                   onChange={(event) => setEmployeeFile(event.target.files?.[0] || null)}
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: '12px', border: '1px solid #e2e8f0' }}
+                  id="employee-file-input"
+                  className="file-input-hidden"
                 />
-                <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', color: '#64748b' }}>Pastikan data employee sudah mengikuti format field pada template import.</p>
+                <label htmlFor="employee-file-input" className="file-upload-label">
+                  <Upload size={20} />
+                  <span>{employeeFile ? "Ganti File" : "Pilih File"}</span>
+                </label>
               </div>
-              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
-                <Button type="submit" variant="primary" size="md" disabled={submittingEmployees}>
-                  <Upload size={16} />
-                  {submittingEmployees ? "Mengimport..." : "Import Employees"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="md"
-                  onClick={() => {
-                    setEmployeeFile(null);
-                    setEmployeeImportResult(null);
-                  }}
-                  disabled={submittingEmployees}
-                >
-                  <RefreshCw size={16} />
-                  Reset
-                </Button>
-              </div>
-              {employeeImportResult !== null && (
-                <pre style={{ margin: 0, padding: '1rem', background: '#f8fafc', borderRadius: '12px', fontSize: '0.8rem', overflow: 'auto' }}>{employeeImportResult}</pre>
-              )}
+            </div>
+
+            <div className="form-actions">
+              <Button type="submit" variant="primary" size="md" disabled={submittingEmployees || !employeeFile}>
+                <Upload size={16} />
+                {submittingEmployees ? "Mengimport..." : "Import Employees"}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="md"
+                onClick={() => {
+                  setEmployeeFile(null);
+                  setEmployeeImportResult(null);
+                }}
+                disabled={submittingEmployees}
+              >
+                <RefreshCw size={16} />
+                Reset
+              </Button>
             </div>
           </form>
-        </div>
-      </Card>
+
+          {employeeImportResult !== null && (
+            <div className="import-result">
+              <div className="import-result-header">
+                <CheckCircle2 size={16} />
+                <span>Hasil Import</span>
+              </div>
+              <pre className="crud-response">{employeeImportResult}</pre>
+            </div>
+          )}
+        </Card>
+      </div>
     </div>
   );
 };
