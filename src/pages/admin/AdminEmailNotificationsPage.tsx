@@ -5,21 +5,23 @@ import { Button } from "@/shared/ui/Button";
 import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { ROLES } from "@/shared/types/rbac.types";
-import { BellRing, RefreshCw, Search, Send, Shield } from "lucide-react";
+import { BellRing, RefreshCw, Search, Send, Shield, Layout, History, Trash2 } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "./AdminCrudPages.css";
 import {
   getAdminEmailNotifications,
   getAdminEmailNotificationLogs,
+  createEmailTemplate,
+  deleteEmailTemplate,
 } from "@/features/admin/api/admin-batch1.service";
-import { getAllEmployees } from "@/features/employee/api/employee.service";
 
 type EmailTemplateItem = {
   id?: number | string;
   key?: string;
   name?: string;
   subject?: string;
+  is_active?: boolean;
 };
 
 type EmailLogItem = {
@@ -29,6 +31,7 @@ type EmailLogItem = {
   status?: string;
   type?: string;
   sent_at?: string;
+  created_at?: string;
 };
 
 const getRoleNames = (user: ReturnType<typeof useAuthStore.getState>["user"]) => (user?.roles ?? []).map((role) => role.name);
@@ -52,17 +55,9 @@ const AdminEmailNotificationsPage = () => {
                 <span>Admin Center</span>
               </div>
               <h1 className="hero-title">Akses Ditolak</h1>
-              <p className="hero-subtitle">
-                Anda tidak memiliki izin untuk mengakses halaman ini.
-              </p>
             </div>
           </div>
         </Card>
-        <div className="white-unified-wrapper">
-          <Card glass style={{ padding: '2rem', textAlign: 'center' }}>
-            <p>Silakan hubungi Administrator untuk mendapatkan akses.</p>
-          </Card>
-        </div>
       </div>
     );
   }
@@ -71,6 +66,20 @@ const AdminEmailNotificationsPage = () => {
   const [logs, setLogs] = useState<EmailLogItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Template Form State
+  const [showModal, setShowModal] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [newTemplate, setNewTemplate] = useState({
+    key: '',
+    name: '',
+    description: '',
+    subject: '',
+    html_body: '',
+    text_body: '',
+    placeholders: [] as string[]
+  });
+  const [currentPlaceholder, setCurrentPlaceholder] = useState('');
 
   // Search
   const [searchText, setSearchText] = useState('');
@@ -83,10 +92,9 @@ const AdminEmailNotificationsPage = () => {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const [templatesResult, logsResult, ] = await Promise.all([
+      const [templatesResult, logsResult] = await Promise.all([
         getAdminEmailNotifications(),
         getAdminEmailNotificationLogs(),
-        getAllEmployees()
       ]);
       setItems(Array.isArray(templatesResult) ? templatesResult : (templatesResult as any)?.data || []);
       setLogs(Array.isArray(logsResult) ? logsResult : (logsResult as any)?.data || []);
@@ -97,11 +105,47 @@ const AdminEmailNotificationsPage = () => {
     }
   };
 
+  const handleAddTemplate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await createEmailTemplate({
+        ...newTemplate,
+      });
+      setShowModal(false);
+      setNewTemplate({ 
+        key: '', 
+        name: '', 
+        description: '', 
+        subject: '', 
+        html_body: '', 
+        text_body: '', 
+        placeholders: [] 
+      });
+      void loadData();
+    } catch (error: any) {
+      console.error("Save Template Error:", error.response?.data || error);
+      const serverMessage = error.response?.data?.message || error.response?.data?.error;
+      alert(serverMessage ? `Server Error: ${serverMessage}` : getErrorMessage(error));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteTemplate = async (id: number | string) => {
+    if (!window.confirm("Apakah Anda yakin ingin menghapus template ini?")) return;
+    try {
+      await deleteEmailTemplate(id);
+      void loadData();
+    } catch (error: any) {
+      alert(getErrorMessage(error));
+    }
+  };
+
   useEffect(() => {
     void loadData();
   }, []);
 
-  // Filter & Sort & Paginate for Templates
   const filteredTemplates = useMemo(() => {
     if (!searchText) return items;
     const q = searchText.toLowerCase();
@@ -115,11 +159,7 @@ const AdminEmailNotificationsPage = () => {
   }, [items, searchText]);
 
   const sortedTemplates = useMemo(() => {
-    return [...filteredTemplates].sort((a, b) => {
-      const nameA = String(a.name ?? '').toLowerCase();
-      const nameB = String(b.name ?? '').toLowerCase();
-      return nameA.localeCompare(nameB);
-    });
+    return [...filteredTemplates].sort((a, b) => String(a.name ?? '').localeCompare(String(b.name ?? '')));
   }, [filteredTemplates]);
 
   const paginatedTemplates = useMemo(() => {
@@ -127,7 +167,6 @@ const AdminEmailNotificationsPage = () => {
     return sortedTemplates.slice(startIndex, startIndex + pageSize);
   }, [sortedTemplates, currentPage, pageSize]);
 
-  // Filter & Sort & Paginate for Logs
   const filteredLogs = useMemo(() => {
     if (!searchText) return logs;
     const q = searchText.toLowerCase();
@@ -171,62 +210,53 @@ const AdminEmailNotificationsPage = () => {
         label: "Email Templates",
         subtitle: "Template yang tersedia",
         value: String(items.length),
-        change: `${paginatedTemplates.length} data per halaman`,
+        change: "Status Active",
         tone: "blue" as const,
-        icon: BellRing,
+        icon: Layout,
       },
       {
-        label: "Email Logs",
-        subtitle: "Riwayat pengiriman email",
+        label: "Total Logs",
+        subtitle: "Riwayat pengiriman",
         value: String(logs.length),
-        change: `${paginatedLogs.length} data per halaman`,
+        change: "All History",
+        tone: "purple" as const,
+        icon: History,
+      },
+      {
+        label: "Berhasil Terkirim",
+        subtitle: "Email sukses",
+        value: String(logs.filter((l) => ["sent", "success", "delivered"].includes(String(l.status ?? '').toLowerCase())).length),
+        change: "Success",
         tone: "green" as const,
         icon: Send,
       },
       {
-        label: "Berhasil Terkirim",
-        subtitle: "Total email sukses terkirim",
-        value: String(logs.filter((l) => ["sent", "success", "delivered"].includes(String(l.status ?? '').toLowerCase())).length),
-        change: "Sukses",
-        tone: "purple" as const,
-        icon: Send,
-      },
-      {
-        label: "Pending",
-        subtitle: "Masih menunggu proses delivery",
-        value: String(logs.filter((l) => ["pending", "queued", "processing"].includes(String(l.status ?? '').toLowerCase())).length),
-        change: "Menunggu",
+        label: "Pending/Failed",
+        subtitle: "Masalah delivery",
+        value: String(logs.filter((l) => !["sent", "success", "delivered"].includes(String(l.status ?? '').toLowerCase())).length),
+        change: "Issue",
         tone: "orange" as const,
         icon: RefreshCw,
       },
     ],
-    [items.length, logs.length, paginatedTemplates.length, paginatedLogs.length]
+    [items.length, logs.length]
   );
 
   const formatDate = (value?: string) => {
     if (!value) return "-";
     const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return value;
-    return date.toLocaleString("id-ID");
+    return Number.isNaN(date.getTime()) ? value : date.toLocaleString("id-ID");
   };
 
   const getStatusBadge = (status?: string) => {
     const normalized = String(status || '').toLowerCase();
-    if (["sent", "success", "delivered"].includes(normalized)) {
-      return <span className="badge-soft badge-soft--green">SENT</span>;
-    }
-    if (["pending", "queued", "processing"].includes(normalized)) {
-      return <span className="badge-soft badge-soft--orange">PENDING</span>;
-    }
-    if (["failed", "error"].includes(normalized)) {
-      return <span className="badge-soft badge-soft--red">FAILED</span>;
-    }
-    return <span className="badge-soft badge-soft--gray">{status || 'N/A'}</span>;
+    if (["sent", "success", "delivered"].includes(normalized)) return <span className="badge-soft badge-soft--green">SENT</span>;
+    if (["pending", "queued", "processing"].includes(normalized)) return <span className="badge-soft badge-soft--orange">PENDING</span>;
+    return <span className="badge-soft badge-soft--red">FAILED</span>;
   };
 
   return (
     <div className="crud-page">
-      {/* Header */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -234,21 +264,145 @@ const AdminEmailNotificationsPage = () => {
               <BellRing size={16} />
               <span>Admin Center</span>
             </div>
-            <h1 className="hero-title">Email Notifications</h1>
+            <h1 className="hero-title">Email Logs & Templates</h1>
             <p className="hero-subtitle">
-              Kelola email notification, template, dan pantau log delivery email.
+              Pantau riwayat pengiriman email dan kelola template sistem.
             </p>
           </div>
-          <div className="hero-actions">
+          <div className="hero-actions" style={{ display: 'flex', gap: '12px' }}>
+            <button className="btn-primary" onClick={() => setShowModal(true)}>
+              <RefreshCw size={16} style={{ transform: 'rotate(45deg)' }} />
+              Buat Template Baru
+            </button>
             <button className="btn-outline" onClick={() => void loadData()} disabled={loading}>
               <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-              Segarkan
+              Segarkan Data
             </button>
           </div>
         </div>
       </Card>
 
-      {/* Summary Cards */}
+      {/* Modal Tambah Template */}
+      {showModal && (
+        <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+          <Card style={{ width: '100%', maxWidth: '800px', padding: '2.5rem', maxHeight: '95vh', overflowY: 'auto', borderRadius: '20px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}>
+            <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '1rem', marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2 style={{ margin: 0, color: '#1e293b' }}>Konfigurasi Template Email Lengkap</h2>
+              <span className="badge-soft badge-soft--blue">System Template Editor</span>
+            </div>
+            
+            <form onSubmit={handleAddTemplate}>
+              <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                <div className="form-group">
+                  <label style={{ fontWeight: 700, color: '#475569' }}>Key Unik (Sistem ID)</label>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    value={newTemplate.key} 
+                    onChange={e => setNewTemplate({...newTemplate, key: e.target.value})}
+                    required 
+                    placeholder="misal: leave_approval_notification"
+                  />
+                </div>
+                <div className="form-group">
+                  <label style={{ fontWeight: 700, color: '#475569' }}>Nama Template (Admin Display)</label>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    value={newTemplate.name} 
+                    onChange={e => setNewTemplate({...newTemplate, name: e.target.value})}
+                    required 
+                    placeholder="misal: Notifikasi Persetujuan Cuti"
+                  />
+                </div>
+                <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                  <label style={{ fontWeight: 700, color: '#475569' }}>Deskripsi Internal</label>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    value={newTemplate.description} 
+                    onChange={e => setNewTemplate({...newTemplate, description: e.target.value})}
+                    placeholder="Jelaskan kapan email ini otomatis terkirim..."
+                  />
+                </div>
+                <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                  <label style={{ fontWeight: 700, color: '#475569' }}>Subject Email Default</label>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    value={newTemplate.subject} 
+                    onChange={e => setNewTemplate({...newTemplate, subject: e.target.value})}
+                    required 
+                    placeholder="[HRIS] Permohonan Cuti Anda Telah Disetujui"
+                  />
+                </div>
+
+                {/* HTML Body */}
+                <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                  <label style={{ fontWeight: 700, color: '#475569' }}>Isi Email (Rich HTML Format)</label>
+                  <textarea 
+                    className="form-input" 
+                    rows={8}
+                    value={newTemplate.html_body} 
+                    onChange={e => setNewTemplate({...newTemplate, html_body: e.target.value})}
+                    required 
+                    placeholder="<h1>Halo {{name}},</h1><p>Permohonan cuti Anda telah disetujui...</p>"
+                    style={{ resize: 'vertical', fontFamily: 'monospace' }}
+                  />
+                </div>
+
+                {/* Plain Text Body */}
+                <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                  <label style={{ fontWeight: 700, color: '#475569' }}>Isi Email (Plain Text - Fallback)</label>
+                  <textarea 
+                    className="form-input" 
+                    rows={4}
+                    value={newTemplate.text_body} 
+                    onChange={e => setNewTemplate({...newTemplate, text_body: e.target.value})}
+                    placeholder="Halo {{name}}, Permohonan cuti Anda telah disetujui..."
+                    style={{ resize: 'vertical', background: '#f8fafc' }}
+                  />
+                </div>
+
+                {/* Placeholders */}
+                <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                  <label style={{ fontWeight: 700, color: '#475569' }}>Dynamic Placeholders (Tags)</label>
+                  <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      value={currentPlaceholder}
+                      onChange={e => setCurrentPlaceholder(e.target.value)}
+                      placeholder="Contoh: name, date, amount"
+                    />
+                    <Button type="button" onClick={() => {
+                      if (currentPlaceholder && !newTemplate.placeholders.includes(currentPlaceholder)) {
+                        setNewTemplate({...newTemplate, placeholders: [...newTemplate.placeholders, currentPlaceholder]});
+                        setCurrentPlaceholder('');
+                      }
+                    }}>Tambah</Button>
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                    {newTemplate.placeholders.map(ph => (
+                      <span key={ph} style={{ background: '#eff6ff', color: '#1d4ed8', padding: '4px 12px', borderRadius: '100px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600 }}>
+                        {`{{${ph}}}`}
+                        <button type="button" style={{ border: 'none', background: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '1rem' }} onClick={() => setNewTemplate({...newTemplate, placeholders: newTemplate.placeholders.filter(p => p !== ph)})}>×</button>
+                      </span>
+                    ))}
+                    {newTemplate.placeholders.length === 0 && <span style={{ color: '#94a3b8', fontSize: '0.85rem', fontStyle: 'italic' }}>Belum ada placeholder ditambahkan.</span>}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '2.5rem', borderTop: '1px solid #f1f5f9', paddingTop: '1.5rem' }}>
+                <Button type="button" variant="outline" onClick={() => setShowModal(false)} style={{ padding: '0.75rem 2rem' }}>Batal</Button>
+                <Button type="submit" variant="primary" loading={saving} style={{ padding: '0.75rem 2rem' }}>Simpan Template Full-Spec</Button>
+              </div>
+            </form>
+          </Card>
+        </div>
+      )}
+
       <div className="employee-summary-wrapper">
         {summaryCards.map((card) => {
           const Icon = card.icon;
@@ -270,237 +424,112 @@ const AdminEmailNotificationsPage = () => {
         })}
       </div>
 
-      {/* Analytics Title Card */}
       <Card className="analytics-title-card">
         <div className="analytics-title-inner">
-          <div className="analytics-icon">
-            <BellRing size={24} />
-          </div>
+          <div className="analytics-icon"><Layout size={24} /></div>
           <div>
             <h2 className="analytics-title">Daftar Email Templates</h2>
-            <p className="analytics-subtitle">Kelola dan lihat semua template email</p>
+            <p className="analytics-subtitle">Gunakan template ini di menu "Kirim Notifikasi Email"</p>
           </div>
         </div>
       </Card>
 
-      {/* Control Section */}
       <Card className="control-section-card">
         <div className="control-section-inner">
-          {/* Search */}
           <div className="control-actions">
             <div className="search-box">
               <div className="search-icon-inside"><Search size={18} /></div>
               <input
                 type="text"
-                placeholder="Cari template..."
+                placeholder="Cari template atau log..."
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
                 className="search-input-pill"
               />
             </div>
-            {searchText && (
-              <button className="btn-clear-filter" onClick={clearFilters}>
-                Hapus Filter
-              </button>
-            )}
+            {searchText && <button className="btn-clear-filter" onClick={clearFilters}>Hapus Filter</button>}
           </div>
         </div>
       </Card>
 
-      {/* Table Section - Templates */}
-      <div className="table-section">
+      <div className="table-section" style={{ marginBottom: '2rem' }}>
         <div className="wuw-table-area">
-          {loading && <LoadingState message="Memuat email templates..." />}
-          {!loading && errorMessage && <ErrorState message="Koneksi Terputus" error={errorMessage} onRetry={loadData} />}
-
-          {!loading && !errorMessage && paginatedTemplates.length === 0 && (
-            <div style={{ padding: '5rem 0' }}>
-              <EmptyState
-                title="Pencarian Kosong"
-                message="Kami tidak menemukan template yang sesuai dengan kriteria Anda."
-                actionLabel="Bersihkan Filter"
-                onAction={clearFilters}
-              />
-            </div>
-          )}
-
-          {!loading && !errorMessage && paginatedTemplates.length > 0 && (
-            <>
-              <div className="table-wrap">
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Key</th>
-                      <th>Name</th>
-                      <th>Subject</th>
-                      <th>Status</th>
-                      <th className="th-center" style={{ width: '120px' }}>Aksi</th>
+          {loading ? <LoadingState message="Memuat templates..." /> : errorMessage ? <ErrorState message="Error" error={errorMessage} onRetry={loadData} /> : paginatedTemplates.length === 0 ? <EmptyState title="Kosong" message="Tidak ada template" /> : (
+            <div className="table-wrap">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Key</th>
+                    <th>Name</th>
+                    <th>Subject</th>
+                    <th>Status</th>
+                    <th className="th-center" style={{ width: '80px' }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedTemplates.map((item) => (
+                    <tr key={item.key}>
+                      <td><span className="cell-id">{item.id || "-"}</span></td>
+                      <td><span className="badge-soft badge-soft--blue">{item.key}</span></td>
+                      <td><span className="cell-name-text" style={{ fontWeight: 600 }}>{item.name}</span></td>
+                      <td>{item.subject}</td>
+                      <td><span className={`badge-soft ${item.is_active ? 'badge-soft--green' : 'badge-soft--red'}`}>{item.is_active ? 'ACTIVE' : 'INACTIVE'}</span></td>
+                      <td className="td-center">
+                        <button 
+                          className="btn-icon btn-icon--red" 
+                          onClick={() => item.id && handleDeleteTemplate(item.id)}
+                          title="Hapus Template"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {paginatedTemplates.map((item, index) => (
-                      <tr key={String(item.id ?? `${item.key ?? "template"}-${index}`)}>
-                        <td><span className="cell-id">{item.id ?? "-"}</span></td>
-                        <td><span className="badge-soft badge-soft--blue">{item.key || "-"}</span></td>
-                        <td>
-                          <div className="cell-name">
-                            <div className="cell-avatar">
-                              {(item.name || 'T').charAt(0).toUpperCase()}
-                            </div>
-                            <span className="cell-name-text">{item.name || "-"}</span>
-                          </div>
-                        </td>
-                        <td>{item.subject || "-"}</td>
-                        <td>
-                          <span className={`badge-soft ${item.is_active ? 'badge-soft--green' : 'badge-soft--red'}`}>
-                            {item.is_active ? 'ACTIVE' : 'INACTIVE'}
-                          </span>
-                        </td>
-                        <td className="td-center">
-                          <span className="badge-soft badge-soft--blue">Template</span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Pagination */}
-              <div className="table-pagination">
-                <div className="pagination-info">
-                  Menampilkan <strong>{paginatedTemplates.length}</strong> dari <strong>{sortedTemplates.length}</strong> templates
-                </div>
-                <div className="pagination-controls">
-                  <button
-                    className="pagination-btn"
-                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                    disabled={currentPage === 1}
-                  >
-                    ‹
-                  </button>
-                  {Array.from({ length: totalPagesTemplates }, (_, i) => i + 1).map((page) => (
-                    <button
-                      key={page}
-                      className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
-                      onClick={() => setCurrentPage(page)}
-                    >
-                      {page}
-                    </button>
                   ))}
-                  <button
-                    className="pagination-btn"
-                    onClick={() => setCurrentPage(Math.min(totalPagesTemplates, currentPage + 1))}
-                    disabled={currentPage === totalPagesTemplates}
-                  >
-                    ›
-                  </button>
-                </div>
-              </div>
-            </>
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </div>
 
-      {/* Analytics Title Card - Logs */}
       <Card className="analytics-title-card">
         <div className="analytics-title-inner">
-          <div className="analytics-icon">
-            <Send size={24} />
-          </div>
+          <div className="analytics-icon"><History size={24} /></div>
           <div>
             <h2 className="analytics-title">Email Delivery Logs</h2>
-            <p className="analytics-subtitle">Pantau log pengiriman email</p>
+            <p className="analytics-subtitle">Audit pengiriman email ke karyawan</p>
           </div>
         </div>
       </Card>
 
-      {/* Table Section - Logs */}
       <div className="table-section">
         <div className="wuw-table-area">
-          {!loading && !errorMessage && paginatedLogs.length === 0 && (
-            <div style={{ padding: '5rem 0' }}>
-              <EmptyState
-                title="Pencarian Kosong"
-                message="Kami tidak menemukan log yang sesuai dengan kriteria Anda."
-                actionLabel="Bersihkan Filter"
-                onAction={clearFilters}
-              />
-            </div>
-          )}
-
-          {!loading && !errorMessage && paginatedLogs.length > 0 && (
-            <>
-              <div className="table-wrap">
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Subject</th>
-                      <th>Recipient</th>
-                      <th>Type</th>
-                      <th>Status</th>
-                      <th>Sent At</th>
-                      <th className="th-center" style={{ width: '120px' }}>Aksi</th>
+          {loading ? <LoadingState message="Memuat logs..." /> : paginatedLogs.length === 0 ? <EmptyState title="Kosong" message="Tidak ada log" /> : (
+            <div className="table-wrap">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Subject</th>
+                    <th>Recipient</th>
+                    <th>Status</th>
+                    <th>Sent At</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedLogs.map((log) => (
+                    <tr key={log.id}>
+                      <td><span className="cell-id">{log.id}</span></td>
+                      <td><span className="cell-name-text" style={{ fontWeight: 600 }}>{log.subject}</span></td>
+                      <td>{log.recipient_email}</td>
+                      <td>{getStatusBadge(log.status)}</td>
+                      <td className="cell-date">{formatDate(log.sent_at || log.created_at)}</td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {paginatedLogs.map((log, index) => (
-                      <tr key={String(log.id ?? `${log.subject ?? "log"}-${index}`)}>
-                        <td><span className="cell-id">{log.id ?? "-"}</span></td>
-                        <td>
-                          <div className="cell-name">
-                            <div className="cell-avatar">
-                              {(log.subject || 'L').charAt(0).toUpperCase()}
-                            </div>
-                            <span className="cell-name-text">{log.subject || "-"}</span>
-                          </div>
-                        </td>
-                        <td>{log.recipient_email || "-"}</td>
-                        <td><span className="badge-soft badge-soft--purple">{log.type || "-"}</span></td>
-                        <td>{getStatusBadge(log.status)}</td>
-                        <td className="cell-date">{formatDate(log.sent_at || log.created_at)}</td>
-                        <td className="td-center">
-                          <span className="badge-soft badge-soft--blue">Logged</span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Pagination */}
-              <div className="table-pagination">
-                <div className="pagination-info">
-                  Menampilkan <strong>{paginatedLogs.length}</strong> dari <strong>{sortedLogs.length}</strong> logs
-                </div>
-                <div className="pagination-controls">
-                  <button
-                    className="pagination-btn"
-                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                    disabled={currentPage === 1}
-                  >
-                    ‹
-                  </button>
-                  {Array.from({ length: totalPagesLogs }, (_, i) => i + 1).map((page) => (
-                    <button
-                      key={page}
-                      className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
-                      onClick={() => setCurrentPage(page)}
-                    >
-                      {page}
-                    </button>
                   ))}
-                  <button
-                    className="pagination-btn"
-                    onClick={() => setCurrentPage(Math.min(totalPagesLogs, currentPage + 1))}
-                    disabled={currentPage === totalPagesLogs}
-                  >
-                    ›
-                  </button>
-                </div>
-              </div>
-            </>
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </div>

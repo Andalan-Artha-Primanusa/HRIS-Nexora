@@ -343,8 +343,14 @@ export const menuItems: MenuItem[] = [
             RBACUtils.isAdmin(user) || RBACUtils.isSuperAdmin(user),
         },
         {
-          label: 'Notifikasi Email',
-          path: '/admin/email-notifications',
+          label: 'Kirim Notifikasi Email',
+          path: '/admin/notifications/email-send',
+          requiredChecker: (user) =>
+            RBACUtils.isAdmin(user) || RBACUtils.isSuperAdmin(user),
+        },
+        {
+          label: 'Log & Template Email',
+          path: '/admin/notifications/email-logs',
           requiredChecker: (user) =>
             RBACUtils.isAdmin(user) || RBACUtils.isSuperAdmin(user),
         },
@@ -385,7 +391,7 @@ export const menuItems: MenuItem[] = [
         },
         {
           label: 'Pengaturan Notifikasi',
-          path: '/settings/notification',
+          path: '/settings/notifications',
           requiredChecker: (user) => RBACUtils.isAdmin(user),
         },
       ],
