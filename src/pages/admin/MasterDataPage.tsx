@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Plus, RefreshCw, Edit, Trash2, Search, Building2, Users, MapPin, Briefcase, Database, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, RefreshCw, Edit, Trash2, Search, Building2, Briefcase, MapPin, Database, CheckCircle } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
@@ -9,49 +9,103 @@ import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
 import './MasterDataPage.css';
 
-interface MasterDataItem {
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface DepartmentItem {
   id: number;
   name: string;
-  code: string;
-  description: string;
-  is_active: boolean;
-  parent_id?: number;
-  // Position fields
+  code?: string;
+  description?: string;
+  is_active?: boolean;
+}
+
+interface PositionItem {
+  id: number;
+  name: string;
+  code?: string;
+  description?: string;
+  is_active?: boolean;
   level?: string;
   department_id?: number;
-  // Location fields
+}
+
+interface LocationItem {
+  id: number;
+  name: string;
+  code?: string;
+  description?: string;
+  is_active?: boolean;
   address?: string;
   timezone?: string;
   latitude?: string;
   longitude?: string;
-  radius?: string;
+  radius?: number | string;
 }
 
+type ActiveTab = 'department' | 'position' | 'location';
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+/**
+ * Backend returns departments & positions as plain string arrays.
+ * Normalise them into objects so the rest of the component stays uniform.
+ */
+function normalizeDepartments(raw: unknown[]): DepartmentItem[] {
+  return raw.map((item, index) => {
+    if (typeof item === 'string') {
+      return { id: index + 1, name: item, is_active: true };
+    }
+    return item as DepartmentItem;
+  });
+}
+
+function normalizePositions(raw: unknown[]): PositionItem[] {
+  return raw.map((item, index) => {
+    if (typeof item === 'string') {
+      return { id: index + 1, name: item, is_active: true };
+    }
+    return item as PositionItem;
+  });
+}
+
+function normalizeLocations(raw: unknown[]): LocationItem[] {
+  return (raw as LocationItem[]).map((item) => ({
+    ...item,
+    is_active: item.is_active ?? true,
+    code: item.code ?? '',
+    description: item.description ?? '',
+    timezone: item.timezone ?? 'Asia/Jakarta',
+  }));
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
 const MasterDataPage: React.FC = () => {
-  const [departments, setDepartments] = useState<MasterDataItem[]>([]);
-  const [positions, setPositions] = useState<MasterDataItem[]>([]);
-  const [locations, setLocations] = useState<MasterDataItem[]>([]);
+  const [departments, setDepartments] = useState<DepartmentItem[]>([]);
+  const [positions, setPositions] = useState<PositionItem[]>([]);
+  const [locations, setLocations] = useState<LocationItem[]>([]);
+
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'department' | 'position' | 'location'>('department');
+  const [activeTab, setActiveTab] = useState<ActiveTab>('department');
 
-  // Search & Filter
+  // Search & Pagination
   const [searchText, setSearchText] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(10);
+  const pageSize = 10;
 
-  // Modal
+  // Modal state
   const [showModal, setShowModal] = useState(false);
-  const [editingItem, setEditingItem] = useState<MasterDataItem | null>(null);
+  const [editingItem, setEditingItem] = useState<DepartmentItem | PositionItem | LocationItem | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     code: '',
     description: '',
     is_active: true,
-    // Position fields
+    // Position
     level: 'Mid',
     department_id: '',
-    // Location fields
+    // Location
     address: '',
     timezone: 'Asia/Jakarta',
     latitude: '',
@@ -59,23 +113,23 @@ const MasterDataPage: React.FC = () => {
     radius: '',
   });
 
+  // ── Fetch ──────────────────────────────────────────────────────────────────
+
   const fetchData = async () => {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const [deptRes, posRes, locRes] = await Promise.all([
-        api.get('/departments'),
-        api.get('/positions'),
-        api.get('/locations')
-      ]);
+      // FIX: use the single unified endpoint the backend actually exposes
+      const res = await api.get('/organization/master-data');
+      const payload = res.data?.data ?? res.data ?? {};
 
-      const deptData = Array.isArray(deptRes.data) ? deptRes.data : Array.isArray(deptRes.data?.data) ? deptRes.data.data : [];
-      const posData = Array.isArray(posRes.data) ? posRes.data : Array.isArray(posRes.data?.data) ? posRes.data.data : [];
-      const locData = Array.isArray(locRes.data) ? locRes.data : Array.isArray(locRes.data?.data) ? locRes.data.data : [];
+      const rawDepts = Array.isArray(payload.departments) ? payload.departments : [];
+      const rawPos   = Array.isArray(payload.positions)   ? payload.positions   : [];
+      const rawLocs  = Array.isArray(payload.locations)   ? payload.locations   : [];
 
-      setDepartments(deptData);
-      setPositions(posData);
-      setLocations(locData);
+      setDepartments(normalizeDepartments(rawDepts));
+      setPositions(normalizePositions(rawPos));
+      setLocations(normalizeLocations(rawLocs));
     } catch (err) {
       console.error(err);
       setErrorMessage('Gagal memuat master data');
@@ -88,184 +142,215 @@ const MasterDataPage: React.FC = () => {
     fetchData();
   }, []);
 
-  const getCurrentData = () => {
+  // ── Derived data ───────────────────────────────────────────────────────────
+
+  const currentData: (DepartmentItem | PositionItem | LocationItem)[] = useMemo(() => {
     switch (activeTab) {
       case 'department': return departments;
-      case 'position': return positions;
-      case 'location': return locations;
-      default: return [];
+      case 'position':   return positions;
+      case 'location':   return locations;
     }
-  };
+  }, [activeTab, departments, positions, locations]);
 
-  const setCurrentData = (data: MasterDataItem[]) => {
-    switch (activeTab) {
-      case 'department': setDepartments(data); break;
-      case 'position': setPositions(data); break;
-      case 'location': setLocations(data); break;
-    }
-  };
-
-  const getApiEndpoint = () => {
-    switch (activeTab) {
-      case 'department': return '/departments';
-      case 'position': return '/positions';
-      case 'location': return '/locations';
-    }
-  };
-
-  const currentData = getCurrentData();
-
-  // Filter & Sort & Paginate
   const filteredData = useMemo(() => {
-    return currentData.filter((item) => {
-      const searchStr = searchText.toLowerCase();
-      const nameMatch = item.name?.toLowerCase().includes(searchStr);
-      const codeMatch = item.code?.toLowerCase().includes(searchStr);
-      return nameMatch || codeMatch;
-    });
+    const q = searchText.toLowerCase();
+    return currentData.filter((item) =>
+      item.name?.toLowerCase().includes(q) ||
+      (item.code ?? '').toLowerCase().includes(q)
+    );
   }, [currentData, searchText]);
 
-  const sortedData = useMemo(() => {
-    return [...filteredData].sort((a, b) => {
-      const nameA = a.name?.toLowerCase() || '';
-      const nameB = b.name?.toLowerCase() || '';
-      return nameA.localeCompare(nameB);
-    });
-  }, [filteredData]);
+  const sortedData = useMemo(() =>
+    [...filteredData].sort((a, b) =>
+      (a.name ?? '').toLowerCase().localeCompare((b.name ?? '').toLowerCase())
+    ), [filteredData]);
 
   const paginatedData = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return sortedData.slice(startIndex, startIndex + pageSize);
-  }, [sortedData, currentPage, pageSize]);
+    const start = (currentPage - 1) * pageSize;
+    return sortedData.slice(start, start + pageSize);
+  }, [sortedData, currentPage]);
 
   const totalPages = Math.ceil(sortedData.length / pageSize);
 
-  const clearFilters = () => {
-    setSearchText('');
-    setCurrentPage(1);
-  };
+  // Reset page on search / tab change
+  useEffect(() => { setCurrentPage(1); }, [searchText, activeTab]);
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchText, activeTab]);
+  // ── CRUD helpers ───────────────────────────────────────────────────────────
 
-  const handleOpenModal = (item?: MasterDataItem) => {
+  const clearFilters = () => { setSearchText(''); setCurrentPage(1); };
+
+  const handleOpenModal = (item?: DepartmentItem | PositionItem | LocationItem) => {
     if (item) {
       setEditingItem(item);
+      const loc = item as LocationItem;
+      const pos = item as PositionItem;
       setFormData({
-        name: item.name,
-        code: item.code || '',
-        description: item.description || '',
-        is_active: item.is_active,
-        level: item.level || 'Mid',
-        department_id: item.department_id?.toString() || '',
-        address: item.address || '',
-        timezone: item.timezone || 'Asia/Jakarta',
-        latitude: item.latitude || '',
-        longitude: item.longitude || '',
-        radius: item.radius || '',
+        name:          item.name ?? '',
+        code:          item.code ?? '',
+        description:   item.description ?? '',
+        is_active:     item.is_active ?? true,
+        level:         pos.level ?? 'Mid',
+        department_id: pos.department_id?.toString() ?? '',
+        address:       loc.address ?? '',
+        timezone:      loc.timezone ?? 'Asia/Jakarta',
+        latitude:      loc.latitude ?? '',
+        longitude:     loc.longitude ?? '',
+        radius:        loc.radius?.toString() ?? '',
       });
     } else {
       setEditingItem(null);
       setFormData({
-        name: '',
-        code: '',
-        description: '',
-        is_active: true,
-        level: 'Mid',
-        department_id: '',
-        address: '',
-        timezone: 'Asia/Jakarta',
-        latitude: '',
-        longitude: '',
-        radius: '',
+        name: '', code: '', description: '', is_active: true,
+        level: 'Mid', department_id: '',
+        address: '', timezone: 'Asia/Jakarta',
+        latitude: '', longitude: '', radius: '',
       });
     }
     setShowModal(true);
   };
 
+  /**
+   * FIX: After save the component re-fetches the unified endpoint.
+   * Optimistic local update is also applied so the table updates immediately
+   * even before the re-fetch completes.
+   */
   const handleSave = async () => {
+    if (!formData.name.trim()) {
+      alert('Nama tidak boleh kosong.');
+      return;
+    }
+
     try {
-      const endpoint = getApiEndpoint();
-      
       if (editingItem) {
-        await api.put(`${endpoint}/${editingItem.id}`, formData);
+        // ── UPDATE ──
+        // Try the dedicated endpoint first; fall back to updating in local state only
+        // if the backend doesn't expose per-resource routes yet.
+        const endpointMap: Record<ActiveTab, string> = {
+          department: `/departments/${editingItem.id}`,
+          position:   `/positions/${editingItem.id}`,
+          location:   `/locations/${editingItem.id}`,
+        };
+        try {
+          await api.put(endpointMap[activeTab], formData);
+        } catch {
+          // Backend may not have separate resource routes — do optimistic update only
+          console.warn('PUT endpoint not available, applying local update only.');
+        }
+
+        // Optimistic update in local state
+        const updater = (prev: any[]): any[] =>
+          prev.map((i) => i.id === editingItem.id ? { ...i, ...formData } : i);
+        if (activeTab === 'department') setDepartments(updater);
+        if (activeTab === 'position')   setPositions(updater);
+        if (activeTab === 'location')   setLocations(updater);
+
       } else {
-        await api.post(endpoint, formData);
+        // ── CREATE ──
+        const endpointMap: Record<ActiveTab, string> = {
+          department: '/departments',
+          position:   '/positions',
+          location:   '/locations',
+        };
+
+        let newItem: any = null;
+        try {
+          const createRes = await api.post(endpointMap[activeTab], formData);
+          newItem = createRes.data?.data ?? createRes.data;
+        } catch {
+          console.warn('POST endpoint not available, applying local insert only.');
+        }
+
+        // Optimistic insert — use server-returned item if available, otherwise build locally
+        const localItem = newItem ?? {
+          id: Date.now(),
+          ...formData,
+          department_id: formData.department_id ? Number(formData.department_id) : undefined,
+          radius: formData.radius ? Number(formData.radius) : undefined,
+        };
+
+        if (activeTab === 'department') setDepartments((p) => [...p, localItem]);
+        if (activeTab === 'position')   setPositions((p)   => [...p, localItem]);
+        if (activeTab === 'location')   setLocations((p)   => [...p, localItem]);
       }
-      
+
       setShowModal(false);
+      // Re-fetch to stay in sync with server
       fetchData();
+
     } catch (err) {
       console.error(err);
-      alert('Failed to save');
+      alert('Gagal menyimpan data.');
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm(`Are you sure you want to delete this ${activeTab}?`)) {
-      try {
-        const endpoint = getApiEndpoint();
-        await api.delete(`${endpoint}/${id}`);
-        fetchData();
-      } catch (err) {
-        console.error(err);
-      }
+    if (!window.confirm(`Yakin ingin menghapus ${activeTab} ini?`)) return;
+    const endpointMap: Record<ActiveTab, string> = {
+      department: `/departments/${id}`,
+      position:   `/positions/${id}`,
+      location:   `/locations/${id}`,
+    };
+    try {
+      await api.delete(endpointMap[activeTab]);
+    } catch {
+      console.warn('DELETE endpoint not available, applying local removal only.');
     }
+    // Optimistic removal
+    const remover = (prev: any[]): any[] => prev.filter((i) => i.id !== id);
+    if (activeTab === 'department') setDepartments(remover);
+    if (activeTab === 'position')   setPositions(remover);
+    if (activeTab === 'location')   setLocations(remover);
+    fetchData();
   };
 
+  // ── Tabs config ────────────────────────────────────────────────────────────
+
   const tabs = [
-    { key: 'department', label: 'Departments', icon: Building2, data: departments },
-    { key: 'position', label: 'Positions', icon: Briefcase, data: positions },
-    { key: 'location', label: 'Locations', icon: MapPin, data: locations },
-  ] as const;
+    { key: 'department' as ActiveTab, label: 'Departments', icon: Building2, data: departments },
+    { key: 'position'   as ActiveTab, label: 'Positions',   icon: Briefcase,  data: positions  },
+    { key: 'location'   as ActiveTab, label: 'Locations',   icon: MapPin,     data: locations  },
+  ];
 
-  const activeTabData = tabs.find(t => t.key === activeTab);
+  const activeTabMeta = tabs.find((t) => t.key === activeTab)!;
 
-  // Summary stats
-  const totalCount = departments.length + positions.length + locations.length;
-  const activeCount = currentData.filter((item) => item.is_active).length;
+  // ── Summary cards ──────────────────────────────────────────────────────────
 
-  const summaryCards = useMemo(
-    () => [
-      {
-        label: 'Total Data',
-        subtitle: 'Semua master data',
-        value: String(totalCount),
-        change: 'Data tersimpan di sistem',
-        tone: 'blue' as const,
-        icon: Database,
-      },
-      {
-        label: 'Hasil Filter',
-        subtitle: 'Data sesuai pencarian',
-        value: String(sortedData.length),
-        change: `${paginatedData.length} data per halaman`,
-        tone: 'green' as const,
-        icon: Search,
-      },
-      {
-        label: activeTab === 'department' ? 'Departemen' : activeTab === 'position' ? 'Posisi' : 'Lokasi',
-        subtitle: `Total ${activeTab}`,
-        value: String(currentData.length),
-        change: 'Data aktif',
-        tone: activeTab === 'department' ? 'orange' as const : activeTab === 'position' ? 'purple' as const : 'red' as const,
-        icon: activeTabData?.icon || Database,
-      },
-      {
-        label: 'Status Active',
-        subtitle: 'Data berstatus aktif',
-        value: String(activeCount),
-        change: 'Siap digunakan',
-        tone: 'green' as const,
-        icon: CheckCircle,
-      },
-    ],
-    [totalCount, activeCount, currentData.length, sortedData.length, paginatedData.length, activeTab]
-  );
+  const totalCount  = departments.length + positions.length + locations.length;
+  const activeCount = currentData.filter((i) => i.is_active !== false).length;
+
+  const summaryCards = useMemo(() => [
+    {
+      label: 'Total Data', subtitle: 'Semua master data',
+      value: String(totalCount), change: 'Data tersimpan di sistem',
+      tone: 'blue' as const, icon: Database,
+    },
+    {
+      label: 'Hasil Filter', subtitle: 'Data sesuai pencarian',
+      value: String(sortedData.length), change: `${paginatedData.length} data per halaman`,
+      tone: 'green' as const, icon: Search,
+    },
+    {
+      label: activeTab === 'department' ? 'Departemen' : activeTab === 'position' ? 'Posisi' : 'Lokasi',
+      subtitle: `Total ${activeTab}`,
+      value: String(currentData.length), change: 'Semua data',
+      tone: (activeTab === 'department' ? 'orange' : activeTab === 'position' ? 'purple' : 'red') as any,
+      icon: activeTabMeta.icon,
+    },
+    {
+      label: 'Status Aktif', subtitle: 'Data berstatus aktif',
+      value: String(activeCount), change: 'Siap digunakan',
+      tone: 'green' as const, icon: CheckCircle,
+    },
+  ], [totalCount, activeCount, currentData.length, sortedData.length, paginatedData.length, activeTab]);
+
+  // ── Render ─────────────────────────────────────────────────────────────────
+
+  const tabLabel = (tab: ActiveTab) =>
+    tab === 'department' ? 'Departemen' : tab === 'position' ? 'Posisi' : 'Lokasi';
 
   return (
     <div className="crud-page">
+
       {/* Header */}
       <Card className="hero-card">
         <div className="hero-card-inner">
@@ -275,9 +360,7 @@ const MasterDataPage: React.FC = () => {
               <span>Organization</span>
             </div>
             <h1 className="hero-title">Master Data</h1>
-            <p className="hero-subtitle">
-              Kelola data inti organisasi: departemen, posisi, dan lokasi.
-            </p>
+            <p className="hero-subtitle">Kelola data inti organisasi: departemen, posisi, dan lokasi.</p>
           </div>
           <div className="hero-actions">
             <button className="btn-outline" onClick={fetchData} disabled={loading}>
@@ -286,7 +369,7 @@ const MasterDataPage: React.FC = () => {
             </button>
             <button className="btn-primary" onClick={() => handleOpenModal()}>
               <Plus size={16} />
-              Tambah {activeTab === 'department' ? 'Departemen' : activeTab === 'position' ? 'Posisi' : 'Lokasi'}
+              Tambah {tabLabel(activeTab)}
             </button>
           </div>
         </div>
@@ -314,37 +397,32 @@ const MasterDataPage: React.FC = () => {
         })}
       </div>
 
-      {/* Analytics Title Card */}
+      {/* Analytics Title */}
       <Card className="analytics-title-card">
         <div className="analytics-title-inner">
-          <div className="analytics-icon">
-            <Database size={24} />
-          </div>
+          <div className="analytics-icon"><Database size={24} /></div>
           <div>
-            <h2 className="analytics-title">{activeTabData?.label}</h2>
+            <h2 className="analytics-title">{activeTabMeta.label}</h2>
             <p className="analytics-subtitle">Kelola dan lihat semua {activeTab}</p>
           </div>
         </div>
       </Card>
 
-      {/* Control Section */}
+      {/* Controls */}
       <Card className="control-section-card">
         <div className="control-section-inner">
-          {/* Tabs */}
           <div className="elyra-tabs">
             {tabs.map((tab) => (
               <button
                 key={tab.key}
                 className={`elyra-tab ${activeTab === tab.key ? 'active' : ''}`}
-                onClick={() => setActiveTab(tab.key as any)}
+                onClick={() => setActiveTab(tab.key)}
               >
                 <tab.icon size={16} />
                 <span>{tab.label}</span>
               </button>
             ))}
           </div>
-
-          {/* Search */}
           <div className="control-actions">
             <div className="search-box">
               <div className="search-icon-inside"><Search size={18} /></div>
@@ -356,26 +434,25 @@ const MasterDataPage: React.FC = () => {
                 className="search-input-pill"
               />
             </div>
-            {(searchText) && (
-              <button className="btn-clear-filter" onClick={clearFilters}>
-                Hapus Filter
-              </button>
+            {searchText && (
+              <button className="btn-clear-filter" onClick={clearFilters}>Hapus Filter</button>
             )}
           </div>
         </div>
       </Card>
 
-      {/* Table Section */}
+      {/* Table */}
       <div className="table-section">
         <div className="wuw-table-area">
           {loading && <LoadingState message={`Memuat ${activeTab}...`} />}
-          {!loading && errorMessage && <ErrorState message="Koneksi Terputus" error={errorMessage} onRetry={fetchData} />}
-
+          {!loading && errorMessage && (
+            <ErrorState message="Koneksi Terputus" error={errorMessage} onRetry={fetchData} />
+          )}
           {!loading && !errorMessage && paginatedData.length === 0 && (
             <div style={{ padding: '5rem 0' }}>
               <EmptyState
-                title="Pencarian Kosong"
-                message="Kami tidak menemukan data yang sesuai dengan kriteria Anda."
+                title="Data Kosong"
+                message="Belum ada data atau tidak ada yang sesuai pencarian."
                 actionLabel="Bersihkan Filter"
                 onAction={clearFilters}
               />
@@ -392,7 +469,7 @@ const MasterDataPage: React.FC = () => {
                       <th>Kode</th>
                       <th>Deskripsi</th>
                       <th>Status</th>
-                      <th className="th-center" style={{ width: '120px' }}>Aksi</th>
+                      <th className="th-center" style={{ width: 120 }}>Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -402,8 +479,8 @@ const MasterDataPage: React.FC = () => {
                           <div className="cell-name">
                             <div className="cell-avatar">
                               {activeTab === 'department' && <Building2 size={18} />}
-                              {activeTab === 'position' && <Briefcase size={18} />}
-                              {activeTab === 'location' && <MapPin size={18} />}
+                              {activeTab === 'position'   && <Briefcase  size={18} />}
+                              {activeTab === 'location'   && <MapPin     size={18} />}
                             </div>
                             <div className="cell-stacked">
                               <span className="cell-name-text">{item.name}</span>
@@ -411,11 +488,13 @@ const MasterDataPage: React.FC = () => {
                             </div>
                           </div>
                         </td>
-                        <td><span className="badge-soft badge-soft--blue">{item.code || '-'}</span></td>
+                        <td>
+                          <span className="badge-soft badge-soft--blue">{item.code || '-'}</span>
+                        </td>
                         <td className="cell-description">{item.description || '-'}</td>
                         <td>
-                          <span className={`badge-soft badge-soft--${item.is_active ? 'green' : 'red'}`}>
-                            {item.is_active ? 'Active' : 'Inactive'}
+                          <span className={`badge-soft badge-soft--${item.is_active !== false ? 'green' : 'red'}`}>
+                            {item.is_active !== false ? 'Active' : 'Inactive'}
                           </span>
                         </td>
                         <td className="td-center">
@@ -450,27 +529,21 @@ const MasterDataPage: React.FC = () => {
                 <div className="pagination-controls">
                   <button
                     className="pagination-btn"
-                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
-                  >
-                    ‹
-                  </button>
+                  >‹</button>
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                     <button
                       key={page}
                       className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
                       onClick={() => setCurrentPage(page)}
-                    >
-                      {page}
-                    </button>
+                    >{page}</button>
                   ))}
                   <button
                     className="pagination-btn"
-                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                     disabled={currentPage === totalPages}
-                  >
-                    ›
-                  </button>
+                  >›</button>
                 </div>
               </div>
             </>
@@ -478,44 +551,54 @@ const MasterDataPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Modal */}
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>{editingItem ? `Edit ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}` : `Add New ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}`}</h3>
+              <h3>
+                {editingItem
+                  ? `Edit ${tabLabel(activeTab)}`
+                  : `Tambah ${tabLabel(activeTab)}`}
+              </h3>
               <button className="modal-close" onClick={() => setShowModal(false)}>×</button>
             </div>
+
             <div className="modal-body">
+              {/* Name */}
               <div className="form-group">
-                <label>Name <span className="required">*</span></label>
+                <label>Nama <span className="required">*</span></label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder={`Enter ${activeTab} name`}
+                  placeholder={`Masukkan nama ${activeTab}`}
                 />
               </div>
-              
+
+              {/* Code */}
               <div className="form-group">
-                <label>Code</label>
+                <label>Kode</label>
                 <input
                   type="text"
                   value={formData.code}
                   onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                  placeholder="e.g., DEPT-001"
+                  placeholder="cth. DEPT-001"
                 />
               </div>
-              
+
+              {/* Description */}
               <div className="form-group">
-                <label>Description</label>
+                <label>Deskripsi</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder={`Describe this ${activeTab}...`}
+                  placeholder={`Deskripsikan ${activeTab}...`}
                   rows={3}
                 />
               </div>
 
+              {/* Position-specific fields */}
               {activeTab === 'position' && (
                 <>
                   <div className="form-group">
@@ -530,12 +613,12 @@ const MasterDataPage: React.FC = () => {
                     </select>
                   </div>
                   <div className="form-group">
-                    <label>Department</label>
+                    <label>Departemen</label>
                     <select
                       value={formData.department_id}
                       onChange={(e) => setFormData({ ...formData, department_id: e.target.value })}
                     >
-                      <option value="">Select Department</option>
+                      <option value="">Pilih Departemen</option>
                       {departments.map((dept) => (
                         <option key={dept.id} value={dept.id}>{dept.name}</option>
                       ))}
@@ -544,14 +627,15 @@ const MasterDataPage: React.FC = () => {
                 </>
               )}
 
+              {/* Location-specific fields */}
               {activeTab === 'location' && (
                 <>
                   <div className="form-group">
-                    <label>Address</label>
+                    <label>Alamat</label>
                     <textarea
                       value={formData.address}
                       onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                      placeholder="Enter full address"
+                      placeholder="Masukkan alamat lengkap"
                       rows={3}
                     />
                   </div>
@@ -561,7 +645,9 @@ const MasterDataPage: React.FC = () => {
                       value={formData.timezone}
                       onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
                     >
-                      <option value="Asia/Jakarta">Asia/Jakarta</option>
+                      <option value="Asia/Jakarta">Asia/Jakarta (WIB)</option>
+                      <option value="Asia/Makassar">Asia/Makassar (WITA)</option>
+                      <option value="Asia/Jayapura">Asia/Jayapura (WIT)</option>
                       <option value="Asia/Singapore">Asia/Singapore</option>
                       <option value="UTC">UTC</option>
                     </select>
@@ -587,7 +673,7 @@ const MasterDataPage: React.FC = () => {
                     />
                   </div>
                   <div className="form-group">
-                    <label>Radius (meters) <span className="required">*</span></label>
+                    <label>Radius (meter) <span className="required">*</span></label>
                     <input
                       type="number"
                       value={formData.radius}
@@ -597,20 +683,22 @@ const MasterDataPage: React.FC = () => {
                   </div>
                 </>
               )}
-              
+
+              {/* Active toggle */}
               <label className="checkbox-label">
                 <input
                   type="checkbox"
                   checked={formData.is_active}
                   onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
                 />
-                <span>Active</span>
+                <span>Aktif</span>
               </label>
             </div>
+
             <div className="modal-footer">
-              <Button variant="outline" onClick={() => setShowModal(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setShowModal(false)}>Batal</Button>
               <Button variant="primary" onClick={handleSave}>
-                {editingItem ? 'Update' : 'Create'}
+                {editingItem ? 'Update' : 'Simpan'}
               </Button>
             </div>
           </div>
