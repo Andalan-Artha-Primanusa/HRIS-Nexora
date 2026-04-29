@@ -4,6 +4,8 @@ import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 import { Card } from '@/shared/ui/Card';
 import { api } from '@/shared/api/httpClient';
 import { useAuthStore } from '@/app/store/auth.store';
+import { FileText } from 'lucide-react';
+import { getMyLeaveBalance, getMyLeaves, getTodayAttendance, getAttendanceHistory } from '@/features/ess/api/ess.service';
 import "./EmployeeDashboardPage.css";
 
 type LeaveItem = {
@@ -54,24 +56,23 @@ const EmployeeDashboardPage = () => {
       setLoading(true);
       try {
         const [balanceRes, leavesRes, attendanceRes, attendanceTrendRes] = await Promise.allSettled([
-          api.get('/leave/balance'),
-          api.get('/leave/requests'),
-          api.get('/attendance/today'),
-          api.get('/attendance/my'),
+          getMyLeaveBalance(),
+          getMyLeaves(),
+          getTodayAttendance(),
+          getAttendanceHistory(),
         ]);
 
         // Leave balance
         if (balanceRes.status === 'fulfilled') {
-          const data = balanceRes.value.data;
-          setLeaveBalance(data?.remaining_days ?? data?.balance ?? 0);
-          setLeaveUsed(data?.used_days ?? data?.used ?? 0);
+          const payload = balanceRes.value.payload as any;
+          setLeaveBalance(payload?.balance?.available_days ?? payload?.remaining_days ?? payload?.balance ?? 0);
+          setLeaveUsed(payload?.balance?.used_days ?? payload?.used_days ?? payload?.used ?? 0);
         }
 
         // Leaves
         let leaves: LeaveItem[] = [];
         if (leavesRes.status === 'fulfilled') {
-          const data = leavesRes.value.data;
-          leaves = Array.isArray(data) ? data : (data?.items || []);
+          leaves = leavesRes.value.items as LeaveItem[];
           const pending = leaves.filter((l) => l.status === 'pending' || l.status === 'submitted');
           setPendingLeaves(pending);
           setAllLeaves(leaves);
@@ -164,16 +165,15 @@ const EmployeeDashboardPage = () => {
 
         // Today attendance
         if (attendanceRes.status === 'fulfilled') {
-          const data = attendanceRes.value.data;
-          if (data && (data.check_in_time || data.status)) {
-            setTodayAttendance(data);
+          const payload = attendanceRes.value.payload as any;
+          if (payload && (payload.check_in_time || payload.status)) {
+            setTodayAttendance(payload);
           }
         }
 
         // Attendance trend (last 7 days)
         if (attendanceTrendRes.status === 'fulfilled') {
-          const data = attendanceTrendRes.value.data;
-          const records = Array.isArray(data) ? data : (data?.items || []);
+          const records = attendanceTrendRes.value.items as any[];
           const dayOrder = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
           const trendData: AttendanceTrendData[] = dayOrder.map((day) => ({ day, present: 0, absent: 0 }));
           
