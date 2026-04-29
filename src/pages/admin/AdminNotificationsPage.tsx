@@ -263,7 +263,9 @@ if (!hasAdminAccess(user)) {
                     <select id="notification-recipient" className="form-input" value={recipientId} onChange={(event) => setRecipientId(event.target.value)}>
                       <option value="">-- Pilih Penerima (Opsional) --</option>
                       {employees.map(emp => (
-                        <option key={emp.id} value={emp.user_id || emp.id}>{emp.full_name} ({emp.employee_id})</option>
+                        <option key={emp.id} value={emp.user_id || emp.id}>
+                          {emp.user?.name || 'Karyawan'} ({emp.employee_code || emp.id})
+                        </option>
                       ))}
                     </select>
                   </div>

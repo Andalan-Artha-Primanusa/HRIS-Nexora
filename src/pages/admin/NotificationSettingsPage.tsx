@@ -9,15 +9,15 @@ import '@/pages/payroll/PayrollShared.css';
 import './NotificationSettingsPage.css';
 
 interface NotificationSetting {
-  id: string;
-  name: string;
+  id: number;
+  category: string;
+  label: string;
   description: string;
-  channels: {
-    email: boolean;
-    push: boolean;
-    in_app: boolean;
-  };
-  category: 'leave' | 'payroll' | 'announcement' | 'system' | 'approval';
+  email: boolean;
+  push: boolean;
+  in_app: boolean;
+  // Kita tambahkan ini untuk filtering UI jika diperlukan
+  group?: 'leave' | 'payroll' | 'announcement' | 'system' | 'approval';
 }
 
 const NotificationSettingsPage: React.FC = () => {
@@ -28,61 +28,35 @@ const NotificationSettingsPage: React.FC = () => {
 
   const defaultSettings: NotificationSetting[] = [
     {
-      id: 'leave_request',
-      name: 'Leave Request',
-      description: 'When employees submit leave requests',
-      category: 'leave',
-      channels: { email: true, push: true, in_app: true }
+      id: 1,
+      category: 'Absensi',
+      label: 'Kehadiran & Absensi',
+      description: 'Notifikasi saat karyawan melakukan check-in, check-out, atau terlambat.',
+      in_app: true,
+      email: true,
+      push: true,
+      group: 'system'
     },
     {
-      id: 'leave_approval',
-      name: 'Leave Approval',
-      description: 'When leave requests are approved or rejected',
-      category: 'approval',
-      channels: { email: true, push: true, in_app: true }
+      id: 2,
+      category: 'Payroll',
+      label: 'Penggajian & Slip Gaji',
+      description: 'Notifikasi saat payroll diproses, slip gaji tersedia, atau ada revisi gaji.',
+      in_app: true,
+      email: true,
+      push: false,
+      group: 'payroll'
     },
     {
-      id: 'payroll_ready',
-      name: 'Payroll Ready',
-      description: 'When payroll is ready for review',
-      category: 'payroll',
-      channels: { email: true, push: false, in_app: true }
-    },
-    {
-      id: 'payroll_paid',
-      name: 'Payroll Paid',
-      description: 'When salary has been disbursed',
-      category: 'payroll',
-      channels: { email: true, push: true, in_app: true }
-    },
-    {
-      id: 'announcement',
-      name: 'Company Announcement',
-      description: 'Important company announcements and updates',
-      category: 'announcement',
-      channels: { email: true, push: true, in_app: true }
-    },
-    {
-      id: 'overtime_request',
-      name: 'Overtime Request',
-      description: 'When overtime requests need approval',
-      category: 'approval',
-      channels: { email: true, push: true, in_app: true }
-    },
-    {
-      id: 'reimbursement',
-      name: 'Reimbursement',
-      description: 'Reimbursement request status updates',
-      category: 'approval',
-      channels: { email: true, push: false, in_app: true }
-    },
-    {
-      id: 'attendance_alert',
-      name: 'Attendance Alert',
-      description: 'Attendance-related notifications',
-      category: 'system',
-      channels: { email: false, push: true, in_app: true }
-    },
+      id: 3,
+      category: 'Cuti',
+      label: 'Manajemen Cuti',
+      description: 'Notifikasi pengajuan cuti baru, persetujuan, atau penolakan cuti.',
+      in_app: true,
+      email: true,
+      push: true,
+      group: 'leave'
+    }
   ];
 
   const fetchData = async () => {
@@ -108,12 +82,33 @@ const NotificationSettingsPage: React.FC = () => {
     fetchData();
   }, []);
 
-  const toggleChannel = (settingId: string, channel: 'email' | 'push' | 'in_app') => {
+  const toggleChannel = async (category: string, channel: 'email' | 'push' | 'in_app') => {
+    const setting = settings.find(s => s.category === category);
+    if (!setting) return;
+
+    const currentValue = setting[channel];
+
+    // Update optimistik di UI
     setSettings(prev => prev.map(s => 
-      s.id === settingId 
-        ? { ...s, channels: { ...s.channels, [channel]: !s.channels[channel] } }
+      s.category === category 
+        ? { ...s, [channel]: !currentValue }
         : s
     ));
+
+    try {
+      await api.put(`/notification-settings/${category}`, {
+        channel,
+        enabled: !currentValue
+      });
+    } catch (err) {
+      console.error(err);
+      // Revert jika gagal
+      setSettings(prev => prev.map(s => 
+        s.category === category 
+          ? { ...s, [channel]: currentValue }
+          : s
+      ));
+    }
   };
 
   const handleSave = async () => {
@@ -131,7 +126,7 @@ const NotificationSettingsPage: React.FC = () => {
 
   const filteredSettings = activeCategory === 'all' 
     ? settings 
-    : settings.filter(s => s.category === activeCategory);
+    : settings.filter(s => s.group === activeCategory || s.category.toLowerCase().includes(activeCategory.toLowerCase()));
 
   const categories = [
     { key: 'all', label: 'All', icon: Bell },
@@ -142,147 +137,186 @@ const NotificationSettingsPage: React.FC = () => {
     { key: 'system', label: 'System', icon: ShieldCheck },
   ];
 
-  const emailEnabledCount = settings.reduce((acc, s) => acc + (s.channels.email ? 1 : 0), 0);
-  const pushEnabledCount = settings.reduce((acc, s) => acc + (s.channels.push ? 1 : 0), 0);
+  const emailEnabledCount = settings.reduce((acc, s) => acc + (s.email ? 1 : 0), 0);
+  const pushEnabledCount = settings.reduce((acc, s) => acc + (s.push ? 1 : 0), 0);
+  const appEnabledCount = settings.reduce((acc, s) => acc + (s.in_app ? 1 : 0), 0);
+
+  const summaryCards = [
+    {
+      label: "Total Triggers",
+      subtitle: "Kategori Notifikasi",
+      value: String(settings.length),
+      change: "Pemicu Aktif",
+      tone: "blue" as const,
+      icon: Bell,
+    },
+    {
+      label: "Email Channel",
+      subtitle: "Via SMTP Service",
+      value: String(emailEnabledCount),
+      change: "Email Terdaftar",
+      tone: "green" as const,
+      icon: Mail,
+    },
+    {
+      label: "Push Notification",
+      subtitle: "Browser & Mobile",
+      value: String(pushEnabledCount),
+      change: "Real-time Alerts",
+      tone: "orange" as const,
+      icon: Smartphone,
+    },
+    {
+      label: "In-App Feed",
+      subtitle: "Dashboard Bell",
+      value: String(appEnabledCount),
+      change: "Internal Feed",
+      tone: "purple" as const,
+      icon: CheckCircle,
+    },
+  ];
 
   return (
-    <div className="crud-page notification-page">
-      <Card className="hero-card" style={{ marginBottom: '2rem' }}>
+    <div className="crud-page training-page notification-page">
+      {/* Header */}
+      <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
             <div className="hero-badge">
-              <Bell size={16} />
-              <span>Communication Center</span>
+              <ShieldCheck size={16} />
+              <span>System Security</span>
             </div>
-            <h1 className="hero-title">Notification Settings</h1>
+            <h1 className="hero-title">Pengaturan Notifikasi</h1>
             <p className="hero-subtitle">
-              Configure how you receive notifications across different channels and business processes.
+              Konfigurasikan bagaimana sistem mengirimkan pemberitahuan untuk setiap aktivitas bisnis di HRIS.
             </p>
           </div>
           <div className="hero-actions">
             <button className="btn-outline" onClick={fetchData} disabled={loading} style={{ background: 'white' }}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-              {loading ? 'Memuat...' : 'Refresh'}
-            </button>
-            <button className="btn-primary" onClick={handleSave} disabled={saving} style={{ boxShadow: '0 10px 20px rgba(37, 99, 235, 0.2)' }}>
-              <Save size={16} />
-              {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
+              {loading ? 'Memuat...' : 'Segarkan'}
             </button>
           </div>
         </div>
       </Card>
 
-      <div className="settings-summary-grid">
-        <Card className="summary-card">
-          <div className="summary-card__header">
-            <div>
-              <span className="summary-card__label">Total Notifications</span>
-              <p className="summary-card__subtitle">Configured triggers</p>
-            </div>
-            <span className="summary-card__icon summary-card__icon--blue">
-              <Bell size={20} />
-            </span>
-          </div>
-          <div className="summary-card__value summary-card__value--blue">{settings.length}</div>
-          <div className="summary-card__change">Active notification types</div>
-        </Card>
-
-        <Card className="summary-card">
-          <div className="summary-card__header">
-            <div>
-              <span className="summary-card__label">Email Channel</span>
-              <p className="summary-card__subtitle">Via SMTP service</p>
-            </div>
-            <span className="summary-card__icon summary-card__icon--green">
-              <Mail size={20} />
-            </span>
-          </div>
-          <div className="summary-card__value summary-card__value--green">{emailEnabledCount}</div>
-          <div className="summary-card__change">Enabled for triggers</div>
-        </Card>
-
-        <Card className="summary-card">
-          <div className="summary-card__header">
-            <div>
-              <span className="summary-card__label">Mobile Push</span>
-              <p className="summary-card__subtitle">App push notifications</p>
-            </div>
-            <span className="summary-card__icon summary-card__icon--orange">
-              <Smartphone size={20} />
-            </span>
-          </div>
-          <div className="summary-card__value summary-card__value--orange">{pushEnabledCount}</div>
-          <div className="summary-card__change">Active mobile endpoints</div>
-        </Card>
-      </div>
-
-      <div className="white-unified-wrapper" style={{ marginTop: '2rem' }}>
-        <div className="wuw-header">
-          <div className="wuw-header-top" style={{ marginBottom: 0 }}>
-            <div className="wuw-title-area">
-              <h3>Notification Preferences</h3>
-              <span className="wuw-count-badge">{filteredSettings.length} modules</span>
-            </div>
-            <div className="settings-tabs-container">
-              {categories.map(cat => (
-                <button
-                  key={cat.key}
-                  className={`settings-nav-tab ${activeCategory === cat.key ? 'active' : ''}`}
-                  onClick={() => setActiveCategory(cat.key)}
-                >
-                  <cat.icon size={16} />
-                  <span>{cat.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="settings-content-area">
-          {loading ? (
-            <div className="settings-loading-state">
-              <RefreshCw size={48} className="animate-spin" color="#2563eb" />
-              <p>Synchronizing preferences...</p>
-            </div>
-          ) : (
-            <div className="notification-list-premium">
-              <div className="notification-header-row-premium">
-                <div className="notification-info-col">Notification Type</div>
-                <div className="notification-channels-col">
-                  <span>Email</span>
-                  <span>Push</span>
-                  <span>In-App</span>
+      {/* Summary Cards */}
+      <div className="training-summary-wrapper">
+        {summaryCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <div key={card.label} className="training-summary-card">
+              <div className="training-summary-header">
+                <div>
+                  <p className="training-summary-label">{card.label}</p>
+                  <p className="training-summary-subtitle">{card.subtitle}</p>
+                </div>
+                <div className={`training-summary-icon-wrapper training-icon-${card.tone}`}>
+                  <Icon size={28} />
                 </div>
               </div>
+              <div className={`training-summary-value training-value-${card.tone}`}>{card.value}</div>
+              <p className="training-summary-trend">{card.change}</p>
+            </div>
+          );
+        })}
+      </div>
 
-              {filteredSettings.map((setting) => (
-                <div key={setting.id} className="notification-item-premium">
-                  <div className="notification-info-col">
-                    <div className="notification-icon-premium">
-                      <Bell size={18} />
-                    </div>
-                    <div className="notification-text-premium">
-                      <h4>{setting.name}</h4>
-                      <p>{setting.description}</p>
-                    </div>
-                  </div>
-                  <div className="notification-channels-col">
-                    {(['email', 'push', 'in_app'] as const).map(channel => {
-                      const isEnabled = setting.channels[channel];
-                      return (
+      {/* Analytics Title Card */}
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <Settings size={24} />
+          </div>
+          <div>
+            <h2 className="analytics-title">Konfigurasi Channel</h2>
+            <p className="analytics-subtitle">Aktifkan atau matikan saluran komunikasi per kategori</p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Control Section */}
+      <Card className="control-section-card">
+        <div className="control-section-inner">
+          <div className="elyra-tabs">
+            {categories.map((cat) => (
+              <button
+                key={cat.key}
+                className={`elyra-tab ${activeCategory === cat.key ? "active" : ""}`}
+                onClick={() => setActiveCategory(cat.key)}
+              >
+                <cat.icon size={16} style={{ marginRight: '8px' }} />
+                {cat.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </Card>
+
+      {/* Table Section */}
+      <div className="table-section">
+        <div className="wuw-table-area">
+          {loading ? (
+            <div className="settings-loading-state" style={{ padding: '5rem 0' }}>
+              <RefreshCw size={48} className="animate-spin" color="#2563eb" />
+              <p style={{ marginTop: '1rem', color: '#64748b' }}>Sinkronisasi preferensi...</p>
+            </div>
+          ) : (
+            <div className="table-wrap">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: '400px' }}>Tipe Notifikasi</th>
+                    <th className="th-center" style={{ width: '150px' }}>Email</th>
+                    <th className="th-center" style={{ width: '150px' }}>Push</th>
+                    <th className="th-center" style={{ width: '150px' }}>In-App</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredSettings.map((setting) => (
+                    <tr key={setting.category}>
+                      <td>
+                        <div className="cell-name">
+                          <div className="cell-avatar">
+                            <Bell size={18} />
+                          </div>
+                          <div className="cell-stacked">
+                            <span className="cell-name-text">{setting.label}</span>
+                            <span className="cell-stacked__sub">{setting.description}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="td-center">
                         <button
-                          key={channel}
-                          className={`channel-pill-toggle ${isEnabled ? 'enabled' : ''}`}
-                          onClick={() => toggleChannel(setting.id, channel)}
+                          className={`channel-pill-toggle ${setting.email ? 'enabled' : ''}`}
+                          onClick={() => toggleChannel(setting.category, 'email')}
                         >
-                          {isEnabled ? <CheckCircle size={18} /> : <XCircle size={18} />}
-                          <span className="channel-pill-label">{channel === 'in_app' ? 'App' : channel === 'push' ? 'Push' : 'Mail'}</span>
+                          {setting.email ? <CheckCircle size={18} /> : <XCircle size={18} />}
+                          <span className="channel-pill-label">Email</span>
                         </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
+                      </td>
+                      <td className="td-center">
+                        <button
+                          className={`channel-pill-toggle ${setting.push ? 'enabled' : ''}`}
+                          onClick={() => toggleChannel(setting.category, 'push')}
+                        >
+                          {setting.push ? <CheckCircle size={18} /> : <XCircle size={18} />}
+                          <span className="channel-pill-label">Push</span>
+                        </button>
+                      </td>
+                      <td className="td-center">
+                        <button
+                          className={`channel-pill-toggle ${setting.in_app ? 'enabled' : ''}`}
+                          onClick={() => toggleChannel(setting.category, 'in_app')}
+                        >
+                          {setting.in_app ? <CheckCircle size={18} /> : <XCircle size={18} />}
+                          <span className="channel-pill-label">App</span>
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>

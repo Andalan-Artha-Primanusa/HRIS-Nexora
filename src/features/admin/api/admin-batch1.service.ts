@@ -31,8 +31,7 @@ const extractArrayPayload = <T>(raw: unknown): T[] => {
 
 export const getAdminNotificationsSummary = async () => {
 	const response = await api.get("/admin/notifications/summary");
-	const payload = extractPayload(response.data);
-	return toRecord(payload);
+	return extractPayload(response.data);
 };
 
 export const createAdminNotification = async (payload: {
@@ -240,5 +239,13 @@ export const previewEmailTemplate = async (
 			data: data ?? {},
 		}
 	);
+	return extractPayload(response.data);
+};
+
+// =============================
+// EMAIL TEMPLATE (DELETE)
+// =============================
+export const deleteEmailTemplate = async (id: string | number) => {
+	const response = await api.delete(`/admin/email-templates/${id}`);
 	return extractPayload(response.data);
 };
