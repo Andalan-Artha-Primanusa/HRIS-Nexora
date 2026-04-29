@@ -5,8 +5,6 @@ import {
   PieChart,
   Pie,
   Cell,
-  AreaChart,
-  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -14,9 +12,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { Link } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
-import { Badge } from "@/shared/ui/Badge";
 import { payrollService, toSafeArray } from "@/features/payroll/api/payroll.service";
 import { getAllEmployees } from "@/features/employee/api/employee.service";
 import type { PayrollItem } from "@/features/payroll/types/payroll.types";
@@ -30,7 +26,6 @@ import {
   LayoutDashboard,
   PencilLine,
   ReceiptText,
-  ShieldCheck,
   TrendingUp,
   RefreshCw,
   Wallet,
@@ -42,10 +37,10 @@ import "./PayrollListPage.css";
 const PayrollDashboard: React.FC = () => {
   const [payrollItems, setPayrollItems] = useState<PayrollItem[]>([]);
   const [employees, setEmployees] = useState<EmployeeItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, _setLoading] = useState(true);
 
   // Chart Data States
-  const [monthlyTrendData, setMonthlyTrendData] = useState<
+  const [_monthlyTrendData, _setMonthlyTrendData] = useState<
     { month: string; totalPayroll: number; processed: number; pending: number }[]
   >([]);
   const [payrollStatusData, setPayrollStatusData] = useState<
@@ -56,15 +51,16 @@ const PayrollDashboard: React.FC = () => {
   >([]);
 
   // KPI States
-  const [totalPayroll, setTotalPayroll] = useState(0);
-  const [totalProcessed, setTotalProcessed] = useState(0);
-  const [totalPending, setTotalPending] = useState(0);
-  const [averagePayroll, setAveragePayroll] = useState(0);
+  const [_totalPayroll, _setTotalPayroll] = useState(0);
+  const [_totalProcessed, _setTotalProcessed] = useState(0);
+  const [_totalPending, _setTotalPending] = useState(0);
+  const [_averagePayroll, _setAveragePayroll] = useState(0);
 
   const chartColors = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
 
   // Helper function to get employee name safely
-  const getEmployeeName = (emp: any): string => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _getEmployeeName = (emp: any): string => {
     if (emp?.user?.name && typeof emp.user.name === "string") {
       return emp.user.name;
     }
@@ -205,7 +201,7 @@ const PayrollDashboard: React.FC = () => {
 
     try {
       // Use generatePayroll with new API format
-      await payrollService.generatePayroll({ periode: period });
+      await payrollService.generatePayroll({ period: period });
       // Reload data
       await loadPayrollData();
     } catch (err) {

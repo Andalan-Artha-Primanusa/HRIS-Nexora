@@ -30,7 +30,6 @@ import {
   Pencil,
   Eye,
   Send,
-  FileSearch,
   Download,
   Banknote,
   UserPlus,
@@ -251,15 +250,15 @@ const sectionDefinitions: Record<string, { title: string; subtitle: string; icon
     icon: CalendarDays,
     color: '#2563EB',
   },
-  '/profiles': {
+   '/profiles': {
      title: 'Profil Karyawan',
      subtitle: 'Kelola profil karyawan dan informasi kontak.',
     icon: UserCircle,
     color: '#2563EB',
   },
-  '/profiles': {
-    title: 'Profil Saya',
-    subtitle: 'Lihat dan kelola informasi profil pribadi Anda.',
+  '/my/profile': {
+     title: 'Profil Saya',
+     subtitle: 'Lihat dan kelola informasi profil pribadi Anda.',
     icon: UserCircle,
     color: '#2563EB',
   },
@@ -985,6 +984,10 @@ const SectionPage = () => {
   const basePath = useMemo(() => getCrudRouteBase(path), [path]);
   const routeCrudMode = useMemo(() => getCrudModeFromPath(path), [path]);
   const activeCrudMode: CrudMode = routeCrudMode ?? 'manage';
+  const setActiveCrudMode = (mode: CrudMode) => {
+    const base = getCrudRouteBase(path);
+    window.location.href = `${base}/${mode}`;
+  };
   const sectionKey = useMemo(() => getSectionTableKey(path), [path]);
   const section = useMemo(() => getSectionData(path), [path]);
   const Icon = section.icon;
@@ -1261,7 +1264,7 @@ const SectionPage = () => {
             formatResponse(paged);
             const parsed = parsePayloadToTable(assets);
             setTableColumns(parsed.columns);
-            setTableRows(parsed.rows);
+            setTableRows(parsed.rows as string[][]);
             setStatusMessage(assets.length === 0 ? 'Belum ada aset.' : 'Data aset berhasil dimuat.');
             setLoading(false);
             return;
@@ -1277,7 +1280,7 @@ const SectionPage = () => {
             formatResponse(assets);
             const parsed = parsePayloadToTable(assets);
             setTableColumns(parsed.columns);
-            setTableRows(parsed.rows);
+            setTableRows(parsed.rows as string[][]);
             setStatusMessage(assets.length === 0 ? 'Belum ada aset.' : 'Data aset berhasil dimuat.');
             setLoading(false);
             return;
@@ -1292,7 +1295,7 @@ const SectionPage = () => {
             formatResponse(paged);
             const parsed = parsePayloadToTable(docs);
             setTableColumns(parsed.columns);
-            setTableRows(parsed.rows);
+            setTableRows(parsed.rows as string[][]);
             setStatusMessage(docs.length === 0 ? 'Belum ada dokumen.' : 'Data dokumen berhasil dimuat.');
             setLoading(false);
             return;
@@ -1307,7 +1310,7 @@ const SectionPage = () => {
             formatResponse(paged);
             const parsed = parsePayloadToTable(docs);
             setTableColumns(parsed.columns);
-            setTableRows(parsed.rows);
+            setTableRows(parsed.rows as string[][]);
             setStatusMessage(docs.length === 0 ? 'Belum ada dokumen.' : 'Data dokumen berhasil dimuat.');
             setLoading(false);
             return;
@@ -1324,7 +1327,7 @@ const SectionPage = () => {
             formatResponse(payload);
             const parsed = parsePayloadToTable(payload);
             setTableColumns(parsed.columns);
-            setTableRows(parsed.rows);
+            setTableRows(parsed.rows as string[][]);
             setStatusMessage('Data berhasil dimuat.');
             setLoading(false);
             return;
@@ -1350,7 +1353,7 @@ const SectionPage = () => {
             if (Array.isArray(payload.by_department)) {
               const parsed = parsePayloadToTable(payload.by_department);
               setTableColumns(parsed.columns);
-              setTableRows(parsed.rows);
+              setTableRows(parsed.rows as string[][]);
             } else {
               setTableColumns([]);
               setTableRows([]);
@@ -1367,7 +1370,7 @@ const SectionPage = () => {
             formatResponse(payload);
             const parsed = parsePayloadToTable(payload);
             setTableColumns(parsed.columns);
-            setTableRows(parsed.rows);
+            setTableRows(parsed.rows as string[][]);
             setStatusMessage('Data struktur organisasi berhasil dimuat.');
             setLoading(false);
             return;
@@ -1470,7 +1473,7 @@ const SectionPage = () => {
             formatResponse(paged);
             const parsed = parsePayloadToTable(programs);
             setTableColumns(parsed.columns);
-            setTableRows(parsed.rows);
+            setTableRows(parsed.rows as string[][]);
             setStatusMessage(programs.length === 0 ? 'Belum ada program pelatihan.' : 'Data program pelatihan berhasil dimuat.');
             setLoading(false);
             return;
@@ -1491,7 +1494,7 @@ const SectionPage = () => {
             formatResponse(paged);
             const parsed = parsePayloadToTable(competencies);
             setTableColumns(parsed.columns);
-            setTableRows(parsed.rows);
+            setTableRows(parsed.rows as string[][]);
             setStatusMessage(competencies.length === 0 ? 'Belum ada kompetensi.' : 'Data kompetensi berhasil dimuat.');
             setLoading(false);
             return;
@@ -1569,7 +1572,7 @@ const SectionPage = () => {
             formatResponse(paged);
             const parsed = parsePayloadToTable(rows);
             setTableColumns(parsed.columns);
-            setTableRows(parsed.rows);
+            setTableRows(parsed.rows as string[][]);
             setStatusMessage(rows.length === 0 ? 'Belum ada ringkasan performa.' : 'Data ringkasan performa berhasil dimuat.');
             setLoading(false);
             return;
@@ -1583,7 +1586,7 @@ const SectionPage = () => {
             formatResponse(paged);
             const parsed = parsePayloadToTable(rows);
             setTableColumns(parsed.columns);
-            setTableRows(parsed.rows);
+            setTableRows(parsed.rows as string[][]);
             setStatusMessage(rows.length === 0 ? 'Belum ada siklus performa.' : 'Data siklus performa berhasil dimuat.');
             setLoading(false);
             return;
@@ -1597,7 +1600,7 @@ const SectionPage = () => {
             formatResponse(paged);
             const parsed = parsePayloadToTable(rows);
             setTableColumns(parsed.columns);
-            setTableRows(parsed.rows);
+            setTableRows(parsed.rows as string[][]);
             setStatusMessage(rows.length === 0 ? 'Belum ada review performa.' : 'Data review performa berhasil dimuat.');
             setLoading(false);
             return;
@@ -1611,7 +1614,7 @@ const SectionPage = () => {
             formatResponse(paged);
             const parsed = parsePayloadToTable(rows);
             setTableColumns(parsed.columns);
-            setTableRows(parsed.rows);
+            setTableRows(parsed.rows as string[][]);
             setStatusMessage(rows.length === 0 ? 'Belum ada OKR.' : 'Data OKR berhasil dimuat.');
             setLoading(false);
             return;
@@ -1625,7 +1628,7 @@ const SectionPage = () => {
             formatResponse(paged);
             const parsed = parsePayloadToTable(rows);
             setTableColumns(parsed.columns);
-            setTableRows(parsed.rows);
+            setTableRows(parsed.rows as string[][]);
             setStatusMessage(rows.length === 0 ? 'Belum ada 360 review.' : 'Data 360 review berhasil dimuat.');
             setLoading(false);
             return;
@@ -1639,7 +1642,7 @@ const SectionPage = () => {
             formatResponse(paged);
             const parsed = parsePayloadToTable(rows);
             setTableColumns(parsed.columns);
-            setTableRows(parsed.rows);
+            setTableRows(parsed.rows as string[][]);
             setStatusMessage(rows.length === 0 ? 'Belum ada kalibrasi performa.' : 'Data kalibrasi performa berhasil dimuat.');
             setLoading(false);
             return;
@@ -1653,7 +1656,7 @@ const SectionPage = () => {
             formatResponse(paged);
             const parsed = parsePayloadToTable(rows);
             setTableColumns(parsed.columns);
-            setTableRows(parsed.rows);
+            setTableRows(parsed.rows as string[][]);
             setStatusMessage(rows.length === 0 ? 'Belum ada IDP.' : 'Data IDP berhasil dimuat.');
             setLoading(false);
             return;
@@ -1667,7 +1670,7 @@ const SectionPage = () => {
             formatResponse(paged);
             const parsed = parsePayloadToTable(rows);
             setTableColumns(parsed.columns);
-            setTableRows(parsed.rows);
+            setTableRows(parsed.rows as string[][]);
             setStatusMessage(rows.length === 0 ? 'Belum ada succession plan.' : 'Data succession plan berhasil dimuat.');
             setLoading(false);
             return;
@@ -1681,7 +1684,7 @@ const SectionPage = () => {
             formatResponse(paged);
             const parsed = parsePayloadToTable(rows);
             setTableColumns(parsed.columns);
-            setTableRows(parsed.rows);
+            setTableRows(parsed.rows as string[][]);
             setStatusMessage(rows.length === 0 ? 'Belum ada survei engagement.' : 'Data survei engagement berhasil dimuat.');
             setLoading(false);
             return;
@@ -1695,7 +1698,7 @@ const SectionPage = () => {
             formatResponse(paged);
             const parsed = parsePayloadToTable(rows);
             setTableColumns(parsed.columns);
-            setTableRows(parsed.rows);
+            setTableRows(parsed.rows as string[][]);
             setStatusMessage(rows.length === 0 ? 'Belum ada lowongan.' : 'Data lowongan berhasil dimuat.');
             setLoading(false);
             return;
@@ -1709,7 +1712,7 @@ const SectionPage = () => {
             formatResponse(paged);
             const parsed = parsePayloadToTable(rows);
             setTableColumns(parsed.columns);
-            setTableRows(parsed.rows);
+            setTableRows(parsed.rows as string[][]);
             setStatusMessage(rows.length === 0 ? 'Belum ada hari libur.' : 'Data hari libur berhasil dimuat.');
             setLoading(false);
             return;
@@ -1723,7 +1726,7 @@ const SectionPage = () => {
             formatResponse(paged);
             const parsed = parsePayloadToTable(rows);
             setTableColumns(parsed.columns);
-            setTableRows(parsed.rows);
+            setTableRows(parsed.rows as string[][]);
             setStatusMessage(rows.length === 0 ? 'Belum ada shift swap.' : 'Data shift swap berhasil dimuat.');
             setLoading(false);
             return;
@@ -1737,7 +1740,7 @@ const SectionPage = () => {
             formatResponse(paged);
             const parsed = parsePayloadToTable(rows);
             setTableColumns(parsed.columns);
-            setTableRows(parsed.rows);
+            setTableRows(parsed.rows as string[][]);
             setStatusMessage(rows.length === 0 ? 'Belum ada aturan lembur.' : 'Data aturan lembur berhasil dimuat.');
             setLoading(false);
             return;
@@ -1912,7 +1915,7 @@ const SectionPage = () => {
           const rows = Array.isArray(reportPayload.by_employee) ? reportPayload.by_employee : [];
           const parsed = parsePayloadToTable(rows);
           setTableColumns(parsed.columns);
-          setTableRows(parsed.rows);
+          setTableRows(parsed.rows as string[][]);
           setStatusMessage(rows.length === 0 ? 'Tidak ada data karyawan untuk laporan kehadiran.' : 'Data laporan kehadiran berhasil dimuat.');
           formatResponse(payload);
           setLoading(false);
@@ -1931,7 +1934,7 @@ const SectionPage = () => {
           const rows = Array.isArray(reportPayload.by_employee) ? reportPayload.by_employee : [];
           const parsed = parsePayloadToTable(rows);
           setTableColumns(parsed.columns);
-          setTableRows(parsed.rows);
+          setTableRows(parsed.rows as string[][]);
           setStatusMessage(rows.length === 0 ? 'Tidak ada data karyawan untuk laporan cuti.' : 'Data laporan cuti berhasil dimuat.');
           formatResponse(payload);
           setLoading(false);
@@ -1954,7 +1957,7 @@ const SectionPage = () => {
           const rows = Array.isArray(reportPayload.by_status) ? reportPayload.by_status : [];
           const parsed = parsePayloadToTable(rows);
           setTableColumns(parsed.columns);
-          setTableRows(parsed.rows);
+          setTableRows(parsed.rows as string[][]);
           setStatusMessage(rows.length === 0 ? 'Tidak ada status payroll untuk laporan payroll.' : 'Data laporan payroll berhasil dimuat.');
           formatResponse(payload);
           setLoading(false);
@@ -1964,7 +1967,7 @@ const SectionPage = () => {
         formatResponse(payload);
         const parsed = parsePayloadToTable(actualPayload);
         setTableColumns(parsed.columns);
-        setTableRows(parsed.rows);
+        setTableRows(parsed.rows as string[][]);
         setStatusMessage('Data berhasil dimuat.');
       } else {
         setStatusMessage('Tidak ada data untuk path ini.');
@@ -2768,11 +2771,11 @@ const SectionPage = () => {
                 <small style={{ color: '#94a3b8', fontWeight: 600 }}>CODE: {String(code)}</small>
               </div>
               <div className="leave-type-meta">
-                <Badge variant={isPaid === 'Yes' || isPaid === true ? 'success' : 'default'}>
-                  {isPaid === 'Yes' || isPaid === true ? 'Paid' : 'Unpaid'}
+                <Badge variant={isPaid === 'Yes' || String(isPaid) === 'true' ? 'success' : 'default'}>
+                  {isPaid === 'Yes' || String(isPaid) === 'true' ? 'Paid' : 'Unpaid'}
                 </Badge>
-                <Badge variant={isActive === 'Yes' || isActive === true ? 'info' : 'danger'}>
-                  {isActive === 'Yes' || isActive === true ? 'Active' : 'Inactive'}
+                <Badge variant={isActive === 'Yes' || String(isActive) === 'true' ? 'info' : 'danger'}>
+                  {isActive === 'Yes' || String(isActive) === 'true' ? 'Active' : 'Inactive'}
                 </Badge>
               </div>
             </div>

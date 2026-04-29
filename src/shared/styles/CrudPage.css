@@ -277,7 +277,7 @@
   font-size: 1rem;
   color: #1e293b;
   transition: all 0.25s ease;
-  font-family: inherit;
+  font-family: 'Poppins', sans-serif;
 }
 
 .search-input-pill:focus {
@@ -305,7 +305,7 @@
   font-size: 0.9rem;
   background: rgba(239, 245, 255, 0.7);
   color: #475569;
-  font-family: inherit;
+  font-family: 'Poppins', sans-serif;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -351,7 +351,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
   color: var(--primary);
-  font-family: inherit;
+  font-family: 'Poppins', sans-serif;
 }
 
 .filter-btn:hover {
@@ -415,7 +415,7 @@
   font-size: 0.9rem;
   outline: none;
   background: rgba(239, 245, 255, 0.7);
-  font-family: inherit;
+  font-family: 'Poppins', sans-serif;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -596,7 +596,7 @@
   border-collapse: separate;
   border-spacing: 0;
   min-width: 900px;
-  font-family: inherit;
+  font-family: 'Poppins', sans-serif;
 }
 
 .table-wrap::-webkit-scrollbar {
@@ -621,7 +621,7 @@
   border-collapse: separate;
   border-spacing: 0;
   min-width: 700px;
-  font-family: inherit;
+  font-family: 'Poppins', sans-serif;
 }
 
 /* HEAD */
@@ -709,11 +709,11 @@
 /* Cell Type Helpers                            */
 /* ============================================ */
 
-/* ID cell — monospace blue */
+/* ID cell — sans-serif blue */
 .data-table .cell-id {
   font-weight: 600;
   font-size: 0.82rem;
-  font-family: "JetBrains Mono", "Fira Code", "SF Mono", "Monaco", "Menlo", monospace;
+  font-family: 'Poppins', sans-serif;
   color: #3b82f6;
   letter-spacing: 0.01em;
 }
@@ -757,7 +757,7 @@
 /* Money/amount cell */
 .data-table .cell-amount {
   text-align: right;
-  font-family: "JetBrains Mono", "Fira Code", "SF Mono", monospace;
+  font-family: 'Poppins', sans-serif;
   font-weight: 600;
   font-size: 0.88rem;
   color: #334155;
@@ -1022,7 +1022,7 @@
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   opacity: 1 !important; /* Ensure all inputs are 100% opaque */
   outline: none;
-  font-family: inherit !important;
+  font-family: 'Poppins', sans-serif;
   box-sizing: border-box;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* Slightly stronger shadow for depth */
 }

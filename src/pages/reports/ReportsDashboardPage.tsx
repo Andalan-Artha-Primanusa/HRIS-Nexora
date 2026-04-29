@@ -9,11 +9,6 @@ import {
   PieChart as PieChartIcon,
   Activity,
   CheckCircle,
-  XCircle,
-  TrendingUp,
-  FileText,
-  DollarSign,
-  Clock3,
 } from 'lucide-react';
 import {
   BarChart,
@@ -217,7 +212,8 @@ const ReportsDashboardPage: React.FC = () => {
   }, [payrollRecords]);
 
   // Summary cards
-  const summaryCards = [
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _summaryCards = [
     { label: 'Total Karyawan', sub: `${activeEmployees} aktif`, value: String(totalEmployees), tone: 'blue', icon: Users },
     { label: 'Kehadiran Hari Ini', sub: `${presentToday} hadir`, value: `${attendanceRate}%`, tone: 'green', icon: Activity },
     { label: 'Cuti Pending', sub: `${leaveRecords.length} total cuti`, value: String(pendingLeaves), tone: 'orange', icon: CalendarDays },

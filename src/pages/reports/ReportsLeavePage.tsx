@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { CalendarDays, CheckCircle, XCircle, Clock, Users, TrendingUp, RefreshCw, PieChart as PieIcon, ClipboardList } from 'lucide-react';
 import { BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card } from '@/shared/ui/Card';
-import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
@@ -26,7 +25,8 @@ const TT = { contentStyle: { backgroundColor:'#fff', border:'1px solid #dbeafe',
 const mkMonth = (raw: string) => { const d = new Date(raw); if (Number.isNaN(d.getTime())) return null; return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; };
 const fmtMonth = (k: string) => { const [y,m] = k.split('-'); return new Date(Number(y),Number(m)-1,1).toLocaleDateString('id-ID',{month:'short',year:'numeric'}); };
 
-const MetricCard: React.FC<{ label: string; sub: string; value: string; tone: string; icon: React.ElementType }> = ({ label, sub, value, tone, icon: Icon }) => (
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _MetricCard: React.FC<{ label: string; sub: string; value: string; tone: string; icon: React.ElementType }> = ({ label, sub, value, tone, icon: Icon }) => (
   <Card className="report-metric-card" glass>
     <div className="report-metric-header">
       <div><span className="report-metric-label">{label}</span><p className="report-metric-sublabel">{sub}</p></div>
@@ -48,8 +48,8 @@ const ReportsLeavePage: React.FC = () => {
   const pending  = useMemo(() => records.filter(r => getStr(r,['status']).toLowerCase()==='pending').length, [records]);
   const approved = useMemo(() => records.filter(r => ['approved','accepted'].includes(getStr(r,['status']).toLowerCase())).length, [records]);
   const rejected = useMemo(() => records.filter(r => ['rejected','declined'].includes(getStr(r,['status']).toLowerCase())).length, [records]);
-  const totalDays = useMemo(() => records.reduce((s,r)=>s+getNum(r.total_days??r.days),0), [records]);
-  const uniqueEmps = useMemo(() => new Set(records.map(r=>getStr(r,['employee_id','user_id']))).size, [records]);
+  const _totalDays = useMemo(() => records.reduce((s,r)=>s+getNum(r.total_days??r.days),0), [records]);
+  const _uniqueEmps = useMemo(() => new Set(records.map(r=>getStr(r,['employee_id','user_id']))).size, [records]);
 
   const leaveTypeData = useMemo(() => { const m = new Map<string,number>(); records.forEach(r=>{ const t=getStr(r,['type','leave_type','leaveType'])||'Unknown'; m.set(t,(m.get(t)||0)+1); }); return [...m].map(([name,value])=>({name,value})); }, [records]);
   const statusData = useMemo(() => [{name:'Pending',value:pending},{name:'Approved',value:approved},{name:'Rejected',value:rejected}].filter(d=>d.value>0), [pending,approved,rejected]);

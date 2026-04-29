@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ShieldCheck, Search, RefreshCw, DollarSign, Users, Eye } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
-import { Button } from '@/shared/ui/Button';
 import { Badge } from '@/shared/ui/Badge';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { payrollService, toSafeArray } from '@/features/payroll/api/payroll.service';
@@ -83,7 +82,8 @@ const PayrollTaxPage: React.FC = () => {
     ];
   }, [data]);
 
-  const clearFilters = () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _clearFilters = () => {
     setSearchText("");
     setActiveTab("Semua");
     setCurrentPage(1);

@@ -135,7 +135,7 @@
   border-collapse: separate;
   border-spacing: 0;
   min-width: 700px;
-  font-family: inherit;
+  font-family: 'Poppins', sans-serif;
 }
 
 .ess-table th,
@@ -520,7 +520,7 @@
 }
 
 .digital-slip {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   color: #1e293b;
 }
 

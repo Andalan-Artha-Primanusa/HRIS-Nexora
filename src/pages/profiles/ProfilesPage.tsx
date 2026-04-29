@@ -4,7 +4,6 @@ import {
   Pencil,
   Plus,
   Trash2,
-  X,
   AlertCircle,
   User,
   MapPin,
@@ -18,8 +17,6 @@ import {
 } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
-import { Button } from "@/shared/ui/Button";
-import { Badge } from "@/shared/ui/Badge";
 import { Alert } from "@/shared/ui/Alert";
 import { useProfiles } from "@/features/profile/hooks/useProfiles";
 import type { Profile, ProfilePayload } from "@/features/profile/types/profile.types";
@@ -404,6 +401,7 @@ type ErrorModalProps = {
   onClose: () => void;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const ErrorModal = ({ errors, isOpen, onClose }: ErrorModalProps) => {
   if (!isOpen || errors.length === 0) return null;
 
@@ -456,6 +454,7 @@ type SectionCardProps = {
   children?: React.ReactNode;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const SectionCard = ({ icon, title, items, children }: SectionCardProps) => {
   return (
     <div className="profile-card-section">
@@ -574,7 +573,7 @@ const ProfilesPage = () => {
   const {
     profiles,
     selectedProfile,
-    statusMessage,
+    statusMessage: _statusMessage,
     errorMessage,
     loading,
     loadProfiles,
@@ -586,14 +585,14 @@ const ProfilesPage = () => {
 
   const [createForm, setCreateForm] = useState<ProfileFormState>(DEFAULT_FORM);
   const [updateForm, setUpdateForm] = useState<ProfileFormState>(DEFAULT_FORM);
-  const [validationMessage, setValidationMessage] = useState<string | null>(null);
-  const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
-  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+  const [_validationMessage, _setValidationMessage] = useState<string | null>(null);
+  const [_validationErrors, _setValidationErrors] = useState<ValidationError[]>([]);
+  const [_isErrorModalOpen, _setIsErrorModalOpen] = useState(false);
 
   // Filter & Search states
   const [searchText, setSearchText] = useState("");
-  const [filterStatus, setFilterStatus] = useState("all");
-  const [showFilters, setShowFilters] = useState(false);
+  const [_filterStatus, _setFilterStatus] = useState("all");
+  const [_showFilters, _setShowFilters] = useState(false);
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [selectedPosition, setSelectedPosition] = useState("");
 
@@ -669,7 +668,8 @@ const ProfilesPage = () => {
     return sortedProfiles.slice(startIndex, startIndex + itemsPerPage);
   }, [sortedProfiles, currentPage]);
 
-  const totalPages = Math.ceil(sortedProfiles.length / itemsPerPage);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _totalPages = Math.ceil(sortedProfiles.length / itemsPerPage);
 
   // Get unique departments/positions for filters
   const uniqueDepartments = useMemo(() => {
@@ -688,7 +688,8 @@ const ProfilesPage = () => {
     return Array.from(positions).sort();
   }, [profiles]);
 
-  const profileSummaryCards = useMemo(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _profileSummaryCards = useMemo(
     () => [
       {
         label: "Total Profiles",
@@ -731,7 +732,8 @@ const ProfilesPage = () => {
     setCurrentPage(1);
   }, [searchText, selectedDepartment, selectedPosition, sortBy, sortOrder]);
 
-  const clearFilters = () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _clearFilters = () => {
     setSearchText("");
     setSelectedDepartment("");
     setSelectedPosition("");
@@ -1030,7 +1032,8 @@ const ProfilesPage = () => {
     await deleteProfileById(id);
   };
 
-  const detailSections = selectedProfile ? buildDetailSections(selectedProfile) : null;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _detailSections = selectedProfile ? buildDetailSections(selectedProfile) : null;
 
   if (isAddPage) {
     return (

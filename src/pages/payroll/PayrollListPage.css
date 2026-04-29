@@ -194,7 +194,7 @@
   font-size: 1rem;
   color: #1e293b;
   transition: all 0.25s ease;
-  font-family: inherit;
+  font-family: 'Poppins', sans-serif;
 }
 
 .control-bar .search-input::placeholder {
@@ -226,7 +226,7 @@
   border: 1px solid #e2e8f0;
   background: #ffffff;
   padding: 0 1rem;
-  font-family: inherit;
+  font-family: 'Poppins', sans-serif;
   font-weight: 500;
   color: #1e293b;
   outline: none;

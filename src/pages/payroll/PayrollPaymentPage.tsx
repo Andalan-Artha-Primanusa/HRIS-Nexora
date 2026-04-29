@@ -108,7 +108,8 @@ const PayrollPaymentPage = () => {
     return employee ? `${employee.employee_code} - ${employee.user?.name || "Unknown"}` : "Unknown";
   };
 
-  const getStatusColor = (status: string) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
       draft: "#999",
       pending: "#f59e0b",
@@ -119,7 +120,8 @@ const PayrollPaymentPage = () => {
     return colors[status] || "#999";
   };
 
-  const getStatusLabel = (status: string) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _getStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
       draft: "Draft",
       pending: "Menunggu",

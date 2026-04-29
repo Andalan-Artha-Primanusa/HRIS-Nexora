@@ -5,8 +5,11 @@ import './Alert.css';
 export type AlertType = 'success' | 'error' | 'info' | 'warning';
 
 interface AlertProps {
-  type: AlertType;
-  message: string;
+  type?: AlertType;
+  variant?: AlertType;
+  message?: string;
+  title?: string;
+  children?: React.ReactNode;
   onClose?: () => void;
   showIcon?: boolean;
   dismissible?: boolean;
@@ -21,17 +24,22 @@ const alertIcons = {
 
 export const Alert: React.FC<AlertProps> = ({
   type,
+  variant,
   message,
+  title,
+  children,
   onClose,
   showIcon = true,
   dismissible = false,
 }) => {
-  const Icon = alertIcons[type];
+  const alertType = type || variant || 'info';
+  const Icon = alertIcons[alertType];
+  const content = children || message || title;
 
   return (
-    <div className={`ui-alert ui-alert-${type}`}>
+    <div className={`ui-alert ui-alert-${alertType}`}>
       {showIcon && <Icon size={20} className="ui-alert-icon" />}
-      <span className="ui-alert-message">{message}</span>
+      <span className="ui-alert-message">{content}</span>
       {dismissible && onClose && (
         <button className="ui-alert-close" onClick={onClose}>
           <X size={18} />

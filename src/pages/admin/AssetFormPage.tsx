@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
-  ArrowLeft, Save, Box, Package, Plus, Tag, 
+  ArrowLeft, Save, Box, Package, Tag, 
   Hash, Info, Truck, DollarSign, Calendar 
 } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';

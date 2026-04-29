@@ -1,19 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Plus, 
-  ShieldCheck, 
-  Clock, 
-  Edit,
+import { useEffect, useMemo, useState } from 'react';
+import {
+  Plus,
+  ShieldCheck,
+  Clock,
+  Pencil,
   Trash2,
   RefreshCw,
-  CalendarDays
+  CalendarDays,
+  Search
 } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
-import '@/pages/payroll/PayrollShared.css';
 import './AdminLeavePages.css';
 
 interface LeavePolicy {
@@ -25,19 +26,100 @@ interface LeavePolicy {
   max_carryover_days: number;
   is_paid: boolean;
   active: boolean;
+  year?: number;
 }
 
-const LeavePolicyPage: React.FC = () => {
+const LeavePolicyPage = () => {
   const [policies, setPolicies] = useState<LeavePolicy[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Search & Filter State
+  const [searchText, setSearchText] = useState('');
+  const [activeTab, setActiveTab] = useState<'Semua' | 'Active' | 'Inactive'>('Semua');
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
+
+  // Filter & Sort & Paginate
+  const filteredPolicies = useMemo(() => {
+    return policies.filter((policy) => {
+      const searchStr = searchText.toLowerCase();
+      const nameMatch = policy.name?.toLowerCase().includes(searchStr);
+      const codeMatch = policy.policy_code?.toLowerCase().includes(searchStr);
+      const textMatch = nameMatch || codeMatch;
+
+      let statusMatch = true;
+      if (activeTab === 'Active') statusMatch = policy.active === true;
+      else if (activeTab === 'Inactive') statusMatch = policy.active === false;
+
+      return textMatch && statusMatch;
+    });
+  }, [policies, searchText, activeTab]);
+
+  const sortedPolicies = useMemo(() => {
+    return [...filteredPolicies].sort((a, b) => {
+      const nameA = a.name?.toLowerCase() || '';
+      const nameB = b.name?.toLowerCase() || '';
+      return nameA.localeCompare(nameB);
+    });
+  }, [filteredPolicies]);
+
+  const paginatedPolicies = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return sortedPolicies.slice(startIndex, startIndex + pageSize);
+  }, [sortedPolicies, currentPage, pageSize]);
+
+  const totalPages = Math.ceil(sortedPolicies.length / pageSize);
+
+  const paidCount = useMemo(() => policies.filter((p) => p.is_paid).length, [policies]);
+  const activeCount = useMemo(() => policies.filter((p) => p.active).length, [policies]);
+  const totalPolicies = policies.length;
+
+  const summaryCards = useMemo(
+    () => [
+      {
+        label: 'Total Policies',
+        subtitle: 'Semua aturan',
+        value: String(totalPolicies),
+        change: 'Data tersimpan di sistem',
+        tone: 'purple' as const,
+        icon: ShieldCheck,
+      },
+      {
+        label: 'Hasil Filter',
+        subtitle: 'Kebijakan sesuai pencarian',
+        value: String(sortedPolicies.length),
+        change: `${paginatedPolicies.length} data per halaman`,
+        tone: 'green' as const,
+        icon: Search,
+      },
+      {
+        label: 'Paid Leave',
+        subtitle: 'Cuti berbayar',
+        value: String(paidCount),
+        change: 'Berbayar',
+        tone: 'blue' as const,
+        icon: Clock,
+      },
+      {
+        label: 'Active Policies',
+        subtitle: 'Policies aktif',
+        value: String(activeCount),
+        change: 'Siap digunakan',
+        tone: 'orange' as const,
+        icon: ShieldCheck,
+      },
+    ],
+    [totalPolicies, paidCount, activeCount, sortedPolicies.length, paginatedPolicies.length]
+  );
 
   const fetchPolicies = async () => {
     setLoading(true);
-    console.log('Fetching policies from /leave-policies for Rules view...');
+    setErrorMessage(null);
     try {
       const response = await api.get('/leave-policies');
-      console.log('Leave Policies (Rules) Response Raw:', response);
-
       let data = response.data;
       if (data && typeof data === 'object') {
         if (Array.isArray(data.data)) data = data.data;
@@ -45,10 +127,10 @@ const LeavePolicyPage: React.FC = () => {
         else if (Array.isArray(data.items)) data = data.items;
         else if (data.status === 'success' && Array.isArray(data.data)) data = data.data;
       }
-
       setPolicies(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching leave policies:', error);
+      setErrorMessage('Gagal memuat kebijakan cuti');
       setPolicies([]);
     } finally {
       setLoading(false);
@@ -59,8 +141,30 @@ const LeavePolicyPage: React.FC = () => {
     fetchPolicies();
   }, []);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText, activeTab]);
+
+  const clearFilters = () => {
+    setSearchText('');
+    setActiveTab('Semua');
+    setCurrentPage(1);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (window.confirm('Apakah Anda yakin ingin menghapus kebijakan ini?')) {
+      try {
+        await api.delete(`/leave-policies/${id}`);
+        fetchPolicies();
+      } catch (error) {
+        console.error('Error deleting policy:', error);
+      }
+    }
+  };
+
   return (
     <div className="crud-page">
+      {/* Header */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -78,7 +182,7 @@ const LeavePolicyPage: React.FC = () => {
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan
             </button>
-            <button className="btn-primary" onClick={() => window.location.href = '/leave/policy/create'}>
+            <button className="btn-primary" onClick={() => (window.location.href = '/leave/policy/create')}>
               <Plus size={16} />
               Konfigurasi Policy
             </button>
@@ -86,176 +190,203 @@ const LeavePolicyPage: React.FC = () => {
         </div>
       </Card>
 
-      <div className="leave-requests-wrapper">
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Total Policies</p>
-              <p className="leave-summary-subtitle">Semua aturan</p>
+      {/* Summary Cards */}
+      <div className="employee-summary-wrapper">
+        {summaryCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <div key={card.label} className="employee-summary-card">
+              <div className="employee-summary-header">
+                <div>
+                  <p className="employee-summary-label">{card.label}</p>
+                  <p className="employee-summary-subtitle">{card.subtitle}</p>
+                </div>
+                <div className={`employee-summary-icon-wrapper employee-icon-${card.tone}`}>
+                  <Icon size={28} />
+                </div>
+              </div>
+              <div className={`employee-summary-value employee-value-${card.tone}`}>{card.value}</div>
+              <p className="employee-summary-trend">{card.change}</p>
             </div>
-            <div className="leave-summary-icon-wrapper leave-icon-purple">
-              <ShieldCheck size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-purple">{policies.length}</div>
-          <p className="leave-summary-trend">Policies</p>
-        </div>
-
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Paid Leave</p>
-              <p className="leave-summary-subtitle">Cuti berbayar</p>
-            </div>
-            <div className="leave-summary-icon-wrapper leave-icon-green">
-              <Clock size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-green">{policies.filter(p => p.is_paid).length}</div>
-          <p className="leave-summary-trend">Paid</p>
-        </div>
-
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Active Policies</p>
-              <p className="leave-summary-subtitle">Policies aktif</p>
-            </div>
-            <div className="leave-summary-icon-wrapper leave-icon-blue">
-              <ShieldCheck size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-blue">{policies.filter(p => p.active).length}</div>
-          <p className="leave-summary-trend">Active</p>
-        </div>
+          );
+        })}
       </div>
 
-      <div className="white-unified-wrapper">
-        <div className="wuw-header">
-          <div className="wuw-header-top">
-            <div className="wuw-title-area">
-              <h3>Daftar Kebijakan Cuti</h3>
-              <span className="wuw-count-badge">{policies.length} Total</span>
-            </div>
+      {/* Analytics Title Card */}
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <ShieldCheck size={24} />
+          </div>
+          <div>
+            <h2 className="analytics-title">Daftar Kebijakan Cuti</h2>
+            <p className="analytics-subtitle">Kelola dan lihat semua kebijakan cuti</p>
           </div>
         </div>
+      </Card>
 
+      {/* Control Section */}
+      <Card className="control-section-card">
+        <div className="control-section-inner">
+          {/* Tabs */}
+          <div className="elyra-tabs">
+            {(['Semua', 'Active', 'Inactive'] as const).map((tab) => (
+              <button key={tab} className={`elyra-tab ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          {/* Search */}
+          <div className="control-actions">
+            <div className="search-box">
+              <div className="search-icon-inside">
+                <Search size={18} />
+              </div>
+              <input
+                type="text"
+                placeholder="Cari kebijakan..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="search-input-pill"
+              />
+            </div>
+            {(searchText || activeTab !== 'Semua') && (
+              <button className="btn-clear-filter" onClick={clearFilters}>
+                Hapus Filter
+              </button>
+            )}
+          </div>
+        </div>
+      </Card>
+
+      {/* Table Section */}
+      <div className="table-section">
         <div className="wuw-table-area">
-          <Card glass style={{ padding: '0', borderRadius: '24px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
-            <div className="table-responsive">
-              <table className="leave-type-table">
-            <thead>
-              <tr>
-                <th>Kebijakan</th>
-                <th>Kode</th>
-                <th>Tahun</th>
-                <th>Jatah (Hari)</th>
-                <th>Carryover</th>
-                <th>Status</th>
-                <th style={{ textAlign: 'right' }}>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={7} style={{ textAlign: 'center', padding: '4rem' }}>
-                    <RefreshCw size={32} className="animate-spin" color="#7c3aed" />
-                    <p style={{ marginTop: '1rem', color: '#64748b' }}>Memuat kebijakan...</p>
-                  </td>
-                </tr>
-              ) : policies.length === 0 ? (
-                <tr>
-                  <td colSpan={7} style={{ textAlign: 'center', padding: '4rem', color: '#94a3b8' }}>
-                    Belum ada kebijakan yang dikonfigurasi.
-                  </td>
-                </tr>
-              ) : policies.map((policy) => (
-                <tr key={policy.id} className="leave-policy-row">
-                  <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ 
-                        width: '40px', 
-                        height: '40px', 
-                        borderRadius: '12px', 
-                        background: '#f5f3ff', 
-                        color: '#7c3aed',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}>
-                        <ShieldCheck size={20} />
-                      </div>
-                      <div>
-                        <div style={{ fontWeight: 700, color: '#1e293b' }}>{policy.name}</div>
-                        <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Tipe: {policy.entitlement_type?.toUpperCase() || 'FIXED'}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <span className="policy-code">{policy.policy_code}</span>
-                  </td>
-                  <td>
-                    <span style={{ fontWeight: 700, color: '#1e3a8a' }}>{policy.year}</span>
-                  </td>
-                  <td>
-                    <div style={{ fontWeight: 800, color: '#1e293b' }}>{policy.entitlement_value} Hari</div>
-                  </td>
-                  <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#64748b' }}>
-                      <Clock size={14} />
-                      <span>{policy.max_carryover_days} Hari</span>
-                    </div>
-                  </td>
-                  <td>
-                    <span className={`policy-badge ${policy.is_paid ? 'policy-badge-paid' : 'policy-badge-unpaid'}`}>
-                      {policy.is_paid ? 'PAID' : 'UNPAID'}
-                    </span>
-                  </td>
-                  <td style={{ textAlign: 'right' }}>
-                    <div className="action-btn-group">
-                      <button 
-                        className="action-btn action-btn-edit" 
-                        onClick={() => window.location.href = `/leave/policy/edit/${policy.id}`}
-                        title="Edit Kebijakan"
-                      >
-                        <Edit size={16} />
-                      </button>
-                      <button 
-                        className="action-btn action-btn-delete" 
-                        onClick={() => {
-                          if (window.confirm('Hapus kebijakan ini?')) {
-                            void api.delete(`/leave-policies/${policy.id}`).then(() => void fetchPolicies());
-                          }
-                        }}
-                        title="Hapus Kebijakan"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          </div>
-          </Card>
-        </div>
+          {loading && <LoadingState message="Memuat kebijakan..." />}
+          {!loading && errorMessage && <ErrorState message="Koneksi Terputus" error={errorMessage} onRetry={fetchPolicies} />}
 
-        <div className="leave-requests-wrapper" style={{ marginTop: '2rem' }}>
-          <div className="leave-summary-card">
-            <div className="leave-summary-header">
-              <div>
-                <p className="leave-summary-label">Compliance Mode</p>
-                <p className="leave-summary-subtitle">Otomatis diterapkan</p>
-              </div>
-              <div className="leave-summary-icon-wrapper leave-icon-purple">
-                <ShieldCheck size={28} />
-              </div>
+          {!loading && !errorMessage && paginatedPolicies.length === 0 && (
+            <div style={{ padding: '5rem 0' }}>
+              <EmptyState
+                title="Pencarian Kosong"
+                message="Kami tidak menemukan kebijakan yang sesuai dengan kriteria Anda."
+                actionLabel="Bersihkan Filter"
+                onAction={clearFilters}
+              />
             </div>
-            <p className="leave-summary-trend" style={{ fontSize: '0.85rem', lineHeight: 1.5 }}>
-              Seluruh kebijakan ini akan diterapkan secara otomatis pada perhitungan saldo cuti karyawan.
-            </p>
-          </div>
+          )}
+
+          {!loading && !errorMessage && paginatedPolicies.length > 0 && (
+            <>
+              <div className="table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Kebijakan</th>
+                      <th>Kode</th>
+                      <th>Tipe</th>
+                      <th>Jatah (Hari)</th>
+                      <th>Carryover</th>
+                      <th>Status</th>
+                      <th className="th-center" style={{ width: '120px' }}>
+                        Aksi
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedPolicies.map((policy) => (
+                      <tr key={policy.id}>
+                        <td>
+                          <div className="cell-name">
+                            <div className="cell-avatar" style={{ background: '#f5f3ff', color: '#7c3aed' }}>
+                              <ShieldCheck size={18} />
+                            </div>
+                            <div className="cell-stacked">
+                              <span className="cell-name-text">{policy.name}</span>
+                              <span className="cell-stacked__sub">{policy.entitlement_type?.toUpperCase() || 'FIXED'}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <span className="badge-soft badge-soft--blue">{policy.policy_code}</span>
+                        </td>
+                        <td>
+                          <span className={`policy-badge ${policy.is_paid ? 'policy-badge-paid' : 'policy-badge-unpaid'}`}>
+                            {policy.is_paid ? 'PAID' : 'UNPAID'}
+                          </span>
+                        </td>
+                        <td>
+                          <span style={{ fontWeight: 800, color: '#1e293b' }}>{policy.entitlement_value} Hari</span>
+                        </td>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#64748b' }}>
+                            <Clock size={14} />
+                            <span>{policy.max_carryover_days} Hari</span>
+                          </div>
+                        </td>
+                        <td className="td-center">
+                          <span className={`badge-soft badge-soft--${policy.active ? 'green' : 'red'}`}>
+                            {policy.active ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
+                        <td className="td-center">
+                          <div className="action-btn-group">
+                            <button
+                              className="action-btn action-btn-edit"
+                              onClick={() => (window.location.href = `/leave/policy/edit/${policy.id}`)}
+                              title="Edit Kebijakan"
+                            >
+                              <Pencil size={16} />
+                            </button>
+                            <button
+                              className="action-btn action-btn-delete"
+                              onClick={() => handleDelete(policy.id)}
+                              title="Hapus Kebijakan"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              <div className="table-pagination">
+                <div className="pagination-info">
+                  Menampilkan <strong>{paginatedPolicies.length}</strong> dari <strong>{sortedPolicies.length}</strong> kebijakan
+                </div>
+                <div className="pagination-controls">
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    ‹
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    ›
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

@@ -3,7 +3,7 @@ import { Card } from '@/shared/ui/Card';
 import { Alert } from '@/shared/ui/Alert';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
-import { History, CheckCircle2, Clock, RefreshCw, XCircle, Calendar, Timer } from 'lucide-react';
+import { History, CheckCircle2, Clock, RefreshCw, Calendar, Timer } from 'lucide-react';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import './AttendanceShared.css';

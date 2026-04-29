@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BarChart3, ClipboardList, PieChart as PieChartIcon, Users, Wallet, TrendingUp, Activity } from 'lucide-react';
+import { BarChart3, ClipboardList, Users, Wallet, TrendingUp, Activity } from 'lucide-react';
 import { KpiCards } from '@/features/dashboard/components/KpiCards';
 import { BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card } from '@/shared/ui/Card';

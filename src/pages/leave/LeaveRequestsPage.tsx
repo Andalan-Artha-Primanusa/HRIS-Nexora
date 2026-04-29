@@ -7,7 +7,7 @@ import type { LeaveItem } from '@/features/leave/types/leave.types';
 import { LeaveSummary } from '@/features/leave/components/LeaveSummary';
 import { LeaveTable } from '@/features/leave/components/LeaveTable';
 import { LeaveDetailModal } from '@/features/leave/components/LeaveDetailModal';
-import { Plus, RefreshCw, Search, Filter, Calendar } from 'lucide-react';
+import { Plus, RefreshCw, Search, Calendar } from 'lucide-react';
 import { showToast } from '@/shared/ui/toast';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';

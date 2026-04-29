@@ -4,6 +4,11 @@ export interface TrainingProgram {
   deskripsi: string;
   jadwal: string;
   status: string;
+  description?: string;
+  category?: string;
+  mode?: string;
+  provider?: string;
+  start_date?: string;
 }
 
 export interface Competency {

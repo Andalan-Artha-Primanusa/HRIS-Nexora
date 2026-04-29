@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
-import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
-import { BarChart3, CheckCircle2, Receipt, Wallet, FileText, Download, Printer, RefreshCw, Search, Eye } from "lucide-react";
+import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
+import { BarChart3, CheckCircle2, Receipt, Wallet, Download, Printer, RefreshCw, Search, Eye } from "lucide-react";
 import { getMyPayroll, getMyPayrollSlip, exportMyPayrollPdf } from "@/features/ess/api/ess.service";
 import type { GenericApiItem } from "@/features/ess/types/ess.types";
 import "@/shared/styles/CrudPage.css";
@@ -12,6 +12,7 @@ import "@/pages/dashboard/overview/OverviewPage.css";
 const MyPayrollPage = () => {
   const [items, setItems] = useState<GenericApiItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [selectedSlip, setSelectedSlip] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -26,11 +27,13 @@ const MyPayrollPage = () => {
 
   const loadPayroll = async () => {
     setLoading(true);
+    setErrorMessage(null);
     try {
       const result = await getMyPayroll();
       setItems(result.items);
     } catch (error) {
       console.error("Failed to load payroll:", error);
+      setErrorMessage('Gagal memuat slip gaji');
     } finally {
       setLoading(false);
     }
@@ -43,7 +46,7 @@ const MyPayrollPage = () => {
   const summaryStats = useMemo(() => {
     const paidCount = items.filter((item) => String(item.status ?? "").toLowerCase() === "paid").length;
     const totalNetSalary = items.reduce((sum, item) => sum + (Number(item.take_home_pay || item.net_salary) || 0), 0);
-    const uniquePeriods = new Set(items.map((item) => String(item.period ?? "")).filter(Boolean));
+    const _uniquePeriods = new Set(items.map((item) => String(item.period ?? "")).filter(Boolean));
     const pendingCount = items.filter((item) => String(item.status ?? "").toLowerCase() === "pending" || String(item.status ?? "").toLowerCase() === "draft").length;
 
     return [
@@ -59,7 +62,7 @@ const MyPayrollPage = () => {
       const period = String(item.period || '').toLowerCase();
       const query = searchText.toLowerCase();
       const matchSearch = period.includes(query) || 
-        (item.employee?.user?.name && item.employee.user.name.toLowerCase().includes(query));
+        (item.employee?.user && typeof item.employee.user === 'object' && 'name' in item.employee.user && item.employee.user.name.toLowerCase().includes(query));
 
       let statusMatch = true;
       if (activeTab === "Paid") statusMatch = String(item.status ?? "").toLowerCase() === "paid";
@@ -182,144 +185,138 @@ const MyPayrollPage = () => {
       {/* Control Section */}
       <Card className="control-section-card">
         <div className="control-section-inner">
-          <div className="search-filter-group">
-            <div className="search-input-wrapper">
-              <Search size={18} className="search-icon" />
+          {/* Tabs */}
+          <div className="elyra-tabs">
+            {(["Semua", "Paid", "Pending", "Draft"] as const).map((tab) => (
+              <button key={tab} className={`elyra-tab ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          {/* Search */}
+          <div className="control-actions">
+            <div className="search-box">
+              <div className="search-icon-inside"><Search size={18} /></div>
               <input
                 type="text"
-                className="search-input"
                 placeholder="Cari periode..."
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
+                className="search-input-pill"
               />
-              {searchText && (
-                <button className="clear-search-btn" onClick={() => setSearchText("")}>×</button>
-              )}
             </div>
-            <Button variant="outline" size="sm" onClick={clearFilters} disabled={!searchText && activeTab === "Semua"}>
-              <RefreshCw size={14} />
-              Reset
-            </Button>
-          </div>
-
-          <div className="tabs-container">
-            {(["Semua", "Paid", "Pending", "Draft"] as const).map((tab) => (
-              <button
-                key={tab}
-                className={`tab-button ${activeTab === tab ? 'active' : ''}`}
-                onClick={() => setActiveTab(tab)}
-              >
-                {tab}
-                {tab !== "Semua" && (
-                  <span className="tab-count">
-                    {tab === "Paid"
-                      ? items.filter((item) => String(item.status ?? "").toLowerCase() === "paid").length
-                      : tab === "Pending"
-                      ? items.filter((item) => String(item.status ?? "").toLowerCase() === "pending").length
-                      : items.filter((item) => String(item.status ?? "").toLowerCase() === "draft").length}
-                  </span>
-                )}
+            {(searchText || activeTab !== "Semua") && (
+              <button className="btn-clear-filter" onClick={clearFilters}>
+                Hapus Filter
               </button>
-            ))}
+            )}
           </div>
         </div>
       </Card>
 
-      {/* Data Table */}
-      <Card className="data-table-card">
-        <div className="data-table-header">
-          <h3 className="data-table-title">
-            Daftar Slip Gaji
-            <span className="data-table-count">{filteredItems.length} ditemukan</span>
-          </h3>
-        </div>
+      {/* Table Section */}
+      <div className="table-section">
+        <div className="wuw-table-area">
+          {loading && <LoadingState message="Memuat data slip gaji..." />}
+          {!loading && errorMessage && <ErrorState message="Koneksi Terputus" error={errorMessage} onRetry={loadPayroll} />}
 
-        {loading ? (
-          <LoadingState message="Memuat data slip gaji..." />
-        ) : filteredItems.length === 0 ? (
-          <EmptyState
-            icon={<Receipt size={48} />}
-            title="Tidak ada slip gaji ditemukan"
-            message={searchText || activeTab !== "Semua" ? "Coba ubah kata kunci atau filter" : "Belum ada riwayat slip gaji"}
-          />
-        ) : (
-          <>
-            <div className="table-wrap">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Periode</th>
-                    <th>Gaji Pokok</th>
-                    <th>Gaji Bersih</th>
-                    <th>Status</th>
-                    <th style={{ textAlign: 'right' }}>Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedItems.map((item) => (
-                    <tr key={String(item.id)}>
-                      <td style={{ fontWeight: 600 }}>{String(item.period || '-')}</td>
-                      <td>{formatCurrency(item.basic_salary)}</td>
-                      <td style={{ color: '#10b981', fontWeight: 700 }}>{formatCurrency(item.take_home_pay || item.net_salary)}</td>
-                      <td>
-                        <span className={`status-badge status-${String(item.status).toLowerCase()}`}>
-                          {String(item.status).toUpperCase()}
-                        </span>
-                      </td>
-                      <td style={{ textAlign: 'right' }}>
-                        {String(item.status).toLowerCase() === 'paid' ? (
-                          <Button variant="ghost" size="sm" onClick={() => handleViewSlip(String(item.id))}>
-                            <Eye size={16} style={{ marginRight: '6px' }} />
-                            Lihat Slip
-                          </Button>
-                        ) : (
-                          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Menunggu Pembayaran</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          {!loading && !errorMessage && paginatedItems.length === 0 && (
+            <div style={{ padding: '5rem 0' }}>
+              <EmptyState
+                title="Pencarian Kosong"
+                message="Kami tidak menemukan slip gaji yang sesuai dengan kriteria Anda."
+                actionLabel="Bersihkan Filter"
+                onAction={clearFilters}
+              />
             </div>
+          )}
 
-            {/* Pagination */}
-            {totalPages > 1 && (
+          {!loading && !errorMessage && paginatedItems.length > 0 && (
+            <>
+              <div className="table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Periode</th>
+                      <th>Gaji Pokok</th>
+                      <th>Gaji Bersih</th>
+                      <th>Status</th>
+                      <th className="th-center" style={{ width: '120px' }}>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedItems.map((item) => (
+                      <tr key={String(item.id)}>
+                        <td>
+                          <span style={{ fontWeight: 600, color: '#1e293b' }}>{String(item.period || '-')}</span>
+                        </td>
+                        <td><span style={{ color: '#475569' }}>{formatCurrency(item.basic_salary)}</span></td>
+                        <td>
+                          <span style={{ color: '#10b981', fontWeight: 700 }}>
+                            {formatCurrency(item.take_home_pay || item.net_salary)}
+                          </span>
+                        </td>
+                        <td>
+                          <span className={`badge-soft badge-soft--${String(item.status).toLowerCase()}`}>
+                            {String(item.status).toUpperCase()}
+                          </span>
+                        </td>
+                        <td className="td-center">
+                          {String(item.status).toLowerCase() === 'paid' ? (
+                            <button
+                              className="action-btn action-btn-edit"
+                              onClick={() => handleViewSlip(String(item.id))}
+                              title="Lihat Slip"
+                            >
+                              <Eye size={16} style={{ marginRight: '6px' }} />
+                              Lihat Slip
+                            </button>
+                          ) : (
+                            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Menunggu Pembayaran</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
               <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, filteredItems.length)} dari {filteredItems.length}
+                  Menampilkan <strong>{paginatedItems.length}</strong> dari <strong>{filteredItems.length}</strong> slip gaji
                 </div>
                 <div className="pagination-controls">
-                  <Button
-                    variant="outline"
-                    size="sm"
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
-                    onClick={() => setCurrentPage(prev => prev - 1)}
                   >
-                    Sebelumnya
-                  </Button>
+                    ‹
+                  </button>
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                     <button
                       key={page}
-                      className={`pagination-page-btn ${currentPage === page ? 'active' : ''}`}
+                      className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
                       onClick={() => setCurrentPage(page)}
                     >
                       {page}
                     </button>
                   ))}
-                  <Button
-                    variant="outline"
-                    size="sm"
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                     disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage(prev => prev + 1)}
                   >
-                    Selanjutnya
-                  </Button>
+                    ›
+                  </button>
                 </div>
               </div>
-            )}
-          </>
-        )}
-      </Card>
+            </>
+          )}
+        </div>
+      </div>
 
       {/* Modal for Slip Details */}
       <Modal

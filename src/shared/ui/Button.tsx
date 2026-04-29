@@ -23,6 +23,8 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   block?: boolean;
   /** Custom className */
   className?: string;
+  /** Danger styling (alternative to variant="danger") */
+  danger?: boolean;
 }
 
 /* ========================================
@@ -38,14 +40,16 @@ export const Button: React.FC<ButtonProps> = ({
   loading = false,
   block = false,
   disabled = false,
+  danger = false,
   className,
   ...props
 }) => {
+  const finalVariant = danger ? 'danger' : variant;
   return (
     <button
       className={clsx(
         'ui-button',
-        `ui-button--${variant}`,
+        `ui-button--${finalVariant}`,
         `ui-button--${size}`,
         {
           'ui-button--full-width': fullWidth,

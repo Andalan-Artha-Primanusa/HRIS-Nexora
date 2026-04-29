@@ -23,7 +23,7 @@
 }
 
 html {
-  font-family: var(--font-family-base);
+  font-family: 'Poppins', sans-serif;
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -297,7 +297,7 @@ dd {
    ====================================== */
 
 code {
-  font-family: var(--font-family-mono);
+  font-family: 'Poppins', sans-serif;
   font-size: 0.9em;
   background-color: var(--color-background);
   color: var(--color-error);
@@ -443,7 +443,7 @@ button,
   padding: 0 var(--button-padding-x);
   font-size: var(--button-font-size);
   font-weight: var(--button-font-weight);
-  font-family: var(--font-family-base);
+  font-family: 'Poppins', sans-serif;
   border: none;
   border-radius: var(--button-border-radius);
   cursor: pointer;
@@ -597,7 +597,7 @@ select {
   width: 100%;
   height: var(--input-height);
   padding: var(--input-padding);
-  font-family: var(--font-family-base);
+  font-family: 'Poppins', sans-serif;
   font-size: var(--input-font-size);
   border: var(--input-border);
   border-radius: var(--input-border-radius);

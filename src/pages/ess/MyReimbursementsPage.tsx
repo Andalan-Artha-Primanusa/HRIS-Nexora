@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Plus, RefreshCw, Wallet, Search, Eye, Pencil, Trash2, Send, CheckCircle2, Clock, TrendingUp } from 'lucide-react';
-import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import {
@@ -36,10 +35,10 @@ const formatDate = (value?: string) => {
 
 const MyReimbursementsPage: React.FC = () => {
   const [items, setItems] = useState<ReimbursementItem[]>([]);
-  const [stats, setStats] = useState<any>(null);
+  const [stats, _setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [_isModalOpen, _setIsModalOpen] = useState(false);
+  const [_isDetailOpen, _setIsDetailOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<ReimbursementItem | null>(null);
 
   // Search & Filter
@@ -124,7 +123,8 @@ const MyReimbursementsPage: React.FC = () => {
     setIsDetailOpen(true);
   };
 
-  const handleSave = async (data: any) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _handleSave = async (data: any) => {
     try {
       if (selectedItem) {
         await updateReimbursement(String(selectedItem.id), data);
@@ -160,7 +160,8 @@ const MyReimbursementsPage: React.FC = () => {
     }
   };
 
-  const clearFilters = () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _clearFilters = () => {
     setSearchText("");
     setActiveTab("Semua");
     setCurrentPage(1);

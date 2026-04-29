@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
+import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { Alert } from "@/shared/ui/Alert";
 import { KeyRound, RefreshCw, ShieldAlert, ShieldPlus, Shield, Plus, Edit, Trash2, Search } from "lucide-react";
 import { deleteRole, getAllRoles } from "@/features/admin/api/admin.service";
@@ -58,29 +59,41 @@ if (!canViewRoles) {
   }
 
   const [roles, setRoles] = useState<Role[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const filteredRoles = roles.filter(r => 
-    r.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    (r.display_name && r.display_name.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
-  
+  const [searchText, setSearchText] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState("");
   const [alertType, setAlertType] = useState<"success" | "error" | "info">("info");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
 
   const loadRoles = async () => {
     setLoading(true);
+    setErrorMessage(null);
     try {
       const data = await getAllRoles();
       const rolesArray = Array.isArray(data) ? data : data.items || data.data || [];
       setRoles(rolesArray);
     } catch (error: unknown) {
-      setStatusMessage(getErrorMessage(error as never));
-      setAlertType("error");
+      setErrorMessage(getErrorMessage(error as never));
     } finally {
       setLoading(false);
     }
   };
+
+  const filteredRoles = useMemo(() => {
+    return roles.filter(r =>
+      r.name.toLowerCase().includes(searchText.toLowerCase()) ||
+      (r.display_name && r.display_name.toLowerCase().includes(searchText.toLowerCase()))
+    );
+  }, [roles, searchText]);
+
+  const paginatedRoles = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredRoles.slice(start, start + pageSize);
+  }, [filteredRoles, currentPage, pageSize]);
+
+  const totalPages = Math.ceil(filteredRoles.length / pageSize);
 
   useEffect(() => {
     void loadRoles();
@@ -131,90 +144,112 @@ if (!canViewRoles) {
 
       {statusMessage && <Alert type={alertType} message={statusMessage} onClose={() => setStatusMessage("")} dismissible />}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', marginTop: '2rem' }}>
-        <Card glass style={{ padding: '2rem', borderRadius: '32px' }}>
-          <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: '#1e3a8a' }}>Daftar Role</h3>
-              <span style={{ padding: '4px 12px', background: '#eff6ff', color: '#2563eb', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 700 }}>
-                {roles.length} roles
-              </span>
+      <div className="white-unified-wrapper">
+        <div className="wuw-header">
+          <div className="wuw-header-top">
+            <div className="wuw-title-area">
+              <h3>Daftar Role</h3>
+              <span className="wuw-count-badge">{filteredRoles.length} roles</span>
             </div>
-            
-            <div style={{ position: 'relative', width: '100%', maxWidth: '300px' }}>
-              <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+            <div className="wuw-search">
+              <Search size={16} className="wuw-search-icon" />
               <input
                 type="text"
+                className="search-input-pill"
                 placeholder="Cari role..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{ width: '100%', padding: '12px 16px 12px 42px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '0.9rem', color: '#0f172a', transition: 'all 0.2s', boxSizing: 'border-box' }}
+                value={searchText}
+                onChange={(e) => { setSearchText(e.target.value); setCurrentPage(1); }}
               />
             </div>
           </div>
+        </div>
 
-          <div style={{ borderRadius: '16px', border: '1px solid #f1f5f9', overflow: 'hidden' }}>
-            <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0 }}>
-              <thead style={{ background: '#f8fafc' }}>
-                <tr>
-                  <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', borderBottom: '1px solid #f1f5f9' }}>ID</th>
-                  <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', borderBottom: '1px solid #f1f5f9' }}>Nama Role</th>
-                  <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', borderBottom: '1px solid #f1f5f9' }}>Display Name</th>
-                  <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', borderBottom: '1px solid #f1f5f9' }}>Permissions</th>
-                  <th style={{ padding: '1rem', textAlign: 'right', fontSize: '0.75rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', borderBottom: '1px solid #f1f5f9' }}>Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr><td colSpan={5} style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>Memuat data...</td></tr>
-                ) : filteredRoles.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} style={{ textAlign: 'center', padding: '4rem' }}>
-                      <KeyRound size={48} style={{ margin: '0 auto 1rem', opacity: 0.1, color: '#1e3a8a' }} />
-                      <div style={{ fontWeight: 600, color: '#94a3b8' }}>Tidak ada data role ditemukan</div>
-                    </td>
-                  </tr>
-                ) : filteredRoles.map((role) => (
-                  <tr key={role.id} style={{ transition: 'all 0.2s' }}>
-                    <td style={{ padding: '1.25rem 1rem', borderBottom: '1px solid #f1f5f9' }}>
-                      <span style={{ fontWeight: 800, color: '#2563eb' }}>#{role.id}</span>
-                    </td>
-                    <td style={{ padding: '1.25rem 1rem', borderBottom: '1px solid #f1f5f9' }}>
-                      <div style={{ fontWeight: 700, color: '#1e293b' }}>{role.name}</div>
-                    </td>
-                    <td style={{ padding: '1.25rem 1rem', borderBottom: '1px solid #f1f5f9' }}>
-                      <div style={{ color: '#475569' }}>{role.display_name || '—'}</div>
-                    </td>
-                    <td style={{ padding: '1.25rem 1rem', borderBottom: '1px solid #f1f5f9' }}>
-                      <span style={{ padding: '4px 10px', borderRadius: '8px', background: (role.permissions_count || 0) > 0 ? '#dcfce7' : '#f1f5f9', color: (role.permissions_count || 0) > 0 ? '#166534' : '#64748b', fontSize: '0.75rem', fontWeight: 700 }}>
-                        {role.permissions_count || 0} permissions
-                      </span>
-                    </td>
-                    <td style={{ padding: '1.25rem 1rem', borderBottom: '1px solid #f1f5f9', textAlign: 'right' }}>
-                        <div className="action-btn-group" style={{ justifyContent: 'flex-end' }}>
-                          <button 
-                            className="action-btn action-btn-edit"
-                            onClick={() => navigate(`/admin/roles/edit/${role.id}`)}
-                            title="Edit Role"
-                          >
-                            <Edit size={16} />
-                          </button>
-                          <button 
-                            className="action-btn action-btn-delete"
-                            onClick={() => void handleDelete(role.id, role.name)}
-                            title="Hapus Role"
-                            disabled={role.id === 1 || role.name === 'admin' || role.name === 'super_admin'}
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
+        <div className="wuw-table-area">
+          {loading && <LoadingState message="Memuat roles..." />}
+          {!loading && errorMessage && <ErrorState message="Koneksi Terputus" error={errorMessage} onRetry={loadRoles} />}
+
+          {!loading && !errorMessage && (
+            <>
+              <div className="table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Nama Role</th>
+                      <th>Display Name</th>
+                      <th>Permissions</th>
+                      <th>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedRoles.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="cell-empty">
+                          <KeyRound size={32} style={{ opacity: 0.4, display: 'block', margin: '0 auto 0.75rem' }} />
+                          Tidak ada data role ditemukan.
+                        </td>
+                      </tr>
+                    ) : (
+                      paginatedRoles.map((role) => (
+                        <tr key={role.id}>
+                          <td><span className="cell-id">#{role.id}</span></td>
+                          <td><span className="cell-name-text">{role.name}</span></td>
+                          <td>{role.display_name || '—'}</td>
+                          <td>
+                            <span className={permissionChipClass(role.permissions_count || 0)}>
+                              {role.permissions_count || 0} permissions
+                            </span>
+                          </td>
+                          <td>
+                            <div className="action-btn-group" style={{ justifyContent: 'flex-end' }}>
+                              <button
+                                className="action-btn action-btn-edit"
+                                onClick={() => navigate(`/admin/roles/edit/${role.id}`)}
+                                title="Edit Role"
+                              >
+                                <Edit size={16} />
+                              </button>
+                              <button
+                                className="action-btn action-btn-delete"
+                                onClick={() => void handleDelete(role.id, role.name)}
+                                title="Hapus Role"
+                                disabled={role.id === 1 || role.name === 'admin' || role.name === 'super_admin'}
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {totalPages > 1 && (
+                <div className="pagination">
+                  <button
+                    className="pagination-btn"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  >
+                    Previous
+                  </button>
+                  <span className="pagination-info">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    className="pagination-btn"
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

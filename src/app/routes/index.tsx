@@ -31,7 +31,7 @@ const MyPayrollPage = lazy(() => import("../../pages/ess/MyPayrollPage"));
 const MyLeavesPage = lazy(() => import("../../pages/ess/MyLeavesPage"));
 const MyTrainingsPage = lazy(() => import("../../pages/ess/MyTrainingsPage"));
 const MyCompetenciesPage = lazy(() => import("../../pages/ess/MyCompetenciesPage"));
-
+const MyDocumentsPage = lazy(() => import("../../pages/ess/MyDocumentsPage"));
 const LocationsPage = lazy(() => import("../../pages/locations/LocationsPage"));
 const CreateLocationPage = lazy(() => import("../../pages/locations/CreateLocationPage"));
 const EditLocationPage = lazy(() => import("../../pages/locations/EditLocationPage"));
@@ -66,7 +66,6 @@ const ReportsLeavePage = lazy(() => import("../../pages/reports/ReportsLeavePage
 const ReportsPayrollPage = lazy(() => import("../../pages/reports/ReportsPayrollPage"));
 const PayrollTaxBPJSPage = lazy(() => import("../../pages/payroll/PayrollTaxPage"));
 const PayrollReportsDetailedPage = lazy(() => import("../../pages/payroll/PayrollReportsDetailedPage"));
-const PayrollSlipPage = lazy(() => import("../../pages/payroll/PayrollSlipPage"));
 const ReportsAssetsPage = lazy(() => import("../../pages/reports/ReportsAssetsPage"));
 const ReportsEmployeePage = lazy(() => import("../../pages/reports/ReportsEmployeePage"));
 const WorkSchedulesPage = lazy(() => import("../../pages/work-schedule/WorkSchedulesPage"));
@@ -365,7 +364,7 @@ export const router = createBrowserRouter([
       {
         path: "/my/documents",
         element: <DashboardLayout />,
-        children: [{ index: true, element: <div>My Documents - Maintenance</div> }],
+        children: [{ index: true, element: <MyDocumentsPage /> }],
       },
       {
         path: "/my/payroll",
@@ -947,11 +946,6 @@ export const router = createBrowserRouter([
         path: "/payroll/reports",
         element: <DashboardLayout />,
         children: [{ index: true, element: <PayrollReportsDetailedPage /> }],
-      },
-      {
-        path: "/payroll/:id/slip",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <PayrollSlipPage /> }],
       },
       {
         path: "/reports/dashboard-summary",

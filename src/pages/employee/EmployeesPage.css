@@ -177,7 +177,7 @@
   height: 44px;
   border: 1px solid #e2e8f0;
   padding: 0 1rem;
-  font-family: inherit;
+  font-family: 'Poppins', sans-serif;
   font-weight: 500;
   color: #1e293b;
   outline: none;
@@ -243,7 +243,7 @@
   font-size: 1rem !important;
   color: #1e293b !important;
   transition: all 0.25s ease !important;
-  font-family: inherit !important;
+  font-family: 'Poppins', sans-serif;
 }
 
 .search-input-pill::placeholder {

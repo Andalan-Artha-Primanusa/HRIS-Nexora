@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Plus, 
-  Search, 
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  Plus,
+  Search,
   Calendar,
   Edit,
   Trash2,
@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
@@ -30,15 +31,22 @@ interface LeaveType {
 
 const LeaveTypePage: React.FC = () => {
   const [types, setTypes] = useState<LeaveType[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Search & Filter
+  const [searchText, setSearchText] = useState('');
+  const [activeTab, setActiveTab] = useState<'Semua' | 'Active' | 'Inactive'>('Semua');
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
 
   const fetchTypes = async () => {
     setLoading(true);
-    console.log('Fetching leave types from /leave-types...');
+    setErrorMessage(null);
     try {
       const response = await api.get('/leave-types');
-      console.log('Leave Types Response Raw:', response);
       
       let data = response.data;
       if (data && typeof data === 'object') {
@@ -51,6 +59,7 @@ const LeaveTypePage: React.FC = () => {
       setTypes(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching leave types:', error);
+      setErrorMessage('Gagal memuat jenis cuti');
       setTypes([]);
     } finally {
       setLoading(false);
@@ -61,13 +70,92 @@ const LeaveTypePage: React.FC = () => {
     fetchTypes();
   }, []);
 
-  const filteredTypes = types.filter(t => 
-    t.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    t.code?.toLowerCase().includes(searchQuery.toLowerCase())
+  // Filter & Sort & Paginate
+  const filteredTypes = useMemo(() => {
+    return types.filter((type) => {
+      const searchStr = searchText.toLowerCase();
+      const nameMatch = type.name?.toLowerCase().includes(searchStr);
+      const codeMatch = type.code?.toLowerCase().includes(searchStr);
+      const textMatch = nameMatch || codeMatch;
+
+      let statusMatch = true;
+      if (activeTab === 'Active') statusMatch = type.is_active === true;
+      else if (activeTab === 'Inactive') statusMatch = type.is_active === false;
+
+      return textMatch && statusMatch;
+    });
+  }, [types, searchText, activeTab]);
+
+  const sortedTypes = useMemo(() => {
+    return [...filteredTypes].sort((a, b) => {
+      const nameA = a.name?.toLowerCase() || '';
+      const nameB = b.name?.toLowerCase() || '';
+      return nameA.localeCompare(nameB);
+    });
+  }, [filteredTypes]);
+
+  const paginatedTypes = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return sortedTypes.slice(startIndex, startIndex + pageSize);
+  }, [sortedTypes, currentPage, pageSize]);
+
+  const totalPages = Math.ceil(sortedTypes.length / pageSize);
+
+  const clearFilters = () => {
+    setSearchText('');
+    setActiveTab('Semua');
+    setCurrentPage(1);
+  };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText, activeTab]);
+
+  const paidCount = useMemo(() => types.filter((t) => t.is_paid).length, [types]);
+  const activeCount = useMemo(() => types.filter((t) => t.is_active).length, [types]);
+  const totalTypes = types.length;
+
+  const summaryCards = useMemo(
+    () => [
+      {
+        label: 'Total Jenis',
+        subtitle: 'Semua kategori',
+        value: String(totalTypes),
+        change: 'Data tersimpan di sistem',
+        tone: 'blue' as const,
+        icon: Calendar,
+      },
+      {
+        label: 'Hasil Filter',
+        subtitle: 'Jenis sesuai pencarian',
+        value: String(sortedTypes.length),
+        change: `${paginatedTypes.length} data per halaman`,
+        tone: 'green' as const,
+        icon: Search,
+      },
+      {
+        label: 'Paid Leave',
+        subtitle: 'Cuti berbayar',
+        value: String(paidCount),
+        change: 'Berbayar',
+        tone: 'orange' as const,
+        icon: ShieldCheck,
+      },
+      {
+        label: 'Active Types',
+        subtitle: 'Jenis aktif',
+        value: String(activeCount),
+        change: 'Siap digunakan',
+        tone: 'purple' as const,
+        icon: CalendarDays,
+      },
+    ],
+    [totalTypes, paidCount, activeCount, sortedTypes.length, paginatedTypes.length]
   );
 
   return (
     <div className="crud-page">
+      {/* Header */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -85,7 +173,7 @@ const LeaveTypePage: React.FC = () => {
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan
             </button>
-            <button className="btn-primary" onClick={() => window.location.href = '/leave/type/create'}>
+            <button className="btn-primary" onClick={() => (window.location.href = '/leave/type/create')}>
               <Plus size={16} />
               Tambah Jenis Cuti
             </button>
@@ -93,216 +181,194 @@ const LeaveTypePage: React.FC = () => {
         </div>
       </Card>
 
-      <div className="leave-requests-wrapper">
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Total Jenis</p>
-              <p className="leave-summary-subtitle">Semua kategori</p>
+      {/* Summary Cards */}
+      <div className="employee-summary-wrapper">
+        {summaryCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <div key={card.label} className="employee-summary-card">
+              <div className="employee-summary-header">
+                <div>
+                  <p className="employee-summary-label">{card.label}</p>
+                  <p className="employee-summary-subtitle">{card.subtitle}</p>
+                </div>
+                <div className={`employee-summary-icon-wrapper employee-icon-${card.tone}`}>
+                  <Icon size={28} />
+                </div>
+              </div>
+              <div className={`employee-summary-value employee-value-${card.tone}`}>{card.value}</div>
+              <p className="employee-summary-trend">{card.change}</p>
             </div>
-            <div className="leave-summary-icon-wrapper leave-icon-blue">
-              <Calendar size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-blue">{types.length}</div>
-          <p className="leave-summary-trend">Jenis Cuti</p>
-        </div>
-
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Paid Leave</p>
-              <p className="leave-summary-subtitle">Cuti berbayar</p>
-            </div>
-            <div className="leave-summary-icon-wrapper leave-icon-green">
-              <ShieldCheck size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-green">{types.filter(t => t.is_paid).length}</div>
-          <p className="leave-summary-trend">Paid</p>
-        </div>
-
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Unpaid Leave</p>
-              <p className="leave-summary-subtitle">Cuti tidak berbayar</p>
-            </div>
-            <div className="leave-summary-icon-wrapper leave-icon-orange">
-              <CalendarDays size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-orange">{types.filter(t => !t.is_paid).length}</div>
-          <p className="leave-summary-trend">Unpaid</p>
-        </div>
+          );
+        })}
       </div>
 
-      <div className="white-unified-wrapper">
-        <div className="wuw-header">
-          <div className="wuw-header-top">
-            <div className="wuw-title-area">
-              <h3>Daftar Jenis Cuti</h3>
-            </div>
+      {/* Analytics Title Card */}
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <Calendar size={24} />
+          </div>
+          <div>
+            <h2 className="analytics-title">Daftar Jenis Cuti</h2>
+            <p className="analytics-subtitle">Kelola dan lihat semua jenis cuti</p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Control Section */}
+      <Card className="control-section-card">
+        <div className="control-section-inner">
+          {/* Tabs */}
+          <div className="elyra-tabs">
+            {(['Semua', 'Active', 'Inactive'] as const).map((tab) => (
+              <button key={tab} className={`elyra-tab ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          {/* Search */}
+          <div className="control-actions">
             <div className="search-box">
-              <Search size={18} />
-              <input 
-                type="text" 
-                placeholder="Cari berdasarkan nama atau kode..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+              <div className="search-icon-inside"><Search size={18} /></div>
+              <input
+                type="text"
+                placeholder="Cari berdasarkan nama atau kode..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="search-input-pill"
               />
             </div>
+            {(searchText || activeTab !== 'Semua') && (
+              <button className="btn-clear-filter" onClick={clearFilters}>
+                Hapus Filter
+              </button>
+            )}
           </div>
         </div>
+      </Card>
 
+      {/* Table Section */}
+      <div className="table-section">
         <div className="wuw-table-area">
-          <Card glass style={{ padding: '0', borderRadius: '24px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
-            <div className="table-responsive">
-              <table className="leave-type-table">
-              <thead>
-                <tr>
-                  <th>Nama Cuti</th>
-                  <th>Kode</th>
-                  <th>Deskripsi</th>
-                  <th>Tipe Pembayaran</th>
-                  <th>Status</th>
-                  <th style={{ textAlign: 'right' }}>Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td colSpan={6} style={{ textAlign: 'center', padding: '4rem' }}>
-                      <RefreshCw size={32} className="animate-spin" color="#2563eb" />
-                      <p style={{ marginTop: '1rem', color: '#64748b' }}>Memuat data...</p>
-                    </td>
-                  </tr>
-                ) : filteredTypes.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} style={{ textAlign: 'center', padding: '4rem', color: '#94a3b8' }}>
-                      Belum ada jenis cuti yang terdaftar.
-                    </td>
-                  </tr>
-                ) : filteredTypes.map((type) => (
-                  <tr key={type.id} className="leave-policy-row">
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div style={{ 
-                          width: '40px', 
-                          height: '40px', 
-                          borderRadius: '12px', 
-                          background: type.is_paid ? '#eff6ff' : '#fff1f2', 
-                          color: type.is_paid ? '#2563eb' : '#e11d48',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}>
-                          <Calendar size={20} />
-                        </div>
-                        <div>
-                          <div style={{ fontWeight: 700, color: '#1e293b' }}>{type.name}</div>
-                          <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Terdaftar pada {type.created_at ? new Date(type.created_at).toLocaleDateString() : '-'}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <span className="policy-code">{type.code}</span>
-                    </td>
-                    <td style={{ maxWidth: '250px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {type.description || '-'}
-                    </td>
-                    <td>
-                      <span className={`policy-badge ${type.is_paid ? 'policy-badge-paid' : 'policy-badge-unpaid'}`}>
-                        {type.is_paid ? 'Paid' : 'Unpaid'}
-                      </span>
-                    </td>
-                    <td>
-                      <span style={{ 
-                        padding: '4px 12px', 
-                        borderRadius: '20px', 
-                        fontSize: '0.75rem', 
-                        fontWeight: 700,
-                        background: type.is_active ? '#dcfce7' : '#f1f5f9',
-                        color: type.is_active ? '#16a34a' : '#64748b'
-                      }}>
-                        {type.is_active ? 'ACTIVE' : 'INACTIVE'}
-                      </span>
-                    </td>
-                    <td style={{ textAlign: 'right' }}>
-                      <div className="action-btn-group">
-                        <button 
-                          className="action-btn action-btn-edit" 
-                          onClick={() => window.location.href = `/leave/type/edit/${type.id}`}
-                          title="Edit Jenis Cuti"
-                        >
-                          <Edit size={16} />
-                        </button>
-                        <button 
-                          className="action-btn action-btn-delete" 
-                          onClick={() => {
-                            if (window.confirm('Hapus jenis cuti ini?')) {
-                              void api.delete(`/leave-types/${type.id}`).then(() => void fetchTypes());
-                            }
-                          }}
-                          title="Hapus Jenis Cuti"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            </div>
-            </Card>
-        </div>
-      </div>
+          {loading && <LoadingState message="Memuat jenis cuti..." />}
+          {!loading && errorMessage && <ErrorState message="Koneksi Terputus" error={errorMessage} onRetry={fetchTypes} />}
 
-      <div className="leave-requests-wrapper">
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Auto-Renewal</p>
-              <p className="leave-summary-subtitle">Otomatis diperpanjang</p>
+          {!loading && !errorMessage && paginatedTypes.length === 0 && (
+            <div style={{ padding: '5rem 0' }}>
+              <EmptyState
+                title="Pencarian Kosong"
+                message="Kami tidak menemukan jenis cuti yang sesuai dengan kriteria Anda."
+                actionLabel="Bersihkan Filter"
+                onAction={clearFilters}
+              />
             </div>
-            <div className="leave-summary-icon-wrapper leave-icon-green">
-              <ShieldCheck size={28} />
-            </div>
-          </div>
-          <p className="leave-summary-trend" style={{ fontSize: '0.85rem', lineHeight: 1.5 }}>
-            Saldo cuti otomatis direset dan diperbarui berdasarkan siklus kebijakan.
-          </p>
-        </div>
+          )}
 
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Prorated Logic</p>
-              <p className="leave-summary-subtitle">Perhitungan proporsional</p>
-            </div>
-            <div className="leave-summary-icon-wrapper leave-icon-blue">
-              <FileText size={28} />
-            </div>
-          </div>
-          <p className="leave-summary-trend" style={{ fontSize: '0.85rem', lineHeight: 1.5 }}>
-            Karyawan baru menerima jumlah cuti proporsional berdasarkan tanggal masuk.
-          </p>
-        </div>
+          {!loading && !errorMessage && paginatedTypes.length > 0 && (
+            <>
+              <div className="table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Jenis Cuti</th>
+                      <th>Kode</th>
+                      <th>Deskripsi</th>
+                      <th>Tipe Pembayaran</th>
+                      <th>Status</th>
+                      <th className="th-center" style={{ width: '120px' }}>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedTypes.map((type) => (
+                      <tr key={type.id}>
+                        <td>
+                          <div className="cell-name">
+                            <div className="cell-avatar" style={{ background: type.is_paid ? '#eff6ff' : '#fff1f2', color: type.is_paid ? '#2563eb' : '#e11d48' }}>
+                              <Calendar size={18} />
+                            </div>
+                            <div className="cell-stacked">
+                              <span className="cell-name-text">{type.name}</span>
+                              <span className="cell-stacked__sub">Terdaftar pada {type.created_at ? new Date(type.created_at).toLocaleDateString() : '-'}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td><span className="badge-soft badge-soft--blue">{type.code}</span></td>
+                        <td style={{ maxWidth: '250px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {type.description || '-'}
+                        </td>
+                        <td>
+                          <span className={`badge-soft ${type.is_paid ? 'badge-soft--green' : 'badge-soft--red'}`}>
+                            {type.is_paid ? 'PAID' : 'UNPAID'}
+                          </span>
+                        </td>
+                        <td className="td-center">
+                          <span className={`badge-soft badge-soft--${type.is_active ? 'green' : 'red'}`}>
+                            {type.is_active ? 'ACTIVE' : 'INACTIVE'}
+                          </span>
+                        </td>
+                        <td className="td-center">
+                          <div className="action-btn-group">
+                            <button
+                              className="action-btn action-btn-edit"
+                              onClick={() => (window.location.href = `/leave/type/edit/${type.id}`)}
+                              title="Edit"
+                            >
+                              <Edit size={16} />
+                            </button>
+                            <button
+                              className="action-btn action-btn-delete"
+                              onClick={() => {
+                                if (window.confirm('Hapus jenis cuti ini?')) {
+                                  void api.delete(`/leave-types/${type.id}`).then(() => void fetchTypes());
+                                }
+                              }}
+                              title="Hapus"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Carryover Rules</p>
-              <p className="leave-summary-subtitle">Aturan carryover</p>
-            </div>
-            <div className="leave-summary-icon-wrapper leave-icon-orange">
-              <Calendar size={28} />
-            </div>
-          </div>
-          <p className="leave-summary-trend" style={{ fontSize: '0.85rem', lineHeight: 1.5 }}>
-            Sisa cuti dapat dibawa ke periode berikutnya sesuai batas kebijakan.
-          </p>
+              {/* Pagination */}
+              <div className="table-pagination">
+                <div className="pagination-info">
+                  Menampilkan <strong>{paginatedTypes.length}</strong> dari <strong>{sortedTypes.length}</strong> jenis cuti
+                </div>
+                <div className="pagination-controls">
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    ‹
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    ›
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

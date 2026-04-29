@@ -20,16 +20,10 @@ import EmployeeLifecycleModals from "./components/EmployeeLifecycleModals";
 import {
   Search,
   Filter,
-  Plus,
-  RefreshCw,
   Pencil,
   Trash2,
   Briefcase,
-  FileText,
-  TrendingUp,
   Users,
-  UserCheck,
-  CalendarOff,
   Building2,
 } from "lucide-react";
 import "@/shared/styles/CrudPage.css";

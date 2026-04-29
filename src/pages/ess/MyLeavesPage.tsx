@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
+import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
 
 import { Calendar, RefreshCw, Clock3, CircleCheckBig, CircleX, Wallet } from "lucide-react";
 
-import { Button } from "@/shared/ui/Button";
 import { getMyLeaveBalance, getMyLeaves } from "@/features/ess/api/ess.service";
 import type { GenericApiItem } from "@/features/ess/types/ess.types";
 import "@/shared/styles/CrudPage.css";
@@ -62,7 +62,8 @@ const toLabel = (key: string) =>
     .trim()
     .replace(/\b\w/g, (char) => char.toUpperCase());
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
 const isNumericLike = (value: unknown) => {
@@ -73,20 +74,31 @@ const isNumericLike = (value: unknown) => {
 
 const MyLeavesPage = () => {
   const { pathname } = useLocation();
-  const isBalanceRoute = pathname === "/leave/balance";
+  const isBalanceRoute = pathname === "/leave/balance" || pathname.includes("leave/balance");
 
   const [leaves, setLeaves] = useState<GenericApiItem[]>([]);
   const [leaveBalance, setLeaveBalance] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Search & Filter (for leaves)
+  const [searchText, setSearchText] = useState('');
+  const [activeTab, setActiveTab] = useState<'Semua' | 'Pending' | 'Approved' | 'Rejected'>('Semua');
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
 
   const loadLeaves = async () => {
     setLoading(true);
+    setErrorMessage(null);
 
     try {
       const result = await getMyLeaves();
       setLeaves(result.items);
     } catch (error: unknown) {
-      // Handle error silently
+      console.error("Failed to load leaves:", error);
+      setErrorMessage('Gagal memuat cuti');
     } finally {
       setLoading(false);
     }
@@ -94,6 +106,7 @@ const MyLeavesPage = () => {
 
   const loadLeaveBalance = async () => {
     setLoading(true);
+    setErrorMessage(null);
 
     try {
       const result = await getMyLeaveBalance();
@@ -104,13 +117,15 @@ const MyLeavesPage = () => {
 
       setLeaveBalance(balancePayload);
     } catch (error: unknown) {
-      // Handle error silently
+      console.error("Failed to load leave balance:", error);
+      setErrorMessage('Gagal memuat saldo cuti');
     } finally {
       setLoading(false);
     }
   };
 
-  const leaveSummaryCards = useMemo(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _leaveSummaryCards = useMemo(
     () => {
       if (isBalanceRoute) {
         const balanceEntries = leaveBalance ? Object.entries(leaveBalance) : [];
@@ -198,7 +213,7 @@ const MyLeavesPage = () => {
 
   return (
     <div className="crud-page">
-      {/* Header - Same style as Dashboard */}
+      {/* Header */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -223,98 +238,25 @@ const MyLeavesPage = () => {
       </Card>
 
       {/* Summary Cards */}
-      <div className="leave-requests-wrapper">
-        {isBalanceRoute ? (
-          <>
-            <div className="leave-summary-card">
-              <div className="leave-summary-header">
+      <div className="employee-summary-wrapper">
+        {summaryCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <div key={card.label} className="employee-summary-card">
+              <div className="employee-summary-header">
                 <div>
-                  <p className="leave-summary-label">Field Saldo</p>
-                  <p className="leave-summary-subtitle">Jumlah field saldo cuti</p>
+                  <p className="employee-summary-label">{card.label}</p>
+                  <p className="employee-summary-subtitle">{card.subtitle}</p>
                 </div>
-                <div className="leave-summary-icon-wrapper leave-icon-blue">
-                  <Wallet size={28} />
+                <div className={`employee-summary-icon-wrapper employee-icon-${card.tone}`}>
+                  <Icon size={28} />
                 </div>
               </div>
-              <div className="leave-summary-value leave-value-blue">{leaveBalance ? Object.keys(leaveBalance).length : 0}</div>
-              <p className="leave-summary-trend">Ringkasan data saldo</p>
+              <div className={`employee-summary-value employee-value-${card.tone}`}>{card.value}</div>
+              <p className="employee-summary-trend">{card.change}</p>
             </div>
-            <div className="leave-summary-card">
-              <div className="leave-summary-header">
-                <div>
-                  <p className="leave-summary-label">Status</p>
-                  <p className="leave-summary-subtitle">Status saldo yang tampil</p>
-                </div>
-                <div className="leave-summary-icon-wrapper leave-icon-green">
-                  <CircleCheckBig size={28} />
-                </div>
-              </div>
-              <div className="leave-summary-value leave-value-green">{leaveBalance ? 'Ready' : '-'}</div>
-              <p className="leave-summary-trend">Data saldo personal</p>
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="leave-summary-card">
-              <div className="leave-summary-header">
-                <div>
-                  <p className="leave-summary-label">Total Cuti</p>
-                  <p className="leave-summary-subtitle">Semua pengajuan cuti</p>
-                </div>
-                <div className="leave-summary-icon-wrapper leave-icon-blue">
-                  <Calendar size={28} />
-                </div>
-              </div>
-              <div className="leave-summary-value leave-value-blue">{leaves.length}</div>
-              <p className="leave-summary-trend">Riwayat cuti tersimpan</p>
-            </div>
-            <div className="leave-summary-card">
-              <div className="leave-summary-header">
-                <div>
-                  <p className="leave-summary-label">Menunggu</p>
-                  <p className="leave-summary-subtitle">Menunggu persetujuan</p>
-                </div>
-                <div className="leave-summary-icon-wrapper leave-icon-orange">
-                  <Clock3 size={28} />
-                </div>
-              </div>
-              <div className="leave-summary-value leave-value-orange">
-                {leaves.filter((item) => String((item as any).status ?? "pending").toLowerCase() === "pending").length}
-              </div>
-              <p className="leave-summary-trend">Perlu ditinjau</p>
-            </div>
-            <div className="leave-summary-card">
-              <div className="leave-summary-header">
-                <div>
-                  <p className="leave-summary-label">Disetujui</p>
-                  <p className="leave-summary-subtitle">Pengajuan disetujui</p>
-                </div>
-                <div className="leave-summary-icon-wrapper leave-icon-green">
-                  <CircleCheckBig size={28} />
-                </div>
-              </div>
-              <div className="leave-summary-value leave-value-green">
-                {leaves.filter((item) => String((item as any).status ?? "").toLowerCase() === "approved").length}
-              </div>
-              <p className="leave-summary-trend">Status final selesai</p>
-            </div>
-            <div className="leave-summary-card">
-              <div className="leave-summary-header">
-                <div>
-                  <p className="leave-summary-label">Ditolak</p>
-                  <p className="leave-summary-subtitle">Pengajuan ditolak</p>
-                </div>
-                <div className="leave-summary-icon-wrapper leave-icon-red">
-                  <CircleX size={28} />
-                </div>
-              </div>
-              <div className="leave-summary-value leave-value-red">
-                {leaves.filter((item) => String((item as any).status ?? "").toLowerCase() === "rejected").length}
-              </div>
-              <p className="leave-summary-trend">Perlu revisi</p>
-            </div>
-          </>
-        )}
+          );
+        })}
       </div>
 
       {!isBalanceRoute && (

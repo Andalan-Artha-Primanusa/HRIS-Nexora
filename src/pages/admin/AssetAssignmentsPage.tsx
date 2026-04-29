@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, RefreshCw, Handshake, Search, Filter, User, Calendar, MapPin, Box, FileText, TrendingUp, CheckCircle, XCircle, Trash2, Eye } from 'lucide-react';
+import { Plus, RefreshCw, Handshake, Search, Filter,Box,CheckCircle, XCircle } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
-import { Button } from '@/shared/ui/Button';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { assetService } from '@/features/assets/api/asset.service';
 import { AssignAssetModal } from '@/features/assets/components/AssignAssetModal';

@@ -10,7 +10,7 @@ import {
   submitMyKpi,
   updateKpi,
 } from '@/features/dashboard/api/kpi.service';
-import { Target, Users, ShieldCheck, RefreshCw, Trash2, Edit, Check, X, FileText } from 'lucide-react';
+import { Target, Users, RefreshCw, Trash2, Edit, Check, FileText } from 'lucide-react';
 import { showToast } from '@/shared/ui/toast';
 import '@/shared/styles/CrudPage.css';
 
@@ -60,7 +60,7 @@ const KpiPage = () => {
     const totalKpi = source.length;
     const approvedCount = source.filter(i => String(i.status).toLowerCase() === 'approved').length;
     const submittedCount = source.filter(i => String(i.status).toLowerCase() === 'submitted').length;
-    const draftCount = source.filter(i => String(i.status).toLowerCase() === 'draft').length;
+    const _draftCount = source.filter(i => String(i.status).toLowerCase() === 'draft').length;
     const avgScore = totalKpi > 0 
       ? source.reduce((sum, i) => sum + (Number(i.score) || 0), 0) / totalKpi 
       : 0;
@@ -211,7 +211,8 @@ const KpiPage = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterStatus]);
 
-  const formatCellValue = (value: unknown) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _formatCellValue = (value: unknown) => {
     if (value === null || value === undefined || value === '') return '-';
     if (typeof value === 'object') {
       const record = value as Record<string, unknown>;

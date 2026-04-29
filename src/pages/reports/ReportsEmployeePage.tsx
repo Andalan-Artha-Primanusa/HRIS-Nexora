@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Users, UserCheck, UserMinus, UserPlus, Briefcase, RefreshCw, BarChart3, PieChart as PieIcon, TrendingUp, UserCircle } from 'lucide-react';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { Card } from '@/shared/ui/Card';
-import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
@@ -22,7 +21,8 @@ const getStr = (rec: Rec, keys: string[]) => { for (const k of keys) { const v =
 const TT = { contentStyle: { backgroundColor:'#fff', border:'1px solid #dbeafe', borderRadius:'8px' }, labelStyle: { color:'#1e40af', fontWeight:'bold' as const } };
 const COLORS = ['#2563eb','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899','#f97316'];
 
-const MetricCard: React.FC<{label:string;sub:string;value:string;tone:string;icon:React.ElementType}> = ({label,sub,value,tone,icon:Icon}) => (
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _MetricCard: React.FC<{label:string;sub:string;value:string;tone:string;icon:React.ElementType}> = ({label,sub,value,tone,icon:Icon}) => (
   <Card className="report-metric-card" glass>
     <div className="report-metric-header">
       <div><span className="report-metric-label">{label}</span><p className="report-metric-sublabel">{sub}</p></div>

@@ -6,10 +6,9 @@ import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import {
   deleteKpi,
   getAllKpis,
-  submitKpiReview,
   approveKpi,
 } from '@/features/dashboard/api/kpi.service';
-import { Target, Users, ShieldCheck, RefreshCw, Trash2, Edit, Check, X, FileText, Send, CheckCircle2 } from 'lucide-react';
+import { Target, Users, RefreshCw, Trash2, Edit, Check, FileText, Send, CheckCircle2 } from 'lucide-react';
 import { showToast } from '@/shared/ui/toast';
 import '@/shared/styles/CrudPage.css';
 
@@ -46,7 +45,7 @@ const KpiListPage = () => {
     const totalKpi = source.length;
     const approvedCount = source.filter(i => String(i.status).toLowerCase() === 'approved').length;
     const submittedCount = source.filter(i => String(i.status).toLowerCase() === 'submitted').length;
-    const draftCount = source.filter(i => String(i.status).toLowerCase() === 'draft').length;
+    const _draftCount = source.filter(i => String(i.status).toLowerCase() === 'draft').length;
     const avgScore = totalKpi > 0 
       ? source.reduce((sum, i) => sum + (Number(i.score) || 0), 0) / totalKpi 
       : 0;

@@ -1,7 +1,7 @@
 import { 
   Users, CalendarDays, CreditCard, Receipt, Target, UserCircle, 
-  FileBarChart, LayoutDashboard, Network, Briefcase, 
-  FileText, Clock, Banknote, Database, ShieldCheck
+  FileBarChart, LayoutDashboard, Briefcase, 
+  FileText, Clock, Banknote, ShieldCheck,Database
 } from 'lucide-react';
 
 import type { LucideIcon } from 'lucide-react';

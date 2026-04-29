@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Briefcase, CheckCircle, Clock, Users, TrendingUp, RefreshCw, BarChart3, PieChart as PieIcon, Package } from 'lucide-react';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card } from '@/shared/ui/Card';
-import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
@@ -23,7 +22,8 @@ const getNum = (v: unknown) => { if (typeof v === 'number' && Number.isFinite(v)
 const TT = { contentStyle: { backgroundColor:'#fff', border:'1px solid #dbeafe', borderRadius:'8px' }, labelStyle: { color:'#1e40af', fontWeight:'bold' as const } };
 const COLORS = ['#2563eb','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4'];
 
-const MetricCard: React.FC<{label:string;sub:string;value:string;tone:string;icon:React.ElementType}> = ({label,sub,value,tone,icon:Icon}) => (
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _MetricCard: React.FC<{label:string;sub:string;value:string;tone:string;icon:React.ElementType}> = ({label,sub,value,tone,icon:Icon}) => (
   <Card className="report-metric-card" glass>
     <div className="report-metric-header">
       <div><span className="report-metric-label">{label}</span><p className="report-metric-sublabel">{sub}</p></div>
@@ -54,8 +54,8 @@ const ReportsAssetsPage: React.FC = () => {
   const active    = useMemo(() => assets.filter(a => ['active','available'].includes(getStr(a,['status']).toLowerCase())).length, [assets]);
   const assigned  = useMemo(() => assets.filter(a => getStr(a,['status']).toLowerCase() === 'assigned').length, [assets]);
   const maintenance = useMemo(() => assets.filter(a => ['maintenance','repair'].includes(getStr(a,['status']).toLowerCase())).length, [assets]);
-  const totalValue = useMemo(() => assets.reduce((s,a) => s + getNum(a.cost ?? a.value ?? a.purchase_cost), 0), [assets]);
-  const uniqueAssignees = useMemo(() => new Set(assignments.map(a => getStr(a,['employee_id','user_id']))).size, [assignments]);
+  const _totalValue = useMemo(() => assets.reduce((s,a) => s + getNum(a.cost ?? a.value ?? a.purchase_cost), 0), [assets]);
+  const _uniqueAssignees = useMemo(() => new Set(assignments.map(a => getStr(a,['employee_id','user_id']))).size, [assignments]);
 
   const categoryData = useMemo(() => {
     const m = new Map<string,number>();

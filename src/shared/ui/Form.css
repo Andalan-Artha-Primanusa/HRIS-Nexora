@@ -73,7 +73,7 @@
   width: 100%;
   height: 40px;
   padding: 0 var(--space-3);
-  font-family: var(--font-family-base);
+  font-family: 'Poppins', sans-serif;
   font-size: var(--font-size-base);
   color: var(--color-text-primary);
   background-color: var(--color-white);
@@ -144,7 +144,7 @@
   width: 100%;
   min-height: 120px;
   padding: var(--space-3);
-  font-family: var(--font-family-base);
+  font-family: 'Poppins', sans-serif;
   font-size: var(--font-size-base);
   color: var(--color-text-primary);
   background-color: var(--color-white);
@@ -184,7 +184,7 @@
   width: 100%;
   height: 40px;
   padding: 0 var(--space-3);
-  font-family: var(--font-family-base);
+  font-family: 'Poppins', sans-serif;
   font-size: var(--font-size-base);
   color: var(--color-text-primary);
   background-color: var(--color-white);

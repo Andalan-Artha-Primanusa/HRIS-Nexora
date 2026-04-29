@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { api } from "@/shared/api/httpClient";
 import { Card } from "@/shared/ui/Card";
-import { Button } from "@/shared/ui/Button";
 import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import {
@@ -10,11 +8,8 @@ import {
   Search,
   RefreshCw,
   CheckCircle2,
-  Calendar,
   Eye,
   TrendingUp,
-  Filter,
-  Pencil
 } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
@@ -34,7 +29,8 @@ type KPIItem = {
   updated_at: string;
 };
 
-const formatDate = (value?: string) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _formatDate = (value?: string) => {
   if (!value) return "—";
   const date = new Date(value);
   if (isNaN(date.getTime())) return value;

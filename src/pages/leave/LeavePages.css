@@ -373,7 +373,7 @@
   font-size: 0.9rem;
   background: #fff;
   color: var(--gray-900);
-  font-family: inherit;
+  font-family: 'Poppins', sans-serif;
   transition: all 0.2s ease;
 }
 
@@ -435,7 +435,7 @@
   border-collapse: separate;
   border-spacing: 0;
   min-width: 850px;
-  font-family: inherit;
+  font-family: 'Poppins', sans-serif;
 }
 
 .leave-table th,
@@ -654,7 +654,7 @@
   border-radius: 8px;
   padding: 1rem;
   font-size: 0.8rem;
-  font-family: 'Courier New', monospace;
+  font-family: 'Poppins', sans-serif;
   overflow: auto;
   max-height: 280px;
 }

@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Plus, RefreshCw, Edit, Trash2, Search, Building2, Users, MapPin, Briefcase, Database, CheckCircle, XCircle } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
+import { api } from '@/shared/api/httpClient';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
@@ -20,9 +22,16 @@ const MasterDataPage: React.FC = () => {
   const [departments, setDepartments] = useState<MasterDataItem[]>([]);
   const [positions, setPositions] = useState<MasterDataItem[]>([]);
   const [locations, setLocations] = useState<MasterDataItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'department' | 'position' | 'location'>('department');
-  const [searchQuery, setSearchQuery] = useState('');
+
+  // Search & Filter
+  const [searchText, setSearchText] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
+
+  // Modal
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState<MasterDataItem | null>(null);
   const [formData, setFormData] = useState({
@@ -34,22 +43,24 @@ const MasterDataPage: React.FC = () => {
 
   const fetchData = async () => {
     setLoading(true);
+    setErrorMessage(null);
     try {
       const [deptRes, posRes, locRes] = await Promise.all([
         api.get('/departments'),
         api.get('/positions'),
         api.get('/locations')
       ]);
-      
+
       const deptData = Array.isArray(deptRes.data) ? deptRes.data : Array.isArray(deptRes.data?.data) ? deptRes.data.data : [];
       const posData = Array.isArray(posRes.data) ? posRes.data : Array.isArray(posRes.data?.data) ? posRes.data.data : [];
       const locData = Array.isArray(locRes.data) ? locRes.data : Array.isArray(locRes.data?.data) ? locRes.data.data : [];
-      
+
       setDepartments(deptData);
       setPositions(posData);
       setLocations(locData);
     } catch (err) {
       console.error(err);
+      setErrorMessage('Gagal memuat master data');
     } finally {
       setLoading(false);
     }
@@ -85,11 +96,40 @@ const MasterDataPage: React.FC = () => {
   };
 
   const currentData = getCurrentData();
-  
-  const filteredData = currentData.filter(item => 
-    item.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.code?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+
+  // Filter & Sort & Paginate
+  const filteredData = useMemo(() => {
+    return currentData.filter((item) => {
+      const searchStr = searchText.toLowerCase();
+      const nameMatch = item.name?.toLowerCase().includes(searchStr);
+      const codeMatch = item.code?.toLowerCase().includes(searchStr);
+      return nameMatch || codeMatch;
+    });
+  }, [currentData, searchText]);
+
+  const sortedData = useMemo(() => {
+    return [...filteredData].sort((a, b) => {
+      const nameA = a.name?.toLowerCase() || '';
+      const nameB = b.name?.toLowerCase() || '';
+      return nameA.localeCompare(nameB);
+    });
+  }, [filteredData]);
+
+  const paginatedData = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return sortedData.slice(startIndex, startIndex + pageSize);
+  }, [sortedData, currentPage, pageSize]);
+
+  const totalPages = Math.ceil(sortedData.length / pageSize);
+
+  const clearFilters = () => {
+    setSearchText('');
+    setCurrentPage(1);
+  };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText, activeTab]);
 
   const handleOpenModal = (item?: MasterDataItem) => {
     if (item) {
@@ -150,8 +190,51 @@ const MasterDataPage: React.FC = () => {
 
   const activeTabData = tabs.find(t => t.key === activeTab);
 
+  // Summary stats
+  const totalCount = departments.length + positions.length + locations.length;
+  const activeCount = currentData.filter((item) => item.is_active).length;
+
+  const summaryCards = useMemo(
+    () => [
+      {
+        label: 'Total Data',
+        subtitle: 'Semua master data',
+        value: String(totalCount),
+        change: 'Data tersimpan di sistem',
+        tone: 'blue' as const,
+        icon: Database,
+      },
+      {
+        label: 'Hasil Filter',
+        subtitle: 'Data sesuai pencarian',
+        value: String(sortedData.length),
+        change: `${paginatedData.length} data per halaman`,
+        tone: 'green' as const,
+        icon: Search,
+      },
+      {
+        label: activeTab === 'department' ? 'Departemen' : activeTab === 'position' ? 'Posisi' : 'Lokasi',
+        subtitle: `Total ${activeTab}`,
+        value: String(currentData.length),
+        change: 'Data aktif',
+        tone: activeTab === 'department' ? 'orange' as const : activeTab === 'position' ? 'purple' as const : 'red' as const,
+        icon: activeTabData?.icon || Database,
+      },
+      {
+        label: 'Status Active',
+        subtitle: 'Data berstatus aktif',
+        value: String(activeCount),
+        change: 'Siap digunakan',
+        tone: 'green' as const,
+        icon: CheckCircle,
+      },
+    ],
+    [totalCount, activeCount, currentData.length, sortedData.length, paginatedData.length, activeTab]
+  );
+
   return (
     <div className="crud-page">
+      {/* Header */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -177,132 +260,188 @@ const MasterDataPage: React.FC = () => {
         </div>
       </Card>
 
-      <div className="leave-requests-wrapper">
-        {tabs.map((tab) => (
-          <div 
-            key={tab.key} 
-            className="leave-summary-card"
-            style={{ cursor: 'pointer', border: activeTab === tab.key ? '2px solid #2563eb' : '2px solid transparent' }}
-            onClick={() => setActiveTab(tab.key as any)}
-          >
-            <div className="leave-summary-header">
-              <div>
-                <p className="leave-summary-label">{tab.label}</p>
-                <p className="leave-summary-subtitle">Total count</p>
+      {/* Summary Cards */}
+      <div className="employee-summary-wrapper">
+        {summaryCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <div key={card.label} className="employee-summary-card">
+              <div className="employee-summary-header">
+                <div>
+                  <p className="employee-summary-label">{card.label}</p>
+                  <p className="employee-summary-subtitle">{card.subtitle}</p>
+                </div>
+                <div className={`employee-summary-icon-wrapper employee-icon-${card.tone}`}>
+                  <Icon size={28} />
+                </div>
               </div>
-              <div className={`leave-summary-icon-wrapper ${tab.key === 'department' ? 'leave-icon-blue' : tab.key === 'position' ? 'leave-icon-green' : 'leave-icon-orange'}`}>
-                <tab.icon size={28} />
-              </div>
+              <div className={`employee-summary-value employee-value-${card.tone}`}>{card.value}</div>
+              <p className="employee-summary-trend">{card.change}</p>
             </div>
-            <div className={`leave-summary-value ${tab.key === 'department' ? 'leave-value-blue' : tab.key === 'position' ? 'leave-value-green' : 'leave-value-orange'}`}>
-              {tab.data.length}
-            </div>
-            <p className="leave-summary-trend">{tab.label}</p>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      <div className="white-unified-wrapper">
-        <div className="wuw-header">
-          <div className="wuw-header-top">
-            <div className="wuw-title-area">
-              <h3>{activeTabData?.label}</h3>
-              <span className="wuw-count-badge">{filteredData.length} items</span>
-            </div>
-            <div className="header-actions">
-              <div className="search-box">
-                <Search size={18} />
-                <input 
-                  type="text" 
-                  placeholder={`Search ${activeTab}...`}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-            </div>
+      {/* Analytics Title Card */}
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <Database size={24} />
           </div>
-          
-          <div className="tab-navigation">
-            {tabs.map(tab => (
+          <div>
+            <h2 className="analytics-title">{activeTabData?.label}</h2>
+            <p className="analytics-subtitle">Kelola dan lihat semua {activeTab}</p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Control Section */}
+      <Card className="control-section-card">
+        <div className="control-section-inner">
+          {/* Tabs */}
+          <div className="elyra-tabs">
+            {tabs.map((tab) => (
               <button
                 key={tab.key}
-                className={`tab-btn ${activeTab === tab.key ? 'active' : ''}`}
+                className={`elyra-tab ${activeTab === tab.key ? 'active' : ''}`}
                 onClick={() => setActiveTab(tab.key as any)}
               >
-                <tab.icon size={18} />
+                <tab.icon size={16} />
                 <span>{tab.label}</span>
-                <span className="tab-count">{tab.data.length}</span>
               </button>
             ))}
           </div>
-        </div>
 
+          {/* Search */}
+          <div className="control-actions">
+            <div className="search-box">
+              <div className="search-icon-inside"><Search size={18} /></div>
+              <input
+                type="text"
+                placeholder={`Cari ${activeTab}...`}
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="search-input-pill"
+              />
+            </div>
+            {(searchText) && (
+              <button className="btn-clear-filter" onClick={clearFilters}>
+                Hapus Filter
+              </button>
+            )}
+          </div>
+        </div>
+      </Card>
+
+      {/* Table Section */}
+      <div className="table-section">
         <div className="wuw-table-area">
-          {loading ? (
-            <div className="loading-state">
-              <RefreshCw size={32} className="animate-spin" />
-              <p>Loading {activeTabData?.label.toLowerCase()}...</p>
+          {loading && <LoadingState message={`Memuat ${activeTab}...`} />}
+          {!loading && errorMessage && <ErrorState message="Koneksi Terputus" error={errorMessage} onRetry={fetchData} />}
+
+          {!loading && !errorMessage && paginatedData.length === 0 && (
+            <div style={{ padding: '5rem 0' }}>
+              <EmptyState
+                title="Pencarian Kosong"
+                message="Kami tidak menemukan data yang sesuai dengan kriteria Anda."
+                actionLabel="Bersihkan Filter"
+                onAction={clearFilters}
+              />
             </div>
-          ) : filteredData.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-icon">
-                {activeTab === 'department' && <Building2 size={48} />}
-                {activeTab === 'position' && <Briefcase size={48} />}
-                {activeTab === 'location' && <MapPin size={48} />}
-              </div>
-              <h4>No {activeTabData?.label.toLowerCase()} found</h4>
-              <p>Create your first {activeTab} to get started.</p>
-              <Button variant="primary" onClick={() => handleOpenModal()}>
-                <Plus size={16} /> Add {activeTab === 'department' ? 'Department' : activeTab === 'position' ? 'Position' : 'Location'}
-              </Button>
-            </div>
-          ) : (
-            <div className="data-table-wrapper">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Code</th>
-                    <th>Description</th>
-                    <th>Status</th>
-                    <th style={{ textAlign: 'right' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredData.map((item) => (
-                    <tr key={item.id}>
-                      <td>
-                        <div className="cell-with-icon">
-                          <div className="cell-icon">
-                            {activeTab === 'department' && <Building2 size={18} />}
-                            {activeTab === 'position' && <Briefcase size={18} />}
-                            {activeTab === 'location' && <MapPin size={18} />}
-                          </div>
-                          <span className="cell-name-text">{item.name}</span>
-                        </div>
-                      </td>
-                      <td><span className="cell-code">{item.code || '-'}</span></td>
-                      <td className="cell-description">{item.description || '-'}</td>
-                      <td>
-                        <span className={`status-badge ${item.is_active ? 'status-active' : 'status-default'}`}>
-                          {item.is_active ? 'Active' : 'Inactive'}
-                        </span>
-                      </td>
-                      <td style={{ textAlign: 'right' }}>
-                        <div className="table-actions">
-                          <Button variant="ghost" size="sm" onClick={() => handleOpenModal(item)}>
-                            <Edit size={16} />
-                          </Button>
-                          <Button variant="ghost" size="sm" danger onClick={() => handleDelete(item.id)}>
-                            <Trash2 size={16} />
-                          </Button>
-                        </div>
-                      </td>
+          )}
+
+          {!loading && !errorMessage && paginatedData.length > 0 && (
+            <>
+              <div className="table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Nama</th>
+                      <th>Kode</th>
+                      <th>Deskripsi</th>
+                      <th>Status</th>
+                      <th className="th-center" style={{ width: '120px' }}>Aksi</th>
                     </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedData.map((item) => (
+                      <tr key={item.id}>
+                        <td>
+                          <div className="cell-name">
+                            <div className="cell-avatar">
+                              {activeTab === 'department' && <Building2 size={18} />}
+                              {activeTab === 'position' && <Briefcase size={18} />}
+                              {activeTab === 'location' && <MapPin size={18} />}
+                            </div>
+                            <div className="cell-stacked">
+                              <span className="cell-name-text">{item.name}</span>
+                              <span className="cell-stacked__sub">{item.code || '-'}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td><span className="badge-soft badge-soft--blue">{item.code || '-'}</span></td>
+                        <td className="cell-description">{item.description || '-'}</td>
+                        <td>
+                          <span className={`badge-soft badge-soft--${item.is_active ? 'green' : 'red'}`}>
+                            {item.is_active ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
+                        <td className="td-center">
+                          <div className="action-btn-group">
+                            <button
+                              className="action-btn action-btn-edit"
+                              onClick={() => handleOpenModal(item)}
+                              title="Edit"
+                            >
+                              <Edit size={16} />
+                            </button>
+                            <button
+                              className="action-btn action-btn-delete"
+                              onClick={() => handleDelete(item.id)}
+                              title="Hapus"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              <div className="table-pagination">
+                <div className="pagination-info">
+                  Menampilkan <strong>{paginatedData.length}</strong> dari <strong>{sortedData.length}</strong> data
+                </div>
+                <div className="pagination-controls">
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    ‹
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
                   ))}
-                </tbody>
-              </table>
-            </div>
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    ›
+                  </button>
+                </div>
+              </div>
+            </>
           )}
         </div>
       </div>

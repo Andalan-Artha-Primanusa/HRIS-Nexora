@@ -24,6 +24,7 @@ const ComplianceDashboardPage: React.FC = () => {
 
   const fetchData = async () => {
     setLoading(true);
+    setErrorMessage(null);
     try {
       const statsData = await workforceService.getComplianceStats();
       const docsData = await workforceService.getComplianceDocuments();
@@ -33,6 +34,7 @@ const ComplianceDashboardPage: React.FC = () => {
       setDocuments(docsArray);
     } catch (err) {
       console.error(err);
+      setErrorMessage('Gagal memuat data kepatuhan');
       setStats([]);
       setDocuments([]);
     } finally {
@@ -123,7 +125,7 @@ const ComplianceDashboardPage: React.FC = () => {
       <div className="employee-summary-wrapper">
         {summaryStats.map((card) => {
           const Icon = card.tone === "blue" ? FileCheck : card.tone === "red" ? AlertTriangle : card.tone === "orange" ? Clock : ShieldCheck;
-
+          
           return (
             <div key={card.label} className="employee-summary-card">
               <div className="employee-summary-header">
@@ -158,148 +160,149 @@ const ComplianceDashboardPage: React.FC = () => {
       {/* Control Section */}
       <Card className="control-section-card">
         <div className="control-section-inner">
-          <div className="search-filter-group">
-            <div className="search-input-wrapper">
-              <Search size={18} className="search-icon" />
-              <input
-                type="text"
-                className="search-input"
-                placeholder="Cari nama karyawan atau jenis dokumen..."
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-              />
-              {searchText && (
-                <button className="clear-search-btn" onClick={() => setSearchText("")}>×</button>
-              )}
-            </div>
-            <Button variant="outline" size="sm" onClick={clearFilters} disabled={!searchText && activeTab === "Semua"}>
-              <RefreshCw size={14} />
-              Reset
-            </Button>
-          </div>
-
-          <div className="tabs-container">
+          {/* Tabs */}
+          <div className="elyra-tabs">
             {(["Semua", "Critical", "Medium", "Compliant"] as const).map((tab) => (
               <button
                 key={tab}
-                className={`tab-button ${activeTab === tab ? 'active' : ''}`}
+                className={`elyra-tab ${activeTab === tab ? 'active' : ''}`}
                 onClick={() => setActiveTab(tab)}
               >
                 {tab}
-                {tab !== "Semua" && (
-                  <span className="tab-count">
-                    {tab === "Critical"
-                      ? documents.filter(d => d.risk === 'CRITICAL').length
-                      : tab === "Medium"
-                      ? documents.filter(d => d.risk === 'MEDIUM').length
-                      : documents.filter(d => d.risk === 'LOW' || !d.risk).length}
-                  </span>
-                )}
               </button>
             ))}
+          </div>
+
+          {/* Search */}
+          <div className="control-actions">
+            <div className="search-box">
+              <div className="search-icon-inside"><Search size={18} /></div>
+              <input
+                type="text"
+                placeholder="Cari nama karyawan atau jenis dokumen..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="search-input-pill"
+              />
+            </div>
+            {(searchText || activeTab !== "Semua") && (
+              <button className="btn-clear-filter" onClick={clearFilters}>
+                Hapus Filter
+              </button>
+            )}
           </div>
         </div>
       </Card>
 
-      {/* Data Table */}
-      <Card className="data-table-card">
-        <div className="data-table-header">
-          <h3 className="data-table-title">
-            Status Kepatuhan Dokumen
-            <span className="data-table-count">{filteredDocuments.length} ditemukan</span>
-          </h3>
-        </div>
+      {/* Table Section */}
+      <div className="table-section">
+        <div className="wuw-table-area">
+          {loading && <LoadingState message="Memuat data kepatuhan..." />}
+          {!loading && errorMessage && (
+            <ErrorState message="Koneksi Terputus" error={errorMessage} onRetry={fetchData} />
+          )}
 
-        {loading ? (
-          <LoadingState message="Memuat data kepatuhan..." />
-        ) : filteredDocuments.length === 0 ? (
-          <EmptyState
-            icon={<ShieldCheck size={48} />}
-            title="Tidak ada dokumen ditemukan"
-            message={searchText || activeTab !== "Semua" ? "Coba ubah kata kunci atau filter" : "Belum ada data dokumen"}
-          />
-        ) : (
-          <>
-            <div className="table-wrap">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Nama Karyawan</th>
-                    <th>Jenis Dokumen</th>
-                    <th>Tgl Kedaluwarsa</th>
-                    <th>Status Risk</th>
-                    <th style={{ textAlign: 'right' }}>Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedDocuments.map((row) => (
-                    <tr key={row.id}>
-                      <td>
-                        <div className="cell-stacked">
-                          <span className="cell-name-text">{row.name}</span>
-                          <span className="cell-email">ID: {row.emp_id || `EMP-00${row.id}`}</span>
-                        </div>
-                      </td>
-                      <td>{row.doc || '-'}</td>
-                      <td style={{ fontWeight: row.date === 'Expired' ? 700 : 400, color: row.date === 'Expired' ? '#ef4444' : 'inherit' }}>
-                        {row.date || '-'}
-                      </td>
-                      <td>
-                        <span className={`status-badge ${row.risk === 'CRITICAL' ? 'status-danger' : row.risk === 'MEDIUM' ? 'status-pending' : 'status-active'}`}>
-                          {row.risk || 'LOW'}
-                        </span>
-                      </td>
-                      <td style={{ textAlign: 'right' }}>
-                        <div className="action-btn-group">
-                          <Button variant="ghost" size="sm" onClick={() => navigate(`/compliance/settings`)}>
-                            <Edit size={16} />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          {!loading && !errorMessage && paginatedDocuments.length === 0 && (
+            <div style={{ padding: '5rem 0' }}>
+              <EmptyState
+                title="Pencarian Kosong"
+                message="Kami tidak menemukan dokumen yang sesuai dengan kriteria Anda."
+                actionLabel="Bersihkan Filter"
+                onAction={clearFilters}
+              />
             </div>
+          )}
 
-            {/* Pagination */}
-            {totalPages > 1 && (
+          {!loading && !errorMessage && paginatedDocuments.length > 0 && (
+            <>
+              <div className="table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Nama Karyawan</th>
+                      <th>Jenis Dokumen</th>
+                      <th>Tgl Kedaluwarsa</th>
+                      <th>Status Risk</th>
+                      <th className="th-center" style={{ width: '120px' }}>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedDocuments.map((row) => (
+                      <tr key={row.id}>
+                        <td>
+                          <div className="cell-name">
+                            <div className="cell-avatar">
+                              {(row.name || 'E').charAt(0).toUpperCase()}
+                            </div>
+                            <div className="cell-stacked">
+                              <span className="cell-name-text">{row.name}</span>
+                              <span className="cell-stacked__sub">ID: {row.emp_id || `EMP-00${row.id}`}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td><span style={{ color: '#475569', fontWeight: 600 }}>{row.doc || '-'}</span></td>
+                        <td>
+                          <span style={{ color: row.date === 'Expired' ? '#ef4444' : '#64748b', fontWeight: 500 }}>
+                            {row.date || '-'}
+                          </span>
+                        </td>
+                        <td>
+                          <span className={`badge-soft ${row.risk === 'CRITICAL' ? 'badge-soft--red' : row.risk === 'MEDIUM' ? 'badge-soft--orange' : 'badge-soft--green'}`}>
+                            {row.risk || 'LOW'}
+                          </span>
+                        </td>
+                        <td className="td-center">
+                          <div className="action-btn-group">
+                            <button
+                              className="action-btn action-btn-edit"
+                              onClick={() => navigate('/compliance/settings')}
+                              title="Edit"
+                            >
+                              <Edit size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
               <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, filteredDocuments.length)} dari {filteredDocuments.length}
+                  Menampilkan <strong>{paginatedDocuments.length}</strong> dari <strong>{filteredDocuments.length}</strong> dokumen
                 </div>
                 <div className="pagination-controls">
-                  <Button
-                    variant="outline"
-                    size="sm"
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
-                    onClick={() => setCurrentPage(prev => prev - 1)}
                   >
-                    Sebelumnya
-                  </Button>
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    ‹
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                     <button
                       key={page}
-                      className={`pagination-page-btn ${currentPage === page ? 'active' : ''}`}
+                      className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
                       onClick={() => setCurrentPage(page)}
                     >
                       {page}
                     </button>
                   ))}
-                  <Button
-                    variant="outline"
-                    size="sm"
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                     disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage(prev => prev + 1)}
                   >
-                    Selanjutnya
-                  </Button>
+                    ›
+                  </button>
                 </div>
               </div>
-            )}
-          </>
-        )}
-      </Card>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

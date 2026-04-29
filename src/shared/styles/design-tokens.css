@@ -48,7 +48,7 @@
 
   /* Font Families */
   --font-family-base: 'Poppins', sans-serif;
-  --font-family-mono: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace;
+  --font-family-mono: 'Poppins', sans-serif;
 
   /* Font Sizes */
   --font-size-xs: 12px;

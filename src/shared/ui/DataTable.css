@@ -48,7 +48,7 @@
   border-collapse: separate;
   border-spacing: 0;
   min-width: 700px;
-  font-family: inherit;
+  font-family: 'Poppins', sans-serif;
 }
 
 .data-table th,
@@ -126,7 +126,7 @@
 
 .data-table-cell-number {
   text-align: right;
-  font-family: 'Courier New', monospace;
+  font-family: 'Poppins', sans-serif;
   font-weight: 500;
 }
 

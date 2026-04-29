@@ -19,7 +19,7 @@
 .ui-tab-btn {
   background: transparent;
   border: none;
-  font-family: inherit;
+  font-family: 'Poppins', sans-serif;
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--gray-500);

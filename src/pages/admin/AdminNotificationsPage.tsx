@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
+import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { Alert } from "@/shared/ui/Alert";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { ROLES } from "@/shared/types/rbac.types";
@@ -64,7 +65,8 @@ if (!hasAdminAccess(user)) {
   const [summary, setSummary] = useState<SummaryData>({});
   const [statusMessage, setStatusMessage] = useState("");
   const [alertType, setAlertType] = useState<"success" | "error" | "info">("info");
-  const [loadingSummary, setLoadingSummary] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [sendingDirect, setSendingDirect] = useState(false);
   const [sendingBroadcast, setSendingBroadcast] = useState(false);
 
@@ -78,7 +80,8 @@ if (!hasAdminAccess(user)) {
   const [broadcastAudience, setBroadcastAudience] = useState("all");
 
   const loadSummary = async () => {
-    setLoadingSummary(true);
+    setLoading(true);
+    setErrorMessage(null);
 
     try {
       const [result, empResult] = await Promise.all([
@@ -87,13 +90,10 @@ if (!hasAdminAccess(user)) {
       ]);
       setSummary((result ?? {}) as SummaryData);
       setEmployees(empResult);
-      setStatusMessage("Ringkasan notifikasi berhasil dimuat.");
-      setAlertType("success");
     } catch (error: unknown) {
-      setStatusMessage(getErrorMessage(error as never));
-      setAlertType("error");
+      setErrorMessage(getErrorMessage(error as never));
     } finally {
-      setLoadingSummary(false);
+      setLoading(false);
     }
   };
 
@@ -213,9 +213,9 @@ if (!hasAdminAccess(user)) {
             </p>
           </div>
           <div className="hero-actions">
-            <button className="btn-outline" onClick={() => void loadSummary()} disabled={loadingSummary}>
-              <RefreshCw size={16} className={loadingSummary ? "animate-spin" : ""} />
-              {loadingSummary ? "Memuat..." : "Segarkan"}
+            <button className="btn-outline" onClick={() => void loadSummary()} disabled={loading}>
+              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+              {loading ? "Memuat..." : "Segarkan"}
             </button>
           </div>
         </div>
@@ -223,7 +223,7 @@ if (!hasAdminAccess(user)) {
 
       {statusMessage && <Alert type={alertType} message={statusMessage} onClose={() => setStatusMessage("")} dismissible />}
 
-<div className="leave-requests-wrapper">
+      <div className="employee-summary-wrapper">
         {summaryCards.map((card) => {
           const Icon = card.icon;
           return (
@@ -243,8 +243,6 @@ if (!hasAdminAccess(user)) {
           );
         })}
       </div>
-
-      {statusMessage && <Alert type={alertType} message={statusMessage} onClose={() => setStatusMessage("")} dismissible />}
 
       <div className="white-unified-wrapper">
         <div className="form-grid">

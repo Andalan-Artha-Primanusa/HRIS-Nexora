@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, RefreshCw, Edit, Trash2, Search, Tag, DollarSign, CheckCircle, FileText, Receipt } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Plus, RefreshCw, Pencil, Trash2, Search, Tag, DollarSign, CheckCircle, FileText, Receipt } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
-import '@/pages/payroll/PayrollShared.css';
 import './ExpenseCategoryPage.css';
 
 interface ExpenseCategory {
@@ -16,13 +16,23 @@ interface ExpenseCategory {
   max_claim: number | null;
   is_active: boolean;
   requires_receipt: boolean;
-  category_type: 'medical' | 'travel' | ' meals' | 'accommodation' | 'transport' | 'other';
+  category_type: 'medical' | 'travel' | 'meals' | 'accommodation' | 'transport' | 'other';
 }
 
-const ExpenseCategoryPage: React.FC = () => {
+const ExpenseCategoryPage = () => {
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Search & Filter State
+  const [searchText, setSearchText] = useState('');
+  const [activeTab, setActiveTab] = useState<'Semua' | 'Active' | 'Inactive'>('Semua');
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
+
+  // Modal State
   const [showModal, setShowModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState<ExpenseCategory | null>(null);
   const [formData, setFormData] = useState({
@@ -32,11 +42,89 @@ const ExpenseCategoryPage: React.FC = () => {
     max_claim: '',
     is_active: true,
     requires_receipt: true,
-    category_type: 'other',
+    category_type: 'other' as const,
   });
+
+  // Extract unique category types
+  const uniqueTypes = useMemo(() => {
+    return Array.from(new Set(categories.map((c) => c.category_type).filter(Boolean))).sort();
+  }, [categories]);
+
+  // Filter & Sort & Paginate
+  const filteredCategories = useMemo(() => {
+    return categories.filter((category) => {
+      const searchStr = searchText.toLowerCase();
+      const nameMatch = category.name?.toLowerCase().includes(searchStr);
+      const codeMatch = category.code?.toLowerCase().includes(searchStr);
+      const textMatch = nameMatch || codeMatch;
+
+      let statusMatch = true;
+      if (activeTab === 'Active') statusMatch = category.is_active === true;
+      else if (activeTab === 'Inactive') statusMatch = category.is_active === false;
+
+      return textMatch && statusMatch;
+    });
+  }, [categories, searchText, activeTab]);
+
+  const sortedCategories = useMemo(() => {
+    return [...filteredCategories].sort((a, b) => {
+      const nameA = a.name?.toLowerCase() || '';
+      const nameB = b.name?.toLowerCase() || '';
+      return nameA.localeCompare(nameB);
+    });
+  }, [filteredCategories]);
+
+  const paginatedCategories = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return sortedCategories.slice(startIndex, startIndex + pageSize);
+  }, [sortedCategories, currentPage, pageSize]);
+
+  const totalPages = Math.ceil(sortedCategories.length / pageSize);
+
+  const activeCount = useMemo(() => categories.filter((c) => c.is_active).length, [categories]);
+  const totalCategories = categories.length;
+
+  const summaryCards = useMemo(
+    () => [
+      {
+        label: 'Total Kategori',
+        subtitle: 'Semua kategori',
+        value: String(totalCategories),
+        change: 'Data tersimpan di sistem',
+        tone: 'blue' as const,
+        icon: Tag,
+      },
+      {
+        label: 'Hasil Filter',
+        subtitle: 'Kategori sesuai pencarian',
+        value: String(sortedCategories.length),
+        change: `${paginatedCategories.length} data per halaman`,
+        tone: 'green' as const,
+        icon: Search,
+      },
+      {
+        label: 'Kategori Aktif',
+        subtitle: 'Status aktif',
+        value: String(activeCount),
+        change: 'Siap digunakan',
+        tone: 'orange' as const,
+        icon: CheckCircle,
+      },
+      {
+        label: 'Jenis Kategori',
+        subtitle: 'Tipe yang tersedia',
+        value: String(uniqueTypes.length),
+        change: 'Medical, Travel, dll',
+        tone: 'purple' as const,
+        icon: FileText,
+      },
+    ],
+    [totalCategories, activeCount, sortedCategories.length, paginatedCategories.length, uniqueTypes.length]
+  );
 
   const fetchData = async () => {
     setLoading(true);
+    setErrorMessage(null);
     try {
       const response = await api.get('/expense-categories');
       const data = response.data;
@@ -44,6 +132,7 @@ const ExpenseCategoryPage: React.FC = () => {
       setCategories(categoriesArray);
     } catch (err) {
       console.error(err);
+      setErrorMessage('Gagal memuat kategori');
       setCategories([]);
     } finally {
       setLoading(false);
@@ -54,10 +143,9 @@ const ExpenseCategoryPage: React.FC = () => {
     fetchData();
   }, []);
 
-  const filteredCategories = categories.filter(c => 
-    c.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    c.code?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText, activeTab]);
 
   const handleOpenModal = (category?: ExpenseCategory) => {
     if (category) {
@@ -92,13 +180,13 @@ const ExpenseCategoryPage: React.FC = () => {
         ...formData,
         max_claim: formData.max_claim ? parseFloat(formData.max_claim) : null,
       };
-      
+
       if (editingCategory) {
         await api.put(`/expense-categories/${editingCategory.id}`, payload);
       } else {
         await api.post('/expense-categories', payload);
       }
-      
+
       setShowModal(false);
       fetchData();
     } catch (err) {
@@ -108,7 +196,7 @@ const ExpenseCategoryPage: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this category?')) {
+    if (window.confirm('Apakah Anda yakin ingin menghapus kategori ini?')) {
       try {
         await api.delete(`/expense-categories/${id}`);
         fetchData();
@@ -118,23 +206,27 @@ const ExpenseCategoryPage: React.FC = () => {
     }
   };
 
-  const activeCount = categories.filter(c => c.is_active).length;
-  const totalCategories = categories.length;
+  const clearFilters = () => {
+    setSearchText('');
+    setActiveTab('Semua');
+    setCurrentPage(1);
+  };
 
-  const getTypeColor = (type: string) => {
-    const colors: Record<string, string> = {
-      medical: '#ef4444',
-      travel: '#3b82f6',
-      meals: '#f59e0b',
-      accommodation: '#8b5cf6',
-      transport: '#10b981',
-      other: '#64748b',
+  const getTypeLabel = (type: string) => {
+    const labels: Record<string, string> = {
+      medical: 'Medical',
+      travel: 'Travel',
+      meals: 'Meals',
+      accommodation: 'Accommodation',
+      transport: 'Transport',
+      other: 'Other',
     };
-    return colors[type] || colors.other;
+    return labels[type] || type;
   };
 
   return (
     <div className="crud-page">
+      {/* Header */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -160,149 +252,219 @@ const ExpenseCategoryPage: React.FC = () => {
         </div>
       </Card>
 
-      <div className="leave-requests-wrapper">
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Total Categories</p>
-              <p className="leave-summary-subtitle">Semua kategori</p>
+      {/* Summary Cards */}
+      <div className="employee-summary-wrapper">
+        {summaryCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <div key={card.label} className="employee-summary-card">
+              <div className="employee-summary-header">
+                <div>
+                  <p className="employee-summary-label">{card.label}</p>
+                  <p className="employee-summary-subtitle">{card.subtitle}</p>
+                </div>
+                <div className={`employee-summary-icon-wrapper employee-icon-${card.tone}`}>
+                  <Icon size={28} />
+                </div>
+              </div>
+              <div className={`employee-summary-value employee-value-${card.tone}`}>{card.value}</div>
+              <p className="employee-summary-trend">{card.change}</p>
             </div>
-            <div className="leave-summary-icon-wrapper leave-icon-blue">
-              <Tag size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-blue">{totalCategories}</div>
-          <p className="leave-summary-trend">Categories</p>
-        </div>
-
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Active</p>
-              <p className="leave-summary-subtitle">Tersedia</p>
-            </div>
-            <div className="leave-summary-icon-wrapper leave-icon-green">
-              <CheckCircle size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-green">{activeCount}</div>
-          <p className="leave-summary-trend">Active</p>
-        </div>
-
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Avg Max Claim</p>
-              <p className="leave-summary-subtitle">Rata-rata limit</p>
-            </div>
-            <div className="leave-summary-icon-wrapper leave-icon-orange">
-              <DollarSign size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-orange">
-            {totalCategories > 0 
-              ? `Rp ${Math.round(categories.reduce((sum, c) => sum + (c.max_claim || 0), 0) / totalCategories).toLocaleString('id-ID')}`
-              : '-'}
-          </div>
-          <p className="leave-summary-trend">Average</p>
-        </div>
+          );
+        })}
       </div>
 
-      <div className="white-unified-wrapper">
-        <div className="wuw-header">
-          <div className="wuw-header-top">
-            <div className="wuw-title-area">
-              <h3>Category List</h3>
-              <span className="wuw-count-badge">{filteredCategories.length} items</span>
-            </div>
-            <div className="search-box">
-              <Search size={18} />
-              <input 
-                type="text" 
-                placeholder="Search categories..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
+      {/* Analytics Title Card */}
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <Tag size={24} />
+          </div>
+          <div>
+            <h2 className="analytics-title">Daftar Kategori</h2>
+            <p className="analytics-subtitle">Kelola dan lihat semua kategori pengeluaran</p>
           </div>
         </div>
+      </Card>
 
+      {/* Control Section */}
+      <Card className="control-section-card">
+        <div className="control-section-inner">
+          {/* Tabs */}
+          <div className="elyra-tabs">
+            {(['Semua', 'Active', 'Inactive'] as const).map((tab) => (
+              <button
+                key={tab}
+                className={`elyra-tab ${activeTab === tab ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          {/* Search */}
+          <div className="control-actions">
+            <div className="search-box">
+              <div className="search-icon-inside"><Search size={18} /></div>
+              <input
+                type="text"
+                placeholder="Cari kategori..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="search-input-pill"
+              />
+            </div>
+            {(searchText || activeTab !== 'Semua') && (
+              <button className="btn-clear-filter" onClick={clearFilters}>
+                Hapus Filter
+              </button>
+            )}
+          </div>
+        </div>
+      </Card>
+
+      {/* Table Section */}
+      <div className="table-section">
         <div className="wuw-table-area">
-          {loading ? (
-            <div className="loading-state">
-              <RefreshCw size={32} className="animate-spin" />
-              <p>Loading categories...</p>
+          {loading && <LoadingState message="Memuat kategori..." />}
+          {!loading && errorMessage && (
+            <ErrorState message="Koneksi Terputus" error={errorMessage} onRetry={fetchData} />
+          )}
+
+          {!loading && !errorMessage && paginatedCategories.length === 0 && (
+            <div style={{ padding: '5rem 0' }}>
+              <EmptyState
+                title="Pencarian Kosong"
+                message="Kami tidak menemukan kategori yang sesuai dengan kriteria Anda."
+                actionLabel="Bersihkan Filter"
+                onAction={clearFilters}
+              />
             </div>
-          ) : filteredCategories.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-icon">
-                <Tag size={48} />
+          )}
+
+          {!loading && !errorMessage && paginatedCategories.length > 0 && (
+            <>
+              <div className="table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Nama Kategori</th>
+                      <th>Kode</th>
+                      <th>Tipe</th>
+                      <th>Max Claim</th>
+                      <th>Receipt</th>
+                      <th className="th-center">Status</th>
+                      <th className="th-center" style={{ width: '120px' }}>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedCategories.map((category) => (
+                      <tr key={category.id}>
+                        <td>
+                          <div className="cell-name">
+                            <div className="cell-avatar">
+                              {category.name ? category.name.charAt(0).toUpperCase() : 'C'}
+                            </div>
+                            <div className="cell-stacked">
+                              <span className="cell-name-text">{category.name}</span>
+                              <span className="cell-stacked__sub">{category.description || 'No description'}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td><span style={{ color: '#475569', fontWeight: 600 }}>{category.code}</span></td>
+                        <td>
+                          <span className="badge-soft badge-soft--purple">
+                            {getTypeLabel(category.category_type)}
+                          </span>
+                        </td>
+                        <td>
+                          <span style={{ color: '#64748b', fontWeight: 500 }}>
+                            {category.max_claim ? `Rp ${Number(category.max_claim).toLocaleString('id-ID')}` : 'Unlimited'}
+                          </span>
+                        </td>
+                        <td>
+                          <span style={{ color: '#64748b' }}>
+                            {category.requires_receipt ? 'Required' : 'Optional'}
+                          </span>
+                        </td>
+                        <td className="td-center">
+                          <span className={`badge-soft badge-soft--${category.is_active ? 'green' : 'red'}`}>
+                            {category.is_active ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
+                        <td className="td-center">
+                          <div className="action-btn-group">
+                            <button
+                              className="action-btn action-btn-edit"
+                              onClick={() => handleOpenModal(category)}
+                              title="Edit"
+                            >
+                              <Pencil size={16} />
+                            </button>
+                            <button
+                              className="action-btn action-btn-delete"
+                              onClick={() => handleDelete(category.id)}
+                              title="Hapus"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-              <h4>No categories found</h4>
-              <p>Create your first expense category to get started.</p>
-              <Button variant="primary" onClick={() => handleOpenModal()}>
-                <Plus size={16} /> Add Category
-              </Button>
-            </div>
-          ) : (
-            <div className="category-grid">
-              {filteredCategories.map((category) => (
-                <Card key={category.id} className="category-card" glass>
-                  <div className="category-header">
-                    <div 
-                      className="category-icon"
-                      style={{ background: `${getTypeColor(category.category_type)}20`, color: getTypeColor(category.category_type) }}
+
+              {/* Pagination */}
+              <div className="table-pagination">
+                <div className="pagination-info">
+                  Menampilkan <strong>{paginatedCategories.length}</strong> dari <strong>{sortedCategories.length}</strong> kategori
+                </div>
+                <div className="pagination-controls">
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    ‹
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
+                      onClick={() => setCurrentPage(page)}
                     >
-                      <Tag size={20} />
-                    </div>
-                    <div className="category-info">
-                      <h4>{category.name}</h4>
-                      <span className="category-code">{category.code}</span>
-                    </div>
-                    <span className={`status-pill ${category.is_active ? 'active' : 'inactive'}`}>
-                      {category.is_active ? 'Active' : 'Inactive'}
-                    </span>
-                  </div>
-                  
-                  <p className="category-description">{category.description || 'No description'}</p>
-                  
-                  <div className="category-meta">
-                    <div className="meta-item">
-                      <DollarSign size={14} />
-                      <span>Max: {category.max_claim ? `Rp ${Number(category.max_claim).toLocaleString('id-ID')}` : 'Unlimited'}</span>
-                    </div>
-                    <div className="meta-item">
-                      <FileText size={14} />
-                      <span>Receipt: {category.requires_receipt ? 'Required' : 'Optional'}</span>
-                    </div>
-                  </div>
-                  
-                  <div className="category-actions">
-                    <Button variant="ghost" size="sm" onClick={() => handleOpenModal(category)}>
-                      <Edit size={16} /> Edit
-                    </Button>
-                    <Button variant="ghost" size="sm" danger onClick={() => handleDelete(category.id)}>
-                      <Trash2 size={16} /> Delete
-                    </Button>
-                  </div>
-                </Card>
-              ))}
-            </div>
+                      {page}
+                    </button>
+                  ))}
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    ›
+                  </button>
+                </div>
+              </div>
+            </>
           )}
         </div>
       </div>
 
+      {/* Modal */}
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>{editingCategory ? 'Edit Category' : 'Add New Category'}</h3>
+              <h3>{editingCategory ? 'Edit Kategori' : 'Tambah Kategori'}</h3>
               <button className="modal-close" onClick={() => setShowModal(false)}>×</button>
             </div>
             <div className="modal-body">
               <div className="form-row">
                 <div className="form-group">
-                  <label>Category Name <span className="required">*</span></label>
+                  <label>Nama Kategori <span className="required">*</span></label>
                   <input
                     type="text"
                     value={formData.name}
@@ -311,7 +473,7 @@ const ExpenseCategoryPage: React.FC = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label>Code <span className="required">*</span></label>
+                  <label>Kode <span className="required">*</span></label>
                   <input
                     type="text"
                     value={formData.code}
@@ -320,20 +482,20 @@ const ExpenseCategoryPage: React.FC = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="form-group">
-                <label>Description</label>
+                <label>Deskripsi</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Describe this category..."
+                  placeholder="Deskripsikan kategori ini..."
                   rows={3}
                 />
               </div>
-              
+
               <div className="form-row">
                 <div className="form-group">
-                  <label>Max Claim Amount</label>
+                  <label>Max Claim</label>
                   <input
                     type="number"
                     value={formData.max_claim}
@@ -342,7 +504,7 @@ const ExpenseCategoryPage: React.FC = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label>Category Type</label>
+                  <label>Tipe Kategori</label>
                   <select
                     value={formData.category_type}
                     onChange={(e) => setFormData({ ...formData, category_type: e.target.value as any })}
@@ -356,7 +518,7 @@ const ExpenseCategoryPage: React.FC = () => {
                   </select>
                 </div>
               </div>
-              
+
               <div className="form-row checkboxes">
                 <label className="checkbox-label">
                   <input
@@ -377,9 +539,9 @@ const ExpenseCategoryPage: React.FC = () => {
               </div>
             </div>
             <div className="modal-footer">
-              <Button variant="outline" onClick={() => setShowModal(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setShowModal(false)}>Batal</Button>
               <Button variant="primary" onClick={handleSave}>
-                {editingCategory ? 'Update' : 'Create'}
+                {editingCategory ? 'Update' : 'Tambah'}
               </Button>
             </div>
           </div>

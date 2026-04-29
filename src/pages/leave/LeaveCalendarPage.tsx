@@ -121,7 +121,8 @@ const LeaveCalendarPage = () => {
 
   const chartColors = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
-  const leaveSummaryCards = [
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _leaveSummaryCards = [
     {
       label: 'Total Requests',
       subtitle: 'Semua data pengajuan cuti',

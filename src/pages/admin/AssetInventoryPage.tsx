@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, RefreshCw, Package, Search, Filter, Laptop, Monitor, Smartphone, Briefcase, Calendar, User, Tag, Trash2, Pencil, CheckCircle2, AlertCircle, XCircle, TrendingUp, Clock } from 'lucide-react';
+import { Plus, RefreshCw, Package, Search, Filter, Laptop, Monitor, Smartphone, Briefcase, User, Trash2, Pencil, CheckCircle2 } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
-import { Button } from '@/shared/ui/Button';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { assetService } from '@/features/assets/api/asset.service';
 import '@/shared/styles/CrudPage.css';
@@ -324,6 +323,7 @@ const AssetInventoryPage: React.FC = () => {
                   <tbody>
                     {paginatedAssets.map((asset) => {
                       const IconComponent = getAssetIcon(asset.category);
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
                       const holderName = asset.current_holder?.user?.name ||
                                         asset.current_holder?.full_name ||
                                         asset.current_holder?.name ||

@@ -3,7 +3,7 @@ import { Card } from '@/shared/ui/Card';
 import { Alert } from '@/shared/ui/Alert';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
-import { BarChart3, RefreshCw, Users, TrendingUp, Clock, Calendar, FileText } from 'lucide-react';
+import { BarChart3, RefreshCw, Users, TrendingUp, Clock, FileText } from 'lucide-react';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import './AttendanceShared.css';

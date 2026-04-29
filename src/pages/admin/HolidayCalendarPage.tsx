@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Calendar, RefreshCw, Edit, Trash2, CalendarDays, Search, ShieldCheck } from 'lucide-react';
+import { Plus, Calendar, RefreshCw, Edit, Trash2, CalendarDays, Search } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
@@ -11,7 +11,8 @@ import '@/pages/dashboard/overview/OverviewPage.css';
 const HolidayCalendarPage: React.FC = () => {
   const navigate = useNavigate();
   const [holidays, setHolidays] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Search & Filter
   const [searchText, setSearchText] = useState("");
@@ -23,12 +24,14 @@ const HolidayCalendarPage: React.FC = () => {
 
   const fetchData = async () => {
     setLoading(true);
+    setErrorMessage(null);
     try {
       const data = await workforceService.getHolidays();
       const holidaysArray = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
       setHolidays(holidaysArray);
     } catch (err) {
       console.error(err);
+      setErrorMessage('Gagal memuat hari libur');
       setHolidays([]);
     } finally {
       setLoading(false);
@@ -127,8 +130,8 @@ const HolidayCalendarPage: React.FC = () => {
       {/* Summary Cards */}
       <div className="employee-summary-wrapper">
         {summaryStats.map((card) => {
-          const Icon = card.tone === "blue" ? Calendar : card.tone === "red" ? CalendarDays : card.tone === "orange" ? Calendar : Calendar;
-
+          const Icon = card.tone === "blue" ? Calendar : card.tone === "red" ? CalendarDays : Calendar;
+          
           return (
             <div key={card.label} className="employee-summary-card">
               <div className="employee-summary-header">
@@ -163,149 +166,160 @@ const HolidayCalendarPage: React.FC = () => {
       {/* Control Section */}
       <Card className="control-section-card">
         <div className="control-section-inner">
-          <div className="search-filter-group">
-            <div className="search-input-wrapper">
-              <Search size={18} className="search-icon" />
-              <input
-                type="text"
-                className="search-input"
-                placeholder="Cari nama atau deskripsi libur..."
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-              />
-              {searchText && (
-                <button className="clear-search-btn" onClick={() => setSearchText("")}>×</button>
-              )}
-            </div>
-            <Button variant="outline" size="sm" onClick={clearFilters} disabled={!searchText && activeTab === "Semua"}>
-              <RefreshCw size={14} />
-              Reset
-            </Button>
-          </div>
-
-          <div className="tabs-container">
+          {/* Tabs */}
+          <div className="elyra-tabs">
             {(["Semua", "National", "Company"] as const).map((tab) => (
               <button
                 key={tab}
-                className={`tab-button ${activeTab === tab ? 'active' : ''}`}
+                className={`elyra-tab ${activeTab === tab ? 'active' : ''}`}
                 onClick={() => setActiveTab(tab)}
               >
                 {tab}
-                {tab !== "Semua" && (
-                  <span className="tab-count">
-                    {tab === "National"
-                      ? holidays.filter((h: any) => h.type === 'national').length
-                      : holidays.filter((h: any) => h.type === 'company').length}
-                  </span>
-                )}
               </button>
             ))}
+          </div>
+
+          {/* Search */}
+          <div className="control-actions">
+            <div className="search-box">
+              <div className="search-icon-inside"><Search size={18} /></div>
+              <input
+                type="text"
+                placeholder="Cari nama atau deskripsi libur..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="search-input-pill"
+              />
+            </div>
+            {(searchText || activeTab !== "Semua") && (
+              <button className="btn-clear-filter" onClick={clearFilters}>
+                Hapus Filter
+              </button>
+            )}
           </div>
         </div>
       </Card>
 
-      {/* Data Table */}
-      <Card className="data-table-card">
-        <div className="data-table-header">
-          <h3 className="data-table-title">
-            Daftar Hari Libur
-            <span className="data-table-count">{filteredHolidays.length} ditemukan</span>
-          </h3>
-        </div>
+      {/* Table Section */}
+      <div className="table-section">
+        <div className="wuw-table-area">
+          {loading && <LoadingState message="Memuat data hari libur..." />}
+          {!loading && errorMessage && <ErrorState message="Koneksi Terputus" error={errorMessage} onRetry={fetchData} />}
 
-        {loading ? (
-          <LoadingState message="Memuat data hari libur..." />
-        ) : filteredHolidays.length === 0 ? (
-          <EmptyState
-            icon={<Calendar size={48} />}
-            title="Tidak ada hari libur ditemukan"
-            message={searchText || activeTab !== "Semua" ? "Coba ubah kata kunci atau filter" : "Belum ada data hari libur"}
-          />
-        ) : (
-          <>
-            <div className="table-wrap">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Hari Libur</th>
-                    <th>Tanggal</th>
-                    <th>Tipe</th>
-                    <th>Berulang</th>
-                    <th>Status</th>
-                    <th style={{ textAlign: 'right' }}>Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedHolidays.map((h) => (
-                    <tr key={h.id}>
-                      <td>
-                        <div className="cell-stacked">
-                          <span className="cell-name-text">{h.name}</span>
-                          <span className="cell-email">{h.description || '-'}</span>
-                        </div>
-                      </td>
-                      <td>{h.date ? new Date(h.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}</td>
-                      <td>
-                        <span className={`status-badge ${h.type === 'national' ? 'status-active' : 'status-pending'}`}>
-                          {h.type === 'national' ? 'Nasional' : 'Perusahaan'}
-                        </span>
-                      </td>
-                      <td>{h.is_recurring ? 'YA' : 'TIDAK'}</td>
-                      <td><span className="status-badge status-active">ACTIVE</span></td>
-                      <td style={{ textAlign: 'right' }}>
-                        <div className="action-btn-group">
-                          <Button variant="ghost" size="sm" onClick={() => navigate(`/workforce/holidays/edit/${h.id}`)}>
-                            <Edit size={16} />
-                          </Button>
-                          <Button variant="ghost" size="sm" danger onClick={() => handleDelete(h.id)}>
-                            <Trash2 size={16} />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          {!loading && !errorMessage && paginatedHolidays.length === 0 && (
+            <div style={{ padding: '5rem 0' }}>
+              <EmptyState
+                title="Pencarian Kosong"
+                message="Kami tidak menemukan hari libur yang sesuai dengan kriteria Anda."
+                actionLabel="Bersihkan Filter"
+                onAction={clearFilters}
+              />
             </div>
+          )}
 
-            {/* Pagination */}
-            {totalPages > 1 && (
+          {!loading && !errorMessage && paginatedHolidays.length > 0 && (
+            <>
+              <div className="table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Hari Libur</th>
+                      <th>Tanggal</th>
+                      <th>Tipe</th>
+                      <th>Berulang</th>
+                      <th>Status</th>
+                      <th className="th-center" style={{ width: '120px' }}>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedHolidays.map((h) => (
+                      <tr key={h.id}>
+                        <td>
+                          <div className="cell-name">
+                            <div className="cell-avatar">
+                              {(h.name || 'H').charAt(0).toUpperCase()}
+                            </div>
+                            <div className="cell-stacked">
+                              <span className="cell-name-text">{h.name}</span>
+                              <span className="cell-stacked__sub">{h.description || '-'}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <span style={{ color: '#475569', fontWeight: 600 }}>
+                            {h.date ? new Date(h.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}
+                          </span>
+                        </td>
+                        <td>
+                          <span className={`badge-soft ${h.type === 'national' ? 'badge-soft--blue' : 'badge-soft--purple'}`}>
+                            {h.type === 'national' ? 'Nasional' : 'Perusahaan'}
+                          </span>
+                        </td>
+                        <td>
+                          <span style={{ color: '#64748b' }}>{h.is_recurring ? 'YA' : 'TIDAK'}</span>
+                        </td>
+                        <td className="td-center">
+                          <span className="badge-soft badge-soft--green">ACTIVE</span>
+                        </td>
+                        <td className="td-center">
+                          <div className="action-btn-group">
+                            <button
+                              className="action-btn action-btn-edit"
+                              onClick={() => navigate(`/workforce/holidays/edit/${h.id}`)}
+                              title="Edit"
+                            >
+                              <Edit size={16} />
+                            </button>
+                            <button
+                              className="action-btn action-btn-delete"
+                              onClick={() => handleDelete(h.id)}
+                              title="Hapus"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
               <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, filteredHolidays.length)} dari {filteredHolidays.length}
+                  Menampilkan <strong>{paginatedHolidays.length}</strong> dari <strong>{filteredHolidays.length}</strong> hari libur
                 </div>
                 <div className="pagination-controls">
-                  <Button
-                    variant="outline"
-                    size="sm"
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
-                    onClick={() => setCurrentPage(prev => prev - 1)}
                   >
-                    Sebelumnya
-                  </Button>
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    ‹
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                     <button
                       key={page}
-                      className={`pagination-page-btn ${currentPage === page ? 'active' : ''}`}
+                      className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
                       onClick={() => setCurrentPage(page)}
                     >
                       {page}
                     </button>
                   ))}
-                  <Button
-                    variant="outline"
-                    size="sm"
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                     disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage(prev => prev + 1)}
                   >
-                    Selanjutnya
-                  </Button>
+                    ›
+                  </button>
                 </div>
               </div>
-            )}
-          </>
-        )}
-      </Card>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

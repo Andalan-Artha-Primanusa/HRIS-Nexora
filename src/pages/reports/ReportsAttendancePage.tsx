@@ -134,7 +134,8 @@ const ReportsAttendancePage: React.FC = () => {
     return Array.from(deptMap, ([name, v]) => ({ name, hadir: v.hadir, total: v.total }));
   }, [employees, records]);
 
-  const metrics = [
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _metrics = [
     { label: 'Total Catatan Absensi', sub: 'Semua records', value: String(records.length), tone: 'blue', icon: Activity },
     { label: 'Total Hadir', sub: `${totalEmployees > 0 ? Math.round((present / Math.max(records.length, 1)) * 100) : 0}% dari catatan`, value: String(present), tone: 'green', icon: CheckCircle },
     { label: 'Total Absen', sub: 'Tidak hadir', value: String(absent), tone: 'red', icon: XCircle },

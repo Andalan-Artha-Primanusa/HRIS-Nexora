@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Plus, Pencil, Trash2, ArrowLeft, RefreshCw, AlertCircle, Info, UserCircle, LayoutDashboard, Clock, CheckCircle } from "lucide-react";
+import { Plus, Pencil, Trash2, ArrowLeft, RefreshCw, AlertCircle, Info, UserCircle, LayoutDashboard } from "lucide-react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";

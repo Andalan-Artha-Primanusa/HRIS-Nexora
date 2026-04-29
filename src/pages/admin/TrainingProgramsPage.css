@@ -199,7 +199,7 @@
   font-size: 1rem;
   color: #1e293b;
   transition: all 0.25s ease;
-  font-family: inherit;
+  font-family: 'Poppins', sans-serif;
 }
 
 .search-input-pill:focus {
@@ -226,7 +226,7 @@
   font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-family: inherit;
+  font-family: 'Poppins', sans-serif;
 }
 
 .filter-btn-rounded:hover {
@@ -351,7 +351,7 @@
   border-collapse: separate;
   border-spacing: 0;
   min-width: 900px;
-  font-family: inherit;
+  font-family: 'Poppins', sans-serif;
 }
 
 .data-table thead {

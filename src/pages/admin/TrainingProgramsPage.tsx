@@ -323,7 +323,7 @@ const TrainingProgramsPage: React.FC = () => {
                             </button>
                             <button
                               className="action-btn action-btn-delete"
-                              onClick={(e) => handleDelete(program.id, e)}
+                              onClick={(e) => handleDelete(typeof program.id === 'string' ? parseInt(program.id, 10) : program.id, e)}
                               title="Hapus"
                             >
                               <Trash2 size={16} />
