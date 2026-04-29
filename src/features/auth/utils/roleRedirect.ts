@@ -80,7 +80,7 @@ const getRoleSpecificPath = (roleName: string) => {
     roleName.includes("staff") ||
     roleName.includes("user")
   ) {
-    return "/attendance";
+    return "/employee-dashboard";
   }
 
   return null;

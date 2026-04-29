@@ -84,11 +84,11 @@ const MyLeavesPage = () => {
     setErrorMessage(null);
     try {
       const result = await getMyLeaveBalance();
-      const balancePayload =
-        result.payload && typeof result.payload === "object"
-          ? (result.payload as Record<string, unknown>)
+      const balanceData =
+        result.data && typeof result.data === "object"
+          ? (result.data as Record<string, unknown>)
           : null;
-      setLeaveBalance(balancePayload);
+      setLeaveBalance(balanceData);
     } catch (error: unknown) {
       console.error("Failed to load leave balance:", error);
       setErrorMessage("Gagal memuat saldo cuti");
@@ -502,6 +502,39 @@ const MyLeavesPage = () => {
         </Card>
       )}
 
+      {/* Balance Policy Info */}
+      {isBalanceRoute && leaveBalance?.policy && (
+        <Card className="control-section-card">
+          <div className="control-section-inner">
+            <div className="filter-group">
+              <h3 style={{ margin: "0 0 0.5rem 0", fontSize: "1rem", fontWeight: 600, color: "#1e293b" }}>
+                Informasi Kebijakan Cuti {leaveBalance.policy.year}
+              </h3>
+              <div style={{ display: "flex", gap: "2rem", flexWrap: "wrap", fontSize: "0.9rem" }}>
+                <div>
+                  <span style={{ color: "#64748b" }}>Jenis Entitlement: </span>
+                  <span style={{ fontWeight: 600, color: "#1e293b" }}>{leaveBalance.policy.entitlement_type === "fixed" ? "Tetap" : leaveBalance.policy.entitlement_type}</span>
+                </div>
+                <div>
+                  <span style={{ color: "#64748b" }}>Cuti Tahunan: </span>
+                  <span style={{ fontWeight: 600, color: "#1e293b" }}>{leaveBalance.policy.annual_allowance} hari</span>
+                </div>
+                <div>
+                  <span style={{ color: "#64748b" }}>Dibayar: </span>
+                  <span style={{ fontWeight: 600, color: leaveBalance.policy.is_paid ? "#059669" : "#dc2626" }}>
+                    {leaveBalance.policy.is_paid ? "Ya" : "Tidak"}
+                  </span>
+                </div>
+                <div>
+                  <span style={{ color: "#64748b" }}>Maks. Hari Pending: </span>
+                  <span style={{ fontWeight: 600, color: "#1e293b" }}>{leaveBalance.policy.max_pending_days} hari</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
+
       {/* Balance Cards Grid */}
       {isBalanceRoute && (
         <div
@@ -512,80 +545,78 @@ const MyLeavesPage = () => {
             gap: "1.5rem",
           }}
         >
-          {leaveBalance ? (
-            Object.entries(leaveBalance).map(([key, value]) => {
-              const label = toLabel(key);
-              const isNumeric = isNumericLike(value);
-              const numValue = isNumeric ? Number(value) : 0;
-
-              return (
-                <div
-                  key={key}
-                  className="leave-balance-card"
-                  style={{
-                    padding: "1.5rem",
-                    borderRadius: "16px",
-                    background: "#fff",
-                    border: "1px solid #e2e8f0",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      marginBottom: "0.75rem",
-                    }}
-                  >
-                    <div>
-                      <h3
-                        style={{
-                          margin: 0,
-                          fontSize: "1rem",
-                          fontWeight: "600",
-                          color: "#1e293b",
-                        }}
-                      >
-                        {label}
-                      </h3>
-                      <p
-                        style={{
-                          margin: "0.25rem 0 0",
-                          color: "#64748b",
-                          fontSize: "0.85rem",
-                        }}
-                      >
-                        Hari Tersedia
-                      </p>
-                    </div>
-                    <span style={{ fontSize: "2rem", fontWeight: 800, color: "#10b981" }}>
-                      {String(value)}
-                    </span>
+          {leaveBalance?.balance ? (
+            <>
+              <div className="employee-summary-card">
+                <div className="employee-summary-header">
+                  <div>
+                    <p className="employee-summary-label">Hari Dialokasikan</p>
+                    <p className="employee-summary-subtitle">Total cuti yang dialokasikan</p>
                   </div>
-                  {isNumeric && (
-                    <div
-                      style={{
-                        height: "12px",
-                        background: "#e2e8f0",
-                        borderRadius: "6px",
-                        overflow: "hidden",
-                      }}
-                    >
-                      <div
-                        style={{
-                          height: "100%",
-                          background: "linear-gradient(90deg, #10b981, #059669)",
-                          borderRadius: "6px",
-                          width: `${Math.min((numValue / 30) * 100, 100)}%`,
-                          transition: "width 0.3s ease",
-                        }}
-                      />
-                    </div>
-                  )}
+                  <div className="employee-summary-icon-wrapper employee-icon-blue">
+                    <Calendar size={28} />
+                  </div>
                 </div>
-              );
-            })
+                <div className="employee-summary-value employee-value-blue">{leaveBalance.balance.allocated_days}</div>
+                <p className="employee-summary-trend">Dari kebijakan perusahaan</p>
+              </div>
+
+              <div className="employee-summary-card">
+                <div className="employee-summary-header">
+                  <div>
+                    <p className="employee-summary-label">Sisa Tahun Lalu</p>
+                    <p className="employee-summary-subtitle">Cuti yang dibawa ke tahun ini</p>
+                  </div>
+                  <div className="employee-summary-icon-wrapper employee-icon-orange">
+                    <Clock size={28} />
+                  </div>
+                </div>
+                <div className="employee-summary-value employee-value-orange">{leaveBalance.balance.carry_over_days}</div>
+                <p className="employee-summary-trend">{leaveBalance.policy?.carry_over_enabled ? "Aktif" : "Tidak aktif"}</p>
+              </div>
+
+              <div className="employee-summary-card">
+                <div className="employee-summary-header">
+                  <div>
+                    <p className="employee-summary-label">Cuti Digunakan</p>
+                    <p className="employee-summary-subtitle">Total cuti yang sudah diambil</p>
+                  </div>
+                  <div className="employee-summary-icon-wrapper employee-icon-red">
+                    <CircleX size={28} />
+                  </div>
+                </div>
+                <div className="employee-summary-value employee-value-red">{leaveBalance.balance.used_days}</div>
+                <p className="employee-summary-trend">Sudah terpakai</p>
+              </div>
+
+              <div className="employee-summary-card">
+                <div className="employee-summary-header">
+                  <div>
+                    <p className="employee-summary-label">Cuti Pending</p>
+                    <p className="employee-summary-subtitle">Sedang dalam pengajuan</p>
+                  </div>
+                  <div className="employee-summary-icon-wrapper employee-icon-purple">
+                    <Clock3 size={28} />
+                  </div>
+                </div>
+                <div className="employee-summary-value employee-value-purple">{leaveBalance.balance.pending_days}</div>
+                <p className="employee-summary-trend">Menunggu persetujuan</p>
+              </div>
+
+              <div className="employee-summary-card">
+                <div className="employee-summary-header">
+                  <div>
+                    <p className="employee-summary-label">Cuti Tersedia</p>
+                    <p className="employee-summary-subtitle">Sisa cuti yang bisa diambil</p>
+                  </div>
+                  <div className="employee-summary-icon-wrapper employee-icon-green">
+                    <CircleCheckBig size={28} />
+                  </div>
+                </div>
+                <div className="employee-summary-value employee-value-green">{leaveBalance.balance.available_days}</div>
+                <p className="employee-summary-trend">Siap digunakan</p>
+              </div>
+            </>
           ) : (
             <div style={{ textAlign: "center", padding: "4rem 2rem", color: "#94a3b8" }}>
               <Wallet size={64} style={{ opacity: 0.3, marginBottom: "1rem" }} />

@@ -7,6 +7,8 @@ import { RefreshCw, Check, X, Clock3, CheckCircle2, XCircle, Search } from "luci
 import { showToast } from "@/shared/ui/toast";
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/leave/LeaveApprovalPage.css';
+import '@/pages/admin/AdminPermissionsPage.css';
 
 const formatDate = (dateString: string | undefined) => {
   if (!dateString) return "-";

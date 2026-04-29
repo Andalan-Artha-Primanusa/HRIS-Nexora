@@ -2,7 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { Card } from '@/shared/ui/Card';
 import { Users, UserCheck, CalendarOff, Clock,TrendingDown, Target } from 'lucide-react';
 import { api } from '@/shared/api/httpClient';
+import { useAuthStore } from '@/app/store/auth.store';
 import './KpiCards.css';
+
+const ADMIN_ROLES = ['super_admin', 'admin', 'hr', 'manager'];
+
+const hasAdminAccess = (user: ReturnType<typeof useAuthStore.getState>['user']) => {
+  const roles = user?.roles ?? [];
+  return roles.some((r: any) => ADMIN_ROLES.includes(r.name));
+};
 
 type KpiCardItem = {
   title: string;
@@ -83,7 +91,12 @@ export const KpiCards: React.FC = () => {
     { title: 'Tingkat Kehadiran', value: '-', trend: 'Memuat...', icon: TrendingDown, color: 'teal' },
   ]);
 
+  const user = useAuthStore((state) => state.user);
+  const isAdmin = hasAdminAccess(user);
+
   useEffect(() => {
+    if (!isAdmin) return;
+
     const loadDashboardKpis = async () => {
       const [employees, attendanceToday, pendingLeaves, pendingReimbursements, kpisRes] =
         await Promise.allSettled([
@@ -105,8 +118,8 @@ export const KpiCards: React.FC = () => {
           : 0;
       const kpis = kpisRes.status === 'fulfilled' ? unwrapPayload(kpisRes.value.data) : [];
       const kpiItems = Array.isArray(kpis) ? kpis : ((kpis as any)?.items || []);
-      const avgKpiScore = kpiItems.length > 0 
-        ? kpiItems.reduce((acc: number, k: any) => acc + (Number(k.score) || 0), 0) / kpiItems.length 
+      const avgKpiScore = kpiItems.length > 0
+        ? kpiItems.reduce((acc: number, k: any) => acc + (Number(k.score) || 0), 0) / kpiItems.length
         : 0;
 
       const attendanceRate = employeesCount > 0 ? Math.round((presentTodayCount / employeesCount) * 100) : 0;
@@ -158,7 +171,7 @@ export const KpiCards: React.FC = () => {
     };
 
     void loadDashboardKpis();
-  }, []);
+  }, [isAdmin]);
 
   return (
     <div className="kpi-grid">

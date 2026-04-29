@@ -29,6 +29,7 @@ const MyReimbursementsPage = lazy(() => import("../../pages/ess/MyReimbursements
 const AdminReimbursementsPage = lazy(() => import("../../pages/admin/AdminReimbursementsPage"));
 const MyPayrollPage = lazy(() => import("../../pages/ess/MyPayrollPage"));
 const MyLeavesPage = lazy(() => import("../../pages/ess/MyLeavesPage"));
+const EmployeeDashboardPage = lazy(() => import("../../pages/dashboard/EmployeeDashboardPage"));
 const MyTrainingsPage = lazy(() => import("../../pages/ess/MyTrainingsPage"));
 const MyCompetenciesPage = lazy(() => import("../../pages/ess/MyCompetenciesPage"));
 const MyDocumentsPage = lazy(() => import("../../pages/ess/MyDocumentsPage"));
@@ -255,11 +256,21 @@ export const router = createBrowserRouter([
       },
       {
         path: "/dashboard",
-        element: <DashboardLayout />,
+        element: <ProtectedRoute role={["super_admin", "admin", "hr", "manager"]} />,
         children: [
           {
             index: true,
             element: <OverviewPage />,
+          },
+        ],
+      },
+      {
+        path: "/employee-dashboard",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <EmployeeDashboardPage />,
           },
         ],
       },

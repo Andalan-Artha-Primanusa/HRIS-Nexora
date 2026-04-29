@@ -23,6 +23,15 @@ export const menuItems: MenuItem[] = [
   label: 'Dashboard',
   icon: LayoutDashboard,
   path: '/dashboard',
+  requiredChecker: (user) =>
+    RBACUtils.isAdmin(user) || RBACUtils.isHR(user) || RBACUtils.isManager(user),
+},
+{
+  label: 'Dashboard Saya',
+  icon: UserCircle,
+  path: '/employee-dashboard',
+  requiredChecker: (user) =>
+    RBACUtils.hasRole(user, 'employee'),
 },
   {
   label: 'Manajemen Karyawan',

@@ -6,6 +6,8 @@ import { BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, Cart
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
+import { useAuthStore } from '@/app/store/auth.store';
+import { RBACUtils } from '@/shared/hooks/rbac';
 import "./OverviewPage.css";
 
 type DashboardRecord = Record<string, unknown>;
@@ -111,8 +113,6 @@ const getCountFromPayload = (raw: unknown): number => {
     payloadRecord.present,
     payloadRecord.present_count,
     payloadRecord.presentCount,
-    payloadRecord.total_present,
-    payloadRecord.totalPresent,
   ];
 
   for (const candidate of numericCandidates) {
@@ -184,6 +184,9 @@ const formatPeriodLabel = (period: string) => {
 
 const OverviewPage: React.FC = () => {
   const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
+  const isAdmin = RBACUtils.isAdmin(user) || RBACUtils.isHR(user) || RBACUtils.isManager(user);
+
   const [attendanceData, setAttendanceData] = useState<AttendanceTrendPoint[]>([]);
   const [departmentData, setDepartmentData] = useState<DepartmentPoint[]>([]);
   const [leaveTypeData, setLeaveTypeData] = useState<LeaveTypePoint[]>([]);
@@ -205,7 +208,7 @@ const OverviewPage: React.FC = () => {
       subtitle: 'Persentase kehadiran hari ini',
       value: `${totalEmployees > 0 ? Math.round((presentToday / totalEmployees) * 100) : 0}%`,
       change: `${presentToday} hadir hari ini`,
-      tone: 'blue',
+      tone: 'blue' as const,
       icon: TrendingUp,
     },
     {
@@ -213,7 +216,7 @@ const OverviewPage: React.FC = () => {
       subtitle: 'Menunggu persetujuan',
       value: String(pendingLeaves),
       change: 'Dari /leaves/pending',
-      tone: 'orange',
+      tone: 'orange' as const,
       icon: ClipboardList,
     },
     {
@@ -221,20 +224,25 @@ const OverviewPage: React.FC = () => {
       subtitle: 'Karyawan aktif bulan ini',
       value: String(activeEmployees),
       change: `${totalEmployees} total karyawan`,
-      tone: 'green',
+      tone: 'green' as const,
       icon: Users,
     },
     {
       label: 'Status Payroll',
       subtitle: 'Payroll bulan berjalan',
       value: `${processedPayrollRate}%`,
-      change: `${payrollData.length} data payroll · ${pendingReimbursements} reimbursement menunggu`,
-      tone: 'purple',
+      change: `${payrollData.length} data payroll . ${pendingReimbursements} reimbursement menunggu`,
+      tone: 'purple' as const,
       icon: Wallet,
     },
   ];
 
   useEffect(() => {
+    if (!isAdmin) {
+      setLoading(false);
+      return;
+    }
+
     const loadDashboardData = async () => {
       setLoading(true);
       setError(null);
@@ -361,14 +369,16 @@ const OverviewPage: React.FC = () => {
             <h1 className="hero-title">Ringkasan Dashboard</h1>
             <p className="hero-subtitle">Selamat datang kembali, berikut informasi organisasi Anda hari ini.</p>
           </div>
-          <div className="hero-actions">
-            <button className="btn-outline" onClick={() => navigate('/admin/analytics/people')}>
-              Lihat Analitik
-            </button>
-            <button className="btn-primary" onClick={() => navigate('/payroll/approve')}>
-              Jalankan Payroll
-            </button>
-          </div>
+          {isAdmin && (
+            <div className="hero-actions">
+              <button className="btn-outline" onClick={() => navigate('/admin/analytics/people')}>
+                Lihat Analitik
+              </button>
+              <button className="btn-primary" onClick={() => navigate('/payroll/approve')}>
+                Jalankan Payroll
+              </button>
+            </div>
+          )}
         </div>
       </Card>
 
@@ -378,46 +388,48 @@ const OverviewPage: React.FC = () => {
         </Card>
       )}
 
-      <KpiCards />
+      {isAdmin && <KpiCards />}
 
-      <div className="summary-grid">
-        {summaryCards.map((card) => {
-          const Icon = card.icon;
+      {isAdmin && (
+        <>
+          <div className="summary-grid">
+            {summaryCards.map((card) => {
+              const Icon = card.icon;
 
-          return (
-            <Card key={card.label} className="metric-card">
-              <div className="metric-header">
-                <div>
-                  <span className="metric-label">{card.label}</span>
-                  <p className="metric-subtitle">{card.subtitle}</p>
-                </div>
-                <span className={`metric-icon metric-icon--${card.tone}`}>
-                  <Icon size={24} />
-                </span>
-              </div>
-              <div className="metric-value">{card.value}</div>
-              <div className="metric-change">
-                <span>{card.change}</span>
-              </div>
-            </Card>
-          );
-        })}
-</div>
-
-      <Card className="analytics-title-card">
-        <div className="analytics-title-inner">
-          <div className="analytics-icon">
-            <BarChart3 size={24} />
+              return (
+                <Card key={card.label} className="metric-card">
+                  <div className="metric-header">
+                    <div>
+                      <span className="metric-label">{card.label}</span>
+                      <p className="metric-subtitle">{card.subtitle}</p>
+                    </div>
+                    <span className={`metric-icon metric-icon--${card.tone}`}>
+                      <Icon size={24} />
+                    </span>
+                  </div>
+                  <div className="metric-value">{card.value}</div>
+                  <div className="metric-change">
+                    <span>{card.change}</span>
+                  </div>
+                </Card>
+              );
+            })}
           </div>
-          <div>
-            <h2 className="analytics-title">Dashboard Analitik</h2>
-            <p className="analytics-subtitle">Data dan insight real-time</p>
-          </div>
-        </div>
-      </Card>
 
-      <div className="charts-section">
-          <Card className="chart-card">
+          <Card className="analytics-title-card">
+            <div className="analytics-title-inner">
+              <div className="analytics-icon">
+                <BarChart3 size={24} />
+              </div>
+              <div>
+                <h2 className="analytics-title">Dashboard Analitik</h2>
+                <p className="analytics-subtitle">Data dan insight real-time</p>
+              </div>
+            </div>
+          </Card>
+
+          <div className="charts-section">
+            <Card className="chart-card">
               <div className="chart-header">
                 <div className="chart-title-area">
                   <h3 className="chart-title">Tren Kehadiran Mingguan</h3>
@@ -431,20 +443,20 @@ const OverviewPage: React.FC = () => {
                   <AreaChart data={attendanceData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorPresent" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#2563eb" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
                       </linearGradient>
                       <linearGradient id="colorAbsent" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                     <XAxis dataKey="day" stroke="#64748b" style={{ fontSize: '12px' }} />
                     <YAxis stroke="#64748b" style={{ fontSize: '12px' }} />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: '#fff', 
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#fff',
                         border: '1px solid #e2e8f0',
                         borderRadius: '8px',
                         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
@@ -476,9 +488,9 @@ const OverviewPage: React.FC = () => {
                     <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                     <XAxis dataKey="name" stroke="#64748b" style={{ fontSize: '12px' }} />
                     <YAxis stroke="#64748b" style={{ fontSize: '12px' }} />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: '#fff', 
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#fff',
                         border: '1px solid #e2e8f0',
                         borderRadius: '8px',
                         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
@@ -509,9 +521,9 @@ const OverviewPage: React.FC = () => {
                     <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                     <XAxis dataKey="month" stroke="#64748b" style={{ fontSize: '12px' }} />
                     <YAxis stroke="#64748b" style={{ fontSize: '12px' }} />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: '#fff', 
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#fff',
                         border: '1px solid #e2e8f0',
                         borderRadius: '8px',
                         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
@@ -541,9 +553,9 @@ const OverviewPage: React.FC = () => {
               ) : leaveTypeData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={280}>
                   <PieChart>
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: '#fff', 
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#fff',
                         border: '1px solid #e2e8f0',
                         borderRadius: '8px',
                         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
@@ -571,7 +583,9 @@ const OverviewPage: React.FC = () => {
                 <div className="chart-empty">Tidak ada data cuti.</div>
               )}
             </Card>
-      </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
