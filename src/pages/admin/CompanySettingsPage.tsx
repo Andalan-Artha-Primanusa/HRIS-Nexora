@@ -11,18 +11,18 @@ import './CompanySettingsPage.css';
 const CompanySettingsPage: React.FC = () => {
   const [company, setCompany] = useState({
     name: '',
-    code: '',
+    legal_name: '',
+    tax_number: '',
     email: '',
     phone: '',
     website: '',
     address: '',
     city: '',
+    state: '',
+    postal_code: '',
     country: '',
-    tax_id: '',
-    industry: '',
-    employee_count: 0,
-    founded_year: '',
   });
+  const [companyId, setCompanyId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('general');
@@ -33,24 +33,29 @@ const CompanySettingsPage: React.FC = () => {
       const response = await api.get('/company');
       const data = response.data;
       const companyData = Array.isArray(data) ? data[0] : data.data || data;
-      if (companyData) {
+      if (companyData && companyData.id) {
+        setCompanyId(companyData.id);
         setCompany({
           name: companyData.name || '',
-          code: companyData.code || '',
+          legal_name: companyData.legal_name || '',
+          tax_number: companyData.tax_number || '',
           email: companyData.email || '',
           phone: companyData.phone || '',
           website: companyData.website || '',
           address: companyData.address || '',
           city: companyData.city || '',
+          state: companyData.state || '',
+          postal_code: companyData.postal_code || '',
           country: companyData.country || '',
-          tax_id: companyData.tax_id || '',
-          industry: companyData.industry || '',
-          employee_count: companyData.employee_count || 0,
-          founded_year: companyData.founded_year || '',
         });
       }
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      if (err.response?.status === 404) {
+        console.log('Company not found, will create on save');
+        setCompanyId(null);
+      } else {
+        console.error(err);
+      }
     } finally {
       setLoading(false);
     }
@@ -61,13 +66,31 @@ const CompanySettingsPage: React.FC = () => {
   }, []);
 
   const handleSave = async () => {
+    if (!company.name) {
+      alert('Company name is required');
+      return;
+    }
     setSaving(true);
     try {
-      await api.put('/company/1', company);
+      // Filter out empty strings
+      const dataToSend = Object.fromEntries(
+        Object.entries(company).filter(([_, v]) => v !== '')
+      );
+      
+      if (companyId) {
+        await api.put(`/company/${companyId}`, dataToSend);
+      } else {
+        const response = await api.post('/company', dataToSend);
+        const newData = response.data?.data || response.data;
+        if (newData?.id) {
+          setCompanyId(newData.id);
+        }
+      }
       alert('Company settings saved successfully!');
-    } catch (err) {
-      console.error(err);
-      alert('Failed to save settings');
+    } catch (err: any) {
+      console.error('Save error:', err.response?.data || err);
+      const errorMessage = err.response?.data?.message || err.response?.data?.error || 'Failed to save settings';
+      alert(`Error: ${errorMessage}`);
     } finally {
       setSaving(false);
     }
@@ -139,19 +162,19 @@ const CompanySettingsPage: React.FC = () => {
           <div className="summary-card__change">Standard Business Type</div>
         </Card>
 
-        <Card className="summary-card">
-          <div className="summary-card__header">
-            <div>
-              <span className="summary-card__label">Workforce Size</span>
-              <p className="summary-card__subtitle">Total active personnel</p>
-            </div>
-            <span className="summary-card__icon summary-card__icon--orange">
-              <User size={20} />
-            </span>
-          </div>
-          <div className="summary-card__value summary-card__value--orange">{company.employee_count}</div>
-          <div className="summary-card__change">Registered Employees</div>
-        </Card>
+         <Card className="summary-card">
+           <div className="summary-card__header">
+             <div>
+               <span className="summary-card__label">Workforce Size</span>
+               <p className="summary-card__subtitle">Total active personnel</p>
+             </div>
+             <span className="summary-card__icon summary-card__icon--orange">
+               <User size={20} />
+             </span>
+           </div>
+           <div className="summary-card__value summary-card__value--orange">-</div>
+           <div className="summary-card__change">Data from employees</div>
+         </Card>
       </div>
 
       <div className="white-unified-wrapper" style={{ marginTop: '2rem' }}>
@@ -199,73 +222,40 @@ const CompanySettingsPage: React.FC = () => {
                     </div>
                   </div>
                   <div className="form-group-item">
-                    <label>Company Code</label>
+                    <label>Legal Name</label>
                     <div className="input-icon-wrapper">
-                      <Globe size={18} className="field-icon" />
+                      <Landmark size={18} className="field-icon" />
                       <input
                         type="text"
-                        value={company.code}
-                        onChange={(e) => handleChange('code', e.target.value)}
-                        placeholder="e.g., MAH-ID"
+                        value={company.legal_name}
+                        onChange={(e) => handleChange('legal_name', e.target.value)}
+                        placeholder="PT Your Company Name"
                         className="premium-input"
                       />
                     </div>
                   </div>
                   <div className="form-group-item">
-                    <label>Industry</label>
-                    <div className="input-icon-wrapper">
-                      <Briefcase size={18} className="field-icon" />
-                      <select
-                        value={company.industry}
-                        onChange={(e) => handleChange('industry', e.target.value)}
-                        className="premium-input"
-                      >
-                        <option value="">Select industry</option>
-                        <option value="technology">Technology & Software</option>
-                        <option value="manufacturing">Manufacturing</option>
-                        <option value="retail">Retail & E-commerce</option>
-                        <option value="finance">Banking & Finance</option>
-                        <option value="healthcare">Healthcare & Biotech</option>
-                        <option value="education">Education</option>
-                        <option value="other">Other</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div className="form-group-item">
-                    <label>Founded Year</label>
-                    <div className="input-icon-wrapper">
-                      <Calendar size={18} className="field-icon" />
-                      <input
-                        type="text"
-                        value={company.founded_year}
-                        onChange={(e) => handleChange('founded_year', e.target.value)}
-                        placeholder="e.g., 2024"
-                        className="premium-input"
-                      />
-                    </div>
-                  </div>
-                  <div className="form-group-item">
-                    <label>Tax ID / NPWP</label>
+                    <label>Tax Number (NPWP)</label>
                     <div className="input-icon-wrapper">
                       <ShieldCheck size={18} className="field-icon" />
                       <input
                         type="text"
-                        value={company.tax_id}
-                        onChange={(e) => handleChange('tax_id', e.target.value)}
+                        value={company.tax_number}
+                        onChange={(e) => handleChange('tax_number', e.target.value)}
                         placeholder="00.000.000.0-000.000"
                         className="premium-input"
                       />
                     </div>
                   </div>
                   <div className="form-group-item">
-                    <label>Total Workforce</label>
+                    <label>Website URL</label>
                     <div className="input-icon-wrapper">
-                      <User size={18} className="field-icon" />
+                      <Globe size={18} className="field-icon" />
                       <input
-                        type="number"
-                        value={company.employee_count}
-                        onChange={(e) => handleChange('employee_count', parseInt(e.target.value) || 0)}
-                        placeholder="0"
+                        type="text"
+                        value={company.website}
+                        onChange={(e) => handleChange('website', e.target.value)}
+                        placeholder="https://www.company.com"
                         className="premium-input"
                       />
                     </div>
@@ -301,19 +291,6 @@ const CompanySettingsPage: React.FC = () => {
                       />
                     </div>
                   </div>
-                  <div className="form-group-item">
-                    <label>Website URL</label>
-                    <div className="input-icon-wrapper">
-                      <Globe size={18} className="field-icon" />
-                      <input
-                        type="text"
-                        value={company.website}
-                        onChange={(e) => handleChange('website', e.target.value)}
-                        placeholder="https://www.company.com"
-                        className="premium-input"
-                      />
-                    </div>
-                  </div>
                   <div className="form-group-item full-width">
                     <label>Full Address</label>
                     <div className="input-icon-wrapper">
@@ -341,6 +318,32 @@ const CompanySettingsPage: React.FC = () => {
                     </div>
                   </div>
                   <div className="form-group-item">
+                    <label>State/Province</label>
+                    <div className="input-icon-wrapper">
+                      <MapPin size={18} className="field-icon" />
+                      <input
+                        type="text"
+                        value={company.state}
+                        onChange={(e) => handleChange('state', e.target.value)}
+                        placeholder="e.g. DKI Jakarta"
+                        className="premium-input"
+                      />
+                    </div>
+                  </div>
+                  <div className="form-group-item">
+                    <label>Postal Code</label>
+                    <div className="input-icon-wrapper">
+                      <MapPin size={18} className="field-icon" />
+                      <input
+                        type="text"
+                        value={company.postal_code}
+                        onChange={(e) => handleChange('postal_code', e.target.value)}
+                        placeholder="12345"
+                        className="premium-input"
+                      />
+                    </div>
+                  </div>
+                  <div className="form-group-item">
                     <label>Country</label>
                     <div className="input-icon-wrapper">
                       <Globe size={18} className="field-icon" />
@@ -349,6 +352,19 @@ const CompanySettingsPage: React.FC = () => {
                         value={company.country}
                         onChange={(e) => handleChange('country', e.target.value)}
                         placeholder="e.g. Indonesia"
+                        className="premium-input"
+                      />
+                    </div>
+                  </div>
+                  <div className="form-group-item">
+                    <label>Website URL</label>
+                    <div className="input-icon-wrapper">
+                      <Globe size={18} className="field-icon" />
+                      <input
+                        type="text"
+                        value={company.website}
+                        onChange={(e) => handleChange('website', e.target.value)}
+                        placeholder="https://www.company.com"
                         className="premium-input"
                       />
                     </div>

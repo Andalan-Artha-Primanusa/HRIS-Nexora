@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { RefreshCw, Award, TrendingUp, CheckCircle, Target, Star } from 'lucide-react';
+import { RefreshCw, Award, TrendingUp, CheckCircle, Target, Star, Search } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { trainingService } from '@/features/training/api/training.service';

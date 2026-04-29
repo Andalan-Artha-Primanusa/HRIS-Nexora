@@ -4,6 +4,7 @@ import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { getAllEmployees } from '@/features/employee/api/employee.service';
 import { legalService } from '@/features/legal/api/legal.service';
+import { api } from '@/shared/api/httpClient';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import '@/shared/styles/CrudPage.css';
@@ -18,6 +19,7 @@ const SeveranceCalculatorPage: React.FC = () => {
   const [terminationDate, setTerminationDate] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [company, setCompany] = useState<any>(null);
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -29,7 +31,20 @@ const SeveranceCalculatorPage: React.FC = () => {
         setEmployees([]);
       }
     };
+    const fetchCompany = async () => {
+      try {
+        const response = await api.get('/company');
+        const data = response.data;
+        const companyData = Array.isArray(data) ? data[0] : data.data || data;
+        if (companyData) {
+          setCompany(companyData);
+        }
+      } catch (err) {
+        console.error('Failed to fetch company', err);
+      }
+    };
     fetchEmployees();
+    fetchCompany();
   }, []);
 
   const handleEmployeeChange = (id: string) => {
@@ -86,27 +101,41 @@ const SeveranceCalculatorPage: React.FC = () => {
     const doc = new jsPDF();
     const emp = employees.find(e => String(e.id) === selectedEmployee);
 
+    // Company Header
+    if (company) {
+      doc.setFillColor(37, 99, 235);
+      doc.rect(0, 0, 210, 40, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(16);
+      doc.text(company.name || 'Company', 105, 15, { align: 'center' });
+      doc.setFontSize(8);
+      if (company.address) doc.text(company.address, 105, 22, { align: 'center' });
+      if (company.phone) doc.text(`Tel: ${company.phone}`, 105, 28, { align: 'center' });
+      if (company.tax_number) doc.text(`NPWP: ${company.tax_number}`, 105, 34, { align: 'center' });
+    }
+
     doc.setFillColor(37, 99, 235);
-    doc.rect(0, 0, 210, 40, 'F');
+    doc.rect(0, company ? 40 : 0, 210, company ? 15 : 40, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(20);
-    doc.text('Kalkulator Pesangon', 105, 25, { align: 'center' });
+    doc.text('Kalkulator Pesangon', 105, company ? 50 : 25, { align: 'center' });
     doc.setFontSize(10);
-    doc.text('PP 35/2021 - Perhitungan Otomatis', 105, 33, { align: 'center' });
+    doc.text('PP 35/2021 - Perhitungan Otomatis', 105, company ? 56 : 33, { align: 'center' });
 
+    const startY = company ? 65 : 45;
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(12);
-    doc.text('Informasi Karyawan', 20, 50);
+    doc.text('Informasi Karyawan', 20, startY);
     doc.setFontSize(10);
-    doc.text(`Nama: ${emp?.full_name || emp?.user?.name || 'N/A'}`, 20, 58);
-    doc.text(`ID: ${emp?.employee_code || emp?.employee_id || 'N/A'}`, 20, 64);
-    doc.text(`Posisi: ${emp?.position || 'N/A'}`, 20, 70);
-    doc.text(`Department: ${emp?.department || 'N/A'}`, 110, 58);
-    doc.text(`Join Date: ${joinDate}`, 110, 64);
-    doc.text(`Termination Date: ${terminationDate}`, 110, 70);
+    doc.text(`Nama: ${emp?.full_name || emp?.user?.name || 'N/A'}`, 20, startY + 8);
+    doc.text(`ID: ${emp?.employee_code || emp?.employee_id || 'N/A'}`, 20, startY + 14);
+    doc.text(`Posisi: ${emp?.position || 'N/A'}`, 20, startY + 20);
+    doc.text(`Department: ${emp?.department || 'N/A'}`, 110, startY + 8);
+    doc.text(`Join Date: ${joinDate}`, 110, startY + 14);
+    doc.text(`Termination Date: ${terminationDate}`, 110, startY + 20);
 
     autoTable(doc, {
-      startY: 78,
+      startY: startY + 28,
       head: [['Komponen', 'Nilai']],
       body: [
         ['Masa Kerja', calculation.service_period_formatted || 'N/A'],

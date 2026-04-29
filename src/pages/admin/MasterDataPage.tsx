@@ -16,6 +16,15 @@ interface MasterDataItem {
   description: string;
   is_active: boolean;
   parent_id?: number;
+  // Position fields
+  level?: string;
+  department_id?: number;
+  // Location fields
+  address?: string;
+  timezone?: string;
+  latitude?: string;
+  longitude?: string;
+  radius?: string;
 }
 
 const MasterDataPage: React.FC = () => {
@@ -39,6 +48,15 @@ const MasterDataPage: React.FC = () => {
     code: '',
     description: '',
     is_active: true,
+    // Position fields
+    level: 'Mid',
+    department_id: '',
+    // Location fields
+    address: '',
+    timezone: 'Asia/Jakarta',
+    latitude: '',
+    longitude: '',
+    radius: '',
   });
 
   const fetchData = async () => {
@@ -136,9 +154,16 @@ const MasterDataPage: React.FC = () => {
       setEditingItem(item);
       setFormData({
         name: item.name,
-        code: item.code,
-        description: item.description,
+        code: item.code || '',
+        description: item.description || '',
         is_active: item.is_active,
+        level: item.level || 'Mid',
+        department_id: item.department_id?.toString() || '',
+        address: item.address || '',
+        timezone: item.timezone || 'Asia/Jakarta',
+        latitude: item.latitude || '',
+        longitude: item.longitude || '',
+        radius: item.radius || '',
       });
     } else {
       setEditingItem(null);
@@ -147,6 +172,13 @@ const MasterDataPage: React.FC = () => {
         code: '',
         description: '',
         is_active: true,
+        level: 'Mid',
+        department_id: '',
+        address: '',
+        timezone: 'Asia/Jakarta',
+        latitude: '',
+        longitude: '',
+        radius: '',
       });
     }
     setShowModal(true);
@@ -483,6 +515,88 @@ const MasterDataPage: React.FC = () => {
                   rows={3}
                 />
               </div>
+
+              {activeTab === 'position' && (
+                <>
+                  <div className="form-group">
+                    <label>Level</label>
+                    <select
+                      value={formData.level}
+                      onChange={(e) => setFormData({ ...formData, level: e.target.value })}
+                    >
+                      <option value="Junior">Junior</option>
+                      <option value="Mid">Mid</option>
+                      <option value="Senior">Senior</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Department</label>
+                    <select
+                      value={formData.department_id}
+                      onChange={(e) => setFormData({ ...formData, department_id: e.target.value })}
+                    >
+                      <option value="">Select Department</option>
+                      {departments.map((dept) => (
+                        <option key={dept.id} value={dept.id}>{dept.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </>
+              )}
+
+              {activeTab === 'location' && (
+                <>
+                  <div className="form-group">
+                    <label>Address</label>
+                    <textarea
+                      value={formData.address}
+                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                      placeholder="Enter full address"
+                      rows={3}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Timezone</label>
+                    <select
+                      value={formData.timezone}
+                      onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
+                    >
+                      <option value="Asia/Jakarta">Asia/Jakarta</option>
+                      <option value="Asia/Singapore">Asia/Singapore</option>
+                      <option value="UTC">UTC</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Latitude <span className="required">*</span></label>
+                    <input
+                      type="number"
+                      step="any"
+                      value={formData.latitude}
+                      onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
+                      placeholder="-6.200000"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Longitude <span className="required">*</span></label>
+                    <input
+                      type="number"
+                      step="any"
+                      value={formData.longitude}
+                      onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
+                      placeholder="106.816666"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Radius (meters) <span className="required">*</span></label>
+                    <input
+                      type="number"
+                      value={formData.radius}
+                      onChange={(e) => setFormData({ ...formData, radius: e.target.value })}
+                      placeholder="100"
+                    />
+                  </div>
+                </>
+              )}
               
               <label className="checkbox-label">
                 <input

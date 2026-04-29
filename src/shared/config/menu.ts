@@ -263,7 +263,6 @@ export const menuItems: MenuItem[] = [
       { label: 'Departemen & Posisi', path: '/organization/master-data' },
       { label: 'Jenis Cuti', path: '/leave/type' },
       { label: 'Kebijakan Cuti', path: '/leave/policy' },
-      { label: 'Kategori Pengeluaran', path: '/settings/master-data/expense-category' },
       {
         label: 'Pusat Impor (Master Data)',
         path: '/admin/import',

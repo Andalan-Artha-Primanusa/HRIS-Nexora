@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { RefreshCw, GraduationCap, Clock, CheckCircle, BookOpen, Play, BookTemplate } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { RefreshCw, GraduationCap, Clock, CheckCircle, BookOpen, Play, BookTemplate, Search } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
+import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';

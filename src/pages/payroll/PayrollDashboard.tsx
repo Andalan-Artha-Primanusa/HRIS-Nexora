@@ -51,10 +51,10 @@ const PayrollDashboard: React.FC = () => {
   >([]);
 
   // KPI States
-  const [_totalPayroll, _setTotalPayroll] = useState(0);
-  const [_totalProcessed, _setTotalProcessed] = useState(0);
-  const [_totalPending, _setTotalPending] = useState(0);
-  const [_averagePayroll, _setAveragePayroll] = useState(0);
+  const [totalPayroll, setTotalPayroll] = useState(0);
+  const [totalProcessed, setTotalProcessed] = useState(0);
+  const [totalPending, setTotalPending] = useState(0);
+  const [averagePayroll, setAveragePayroll] = useState(0);
 
   const chartColors = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
 

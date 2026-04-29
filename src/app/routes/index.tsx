@@ -824,7 +824,6 @@ export const router = createBrowserRouter([
           { path: "/settings/company", element: <CompanySettingsPage /> },
           { path: "/settings/notification", element: <NotificationSettingsPage /> },
           { path: "/organization/master-data", element: <MasterDataPage /> },
-          { path: "/settings/master-data/expense-category", element: <ExpenseCategoryPage /> },
         ],
       },
       {

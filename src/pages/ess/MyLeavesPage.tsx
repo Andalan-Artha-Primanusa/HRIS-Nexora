@@ -62,10 +62,6 @@ const toLabel = (key: string) =>
     .trim()
     .replace(/\b\w/g, (char) => char.toUpperCase());
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
-
 const isNumericLike = (value: unknown) => {
   if (typeof value === "number") return true;
   if (typeof value !== "string") return false;
@@ -81,24 +77,18 @@ const MyLeavesPage = () => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Search & Filter (for leaves)
-  const [searchText, setSearchText] = useState('');
-  const [activeTab, setActiveTab] = useState<'Semua' | 'Pending' | 'Approved' | 'Rejected'>('Semua');
-
-  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
 
   const loadLeaves = async () => {
     setLoading(true);
     setErrorMessage(null);
-
     try {
       const result = await getMyLeaves();
       setLeaves(result.items);
     } catch (error: unknown) {
       console.error("Failed to load leaves:", error);
-      setErrorMessage('Gagal memuat cuti');
+      setErrorMessage("Gagal memuat cuti");
     } finally {
       setLoading(false);
     }
@@ -107,98 +97,103 @@ const MyLeavesPage = () => {
   const loadLeaveBalance = async () => {
     setLoading(true);
     setErrorMessage(null);
-
     try {
       const result = await getMyLeaveBalance();
       const balancePayload =
         result.payload && typeof result.payload === "object"
           ? (result.payload as Record<string, unknown>)
           : null;
-
       setLeaveBalance(balancePayload);
     } catch (error: unknown) {
       console.error("Failed to load leave balance:", error);
-      setErrorMessage('Gagal memuat saldo cuti');
+      setErrorMessage("Gagal memuat saldo cuti");
     } finally {
       setLoading(false);
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _leaveSummaryCards = useMemo(
-    () => {
-      if (isBalanceRoute) {
-        const balanceEntries = leaveBalance ? Object.entries(leaveBalance) : [];
-
-        return [
-          {
-            label: "Balance Fields",
-            subtitle: "Jumlah field saldo cuti",
-            value: String(balanceEntries.length),
-            change: "Ringkasan data saldo",
-            tone: "blue" as const,
-          },
-          {
-            label: "Available Snapshot",
-            subtitle: "Status saldo yang tampil",
-            value: leaveBalance ? "Ready" : "-",
-            change: "Data saldo personal",
-            tone: "green" as const,
-          },
-          {
-            label: "Route",
-            subtitle: "Halaman yang sedang dibuka",
-            value: "Balance",
-            change: "/leave/balance",
-            tone: "orange" as const,
-          },
-        ];
-      }
-
-      const pendingLeaves = leaves.filter((item) => String((item as any).status ?? "pending").toLowerCase() === "pending").length;
-      const approvedLeaves = leaves.filter((item) => String((item as any).status ?? "").toLowerCase() === "approved").length;
-      const rejectedLeaves = leaves.filter((item) => String((item as any).status ?? "").toLowerCase() === "rejected").length;
-
+  const summaryCards = useMemo(() => {
+    if (isBalanceRoute) {
+      const balanceEntries = leaveBalance ? Object.entries(leaveBalance) : [];
       return [
         {
-          label: "Total Leaves",
-          subtitle: "Semua pengajuan cuti",
-          value: String(leaves.length),
-          change: "Riwayat cuti yang tersimpan",
+          label: "Balance Fields",
+          subtitle: "Jumlah field saldo cuti",
+          value: String(balanceEntries.length),
+          change: "Ringkasan data saldo",
           tone: "blue" as const,
+          icon: Wallet,
         },
         {
-          label: "Pending",
-          subtitle: "Menunggu persetujuan",
-          value: String(pendingLeaves),
-          change: "Perlu ditinjau",
-          tone: "orange" as const,
-        },
-        {
-          label: "Approved",
-          subtitle: "Pengajuan disetujui",
-          value: String(approvedLeaves),
-          change: "Status final selesai",
+          label: "Available Snapshot",
+          subtitle: "Status saldo yang tampil",
+          value: leaveBalance ? "Ready" : "-",
+          change: "Data saldo personal",
           tone: "green" as const,
+          icon: CircleCheckBig,
         },
         {
-          label: "Rejected",
-          subtitle: "Pengajuan ditolak",
-          value: String(rejectedLeaves),
-          change: "Butuh revisi atau tindak lanjut",
-          tone: "red" as const,
+          label: "Route",
+          subtitle: "Halaman yang sedang dibuka",
+          value: "Balance",
+          change: "/leave/balance",
+          tone: "orange" as const,
+          icon: Calendar,
         },
       ];
-    },
-    [isBalanceRoute, leaveBalance, leaves]
-  );
+    }
+
+    const pendingLeaves = leaves.filter(
+      (item) => String((item as any).status ?? "pending").toLowerCase() === "pending"
+    ).length;
+    const approvedLeaves = leaves.filter(
+      (item) => String((item as any).status ?? "").toLowerCase() === "approved"
+    ).length;
+    const rejectedLeaves = leaves.filter(
+      (item) => String((item as any).status ?? "").toLowerCase() === "rejected"
+    ).length;
+
+    return [
+      {
+        label: "Total Leaves",
+        subtitle: "Semua pengajuan cuti",
+        value: String(leaves.length),
+        change: "Riwayat cuti yang tersimpan",
+        tone: "blue" as const,
+        icon: Calendar,
+      },
+      {
+        label: "Pending",
+        subtitle: "Menunggu persetujuan",
+        value: String(pendingLeaves),
+        change: "Perlu ditinjau",
+        tone: "orange" as const,
+        icon: Clock3,
+      },
+      {
+        label: "Approved",
+        subtitle: "Pengajuan disetujui",
+        value: String(approvedLeaves),
+        change: "Status final selesai",
+        tone: "green" as const,
+        icon: CircleCheckBig,
+      },
+      {
+        label: "Rejected",
+        subtitle: "Pengajuan ditolak",
+        value: String(rejectedLeaves),
+        change: "Butuh revisi atau tindak lanjut",
+        tone: "red" as const,
+        icon: CircleX,
+      },
+    ];
+  }, [isBalanceRoute, leaveBalance, leaves]);
 
   const handleRefresh = () => {
     if (isBalanceRoute) {
       void loadLeaveBalance();
       return;
     }
-
     void loadLeaves();
   };
 
@@ -219,18 +214,18 @@ const MyLeavesPage = () => {
           <div className="hero-content">
             <div className="hero-badge">
               {isBalanceRoute ? <Wallet size={16} /> : <Calendar size={16} />}
-              <span>{isBalanceRoute ? 'Pusat Saldo Cuti' : 'Pusat Cuti'}</span>
+              <span>{isBalanceRoute ? "Pusat Saldo Cuti" : "Pusat Cuti"}</span>
             </div>
-            <h1 className="hero-title">{isBalanceRoute ? 'Saldo Cuti Saya' : 'Cuti Saya'}</h1>
+            <h1 className="hero-title">{isBalanceRoute ? "Saldo Cuti Saya" : "Cuti Saya"}</h1>
             <p className="hero-subtitle">
-              {isBalanceRoute 
-                ? 'Lihat saldo cuti tersedia Anda dengan tampilan visual yang konsisten.' 
-                : 'Lihat riwayat cuti Anda dengan tampilan yang konsisten di seluruh aplikasi.'}
+              {isBalanceRoute
+                ? "Lihat saldo cuti tersedia Anda dengan tampilan visual yang konsisten."
+                : "Lihat riwayat cuti Anda dengan tampilan yang konsisten di seluruh aplikasi."}
             </p>
           </div>
           <div className="hero-actions">
             <button className="btn-outline" onClick={handleRefresh} disabled={loading}>
-              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
               Segarkan
             </button>
           </div>
@@ -259,6 +254,7 @@ const MyLeavesPage = () => {
         })}
       </div>
 
+      {/* Leave History Table */}
       {!isBalanceRoute && (
         <Card className="crud-table-card">
           <div className="crud-table-wrap">
@@ -307,6 +303,7 @@ const MyLeavesPage = () => {
         </Card>
       )}
 
+      {/* Balance Section Header */}
       {isBalanceRoute && leaveBalance && (
         <Card className="analytics-title-card">
           <div className="analytics-title-inner">
@@ -321,8 +318,16 @@ const MyLeavesPage = () => {
         </Card>
       )}
 
-{isBalanceRoute && (
-        <div className="leave-balance-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
+      {/* Balance Cards Grid */}
+      {isBalanceRoute && (
+        <div
+          className="leave-balance-grid"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+            gap: "1.5rem",
+          }}
+        >
           {leaveBalance ? (
             Object.entries(leaveBalance).map(([key, value]) => {
               const label = toLabel(key);
@@ -330,35 +335,78 @@ const MyLeavesPage = () => {
               const numValue = isNumeric ? Number(value) : 0;
 
               return (
-                <div key={key} className="leave-balance-card" style={{ padding: '1.5rem', borderRadius: '16px', background: '#fff', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+                <div
+                  key={key}
+                  className="leave-balance-card"
+                  style={{
+                    padding: "1.5rem",
+                    borderRadius: "16px",
+                    background: "#fff",
+                    border: "1px solid #e2e8f0",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      marginBottom: "0.75rem",
+                    }}
+                  >
                     <div>
-                      <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: '600', color: '#1e293b' }}>{label}</h3>
-                      <p style={{ margin: '0.25rem 0 0', color: '#64748b', fontSize: '0.85rem' }}>Hari Tersedia</p>
+                      <h3
+                        style={{
+                          margin: 0,
+                          fontSize: "1rem",
+                          fontWeight: "600",
+                          color: "#1e293b",
+                        }}
+                      >
+                        {label}
+                      </h3>
+                      <p
+                        style={{
+                          margin: "0.25rem 0 0",
+                          color: "#64748b",
+                          fontSize: "0.85rem",
+                        }}
+                      >
+                        Hari Tersedia
+                      </p>
                     </div>
-                    <span style={{ fontSize: '2rem', fontWeight: '800', color: '#10b981' }}>
+                    <span style={{ fontSize: "2rem", fontWeight: "800", color: "#10b981" }}>
                       {asDisplay(value)}
                     </span>
                   </div>
                   {isNumeric && (
-                    <div style={{ height: '12px', background: '#e2e8f0', borderRadius: '6px', overflow: 'hidden' }}>
-                      <div style={{
-                        height: '100%',
-                        background: 'linear-gradient(90deg, #10b981, #059669)',
-                        borderRadius: '6px',
-                        width: `${Math.min((numValue / 30) * 100, 100)}%`,
-                        transition: 'width 0.3s ease'
-                      }} />
+                    <div
+                      style={{
+                        height: "12px",
+                        background: "#e2e8f0",
+                        borderRadius: "6px",
+                        overflow: "hidden",
+                      }}
+                    >
+                      <div
+                        style={{
+                          height: "100%",
+                          background: "linear-gradient(90deg, #10b981, #059669)",
+                          borderRadius: "6px",
+                          width: `${Math.min((numValue / 30) * 100, 100)}%`,
+                          transition: "width 0.3s ease",
+                        }}
+                      />
                     </div>
                   )}
                 </div>
               );
             })
           ) : (
-            <div style={{ textAlign: 'center', padding: '4rem 2rem', color: '#94a3b8' }}>
-              <Wallet size={64} style={{ opacity: 0.3, marginBottom: '1rem' }} />
-              <p style={{ fontSize: '1.1rem', fontWeight: '500' }}>Tidak ada data saldo cuti</p>
-              <p style={{ marginTop: '0.5rem' }}>Hak cuti Anda akan muncul di sini.</p>
+            <div style={{ textAlign: "center", padding: "4rem 2rem", color: "#94a3b8" }}>
+              <Wallet size={64} style={{ opacity: 0.3, marginBottom: "1rem" }} />
+              <p style={{ fontSize: "1.1rem", fontWeight: "500" }}>Tidak ada data saldo cuti</p>
+              <p style={{ marginTop: "0.5rem" }}>Hak cuti Anda akan muncul di sini.</p>
             </div>
           )}
         </div>

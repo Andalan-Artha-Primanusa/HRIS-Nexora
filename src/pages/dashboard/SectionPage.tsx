@@ -612,7 +612,6 @@ const supportsList = (pathname: string) => {
       '/settings/master-data/department',
       '/settings/master-data/position',
       '/settings/master-data/leave-type',
-      '/settings/master-data/expense-category',
       '/settings/notification',
       '/settings/logs',
       '/locations',
@@ -1809,9 +1808,6 @@ const SectionPage = () => {
         case '/settings/master-data/leave-type':
           result = await api.get('/leave-policies');
           break;
-        case '/settings/master-data/expense-category':
-          result = await api.get('/reimbursements/statistics');
-          break;
         case '/settings/notification':
         case '/settings/logs':
           result = await api.get('/notifications');
@@ -2558,7 +2554,6 @@ const SectionPage = () => {
       case '/settings/master-data/department':
       case '/settings/master-data/position':
       case '/settings/master-data/leave-type':
-      case '/settings/master-data/expense-category':
       case '/settings/notification':
       case '/settings/logs':
         return (

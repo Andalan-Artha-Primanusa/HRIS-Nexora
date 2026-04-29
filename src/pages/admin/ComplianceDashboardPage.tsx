@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ShieldCheck, AlertTriangle, FileCheck, Clock, Plus, RefreshCw, Edit, Search, Shield, Filter } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
-import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
+import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { workforceService } from '@/features/workforce/api/workforce.service';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
@@ -13,6 +13,7 @@ const ComplianceDashboardPage: React.FC = () => {
   const [stats, setStats] = useState<any[]>([]);
   const [documents, setDocuments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Search & Filter
   const [searchText, setSearchText] = useState("");
@@ -47,18 +48,13 @@ const ComplianceDashboardPage: React.FC = () => {
   }, []);
 
   const summaryStats = useMemo(() => {
-    const total = documents.length;
-    const critical = documents.filter(d => d.risk === 'CRITICAL').length;
-    const medium = documents.filter(d => d.risk === 'MEDIUM').length;
-    const compliant = documents.filter(d => d.risk === 'LOW' || !d.risk).length;
-
-    return [
-      { label: "Total Dokumen", subtitle: "Employee documents", value: total, tone: "blue" as const },
-      { label: "Critical Risk", subtitle: "Perlu perhatian", value: critical, tone: "red" as const },
-      { label: "Medium Risk", subtitle: "Perlu dipantau", value: medium, tone: "orange" as const },
-      { label: "Compliant", subtitle: "Sudah sesuai", value: compliant, tone: "green" as const },
-    ];
-  }, [documents]);
+    if (!stats || stats.length === 0) return [];
+    return stats.map((stat: any) => ({
+      label: stat.label,
+      value: stat.value,
+      color: stat.color,
+    }));
+  }, [stats]);
 
   const filteredDocuments = useMemo(() => {
     return documents.filter((doc: any) => {
@@ -123,25 +119,16 @@ const ComplianceDashboardPage: React.FC = () => {
 
       {/* Summary Cards */}
       <div className="employee-summary-wrapper">
-        {summaryStats.map((card) => {
-          const Icon = card.tone === "blue" ? FileCheck : card.tone === "red" ? AlertTriangle : card.tone === "orange" ? Clock : ShieldCheck;
-          
-          return (
-            <div key={card.label} className="employee-summary-card">
-              <div className="employee-summary-header">
-                <div>
-                  <p className="employee-summary-label">{card.label}</p>
-                  <p className="employee-summary-subtitle">{card.subtitle}</p>
-                </div>
-                <div className={`employee-summary-icon-wrapper employee-icon-${card.tone}`}>
-                  <Icon size={28} />
-                </div>
+        {summaryStats.map((card: any) => (
+          <div key={card.label} className="employee-summary-card">
+            <div className="employee-summary-header">
+              <div>
+                <p className="employee-summary-label">{card.label}</p>
               </div>
-              <div className={`employee-summary-value employee-value-${card.tone}`}>{card.value}</div>
-              <p className="employee-summary-trend">{card.subtitle}</p>
             </div>
-          );
-        })}
+            <div className="employee-summary-value" style={{ color: card.color }}>{card.value}</div>
+          </div>
+        ))}
       </div>
 
       {/* Analytics Title Card */}
