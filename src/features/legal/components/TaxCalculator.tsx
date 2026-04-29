@@ -44,54 +44,105 @@ export const TaxCalculator: React.FC<TaxCalculatorProps> = ({ income, setIncome,
   const exportPDF = () => {
     if (!result) return;
     const doc = new jsPDF();
+    const pageWidth = 210;
+    const margin = 20;
 
-    // Company Header
+    // Professional Header
+    doc.setFillColor(20, 30, 48);
+    doc.rect(0,0, pageWidth, 50, 'F');
+    doc.setFillColor(37, 99, 235);
+    doc.rect(0,0, pageWidth, 3, 'F');
+
+    // Company Info
     if (company) {
-      doc.setFillColor(37, 99, 235);
-      doc.rect(0, 0, 210, 35, 'F');
       doc.setTextColor(255, 255, 255);
-      doc.setFontSize(14);
-      doc.text(company.name || 'Company', 105, 12, { align: 'center' });
-      doc.setFontSize(8);
-      if (company.address) doc.text(company.address, 105, 19, { align: 'center' });
-      if (company.tax_number) doc.text(`NPWP: ${company.tax_number}`, 105, 26, { align: 'center' });
+      doc.setFontSize(20);
+      doc.setFont(undefined, 'bold');
+      doc.text(company.name || 'Company', pageWidth / 2, 18, { align: 'center' });
+      doc.setFont(undefined, 'normal');
+      
+      doc.setFontSize(9);
+      const addr = [company.address, company.city, company.state].filter(v => v).join(', ');
+      if (addr) doc.text(addr, pageWidth / 2, 26, { align: 'center' });
+      
+      const contact = [company.phone, company.email].filter(v => v).join(' | ');
+      if (contact) doc.text(contact, pageWidth / 2, 32, { align: 'center' });
+      if (company.tax_number) {
+        doc.text(`NPWP: ${company.tax_number}`, pageWidth / 2, 38, { align: 'center' });
+      }
     }
 
-    doc.setFillColor(37, 99, 235);
-    doc.rect(0, company ? 35 : 0, 210, company ? 15 : 40, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(18);
-    doc.text('Tax Calculation', 105, company ? 45 : 25, { align: 'center' });
+    // Title
+    doc.setTextColor(20, 30, 48);
+    doc.setFontSize(16);
+    doc.setFont(undefined, 'bold');
+    doc.text('TAX CALCULATION REPORT', pageWidth / 2, 62, { align: 'center' });
+    doc.setFont(undefined, 'normal');
+    
+    doc.setFontSize(9);
+    doc.setTextColor(100, 100, 100);
+    doc.text('Based on UU PPh (UU HPP) - Progressive Tax Rates', pageWidth / 2, 68, { align: 'center' });
 
-    const startY = company ? 55 : 35;
-    doc.setTextColor(0, 0, 0);
-    doc.setFontSize(12);
-    doc.text('Tax Simulation Result', 20, startY);
-    doc.setFontSize(10);
-    doc.text(`Total PKP: ${formatCurrency(income)}`, 20, startY + 8);
-    doc.text(`Total Tax: ${formatCurrency(result.tax || result.total_tax || 0)}`, 20, startY + 14);
-    doc.text(`Take Home Pay: ${formatCurrency(income - (result.tax || result.total_tax || 0))}`, 20, startY + 20);
+    // Divider
+    doc.setDrawColor(37, 99, 235);
+    doc.setLineWidth(0.5);
+    doc.line(margin, 72, pageWidth - margin, 72);
 
+    // Income Info Box
+    const infoStartY = 80;
+    doc.setFillColor(248, 250, 252);
+    doc.roundedRect(margin, infoStartY, pageWidth - (margin * 2), 30, 3, 3, 'F');
+    doc.setDrawColor(226, 232, 240);
+    doc.roundedRect(margin, infoStartY, pageWidth - (margin * 2), 30, 3, 3, 'S');
+
+    doc.setTextColor(20, 30, 48);
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'bold');
+    doc.text('TAX CALCULATION DETAILS', margin + 8, infoStartY + 10);
+    doc.setFont(undefined, 'normal');
+    
+    doc.setFontSize(9);
+    doc.setTextColor(60, 60, 60);
+    doc.text(`Annual Taxable Income (PKP): ${formatCurrency(income)}`, margin + 8, infoStartY + 18);
+    doc.text(`Total Tax Payable: ${formatCurrency(result.tax || result.total_tax || 0)}`, margin + 8, infoStartY + 24);
+    doc.text(`Take Home Pay: ${formatCurrency(income - (result.tax || result.total_tax || 0))}`, margin + 100, infoStartY + 18);
+    doc.text(`Reference: Government Regulation - Progressive Rates`, margin + 100, infoStartY + 24);
+
+    // Tax Breakdown Table
     if (result.breakdown?.length > 0) {
       autoTable(doc, {
-        startY: startY + 28,
-        head: [['Layer (Rate)', 'Tax Base', 'Tax Amount']],
+        startY: infoStartY + 38,
+        head: [['Tax Layer (Rate)', 'Tax Base', 'Tax Amount']],
         body: result.breakdown.map((item: any) => [
           `${item.rate}%`,
           formatCurrency(item.amount),
           formatCurrency(item.tax)
         ]),
-        styles: { fontSize: 10, cellPadding: 5 },
-        headStyles: { fillColor: [37, 99, 235], textColor: [255, 255, 255] },
+        styles: { fontSize: 10, cellPadding: 7, lineColor: [230, 230, 230] },
+        headStyles: { 
+          fillColor: [20, 30, 48], 
+          textColor: [255, 255, 255], 
+          fontStyle: 'bold',
+          halign: 'left'
+        },
+        columnStyles: { 
+          0: { fontStyle: 'bold', cellWidth: 60, fillColor: [248, 250, 252] }, 
+          2: { halign: 'right', fontStyle: 'bold' } 
+        },
+        alternateRowStyles: { fillColor: [252, 252, 253] }
       });
     }
 
-    doc.setTextColor(128, 128, 128);
+    // Footer
+    doc.setTextColor(150, 150, 150);
     doc.setFontSize(8);
-    doc.text(`Generated: ${new Date().toLocaleString('id-ID')}`, 105, 290, { align: 'center' });
-    if (company?.name) doc.text(company.name, 105, 286, { align: 'center' });
+    const footerY = 285;
+    doc.text(`Generated: ${new Date().toLocaleString('id-ID')}`, margin, footerY);
+    doc.text(`Powered by ${company?.name || 'HRIS System'}`, pageWidth / 2, footerY, { align: 'center' });
+    doc.text('Page 1 of 1', pageWidth - margin, footerY, { align: 'right' });
 
-    doc.save('tax-calculation.pdf');
+    // Save
+    doc.save(`TaxCalculation_${new Date().getTime()}.pdf`);
   };
 
   return (

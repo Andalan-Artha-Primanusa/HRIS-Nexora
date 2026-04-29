@@ -4,14 +4,12 @@ import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
-import { Alert } from "@/shared/ui/Alert";
-import { KeyRound, RefreshCw, ShieldAlert, ShieldPlus, Shield, Plus, Edit, Trash2, Search } from "lucide-react";
+import { KeyRound, RefreshCw, ShieldAlert, ShieldPlus, Shield, Plus, Search, Filter, Edit, Trash2 } from "lucide-react";
 import { deleteRole, getAllRoles } from "@/features/admin/api/admin.service";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { RBACUtils } from "@/shared/hooks/rbac";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
-import "@/pages/payroll/PayrollShared.css";
 import "./AdminRolesPage.css";
 
 interface Role {
@@ -26,40 +24,10 @@ const AdminRolesPage = () => {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const canViewRoles = RBACUtils.canViewRoles(user);
-  const permissionChipClass = (count: number) => {
-    if (count === 0) return "admin-roles-perm-chip admin-roles-perm-chip--empty";
-    return "admin-roles-perm-chip admin-roles-perm-chip--active";
-  };
-  
-if (!canViewRoles) {
-    return (
-      <div className="crud-page">
-        <Card className="hero-card">
-          <div className="hero-card-inner">
-            <div className="hero-content">
-              <div className="hero-badge">
-                <Shield size={16} />
-                <span>Admin Center</span>
-              </div>
-              <h1 className="hero-title">Akses Ditolak</h1>
-              <p className="hero-subtitle">
-                Anda tidak memiliki izin untuk mengakses halaman ini.
-              </p>
-            </div>
-          </div>
-        </Card>
-
-        <div className="white-unified-wrapper">
-          <Card glass style={{ padding: '2rem', textAlign: 'center' }}>
-            <p>Silakan hubungi Administrator untuk mendapatkan akses.</p>
-</Card>
-        </div>
-      </div>
-    );
-  }
 
   const [roles, setRoles] = useState<Role[]>([]);
   const [searchText, setSearchText] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState("");
@@ -81,11 +49,18 @@ if (!canViewRoles) {
     }
   };
 
+  // Filter & Paginate Logic
   const filteredRoles = useMemo(() => {
-    return roles.filter(r =>
-      r.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      (r.display_name && r.display_name.toLowerCase().includes(searchText.toLowerCase()))
-    );
+    return roles.filter((r) => {
+      const searchStr = searchText.toLowerCase();
+      if (searchStr) {
+        const nameMatch = r.name?.toLowerCase().includes(searchStr);
+        const displayMatch = r.display_name?.toLowerCase().includes(searchStr);
+        if (!nameMatch && !displayMatch) return false;
+      }
+
+      return true;
+    });
   }, [roles, searchText]);
 
   const paginatedRoles = useMemo(() => {
@@ -95,12 +70,43 @@ if (!canViewRoles) {
 
   const totalPages = Math.ceil(filteredRoles.length / pageSize);
 
-  useEffect(() => {
-    void loadRoles();
-  }, []);
+  const rolesSummaryCards = useMemo(
+    () => [
+      {
+        label: "Total Roles",
+        subtitle: "Semua role tersedia",
+        value: String(roles.length),
+        change: "Data role sistem",
+        tone: "blue" as const,
+        icon: Shield,
+      },
+      {
+        label: "Hasil Filter",
+        subtitle: "Role sesuai pencarian",
+        value: String(filteredRoles.length),
+        change: `${paginatedRoles.length} data per halaman`,
+        tone: "green" as const,
+        icon: Search,
+      },
+      {
+        label: "Total Permissions",
+        subtitle: "Jumlah permission aktif",
+        value: String(roles.reduce((sum, r) => sum + (r.permissions_count || 0), 0)),
+        change: "Hak akses sistem",
+        tone: "orange" as const,
+        icon: KeyRound,
+      },
+    ],
+    [roles.length, filteredRoles.length, paginatedRoles.length]
+  );
+
+  const clearFilters = () => {
+    setSearchText("");
+    setCurrentPage(1);
+  };
 
   const handleDelete = async (id: number, name: string) => {
-    if (id === 1 || name === 'admin' || name === 'super_admin') {
+    if (id === 1 || name === "admin" || name === "super_admin") {
       setStatusMessage("Role sistem utama tidak dapat dihapus.");
       setAlertType("error");
       return;
@@ -119,8 +125,42 @@ if (!canViewRoles) {
     }
   };
 
+  // Reset page on filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText]);
+
+  useEffect(() => {
+    void loadRoles();
+  }, []);
+
+  if (!canViewRoles) {
+    return (
+      <div className="crud-page">
+        <Card className="hero-card">
+          <div className="hero-card-inner">
+            <div className="hero-content">
+              <div className="hero-badge">
+                <Shield size={16} />
+                <span>Admin Center</span>
+              </div>
+              <h1 className="hero-title">Akses Ditolak</h1>
+              <p className="hero-subtitle">Anda tidak memiliki izin untuk mengakses halaman ini.</p>
+            </div>
+          </div>
+        </Card>
+        <div className="white-unified-wrapper">
+          <Card glass style={{ padding: "2rem", textAlign: "center" }}>
+            <p>Silakan hubungi Administrator untuk mendapatkan akses.</p>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="crud-page">
+      {/* Header */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -129,11 +169,13 @@ if (!canViewRoles) {
               <span>Admin Center</span>
             </div>
             <h1 className="hero-title">Kelola Role</h1>
-            <p className="hero-subtitle">
-              Manajemen role dan permission pengguna sistem.
-            </p>
+            <p className="hero-subtitle">Manajemen role dan permission pengguna sistem.</p>
           </div>
           <div className="hero-actions">
+            <button className="btn-outline" onClick={() => void loadRoles()} disabled={loading}>
+              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+              {loading ? "Memuat..." : "Segarkan"}
+            </button>
             <button type="button" className="btn-primary" onClick={() => navigate("/admin/roles/create")}>
               <Plus size={16} />
               Tambah Role
@@ -144,109 +186,196 @@ if (!canViewRoles) {
 
       {statusMessage && <Alert type={alertType} message={statusMessage} onClose={() => setStatusMessage("")} dismissible />}
 
-      <div className="white-unified-wrapper">
-        <div className="wuw-header">
-          <div className="wuw-header-top">
-            <div className="wuw-title-area">
-              <h3>Daftar Role</h3>
-              <span className="wuw-count-badge">{filteredRoles.length} roles</span>
+      {/* Summary Cards */}
+      <div className="employee-summary-wrapper">
+        {rolesSummaryCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <div key={card.label} className="employee-summary-card">
+              <div className="employee-summary-header">
+                <div>
+                  <p className="employee-summary-label">{card.label}</p>
+                  <p className="employee-summary-subtitle">{card.subtitle}</p>
+                </div>
+                <div className={`employee-summary-icon-wrapper employee-icon-${card.tone}`}>
+                  <Icon size={28} />
+                </div>
+              </div>
+              <div className={`employee-summary-value employee-value-${card.tone}`}>{card.value}</div>
+              <p className="employee-summary-trend">{card.change}</p>
             </div>
-            <div className="wuw-search">
-              <Search size={16} className="wuw-search-icon" />
+          );
+        })}
+      </div>
+
+      {/* Analytics Title Card */}
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <Shield size={24} />
+          </div>
+          <div>
+            <h2 className="analytics-title">Daftar Role</h2>
+            <p className="analytics-subtitle">Kelola dan lihat semua role</p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Control Section */}
+      <Card className="control-section-card">
+        <div className="control-section-inner">
+          <div className="control-actions">
+            <div className="search-box">
+              <div className="search-icon-inside">
+                <Search size={18} />
+              </div>
               <input
                 type="text"
-                className="search-input-pill"
                 placeholder="Cari role..."
                 value={searchText}
-                onChange={(e) => { setSearchText(e.target.value); setCurrentPage(1); }}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="search-input-pill"
               />
             </div>
+            <button className={`filter-btn-rounded ${showFilters ? "active" : ""}`} onClick={() => setShowFilters(!showFilters)}>
+              <Filter size={18} />
+              <span>Filter</span>
+            </button>
           </div>
         </div>
 
+        {/* Filter Panel - can be extended for role-specific filters */}
+        {showFilters && (
+          <div className="filter-dropdown">
+            <div className="filter-row">
+              {(searchText) && (
+                <button className="btn-clear-filter" onClick={clearFilters}>
+                  Hapus Filter
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </Card>
+
+      {/* Table Section */}
+      <div className="table-section">
         <div className="wuw-table-area">
           {loading && <LoadingState message="Memuat roles..." />}
-          {!loading && errorMessage && <ErrorState message="Koneksi Terputus" error={errorMessage} onRetry={loadRoles} />}
 
-          {!loading && !errorMessage && (
+          {!loading && errorMessage && (
+            <div className="error-state-container">
+              <div className="error-state">
+                <p className="error-state-title">Koneksi Terputus</p>
+                <p className="error-state-message">{errorMessage}</p>
+                <button className="btn-primary" onClick={() => void loadRoles()}>
+                  Coba Lagi
+                </button>
+              </div>
+            </div>
+          )}
+
+          {!loading && !errorMessage && paginatedRoles.length === 0 && (
+            <div style={{ padding: "5rem 0" }}>
+              <EmptyState
+                title="Role Kosong"
+                message={searchText ? "Tidak ada role yang sesuai dengan kriteria Anda." : "Belum ada data role. Tambah role baru untuk memulai."}
+                actionLabel="Tambah Role"
+                onAction={() => navigate("/admin/roles/create")}
+              />
+            </div>
+          )}
+
+          {!loading && !errorMessage && paginatedRoles.length > 0 && (
             <>
               <div className="table-wrap">
                 <table className="data-table">
                   <thead>
                     <tr>
-                      <th>ID</th>
-                      <th>Nama Role</th>
+                      <th style={{ width: "400px" }}>Nama Role</th>
                       <th>Display Name</th>
                       <th>Permissions</th>
-                      <th>Aksi</th>
+                      <th className="th-center" style={{ width: "120px" }}>
+                        Aksi
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {paginatedRoles.length === 0 ? (
-                      <tr>
-                        <td colSpan={5} className="cell-empty">
-                          <KeyRound size={32} style={{ opacity: 0.4, display: 'block', margin: '0 auto 0.75rem' }} />
-                          Tidak ada data role ditemukan.
+                    {paginatedRoles.map((role) => (
+                      <tr key={role.id}>
+                        <td>
+                          <div className="cell-name">
+                            <div className="cell-avatar">
+                              {role.name?.charAt(0).toUpperCase() || "R"}
+                            </div>
+                            <div className="cell-stacked">
+                              <span className="cell-name-text">{role.name}</span>
+                              <span className="cell-stacked__sub">{String(role.id)}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td style={{ color: "#475569", fontWeight: 500 }}>{role.display_name || "-"}</td>
+                        <td>
+                          <span className={`badge-soft ${role.permissions_count ? "badge-soft--green" : "badge-soft--orange"}`}>
+                            {role.permissions_count || 0} permissions
+                          </span>
+                        </td>
+                        <td className="td-center">
+                          <div className="action-btn-group">
+                            <button
+                              className="action-btn action-btn-edit"
+                              onClick={() => navigate(`/admin/roles/edit/${role.id}`)}
+                              title="Edit Role"
+                            >
+                              <Edit size={16} />
+                            </button>
+                            <button
+                              className="action-btn action-btn-delete"
+                              onClick={() => void handleDelete(role.id, role.name)}
+                              title="Hapus Role"
+                              disabled={role.id === 1 || role.name === "admin" || role.name === "super_admin"}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
                         </td>
                       </tr>
-                    ) : (
-                      paginatedRoles.map((role) => (
-                        <tr key={role.id}>
-                          <td><span className="cell-id">#{role.id}</span></td>
-                          <td><span className="cell-name-text">{role.name}</span></td>
-                          <td>{role.display_name || '—'}</td>
-                          <td>
-                            <span className={permissionChipClass(role.permissions_count || 0)}>
-                              {role.permissions_count || 0} permissions
-                            </span>
-                          </td>
-                          <td>
-                            <div className="action-btn-group" style={{ justifyContent: 'flex-end' }}>
-                              <button
-                                className="action-btn action-btn-edit"
-                                onClick={() => navigate(`/admin/roles/edit/${role.id}`)}
-                                title="Edit Role"
-                              >
-                                <Edit size={16} />
-                              </button>
-                              <button
-                                className="action-btn action-btn-delete"
-                                onClick={() => void handleDelete(role.id, role.name)}
-                                title="Hapus Role"
-                                disabled={role.id === 1 || role.name === 'admin' || role.name === 'super_admin'}
-                              >
-                                <Trash2 size={16} />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    )}
+                    ))}
                   </tbody>
                 </table>
               </div>
 
-              {totalPages > 1 && (
-                <div className="pagination">
+              {/* Pagination */}
+              <div className="table-pagination">
+                <div className="pagination-info">
+                  Menampilkan <strong>{paginatedRoles.length}</strong> dari <strong>{filteredRoles.length}</strong> roles
+                </div>
+                <div className="pagination-controls">
                   <button
                     className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
-                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   >
-                    Previous
+                    ‹
                   </button>
-                  <span className="pagination-info">
-                    Page {currentPage} of {totalPages}
-                  </span>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      className={`pagination-btn ${currentPage === page ? "active" : ""}`}
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
+                  ))}
                   <button
                     className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                     disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   >
-                    Next
+                    ›
                   </button>
                 </div>
-              )}
+              </div>
             </>
           )}
         </div>

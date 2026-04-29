@@ -100,69 +100,127 @@ const SeveranceCalculatorPage: React.FC = () => {
     if (!calculation) return;
     const doc = new jsPDF();
     const emp = employees.find(e => String(e.id) === selectedEmployee);
+    const pageWidth = 210;
+    const margin = 20;
 
-    // Company Header
+    // Professional Header with gradient effect
+    doc.setFillColor(20, 30, 48);
+    doc.rect(0, 0, pageWidth, 50, 'F');
+    doc.setFillColor(37, 99, 235);
+    doc.rect(0, 0, pageWidth, 3, 'F');
+
+    // Company Info
     if (company) {
-      doc.setFillColor(37, 99, 235);
-      doc.rect(0, 0, 210, 40, 'F');
       doc.setTextColor(255, 255, 255);
-      doc.setFontSize(16);
-      doc.text(company.name || 'Company', 105, 15, { align: 'center' });
-      doc.setFontSize(8);
-      if (company.address) doc.text(company.address, 105, 22, { align: 'center' });
-      if (company.phone) doc.text(`Tel: ${company.phone}`, 105, 28, { align: 'center' });
-      if (company.tax_number) doc.text(`NPWP: ${company.tax_number}`, 105, 34, { align: 'center' });
+      doc.setFontSize(20);
+      doc.setFont(undefined, 'bold');
+      doc.text(company.name || 'Company', pageWidth / 2, 18, { align: 'center' });
+      doc.setFont(undefined, 'normal');
+      
+      doc.setFontSize(9);
+      const addr = [company.address, company.city, company.state].filter(v => v).join(', ');
+      if (addr) doc.text(addr, pageWidth / 2, 26, { align: 'center' });
+      
+      const contact = [company.phone, company.email].filter(v => v).join(' | ');
+      if (contact) doc.text(contact, pageWidth / 2, 32, { align: 'center' });
+      if (company.tax_number) {
+        doc.text(`NPWP: ${company.tax_number}`, pageWidth / 2, 38, { align: 'center' });
+      }
     }
 
-    doc.setFillColor(37, 99, 235);
-    doc.rect(0, company ? 40 : 0, 210, company ? 15 : 40, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(20);
-    doc.text('Kalkulator Pesangon', 105, company ? 50 : 25, { align: 'center' });
-    doc.setFontSize(10);
-    doc.text('PP 35/2021 - Perhitungan Otomatis', 105, company ? 56 : 33, { align: 'center' });
+    // Document Title
+    doc.setTextColor(20, 30, 48);
+    doc.setFontSize(16);
+    doc.setFont(undefined, 'bold');
+    doc.text('CALCULATION OF SEVERANCE PAY', pageWidth / 2, 62, { align: 'center' });
+    doc.setFont(undefined, 'normal');
+    
+    doc.setFontSize(9);
+    doc.setTextColor(100, 100, 100);
+    doc.text('Based on PP No. 35 of 2021 - Progressive Calculation', pageWidth / 2, 68, { align: 'center' });
 
-    const startY = company ? 65 : 45;
-    doc.setTextColor(0, 0, 0);
-    doc.setFontSize(12);
-    doc.text('Informasi Karyawan', 20, startY);
-    doc.setFontSize(10);
-    doc.text(`Nama: ${emp?.full_name || emp?.user?.name || 'N/A'}`, 20, startY + 8);
-    doc.text(`ID: ${emp?.employee_code || emp?.employee_id || 'N/A'}`, 20, startY + 14);
-    doc.text(`Posisi: ${emp?.position || 'N/A'}`, 20, startY + 20);
-    doc.text(`Department: ${emp?.department || 'N/A'}`, 110, startY + 8);
-    doc.text(`Join Date: ${joinDate}`, 110, startY + 14);
-    doc.text(`Termination Date: ${terminationDate}`, 110, startY + 20);
+    // Divider
+    doc.setDrawColor(37, 99, 235);
+    doc.setLineWidth(0.5);
+    doc.line(margin, 72, pageWidth - margin, 72);
 
+    // Employee Information Section
+    const infoStartY = 80;
+    doc.setFillColor(248, 250, 252);
+    doc.roundedRect(margin, infoStartY, pageWidth - (margin * 2), 38, 3, 3, 'F');
+    doc.setDrawColor(226, 232, 240);
+    doc.roundedRect(margin, infoStartY, pageWidth - (margin * 2), 38, 3, 3, 'S');
+
+    doc.setTextColor(20, 30, 48);
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'bold');
+    doc.text('EMPLOYEE INFORMATION', margin + 8, infoStartY + 10);
+    doc.setFont(undefined, 'normal');
+    
+    doc.setFontSize(9);
+    doc.setTextColor(60, 60, 60);
+    
+    const empName = emp?.full_name || emp?.user?.name || 'N/A';
+    const empCode = emp?.employee_code || emp?.employee_id || 'N/A';
+    const empPos = emp?.position || 'N/A';
+    const empDept = emp?.department || 'N/A';
+
+    doc.text(`Name: ${empName}`, margin + 8, infoStartY + 17);
+    doc.text(`Employee ID: ${empCode}`, margin + 8, infoStartY + 23);
+    doc.text(`Position: ${empPos}`, margin + 8, infoStartY + 29);
+    doc.text(`Department: ${empDept}`, margin + 75, infoStartY + 17);
+    doc.text(`Join Date: ${joinDate}`, margin + 75, infoStartY + 23);
+    doc.text(`Termination: ${terminationDate}`, margin + 75, infoStartY + 29);
+
+    // Calculation Results Table
+    const tableStartY = infoStartY + 48;
     autoTable(doc, {
-      startY: startY + 28,
-      head: [['Komponen', 'Nilai']],
+      startY: tableStartY,
+      head: [['Component', 'Amount (IDR)']],
       body: [
-        ['Masa Kerja', calculation.service_period_formatted || 'N/A'],
-        ['Gaji Dasar', formatCurrency(calculation.base_salary)],
-        ['Uang Pesangon (Pesangon)', formatCurrency(calculation.severance_pay)],
-        ['Uang Penghargaan (UPMK)', formatCurrency(calculation.service_reward)],
-        ['Uang Penggantian (UPH)', formatCurrency(calculation.compensation)],
+        ['Service Period', calculation.service_period_formatted || 'N/A'],
+        ['Base Salary', formatCurrency(calculation.base_salary)],
+        ['Severance Pay (Pesangon)', formatCurrency(calculation.severance_pay)],
+        ['Service Reward (UPMK)', formatCurrency(calculation.service_reward)],
+        ['Compensation (UPH)', formatCurrency(calculation.compensation)],
       ],
-      styles: { fontSize: 10, cellPadding: 5 },
-      headStyles: { fillColor: [37, 99, 235], textColor: [255, 255, 255] },
-      columnStyles: { 0: { fontStyle: 'bold' } }
+      styles: { fontSize: 10, cellPadding: 7, lineColor: [230, 230, 230] },
+      headStyles: { 
+        fillColor: [20, 30, 48], 
+        textColor: [255, 255, 255], 
+        fontStyle: 'bold',
+        halign: 'left'
+      },
+      columnStyles: { 
+        0: { fontStyle: 'bold', cellWidth: 130, fillColor: [248, 250, 252] }, 
+        1: { halign: 'right', cellWidth: 60, fontStyle: 'bold' } 
+      },
+      alternateRowStyles: { fillColor: [252, 252, 253] }
     });
 
-    const finalY = (doc as any).lastAutoTable.finalY + 10;
-    doc.setFillColor(37, 99, 235);
-    doc.rect(20, finalY, 170, 20, 'F');
+    // Total Box
+    const finalY = (doc as any).lastAutoTable.finalY + 15;
+    doc.setFillColor(20, 30, 48);
+    doc.roundedRect(margin, finalY, pageWidth - (margin * 2), 28, 3, 3, 'F');
+    
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(12);
-    doc.text('Total Payout Amount', 30, finalY + 8);
-    doc.setFontSize(16);
-    doc.text(formatCurrency(calculation.total_severance), 170, finalY + 8, { align: 'right' });
+    doc.setFontSize(13);
+    doc.text('TOTAL SEVERANCE PAY', margin + 10, finalY + 11);
+    doc.setFontSize(18);
+    doc.setFont(undefined, 'bold');
+    doc.text(formatCurrency(calculation.total_severance), pageWidth - margin - 10, finalY + 11, { align: 'right' });
+    doc.setFont(undefined, 'normal');
 
-    doc.setTextColor(128, 128, 128);
+    // Footer
+    doc.setTextColor(150, 150, 150);
     doc.setFontSize(8);
-    doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`, 105, 285, { align: 'center' });
+    const footerY = 285;
+    doc.text(`Generated: ${new Date().toLocaleString('id-ID')}`, margin, footerY);
+    doc.text(`Powered by ${company?.name || 'HRIS System'}`, pageWidth / 2, footerY, { align: 'center' });
+    doc.text('Page 1 of 1', pageWidth - margin, footerY, { align: 'right' });
 
-    doc.save(`Pesangon_${emp?.employee_code || 'export'}_${Date.now()}.pdf`);
+    // Save
+    doc.save(`SeverancePay_${empCode}_${new Date().getTime()}.pdf`);
   };
 
   return (

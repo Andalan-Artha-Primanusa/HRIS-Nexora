@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { RefreshCw, Save, Building2, Mail, Phone, MapPin, Globe, Clock, User, Briefcase, Settings, Calendar, Landmark, Info, ShieldCheck } from 'lucide-react';
+import { RefreshCw, Save, Building2, Mail, Phone, MapPin, Globe, Clock, User, Briefcase, Settings, Calendar, Landmark, Info, ShieldCheck, Upload, Trash2 } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
@@ -21,10 +21,13 @@ const CompanySettingsPage: React.FC = () => {
     state: '',
     postal_code: '',
     country: '',
+    logo: '',
   });
   const [companyId, setCompanyId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('general');
 
   const fetchData = async () => {
@@ -96,6 +99,61 @@ const CompanySettingsPage: React.FC = () => {
     }
   };
 
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    if (!companyId) {
+      alert('Please save company data first before uploading logo');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('logo', file);
+
+    setUploadingLogo(true);
+    try {
+      const response = await api.post(`/company/${companyId}/logo`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      const updatedData = response.data?.data || response.data;
+      if (updatedData?.logo) {
+        setCompany(prev => ({ ...prev, logo: updatedData.logo }));
+        setLogoPreview(null);
+      }
+      alert('Logo uploaded successfully!');
+    } catch (err: any) {
+      console.error('Logo upload error:', err.response?.data || err);
+      alert('Failed to upload logo');
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
+  const handleDeleteLogo = async () => {
+    if (!companyId) return;
+    if (!confirm('Are you sure you want to delete the logo?')) return;
+
+    try {
+      await api.delete(`/company/${companyId}/logo`);
+      setCompany(prev => ({ ...prev, logo: '' }));
+      setLogoPreview(null);
+      alert('Logo deleted successfully!');
+    } catch (err: any) {
+      console.error('Logo delete error:', err.response?.data || err);
+      alert('Failed to delete logo');
+    }
+  };
+
+  const handleLogoPreview = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => setLogoPreview(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleChange = (field: string, value: string | number) => {
     setCompany(prev => ({ ...prev, [field]: value }));
   };
@@ -129,6 +187,52 @@ const CompanySettingsPage: React.FC = () => {
               <Save size={16} />
               {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
             </button>
+          </div>
+        </div>
+      </Card>
+
+      {/* Logo Section */}
+      <Card className="hero-card" style={{ marginBottom: '2rem' }}>
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Upload size={16} />
+              <span>Company Logo</span>
+            </div>
+            <h1 className="hero-title">Update Logo</h1>
+            <p className="hero-subtitle">
+              Upload your company logo for documents and reports.
+            </p>
+          </div>
+          <div className="hero-actions" style={{ flexDirection: 'column', gap: '1rem' }}>
+            {(company.logo || logoPreview) && (
+              <div style={{ textAlign: 'center' }}>
+                <img 
+                  src={logoPreview || `${api.defaults.baseURL?.replace('/api', '')}/${company.logo}`} 
+                  alt="Company Logo" 
+                  style={{ maxHeight: '100px', maxWidth: '200px', objectFit: 'contain' }}
+                />
+              </div>
+            )}
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <label className="btn-outline" style={{ cursor: 'pointer', background: 'white' }}>
+                <Upload size={16} />
+                {uploadingLogo ? 'Uploading...' : 'Upload Logo'}
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={(e) => { handleLogoPreview(e); handleLogoUpload(e); }}
+                  style={{ display: 'none' }}
+                  disabled={uploadingLogo}
+                />
+              </label>
+              {(company.logo || logoPreview) && (
+                <button className="btn-outline" onClick={handleDeleteLogo} style={{ background: 'white' }}>
+                  <Trash2 size={16} />
+                  Delete Logo
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </Card>

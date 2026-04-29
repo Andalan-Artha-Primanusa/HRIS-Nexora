@@ -1,58 +1,125 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
-import { Alert } from '@/shared/ui/Alert';
+import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { getAllLocations, deleteLocation } from '@/features/location/api/location.service';
 import type { LocationItem } from '@/features/location/types/location.types';
-import { BarChart3, MapPin, Pencil, Plus, RefreshCw, Trash2, MapPinned } from 'lucide-react';
+import { MapPinned, Pencil, Plus, RefreshCw, Trash2, MapPin, Search, Filter } from 'lucide-react';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
-import '@/pages/payroll/PayrollShared.css';
 import './LocationsPage.css';
 
 const LocationsPage = () => {
   const navigate = useNavigate();
   const [locations, setLocations] = useState<LocationItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [alertMessage, setAlertMessage] = useState('');
-  const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('error');
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Search & Filter State
+  const [searchText, setSearchText] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedDepartment, setSelectedDepartment] = useState('');
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
+
+  // Extract unique departments for filter
+  const uniqueDepartments = useMemo(() => {
+    return Array.from(new Set(locations.map((loc) => (loc as any).department).filter(Boolean))).sort();
+  }, [locations]);
+
+  // Filter & Paginate Logic
+  const filteredLocations = useMemo(() => {
+    return locations.filter((location) => {
+      const loc = location as any;
+      const searchStr = searchText.toLowerCase();
+      const nameMatch = loc.name?.toLowerCase().includes(searchStr);
+      const idMatch = String(loc.id).includes(searchStr);
+      const textMatch = !searchText || nameMatch || idMatch;
+
+      const deptMatch = !selectedDepartment || loc.department === selectedDepartment;
+
+      return textMatch && deptMatch;
+    });
+  }, [locations, searchText, selectedDepartment]);
+
+  const paginatedLocations = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredLocations.slice(startIndex, startIndex + pageSize);
+  }, [filteredLocations, currentPage, pageSize]);
+
+  const totalPages = Math.ceil(filteredLocations.length / pageSize);
 
   const withCoordinateCount = locations.filter((location) => {
-    const lat = parseFloat(String(location.latitude || 0));
-    const lng = parseFloat(String(location.longitude || 0));
+    const lat = parseFloat(String((location as any).latitude || 0));
+    const lng = parseFloat(String((location as any).longitude || 0));
     return lat !== 0 && lng !== 0;
   }).length;
 
+  const locationSummaryCards = useMemo(
+    () => [
+      {
+        label: 'Total Lokasi',
+        subtitle: 'Semua lokasi terdaftar',
+        value: String(locations.length),
+        change: 'Data lokasi aktif',
+        tone: 'blue' as const,
+        icon: MapPinned,
+      },
+      {
+        label: 'Hasil Filter',
+        subtitle: 'Lokasi sesuai pencarian',
+        value: String(filteredLocations.length),
+        change: `${paginatedLocations.length} data per halaman`,
+        tone: 'green' as const,
+        icon: Search,
+      },
+      {
+        label: 'Dengan Koordinat',
+        subtitle: 'Latitude dan longitude valid',
+        value: String(withCoordinateCount),
+        change: 'Lokasi siap absensi',
+        tone: 'orange' as const,
+        icon: MapPin,
+      },
+    ],
+    [locations.length, filteredLocations.length, paginatedLocations.length, withCoordinateCount]
+  );
+
+  const clearFilters = () => {
+    setSearchText('');
+    setSelectedDepartment('');
+    setCurrentPage(1);
+  };
+
   const loadLocations = async () => {
     setLoading(true);
-    setAlertMessage('');
+    setErrorMessage(null);
 
     try {
       const result = await getAllLocations();
       setLocations(result.items);
     } catch (err: any) {
       const message = err.response?.data?.message || err.message || 'Gagal memuat locations';
-      setAlertMessage(message);
-      setAlertType('error');
+      setErrorMessage(message);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id: string) => {
+    if (!window.confirm('Apakah Anda yakin ingin menghapus lokasi ini?')) return;
+
     setLoading(true);
     try {
       await deleteLocation(id);
       await loadLocations();
-      setDeleteConfirm(null);
-      setAlertMessage('Location berhasil dihapus.');
-      setAlertType('success');
+      setErrorMessage(null);
     } catch (err: any) {
       const message = err.response?.data?.message || err.message || 'Gagal menghapus location';
-      setAlertMessage(message);
-      setAlertType('error');
+      setErrorMessage(message);
     } finally {
       setLoading(false);
     }
@@ -62,8 +129,14 @@ const LocationsPage = () => {
     void loadLocations();
   }, []);
 
+  // Reset page on filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText, selectedDepartment]);
+
   return (
     <div className="crud-page">
+      {/* Header */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -71,10 +144,8 @@ const LocationsPage = () => {
               <MapPinned size={16} />
               <span>Location Center</span>
             </div>
-            <h1 className="hero-title">Location Management</h1>
-            <p className="hero-subtitle">
-              Kelola lokasi absensi dan radius untuk setiap tempat kerja.
-            </p>
+            <h1 className="hero-title">Daftar Lokasi</h1>
+            <p className="hero-subtitle">Kelola lokasi absensi dan radius untuk setiap tempat kerja.</p>
           </div>
           <div className="hero-actions">
             <button className="btn-outline" onClick={() => void loadLocations()} disabled={loading}>
@@ -89,148 +160,206 @@ const LocationsPage = () => {
         </div>
       </Card>
 
-      <div className="leave-requests-wrapper">
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Total Lokasi</p>
-              <p className="leave-summary-subtitle">Semua lokasi terdaftar</p>
+      {/* Summary Cards */}
+      <div className="employee-summary-wrapper">
+        {locationSummaryCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <div key={card.label} className="employee-summary-card">
+              <div className="employee-summary-header">
+                <div>
+                  <p className="employee-summary-label">{card.label}</p>
+                  <p className="employee-summary-subtitle">{card.subtitle}</p>
+                </div>
+                <div className={`employee-summary-icon-wrapper employee-icon-${card.tone}`}>
+                  <Icon size={28} />
+                </div>
+              </div>
+              <div className={`employee-summary-value employee-value-${card.tone}`}>{card.value}</div>
+              <p className="employee-summary-trend">{card.change}</p>
             </div>
-            <div className="leave-summary-icon-wrapper leave-icon-blue">
-              <BarChart3 size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-blue">{locations.length}</div>
-          <p className="leave-summary-trend">Data lokasi aktif</p>
-        </div>
-
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Dengan Koordinat</p>
-              <p className="leave-summary-subtitle">Latitude dan longitude valid</p>
-            </div>
-            <div className="leave-summary-icon-wrapper leave-icon-green">
-              <MapPin size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-green">{withCoordinateCount}</div>
-          <p className="leave-summary-trend">Lokasi siap absensi</p>
-        </div>
+          );
+        })}
       </div>
 
-      {alertMessage && (
-        <Alert
-          type={alertType}
-          message={alertMessage}
-          onClose={() => setAlertMessage('')}
-          dismissible
-        />
-      )}
+      {/* Analytics Title Card */}
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <MapPinned size={24} />
+          </div>
+          <div>
+            <h2 className="analytics-title">Daftar Lokasi</h2>
+            <p className="analytics-subtitle">Kelola dan lihat semua lokasi</p>
+          </div>
+        </div>
+      </Card>
 
-      <div className="white-unified-wrapper">
-        <div className="wuw-header">
-          <div className="wuw-header-top">
-            <div className="wuw-title-area">
-              <h3>Data Lokasi</h3>
-              <span className="wuw-count-badge">{locations.length} lokasi</span>
+      {/* Control Section */}
+      <Card className="control-section-card">
+        <div className="control-section-inner">
+          <div className="control-actions">
+            <div className="search-box">
+              <div className="search-icon-inside">
+                <Search size={18} />
+              </div>
+              <input
+                type="text"
+                placeholder="Cari lokasi..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="search-input-pill"
+              />
             </div>
+            <button className={`filter-btn-rounded ${showFilters ? 'active' : ''}`} onClick={() => setShowFilters(!showFilters)}>
+              <Filter size={18} />
+              <span>Filter</span>
+            </button>
           </div>
         </div>
 
+        {/* Filter Panel */}
+        {showFilters && (
+          <div className="filter-dropdown">
+            <div className="filter-row">
+              <div className="filter-group">
+                <label>Departemen</label>
+                <select value={selectedDepartment} onChange={(e) => setSelectedDepartment(e.target.value)} className="filter-select-premium">
+                  <option value="">Semua Departemen</option>
+                  {uniqueDepartments.map((dept) => (
+                    <option key={dept} value={dept}>
+                      {dept}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {(searchText || selectedDepartment) && (
+                <button className="btn-clear-filter" onClick={clearFilters}>
+                  Hapus Filter
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </Card>
+
+      {/* Table Section */}
+      <div className="table-section">
         <div className="wuw-table-area">
-          {locations.length > 0 ? (
-            <div className="table-wrap">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Nama Lokasi</th>
-                    <th>Departemen</th>
-                    <th>Latitude</th>
-                    <th>Longitude</th>
-                    <th>Radius</th>
-                    <th className="th-center">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {locations.map((location, idx) => {
-                    const loc = location as any;
-                    return (
-                      <tr key={String(loc.id ?? idx)}>
-                        <td>
-                          <div className="cell-name">
-                            <div className="cell-avatar">
-                              <MapPin size={14} />
+          {loading && <LoadingState message="Memuat lokasi..." />}
+
+          {!loading && errorMessage && (
+            <div className="error-state-container">
+              <div className="error-state">
+                <p className="error-state-title">Koneksi Terputus</p>
+                <p className="error-state-message">{errorMessage}</p>
+                <button className="btn-primary" onClick={() => void loadLocations()}>
+                  Coba Lagi
+                </button>
+              </div>
+            </div>
+          )}
+
+          {!loading && !errorMessage && paginatedLocations.length === 0 && (
+            <div style={{ padding: '5rem 0' }}>
+              <EmptyState
+                title="Lokasi Kosong"
+                message={searchText || selectedDepartment ? 'Tidak ada lokasi yang sesuai dengan kriteria Anda.' : 'Belum ada lokasi. Buat lokasi baru untuk memulai.'}
+                actionLabel="Buat Lokasi Baru"
+                onAction={() => navigate('/locations/create')}
+              />
+            </div>
+          )}
+
+          {!loading && !errorMessage && paginatedLocations.length > 0 && (
+            <>
+              <div className="table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: '400px' }}>Nama Lokasi</th>
+                      <th>Departemen</th>
+                      <th>Latitude</th>
+                      <th>Longitude</th>
+                      <th>Radius</th>
+                      <th className="th-center" style={{ width: '120px' }}>
+                        Aksi
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedLocations.map((location, idx) => {
+                      const loc = location as any;
+                      return (
+                        <tr key={String(loc.id ?? idx)}>
+                          <td>
+                            <div className="cell-name">
+                              <div className="cell-avatar">
+                                {loc.name ? loc.name.charAt(0).toUpperCase() : <MapPin size={14} />}
+                              </div>
+                              <div className="cell-stacked">
+                                <span className="cell-name-text">{loc.name || 'N/A'}</span>
+                                <span className="cell-stacked__sub">{loc.id}</span>
+                              </div>
                             </div>
-                            <span className="cell-name-text">{loc.name || "N/A"}</span>
-                          </div>
-                        </td>
-                        <td>
-                          <span className="cell-tag" style={{ backgroundColor: '#f0f4ff', color: '#1e40af' }}>
-                            {String(loc.department || 'All Departments')}
-                          </span>
-                        </td>
-                        <td>{parseFloat(String(loc.latitude || 0)).toFixed(6)}</td>
-                        <td>{parseFloat(String(loc.longitude || 0)).toFixed(6)}</td>
-                        <td><span className="cell-tag">{String(loc.radius || 0)}m</span></td>
-                        <td>
-                          <div className="action-btn-group">
-                            <button
-                              className="action-btn action-btn-edit"
-                              onClick={() => navigate(`/locations/edit/${loc.id}`)}
-                              disabled={loading || deleteConfirm === String(loc.id)}
-                              title="Edit"
-                            >
-                              <Pencil size={16} />
-                            </button>
-                            <button
-                              className="action-btn action-btn-delete"
-                              onClick={() => {
-                                if (deleteConfirm === String(loc.id)) {
-                                  void handleDelete(String(loc.id));
-                                } else {
-                                  setDeleteConfirm(String(loc.id));
-                                }
-                              }}
-                              disabled={loading}
-                              title="Hapus"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                            {deleteConfirm === String(loc.id) && (
-                              <span style={{ fontSize: '0.8rem', color: '#ef4444', display: 'flex', alignItems: 'center' }}>
-                                Hapus?{' '}
-                                <button
-                                  className="action-btn"
-                                  onClick={() => setDeleteConfirm(null)}
-                                  disabled={loading}
-                                  style={{ padding: '4px 8px', fontSize: '0.75rem', background: '#f1f5f9', color: '#64748b' }}
-                                >
-                                  Batal
-                                </button>
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="empty-state">
-              <MapPin size={32} style={{ opacity: 0.4 }} />
-              <p>Belum ada lokasi. Buat lokasi baru untuk memulai.</p>
-              <Button
-                variant="primary"
-                size="md"
-                onClick={() => navigate('/locations/create')}
-              >
-                <Plus size={16} />
-                Buat Lokasi Pertama
-              </Button>
-            </div>
+                          </td>
+                          <td>
+                            <span className="badge-soft badge-soft--blue">{String(loc.department || 'All Departments')}</span>
+                          </td>
+                          <td>{parseFloat(String(loc.latitude || 0)).toFixed(6)}</td>
+                          <td>{parseFloat(String(loc.longitude || 0)).toFixed(6)}</td>
+                          <td>
+                            <span className="badge-soft badge-soft--orange">{String(loc.radius || 0)}m</span>
+                          </td>
+                          <td className="td-center">
+                            <div className="action-btn-group">
+                              <button className="action-btn action-btn-edit" onClick={() => navigate(`/locations/edit/${loc.id}`)} title="Edit">
+                                <Pencil size={16} />
+                              </button>
+                              <button className="action-btn action-btn-delete" onClick={() => void handleDelete(String(loc.id))} title="Hapus">
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              <div className="table-pagination">
+                <div className="pagination-info">
+                  Menampilkan <strong>{paginatedLocations.length}</strong> dari <strong>{filteredLocations.length}</strong> lokasi
+                </div>
+                <div className="pagination-controls">
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    ‹
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    ›
+                  </button>
+                </div>
+              </div>
+            </>
           )}
         </div>
       </div>

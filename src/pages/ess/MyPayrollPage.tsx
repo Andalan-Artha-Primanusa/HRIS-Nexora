@@ -6,6 +6,8 @@ import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDispl
 import { BarChart3, CheckCircle2, Receipt, Wallet, Download, Printer, RefreshCw, Search, Eye } from "lucide-react";
 import { getMyPayroll, getMyPayrollSlip, exportMyPayrollPdf } from "@/features/ess/api/ess.service";
 import type { GenericApiItem } from "@/features/ess/types/ess.types";
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 
@@ -117,7 +119,162 @@ const MyPayrollPage = () => {
       link.parentNode?.removeChild(link);
     } catch (error) {
       console.error("Failed to download PDF:", error);
+      alert('Gagal mengunduh PDF. Silakan coba lagi.');
     }
+  };
+
+  const generateSlipPDF = (slip: any) => {
+    const doc = new jsPDF();
+    const pageWidth = 210;
+    const margin = 20;
+
+    // Professional Header
+    doc.setFillColor(20, 30, 48);
+    doc.rect(0, 0, pageWidth, 55, 'F');
+    doc.setFillColor(37, 99, 235);
+    doc.rect(0, 0, pageWidth, 4, 'F');
+
+    // Company Name
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(22);
+    doc.setFont(undefined, 'bold');
+    doc.text(slip?.company_name || 'Company Name', pageWidth / 2, 20, { align: 'center' });
+    doc.setFont(undefined, 'normal');
+    
+    // Company Address
+    doc.setFontSize(9);
+    if (slip?.company_address) {
+      doc.text(slip.company_address, pageWidth / 2, 28, { align: 'center' });
+    }
+    
+    // Company Contact
+    const contact = [slip?.company_phone, slip?.company_email].filter(Boolean).join(' | ');
+    if (contact) {
+      doc.text(contact, pageWidth / 2, 35, { align: 'center' });
+    }
+
+    // Document Title
+    doc.setFontSize(16);
+    doc.setTextColor(20, 30, 48);
+    doc.setFont(undefined, 'bold');
+    doc.text('SLIP GAJI DIGITAL', pageWidth / 2, 68, { align: 'center' });
+    doc.setFont(undefined, 'normal');
+    
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Periode: ${slip?.period || 'N/A'}`, pageWidth / 2, 75, { align: 'center' });
+
+    // Divider
+    doc.setDrawColor(37, 99, 235);
+    doc.setLineWidth(0.5);
+    doc.line(margin, 79, pageWidth - margin, 79);
+
+    // Employee Info
+    const infoStartY = 87;
+    doc.setFillColor(248, 250, 252);
+    doc.roundedRect(margin, infoStartY, pageWidth - (margin * 2), 40, 3, 3, 'F');
+    doc.setDrawColor(226, 232, 240);
+    doc.roundedRect(margin, infoStartY, pageWidth - (margin * 2), 40, 3, 3, 'S');
+
+    doc.setTextColor(20, 30, 48);
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'bold');
+    doc.text('INFORMASI KARYAWAN', margin + 8, infoStartY + 10);
+    doc.setFont(undefined, 'normal');
+    
+    doc.setFontSize(9);
+    doc.setTextColor(60, 60, 60);
+    
+    if (slip?.employee) {
+      doc.text(`Nama: ${slip.employee.name || 'N/A'}`, margin + 8, infoStartY + 17);
+      doc.text(`ID: ${slip.employee.employee_code || 'N/A'}`, margin + 8, infoStartY + 23);
+      doc.text(`Posisi: ${slip.employee.position || 'N/A'}`, margin + 8, infoStartY + 29);
+      doc.text(`Departemen: ${slip.employee.department || 'N/A'}`, margin + 8, infoStartY + 35);
+    }
+
+    // Earnings Section
+    const earnStartY = infoStartY + 50;
+    doc.setFillColor(247, 254, 231);
+    doc.roundedRect(margin, earnStartY, pageWidth - (margin * 2), 38, 3, 3, 'F');
+    
+    doc.setTextColor(20, 30, 48);
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'bold');
+    doc.text('PENERIMAAN', margin + 8, earnStartY + 10);
+    doc.setFont(undefined, 'normal');
+    
+    doc.setFontSize(9);
+    doc.setTextColor(60, 60, 60);
+    
+    const summary = slip?.summary || {};
+    doc.text('Gaji Pokok', margin + 8, earnStartY + 17);
+    doc.text(formatCurrency(summary.basic_salary), pageWidth - margin - 8, earnStartY + 17, { align: 'right' });
+    
+    if (summary.allowance > 0) {
+      doc.text('Tunjangan', margin + 8, earnStartY + 23);
+      doc.text(formatCurrency(summary.allowance), pageWidth - margin - 8, earnStartY + 23, { align: 'right' });
+    }
+    
+    if (summary.bonus > 0) {
+      doc.text('Bonus', margin + 8, earnStartY + 29);
+      doc.text(formatCurrency(summary.bonus), pageWidth - margin - 8, earnStartY + 29, { align: 'right' });
+    }
+    
+    doc.setFont(undefined, 'bold');
+    doc.text('Total Gross', margin + 8, earnStartY + 35);
+    doc.text(formatCurrency(summary.gross_pay), pageWidth - margin - 8, earnStartY + 35, { align: 'right' });
+    doc.setFont(undefined, 'normal');
+
+    // Deductions Section
+    const deductStartY = earnStartY + 48;
+    doc.setFillColor(254, 242, 242);
+    doc.roundedRect(margin, deductStartY, pageWidth - (margin * 2), 38, 3, 3, 'F');
+    
+    doc.setTextColor(20, 30, 48);
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'bold');
+    doc.text('POTONGAN', margin + 8, deductStartY + 10);
+    doc.setFont(undefined, 'normal');
+    
+    doc.setFontSize(9);
+    doc.setTextColor(60, 60, 60);
+    
+    doc.text('BPJS Kesehatan', margin + 8, deductStartY + 17);
+    doc.text(`- ${formatCurrency(summary.bpjs_kesehatan)}`, pageWidth - margin - 8, deductStartY + 17, { align: 'right' });
+    
+    doc.text('BPJS Ketenagakerjaan', margin + 8, deductStartY + 23);
+    doc.text(`- ${formatCurrency(summary.bpjs_ketenagakerjaan)}`, pageWidth - margin - 8, deductStartY + 23, { align: 'right' });
+    
+    doc.text('PPh21 (Pajak)', margin + 8, deductStartY + 29);
+    doc.text(`- ${formatCurrency(summary.pph21)}`, pageWidth - margin - 8, deductStartY + 29, { align: 'right' });
+    
+    doc.setFont(undefined, 'bold');
+    doc.text('Total Potongan', margin + 8, deductStartY + 35);
+    doc.text(`- ${formatCurrency(summary.total_deduction)}`, pageWidth - margin - 8, deductStartY + 35, { align: 'right' });
+    doc.setFont(undefined, 'normal');
+
+    // Take Home Pay
+    const thpStartY = deductStartY + 48;
+    doc.setFillColor(20, 30, 48);
+    doc.roundedRect(margin, thpStartY, pageWidth - (margin * 2), 30, 3, 3, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(12);
+    doc.text('TAKE HOME PAY (GAJI BERSIH)', margin + 10, thpStartY + 12);
+    doc.setFontSize(16);
+    doc.setFont(undefined, 'bold');
+    doc.text(formatCurrency(summary.take_home_pay), pageWidth - margin - 10, thpStartY + 12, { align: 'right' });
+    doc.setFont(undefined, 'normal');
+
+    // Footer
+    doc.setTextColor(150, 150, 150);
+    doc.setFontSize(8);
+    const footerY = 285;
+    doc.text(`Dicetak: ${new Date().toLocaleString('id-ID')}`, margin, footerY);
+    doc.text(`Slip Gaji - ${slip?.period || ''}`, pageWidth / 2, footerY, { align: 'center' });
+    doc.text('Halaman 1 dari 1', pageWidth - margin, footerY, { align: 'right' });
+
+    doc.save(`Slip_Gaji_${slip?.period || 'export'}_${Date.now()}.pdf`);
   };
 
   const formatCurrency = (val: any) => `Rp ${Number(val || 0).toLocaleString("id-ID")}`;
@@ -265,15 +422,27 @@ const MyPayrollPage = () => {
                         <td className="td-center">
                           {String(item.status).toLowerCase() === 'paid' ? (
                             <button
-                              className="action-btn action-btn-edit"
+                              className="btn-outline"
+                              style={{ 
+                                padding: '6px 12px', 
+                                borderRadius: '8px', 
+                                fontSize: '0.85rem',
+                                border: '1px solid #2563eb',
+                                color: '#2563eb',
+                                background: 'white',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}
                               onClick={() => handleViewSlip(String(item.id))}
                               title="Lihat Slip"
                             >
-                              <Eye size={16} style={{ marginRight: '6px' }} />
+                              <Eye size={16} />
                               Lihat Slip
                             </button>
                           ) : (
-                            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Menunggu Pembayaran</span>
+                            <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>-</span>
                           )}
                         </td>
                       </tr>
@@ -331,17 +500,39 @@ const MyPayrollPage = () => {
             <p>Memuat rincian slip gaji...</p>
           </div>
         ) : selectedSlip && selectedSlip.summary && (
-          <div className="digital-slip">
-            <div className="digital-slip-header">
-              <div className="digital-slip-brand">
-                <div className="slip-logo">HR</div>
+          <div className="digital-slip" style={{ maxWidth: '800px', margin: '0 auto' }}>
+            {/* Header - Blue & White Theme */}
+            <div className="digital-slip-header" style={{ 
+              background: 'linear-gradient(135deg, #2563eb, #3b82f6)', 
+              color: 'white', 
+              padding: '2rem', 
+              borderRadius: '16px 16px 0 0',
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center' 
+            }}>
+              <div className="digital-slip-brand" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div className="slip-logo" style={{ 
+                  background: 'rgba(255,255,255,0.2)', 
+                  padding: '12px 20px', 
+                  borderRadius: '12px',
+                  fontSize: '1.5rem',
+                  fontWeight: 'bold'
+                }}>HR</div>
                 <div>
-                  <h3>Slip Gaji Digital</h3>
-                  <p>Periode: {selectedSlip.period}</p>
+                  <h3 style={{ margin: 0, fontSize: '1.5rem' }}>Slip Gaji Digital</h3>
+                  <p style={{ margin: '4px 0 0', opacity: 0.9 }}>Periode: {selectedSlip.period}</p>
                 </div>
               </div>
               <div className="digital-slip-status">
-                <span className={`status-badge-${String(selectedSlip.status || 'draft').toLowerCase()}`}>
+                <span className={`status-badge-${String(selectedSlip.status || 'draft').toLowerCase()}`} style={{
+                  background: selectedSlip.status === 'paid' ? '#10b981' : selectedSlip.status === 'approved' ? '#3b82f6' : '#f59e0b',
+                  color: 'white',
+                  padding: '8px 16px',
+                  borderRadius: '20px',
+                  fontWeight: 'bold',
+                  fontSize: '0.85rem'
+                }}>
                   {String(selectedSlip.status || 'DRAFT').toUpperCase()}
                 </span>
               </div>
@@ -349,77 +540,133 @@ const MyPayrollPage = () => {
 
             {/* Employee Info */}
             {selectedSlip.employee && (
-              <div className="slip-employee-info" style={{ marginBottom: '1.5rem', padding: '1rem', background: '#f8fafc', borderRadius: '8px' }}>
-                <p style={{ margin: 0 }}><strong>{selectedSlip.employee.name}</strong></p>
+              <div className="slip-employee-info" style={{ 
+                margin: '1.5rem', 
+                padding: '1.5rem', 
+                background: '#eff6ff', 
+                borderRadius: '12px',
+                border: '1px solid #bfdbfe'
+              }}>
+                <p style={{ margin: '0 0 4px' }}><strong style={{ fontSize: '1.1rem' }}>{selectedSlip.employee.name}</strong></p>
                 <p style={{ margin: 0, fontSize: '0.875rem', color: '#64748b' }}>
                   {selectedSlip.employee.employee_code} - {selectedSlip.employee.position} - {selectedSlip.employee.department}
                 </p>
               </div>
             )}
 
-            <div className="digital-slip-grid">
-              <div className="slip-section">
-                <h4>PENERIMAAN</h4>
-                <div className="slip-row">
-                  <span>Gaji Pokok</span>
-                  <span>{formatCurrency(selectedSlip.summary.basic_salary)}</span>
+            <div className="digital-slip-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', padding: '0 1.5rem 1.5rem' }}>
+              <div className="slip-section" style={{ 
+                background: '#eff6ff', 
+                padding: '1.5rem', 
+                borderRadius: '12px',
+                border: '1px solid #bfdbfe'
+              }}>
+                <h4 style={{ margin: '0 0 1rem', color: '#1e40af', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>PENERIMAAN</h4>
+                <div className="slip-row" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span style={{ color: '#1e40af' }}>Gaji Pokok</span>
+                  <span style={{ fontWeight: 600 }}>{formatCurrency(selectedSlip.summary.basic_salary)}</span>
                 </div>
                 {selectedSlip.summary.allowance > 0 && (
-                  <div className="slip-row">
-                    <span>Tunjangan</span>
-                    <span>{formatCurrency(selectedSlip.summary.allowance)}</span>
+                  <div className="slip-row" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span style={{ color: '#1e40af' }}>Tunjangan</span>
+                    <span style={{ fontWeight: 600 }}>{formatCurrency(selectedSlip.summary.allowance)}</span>
                   </div>
                 )}
                 {selectedSlip.summary.bonus > 0 && (
-                  <div className="slip-row">
-                    <span>Bonus</span>
-                    <span>{formatCurrency(selectedSlip.summary.bonus)}</span>
+                  <div className="slip-row" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span style={{ color: '#1e40af' }}>Bonus</span>
+                    <span style={{ fontWeight: 600 }}>{formatCurrency(selectedSlip.summary.bonus)}</span>
                   </div>
                 )}
-                <div className="slip-row slip-row--total">
+                <div className="slip-row slip-row--total" style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  marginTop: '12px', 
+                  paddingTop: '12px', 
+                  borderTop: '2px solid #3b82f6',
+                  fontWeight: 'bold',
+                  color: '#1e40af'
+                }}>
                   <span>Total Pendapatan Kotor (Gross)</span>
                   <span>{formatCurrency(selectedSlip.summary.gross_pay)}</span>
                 </div>
               </div>
 
-              <div className="slip-section">
-                <h4>POTONGAN</h4>
-                <div className="slip-row">
-                  <span>BPJS Kesehatan</span>
-                  <span style={{ color: '#ef4444' }}>- {formatCurrency(selectedSlip.summary.bpjs_kesehatan)}</span>
+              <div className="slip-section" style={{ 
+                background: '#fef2f2', 
+                padding: '1.5rem', 
+                borderRadius: '12px',
+                border: '1px solid #fecaca'
+              }}>
+                <h4 style={{ margin: '0 0 1rem', color: '#991b1b', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>POTONGAN</h4>
+                <div className="slip-row" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span style={{ color: '#991b1b' }}>BPJS Kesehatan</span>
+                  <span style={{ color: '#ef4444', fontWeight: 600 }}>- {formatCurrency(selectedSlip.summary.bpjs_kesehatan)}</span>
                 </div>
-                <div className="slip-row">
-                  <span>BPJS Ketenagakerjaan</span>
-                  <span style={{ color: '#ef4444' }}>- {formatCurrency(selectedSlip.summary.bpjs_ketenagakerjaan)}</span>
+                <div className="slip-row" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span style={{ color: '#991b1b' }}>BPJS Ketenagakerjaan</span>
+                  <span style={{ color: '#ef4444', fontWeight: 600 }}>- {formatCurrency(selectedSlip.summary.bpjs_ketenagakerjaan)}</span>
                 </div>
-                <div className="slip-row">
-                  <span>PPh21 (Pajak)</span>
-                  <span style={{ color: '#ef4444' }}>- {formatCurrency(selectedSlip.summary.pph21)}</span>
+                <div className="slip-row" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span style={{ color: '#991b1b' }}>PPh21 (Pajak)</span>
+                  <span style={{ color: '#ef4444', fontWeight: 600 }}>- {formatCurrency(selectedSlip.summary.pph21)}</span>
                 </div>
-                <div className="slip-row slip-row--total">
+                <div className="slip-row slip-row--total" style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  marginTop: '12px', 
+                  paddingTop: '12px', 
+                  borderTop: '2px solid #991b1b',
+                  fontWeight: 'bold',
+                  color: '#991b1b'
+                }}>
                   <span>Total Potongan</span>
                   <span style={{ color: '#ef4444' }}>- {formatCurrency(selectedSlip.summary.total_deduction)}</span>
                 </div>
               </div>
             </div>
 
-            <div className="digital-slip-footer">
+            <div className="digital-slip-footer" style={{ 
+              background: 'linear-gradient(135deg, #2563eb, #3b82f6)', 
+              color: 'white',
+              padding: '2rem',
+              borderRadius: '0 0 16px 16px',
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              margin: '0 1.5rem 1.5rem'
+            }}>
               <div className="thp-box">
-                <span className="thp-label">TAKE HOME PAY (GAJI BERSIH)</span>
-                <span className="thp-value">{formatCurrency(selectedSlip.summary.take_home_pay)}</span>
-              </div>
-
-              <div className="slip-actions">
-                <Button variant="outline" size="md" onClick={() => window.print()}>
-                  <Printer size={16} style={{ marginRight: '8px' }} /> Cetak
-                </Button>
-                <Button variant="primary" size="md" onClick={() => handleDownloadPdf(String(selectedSlip.id))}>
-                  <Download size={16} style={{ marginRight: '8px' }} /> Download PDF
-                </Button>
+                <div className="thp-label" style={{ fontSize: '0.85rem', opacity: 0.8, marginBottom: '4px' }}>TAKE HOME PAY (GAJI BERSIH)</div>
+                <div className="thp-value" style={{ fontSize: '2rem', fontWeight: 800 }}>{formatCurrency(selectedSlip.summary.take_home_pay)}</div>
               </div>
             </div>
 
-            <p className="slip-disclaimer">
+            <div className="slip-actions" style={{ 
+              display: 'flex', 
+              gap: '1rem', 
+              justifyContent: 'center',
+              padding: '1.5rem',
+              borderTop: '1px solid #e2e8f0'
+            }}>
+              <Button variant="outline" size="md" onClick={() => window.print()}>
+                <Printer size={16} style={{ marginRight: '8px' }} /> Cetak
+              </Button>
+              <Button variant="primary" size="md" onClick={() => {
+                generateSlipPDF(selectedSlip);
+                setIsModalOpen(false);
+              }}>
+                <Download size={16} style={{ marginRight: '8px' }} /> Download PDF
+              </Button>
+            </div>
+
+            <p className="slip-disclaimer" style={{ 
+              textAlign: 'center', 
+              fontSize: '0.75rem', 
+              color: '#94a3b8', 
+              padding: '0 1.5rem 1.5rem',
+              margin: 0
+            }}>
               * Slip gaji ini dihasilkan secara otomatis oleh sistem HRIS dan merupakan dokumen sah perusahaan.
             </p>
           </div>

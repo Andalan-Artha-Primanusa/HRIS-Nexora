@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, RefreshCw, GraduationCap, Calendar, Users, Search, CheckCircle, Clock, XCircle, BookOpen, TrendingUp } from 'lucide-react';
+import { Plus, RefreshCw, GraduationCap, Calendar, Users, Search, Filter, CheckCircle, Clock, XCircle, BookOpen, TrendingUp } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { trainingService } from '@/features/training/api/training.service';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/leave/LeaveShared.css';
 
 const TrainingEnrollmentsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ const TrainingEnrollmentsPage: React.FC = () => {
 
   // Search & Filter
   const [searchText, setSearchText] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
   const [activeTab, setActiveTab] = useState<"Semua" | "Pending" | "In Progress" | "Completed" | "Cancelled">("Semua");
 
   // Pagination
@@ -43,21 +45,23 @@ const TrainingEnrollmentsPage: React.FC = () => {
     const completed = enrollments.filter(e => e.status === 'completed').length;
     const inProgress = enrollments.filter(e => e.status === 'in_progress' || e.status === 'ongoing').length;
     const pending = enrollments.filter(e => e.status === 'pending').length;
+    const cancelled = enrollments.filter(e => e.status === 'cancelled' || e.status === 'dropped').length;
 
     return [
-      { label: "Total Pendaftaran", subtitle: "Seluruh pendaftaran", value: total, tone: "blue" as const },
-      { label: "Sedang Berlangsung", subtitle: "Pelatihan aktif", value: inProgress, tone: "orange" as const },
-      { label: "Selesai", subtitle: "Pelatihan selesai", value: completed, tone: "green" as const },
-      { label: "Pending", subtitle: "Menunggu persetujuan", value: pending, tone: "red" as const },
+      { label: "Total Pendaftaran", subtitle: "Seluruh pendaftaran", value: String(total), change: "Data pendaftaran aktif", tone: "blue" as const, icon: Users },
+      { label: "Hasil Filter", subtitle: "Pendaftaran sesuai pencarian", value: String(filteredEnrollments.length), change: `${paginatedEnrollments.length} data per halaman`, tone: "green" as const, icon: Search },
+      { label: "Sedang Berlangsung", subtitle: "Pelatihan aktif", value: String(inProgress), change: "Dalam proses", tone: "orange" as const, icon: Clock },
+      { label: "Selesai", subtitle: "Pelatihan selesai", value: String(completed), change: "Status final selesai", tone: "green" as const, icon: CheckCircle },
     ];
-  }, [enrollments]);
+  }, [enrollments, filteredEnrollments.length, paginatedEnrollments.length]);
 
   const filteredEnrollments = useMemo(() => {
     return enrollments.filter((e: any) => {
       const programTitle = String(e.program?.title || e.training_title || '').toLowerCase();
       const employeeName = String(e.employee?.user?.name || e.employee_name || '').toLowerCase();
       const query = searchText.toLowerCase();
-      const matchSearch = programTitle.includes(query) || employeeName.includes(query);
+      
+      const matchSearch = !query || programTitle.includes(query) || employeeName.includes(query);
 
       let statusMatch = true;
       if (activeTab === "Pending") statusMatch = e.status === 'pending';
@@ -87,20 +91,20 @@ const TrainingEnrollmentsPage: React.FC = () => {
   }, [searchText, activeTab]);
 
   const getStatusBadge = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case 'completed':
-        return <span className="status-badge status-active">COMPLETED</span>;
-      case 'in_progress':
-      case 'ongoing':
-        return <span className="status-badge status-pending">IN PROGRESS</span>;
-      case 'pending':
-        return <span className="status-badge status-pending">PENDING</span>;
-      case 'cancelled':
-      case 'dropped':
-        return <span className="status-badge status-danger">CANCELLED</span>;
-      default:
-        return <span className="status-badge status-pending">{status?.toUpperCase() || 'UNKNOWN'}</span>;
-    }
+    const statusMap: Record<string, { label: string; tone: string }> = {
+      'completed': { label: 'Completed', tone: 'green' },
+      'in_progress': { label: 'In Progress', tone: 'orange' },
+      'ongoing': { label: 'In Progress', tone: 'orange' },
+      'pending': { label: 'Pending', tone: 'orange' },
+      'cancelled': { label: 'Cancelled', tone: 'red' },
+      'dropped': { label: 'Cancelled', tone: 'red' },
+    };
+    const config = statusMap[status?.toLowerCase()] || { label: status?.toUpperCase() || 'UNKNOWN', tone: 'orange' };
+    return (
+      <span className={`badge-soft badge-soft--${config.tone}`}>
+        {config.label}
+      </span>
+    );
   };
 
   return (
@@ -121,7 +125,7 @@ const TrainingEnrollmentsPage: React.FC = () => {
           <div className="hero-actions">
             <button className="btn-outline" onClick={fetchData} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-              Segarkan
+              {loading ? 'Memuat...' : 'Segarkan'}
             </button>
           </div>
         </div>
@@ -130,8 +134,7 @@ const TrainingEnrollmentsPage: React.FC = () => {
       {/* Summary Cards */}
       <div className="employee-summary-wrapper">
         {summaryStats.map((card) => {
-          const Icon = card.tone === "blue" ? Users : card.tone === "orange" ? Clock : card.tone === "green" ? CheckCircle : TrendingUp;
-
+          const Icon = card.icon;
           return (
             <div key={card.label} className="employee-summary-card">
               <div className="employee-summary-header">
@@ -144,7 +147,7 @@ const TrainingEnrollmentsPage: React.FC = () => {
                 </div>
               </div>
               <div className={`employee-summary-value employee-value-${card.tone}`}>{card.value}</div>
-              <p className="employee-summary-trend">{card.subtitle}</p>
+              <p className="employee-summary-trend">{card.change}</p>
             </div>
           );
         })}
@@ -166,31 +169,12 @@ const TrainingEnrollmentsPage: React.FC = () => {
       {/* Control Section */}
       <Card className="control-section-card">
         <div className="control-section-inner">
-          <div className="search-filter-group">
-            <div className="search-input-wrapper">
-              <Search size={18} className="search-icon" />
-              <input
-                type="text"
-                className="search-input"
-                placeholder="Cari program atau nama karyawan..."
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-              />
-              {searchText && (
-                <button className="clear-search-btn" onClick={() => setSearchText("")}>×</button>
-              )}
-            </div>
-            <Button variant="outline" size="sm" onClick={clearFilters} disabled={!searchText && activeTab === "Semua"}>
-              <RefreshCw size={14} />
-              Reset
-            </Button>
-          </div>
-
-          <div className="tabs-container">
+          {/* Tabs */}
+          <div className="elyra-tabs">
             {(["Semua", "Pending", "In Progress", "Completed", "Cancelled"] as const).map((tab) => (
               <button
                 key={tab}
-                className={`tab-button ${activeTab === tab ? 'active' : ''}`}
+                className={`elyra-tab ${activeTab === tab ? 'active' : ''}`}
                 onClick={() => setActiveTab(tab)}
               >
                 {tab}
@@ -208,118 +192,161 @@ const TrainingEnrollmentsPage: React.FC = () => {
               </button>
             ))}
           </div>
+
+          {/* Search & Filter */}
+          <div className="control-actions">
+            <div className="search-box">
+              <div className="search-icon-inside">
+                <Search size={18} />
+              </div>
+              <input
+                type="text"
+                placeholder="Cari program atau nama karyawan..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="search-input-pill"
+              />
+            </div>
+            <button
+              className={`filter-btn-rounded ${showFilters ? 'active' : ''}`}
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <Filter size={18} />
+              <span>Filter</span>
+            </button>
+          </div>
         </div>
+
+        {/* Filter Panel */}
+        {showFilters && (
+          <div className="filter-dropdown">
+            <div className="filter-row">
+              {(searchText || activeTab !== "Semua") && (
+                <button className="btn-clear-filter" onClick={clearFilters}>
+                  Hapus Filter
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </Card>
 
-      {/* Data Table */}
-      <Card className="data-table-card">
-        <div className="data-table-header">
-          <h3 className="data-table-title">
-            Daftar Pendaftaran Pelatihan
-            <span className="data-table-count">{filteredEnrollments.length} ditemukan</span>
-          </h3>
-        </div>
+      {/* Table Section */}
+      <div className="table-section">
+        <div className="wuw-table-area">
+          {loading && <LoadingState message="Memuat data pendaftaran..." />}
 
-        {loading ? (
-          <LoadingState message="Memuat data pendaftaran..." />
-        ) : filteredEnrollments.length === 0 ? (
-          <EmptyState
-            icon={<GraduationCap size={48} />}
-            title="Tidak ada pendaftaran ditemukan"
-            message={searchText || activeTab !== "Semua" ? "Coba ubah kata kunci atau filter" : "Belum ada data pendaftaran pelatihan"}
-          />
-        ) : (
-          <>
-            <div className="table-wrap">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Program Pelatihan</th>
-                    <th>Karyawan</th>
-                    <th>Tanggal Mulai</th>
-                    <th>Status</th>
-                    <th>Progress</th>
-                    <th style={{ textAlign: 'right' }}>Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedEnrollments.map((enrollment) => (
-                    <tr key={enrollment.id}>
-                      <td>
-                        <div className="cell-stacked">
-                          <span className="cell-name-text">{enrollment.program?.title || enrollment.program?.nama || enrollment.training_title || 'Training Program'}</span>
-                          <span className="cell-email">{enrollment.program?.description || '-'}</span>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="cell-stacked">
-                          <span className="cell-name-text">{enrollment.employee?.user?.name || enrollment.employee_name || 'Employee'}</span>
-                          <span className="cell-email">{enrollment.employee?.employee_code || '-'}</span>
-                        </div>
-                      </td>
-                      <td>{enrollment.start_date || 'N/A'}</td>
-                      <td>{getStatusBadge(enrollment.status)}</td>
-                      <td>
-                        {enrollment.progress !== undefined ? (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <div style={{ width: '60px', height: '6px', background: '#e2e8f0', borderRadius: '3px', overflow: 'hidden' }}>
-                              <div style={{ width: `${enrollment.progress}%`, height: '100%', background: '#10b981', borderRadius: '3px' }} />
-                            </div>
-                            <span style={{ fontSize: '0.85rem', color: '#64748b' }}>{enrollment.progress}%</span>
-                          </div>
-                        ) : '-'}
-                      </td>
-                      <td style={{ textAlign: 'right' }}>
-                        <div className="action-btn-group">
-                          <Button variant="ghost" size="sm" onClick={() => navigate(`/training/programs`)}>
-                            <BookOpen size={16} />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          {!loading && paginatedEnrollments.length === 0 && (
+            <div style={{ padding: '5rem 0' }}>
+              <EmptyState
+                title="Pendaftaran Kosong"
+                message={searchText || activeTab !== "Semua" ? 'Tidak ada pendaftaran yang sesuai dengan kriteria Anda.' : 'Belum ada data pendaftaran pelatihan.'}
+                actionLabel="Segarkan"
+                onAction={fetchData}
+              />
             </div>
+          )}
 
-            {/* Pagination */}
-            {totalPages > 1 && (
+          {!loading && paginatedEnrollments.length > 0 && (
+            <>
+              <div className="table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: '400px' }}>Program Pelatihan</th>
+                      <th>Karyawan</th>
+                      <th>Tanggal Mulai</th>
+                      <th>Status</th>
+                      <th>Progress</th>
+                      <th className="th-center" style={{ width: '120px' }}>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedEnrollments.map((enrollment) => (
+                      <tr key={enrollment.id}>
+                        <td>
+                          <div className="cell-name">
+                            <div className="cell-avatar">
+                              {(enrollment.program?.title || enrollment.training_title || 'T').charAt(0).toUpperCase()}
+                            </div>
+                            <div className="cell-stacked">
+                              <span className="cell-name-text">{enrollment.program?.title || enrollment.program?.nama || enrollment.training_title || 'Training Program'}</span>
+                              <span className="cell-stacked__sub">{String(enrollment.program_id || enrollment.id)}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="cell-stacked">
+                            <span className="cell-name-text">{enrollment.employee?.user?.name || enrollment.employee_name || 'Employee'}</span>
+                            <span className="cell-stacked__sub">{enrollment.employee?.employee_code || '-'}</span>
+                          </div>
+                        </td>
+                        <td style={{ color: '#475569', fontWeight: 500 }}>{enrollment.start_date || 'N/A'}</td>
+                        <td className="td-center">
+                          {getStatusBadge(enrollment.status)}
+                        </td>
+                        <td>
+                          {enrollment.progress !== undefined ? (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <div style={{ width: '60px', height: '6px', background: '#e2e8f0', borderRadius: '3px', overflow: 'hidden' }}>
+                                <div style={{ width: `${enrollment.progress}%`, height: '100%', background: '#10b981', borderRadius: '3px' }} />
+                              </div>
+                              <span style={{ fontSize: '0.85rem', color: '#64748b' }}>{enrollment.progress}%</span>
+                            </div>
+                          ) : '-'}
+                        </td>
+                        <td className="td-center">
+                          <div className="action-btn-group">
+                            <button
+                              className="action-btn action-btn-edit"
+                              onClick={() => navigate(`/training/programs`)}
+                              title="Lihat Program"
+                            >
+                              <BookOpen size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
               <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, filteredEnrollments.length)} dari {filteredEnrollments.length}
+                  Menampilkan <strong>{paginatedEnrollments.length}</strong> dari <strong>{filteredEnrollments.length}</strong> pendaftaran
                 </div>
                 <div className="pagination-controls">
-                  <Button
-                    variant="outline"
-                    size="sm"
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
-                    onClick={() => setCurrentPage(prev => prev - 1)}
                   >
-                    Sebelumnya
-                  </Button>
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    ‹
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                     <button
                       key={page}
-                      className={`pagination-page-btn ${currentPage === page ? 'active' : ''}`}
+                      className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
                       onClick={() => setCurrentPage(page)}
                     >
                       {page}
                     </button>
                   ))}
-                  <Button
-                    variant="outline"
-                    size="sm"
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                     disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage(prev => prev + 1)}
                   >
-                    Selanjutnya
-                  </Button>
+                    ›
+                  </button>
                 </div>
               </div>
-            )}
-          </>
-        )}
-      </Card>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

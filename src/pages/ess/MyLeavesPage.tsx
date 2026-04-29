@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
 import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
 
-import { Calendar, RefreshCw, Clock3, CircleCheckBig, CircleX, Wallet } from "lucide-react";
+import { Calendar, RefreshCw, Clock3, CircleCheckBig, CircleX, Wallet, Search, Filter, Plus } from "lucide-react";
 
 import { getMyLeaveBalance, getMyLeaves } from "@/features/ess/api/ess.service";
 import type { GenericApiItem } from "@/features/ess/types/ess.types";
@@ -35,26 +35,6 @@ const getLeaveTypeLabel = (type: string | undefined) => {
   return typeMap[type?.toLowerCase() ?? ""] ?? type ?? "-";
 };
 
-const asDisplay = (value: unknown) => {
-  if (value === null || value === undefined) return "-";
-  if (typeof value === "object") return "-";
-
-  if (typeof value === "string") {
-    const trimmed = value.trim();
-    if (trimmed.includes("T") && !Number.isNaN(Date.parse(trimmed))) {
-      return new Date(trimmed).toLocaleString("id-ID", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    }
-  }
-
-  return String(value);
-};
-
 const toLabel = (key: string) =>
   key
     .replace(/_/g, " ")
@@ -70,6 +50,7 @@ const isNumericLike = (value: unknown) => {
 
 const MyLeavesPage = () => {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const isBalanceRoute = pathname === "/leave/balance" || pathname.includes("leave/balance");
 
   const [leaves, setLeaves] = useState<GenericApiItem[]>([]);
@@ -77,6 +58,10 @@ const MyLeavesPage = () => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // Search & Filter State
+  const [searchText, setSearchText] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
 
@@ -111,6 +96,33 @@ const MyLeavesPage = () => {
       setLoading(false);
     }
   };
+
+  // Filter & Paginate Logic
+  const filteredLeaves = useMemo(() => {
+    return leaves.filter((item) => {
+      const leave = item as any;
+      const searchStr = searchText.toLowerCase();
+      if (searchStr) {
+        const typeMatch = getLeaveTypeLabel(leave.type).toLowerCase().includes(searchStr);
+        const idMatch = String(leave.id).includes(searchStr);
+        if (!typeMatch && !idMatch) return false;
+      }
+
+      if (selectedStatus) {
+        const status = (leave.status || "pending").toLowerCase();
+        if (status !== selectedStatus.toLowerCase()) return false;
+      }
+
+      return true;
+    });
+  }, [leaves, searchText, selectedStatus]);
+
+  const paginatedLeaves = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredLeaves.slice(startIndex, startIndex + pageSize);
+  }, [filteredLeaves, currentPage, pageSize]);
+
+  const totalPages = Math.ceil(filteredLeaves.length / pageSize);
 
   const summaryCards = useMemo(() => {
     if (isBalanceRoute) {
@@ -163,6 +175,14 @@ const MyLeavesPage = () => {
         icon: Calendar,
       },
       {
+        label: "Hasil Filter",
+        subtitle: "Cuti sesuai pencarian",
+        value: String(filteredLeaves.length),
+        change: `${paginatedLeaves.length} data per halaman`,
+        tone: "green" as const,
+        icon: Search,
+      },
+      {
         label: "Pending",
         subtitle: "Menunggu persetujuan",
         value: String(pendingLeaves),
@@ -178,16 +198,14 @@ const MyLeavesPage = () => {
         tone: "green" as const,
         icon: CircleCheckBig,
       },
-      {
-        label: "Rejected",
-        subtitle: "Pengajuan ditolak",
-        value: String(rejectedLeaves),
-        change: "Butuh revisi atau tindak lanjut",
-        tone: "red" as const,
-        icon: CircleX,
-      },
     ];
-  }, [isBalanceRoute, leaveBalance, leaves]);
+  }, [isBalanceRoute, leaveBalance, leaves, filteredLeaves.length, paginatedLeaves.length]);
+
+  const clearFilters = () => {
+    setSearchText("");
+    setSelectedStatus("");
+    setCurrentPage(1);
+  };
 
   const handleRefresh = () => {
     if (isBalanceRoute) {
@@ -197,13 +215,17 @@ const MyLeavesPage = () => {
     void loadLeaves();
   };
 
+  // Reset page on filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText, selectedStatus]);
+
   useEffect(() => {
     if (isBalanceRoute) {
       void loadLeaveBalance();
     } else {
       void loadLeaves();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isBalanceRoute]);
 
   return (
@@ -226,8 +248,14 @@ const MyLeavesPage = () => {
           <div className="hero-actions">
             <button className="btn-outline" onClick={handleRefresh} disabled={loading}>
               <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-              Segarkan
+              {loading ? "Memuat..." : "Segarkan"}
             </button>
+            {!isBalanceRoute && (
+              <button className="btn-primary" onClick={() => navigate("/leave/request")} disabled={loading}>
+                <Plus size={16} />
+                Ajukan Cuti
+              </button>
+            )}
           </div>
         </div>
       </Card>
@@ -254,53 +282,209 @@ const MyLeavesPage = () => {
         })}
       </div>
 
-      {/* Leave History Table */}
+      {/* Analytics Title Card - Only for leave history */}
       {!isBalanceRoute && (
-        <Card className="crud-table-card">
-          <div className="crud-table-wrap">
-            <table className="crud-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Jenis Cuti</th>
-                  <th>Mulai - Selesai</th>
-                  <th>Hari</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {leaves.length > 0 ? (
-                  leaves.map((item, index) => {
-                    const leave = item as any;
-                    const status = leave.status || "pending";
-                    return (
-                      <tr key={String(leave.id ?? index)}>
-                        <td className="crud-table-id">{index + 1}</td>
-                        <td className="crud-table-type">{getLeaveTypeLabel(leave.type)}</td>
-                        <td className="crud-table-dates">
-                          <div>{formatDate(leave.start_date)}</div>
-                          <div className="crud-table-dates-sub">s/d {formatDate(leave.end_date)}</div>
-                        </td>
-                        <td className="crud-table-days">{leave.total_days || 1} hari</td>
-                        <td>
-                          <span className={`leave-status-badge leave-status-${status}`}>
-                            {status.charAt(0).toUpperCase() + status.slice(1)}
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })
-                ) : (
-                  <tr>
-                    <td colSpan={5} className="crud-table-empty">
-                      Tidak ada data cuti
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+        <Card className="analytics-title-card">
+          <div className="analytics-title-inner">
+            <div className="analytics-icon">
+              <Calendar size={24} />
+            </div>
+            <div>
+              <h2 className="analytics-title">Riwayat Cuti</h2>
+              <p className="analytics-subtitle">Kelola dan lihat semua pengajuan cuti</p>
+            </div>
           </div>
         </Card>
+      )}
+
+      {/* Control Section - Only for leave history */}
+      {!isBalanceRoute && (
+        <Card className="control-section-card">
+          <div className="control-section-inner">
+            <div className="control-actions">
+              <div className="search-box">
+                <div className="search-icon-inside">
+                  <Search size={18} />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Cari cuti..."
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  className="search-input-pill"
+                />
+              </div>
+              <button
+                className={`filter-btn-rounded ${showFilters ? "active" : ""}`}
+                onClick={() => setShowFilters(!showFilters)}
+              >
+                <Filter size={18} />
+                <span>Filter</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Filter Panel */}
+          {showFilters && (
+            <div className="filter-dropdown">
+              <div className="filter-row">
+                <div className="filter-group">
+                  <label>Status</label>
+                  <select
+                    value={selectedStatus}
+                    onChange={(e) => setSelectedStatus(e.target.value)}
+                    className="filter-select-premium"
+                  >
+                    <option value="">Semua Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                </div>
+                {(searchText || selectedStatus) && (
+                  <button className="btn-clear-filter" onClick={clearFilters}>
+                    Hapus Filter
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </Card>
+      )}
+
+      {/* Leave History Table */}
+      {!isBalanceRoute && (
+        <div className="table-section">
+          <div className="wuw-table-area">
+            {loading && <LoadingState message="Memuat cuti..." />}
+
+            {!loading && errorMessage && (
+              <div className="error-state-container">
+                <div className="error-state">
+                  <p className="error-state-title">Koneksi Terputus</p>
+                  <p className="error-state-message">{errorMessage}</p>
+                  <button className="btn-primary" onClick={() => void loadLeaves()}>
+                    Coba Lagi
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {!loading && !errorMessage && paginatedLeaves.length === 0 && (
+              <div style={{ padding: "5rem 0" }}>
+                <EmptyState
+                  title="Cuti Kosong"
+                  message={
+                    searchText || selectedStatus
+                      ? "Tidak ada cuti yang sesuai dengan kriteria Anda."
+                      : "Belum ada pengajuan cuti. Ajukan cuti untuk memulai."
+                  }
+                  actionLabel="Ajukan Cuti"
+                  onAction={() => navigate("/leave/request")}
+                />
+              </div>
+            )}
+
+            {!loading && !errorMessage && paginatedLeaves.length > 0 && (
+              <>
+                <div className="table-wrap">
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th style={{ width: "400px" }}>Jenis Cuti</th>
+                        <th>Mulai</th>
+                        <th>Selesai</th>
+                        <th>Hari</th>
+                        <th className="th-center">Status</th>
+                        <th className="th-center" style={{ width: "120px" }}>
+                          Aksi
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paginatedLeaves.map((item, index) => {
+                        const leave = item as any;
+                        const status = (leave.status || "pending").toLowerCase();
+                        return (
+                          <tr key={String(leave.id ?? index)}>
+                            <td>
+                              <div className="cell-name">
+                                <div className="cell-avatar">
+                                  {getLeaveTypeLabel(leave.type).charAt(0)}
+                                </div>
+                                <div className="cell-stacked">
+                                  <span className="cell-name-text">{getLeaveTypeLabel(leave.type)}</span>
+                                  <span className="cell-stacked__sub">{String(leave.id)}</span>
+                                </div>
+                              </div>
+                            </td>
+                            <td style={{ color: "#475569", fontWeight: 500 }}>{formatDate(leave.start_date)}</td>
+                            <td style={{ color: "#475569", fontWeight: 500 }}>{formatDate(leave.end_date)}</td>
+                            <td>
+                              <span style={{ color: "#64748b", fontWeight: 600 }}>{leave.total_days || 1} hari</span>
+                            </td>
+                            <td className="td-center">
+                              <span
+                                className={`badge-soft badge-soft--${
+                                  status === "approved" ? "green" : status === "pending" ? "orange" : "red"
+                                }`}
+                              >
+                                {status.charAt(0).toUpperCase() + status.slice(1)}
+                              </span>
+                            </td>
+                            <td className="td-center">
+                              <div className="action-btn-group">
+                                <button
+                                  className="action-btn action-btn-edit"
+                                  onClick={() => navigate(`/leave/request/${leave.id}`)}
+                                  title="Lihat Detail"
+                                >
+                                  <Calendar size={16} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Pagination */}
+                <div className="table-pagination">
+                  <div className="pagination-info">
+                    Menampilkan <strong>{paginatedLeaves.length}</strong> dari <strong>{filteredLeaves.length}</strong> cuti
+                  </div>
+                  <div className="pagination-controls">
+                    <button
+                      className="pagination-btn"
+                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      ‹
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <button
+                        key={page}
+                        className={`pagination-btn ${currentPage === page ? "active" : ""}`}
+                        onClick={() => setCurrentPage(page)}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                    <button
+                      className="pagination-btn"
+                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                      disabled={currentPage === totalPages}
+                    >
+                      ›
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       )}
 
       {/* Balance Section Header */}
@@ -375,8 +559,8 @@ const MyLeavesPage = () => {
                         Hari Tersedia
                       </p>
                     </div>
-                    <span style={{ fontSize: "2rem", fontWeight: "800", color: "#10b981" }}>
-                      {asDisplay(value)}
+                    <span style={{ fontSize: "2rem", fontWeight: 800, color: "#10b981" }}>
+                      {String(value)}
                     </span>
                   </div>
                   {isNumeric && (

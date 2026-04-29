@@ -2,54 +2,53 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
 import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
-import { Alert } from "@/shared/ui/Alert";
 import { RBACUtils } from "@/shared/hooks/rbac";
 import { getAllPermissions } from "@/features/admin/api/admin.service";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import type { AdminEntityItem } from "@/features/admin/types/admin.types";
-import { KeyRound, RefreshCw, Search, ShieldAlert, Shield } from "lucide-react";
+import { KeyRound, RefreshCw, Search, Shield, Filter } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
-import "@/pages/payroll/PayrollShared.css";
-
-const asDisplay = (value: unknown) => {
-  if (value === null || value === undefined) return "-";
-  if (typeof value === "object") return JSON.stringify(value);
-  return String(value);
-};
-
-const getColumns = (perms: AdminEntityItem[]) => {
-  if (perms.length === 0) {
-    return ["id", "name", "guard_name"];
-  }
-
-  const keys = Object.keys(perms[0]);
-  const preferred = ["id", "name", "guard_name"];
-  const merged = [...preferred, ...keys.filter((key) => !preferred.includes(key))];
-  return merged.filter((key, index) => merged.indexOf(key) === index);
-};
+import "./AdminPermissionsPage.css";
 
 const AdminPermissionsPage = () => {
   const user = useAuthStore((state) => state.user);
   const canViewPermissions = RBACUtils.canViewPermissions(user);
+
   const [permissions, setPermissions] = useState<AdminEntityItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [searchText, setSearchText] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedGuard, setSelectedGuard] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
 
-  const columns = useMemo(() => getColumns(permissions), [permissions]);
+  // Extract unique guard names for filter
+  const uniqueGuards = useMemo(() => {
+    const guards = new Set<string>();
+    permissions.forEach((p) => {
+      if (p.guard_name) guards.add(p.guard_name);
+    });
+    return Array.from(guards).sort();
+  }, [permissions]);
 
   const filteredPermissions = useMemo(() => {
     return permissions.filter((item) => {
       const searchStr = searchText.toLowerCase();
-      if (!searchStr) return true;
-      const nameMatch = item.name?.toLowerCase().includes(searchStr);
-      const guardMatch = item.guard_name?.toLowerCase().includes(searchStr);
-      return nameMatch || guardMatch;
+      if (searchStr) {
+        const nameMatch = item.name?.toLowerCase().includes(searchStr);
+        const guardMatch = item.guard_name?.toLowerCase().includes(searchStr);
+        if (!nameMatch && !guardMatch) return false;
+      }
+
+      if (selectedGuard) {
+        if (item.guard_name !== selectedGuard) return false;
+      }
+
+      return true;
     });
-  }, [permissions, searchText]);
+  }, [permissions, searchText, selectedGuard]);
 
   const paginatedPermissions = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
@@ -57,6 +56,42 @@ const AdminPermissionsPage = () => {
   }, [filteredPermissions, currentPage, pageSize]);
 
   const totalPages = Math.ceil(filteredPermissions.length / pageSize);
+
+  const permissionSummaryCards = useMemo(
+    () => [
+      {
+        label: "Total Permissions",
+        subtitle: "Semua permission tersedia",
+        value: String(permissions.length),
+        change: "Data permission sistem",
+        tone: "blue" as const,
+        icon: KeyRound,
+      },
+      {
+        label: "Hasil Filter",
+        subtitle: "Permission sesuai pencarian",
+        value: String(filteredPermissions.length),
+        change: `${paginatedPermissions.length} data per halaman`,
+        tone: "green" as const,
+        icon: Search,
+      },
+      {
+        label: "Guard Types",
+        subtitle: "Jenis guard yang digunakan",
+        value: String(uniqueGuards.length),
+        change: "Hak akses sistem",
+        tone: "orange" as const,
+        icon: Shield,
+      },
+    ],
+    [permissions.length, filteredPermissions.length, paginatedPermissions.length, uniqueGuards.length]
+  );
+
+  const clearFilters = () => {
+    setSearchText("");
+    setSelectedGuard("");
+    setCurrentPage(1);
+  };
 
   const loadPermissions = async () => {
     setLoading(true);
@@ -71,6 +106,11 @@ const AdminPermissionsPage = () => {
       setLoading(false);
     }
   };
+
+  // Reset page on filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText, selectedGuard]);
 
   useEffect(() => {
     void loadPermissions();
@@ -104,6 +144,7 @@ const AdminPermissionsPage = () => {
 
   return (
     <div className="crud-page">
+      {/* Header */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -125,96 +166,199 @@ const AdminPermissionsPage = () => {
         </div>
       </Card>
 
-      <div className="white-unified-wrapper">
-        <div className="wuw-header">
-          <div className="wuw-header-top">
-            <div className="wuw-title-area">
-              <h3>Tabel Permissions</h3>
-              <span className="wuw-count-badge">{filteredPermissions.length} permissions</span>
+      {/* Summary Cards */}
+      <div className="employee-summary-wrapper">
+        {permissionSummaryCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <div key={card.label} className="employee-summary-card">
+              <div className="employee-summary-header">
+                <div>
+                  <p className="employee-summary-label">{card.label}</p>
+                  <p className="employee-summary-subtitle">{card.subtitle}</p>
+                </div>
+                <div className={`employee-summary-icon-wrapper employee-icon-${card.tone}`}>
+                  <Icon size={28} />
+                </div>
+              </div>
+              <div className={`employee-summary-value employee-value-${card.tone}`}>{card.value}</div>
+              <p className="employee-summary-trend">{card.change}</p>
             </div>
-            <div className="wuw-search">
-              <Search size={16} className="wuw-search-icon" />
+          );
+        })}
+      </div>
+
+      {/* Analytics Title Card */}
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <KeyRound size={24} />
+          </div>
+          <div>
+            <h2 className="analytics-title">Daftar Permissions</h2>
+            <p className="analytics-subtitle">Kelola dan lihat semua permission</p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Control Section */}
+      <Card className="control-section-card">
+        <div className="control-section-inner">
+          <div className="control-actions">
+            <div className="search-box">
+              <div className="search-icon-inside">
+                <Search size={18} />
+              </div>
               <input
                 type="text"
-                className="search-input-pill"
                 placeholder="Cari permission..."
                 value={searchText}
-                onChange={(e) => { setSearchText(e.target.value); setCurrentPage(1); }}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="search-input-pill"
               />
             </div>
+            <button
+              className={`filter-btn-rounded ${showFilters ? 'active' : ''}`}
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <Filter size={18} />
+              <span>Filter</span>
+            </button>
           </div>
         </div>
 
+        {/* Filter Panel */}
+        {showFilters && (
+          <div className="filter-dropdown">
+            <div className="filter-row">
+              <div className="filter-group">
+                <label>Guard</label>
+                <select
+                  value={selectedGuard}
+                  onChange={(e) => setSelectedGuard(e.target.value)}
+                  className="filter-select-premium"
+                >
+                  <option value="">Semua Guard</option>
+                  {uniqueGuards.map((guard) => (
+                    <option key={guard} value={guard}>
+                      {guard}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {(searchText || selectedGuard) && (
+                <button className="btn-clear-filter" onClick={clearFilters}>
+                  Hapus Filter
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </Card>
+
+      {/* Table Section */}
+      <div className="table-section">
         <div className="wuw-table-area">
           {loading && <LoadingState message="Memuat permissions..." />}
-          {!loading && errorMessage && <ErrorState message="Koneksi Terputus" error={errorMessage} onRetry={loadPermissions} />}
 
-          {!loading && !errorMessage && (
+          {!loading && errorMessage && (
+            <div className="error-state-container">
+              <div className="error-state">
+                <p className="error-state-title">Koneksi Terputus</p>
+                <p className="error-state-message">{errorMessage}</p>
+                <button className="btn-primary" onClick={() => void loadPermissions()}>
+                  Coba Lagi
+                </button>
+              </div>
+            </div>
+          )}
+
+          {!loading && !errorMessage && paginatedPermissions.length === 0 && (
+            <div style={{ padding: '5rem 0' }}>
+              <EmptyState
+                title="Permission Kosong"
+                message={searchText || selectedGuard ? 'Tidak ada permission yang sesuai dengan kriteria Anda.' : 'Belum ada data permission.'}
+                actionLabel="Segarkan"
+                onAction={() => void loadPermissions()}
+              />
+            </div>
+          )}
+
+          {!loading && !errorMessage && paginatedPermissions.length > 0 && (
             <>
               <div className="table-wrap">
                 <table className="data-table">
                   <thead>
                     <tr>
-                      {columns.map((column) => (
-                        <th key={column}>
-                          {column === "id" && "ID"}
-                          {column === "name" && "Permission"}
-                          {column === "guard_name" && "Guard"}
-                          {column !== "id" && column !== "name" && column !== "guard_name" && column}
-                        </th>
-                      ))}
+                      <th style={{ width: '400px' }}>Permission</th>
+                      <th>Guard</th>
+                      <th className="th-center" style={{ width: '120px' }}>Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {paginatedPermissions.length > 0 ? (
-                      paginatedPermissions.map((item, index) => (
-                        <tr key={String(item.id ?? index)}>
-                          {columns.map((column) => (
-                            <td key={`${String(item.id ?? index)}-${column}`}>
-                              {column === 'id' ? (
-                                <span className="cell-id">{asDisplay(item[column])}</span>
-                              ) : column === 'name' ? (
-                                <span className="cell-tag">{asDisplay(item[column])}</span>
-                              ) : (
-                                asDisplay(item[column])
-                              )}
-                            </td>
-                          ))}
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={columns.length} className="cell-empty">
-                          <KeyRound size={32} style={{ opacity: 0.4, display: 'block', margin: '0 auto 0.75rem' }} />
-                          Tidak ada data permission.
+                    {paginatedPermissions.map((item, index) => (
+                      <tr key={String(item.id ?? index)}>
+                        <td>
+                          <div className="cell-name">
+                            <div className="cell-avatar">
+                              {item.name?.charAt(0).toUpperCase() || "P"}
+                            </div>
+                            <div className="cell-stacked">
+                              <span className="cell-name-text">{item.name}</span>
+                              <span className="cell-stacked__sub">{String(item.id)}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <span className="badge-soft badge-soft--blue">{item.guard_name || "-"}</span>
+                        </td>
+                        <td className="td-center">
+                          <div className="action-btn-group">
+                            <button
+                              className="action-btn action-btn-edit"
+                              title="Lihat Detail"
+                            >
+                              <KeyRound size={16} />
+                            </button>
+                          </div>
                         </td>
                       </tr>
-                    )}
+                    ))}
                   </tbody>
                 </table>
               </div>
 
-              {totalPages > 1 && (
-                <div className="pagination">
+              {/* Pagination */}
+              <div className="table-pagination">
+                <div className="pagination-info">
+                  Menampilkan <strong>{paginatedPermissions.length}</strong> dari <strong>{filteredPermissions.length}</strong> permissions
+                </div>
+                <div className="pagination-controls">
                   <button
                     className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
-                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   >
-                    Previous
+                    ‹
                   </button>
-                  <span className="pagination-info">
-                    Page {currentPage} of {totalPages}
-                  </span>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
+                  ))}
                   <button
                     className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                     disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   >
-                    Next
+                    ›
                   </button>
                 </div>
-              )}
+              </div>
             </>
           )}
         </div>
