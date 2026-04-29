@@ -9,12 +9,16 @@ import { LeaveTable } from '@/features/leave/components/LeaveTable';
 import { LeaveDetailModal } from '@/features/leave/components/LeaveDetailModal';
 import { Plus, RefreshCw, Search, Calendar } from 'lucide-react';
 import { showToast } from '@/shared/ui/toast';
+import { useAuthStore } from '@/app/store/auth.store';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import './LeaveShared.css';
 
 const LeaveRequestsPage = () => {
   const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user) as any;
+  const isAdmin = user?.roles?.some((r: any) => ['super_admin', 'admin', 'hr', 'manager'].includes(r.name?.toLowerCase())) || false;
+  
   const [items, setItems] = useState<LeaveItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -195,7 +199,7 @@ const LeaveRequestsPage = () => {
               onReject={handleReject}
               onEdit={(id) => navigate(`/leave/requests/edit/${id}`)}
               onDelete={handleDelete}
-              isAdmin={true}
+              isAdmin={isAdmin}
             />
           )}
         </div>
@@ -207,7 +211,7 @@ const LeaveRequestsPage = () => {
         item={selectedDetail}
         onApprove={handleApprove}
         onReject={handleReject}
-        isAdmin={true}
+        isAdmin={isAdmin}
       />
     </div>
   );
