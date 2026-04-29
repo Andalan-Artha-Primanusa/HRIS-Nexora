@@ -9,6 +9,7 @@ import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/leave/LeaveApprovalPage.css';
 import '@/pages/admin/AdminPermissionsPage.css';
+import { useAuthStore } from "@/app/store/auth.store";
 
 const formatDate = (dateString: string | undefined) => {
   if (!dateString) return "-";
@@ -45,6 +46,9 @@ const getEmployeeName = (leave: any) => {
 };
 
 const LeaveApprovalPage = () => {
+  const user = useAuthStore((state) => state.user) as any;
+  const isAdmin = user?.roles?.some((r: any) => ['super_admin', 'admin', 'hr', 'manager'].includes(r.name?.toLowerCase())) || false;
+
   const [items, setItems] = useState<LeaveItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -277,7 +281,7 @@ const LeaveApprovalPage = () => {
                       <th>Hari</th>
                       <th>Alasan</th>
                       <th className="th-center">Status</th>
-                      <th className="th-center" style={{ width: '140px' }}>Aksi</th>
+                      {isAdmin && <th className="th-center" style={{ width: '140px' }}>Aksi</th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -315,31 +319,33 @@ const LeaveApprovalPage = () => {
                               item.status === "submitted" || item.status === "pending" ? "Pending" : "Rejected"}
                           </span>
                         </td>
-                        <td className="td-center">
-                          <div className="action-btn-group">
-                            {item.status === 'pending' || item.status === 'submitted' ? (
-                              <>
-                                <button
-                                  className="action-btn"
-                                  style={{ color: '#10b981' }}
-                                  onClick={() => handleApprove(item.id)}
-                                  disabled={actionLoading === String(item.id)}
-                                  title="Setujui"
-                                >
-                                  <Check size={16} />
-                                </button>
-                                <button
-                                  className="action-btn action-btn-delete"
-                                  onClick={() => handleReject(item.id)}
-                                  disabled={actionLoading === String(item.id)}
-                                  title="Tolak"
-                                >
-                                  <X size={16} />
-                                </button>
-                              </>
-                            ) : null}
-                          </div>
-                        </td>
+                        {isAdmin && (
+                          <td className="td-center">
+                            <div className="action-btn-group">
+                              {item.status === 'pending' || item.status === 'submitted' ? (
+                                <>
+                                  <button
+                                    className="action-btn"
+                                    style={{ color: '#10b981' }}
+                                    onClick={() => handleApprove(item.id)}
+                                    disabled={actionLoading === String(item.id)}
+                                    title="Setujui"
+                                  >
+                                    <Check size={16} />
+                                  </button>
+                                  <button
+                                    className="action-btn action-btn-delete"
+                                    onClick={() => handleReject(item.id)}
+                                    disabled={actionLoading === String(item.id)}
+                                    title="Tolak"
+                                  >
+                                    <X size={16} />
+                                  </button>
+                                </>
+                              ) : null}
+                            </div>
+                          </td>
+                        )}
                       </tr>
                     ))}
                   </tbody>
