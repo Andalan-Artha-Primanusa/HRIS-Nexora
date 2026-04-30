@@ -1,6 +1,5 @@
 import React from 'react';
 import { Eye, Trash2, Clock } from 'lucide-react';
-import { Button } from '@/shared/ui/Button';
 
 interface AttendanceTableProps {
   items: any[];

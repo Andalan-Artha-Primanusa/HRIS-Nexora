@@ -29,10 +29,10 @@ const AdminRoleFormPage: React.FC = () => {
         setFetching(true);
         try {
           const res = await getRoleById(id);
-          const data = res.data || res;
+          const data = (res as any).data || res;
           setFormData({
-            name: data.name || '',
-            description: data.description || ''
+            name: (data as any).name || '',
+            description: (data as any).description || ''
           });
         } catch (err: any) {
           setStatusMessage(err.message || "Gagal memuat detail role.");

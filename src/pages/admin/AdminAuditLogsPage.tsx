@@ -65,9 +65,9 @@ const AdminAuditLogsPage = () => {
 
   const sortedLogs = useMemo(() => {
     return [...filteredLogs].sort((a, b) => {
-      const dateA = new Date(a.created_at || a.timestamp || 0).getTime();
-      const dateB = new Date(b.created_at || b.timestamp || 0).getTime();
-      return dateB - dateA; // Newest first
+      const dateA = new Date(String(a.created_at || a.timestamp || 0)).getTime();
+      const dateB = new Date(String(b.created_at || b.timestamp || 0)).getTime();
+      return dateB - dateA;
     });
   }, [filteredLogs]);
 

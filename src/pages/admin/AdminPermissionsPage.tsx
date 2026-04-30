@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
-import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
+import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { RBACUtils } from "@/shared/hooks/rbac";
 import { getAllPermissions } from "@/features/admin/api/admin.service";
 import { getErrorMessage } from "@/shared/api/errorHandler";
@@ -27,18 +27,18 @@ const AdminPermissionsPage = () => {
   // Extract unique guard names for filter
   const uniqueGuards = useMemo(() => {
     const guards = new Set<string>();
-    permissions.forEach((p) => {
-      if (p.guard_name) guards.add(p.guard_name);
+    (permissions as any[]).forEach((p) => {
+      if (p.guard_name) guards.add(String(p.guard_name));
     });
     return Array.from(guards).sort();
   }, [permissions]);
 
   const filteredPermissions = useMemo(() => {
-    return permissions.filter((item) => {
+    return (permissions as any[]).filter((item) => {
       const searchStr = searchText.toLowerCase();
       if (searchStr) {
-        const nameMatch = item.name?.toLowerCase().includes(searchStr);
-        const guardMatch = item.guard_name?.toLowerCase().includes(searchStr);
+        const nameMatch = String(item.name || '').toLowerCase().includes(searchStr);
+        const guardMatch = String(item.guard_name || '').toLowerCase().includes(searchStr);
         if (!nameMatch && !guardMatch) return false;
       }
 
@@ -98,7 +98,7 @@ const AdminPermissionsPage = () => {
     setErrorMessage(null);
     try {
       const data = await getAllPermissions();
-      const permsArray = Array.isArray(data) ? data : data.data || [];
+      const permsArray = Array.isArray(data) ? data : (data as any).data || [];
       setPermissions(permsArray);
     } catch (error: unknown) {
       setErrorMessage(getErrorMessage(error as never));
@@ -296,21 +296,21 @@ const AdminPermissionsPage = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {paginatedPermissions.map((item, index) => (
+                    {(paginatedPermissions as any[]).map((item, index) => (
                       <tr key={String(item.id ?? index)}>
                         <td>
                           <div className="cell-name">
                             <div className="cell-avatar">
-                              {item.name?.charAt(0).toUpperCase() || "P"}
+                              {String(item.name || 'P').charAt(0).toUpperCase()}
                             </div>
                             <div className="cell-stacked">
-                              <span className="cell-name-text">{item.name}</span>
+                              <span className="cell-name-text">{String(item.name)}</span>
                               <span className="cell-stacked__sub">{String(item.id)}</span>
                             </div>
                           </div>
                         </td>
                         <td>
-                          <span className="badge-soft badge-soft--blue">{item.guard_name || "-"}</span>
+                          <span className="badge-soft badge-soft--blue">{String(item.guard_name || '-')}</span>
                         </td>
                         <td className="td-center">
                           <div className="action-btn-group">

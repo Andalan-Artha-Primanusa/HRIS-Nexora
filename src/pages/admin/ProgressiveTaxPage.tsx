@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, BookTemplate, RefreshCw } from 'lucide-react';
+import { BookTemplate, RefreshCw } from 'lucide-react';
 import { TaxCalculator } from '@/features/legal/components/TaxCalculator';
 import { legalService } from '@/features/legal/api/legal.service';
 import { Card } from '@/shared/ui/Card';

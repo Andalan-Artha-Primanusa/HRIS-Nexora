@@ -9,7 +9,6 @@ import {
   ShieldCheck, 
   RefreshCw,
   Info,
-  Layers,
   CheckCircle,
   XCircle,
   Settings

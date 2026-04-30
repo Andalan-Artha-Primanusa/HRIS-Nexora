@@ -5,7 +5,7 @@ import { Button } from "@/shared/ui/Button";
 import { Alert } from "@/shared/ui/Alert";
 import { assignRolesToUser, getAllUsers, getAllRoles } from "@/features/admin/api/admin.service";
 import type { Role } from "@/shared/types/rbac.types";
-import { Search, Users, ShieldCheck, CheckSquare, Square, ChevronLeft, Shield } from "lucide-react";
+import { Search, Users, ShieldCheck, CheckSquare, ChevronLeft, Shield } from "lucide-react";
 import "./AdminCrudPages.css";
 import "../dashboard/overview/OverviewPage.css";
 

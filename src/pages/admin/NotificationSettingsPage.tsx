@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { RefreshCw, Save, Bell, Mail, MessageSquare, Smartphone, CheckCircle, XCircle, Clock, AlertTriangle, Settings, Info, ShieldCheck, UserCheck } from 'lucide-react';
+import { RefreshCw, Bell, Mail, MessageSquare, Smartphone, CheckCircle, XCircle, Clock, Settings, ShieldCheck, UserCheck } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
-import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
@@ -23,7 +22,7 @@ interface NotificationSetting {
 const NotificationSettingsPage: React.FC = () => {
   const [settings, setSettings] = useState<NotificationSetting[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [_saving, setSaving] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string>('all');
 
   const defaultSettings: NotificationSetting[] = [
@@ -111,7 +110,7 @@ const NotificationSettingsPage: React.FC = () => {
     }
   };
 
-  const handleSave = async () => {
+  const _handleSave = async () => {
     setSaving(true);
     try {
       await api.put('/notification-settings', { settings });

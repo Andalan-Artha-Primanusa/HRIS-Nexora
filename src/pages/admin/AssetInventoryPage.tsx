@@ -323,11 +323,6 @@ const AssetInventoryPage: React.FC = () => {
                   <tbody>
                     {paginatedAssets.map((asset) => {
                       const IconComponent = getAssetIcon(asset.category);
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-                      const holderName = asset.current_holder?.user?.name ||
-                                        asset.current_holder?.full_name ||
-                                        asset.current_holder?.name ||
-                                        'Tersedia di Gudang';
                       return (
                         <tr key={asset.id}>
                           <td>

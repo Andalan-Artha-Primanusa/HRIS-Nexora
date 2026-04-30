@@ -6,12 +6,10 @@ import {
   Edit,
   Trash2,
   RefreshCw,
-  FileText,
   ShieldCheck,
   CalendarDays
 } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
-import { Button } from '@/shared/ui/Button';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
 import '@/shared/styles/CrudPage.css';

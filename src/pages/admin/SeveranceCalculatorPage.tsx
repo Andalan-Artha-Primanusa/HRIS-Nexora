@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calculator, Download, RefreshCw, BookTemplate, Plus } from 'lucide-react';
+import { Calculator, Download, RefreshCw, BookTemplate } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { getAllEmployees } from '@/features/employee/api/employee.service';
@@ -113,9 +113,9 @@ const SeveranceCalculatorPage: React.FC = () => {
     if (company) {
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(20);
-      doc.setFont(undefined, 'bold');
+      doc.setFont('helvetica', 'bold');
       doc.text(company.name || 'Company', pageWidth / 2, 18, { align: 'center' });
-      doc.setFont(undefined, 'normal');
+      doc.setFont('helvetica', 'normal');
       
       doc.setFontSize(9);
       const addr = [company.address, company.city, company.state].filter(v => v).join(', ');
@@ -131,9 +131,9 @@ const SeveranceCalculatorPage: React.FC = () => {
     // Document Title
     doc.setTextColor(20, 30, 48);
     doc.setFontSize(16);
-    doc.setFont(undefined, 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.text('CALCULATION OF SEVERANCE PAY', pageWidth / 2, 62, { align: 'center' });
-    doc.setFont(undefined, 'normal');
+    doc.setFont('helvetica', 'normal');
     
     doc.setFontSize(9);
     doc.setTextColor(100, 100, 100);
@@ -153,9 +153,9 @@ const SeveranceCalculatorPage: React.FC = () => {
 
     doc.setTextColor(20, 30, 48);
     doc.setFontSize(11);
-    doc.setFont(undefined, 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.text('EMPLOYEE INFORMATION', margin + 8, infoStartY + 10);
-    doc.setFont(undefined, 'normal');
+    doc.setFont('helvetica', 'normal');
     
     doc.setFontSize(9);
     doc.setTextColor(60, 60, 60);
@@ -207,9 +207,9 @@ const SeveranceCalculatorPage: React.FC = () => {
     doc.setFontSize(13);
     doc.text('TOTAL SEVERANCE PAY', margin + 10, finalY + 11);
     doc.setFontSize(18);
-    doc.setFont(undefined, 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.text(formatCurrency(calculation.total_severance), pageWidth - margin - 10, finalY + 11, { align: 'right' });
-    doc.setFont(undefined, 'normal');
+    doc.setFont('helvetica', 'normal');
 
     // Footer
     doc.setTextColor(150, 150, 150);

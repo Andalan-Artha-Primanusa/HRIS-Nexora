@@ -2,9 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
-import { Button } from "@/shared/ui/Button";
-import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
-import { KeyRound, RefreshCw, ShieldAlert, ShieldPlus, Shield, Plus, Search, Filter, Edit, Trash2 } from "lucide-react";
+import { Alert } from "@/shared/ui/Alert";
+import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
+import { KeyRound, RefreshCw, Shield, Plus, Search, Filter, Edit, Trash2 } from "lucide-react";
 import { deleteRole, getAllRoles } from "@/features/admin/api/admin.service";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { RBACUtils } from "@/shared/hooks/rbac";
@@ -40,7 +40,7 @@ const AdminRolesPage = () => {
     setErrorMessage(null);
     try {
       const data = await getAllRoles();
-      const rolesArray = Array.isArray(data) ? data : data.items || data.data || [];
+      const rolesArray = Array.isArray(data) ? data : (data as any).items || (data as any).data || [];
       setRoles(rolesArray);
     } catch (error: unknown) {
       setErrorMessage(getErrorMessage(error as never));

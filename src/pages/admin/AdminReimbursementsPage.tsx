@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Plus, RefreshCw, Wallet, Search, Filter, Clock, CheckCircle, XCircle, TrendingUp, Eye, Edit, Trash2, FileText } from 'lucide-react';
+import { RefreshCw, Wallet, Search, Filter, Clock, CheckCircle, XCircle, Eye, Trash2, FileText } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
-import { Button } from '@/shared/ui/Button';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import {
   getAllReimbursements,
@@ -10,9 +8,8 @@ import {
   approveReimbursement,
   rejectReimbursement,
   deleteReimbursement,
-  type ReimbursementItem
 } from '@/features/reimbursement/api/reimbursement.service';
-import { api } from '@/shared/api/httpClient';
+import type { ReimbursementItem } from '@/features/reimbursement/types/reimbursement.types';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import './AdminReimbursementsPage.css';
@@ -28,7 +25,6 @@ const formatCurrency = (amount: number) => {
 };
 
 const AdminReimbursementsPage: React.FC = () => {
-  const navigate = useNavigate();
   const [items, setItems] = useState<ReimbursementItem[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);

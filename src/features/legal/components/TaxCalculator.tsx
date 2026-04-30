@@ -57,15 +57,15 @@ export const TaxCalculator: React.FC<TaxCalculatorProps> = ({ income, setIncome,
     if (company) {
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(20);
-      doc.setFont(undefined, 'bold');
-      doc.text(company.name || 'Company', pageWidth / 2, 18, { align: 'center' });
-      doc.setFont(undefined, 'normal');
+      doc.setFont('helvetica', 'bold');
+      doc.text(String(company.name || 'Company'), pageWidth / 2, 18, { align: 'center' });
+      doc.setFont('helvetica', 'normal');
       
       doc.setFontSize(9);
-      const addr = [company.address, company.city, company.state].filter(v => v).join(', ');
+      const addr = [company.address, company.city, company.state].filter((v: any) => v).join(', ');
       if (addr) doc.text(addr, pageWidth / 2, 26, { align: 'center' });
       
-      const contact = [company.phone, company.email].filter(v => v).join(' | ');
+      const contact = [company.phone, company.email].filter((v: any) => v).join(' | ');
       if (contact) doc.text(contact, pageWidth / 2, 32, { align: 'center' });
       if (company.tax_number) {
         doc.text(`NPWP: ${company.tax_number}`, pageWidth / 2, 38, { align: 'center' });
@@ -75,9 +75,9 @@ export const TaxCalculator: React.FC<TaxCalculatorProps> = ({ income, setIncome,
     // Title
     doc.setTextColor(20, 30, 48);
     doc.setFontSize(16);
-    doc.setFont(undefined, 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.text('TAX CALCULATION REPORT', pageWidth / 2, 62, { align: 'center' });
-    doc.setFont(undefined, 'normal');
+    doc.setFont('helvetica', 'normal');
     
     doc.setFontSize(9);
     doc.setTextColor(100, 100, 100);
@@ -97,9 +97,9 @@ export const TaxCalculator: React.FC<TaxCalculatorProps> = ({ income, setIncome,
 
     doc.setTextColor(20, 30, 48);
     doc.setFontSize(11);
-    doc.setFont(undefined, 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.text('TAX CALCULATION DETAILS', margin + 8, infoStartY + 10);
-    doc.setFont(undefined, 'normal');
+    doc.setFont('helvetica', 'normal');
     
     doc.setFontSize(9);
     doc.setTextColor(60, 60, 60);

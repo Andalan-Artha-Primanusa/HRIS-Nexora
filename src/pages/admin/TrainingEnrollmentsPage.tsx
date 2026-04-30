@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, RefreshCw, GraduationCap, Calendar, Users, Search, Filter, CheckCircle, Clock, XCircle, BookOpen, TrendingUp } from 'lucide-react';
+import { RefreshCw, GraduationCap, Users, Search, Filter, CheckCircle, Clock, XCircle, BookOpen } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
-import { Button } from '@/shared/ui/Button';
-import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
+import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { trainingService } from '@/features/training/api/training.service';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Save, Clock, DollarSign, Timer, Settings, Info, RefreshCw, CheckCircle2 } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
+import { workforceService } from '@/features/workforce/api/workforce.service';
 import './AdminWorkforcePages.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';

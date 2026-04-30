@@ -1,6 +1,5 @@
 import React from 'react';
 import { Eye, Check, X, Pencil, Trash2 } from 'lucide-react';
-import { Button } from '@/shared/ui/Button';
 
 interface LeaveTableProps {
   items: any[];

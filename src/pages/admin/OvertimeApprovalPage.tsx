@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { RefreshCw, Timer, Search, CheckCircle, XCircle, Clock, Users, AlertCircle, Eye } from 'lucide-react';
+import { RefreshCw, Timer, Search, CheckCircle, XCircle, Users, AlertCircle, Eye } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';

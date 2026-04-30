@@ -180,14 +180,14 @@ export const deletePayroll = async (id: string | number) => payrollService.delet
 // Updated: approvePayroll now expects array of IDs (matches API docs)
 export const approvePayroll = async (ids: (string | number)[] | string | number) => {
   const payrollIds = Array.isArray(ids) ? ids : [ids];
-  return payrollService.approvePayroll(payrollIds);
+  return Promise.all(payrollIds.map(id => payrollService.approvePayroll(id)));
 };
 
 export const markPayrollAsPaid = async (id: string | number) => payrollService.processPayment(id);
 
 // Updated: generateMonthlyPayroll now uses /api/payroll/generate
-export const generateMonthlyPayroll = async (payload: { period: string; karyawan_ids?: number[] }) => {
-    return payrollService.generatePayroll({ period: payload.period, karyawan_ids: payload.karyawan_ids });
+export const generateMonthlyPayroll = async (payload: { period: string; employee_ids?: number[] }) => {
+    return payrollService.generatePayroll({ period: payload.period, employee_ids: payload.employee_ids });
 };
 
 // Payroll detail sub-items (backward compat)

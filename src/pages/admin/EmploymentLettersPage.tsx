@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { FileText, Search, RefreshCw, Calendar, BookTemplate, Plus, Users, CheckCircle2 } from 'lucide-react';
+import { FileText, Search, RefreshCw, Calendar, BookTemplate, Users, CheckCircle2 } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';

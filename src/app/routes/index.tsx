@@ -109,7 +109,7 @@ const AssetFormPage = lazy(() => import("../../pages/admin/AssetFormPage"));
 const OkrFormPage = lazy(() => import("../../pages/admin/OkrFormPage"));
 const SurveyFormPage = lazy(() => import("../../pages/admin/SurveyFormPage"));
 const BenefitFormPage = lazy(() => import("../../pages/admin/BenefitFormPage"));
-const ExpenseCategoryPage = lazy(() => import("../../pages/admin/ExpenseCategoryPage"));
+
 const MasterDataPage = lazy(() => import("../../pages/admin/MasterDataPage"));
 const CompanySettingsPage = lazy(() => import("../../pages/admin/CompanySettingsPage"));
 const NotificationSettingsPage = lazy(() => import("../../pages/admin/NotificationSettingsPage"));
@@ -125,7 +125,7 @@ const CalibrationFormPage = lazy(() => import("../../pages/admin/CalibrationForm
 const HrRequestFormPage = lazy(() => import("../../pages/admin/HrRequestFormPage.tsx"));
 const SlaPage = lazy(() => import("../../pages/admin/SlaPage.tsx"));
 const AssetAssignmentsPage = lazy(() => import("../../pages/admin/AssetAssignmentsPage.tsx"));
-const AssignmentLettersPage = lazy(() => import("../../pages/admin/AssignmentLettersPage.tsx"));
+
 const MyAssetsPage = lazy(() => import("../../pages/ess/MyAssetsPage.tsx"));
 const MyAssignmentLettersPage = lazy(() => import("../../pages/ess/MyAssignmentLettersPage.tsx"));
 // const MyDocumentsPage = lazy(() => import("../../pages/ess/MyDocumentsPage.tsx"));

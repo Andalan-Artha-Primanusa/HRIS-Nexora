@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Plus, RefreshCw, Handshake, Search, Filter,Box,CheckCircle, XCircle } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
@@ -18,7 +17,6 @@ const formatDateTime = (input: string) => {
 };
 
 const AssetAssignmentsPage: React.FC = () => {
-  const navigate = useNavigate();
   const [assignments, setAssignments] = useState<any[]>([]);
   const [assets, setAssets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

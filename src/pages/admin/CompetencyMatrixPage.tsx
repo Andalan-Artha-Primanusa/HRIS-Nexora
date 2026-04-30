@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Download, Award, Users, TrendingUp, Plus, RefreshCw, Edit, Trash2, Target, Star, BookTemplate } from 'lucide-react';
+import { Search, Download, Award, Users, TrendingUp, Plus, RefreshCw, Edit, Trash2, Target, Star } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { trainingService } from '@/features/training/api/training.service';
@@ -41,8 +41,6 @@ const CompetencyMatrixPage: React.FC = () => {
 
   const expertCount = competencies.filter(c => c.level?.toLowerCase() === 'expert').length;
   const advancedCount = competencies.filter(c => c.level?.toLowerCase() === 'advanced').length;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const intermediateCount = competencies.filter(c => c.level?.toLowerCase() === 'intermediate').length;
 
   const getLevelColor = (level: string) => {
     switch (level?.toLowerCase()) {

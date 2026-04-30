@@ -16,12 +16,10 @@ import {
   Clock,
   FileText,
   Trash2,
-  User,
   Calendar,
   TrendingUp,
   Eye,
   Target,
-  Filter,
   Pencil
 } from "lucide-react";
 import "@/shared/styles/CrudPage.css";

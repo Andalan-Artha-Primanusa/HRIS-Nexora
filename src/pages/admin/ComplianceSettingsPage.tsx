@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Database, UserX, FileText, Plus, AlertCircle, Trash2, Edit, Save, ArrowLeft, ChevronLeft } from 'lucide-react';
+import { ShieldCheck, Database, UserX, FileText, Plus, AlertCircle, Trash2, Edit, ChevronLeft } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { useNavigate } from 'react-router-dom';

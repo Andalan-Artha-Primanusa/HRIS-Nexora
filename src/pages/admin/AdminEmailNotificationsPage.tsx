@@ -192,8 +192,6 @@ const AdminEmailNotificationsPage = () => {
     return sortedLogs.slice(startIndex, startIndex + pageSize);
   }, [sortedLogs, currentPage, pageSize]);
 
-  const totalPagesTemplates = Math.ceil(sortedTemplates.length / pageSize);
-  const totalPagesLogs = Math.ceil(sortedLogs.length / pageSize);
 
   const clearFilters = () => {
     setSearchText('');

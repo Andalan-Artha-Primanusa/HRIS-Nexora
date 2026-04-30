@@ -5,7 +5,7 @@ import { Card } from "@/shared/ui/Card";
 import { Alert } from "@/shared/ui/Alert";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { ROLES } from "@/shared/types/rbac.types";
-import { MonitorCog, RefreshCw, ShieldAlert, Shield, Wifi, WifiOff, Plus, Edit2 } from "lucide-react";
+import { MonitorCog, RefreshCw, Shield, Wifi, WifiOff, Plus, Edit2 } from "lucide-react";
 import {
   getBiometricDevices,
   syncBiometricAttendance,

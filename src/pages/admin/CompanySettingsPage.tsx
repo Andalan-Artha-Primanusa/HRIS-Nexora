@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { RefreshCw, Save, Building2, Mail, Phone, MapPin, Globe, Clock, User, Briefcase, Settings, Calendar, Landmark, Info, ShieldCheck, Upload, Trash2 } from 'lucide-react';
+import { RefreshCw, Save, Building2, Mail, Phone, MapPin, Globe, Clock, User, Briefcase, Settings, Landmark, Info, ShieldCheck, Upload, Trash2 } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
-import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
@@ -22,7 +21,10 @@ const CompanySettingsPage: React.FC = () => {
     postal_code: '',
     country: '',
     logo: '',
-  });
+    code: '',
+    founded_year: '',
+    industry: '',
+  } as Record<string, string | number>);
   const [companyId, setCompanyId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -50,6 +52,10 @@ const CompanySettingsPage: React.FC = () => {
           state: companyData.state || '',
           postal_code: companyData.postal_code || '',
           country: companyData.country || '',
+          logo: companyData.logo || '',
+          code: companyData.code || '',
+          founded_year: companyData.founded_year || '',
+          industry: companyData.industry || '',
         });
       }
     } catch (err: any) {

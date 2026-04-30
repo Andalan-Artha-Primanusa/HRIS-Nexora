@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShieldCheck, AlertTriangle, FileCheck, Clock, Plus, RefreshCw, Edit, Search, Shield, Filter } from 'lucide-react';
+import { ShieldCheck, Plus, RefreshCw, Edit, Search, Shield } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
-import { Button } from '@/shared/ui/Button';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { workforceService } from '@/features/workforce/api/workforce.service';
 import '@/shared/styles/CrudPage.css';

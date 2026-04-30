@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
-  ArrowLeft, Save, AlertCircle, Calendar, User, Clock, 
+  Save, Calendar, User, Clock, 
   ArrowLeftRight, CheckCircle2, RefreshCw, ChevronLeft,
-  Info, ShieldCheck, HelpCircle
+  ShieldCheck, HelpCircle
 } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
-import { workforceService } from '@/features/workforce/api/workforce.service';
 import { employeeService } from '@/features/employee/api/employee.service';
 import './AdminWorkforcePages.css';
 import '../dashboard/overview/OverviewPage.css';
@@ -26,7 +25,7 @@ const ShiftSwapFormPage: React.FC = () => {
   });
 
   const [employees, setEmployees] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [_loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {

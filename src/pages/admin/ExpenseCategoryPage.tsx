@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Plus, RefreshCw, Pencil, Trash2, Search, Tag, DollarSign, CheckCircle, FileText, Receipt } from 'lucide-react';
+import { Plus, RefreshCw, Pencil, Trash2, Search, Tag, CheckCircle, FileText, Receipt } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
@@ -157,7 +157,7 @@ const ExpenseCategoryPage = () => {
         max_claim: category.max_claim?.toString() || '',
         is_active: category.is_active,
         requires_receipt: category.requires_receipt,
-        category_type: category.category_type,
+        category_type: category.category_type as any,
       });
     } else {
       setEditingCategory(null);

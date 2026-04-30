@@ -2,11 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
-import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
-import { Alert } from "@/shared/ui/Alert";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { ROLES } from "@/shared/types/rbac.types";
-import { Bell, Megaphone, RefreshCw, Send, ShieldAlert, Shield, Users } from "lucide-react";
+import { Alert } from "@/shared/ui/Alert";
+import { Bell, Megaphone, RefreshCw, Send, Shield, Users } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "@/pages/payroll/PayrollShared.css";
@@ -66,7 +65,7 @@ if (!hasAdminAccess(user)) {
   const [statusMessage, setStatusMessage] = useState("");
   const [alertType, setAlertType] = useState<"success" | "error" | "info">("info");
   const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [_errorMessage, setErrorMessage] = useState<string | null>(null);
   const [sendingDirect, setSendingDirect] = useState(false);
   const [sendingBroadcast, setSendingBroadcast] = useState(false);
 
