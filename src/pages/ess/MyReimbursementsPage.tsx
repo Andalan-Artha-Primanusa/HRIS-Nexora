@@ -7,8 +7,7 @@ import {
   createMyReimbursement,
   updateReimbursement,
   deleteReimbursement,
-  submitMyReimbursement,
-  getReimbursementStatistics
+  submitMyReimbursement
 } from '../../features/reimbursement/api/reimbursement.service';
 import type { ReimbursementItem } from '../../features/reimbursement/types/reimbursement.types';
 import '@/shared/styles/CrudPage.css';
@@ -35,7 +34,6 @@ const formatDate = (value?: string) => {
 
 const MyReimbursementsPage: React.FC = () => {
   const [items, setItems] = useState<ReimbursementItem[]>([]);
-  const [stats, _setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [_isModalOpen, _setIsModalOpen] = useState(false);
   const [_isDetailOpen, _setIsDetailOpen] = useState(false);
@@ -52,12 +50,8 @@ const MyReimbursementsPage: React.FC = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [reimbData, statsData] = await Promise.all([
-        getMyReimbursements(),
-        getReimbursementStatistics()
-      ]);
+      const reimbData = await getMyReimbursements();
       setItems(reimbData.items);
-      setStats(statsData.payload);
     } catch (error) {
       console.error('Failed to fetch reimbursements:', error);
     } finally {

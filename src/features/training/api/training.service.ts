@@ -25,12 +25,38 @@ export const trainingService = {
     const response = await api.delete(`/training/programs/${id}`);
     return response.data;
   },
+  getEnrollments: async () => {
+    const response = await api.get('/training/enrollments');
+    return response.data;
+  },
   enrollInProgram: async (id: string | number) => {
     const response = await api.post(`/training/programs/${id}/enroll`);
     return response.data;
   },
   completeTraining: async (id: string | number) => {
     const response = await api.put(`/training/enrollments/${id}/complete`);
+    return response.data;
+  },
+  approveEnrollment: async (id: string | number) => {
+    const response = await api.put(`/training/enrollments/${id}/approve`);
+    return response.data;
+  },
+  rejectEnrollment: async (id: string | number) => {
+    const response = await api.put(`/training/enrollments/${id}/reject`);
+    return response.data;
+  },
+
+  // ESS Training
+  getMyTrainings: async () => {
+    const response = await api.get('/my/trainings');
+    return response.data;
+  },
+  getAvailableTrainings: async () => {
+    const response = await api.get('/my/trainings/available');
+    return response.data;
+  },
+  selfEnroll: async (id: string | number) => {
+    const response = await api.post(`/my/trainings/${id}/enroll`);
     return response.data;
   },
 

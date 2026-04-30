@@ -38,6 +38,14 @@ export const getAllLocations = async () => {
   };
 };
 
+export const getActiveLocations = async () => {
+  const response = await api.get("/attendance/locations");
+  return {
+    items: extractArrayPayload(response.data),
+    raw: response.data,
+  };
+};
+
 export const createLocation = async (payload: LocationCreatePayload) => {
   const response = await api.post("/locations", payload);
   return { raw: response.data };

@@ -9,12 +9,13 @@ import '@/pages/payroll/PayrollShared.css';
 
 const MyTrainingsPage: React.FC = () => {
   const [trainings, setTrainings] = useState<any[]>([]);
+  const [availableTrainings, setAvailableTrainings] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Search & Filter
   const [searchText, setSearchText] = useState('');
-  const [activeTab, setActiveTab] = useState<'Semua' | 'In Progress' | 'Completed'>('Semua');
+  const [activeTab, setActiveTab] = useState<'Semua' | 'In Progress' | 'Completed' | 'Tersedia' | 'Pending'>('Semua');
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -24,14 +25,18 @@ const MyTrainingsPage: React.FC = () => {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const response = await api.get('/my/trainings');
-      const data = response.data;
-      const trainingsArray = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
-      setTrainings(trainingsArray);
+      const [myRes, availRes] = await Promise.all([
+        api.get('/my/trainings'),
+        api.get('/my/trainings/available')
+      ]);
+      const myData = myRes.data;
+      const availData = availRes.data;
+      
+      setTrainings(Array.isArray(myData) ? myData : Array.isArray(myData?.data) ? myData.data : []);
+      setAvailableTrainings(Array.isArray(availData) ? availData : Array.isArray(availData?.data?.data) ? availData.data.data : Array.isArray(availData?.data) ? availData.data : []);
     } catch (error) {
-      console.error('Error fetching my trainings:', error);
+      console.error('Error fetching trainings:', error);
       setErrorMessage('Gagal memuat pelatihan');
-      setTrainings([]);
     } finally {
       setLoading(false);
     }
@@ -41,21 +46,37 @@ const MyTrainingsPage: React.FC = () => {
     fetchData();
   }, []);
 
+  const handleEnroll = async (id: number) => {
+    if (!window.confirm('Apakah Anda yakin ingin mendaftar pelatihan ini?')) return;
+    try {
+      setLoading(true);
+      await api.post(`/my/trainings/${id}/enroll`);
+      alert('Berhasil mengajukan pendaftaran pelatihan. Menunggu approval.');
+      fetchData();
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Gagal mendaftar pelatihan');
+      setLoading(false);
+    }
+  };
+
   // Filter & Sort & Paginate
+  const currentList = useMemo(() => activeTab === 'Tersedia' ? availableTrainings : trainings, [activeTab, availableTrainings, trainings]);
+
   const filteredTrainings = useMemo(() => {
-    return trainings.filter((training) => {
+    return currentList.filter((training) => {
       const searchStr = searchText.toLowerCase();
       const nameMatch = (training.program?.title || training.title || '').toLowerCase().includes(searchStr);
       const categoryMatch = (training.category || training.program?.category || '').toLowerCase().includes(searchStr);
       const textMatch = nameMatch || categoryMatch;
 
       let statusMatch = true;
-      if (activeTab === 'In Progress') statusMatch = training.status === 'in_progress' || training.status === 'ongoing';
+      if (activeTab === 'In Progress') statusMatch = training.status === 'in_progress' || training.status === 'ongoing' || training.status === 'enrolled';
       else if (activeTab === 'Completed') statusMatch = training.status === 'completed';
+      else if (activeTab === 'Pending') statusMatch = training.status === 'pending';
 
       return textMatch && statusMatch;
     });
-  }, [trainings, searchText, activeTab]);
+  }, [currentList, searchText, activeTab]);
 
   const sortedTrainings = useMemo(() => {
     return [...filteredTrainings].sort((a, b) => {
@@ -88,8 +109,10 @@ const MyTrainingsPage: React.FC = () => {
   const getStatusStyle = (status: string) => {
     switch (status?.toLowerCase()) {
       case 'completed': return { icon: CheckCircle, color: '#10b981', bg: '#ecfdf5' };
-      case 'in_progress': case 'ongoing': return { icon: Play, color: '#f59e0b', bg: '#fffbeb' };
+      case 'in_progress': case 'ongoing': case 'enrolled': return { icon: Play, color: '#f59e0b', bg: '#fffbeb' };
       case 'upcoming': case 'scheduled': return { icon: Clock, color: '#6366f1', bg: '#eef2ff' };
+      case 'pending': return { icon: Clock, color: '#f59e0b', bg: '#fffbeb' };
+      case 'active': return { icon: BookOpen, color: '#3b82f6', bg: '#eff6ff' };
       default: return { icon: Clock, color: '#64748b', bg: '#f1f5f9' };
     }
   };
@@ -119,6 +142,14 @@ const MyTrainingsPage: React.FC = () => {
         change: 'In progress',
         tone: 'orange' as const,
         icon: Play,
+      },
+      {
+        label: 'Menunggu Persetujuan',
+        subtitle: 'Pengajuan pelatihan',
+        value: String(trainings.filter(t => t.status === 'pending').length),
+        change: 'Pending approval',
+        tone: 'orange' as const,
+        icon: Clock,
       },
       {
         label: 'Selesai',
@@ -196,7 +227,7 @@ const MyTrainingsPage: React.FC = () => {
         <div className="control-section-inner">
           {/* Tabs */}
           <div className="elyra-tabs">
-            {(['Semua', 'In Progress', 'Completed'] as const).map((tab) => (
+            {(['Semua', 'Tersedia', 'Pending', 'In Progress', 'Completed'] as const).map((tab) => (
               <button key={tab} className={`elyra-tab ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
                 {tab}
               </button>
@@ -275,16 +306,24 @@ const MyTrainingsPage: React.FC = () => {
                           <td>
                             <span style={{ padding: '4px 10px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, background: statusStyle.bg, color: statusStyle.color }}>
                               <StatusIcon size={12} style={{ marginRight: '4px' }} />
-                              {training.status || 'Pending'}
+                              {activeTab === 'Tersedia' ? 'Tersedia' : (training.status || 'Pending')}
                             </span>
                           </td>
                           <td>
-                            {training.progress !== undefined ? (
+                            {training.progress !== undefined && activeTab !== 'Tersedia' ? (
                               <span style={{ color: '#64748b' }}>{training.progress}%</span>
                             ) : '-'}
                           </td>
                           <td className="td-center">
-                            <span className="badge-soft badge-soft--blue">Active</span>
+                            {activeTab === 'Tersedia' ? (
+                              <button className="btn-primary" style={{ padding: '6px 12px', fontSize: '0.75rem' }} onClick={() => handleEnroll(training.id)}>
+                                Daftar
+                              </button>
+                            ) : (
+                              <span className={`badge-soft badge-soft--${training.status === 'completed' ? 'green' : training.status === 'pending' ? 'yellow' : 'blue'}`}>
+                                {training.status}
+                              </span>
+                            )}
                           </td>
                         </tr>
                       );

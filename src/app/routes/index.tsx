@@ -29,6 +29,7 @@ const MyReimbursementsPage = lazy(() => import("../../pages/ess/MyReimbursements
 const AdminReimbursementsPage = lazy(() => import("../../pages/admin/AdminReimbursementsPage"));
 const MyPayrollPage = lazy(() => import("../../pages/ess/MyPayrollPage"));
 const MyLeavesPage = lazy(() => import("../../pages/ess/MyLeavesPage"));
+const LeaveBalancePage = lazy(() => import("../../pages/leave/LeaveBalancePage"));
 const EmployeeDashboardPage = lazy(() => import("../../pages/dashboard/EmployeeDashboardPage"));
 const MyTrainingsPage = lazy(() => import("../../pages/ess/MyTrainingsPage"));
 const MyCompetenciesPage = lazy(() => import("../../pages/ess/MyCompetenciesPage"));
@@ -129,6 +130,7 @@ const MyAssetsPage = lazy(() => import("../../pages/ess/MyAssetsPage.tsx"));
 const MyAssignmentLettersPage = lazy(() => import("../../pages/ess/MyAssignmentLettersPage.tsx"));
 // const MyDocumentsPage = lazy(() => import("../../pages/ess/MyDocumentsPage.tsx"));
 const ShiftSwapFormPage = lazy(() => import("../../pages/admin/ShiftSwapFormPage.tsx"));
+const OvertimeApprovalPage = lazy(() => import("../../pages/admin/OvertimeApprovalPage.tsx"));
 
 
 
@@ -257,7 +259,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "/dashboard",
-        element: <ProtectedRoute role={["super_admin", "admin", "hr", "manager"]} />,
+        element: <DashboardLayout />,
         children: [
           {
             index: true,
@@ -414,7 +416,7 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <MyLeavesPage />,
+            element: <LeaveBalancePage />,
           },
         ],
       },
@@ -709,6 +711,7 @@ export const router = createBrowserRouter([
 
           { path: "/biometric/devices", element: <BiometricDevicesPage /> },
           { path: "/enterprise/compensation", element: <CompensationPage /> },
+          { path: "/overtime/approval", element: <OvertimeApprovalPage /> },
           { path: "/inventory/assets", element: <AssetInventoryPage /> },
           { path: "/assets", element: <AssetInventoryPage /> },
           { path: "/assets/assignments", element: <AssetAssignmentsPage /> },

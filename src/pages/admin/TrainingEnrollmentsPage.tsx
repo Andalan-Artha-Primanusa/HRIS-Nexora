@@ -40,6 +40,32 @@ const TrainingEnrollmentsPage: React.FC = () => {
     fetchData();
   }, []);
 
+  const handleApprove = async (id: number) => {
+    if (!window.confirm('Approve this training enrollment?')) return;
+    try {
+      setLoading(true);
+      await trainingService.approveEnrollment(id);
+      fetchData();
+    } catch (error) {
+      console.error(error);
+      alert('Failed to approve enrollment');
+      setLoading(false);
+    }
+  };
+
+  const handleReject = async (id: number) => {
+    if (!window.confirm('Reject this training enrollment?')) return;
+    try {
+      setLoading(true);
+      await trainingService.rejectEnrollment(id);
+      fetchData();
+    } catch (error) {
+      console.error(error);
+      alert('Failed to reject enrollment');
+      setLoading(false);
+    }
+  };
+
   const summaryStats = useMemo(() => {
     const total = enrollments.length;
     const completed = enrollments.filter(e => e.status === 'completed').length;
@@ -297,6 +323,26 @@ const TrainingEnrollmentsPage: React.FC = () => {
                         </td>
                         <td className="td-center">
                           <div className="action-btn-group">
+                            {enrollment.status === 'pending' && (
+                              <>
+                                <button
+                                  className="action-btn"
+                                  style={{ color: '#10b981', background: '#ecfdf5' }}
+                                  onClick={() => handleApprove(enrollment.id)}
+                                  title="Approve"
+                                >
+                                  <CheckCircle size={16} />
+                                </button>
+                                <button
+                                  className="action-btn"
+                                  style={{ color: '#ef4444', background: '#fef2f2' }}
+                                  onClick={() => handleReject(enrollment.id)}
+                                  title="Reject"
+                                >
+                                  <XCircle size={16} />
+                                </button>
+                              </>
+                            )}
                             <button
                               className="action-btn action-btn-edit"
                               onClick={() => navigate(`/training/programs`)}

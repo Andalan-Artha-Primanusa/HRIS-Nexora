@@ -1,42 +1,43 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Card } from '@/shared/ui/Card';
-import { Alert } from '@/shared/ui/Alert';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
-import { Clock, RefreshCw, Calendar, Timer, AlertCircle } from 'lucide-react';
+import { Clock, RefreshCw, Calendar, Timer, AlertCircle, CheckCircle, XCircle, Search, MessageSquare } from 'lucide-react';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import './AttendanceShared.css';
 
 interface OvertimeRecord {
-  id?: number;
-  date?: string;
-  hours?: number;
-  minutes?: number;
-  reason?: string;
-  status?: string;
-  employee_name?: string;
-  approved_by?: string;
+  id: number;
+  date: string;
+  scheduled_checkout: string;
+  actual_checkout: string;
+  overtime_minutes: number;
+  status: string;
+  reason: string | null;
+  reject_reason: string | null;
+  approved_by: number | null;
+  approved_at: string | null;
+  approver?: { id: number; name: string } | null;
   [key: string]: any;
 }
 
 const OvertimePage = () => {
   const [records, setRecords] = useState<OvertimeRecord[]>([]);
   const [loading, setLoading] = useState(false);
-  const [alertMessage, setAlertMessage] = useState('');
-  const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('error');
+  const [searchText, setSearchText] = useState('');
+  const [activeTab, setActiveTab] = useState<'Semua' | 'Pending' | 'Approved' | 'Rejected'>('Semua');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
 
   const loadRecords = async () => {
     setLoading(true);
-    setAlertMessage('');
     try {
-      const result = await api.get('/attendance/overtime', { params: { days: 30 } });
+      const result = await api.get('/my/overtime');
       const payload = result.data?.data ?? result.data;
       setRecords(Array.isArray(payload) ? payload : []);
     } catch (error: any) {
-      const message = error.response?.data?.message || error.message || 'Terjadi kesalahan';
-      setAlertMessage(message);
-      setAlertType('error');
+      console.error('Failed to load overtime:', error);
     } finally {
       setLoading(false);
     }
@@ -46,10 +47,50 @@ const OvertimePage = () => {
     void loadRecords();
   }, []);
 
-  const formatDuration = (hours?: number, minutes?: number) => {
-    if (!hours && !minutes) return '-';
-    const h = hours || 0;
-    const m = minutes || 0;
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText, activeTab]);
+
+  const handleAddReason = async (id: number) => {
+    const reason = window.prompt('Masukkan alasan lembur:');
+    if (!reason) return;
+    try {
+      await api.put(`/my/overtime/${id}/reason`, { reason });
+      loadRecords();
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Gagal menambahkan alasan');
+    }
+  };
+
+  const filteredRecords = useMemo(() => {
+    return records.filter((r) => {
+      const dateMatch = (r.date || '').toLowerCase().includes(searchText.toLowerCase());
+      const reasonMatch = (r.reason || '').toLowerCase().includes(searchText.toLowerCase());
+      const textMatch = dateMatch || reasonMatch;
+
+      let statusMatch = true;
+      if (activeTab === 'Pending') statusMatch = r.status === 'pending';
+      else if (activeTab === 'Approved') statusMatch = r.status === 'approved';
+      else if (activeTab === 'Rejected') statusMatch = r.status === 'rejected';
+
+      return textMatch && statusMatch;
+    });
+  }, [records, searchText, activeTab]);
+
+  const paginatedRecords = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredRecords.slice(start, start + pageSize);
+  }, [filteredRecords, currentPage, pageSize]);
+
+  const totalPages = Math.ceil(filteredRecords.length / pageSize);
+
+  const pendingCount = records.filter(r => r.status === 'pending').length;
+  const approvedCount = records.filter(r => r.status === 'approved').length;
+  const totalMinutes = records.filter(r => r.status === 'approved').reduce((sum, r) => sum + (r.overtime_minutes || 0), 0);
+
+  const formatDuration = (minutes: number) => {
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
     return `${h}j ${m}m`;
   };
 
@@ -63,33 +104,39 @@ const OvertimePage = () => {
     }
   };
 
-  const getStatusClass = (status: string | undefined) => {
-    if (!status) return 'draft';
-    const statusLower = String(status).toLowerCase();
-    if (statusLower.includes('approved') || statusLower.includes('disetujui')) return 'approved';
-    if (statusLower.includes('rejected') || statusLower.includes('ditolak')) return 'rejected';
-    if (statusLower.includes('pending') || statusLower.includes('menunggu')) return 'pending';
-    return 'draft';
+  const getStatusBadge = (status: string) => {
+    const map: Record<string, { label: string; tone: string }> = {
+      'pending': { label: 'Menunggu', tone: 'orange' },
+      'approved': { label: 'Disetujui', tone: 'green' },
+      'rejected': { label: 'Ditolak', tone: 'red' },
+    };
+    const config = map[status] || { label: status, tone: 'orange' };
+    return <span className={`badge-soft badge-soft--${config.tone}`}>{config.label}</span>;
   };
 
-  const totalHours = records.reduce((sum, r) => sum + (r.hours || 0), 0);
-  const totalMinutes = records.reduce((sum, r) => sum + (r.minutes || 0), 0);
+  const summaryCards = [
+    { label: 'Total Pengajuan', subtitle: 'Seluruh lembur', value: String(records.length), tone: 'blue' as const, icon: Clock },
+    { label: 'Menunggu Persetujuan', subtitle: 'Pending approval', value: String(pendingCount), tone: 'orange' as const, icon: AlertCircle },
+    { label: 'Disetujui', subtitle: 'Sudah approved', value: String(approvedCount), tone: 'green' as const, icon: CheckCircle },
+    { label: 'Total Jam Approved', subtitle: 'Total jam disetujui', value: formatDuration(totalMinutes), tone: 'purple' as const, icon: Timer },
+  ];
 
   return (
     <div className="crud-page">
-      {/* Header - Same style as Dashboard */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <Timer size={16} />
-              <span>Pusat Overtime</span>
+              <span>Layanan Mandiri</span>
             </div>
-            <h1 className="hero-title">Overtime</h1>
-            <p className="hero-subtitle">Pengajuan dan riwayat lembur karyawan.</p>
+            <h1 className="hero-title">Lembur Saya</h1>
+            <p className="hero-subtitle">
+              Riwayat dan status pengajuan lembur Anda. Lembur otomatis tercatat saat Anda checkout melebihi jam kerja.
+            </p>
           </div>
           <div className="hero-actions">
-            <button className="btn-outline" onClick={() => void loadRecords()}>
+            <button className="btn-outline" onClick={() => void loadRecords()} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan
             </button>
@@ -97,57 +144,26 @@ const OvertimePage = () => {
         </div>
       </Card>
 
-      {alertMessage && (
-        <Alert variant={alertType === 'success' ? 'success' : 'error'} title={alertType === 'success' ? 'Berhasil' : 'Kesalahan'}>
-          {alertMessage}
-        </Alert>
-      )}
-
       {/* Summary Cards */}
-      <div className="attendance-overtime-wrapper">
-        <div className="attendance-summary-card">
-          <div className="attendance-summary-header">
-            <div>
-              <p className="attendance-summary-label">Total Overtime</p>
-              <p className="attendance-summary-subtitle">Semua pengajuan</p>
+      <div className="employee-summary-wrapper">
+        {summaryCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <div key={card.label} className="employee-summary-card">
+              <div className="employee-summary-header">
+                <div>
+                  <p className="employee-summary-label">{card.label}</p>
+                  <p className="employee-summary-subtitle">{card.subtitle}</p>
+                </div>
+                <div className={`employee-summary-icon-wrapper employee-icon-${card.tone}`}>
+                  <Icon size={28} />
+                </div>
+              </div>
+              <div className={`employee-summary-value employee-value-${card.tone}`}>{card.value}</div>
+              <p className="employee-summary-trend">{card.subtitle}</p>
             </div>
-            <div className="attendance-summary-icon-wrapper attendance-icon-blue">
-              <Clock size={28} />
-            </div>
-          </div>
-          <div className="attendance-summary-value attendance-value-blue">{records.length}</div>
-          <p className="attendance-summary-trend">Pengajuan dalam 30 hari</p>
-        </div>
-
-        <div className="attendance-summary-card">
-          <div className="attendance-summary-header">
-            <div>
-              <p className="attendance-summary-label">Total Jam</p>
-              <p className="attendance-summary-subtitle">Total jam lembur</p>
-            </div>
-            <div className="attendance-summary-icon-wrapper attendance-icon-green">
-              <Clock size={28} />
-            </div>
-          </div>
-          <div className="attendance-summary-value attendance-value-green">{totalHours + Math.floor(totalMinutes / 60)}j</div>
-          <p className="attendance-summary-trend">{(totalMinutes % 60)}m menit lembur</p>
-        </div>
-
-        <div className="attendance-summary-card">
-          <div className="attendance-summary-header">
-            <div>
-              <p className="attendance-summary-label">Menunggu</p>
-              <p className="attendance-summary-subtitle">Pending approval</p>
-            </div>
-            <div className="attendance-summary-icon-wrapper attendance-icon-orange">
-              <AlertCircle size={28} />
-            </div>
-          </div>
-          <div className="attendance-summary-value attendance-value-orange">
-            {records.filter(r => (r.status || '').toLowerCase().includes('pending')).length}
-          </div>
-          <p className="attendance-summary-trend">Perlu review</p>
-        </div>
+          );
+        })}
       </div>
 
       {/* Analytics Title Card */}
@@ -157,51 +173,160 @@ const OvertimePage = () => {
             <Timer size={24} />
           </div>
           <div>
-            <h2 className="analytics-title">Daftar Overtime</h2>
-            <p className="analytics-subtitle">Riwayat pengajuan lembur</p>
+            <h2 className="analytics-title">Daftar Lembur</h2>
+            <p className="analytics-subtitle">Riwayat pengajuan lembur otomatis dari sistem absensi</p>
           </div>
         </div>
       </Card>
 
-      {/* Table Section */}
+      {/* Control Section */}
+      <Card className="control-section-card">
+        <div className="control-section-inner">
+          <div className="elyra-tabs">
+            {(['Semua', 'Pending', 'Approved', 'Rejected'] as const).map((tab) => (
+              <button
+                key={tab}
+                className={`elyra-tab ${activeTab === tab ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab}
+                {tab !== 'Semua' && (
+                  <span className="tab-count">
+                    {tab === 'Pending' ? pendingCount : tab === 'Approved' ? approvedCount : records.filter(r => r.status === 'rejected').length}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+
+          <div className="control-actions">
+            <div className="search-box">
+              <div className="search-icon-inside"><Search size={18} /></div>
+              <input
+                type="text"
+                placeholder="Cari lembur..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="search-input-pill"
+              />
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      {/* Table */}
       <div className="table-section">
-        <div className="table-wrap">
-          {loading && <LoadingState message="Memuat overtime..." />}
-          {!loading && records.length === 0 && (
-            <div className="empty-state">
-              <EmptyState title="Tidak Ada Data" message="Belum ada data overtime." />
+        <div className="wuw-table-area">
+          {loading && <LoadingState message="Memuat lembur..." />}
+
+          {!loading && paginatedRecords.length === 0 && (
+            <div style={{ padding: '5rem 0' }}>
+              <EmptyState
+                title="Belum Ada Lembur"
+                message="Belum ada data lembur. Lembur akan otomatis tercatat saat Anda checkout melebihi jadwal."
+              />
             </div>
           )}
-          {!loading && records.length > 0 && (
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Tanggal</th>
-                  <th>Durasi</th>
-                  <th>Alasan</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {records.map((record, idx) => (
-                  <tr key={record.id || idx}>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <Calendar size={16} color="#64748b" />
-                        {formatDate(record.date)}
-                      </div>
-                    </td>
-                    <td style={{ fontWeight: 600 }}>{formatDuration(record.hours, record.minutes)}</td>
-                    <td>{record.reason || '-'}</td>
-                    <td>
-                      <span className={`status-badge status-badge--${getStatusClass(record.status)}`}>
-                        {record.status || '-'}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+
+          {!loading && paginatedRecords.length > 0 && (
+            <>
+              <div className="table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Tanggal</th>
+                      <th>Jadwal Checkout</th>
+                      <th>Aktual Checkout</th>
+                      <th>Durasi Lembur</th>
+                      <th>Alasan</th>
+                      <th className="th-center">Status</th>
+                      <th className="th-center" style={{ width: '100px' }}>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedRecords.map((record) => (
+                      <tr key={record.id}>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <Calendar size={16} color="#64748b" />
+                            {formatDate(record.date)}
+                          </div>
+                        </td>
+                        <td style={{ fontWeight: 500, color: '#475569' }}>{record.scheduled_checkout || '-'}</td>
+                        <td style={{ fontWeight: 600, color: '#0f172a' }}>{record.actual_checkout || '-'}</td>
+                        <td>
+                          <span style={{ fontWeight: 700, color: '#7c3aed' }}>
+                            {formatDuration(record.overtime_minutes)}
+                          </span>
+                        </td>
+                        <td style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {record.reason || <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>Belum diisi</span>}
+                        </td>
+                        <td className="td-center">
+                          {getStatusBadge(record.status)}
+                        </td>
+                        <td className="td-center">
+                          <div className="action-btn-group">
+                            {record.status === 'pending' && !record.reason && (
+                              <button
+                                className="action-btn"
+                                style={{ color: '#6366f1', background: '#eef2ff' }}
+                                onClick={() => handleAddReason(record.id)}
+                                title="Tambah Alasan"
+                              >
+                                <MessageSquare size={16} />
+                              </button>
+                            )}
+                            {record.status === 'rejected' && record.reject_reason && (
+                              <button
+                                className="action-btn"
+                                style={{ color: '#ef4444', background: '#fef2f2' }}
+                                onClick={() => alert('Alasan ditolak: ' + record.reject_reason)}
+                                title="Lihat Alasan Penolakan"
+                              >
+                                <XCircle size={16} />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              <div className="table-pagination">
+                <div className="pagination-info">
+                  Menampilkan <strong>{paginatedRecords.length}</strong> dari <strong>{filteredRecords.length}</strong> lembur
+                </div>
+                <div className="pagination-controls">
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    ‹
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    ›
+                  </button>
+                </div>
+              </div>
+            </>
           )}
         </div>
       </div>

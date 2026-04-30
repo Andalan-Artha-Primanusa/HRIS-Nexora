@@ -4,6 +4,7 @@ import type {
   LeaveDecisionPayload,
   LeaveItem,
   LeaveUpdatePayload,
+  LeaveBalanceResponse,
 } from "../types/leave.types";
 
 type UnknownRecord = Record<string, unknown>;
@@ -106,4 +107,13 @@ export const approveLeave = async (id: string, payload: LeaveDecisionPayload) =>
 export const rejectLeave = async (id: string, payload: LeaveDecisionPayload) => {
   const response = await api.put(`/leaves/${id}/reject`, payload);
   return { raw: response.data };
+};
+
+export const getLeaveBalance = async () => {
+  const response = await api.get("/leaves/balance");
+  return {
+    policy: response.data.data.policy as LeaveBalanceResponse["policy"],
+    balance: response.data.data.balance as LeaveBalanceResponse["balance"],
+    raw: response.data,
+  };
 };

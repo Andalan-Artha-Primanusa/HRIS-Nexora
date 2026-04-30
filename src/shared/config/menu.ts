@@ -75,6 +75,7 @@ export const menuItems: MenuItem[] = [
       { label: 'Riwayat Semua Karyawan', path: '/attendance/daily' },
       { label: 'Timesheet', path: '/attendance/timesheet' },
       { label: 'Lembur', path: '/attendance/overtime' },
+      { label: 'Persetujuan Lembur', path: '/overtime/approval' },
       { label: 'Laporan', path: '/attendance/reports' },
     ]
   },
@@ -220,6 +221,7 @@ export const menuItems: MenuItem[] = [
         label: 'Pengembangan',
         subItems: [
           { label: 'Pelatihan Saya', path: '/my/trainings' },
+          { label: 'Lembur Saya', path: '/attendance/overtime' },
         ]
       },
       {

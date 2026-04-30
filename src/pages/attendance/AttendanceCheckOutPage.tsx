@@ -63,12 +63,22 @@ const AttendanceCheckOutPage = () => {
 
     try {
       const now = new Date();
-      await api.post('/attendance/check-out', {
+      const response = await api.post('/attendance/check-out', {
         latitude,
         longitude,
       });
       setStatus('Check-out berhasil');
-      setAlertMessage(`✓ Anda telah berhasil check-out pada ${now.toLocaleTimeString('id-ID')}`);
+
+      const overtimeReq = response.data?.data?.overtime_request;
+      let msg = `✓ Anda telah berhasil check-out pada ${now.toLocaleTimeString('id-ID')}`;
+      if (overtimeReq) {
+        const mins = overtimeReq.overtime_minutes || 0;
+        const h = Math.floor(mins / 60);
+        const m = mins % 60;
+        msg += ` | ⏰ Lembur terdeteksi: ${h}j ${m}m — Menunggu Persetujuan`;
+      }
+
+      setAlertMessage(msg);
       setAlertType('success');
     } catch (error: any) {
       setStatus('Check-out gagal');

@@ -5,7 +5,7 @@ import { Alert } from '@/shared/ui/Alert';
 import { api } from '@/shared/api/httpClient';
 import { CheckCircle2, MapPin, Building2, Clock, LogIn } from 'lucide-react';
 import type { LocationItem } from '@/features/location/types/location.types';
-import { getAllLocations } from '@/features/location/api/location.service';
+import { getActiveLocations } from '@/features/location/api/location.service';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
 import './AttendancePages.css';
@@ -67,8 +67,8 @@ const AttendanceCheckInPage = () => {
         
         setUserDepartment(dept);
 
-        // 2. Get all locations
-        const locsRes = await getAllLocations();
+        // 2. Get all active locations
+        const locsRes = await getActiveLocations();
         const allLocs = locsRes.items;
         
         // 3. Filtering Logic:
