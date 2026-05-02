@@ -163,10 +163,22 @@ export const useAuth = () => {
   };
 
   const handleGoogleCallback = async (searchParams: URLSearchParams) => {
-    // const hashText = window.location.hash.startsWith("#") ? window.location.hash.slice(1) : window.location.hash;
-    // const hashParams = new URLSearchParams(hashText);
-    // const allParams = [searchParams, hashParams];
+    // Cek apakah backend mengirim token dan user secara langsung (alur baru)
+    const directToken = searchParams.get("token");
+    const directUserStr = searchParams.get("user");
 
+    if (directToken && directUserStr) {
+      try {
+        const parsedUser = JSON.parse(decodeURIComponent(directUserStr));
+        const userWithRoles = extractAuthFromResponse({ data: { user: parsedUser } }).user || parsedUser;
+        setAuth(userWithRoles as AuthUser, directToken);
+        return { user: userWithRoles, token: directToken };
+      } catch (e) {
+        console.error("Failed to parse user from URL params", e);
+      }
+    }
+
+    // Alur lama: memanggil API frontend dengan 'code'
     const code = searchParams.get("code");
     if (!code) throw new Error("Parameter code OAuth tidak ditemukan");
 
