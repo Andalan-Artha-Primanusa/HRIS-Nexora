@@ -98,16 +98,16 @@ const MyPromotionsPage: React.FC = () => {
         {summaryCards.map((card) => {
           const Icon = card.icon;
           return (
-            <div key={card.label} className="overview-summary-card">
-              <div className="overview-summary-header">
+            <div key={card.label} className="employee-summary-card">
+              <div className="employee-summary-header">
                 <div>
-                  <p className="overview-summary-label">{card.label}</p>
+                  <p className="employee-summary-label">{card.label}</p>
                 </div>
-                <div className={`overview-summary-icon-wrapper overview-icon-${card.tone}`}>
+                <div className={`employee-summary-icon-wrapper employee-icon-${card.tone}`}>
                   <Icon size={28} />
                 </div>
               </div>
-              <div className={`overview-summary-value overview-value-${card.tone}`}>{card.value}</div>
+              <div className={`employee-summary-value employee-value-${card.tone}`}>{card.value}</div>
             </div>
           );
         })}

@@ -565,6 +565,25 @@
   color: #dc2626;
 }
 
+.badge-soft--yellow {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.badge-soft--gray {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+/* Table Cell Alignment */
+.th-center {
+  text-align: center;
+}
+
+.td-center {
+  text-align: center;
+}
+
 /* Action Buttons */
 .action-btn-group {
   display: flex;

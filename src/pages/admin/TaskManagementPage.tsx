@@ -215,18 +215,18 @@ const TaskManagementPage: React.FC = () => {
         {summaryCards.map((card) => {
           const Icon = card.icon;
           return (
-            <div key={card.label} className="overview-summary-card">
-              <div className="overview-summary-header">
+            <div key={card.label} className="employee-summary-card">
+              <div className="employee-summary-header">
                 <div>
-                  <p className="overview-summary-label">{card.label}</p>
-                  <p className="overview-summary-subtitle">{card.subtitle}</p>
+                  <p className="employee-summary-label">{card.label}</p>
+                  <p className="employee-summary-subtitle">{card.subtitle}</p>
                 </div>
-                <div className={`overview-summary-icon-wrapper overview-icon-${card.tone}`}>
+                <div className={`employee-summary-icon-wrapper employee-icon-${card.tone}`}>
                   <Icon size={28} />
                 </div>
               </div>
-              <div className={`overview-summary-value overview-value-${card.tone}`}>{card.value}</div>
-              <p className="overview-summary-trend">{card.change}</p>
+              <div className={`employee-summary-value employee-value-${card.tone}`}>{card.value}</div>
+              <p className="employee-summary-trend">{card.change}</p>
             </div>
           );
         })}
@@ -340,14 +340,14 @@ const TaskManagementPage: React.FC = () => {
                             <span className="cell-stacked__sub">{task.description?.substring(0, 60)}{task.description?.length > 60 ? '...' : ''}</span>
                           </div>
                         </td>
-                        <td>
-                          <div className="cell-stacked">
-                            <span className="cell-stacked__main">
-                              {task.assigned_to?.user?.name || task.assigned_to?.full_name || task.assigned_to?.name || '-'}
-                            </span>
-                            <span className="cell-stacked__sub">oleh {task.assigned_by?.user?.name || task.assigned_by?.name || '-'}</span>
-                          </div>
-                        </td>
+        <td>
+          <div className="cell-stacked">
+            <span className="cell-stacked__main">
+              {task.assigned_to?.name || task.assigned_to?.profile?.full_name || '-'}
+            </span>
+            <span className="cell-stacked__sub">oleh {task.assigned_by?.name || '-'}</span>
+          </div>
+        </td>
                         <td>{getPriorityBadge(task.priority)}</td>
                         <td>{getStatusBadge(task.status)}</td>
                         <td>
