@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, RefreshCw, GraduationCap, Calendar, Users, BookOpen, Search, Filter, Clock, Award, Edit, Trash2, BookTemplate, CheckCircle, TrendingUp } from 'lucide-react';
+import { Plus, RefreshCw, GraduationCap, Calendar, Users, BookOpen, Search, Filter, Clock, Award, Edit, Trash2, BookTemplate, CheckCircle, TrendingUp, UserPlus, X, Loader2 } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { Modal } from '@/shared/ui/Modal';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { trainingService } from '@/features/training/api/training.service';
+import { employeeService } from '@/features/employee/api/employee.service';
 import type { TrainingProgram } from '@/features/training/types/training.types';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
@@ -28,6 +30,15 @@ const TrainingProgramsPage: React.FC = () => {
   const [pageSize] = useState(10);
   const [showFilters, setShowFilters] = useState(false);
 
+  // Enroll Modal State
+  const [enrollModalOpen, setEnrollModalOpen] = useState(false);
+  const [selectedProgramId, setSelectedProgramId] = useState<number | null>(null);
+  const [selectedProgramName, setSelectedProgramName] = useState('');
+  const [employees, setEmployees] = useState<any[]>([]);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | null>(null);
+  const [enrolling, setEnrolling] = useState(false);
+  const [employeeSearch, setEmployeeSearch] = useState('');
+
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -50,7 +61,7 @@ const TrainingProgramsPage: React.FC = () => {
   const filteredPrograms = useMemo(() => {
     return programs.filter(p => {
       const searchStr = searchQuery.toLowerCase();
-      const textMatch = (p.title || p.nama || '')?.toLowerCase().includes(searchStr) ||
+      const textMatch = ((p as any).title || p.nama || '')?.toLowerCase().includes(searchStr) ||
                         (p.category || '')?.toLowerCase().includes(searchStr);
       
       let statusMatch = true;
@@ -66,8 +77,8 @@ const TrainingProgramsPage: React.FC = () => {
   // Sort by title
   const sortedPrograms = useMemo(() => {
     return [...filteredPrograms].sort((a, b) => {
-      const valA = (a.title || '').toLowerCase();
-      const valB = (b.title || '').toLowerCase();
+      const valA = ((a as any).title || '').toLowerCase();
+      const valB = ((b as any).title || '').toLowerCase();
       return valA < valB ? -1 : valA > valB ? 1 : 0;
     });
   }, [filteredPrograms]);
@@ -124,15 +135,65 @@ const TrainingProgramsPage: React.FC = () => {
 
   const handleDelete = async (id: number, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (window.confirm('Are you sure you want to delete this program?')) {
+    if (window.confirm('Apakah Anda yakin ingin menghapus program ini?')) {
       try {
-        await trainingService.updateTraining(id, { status: 'deleted' } as any);
+        await trainingService.deleteProgram(id);
         fetchData();
       } catch (err) {
         console.error(err);
       }
     }
   };
+
+  const openEnrollModal = (programId: number, programName: string) => {
+    setSelectedProgramId(programId);
+    setSelectedProgramName(programName);
+    setEnrollModalOpen(true);
+    setSelectedEmployeeId(null);
+    setEmployeeSearch('');
+  };
+
+  const closeEnrollModal = () => {
+    setEnrollModalOpen(false);
+    setSelectedProgramId(null);
+    setSelectedProgramName('');
+    setSelectedEmployeeId(null);
+    setEmployeeSearch('');
+  };
+
+  const loadEmployees = async () => {
+    try {
+      const data = await employeeService.getEmployees();
+      setEmployees(data);
+    } catch (err) {
+      console.error('Error loading employees:', err);
+    }
+  };
+
+  const handleEnroll = async () => {
+    if (!selectedProgramId || !selectedEmployeeId) return;
+    setEnrolling(true);
+    try {
+      await trainingService.enrollEmployees(selectedProgramId, [selectedEmployeeId]);
+      closeEnrollModal();
+      fetchData();
+    } catch (err: any) {
+      console.error(err);
+      alert(err.response?.data?.message || 'Gagal mendaftarkan karyawan');
+    } finally {
+      setEnrolling(false);
+    }
+  };
+
+  const filteredEmployees = useMemo(() => {
+    if (!employeeSearch) return employees;
+    const q = employeeSearch.toLowerCase();
+    return employees.filter((emp: any) => {
+      const name = emp.user?.name || emp.name || '';
+      const code = emp.employee_code || '';
+      return name.toLowerCase().includes(q) || code.toLowerCase().includes(q);
+    });
+  }, [employees, employeeSearch]);
 
   return (
     <div className="crud-page training-page">
@@ -286,7 +347,7 @@ const TrainingProgramsPage: React.FC = () => {
                         <td>
                           <div className="cell-name">
                             <div className="cell-avatar">
-                              {(program.title || 'P').charAt(0).toUpperCase()}
+                              {((program as any).title || 'P').charAt(0).toUpperCase()}
                             </div>
                             <div className="cell-stacked">
                               <span className="cell-name-text">{program.title || program.nama}</span>
@@ -314,6 +375,14 @@ const TrainingProgramsPage: React.FC = () => {
                         </td>
                         <td className="td-center">
                           <div className="action-btn-group">
+                            <button
+                              className="action-btn"
+                              style={{ color: '#6366f1', background: '#eef2ff' }}
+                              onClick={() => openEnrollModal(typeof program.id === 'string' ? parseInt(program.id, 10) : program.id, program.title || program.nama || '')}
+                              title="Daftarkan Karyawan"
+                            >
+                              <UserPlus size={16} />
+                            </button>
                             <button
                               className="action-btn action-btn-edit"
                               onClick={() => navigate(`/training/programs/edit/${program.id}`)}
@@ -371,6 +440,101 @@ const TrainingProgramsPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Enroll Modal */}
+      <Modal
+        isOpen={enrollModalOpen}
+        onClose={closeEnrollModal}
+        title={`Daftarkan Karyawan — ${selectedProgramName}`}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div style={{ position: 'relative' }}>
+            <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+            <input
+              type="text"
+              placeholder="Cari karyawan..."
+              value={employeeSearch}
+              onChange={(e) => setEmployeeSearch(e.target.value)}
+              onFocus={async () => { if (employees.length === 0) await loadEmployees(); }}
+              className="form-control"
+              style={{ paddingLeft: '36px' }}
+            />
+          </div>
+
+          <div style={{ maxHeight: '300px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {filteredEmployees.length === 0 ? (
+              <p style={{ textAlign: 'center', color: '#94a3b8', padding: '2rem 0' }}>Tidak ada karyawan ditemukan</p>
+            ) : (
+              filteredEmployees.map((emp: any) => {
+                const empId = emp.id;
+                const empName = emp.user?.name || emp.name || 'Employee';
+                const empCode = emp.employee_code || '-';
+                return (
+                  <button
+                    key={empId}
+                    type="button"
+                    onClick={() => setSelectedEmployeeId(empId)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem',
+                      padding: '0.75rem 1rem',
+                      borderRadius: '10px',
+                      border: selectedEmployeeId === empId ? '2px solid #6366f1' : '1px solid #e2e8f0',
+                      background: selectedEmployeeId === empId ? '#eef2ff' : '#fff',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    <div style={{
+                      width: '36px', height: '36px', borderRadius: '50%',
+                      background: selectedEmployeeId === empId ? '#6366f1' : '#f1f5f9',
+                      color: selectedEmployeeId === empId ? '#fff' : '#64748b',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontWeight: 700, fontSize: '0.85rem', flexShrink: 0,
+                    }}>
+                      {empName.charAt(0).toUpperCase()}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#1e293b' }}>{empName}</div>
+                      <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{empCode}</div>
+                    </div>
+                    {selectedEmployeeId === empId && (
+                      <CheckCircle size={18} color="#6366f1" />
+                    )}
+                  </button>
+                );
+              })
+            )}
+          </div>
+
+          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+            <button
+              type="button"
+              className="btn-primary"
+              style={{ flex: 1, padding: '0.75rem', borderRadius: '10px', fontWeight: 600 }}
+              onClick={handleEnroll}
+              disabled={!selectedEmployeeId || enrolling}
+            >
+              {enrolling ? (
+                <><Loader2 size={16} className="animate-spin" style={{ marginRight: '6px' }} />Mendaftar...</>
+              ) : (
+                <><UserPlus size={16} style={{ marginRight: '6px' }} />Daftarkan</>
+              )}
+            </button>
+            <button
+              type="button"
+              className="btn-outline"
+              style={{ flex: 1, padding: '0.75rem', borderRadius: '10px', fontWeight: 600 }}
+              onClick={closeEnrollModal}
+              disabled={enrolling}
+            >
+              <X size={16} style={{ marginRight: '6px' }} />Batal
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

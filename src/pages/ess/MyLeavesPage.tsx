@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
 import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
 
-import { Calendar, RefreshCw, Clock3, CircleCheckBig, CircleX, Wallet, Search, Filter, Plus } from "lucide-react";
+import { Calendar, RefreshCw, Clock3, CircleCheckBig, CircleX, Wallet, Search, Filter, Plus, Clock } from "lucide-react";
 
 import { getMyLeaveBalance, getMyLeaves } from "@/features/ess/api/ess.service";
 import type { GenericApiItem } from "@/features/ess/types/ess.types";
@@ -48,13 +48,31 @@ const isNumericLike = (value: unknown) => {
   return value.trim() !== "" && !Number.isNaN(Number(value));
 };
 
+type LeaveBalanceData = {
+  policy: {
+    year?: number | string;
+    entitlement_type?: string;
+    annual_allowance?: number;
+    is_paid?: boolean;
+    max_pending_days?: number;
+    carry_over_enabled?: boolean;
+  };
+  balance: {
+    allocated_days?: number;
+    carry_over_days?: number;
+    used_days?: number;
+    pending_days?: number;
+    available_days?: number;
+  };
+};
+
 const MyLeavesPage = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const isBalanceRoute = pathname === "/leave/balance" || pathname.includes("leave/balance");
 
   const [leaves, setLeaves] = useState<GenericApiItem[]>([]);
-  const [leaveBalance, setLeaveBalance] = useState<Record<string, unknown> | null>(null);
+  const [leaveBalance, setLeaveBalance] = useState<LeaveBalanceData | null>(null);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -85,8 +103,8 @@ const MyLeavesPage = () => {
     try {
       const result = await getMyLeaveBalance();
       const balanceData =
-        result.data && typeof result.data === "object"
-          ? (result.data as Record<string, unknown>)
+        result.payload && typeof result.payload === "object"
+          ? (result.payload as unknown as LeaveBalanceData)
           : null;
       setLeaveBalance(balanceData);
     } catch (error: unknown) {

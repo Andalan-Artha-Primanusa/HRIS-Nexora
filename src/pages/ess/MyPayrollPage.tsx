@@ -64,7 +64,7 @@ const MyPayrollPage = () => {
       const period = String(item.period || '').toLowerCase();
       const query = searchText.toLowerCase();
       const matchSearch = period.includes(query) || 
-        (item.employee?.user && typeof item.employee.user === 'object' && 'name' in item.employee.user && item.employee.user.name.toLowerCase().includes(query));
+        ((item as any).employee?.user && typeof (item as any).employee.user === 'object' && 'name' in (item as any).employee.user && (item as any).employee.user.name.toLowerCase().includes(query));
 
       let statusMatch = true;
       if (activeTab === "Paid") statusMatch = String(item.status ?? "").toLowerCase() === "paid";
@@ -137,9 +137,9 @@ const MyPayrollPage = () => {
     // Company Name
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(22);
-    doc.setFont(undefined, 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.text(slip?.company_name || 'Company Name', pageWidth / 2, 20, { align: 'center' });
-    doc.setFont(undefined, 'normal');
+    doc.setFont('helvetica', 'normal');
     
     // Company Address
     doc.setFontSize(9);
@@ -156,9 +156,9 @@ const MyPayrollPage = () => {
     // Document Title
     doc.setFontSize(16);
     doc.setTextColor(20, 30, 48);
-    doc.setFont(undefined, 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.text('SLIP GAJI DIGITAL', pageWidth / 2, 68, { align: 'center' });
-    doc.setFont(undefined, 'normal');
+    doc.setFont('helvetica', 'normal');
     
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
@@ -178,9 +178,9 @@ const MyPayrollPage = () => {
 
     doc.setTextColor(20, 30, 48);
     doc.setFontSize(11);
-    doc.setFont(undefined, 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.text('INFORMASI KARYAWAN', margin + 8, infoStartY + 10);
-    doc.setFont(undefined, 'normal');
+    doc.setFont('helvetica', 'normal');
     
     doc.setFontSize(9);
     doc.setTextColor(60, 60, 60);
@@ -199,9 +199,9 @@ const MyPayrollPage = () => {
     
     doc.setTextColor(20, 30, 48);
     doc.setFontSize(11);
-    doc.setFont(undefined, 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.text('PENERIMAAN', margin + 8, earnStartY + 10);
-    doc.setFont(undefined, 'normal');
+    doc.setFont('helvetica', 'normal');
     
     doc.setFontSize(9);
     doc.setTextColor(60, 60, 60);
@@ -220,10 +220,10 @@ const MyPayrollPage = () => {
       doc.text(formatCurrency(summary.bonus), pageWidth - margin - 8, earnStartY + 29, { align: 'right' });
     }
     
-    doc.setFont(undefined, 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.text('Total Gross', margin + 8, earnStartY + 35);
     doc.text(formatCurrency(summary.gross_pay), pageWidth - margin - 8, earnStartY + 35, { align: 'right' });
-    doc.setFont(undefined, 'normal');
+    doc.setFont('helvetica', 'normal');
 
     // Deductions Section
     const deductStartY = earnStartY + 48;
@@ -232,9 +232,9 @@ const MyPayrollPage = () => {
     
     doc.setTextColor(20, 30, 48);
     doc.setFontSize(11);
-    doc.setFont(undefined, 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.text('POTONGAN', margin + 8, deductStartY + 10);
-    doc.setFont(undefined, 'normal');
+    doc.setFont('helvetica', 'normal');
     
     doc.setFontSize(9);
     doc.setTextColor(60, 60, 60);
@@ -248,10 +248,10 @@ const MyPayrollPage = () => {
     doc.text('PPh21 (Pajak)', margin + 8, deductStartY + 29);
     doc.text(`- ${formatCurrency(summary.pph21)}`, pageWidth - margin - 8, deductStartY + 29, { align: 'right' });
     
-    doc.setFont(undefined, 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.text('Total Potongan', margin + 8, deductStartY + 35);
     doc.text(`- ${formatCurrency(summary.total_deduction)}`, pageWidth - margin - 8, deductStartY + 35, { align: 'right' });
-    doc.setFont(undefined, 'normal');
+    doc.setFont('helvetica', 'normal');
 
     // Take Home Pay
     const thpStartY = deductStartY + 48;
@@ -262,9 +262,9 @@ const MyPayrollPage = () => {
     doc.setFontSize(12);
     doc.text('TAKE HOME PAY (GAJI BERSIH)', margin + 10, thpStartY + 12);
     doc.setFontSize(16);
-    doc.setFont(undefined, 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.text(formatCurrency(summary.take_home_pay), pageWidth - margin - 10, thpStartY + 12, { align: 'right' });
-    doc.setFont(undefined, 'normal');
+    doc.setFont('helvetica', 'normal');
 
     // Footer
     doc.setTextColor(150, 150, 150);

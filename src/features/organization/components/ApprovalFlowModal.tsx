@@ -115,8 +115,6 @@ export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, on
               <option value="reimbursement">Reimbursement</option>
               <option value="overtime">Overtime</option>
               <option value="promotion">Promotion Request</option>
-              <option value="termination">Termination Request</option>
-              <option value="mutation">Mutation / Transfer</option>
               <option value="training">Training Request</option>
             </select>
           </div>

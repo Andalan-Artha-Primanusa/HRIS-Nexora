@@ -33,7 +33,7 @@ const ShiftSwapFormPage: React.FC = () => {
       setLoading(true);
       try {
         const data = await employeeService.getEmployees();
-        setEmployees(Array.isArray(data) ? data : data.data || []);
+        setEmployees(Array.isArray(data) ? data : (data as any).data || []);
       } catch (err) {
         console.error(err);
       } finally {

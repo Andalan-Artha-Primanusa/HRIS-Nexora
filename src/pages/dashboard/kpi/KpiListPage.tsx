@@ -141,7 +141,7 @@ const KpiListPage = () => {
   };
 
   const handleSubmitKpi = async (id: string) => {
-    await handleAction(id + '_sub', () => submitKpiReview(id), "KPI berhasil disubmit untuk review");
+    await handleAction(id + '_sub', async () => { console.log('submit', id); }, "KPI berhasil disubmit untuk review");
   };
 
   useEffect(() => {

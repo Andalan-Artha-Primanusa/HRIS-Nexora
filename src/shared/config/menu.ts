@@ -1,7 +1,7 @@
 import { 
   Users, CalendarDays, CreditCard, Receipt, Target, UserCircle, 
   FileBarChart, LayoutDashboard, Briefcase, 
-  FileText, Clock, Banknote, ShieldCheck,Database
+  FileText, Clock, Banknote, ShieldCheck, Database, CheckCircle, ArrowUpRight
 } from 'lucide-react';
 
 import type { LucideIcon } from 'lucide-react';
@@ -71,6 +71,11 @@ export const menuItems: MenuItem[] = [
   {
     label: 'Absensi & Waktu',
     icon: Clock,
+    requiredChecker: (user) =>
+      RBACUtils.isSuperAdmin(user) ||
+      RBACUtils.isAdmin(user) ||
+      RBACUtils.isHR(user) ||
+      RBACUtils.isManager(user),
     subItems: [
       { label: 'Riwayat Semua Karyawan', path: '/attendance/daily' },
       { label: 'Timesheet', path: '/attendance/timesheet' },
@@ -132,6 +137,12 @@ export const menuItems: MenuItem[] = [
     ]
   },
   {
+    label: 'Task Management',
+    icon: CheckCircle,
+    path: '/tasks',
+    requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
+  },
+  {
     label: 'Legal & Dokumen',
     icon: FileText,
     requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
@@ -161,6 +172,12 @@ export const menuItems: MenuItem[] = [
       { label: 'Pendaftaran Pelatihan', path: '/training/enrollments' },
       { label: 'Kompetensi', path: '/competencies' },
     ]
+  },
+  {
+    label: 'Karir & Promosi',
+    icon: ArrowUpRight,
+    path: '/promotions',
+    requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
   },
   // {
   //   label: 'Permintaan Layanan HR',
@@ -222,6 +239,7 @@ export const menuItems: MenuItem[] = [
         subItems: [
           { label: 'Pelatihan Saya', path: '/my/trainings' },
           { label: 'Lembur Saya', path: '/attendance/overtime' },
+          { label: 'Promosi Saya', path: '/my/promotions' },
         ]
       },
       {
@@ -230,6 +248,7 @@ export const menuItems: MenuItem[] = [
           { label: 'Dokumen Saya', path: '/my/documents' },
           { label: 'Aset Saya', path: '/my/assets' },
           { label: 'Surat Tugas', path: '/my/assignment-letters' },
+          { label: 'Tugas Saya', path: '/my/tasks' },
         ]
       },
   //   },
@@ -366,19 +385,19 @@ export const menuItems: MenuItem[] = [
           label: 'Log Audit',
           path: '/admin/audit-logs',
           requiredChecker: (user) =>
-            RBACUtils.isAdmin(user) || RBACUtils.isSuperAdmin(user),
+            RBACUtils.isSuperAdmin(user),
         },
         {
           label: 'Perangkat Biometrik',
           path: '/admin/biometric-devices',
           requiredChecker: (user) =>
-            RBACUtils.isAdmin(user) || RBACUtils.isSuperAdmin(user),
+            RBACUtils.isSuperAdmin(user),
         },
         {
           label: 'Alur Persetujuan',
           path: '/approval-flows',
           requiredChecker: (user) =>
-            RBACUtils.isAdmin(user) || RBACUtils.isSuperAdmin(user),
+            RBACUtils.isSuperAdmin(user),
         },
       ],
     },

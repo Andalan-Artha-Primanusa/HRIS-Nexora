@@ -2817,8 +2817,8 @@ const SectionPage = () => {
                 </div>
               </div>
               <div className="policy-actions">
-                <Badge variant={active === 'Yes' || active === true ? 'success' : 'danger'}>
-                  {active === 'Yes' || active === true ? 'Active' : 'Inactive'}
+                <Badge variant={String(active) === 'Yes' || String(active) === 'true' ? 'success' : 'danger'}>
+                  {String(active) === 'Yes' || String(active) === 'true' ? 'Active' : 'Inactive'}
                 </Badge>
               </div>
             </div>

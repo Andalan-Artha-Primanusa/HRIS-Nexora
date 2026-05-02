@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { RefreshCw, GraduationCap, Clock, CheckCircle, BookOpen, Play, BookTemplate, Search } from 'lucide-react';
+import { RefreshCw, GraduationCap, Clock, CheckCircle, BookOpen, Play, BookTemplate, Search, Award, FileText, Star, X, ExternalLink, Eye } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
-import { api } from '@/shared/api/httpClient';
+import { trainingService } from '@/features/training/api/training.service';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
@@ -21,19 +21,21 @@ const MyTrainingsPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
 
+  // Result Modal
+  const [showResultModal, setShowResultModal] = useState(false);
+  const [selectedResult, setSelectedResult] = useState<any>(null);
+
   const fetchData = async () => {
     setLoading(true);
     setErrorMessage(null);
     try {
       const [myRes, availRes] = await Promise.all([
-        api.get('/my/trainings'),
-        api.get('/my/trainings/available')
+        trainingService.getMyTrainings(),
+        trainingService.getAvailableTrainings()
       ]);
-      const myData = myRes.data;
-      const availData = availRes.data;
       
-      setTrainings(Array.isArray(myData) ? myData : Array.isArray(myData?.data) ? myData.data : []);
-      setAvailableTrainings(Array.isArray(availData) ? availData : Array.isArray(availData?.data?.data) ? availData.data.data : Array.isArray(availData?.data) ? availData.data : []);
+      setTrainings(Array.isArray(myRes) ? myRes : Array.isArray(myRes?.data) ? myRes.data : []);
+      setAvailableTrainings(Array.isArray(availRes) ? availRes : Array.isArray(availRes?.data?.data) ? availRes.data.data : Array.isArray(availRes?.data) ? availRes.data : []);
     } catch (error) {
       console.error('Error fetching trainings:', error);
       setErrorMessage('Gagal memuat pelatihan');
@@ -50,13 +52,18 @@ const MyTrainingsPage: React.FC = () => {
     if (!window.confirm('Apakah Anda yakin ingin mendaftar pelatihan ini?')) return;
     try {
       setLoading(true);
-      await api.post(`/my/trainings/${id}/enroll`);
+      await trainingService.selfEnroll(id);
       alert('Berhasil mengajukan pendaftaran pelatihan. Menunggu approval.');
       fetchData();
     } catch (error: any) {
       alert(error.response?.data?.message || 'Gagal mendaftar pelatihan');
       setLoading(false);
     }
+  };
+
+  const handleViewResult = (training: any) => {
+    setSelectedResult(training);
+    setShowResultModal(true);
   };
 
   // Filter & Sort & Paginate
@@ -314,10 +321,14 @@ const MyTrainingsPage: React.FC = () => {
                               <span style={{ color: '#64748b' }}>{training.progress}%</span>
                             ) : '-'}
                           </td>
-                          <td className="td-center">
+                           <td className="td-center">
                             {activeTab === 'Tersedia' ? (
                               <button className="btn-primary" style={{ padding: '6px 12px', fontSize: '0.75rem' }} onClick={() => handleEnroll(training.id)}>
                                 Daftar
+                              </button>
+                            ) : training.status === 'completed' ? (
+                              <button className="btn-outline" style={{ padding: '6px 12px', fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }} onClick={() => handleViewResult(training)}>
+                                <Eye size={14} /> Lihat Hasil
                               </button>
                             ) : (
                               <span className={`badge-soft badge-soft--${training.status === 'completed' ? 'green' : training.status === 'pending' ? 'yellow' : 'blue'}`}>
@@ -367,6 +378,116 @@ const MyTrainingsPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Result Modal */}
+      {showResultModal && selectedResult && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }} onClick={() => setShowResultModal(false)}>
+          <Card glass style={{ maxWidth: '560px', width: '100%', position: 'relative', maxHeight: '90vh', overflowY: 'auto' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ padding: '1.5rem' }}>
+              {/* Header */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div style={{ background: '#ecfdf5', borderRadius: '12px', padding: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Award size={28} color="#10b981" />
+                  </div>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#1e293b', fontWeight: 700 }}>Hasil Pelatihan</h3>
+                    <p style={{ margin: 0, fontSize: '0.875rem', color: '#64748b' }}>{selectedResult.program?.title || selectedResult.title}</p>
+                  </div>
+                </div>
+                <button onClick={() => setShowResultModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '0.25rem' }}>
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Score Card */}
+              {selectedResult.score !== null && selectedResult.score !== undefined && (
+                <div style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', borderRadius: '16px', padding: '1.5rem', marginBottom: '1.5rem', textAlign: 'center', color: '#fff' }}>
+                  <Star size={32} style={{ marginBottom: '0.5rem' }} fill="#fbbf24" color="#fbbf24" />
+                  <div style={{ fontSize: '3rem', fontWeight: 800 }}>{selectedResult.score}</div>
+                  <div style={{ fontSize: '0.875rem', opacity: 0.9 }}>Skor Akhir</div>
+                </div>
+              )}
+
+              {/* Details */}
+              <div style={{ background: '#f8fafc', borderRadius: '12px', padding: '1.25rem' }}>
+                <h4 style={{ margin: '0 0 1rem', fontSize: '0.9rem', fontWeight: 600, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Detail</h4>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {/* Program */}
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                    <div style={{ background: '#eff6ff', borderRadius: '8px', padding: '0.5rem', display: 'flex' }}>
+                      <BookOpen size={16} color="#3b82f6" />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.125rem' }}>Program</div>
+                      <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1e293b' }}>{selectedResult.program?.title || selectedResult.title || '-'}</div>
+                    </div>
+                  </div>
+
+                  {/* Category */}
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                    <div style={{ background: '#f0fdf4', borderRadius: '8px', padding: '0.5rem', display: 'flex' }}>
+                      <GraduationCap size={16} color="#22c55e" />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.125rem' }}>Kategori</div>
+                      <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1e293b' }}>{selectedResult.category || selectedResult.program?.category || '-'}</div>
+                    </div>
+                  </div>
+
+                  {/* Completed Date */}
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                    <div style={{ background: '#fef3c7', borderRadius: '8px', padding: '0.5rem', display: 'flex' }}>
+                      <Clock size={16} color="#f59e0b" />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.125rem' }}>Tanggal Selesai</div>
+                      <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1e293b' }}>{selectedResult.completed_at ? new Date(selectedResult.completed_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}</div>
+                    </div>
+                  </div>
+
+                  {/* Certificate */}
+                  {selectedResult.certificate_path && (
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                      <div style={{ background: '#fdf2f8', borderRadius: '8px', padding: '0.5rem', display: 'flex' }}>
+                        <FileText size={16} color="#ec4899" />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.125rem' }}>Sertifikat</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1e293b' }}>Tersedia</span>
+                          <ExternalLink size={14} color="#6366f1" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Notes */}
+                  {selectedResult.notes && (
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                      <div style={{ background: '#f1f5f9', borderRadius: '8px', padding: '0.5rem', display: 'flex' }}>
+                        <FileText size={16} color="#64748b" />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.125rem' }}>Catatan</div>
+                        <div style={{ fontSize: '0.875rem', color: '#334155' }}>{selectedResult.notes}</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Close Button */}
+              <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'flex-end' }}>
+                <button className="btn-primary" onClick={() => setShowResultModal(false)} style={{ padding: '0.625rem 1.5rem' }}>
+                  Tutup
+                </button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };

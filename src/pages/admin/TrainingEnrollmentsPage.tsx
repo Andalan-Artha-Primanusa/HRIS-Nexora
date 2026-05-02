@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { RefreshCw, GraduationCap, Users, Search, Filter, CheckCircle, Clock, XCircle, BookOpen } from 'lucide-react';
+import { RefreshCw, GraduationCap, Users, Search, Filter, CheckCircle, Clock, XCircle, BookOpen, Award, X, Loader2 } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
-import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
+import { Modal } from '@/shared/ui/Modal';
+import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { trainingService } from '@/features/training/api/training.service';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
@@ -21,6 +22,13 @@ const TrainingEnrollmentsPage: React.FC = () => {
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
+
+  // Complete Modal State
+  const [completeModalOpen, setCompleteModalOpen] = useState(false);
+  const [completingEnrollmentId, setCompletingEnrollmentId] = useState<number | null>(null);
+  const [completingEnrollmentName, setCompletingEnrollmentName] = useState('');
+  const [completing, setCompleting] = useState(false);
+  const [completeData, setCompleteData] = useState({ score: '', notes: '', certificate_path: '' });
 
   const fetchData = async () => {
     setLoading(true);
@@ -65,20 +73,38 @@ const TrainingEnrollmentsPage: React.FC = () => {
     }
   };
 
-  const summaryStats = useMemo(() => {
-    const total = enrollments.length;
-    const completed = enrollments.filter(e => e.status === 'completed').length;
-    const inProgress = enrollments.filter(e => e.status === 'in_progress' || e.status === 'ongoing').length;
-    const pending = enrollments.filter(e => e.status === 'pending').length;
-    const cancelled = enrollments.filter(e => e.status === 'cancelled' || e.status === 'dropped').length;
+  const openCompleteModal = (enrollment: any) => {
+    setCompletingEnrollmentId(enrollment.id);
+    setCompletingEnrollmentName(enrollment.program?.title || 'Training');
+    setCompleteData({ score: '', notes: '', certificate_path: '' });
+    setCompleteModalOpen(true);
+  };
 
-    return [
-      { label: "Total Pendaftaran", subtitle: "Seluruh pendaftaran", value: String(total), change: "Data pendaftaran aktif", tone: "blue" as const, icon: Users },
-      { label: "Hasil Filter", subtitle: "Pendaftaran sesuai pencarian", value: String(filteredEnrollments.length), change: `${paginatedEnrollments.length} data per halaman`, tone: "green" as const, icon: Search },
-      { label: "Sedang Berlangsung", subtitle: "Pelatihan aktif", value: String(inProgress), change: "Dalam proses", tone: "orange" as const, icon: Clock },
-      { label: "Selesai", subtitle: "Pelatihan selesai", value: String(completed), change: "Status final selesai", tone: "green" as const, icon: CheckCircle },
-    ];
-  }, [enrollments, filteredEnrollments.length, paginatedEnrollments.length]);
+  const closeCompleteModal = () => {
+    setCompleteModalOpen(false);
+    setCompletingEnrollmentId(null);
+    setCompletingEnrollmentName('');
+    setCompleteData({ score: '', notes: '', certificate_path: '' });
+  };
+
+  const handleComplete = async () => {
+    if (!completingEnrollmentId) return;
+    setCompleting(true);
+    try {
+      const payload: any = {};
+      if (completeData.score) payload.score = Number(completeData.score);
+      if (completeData.notes) payload.notes = completeData.notes;
+      if (completeData.certificate_path) payload.certificate_path = completeData.certificate_path;
+      await trainingService.completeTraining(completingEnrollmentId, payload);
+      closeCompleteModal();
+      fetchData();
+    } catch (err: any) {
+      console.error(err);
+      alert(err.response?.data?.message || 'Gagal menandai pelatihan selesai');
+    } finally {
+      setCompleting(false);
+    }
+  };
 
   const filteredEnrollments = useMemo(() => {
     return enrollments.filter((e: any) => {
@@ -102,6 +128,19 @@ const TrainingEnrollmentsPage: React.FC = () => {
     const startIndex = (currentPage - 1) * pageSize;
     return filteredEnrollments.slice(startIndex, startIndex + pageSize);
   }, [filteredEnrollments, currentPage, pageSize]);
+
+  const summaryStats = useMemo(() => {
+    const total = enrollments.length;
+    const completed = enrollments.filter(e => e.status === 'completed').length;
+    const inProgress = enrollments.filter(e => e.status === 'in_progress' || e.status === 'ongoing').length;
+
+    return [
+      { label: "Total Pendaftaran", subtitle: "Seluruh pendaftaran", value: String(total), change: "Data pendaftaran aktif", tone: "blue" as const, icon: Users },
+      { label: "Hasil Filter", subtitle: "Pendaftaran sesuai pencarian", value: String(filteredEnrollments.length), change: `${paginatedEnrollments.length} data per halaman`, tone: "green" as const, icon: Search },
+      { label: "Sedang Berlangsung", subtitle: "Pelatihan aktif", value: String(inProgress), change: "Dalam proses", tone: "orange" as const, icon: Clock },
+      { label: "Selesai", subtitle: "Pelatihan selesai", value: String(completed), change: "Status final selesai", tone: "green" as const, icon: CheckCircle },
+    ];
+  }, [enrollments, filteredEnrollments.length, paginatedEnrollments.length]);
 
   const totalPages = Math.ceil(filteredEnrollments.length / pageSize);
 
@@ -342,6 +381,16 @@ const TrainingEnrollmentsPage: React.FC = () => {
                                 </button>
                               </>
                             )}
+                            {(enrollment.status === 'enrolled' || enrollment.status === 'in_progress') && (
+                              <button
+                                className="action-btn"
+                                style={{ color: '#8b5cf6', background: '#f5f3ff' }}
+                                onClick={() => openCompleteModal(enrollment)}
+                                title="Tandai Selesai"
+                              >
+                                <Award size={16} />
+                              </button>
+                            )}
                             <button
                               className="action-btn action-btn-edit"
                               onClick={() => navigate(`/training/programs`)}
@@ -392,6 +441,72 @@ const TrainingEnrollmentsPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Complete Modal */}
+      <Modal
+        isOpen={completeModalOpen}
+        onClose={closeCompleteModal}
+        title={`Tandai Selesai — ${completingEnrollmentName}`}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div className="form-group">
+            <label>Nilai (0-100)</label>
+            <input
+              type="number"
+              min="0"
+              max="100"
+              placeholder="Masukkan nilai"
+              value={completeData.score}
+              onChange={(e) => setCompleteData({ ...completeData, score: e.target.value })}
+              className="form-control"
+            />
+          </div>
+          <div className="form-group">
+            <label>Path Sertifikat (opsional)</label>
+            <input
+              type="text"
+              placeholder="/path/to/certificate.pdf"
+              value={completeData.certificate_path}
+              onChange={(e) => setCompleteData({ ...completeData, certificate_path: e.target.value })}
+              className="form-control"
+            />
+          </div>
+          <div className="form-group">
+            <label>Catatan (opsional)</label>
+            <textarea
+              placeholder="Catatan tambahan..."
+              value={completeData.notes}
+              onChange={(e) => setCompleteData({ ...completeData, notes: e.target.value })}
+              className="form-control"
+              rows={3}
+            />
+          </div>
+          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+            <button
+              type="button"
+              className="btn-primary"
+              style={{ flex: 1, padding: '0.75rem', borderRadius: '10px', fontWeight: 600 }}
+              onClick={handleComplete}
+              disabled={completing}
+            >
+              {completing ? (
+                <><Loader2 size={16} className="animate-spin" style={{ marginRight: '6px' }} />Menyimpan...</>
+              ) : (
+                <><Award size={16} style={{ marginRight: '6px' }} />Tandai Selesai</>
+              )}
+            </button>
+            <button
+              type="button"
+              className="btn-outline"
+              style={{ flex: 1, padding: '0.75rem', borderRadius: '10px', fontWeight: 600 }}
+              onClick={closeCompleteModal}
+              disabled={completing}
+            >
+              <X size={16} style={{ marginRight: '6px' }} />Batal
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

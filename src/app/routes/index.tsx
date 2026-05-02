@@ -125,9 +125,14 @@ const CalibrationFormPage = lazy(() => import("../../pages/admin/CalibrationForm
 const HrRequestFormPage = lazy(() => import("../../pages/admin/HrRequestFormPage.tsx"));
 const SlaPage = lazy(() => import("../../pages/admin/SlaPage.tsx"));
 const AssetAssignmentsPage = lazy(() => import("../../pages/admin/AssetAssignmentsPage.tsx"));
+const AssignmentLettersPage = lazy(() => import("../../pages/admin/AssignmentLettersPage.tsx"));
+const TaskManagementPage = lazy(() => import("../../pages/admin/TaskManagementPage.tsx"));
+const PromotionPage = lazy(() => import("../../pages/admin/PromotionPage.tsx"));
 
 const MyAssetsPage = lazy(() => import("../../pages/ess/MyAssetsPage.tsx"));
 const MyAssignmentLettersPage = lazy(() => import("../../pages/ess/MyAssignmentLettersPage.tsx"));
+const MyTasksPage = lazy(() => import("../../pages/ess/MyTasksPage.tsx"));
+const MyPromotionsPage = lazy(() => import("../../pages/ess/MyPromotionsPage.tsx"));
 // const MyDocumentsPage = lazy(() => import("../../pages/ess/MyDocumentsPage.tsx"));
 const ShiftSwapFormPage = lazy(() => import("../../pages/admin/ShiftSwapFormPage.tsx"));
 const OvertimeApprovalPage = lazy(() => import("../../pages/admin/OvertimeApprovalPage.tsx"));
@@ -374,6 +379,16 @@ export const router = createBrowserRouter([
         path: "/my/assignment-letters",
         element: <DashboardLayout />,
         children: [{ index: true, element: <MyAssignmentLettersPage /> }],
+      },
+      {
+        path: "/my/tasks",
+        element: <DashboardLayout />,
+        children: [{ index: true, element: <MyTasksPage /> }],
+      },
+      {
+        path: "/my/promotions",
+        element: <DashboardLayout />,
+        children: [{ index: true, element: <MyPromotionsPage /> }],
       },
       {
         path: "/my/documents",
@@ -674,6 +689,7 @@ export const router = createBrowserRouter([
           { path: "/legal/severance", element: <SeveranceCalculatorPage /> },
           { path: "/legal/letters", element: <EmploymentLettersPage /> },
           { path: "/legal/tax", element: <ProgressiveTaxPage /> },
+          { path: "/admin/assignment-letters", element: <AssignmentLettersPage /> },
           
           { path: "/organization/chart", element: <OrgChartPage /> },
           { path: "/hr-requests", element: <HrRequestsPage /> },
@@ -717,6 +733,9 @@ export const router = createBrowserRouter([
           { path: "/assets/assignments", element: <AssetAssignmentsPage /> },
           { path: "/inventory/assets/create", element: <AssetFormPage /> },
           { path: "/inventory/assets/edit/:id", element: <AssetFormPage /> },
+          { path: "/tasks", element: <TaskManagementPage /> },
+          { path: "/promotions", element: <PromotionPage /> },
+          { path: "/admin/assignment-letters", element: <AssignmentLettersPage /> },
           { path: "/compensation/benefits", element: <BenefitManagementPage /> },
           { path: "/compensation/benefits/create", element: <BenefitFormPage /> },
           { path: "/compensation/benefits/edit/:id", element: <BenefitFormPage /> },

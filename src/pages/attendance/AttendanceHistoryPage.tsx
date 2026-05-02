@@ -155,12 +155,12 @@ const AttendanceHistoryPage = () => {
       </Card>
 
       {errorMessage && (
-        <Alert
-          type="error"
-          message={errorMessage}
-          onClose={() => setErrorMessage('')}
-          dismissible
-        />
+        <div style={{ background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: '0.5rem', padding: '1rem', marginBottom: '1rem', color: '#b91c1c' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>{errorMessage}</span>
+            <button onClick={() => setErrorMessage('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#b91c1c' }}>×</button>
+          </div>
+        </div>
       )}
 
       {/* Summary Cards */}

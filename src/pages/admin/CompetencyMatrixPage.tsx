@@ -1,27 +1,49 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Download, Award, Users, TrendingUp, Plus, RefreshCw, Edit, Trash2, Target, Star } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Search, Filter, Award, Target, Plus, RefreshCw, Pencil, Trash2, Users, CheckCircle, UserPlus, Eye } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { trainingService } from '@/features/training/api/training.service';
+import { CompetencyModal } from '@/features/training/components/CompetencyModal';
+import { AssignCompetencyModal } from '@/features/training/components/AssignCompetencyModal';
+import { AssignedEmployeesModal } from '@/features/training/components/AssignedEmployeesModal';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
-import '@/pages/payroll/PayrollShared.css';
-import './CompetencyMatrixPage.css';
+import '@/pages/employee/EmployeesPage.css';
 
 const CompetencyMatrixPage: React.FC = () => {
-  const [competencies, setCompetencies] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [levelFilter, setLevelFilter] = useState('all');
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [searchText, setSearchText] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [activeTab, setActiveTab] = useState<'Semua' | 'Aktif' | 'Tidak Aktif'>('Semua');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingCompetency, setEditingCompetency] = useState<any>(null);
+  const [assigningCompetency, setAssigningCompetency] = useState<any>(null);
+  const [viewingAssigned, setViewingAssigned] = useState<any>(null);
 
   const fetchData = async () => {
     setLoading(true);
+    setErrorMessage(null);
     try {
-      const data = await trainingService.getCompetencies();
-      const competenciesArray = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
-      setCompetencies(competenciesArray);
-    } catch (err) {
-      console.error(err);
+      const response = await trainingService.getCompetencies();
+      let data: any[] = [];
+      if (Array.isArray(response)) {
+        data = response;
+      } else if (response?.data?.data && Array.isArray(response.data.data)) {
+        data = response.data.data;
+      } else if (response?.data && Array.isArray(response.data)) {
+        data = response.data;
+      }
+      setItems(Array.isArray(data) ? data : []);
+    } catch (err: any) {
+      const msg = err instanceof Error ? err.message : 'Gagal memuat kompetensi.';
+      setErrorMessage(msg);
+      setItems([]);
     } finally {
       setLoading(false);
     }
@@ -31,37 +53,118 @@ const CompetencyMatrixPage: React.FC = () => {
     fetchData();
   }, []);
 
-  const filteredCompetencies = competencies.filter(c => {
-    const matchesSearch = 
-      c.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.category?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesLevel = levelFilter === 'all' || c.level?.toLowerCase() === levelFilter;
-    return matchesSearch && matchesLevel;
-  });
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText, selectedCategory, activeTab]);
 
-  const expertCount = competencies.filter(c => c.level?.toLowerCase() === 'expert').length;
-  const advancedCount = competencies.filter(c => c.level?.toLowerCase() === 'advanced').length;
+  const uniqueCategories = useMemo(() => {
+    return Array.from(new Set(items.map((c) => c.category).filter(Boolean))).sort();
+  }, [items]);
 
-  const getLevelColor = (level: string) => {
-    switch (level?.toLowerCase()) {
-      case 'expert': return { color: '#8b5cf6', bg: '#f5f3ff', label: 'Expert' };
-      case 'advanced': return { color: '#2563eb', bg: '#eff6ff', label: 'Advanced' };
-      case 'intermediate': return { color: '#10b981', bg: '#ecfdf5', label: 'Intermediate' };
-      case 'beginner': return { color: '#f59e0b', bg: '#fffbeb', label: 'Beginner' };
-      default: return { color: '#64748b', bg: '#f1f5f9', label: 'Unknown' };
+  const filteredItems = useMemo(() => {
+    return items.filter((item) => {
+      const searchStr = searchText.toLowerCase();
+      const nameMatch = item.name?.toLowerCase().includes(searchStr);
+      const codeMatch = item.code?.toLowerCase().includes(searchStr);
+      const descMatch = item.description?.toLowerCase().includes(searchStr);
+      const textMatch = nameMatch || codeMatch || descMatch;
+      const catMatch = !selectedCategory || item.category === selectedCategory;
+      let statusMatch = true;
+      if (activeTab === 'Aktif') statusMatch = item.status === 'active';
+      else if (activeTab === 'Tidak Aktif') statusMatch = item.status === 'inactive';
+      return textMatch && catMatch && statusMatch;
+    });
+  }, [items, searchText, selectedCategory, activeTab]);
+
+  const paginatedItems = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredItems.slice(start, start + pageSize);
+  }, [filteredItems, currentPage, pageSize]);
+
+  const totalPages = Math.ceil(filteredItems.length / pageSize);
+
+  const activeCount = items.filter((c) => c.status === 'active').length;
+  const inactiveCount = items.filter((c) => c.status === 'inactive').length;
+
+  const summaryCards = [
+    {
+      label: 'Total Kompetensi',
+      subtitle: 'Seluruh kompetensi karyawan',
+      value: String(items.length),
+      change: 'Kompetensi terdaftar',
+      tone: 'blue' as const,
+      icon: Award,
+    },
+    {
+      label: 'Aktif',
+      subtitle: 'Kompetensi yang aktif',
+      value: String(activeCount),
+      change: 'Kompetensi berlaku',
+      tone: 'green' as const,
+      icon: CheckCircle,
+    },
+    {
+      label: 'Tidak Aktif',
+      subtitle: 'Kompetensi dinonaktifkan',
+      value: String(inactiveCount),
+      change: 'Kompetensi tidak berlaku',
+      tone: 'red' as const,
+      icon: Target,
+    },
+    {
+      label: 'Kategori',
+      subtitle: 'Jenis kompetensi',
+      value: String(uniqueCategories.length),
+      change: 'Kategori terdaftar',
+      tone: 'purple' as const,
+      icon: Users,
+    },
+  ];
+
+  const clearFilters = () => {
+    setSearchText('');
+    setSelectedCategory('');
+    setActiveTab('Semua');
+    setCurrentPage(1);
+  };
+
+  const handleSave = async (formData: any) => {
+    if (editingCompetency) {
+      await trainingService.updateCompetency(editingCompetency.id, formData);
+    } else {
+      await trainingService.createCompetency(formData);
+    }
+    setEditingCompetency(null);
+    fetchData();
+  };
+
+  const handleEdit = (comp: any) => {
+    setEditingCompetency(comp);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('Yakin ingin menghapus kompetensi ini?')) return;
+    try {
+      await trainingService.deleteCompetency(id);
+      fetchData();
+    } catch (err) {
+      console.error('Gagal menghapus kompetensi', err);
     }
   };
 
-  const levelFilters = [
-    { key: 'all', label: 'All Levels' },
-    { key: 'expert', label: 'Expert' },
-    { key: 'advanced', label: 'Advanced' },
-    { key: 'intermediate', label: 'Intermediate' },
-    { key: 'beginner', label: 'Beginner' },
-  ];
+  const handleAddNew = () => {
+    setEditingCompetency(null);
+    setIsModalOpen(true);
+  };
+
+  const handleAssign = async (competencyId: string | number, employeeId: number, data: { proficiency_level?: number; notes?: string }) => {
+    await trainingService.assignCompetency(competencyId, [employeeId], data);
+    fetchData();
+  };
 
   return (
-    <div className="crud-page competency-page">
+    <div className="crud-page">
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -70,171 +173,282 @@ const CompetencyMatrixPage: React.FC = () => {
               <span>Kompetensi</span>
             </div>
             <h1 className="hero-title">Matriks Kompetensi</h1>
-            <p className="hero-subtitle">
-              Kelola keterampilan, keahlian teknis, dan kompetensi inti karyawan.
-            </p>
+            <p className="hero-subtitle">Kelola keterampilan, keahlian teknis, dan kompetensi inti karyawan.</p>
           </div>
           <div className="hero-actions">
             <button className="btn-outline" onClick={fetchData} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan
             </button>
-            <button className="btn-primary" onClick={() => {}}>
-              <Download size={16} />
-              Ekspor
+            <button className="btn-primary" onClick={handleAddNew}>
+              <Plus size={16} />
+              Tambah Kompetensi
             </button>
           </div>
         </div>
       </Card>
 
-      <div className="leave-requests-wrapper">
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Total Kompetensi</p>
-              <p className="leave-summary-subtitle">Seluruh kompetensi karyawan</p>
+      <div className="employee-summary-wrapper">
+        {summaryCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <div key={card.label} className="employee-summary-card">
+              <div className="employee-summary-header">
+                <div>
+                  <p className="employee-summary-label">{card.label}</p>
+                  <p className="employee-summary-subtitle">{card.subtitle}</p>
+                </div>
+                <div className={`employee-summary-icon-wrapper employee-icon-${card.tone}`}>
+                  <Icon size={28} />
+                </div>
+              </div>
+              <div className={`employee-summary-value employee-value-${card.tone}`}>{card.value}</div>
+              <p className="employee-summary-trend">{card.change}</p>
             </div>
-            <div className="leave-summary-icon-wrapper leave-icon-blue">
-              <Award size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-blue">{competencies.length}</div>
-          <p className="leave-summary-trend">Kompetensi</p>
-        </div>
-
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Ahli</p>
-              <p className="leave-summary-subtitle">Tingkat ahli</p>
-            </div>
-            <div className="leave-summary-icon-wrapper" style={{ background: '#f5f3ff' }}>
-              <Star size={28} color="#8b5cf6" />
-            </div>
-          </div>
-          <div className="leave-summary-value" style={{ color: '#8b5cf6' }}>{expertCount}</div>
-          <p className="leave-summary-trend">Keahlian Ahli</p>
-        </div>
-
-        <div className="leave-summary-card">
-          <div className="leave-summary-header">
-            <div>
-              <p className="leave-summary-label">Mahir</p>
-              <p className="leave-summary-subtitle">Tingkat mahir</p>
-            </div>
-            <div className="leave-summary-icon-wrapper leave-icon-green">
-              <TrendingUp size={28} />
-            </div>
-          </div>
-          <div className="leave-summary-value leave-value-green">{advancedCount}</div>
-          <p className="leave-summary-trend">Keahlian Mahir</p>
-        </div>
+          );
+        })}
       </div>
 
-      <div className="white-unified-wrapper">
-        <div className="wuw-header">
-          <div className="wuw-header-top">
-            <div className="wuw-title-area">
-              <h3>Skill Inventory</h3>
-              <span className="wuw-count-badge">{filteredCompetencies.length} skills</span>
-            </div>
-            <div className="header-actions">
-              <div className="search-box">
-                <Search size={18} />
-                <input 
-                  type="text" 
-                  placeholder="Search skills..." 
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-            </div>
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <Award size={24} />
           </div>
-          <div className="level-filters">
-            {levelFilters.map(filter => (
+          <div>
+            <h2 className="analytics-title">Daftar Kompetensi</h2>
+            <p className="analytics-subtitle">Kelola dan lihat semua kompetensi</p>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="control-section-card">
+        <div className="control-section-inner">
+          <div className="elyra-tabs">
+            {(['Semua', 'Aktif', 'Tidak Aktif'] as const).map((tab) => (
               <button
-                key={filter.key}
-                className={`level-filter ${levelFilter === filter.key ? 'active' : ''}`}
-                onClick={() => setLevelFilter(filter.key)}
+                key={tab}
+                className={`elyra-tab ${activeTab === tab ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab)}
               >
-                {filter.label}
+                {tab}
               </button>
             ))}
           </div>
+
+          <div className="control-actions">
+            <div className="search-box">
+              <div className="search-icon-inside"><Search size={18} /></div>
+              <input
+                type="text"
+                placeholder="Cari kompetensi..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="search-input-pill"
+              />
+            </div>
+            <button
+              className={`filter-btn-rounded ${showFilters ? 'active' : ''}`}
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <Filter size={18} />
+              <span>Filter</span>
+            </button>
+          </div>
         </div>
 
-        <div className="wuw-table-area">
-          {loading ? (
-            <div className="loading-state">
-              <RefreshCw size={32} className="animate-spin" />
-              <p>Loading competencies...</p>
-            </div>
-          ) : filteredCompetencies.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-icon">
-                <Award size={48} />
+        {showFilters && (
+          <div className="filter-dropdown">
+            <div className="filter-row">
+              <div className="filter-group">
+                <label>Kategori</label>
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="filter-select-premium"
+                >
+                  <option value="">Semua Kategori</option>
+                  {uniqueCategories.map((cat) => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
               </div>
-              <h4>No competencies found</h4>
-              <p>Add your first competency to build the skill matrix.</p>
-              <Button variant="primary">
-                <Plus size={16} /> Add Competency
-              </Button>
+              {(searchText || selectedCategory || activeTab !== 'Semua') && (
+                <button className="btn-clear-filter" onClick={clearFilters}>
+                  Hapus Filter
+                </button>
+              )}
             </div>
-          ) : (
-            <div className="competency-grid">
-              {filteredCompetencies.map((comp) => {
-                const levelStyle = getLevelColor(comp.level);
-                return (
-                  <Card key={comp.id} className="competency-card" glass>
-                    <div className="competency-header">
-                      <div 
-                        className="competency-icon"
-                        style={{ background: levelStyle.bg, color: levelStyle.color }}
-                      >
-                        <Target size={20} />
-                      </div>
-                      <div className="competency-info">
-                        <h4>{comp.name}</h4>
-                        <span className="competency-category">{comp.category || 'General'}</span>
-                      </div>
-                      <span 
-                        className="competency-level"
-                        style={{ background: levelStyle.bg, color: levelStyle.color }}
-                      >
-                        {levelStyle.label}
-                      </span>
-                    </div>
-                    
-                    <p className="competency-description">{comp.description || 'No description provided.'}</p>
-                    
-                    <div className="competency-meta">
-                      <div className="meta-item">
-                        <Users size={14} />
-                        <span>{comp.employee_count || comp.assigned_count || 0} assigned</span>
-                      </div>
-                      {comp.required_for && (
-                        <div className="meta-item">
-                          <Target size={14} />
-                          <span>Required for: {comp.required_for}</span>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="competency-actions">
-                      <Button variant="ghost" size="sm">
-                        <Edit size={16} /> Edit
-                      </Button>
-                      <Button variant="ghost" size="sm" danger>
-                        <Trash2 size={16} /> Delete
-                      </Button>
-                    </div>
-                  </Card>
-                );
-              })}
+          </div>
+        )}
+      </Card>
+
+      <div className="table-section">
+        <div className="wuw-table-area">
+          {loading && <LoadingState message="Memuat kompetensi..." />}
+          {!loading && errorMessage && (
+            <ErrorState message="Koneksi Terputus" error={errorMessage} onRetry={fetchData} />
+          )}
+          {!loading && !errorMessage && filteredItems.length === 0 && (
+            <div style={{ padding: '5rem 0' }}>
+              <EmptyState
+                title="Pencarian Kosong"
+                message="Kami tidak menemukan kompetensi yang sesuai dengan kriteria Anda."
+                actionLabel="Bersihkan Filter"
+                onAction={clearFilters}
+              />
             </div>
+          )}
+          {!loading && !errorMessage && filteredItems.length > 0 && (
+            <>
+              <div className="table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: '300px' }}>Kompetensi</th>
+                      <th>Kode</th>
+                      <th>Kategori</th>
+                      <th>Deskripsi</th>
+                      <th>Ditugaskan</th>
+                      <th className="th-center">Status</th>
+                      <th className="th-center" style={{ width: '120px' }}>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedItems.map((item) => (
+                      <tr key={item.id}>
+                        <td>
+                          <div className="cell-name">
+                            <div className="cell-avatar">
+                              {item.name ? item.name.charAt(0).toUpperCase() : 'C'}
+                            </div>
+                            <div className="cell-stacked">
+                              <span className="cell-name-text">{item.name}</span>
+                              <span className="cell-stacked__sub">{item.category || 'General'}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <span className="badge-soft badge-soft--blue">{item.code || '-'}</span>
+                        </td>
+                        <td>
+                          <span style={{ color: '#475569', fontWeight: 600 }}>{item.category || '-'}</span>
+                        </td>
+                        <td>
+                          <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
+                            {item.description ? (item.description.length > 60 ? item.description.substring(0, 60) + '...' : item.description) : '-'}
+                          </span>
+                        </td>
+                        <td>
+                          <button
+                            onClick={() => setViewingAssigned(item)}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: '6px' }}
+                          >
+                            <div className="cell-stacked">
+                              <span className="cell-stacked__main" style={{ fontSize: '0.9rem', fontWeight: 600, color: '#2563eb', textDecoration: 'underline' }}>
+                                {item.employee_competencies?.length || 0}
+                              </span>
+                              <span className="cell-stacked__sub">karyawan</span>
+                            </div>
+                            <Eye size={14} color="#2563eb" />
+                          </button>
+                        </td>
+                        <td className="td-center">
+                          <span className={`badge-soft badge-soft--${item.status === 'active' ? 'green' : 'red'}`}>
+                            {item.status === 'active' ? 'Aktif' : 'Tidak Aktif'}
+                          </span>
+                        </td>
+                        <td className="td-center">
+                          <div className="action-btn-group">
+                            <button
+                              className="action-btn action-btn-secondary"
+                              onClick={() => {
+                                setAssigningCompetency(item);
+                              }}
+                              title="Assign"
+                            >
+                              <UserPlus size={16} />
+                            </button>
+                            <button
+                              className="action-btn action-btn-edit"
+                              onClick={() => handleEdit(item)}
+                              title="Edit"
+                            >
+                              <Pencil size={16} />
+                            </button>
+                            <button
+                              className="action-btn action-btn-delete"
+                              onClick={() => handleDelete(item.id)}
+                              title="Hapus"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="table-pagination">
+                <div className="pagination-info">
+                  Menampilkan <strong>{paginatedItems.length}</strong> dari <strong>{filteredItems.length}</strong> kompetensi
+                </div>
+                <div className="pagination-controls">
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    ‹
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    ›
+                  </button>
+                </div>
+              </div>
+            </>
           )}
         </div>
       </div>
+
+      <CompetencyModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingCompetency(null);
+        }}
+        onSave={handleSave}
+        initialData={editingCompetency}
+      />
+
+      <AssignCompetencyModal
+        isOpen={!!assigningCompetency}
+        onClose={() => setAssigningCompetency(null)}
+        onAssign={handleAssign}
+        competencyId={assigningCompetency?.id}
+        competencyName={assigningCompetency?.name}
+      />
+
+      <AssignedEmployeesModal
+        isOpen={!!viewingAssigned}
+        onClose={() => setViewingAssigned(null)}
+        competencyId={viewingAssigned?.id}
+        competencyName={viewingAssigned?.name}
+      />
     </div>
   );
 };

@@ -87,7 +87,7 @@ const KpiPage = () => {
         value: String(approvedCount),
         change: "Selesai review",
         tone: "green" as const,
-        icon: ShieldCheck,
+        icon: null,
       },
       {
         label: "Avg Score",
@@ -271,7 +271,7 @@ const KpiPage = () => {
                   <p className="summary-card__subtitle">{card.subtitle}</p>
                 </div>
                 <span className={`summary-card__icon summary-card__icon--${card.tone}`}>
-                  <Icon size={20} />
+                  {Icon && <Icon size={20} />}
                 </span>
               </div>
               <div className={`summary-card__value summary-card__value--${card.tone}`}>{card.value}</div>

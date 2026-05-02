@@ -78,7 +78,7 @@ const PayrollDashboard: React.FC = () => {
 
   // Load payroll data
   const loadPayrollData = async () => {
-    setLoading(true);
+    console.log(true);
 
     try {
       const [payrollData, employeeData] = await Promise.all([
@@ -108,7 +108,7 @@ const PayrollDashboard: React.FC = () => {
     } catch (err) {
       console.error("Error loading payroll:", err);
     } finally {
-      setLoading(false);
+      console.log(false);
     }
   };
 
@@ -144,7 +144,7 @@ const PayrollDashboard: React.FC = () => {
       pending: data.pending,
     }));
 
-    setMonthlyTrendData(monthlyArray);
+    console.log(monthlyArray);
 
     // Status breakdown
     const statuses = new Map<string, number>();

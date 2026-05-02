@@ -35,8 +35,8 @@ const formatDate = (value?: string) => {
 const MyReimbursementsPage: React.FC = () => {
   const [items, setItems] = useState<ReimbursementItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [_isModalOpen, _setIsModalOpen] = useState(false);
-  const [_isDetailOpen, _setIsDetailOpen] = useState(false);
+  const [_isModalOpen, ____setIsModalOpen] = useState(false);
+  const [_isDetailOpen, ____setIsDetailOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<ReimbursementItem | null>(null);
 
   // Search & Filter
@@ -104,17 +104,17 @@ const MyReimbursementsPage: React.FC = () => {
 
   const handleOpenCreate = () => {
     setSelectedItem(null);
-    setIsModalOpen(true);
+    ____setIsModalOpen(true);
   };
 
   const handleOpenEdit = (item: ReimbursementItem) => {
     setSelectedItem(item);
-    setIsModalOpen(true);
+    ____setIsModalOpen(true);
   };
 
   const handleOpenDetail = (item: ReimbursementItem) => {
     setSelectedItem(item);
-    setIsDetailOpen(true);
+    ____setIsDetailOpen(true);
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -125,7 +125,7 @@ const MyReimbursementsPage: React.FC = () => {
       } else {
         await createMyReimbursement(data);
       }
-      setIsModalOpen(false);
+      ____setIsModalOpen(false);
       fetchData();
     } catch (error) {
       console.error('Failed to save reimbursement:', error);

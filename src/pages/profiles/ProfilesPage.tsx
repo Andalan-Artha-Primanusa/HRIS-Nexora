@@ -14,10 +14,12 @@ import {
   Building2,
   Search,
   RefreshCw,
+  X,
 } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
 import { Alert } from "@/shared/ui/Alert";
+import { Button } from "@/shared/ui/Button";
 import { useProfiles } from "@/features/profile/hooks/useProfiles";
 import type { Profile, ProfilePayload } from "@/features/profile/types/profile.types";
 import "./ProfilesPage.css";
@@ -585,9 +587,9 @@ const ProfilesPage = () => {
 
   const [createForm, setCreateForm] = useState<ProfileFormState>(DEFAULT_FORM);
   const [updateForm, setUpdateForm] = useState<ProfileFormState>(DEFAULT_FORM);
-  const [_validationMessage, _setValidationMessage] = useState<string | null>(null);
-  const [_validationErrors, _setValidationErrors] = useState<ValidationError[]>([]);
-  const [_isErrorModalOpen, _setIsErrorModalOpen] = useState(false);
+  const [validationMessage, setValidationMessage] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
 
   // Filter & Search states
   const [searchText, setSearchText] = useState("");

@@ -2,17 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { Modal } from '@/shared/ui/Modal';
 import { Button } from '@/shared/ui/Button';
 import { getAllEmployees } from '@/features/employee/api/employee.service';
-import { User, FileText, Calendar, MapPin, AlignLeft } from 'lucide-react';
+import { useAuthStore } from '@/app/store/auth.store';
+import { User, FileText, Calendar, MapPin, AlignLeft, Lock } from 'lucide-react';
 
 export const AssignmentLetterModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   onSave: (data: any) => void;
 }> = ({ isOpen, onClose, onSave }) => {
+  const user = useAuthStore((state) => state.user);
+  const isAdminOrHR = user?.roles?.some((r: any) => ['admin', 'hr', 'super_admin'].includes(r.name));
+
   const [employees, setEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    employee_id: '',
+    user_id: '',
     title: '',
     description: '',
     start_date: '',
@@ -24,7 +28,7 @@ export const AssignmentLetterModal: React.FC<{
     if (isOpen) {
       fetchEmployees();
       setFormData({
-        employee_id: '',
+        user_id: isAdminOrHR ? '' : String(user?.id ?? ''),
         title: '',
         description: '',
         start_date: '',
@@ -32,7 +36,7 @@ export const AssignmentLetterModal: React.FC<{
         location: '',
       });
     }
-  }, [isOpen]);
+  }, [isOpen, isAdminOrHR, user?.id]);
 
   const extractArr = (res: any): any[] => {
     if (Array.isArray(res)) return res;
@@ -49,6 +53,7 @@ export const AssignmentLetterModal: React.FC<{
   };
 
   const fetchEmployees = async () => {
+    if (!isAdminOrHR) return;
     try {
       const data = await getAllEmployees();
       setEmployees(extractArr(data));
@@ -81,23 +86,32 @@ export const AssignmentLetterModal: React.FC<{
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             
             <div className="form-group">
-              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '8px', display: 'block' }}>Assignee</label>
+              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '8px', display: 'block' }}>
+                {isAdminOrHR ? 'Assignee' : 'Employee'}
+              </label>
               <div style={{ position: 'relative' }}>
                 <User size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', zIndex: 1 }} />
-                <select 
-                  className="crud-input"
-                  value={formData.employee_id}
-                  onChange={(e) => setFormData({ ...formData, employee_id: e.target.value })}
-                  required
-                  style={{ paddingLeft: '44px', height: '52px', borderRadius: '12px', border: '1px solid #e2e8f0', width: '100%' }}
-                >
-                  <option value="">Select Employee...</option>
-                  {employees.map((emp) => (
-                    <option key={emp.id} value={emp.id}>
-                      {emp.user?.name || emp.full_name || emp.name || `Employee #${emp.id}`} {emp.employee_code ? `[${emp.employee_code}]` : ''}
-                    </option>
-                  ))}
-                </select>
+                {isAdminOrHR ? (
+                  <select 
+                    className="crud-input"
+                    value={formData.user_id}
+                    onChange={(e) => setFormData({ ...formData, user_id: e.target.value })}
+                    required
+                    style={{ paddingLeft: '44px', height: '52px', borderRadius: '12px', border: '1px solid #e2e8f0', width: '100%' }}
+                  >
+                    <option value="">Select Employee...</option>
+                    {employees.map((emp) => (
+                      <option key={emp.id} value={emp.id}>
+                        {emp.user?.name || emp.full_name || emp.name || `Employee #${emp.id}`} {emp.employee_code ? `[${emp.employee_code}]` : ''}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <div style={{ paddingLeft: '44px', height: '52px', borderRadius: '12px', border: '1px solid #e2e8f0', width: '100%', display: 'flex', alignItems: 'center', background: '#f8fafc', color: '#64748b', fontSize: '0.95rem', fontWeight: 500 }}>
+                    {user?.name || user?.email || 'Current User'}
+                    <Lock size={14} style={{ marginLeft: '8px', color: '#94a3b8' }} />
+                  </div>
+                )}
               </div>
             </div>
 
