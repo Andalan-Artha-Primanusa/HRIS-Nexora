@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, RefreshCw, Package, Search, Filter, Laptop, Monitor, Smartphone, Briefcase, User, Trash2, Pencil, CheckCircle2 } from 'lucide-react';
+import { Plus, RefreshCw, Package, Search, Filter, Laptop, Monitor, Smartphone, Briefcase, User, Trash2, Pencil, CheckCircle2, X, ArrowDownToLine, ArrowUpFromLine } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { assetService } from '@/features/assets/api/asset.service';
+import { api } from '@/shared/api/httpClient';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/employee/EmployeesPage.css';
 import './AssetInventoryPage.css';
 
 const formatDateTime = (input: string) => {
@@ -28,35 +30,36 @@ const AssetInventoryPage: React.FC = () => {
   const [assets, setAssets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [employees, setEmployees] = useState<any[]>([]);
 
-  // Filter & Pagination State
   const [activeTab, setActiveTab] = useState<"Semua" | "Available" | "Assigned" | "Maintenance" | "Retired">("Semua");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
   const [showFilters, setShowFilters] = useState(false);
 
+  const [assignModal, setAssignModal] = useState(false);
+  const [selectedAsset, setSelectedAsset] = useState<any>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState('');
+  const [assignmentNote, setAssignmentNote] = useState('');
+  const [assigningLoading, setAssigningLoading] = useState(false);
+
+  const [returnModal, setReturnModal] = useState(false);
+  const [selectedAssignment, setSelectedAssignment] = useState<any>(null);
+  const [returnNote, setReturnNote] = useState('');
+  const [returningLoading, setReturningLoading] = useState(false);
+
   const fetchData = async () => {
     setLoading(true);
     try {
       const response = await assetService.getAssets();
-      
-      // assetService.getAssets() returns api.get('/assets').data
-      // So response = { success, message, data: { current_page, data: [...], total } }
-      // The assets array is in response.data.data
       let assetsArray: any[] = [];
-      
       if (response?.data?.data && Array.isArray(response.data.data)) {
-        // Paginated response structure
         assetsArray = response.data.data;
       } else if (response?.data && Array.isArray(response.data)) {
-        // Direct array in response.data
         assetsArray = response.data;
       } else if (Array.isArray(response)) {
-        // Direct array response
         assetsArray = response;
       }
-      
-      console.log('Assets loaded:', assetsArray.length, 'items');
       setAssets(assetsArray);
     } catch (error) {
       console.error('Failed to fetch assets:', error);
@@ -66,11 +69,83 @@ const AssetInventoryPage: React.FC = () => {
     }
   };
 
+  const fetchEmployees = async () => {
+    try {
+      const res = await api.get('/employees');
+      let list = res?.data?.data?.data || res?.data?.data || res?.data || [];
+      if (!Array.isArray(list)) list = [];
+      setEmployees(list);
+    } catch (error) {
+      console.error('Failed to fetch employees:', error);
+    }
+  };
+
   useEffect(() => {
     fetchData();
+    fetchEmployees();
   }, []);
 
-  // Filter Logic
+  const openAssignModal = (asset: any) => {
+    setSelectedAsset(asset);
+    setSelectedEmployee('');
+    setAssignmentNote('');
+    setAssignModal(true);
+  };
+
+  const closeAssignModal = () => {
+    setAssignModal(false);
+    setSelectedAsset(null);
+    setSelectedEmployee('');
+    setAssignmentNote('');
+  };
+
+  const handleAssign = async () => {
+    if (!selectedAsset || !selectedEmployee) return;
+    setAssigningLoading(true);
+    try {
+      await assetService.assignAsset(selectedAsset.id, {
+        employee_id: selectedEmployee,
+        assignment_note: assignmentNote,
+      });
+      closeAssignModal();
+      fetchData();
+    } catch (error) {
+      console.error('Failed to assign asset:', error);
+    } finally {
+      setAssigningLoading(false);
+    }
+  };
+
+  const openReturnModal = (asset: any) => {
+    const currentAssignment = asset.assignments?.find((a: any) => a.status === 'assigned');
+    setSelectedAssignment(currentAssignment);
+    setReturnNote('');
+    setReturnModal(true);
+  };
+
+  const closeReturnModal = () => {
+    setReturnModal(false);
+    setSelectedAssignment(null);
+    setReturnNote('');
+  };
+
+  const handleReturn = async () => {
+    if (!selectedAssignment) return;
+    setReturningLoading(true);
+    try {
+      await assetService.returnAsset(selectedAssignment.id, {
+        return_note: returnNote,
+        condition: 'good',
+      });
+      closeReturnModal();
+      fetchData();
+    } catch (error) {
+      console.error('Failed to return asset:', error);
+    } finally {
+      setReturningLoading(false);
+    }
+  };
+
   const filteredAssets = useMemo(() => {
     return assets.filter(asset => {
       const searchStr = searchQuery.toLowerCase();
@@ -90,7 +165,6 @@ const AssetInventoryPage: React.FC = () => {
     });
   }, [assets, searchQuery, activeTab]);
 
-  // Sort by purchase date (newest first)
   const sortedAssets = useMemo(() => {
     return [...filteredAssets].sort((a, b) => {
       const dateA = new Date(a.purchase_date || 0).getTime();
@@ -99,7 +173,6 @@ const AssetInventoryPage: React.FC = () => {
     });
   }, [filteredAssets]);
 
-  // Paginate
   const paginatedAssets = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize;
     return sortedAssets.slice(startIndex, startIndex + pageSize);
@@ -107,7 +180,6 @@ const AssetInventoryPage: React.FC = () => {
 
   const totalPages = Math.ceil(sortedAssets.length / pageSize);
 
-  // Summary Cards
   const summaryCards = useMemo(() => [
     {
       label: "Total Aset",
@@ -174,9 +246,14 @@ const AssetInventoryPage: React.FC = () => {
     );
   };
 
+  const getAssignedEmployee = (asset: any) => {
+    const currentAssignment = asset.assignments?.find((a: any) => a.status === 'assigned');
+    if (!currentAssignment) return null;
+    return currentAssignment.employee?.user?.name || currentAssignment.employee?.full_name || '-';
+  };
+
   return (
     <div className="crud-page asset-page">
-      {/* Header */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -202,29 +279,27 @@ const AssetInventoryPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* Summary Cards */}
-      <div className="asset-summary-wrapper">
+      <div className="employee-summary-wrapper">
         {summaryCards.map((card) => {
           const Icon = card.icon;
           return (
-            <div key={card.label} className="asset-summary-card">
-              <div className="asset-summary-header">
+            <div key={card.label} className="employee-summary-card">
+              <div className="employee-summary-header">
                 <div>
-                  <p className="asset-summary-label">{card.label}</p>
-                  <p className="asset-summary-subtitle">{card.subtitle}</p>
+                  <p className="employee-summary-label">{card.label}</p>
+                  <p className="employee-summary-subtitle">{card.subtitle}</p>
                 </div>
-                <div className={`asset-summary-icon-wrapper asset-icon-${card.tone}`}>
+                <div className={`employee-summary-icon-wrapper employee-icon-${card.tone}`}>
                   <Icon size={28} />
                 </div>
               </div>
-              <div className={`asset-summary-value asset-value-${card.tone}`}>{card.value}</div>
-              <p className="asset-summary-trend">{card.change}</p>
+              <div className={`employee-summary-value employee-value-${card.tone}`}>{card.value}</div>
+              <p className="employee-summary-trend">{card.change}</p>
             </div>
           );
         })}
       </div>
 
-      {/* Analytics Title Card */}
       <Card className="analytics-title-card">
         <div className="analytics-title-inner">
           <div className="analytics-icon">
@@ -237,10 +312,8 @@ const AssetInventoryPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* Control Section */}
       <Card className="control-section-card">
         <div className="control-section-inner">
-          {/* Tabs */}
           <div className="elyra-tabs">
             {(["Semua", "Available", "Assigned", "Maintenance", "Retired"] as const).map((tab) => (
               <button
@@ -253,7 +326,6 @@ const AssetInventoryPage: React.FC = () => {
             ))}
           </div>
 
-          {/* Search & Filter */}
           <div className="control-actions">
             <div className="search-box">
               <div className="search-icon-inside"><Search size={18} /></div>
@@ -275,7 +347,6 @@ const AssetInventoryPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Filter Panel */}
         {showFilters && (
           <div className="filter-dropdown">
             <div className="filter-row">
@@ -289,7 +360,6 @@ const AssetInventoryPage: React.FC = () => {
         )}
       </Card>
 
-      {/* Table Section */}
       <div className="table-section">
         <div className="wuw-table-area">
           {loading && <LoadingState message="Memuat aset..." />}
@@ -311,18 +381,17 @@ const AssetInventoryPage: React.FC = () => {
                 <table className="data-table">
                   <thead>
                     <tr>
-                      <th style={{ width: '400px' }}>Aset</th>
+                      <th style={{ width: '350px' }}>Aset</th>
                       <th>Kode</th>
-                      <th>Kategori</th>
-                      <th>Brand</th>
-                      <th>Tanggal Beli</th>
+                      <th>Dipakai Oleh</th>
                       <th className="th-center">Status</th>
-                      <th className="th-center" style={{ width: '120px' }}>Aksi</th>
+                      <th className="th-center" style={{ width: '150px' }}>Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
                     {paginatedAssets.map((asset) => {
                       const IconComponent = getAssetIcon(asset.category);
+                      const assignedTo = getAssignedEmployee(asset);
                       return (
                         <tr key={asset.id}>
                           <td>
@@ -337,19 +406,41 @@ const AssetInventoryPage: React.FC = () => {
                             </div>
                           </td>
                           <td><span style={{ color: '#475569', fontWeight: 600 }}>{asset.code || "-"}</span></td>
-                          <td><span className="badge-soft badge-soft--purple">{asset.category || "-"}</span></td>
-                          <td><span style={{ color: '#64748b', fontWeight: 500 }}>{asset.brand || "-"}</span></td>
                           <td>
-                            <div className="cell-stacked">
-                              <span className="cell-stacked__main" style={{ fontSize: '0.85rem' }}>{formatDateTime(asset.purchase_date)}</span>
-                              <span className="cell-stacked__sub">Tanggal beli</span>
-                            </div>
+                            {assignedTo ? (
+                              <div className="cell-stacked">
+                                <span className="cell-stacked__main" style={{ fontSize: '0.85rem' }}>{assignedTo}</span>
+                                <span className="cell-stacked__sub">Sedang dipakai</span>
+                              </div>
+                            ) : (
+                              <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>-</span>
+                            )}
                           </td>
                           <td className="td-center">
                             {getStatusBadge(asset.status)}
                           </td>
                           <td className="td-center">
                             <div className="action-btn-group">
+                              {asset.status?.toLowerCase() === 'available' && (
+                                <button
+                                  className="action-btn"
+                                  style={{ background: '#dbeafe', color: '#2563eb' }}
+                                  onClick={() => openAssignModal(asset)}
+                                  title="Assign ke Karyawan"
+                                >
+                                  <ArrowDownToLine size={16} />
+                                </button>
+                              )}
+                              {asset.status?.toLowerCase() === 'assigned' && (
+                                <button
+                                  className="action-btn"
+                                  style={{ background: '#fef3c7', color: '#d97706' }}
+                                  onClick={() => openReturnModal(asset)}
+                                  title="Kembalikan Aset"
+                                >
+                                  <ArrowUpFromLine size={16} />
+                                </button>
+                              )}
                               <button
                                 className="action-btn action-btn-edit"
                                 onClick={() => navigate(`/inventory/assets/edit/${asset.id}`)}
@@ -373,7 +464,6 @@ const AssetInventoryPage: React.FC = () => {
                 </table>
               </div>
 
-              {/* Pagination */}
               <div className="table-pagination">
                 <div className="pagination-info">
                   Menampilkan <strong>{paginatedAssets.length}</strong> dari <strong>{sortedAssets.length}</strong> aset
@@ -408,6 +498,116 @@ const AssetInventoryPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Assign Modal */}
+      {assignModal && selectedAsset && (
+        <div className="modal-overlay" onClick={closeAssignModal}>
+          <div className="modal-completion" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-completion-header">
+              <div className="modal-completion-icon">
+                <User size={24} />
+              </div>
+              <div>
+                <h3 className="modal-completion-title">Assign Aset</h3>
+                <p className="modal-completion-task">{selectedAsset.name} ({selectedAsset.code})</p>
+              </div>
+              <button className="modal-close-btn" onClick={closeAssignModal}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="modal-completion-body">
+              <label className="modal-completion-label">Pilih Karyawan</label>
+              <select
+                className="modal-completion-select"
+                value={selectedEmployee}
+                onChange={(e) => setSelectedEmployee(e.target.value)}
+              >
+                <option value="">-- Pilih Karyawan --</option>
+                {employees.map((emp) => (
+                  <option key={emp.id} value={emp.id}>
+                    {emp.user?.name || emp.full_name || `Employee #${emp.id}`} - {emp.position || '-'}
+                  </option>
+                ))}
+              </select>
+
+              <label className="modal-completion-label" style={{ marginTop: '1rem' }}>Catatan Assignment</label>
+              <textarea
+                className="modal-completion-textarea"
+                placeholder="Catatan tambahan (opsional)..."
+                value={assignmentNote}
+                onChange={(e) => setAssignmentNote(e.target.value)}
+                rows={3}
+              />
+            </div>
+
+            <div className="modal-completion-footer">
+              <button className="modal-btn-cancel" onClick={closeAssignModal}>Batal</button>
+              <button
+                className="modal-btn-confirm"
+                onClick={handleAssign}
+                disabled={assigningLoading || !selectedEmployee}
+              >
+                {assigningLoading ? (
+                  <><RefreshCw size={16} className="animate-spin" /> Menyimpan...</>
+                ) : (
+                  <><ArrowDownToLine size={16} /> Assign Aset</>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Return Modal */}
+      {returnModal && selectedAssignment && (
+        <div className="modal-overlay" onClick={closeReturnModal}>
+          <div className="modal-completion" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-completion-header">
+              <div className="modal-completion-icon" style={{ background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)', color: '#d97706' }}>
+                <ArrowUpFromLine size={24} />
+              </div>
+              <div>
+                <h3 className="modal-completion-title">Kembalikan Aset</h3>
+                <p className="modal-completion-task">
+                  Dari: {selectedAssignment.employee?.user?.name || selectedAssignment.employee?.full_name || '-'}
+                </p>
+              </div>
+              <button className="modal-close-btn" onClick={closeReturnModal}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="modal-completion-body">
+              <label className="modal-completion-label">Catatan Pengembalian</label>
+              <textarea
+                className="modal-completion-textarea"
+                placeholder="Kondisi aset saat dikembalikan..."
+                value={returnNote}
+                onChange={(e) => setReturnNote(e.target.value)}
+                rows={3}
+              />
+              <p className="modal-completion-hint">Opsional. Kosongkan jika tidak ada catatan.</p>
+            </div>
+
+            <div className="modal-completion-footer">
+              <button className="modal-btn-cancel" onClick={closeReturnModal}>Batal</button>
+              <button
+                className="modal-btn-confirm"
+                onClick={handleReturn}
+                disabled={returningLoading}
+                style={{ background: 'linear-gradient(135deg, #d97706 0%, #b45309 100%)', boxShadow: '0 4px 14px rgba(217, 119, 6, 0.3)' }}
+              >
+                {returningLoading ? (
+                  <><RefreshCw size={16} className="animate-spin" /> Memproses...</>
+                ) : (
+                  <><ArrowUpFromLine size={16} /> Kembalikan</>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Filter, Plus, RefreshCw, Pencil, Trash2, CheckCircle, Clock, AlertCircle, XCircle, Eye } from 'lucide-react';
+import { Search, Filter, Plus, RefreshCw, Pencil, Trash2, CheckCircle, Clock, AlertCircle, X, Sparkles } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
-import { Button } from '@/shared/ui/Button';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { taskService } from '@/features/tasks/api/task.service';
 import { TaskModal } from '@/features/tasks/components/TaskModal';
@@ -21,6 +20,9 @@ const TaskManagementPage: React.FC = () => {
   const [pageSize] = useState(10);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<any>(null);
+  const [completingTask, setCompletingTask] = useState<any>(null);
+  const [completionNotes, setCompletionNotes] = useState('');
+  const [submittingCompletion, setSubmittingCompletion] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -33,7 +35,9 @@ const TaskManagementPage: React.FC = () => {
 
       const response = await taskService.getTasks(params);
       let data: any[] = [];
-      if (response?.data?.data && Array.isArray(response.data.data)) {
+      if (response?.data?.data?.data && Array.isArray(response.data.data.data)) {
+        data = response.data.data.data;
+      } else if (response?.data?.data && Array.isArray(response.data.data)) {
         data = response.data.data;
       } else if (response?.data && Array.isArray(response.data)) {
         data = response.data;
@@ -51,6 +55,10 @@ const TaskManagementPage: React.FC = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText, selectedStatus, selectedPriority]);
 
   const handleSave = async (formData: any) => {
     if (editingTask) {
@@ -72,13 +80,44 @@ const TaskManagementPage: React.FC = () => {
   };
 
   const handleStatusChange = async (task: any, newStatus: string) => {
-    const updates: any = { status: newStatus };
-    if (newStatus === 'completed') {
-      updates.completion_notes = prompt('Catatan penyelesaian (opsional):') || '';
-    }
-    await taskService.updateTask(task.id, updates);
+    await taskService.updateTask(task.id, { status: newStatus });
     fetchData();
   };
+
+  const openCompletionModal = (task: any) => {
+    setCompletingTask(task);
+    setCompletionNotes('');
+  };
+
+  const closeCompletionModal = () => {
+    setCompletingTask(null);
+    setCompletionNotes('');
+  };
+
+  const handleCompleteTask = async () => {
+    if (!completingTask) return;
+    setSubmittingCompletion(true);
+    try {
+      await taskService.updateTask(completingTask.id, {
+        status: 'completed',
+        completion_notes: completionNotes || '',
+      });
+      closeCompletionModal();
+      fetchData();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setSubmittingCompletion(false);
+    }
+  };
+
+  const uniqueStatuses = useMemo(() => {
+    return Array.from(new Set(items.map((i) => i.status).filter(Boolean))).sort();
+  }, [items]);
+
+  const uniquePriorities = useMemo(() => {
+    return Array.from(new Set(items.map((i) => i.priority).filter(Boolean))).sort();
+  }, [items]);
 
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
@@ -87,8 +126,8 @@ const TaskManagementPage: React.FC = () => {
         !searchText ||
         item.title?.toLowerCase().includes(searchStr) ||
         item.description?.toLowerCase().includes(searchStr) ||
-        item.assigned_to?.user?.name?.toLowerCase().includes(searchStr) ||
-        item.assigned_to?.full_name?.toLowerCase().includes(searchStr);
+        item.assigned_to?.name?.toLowerCase().includes(searchStr) ||
+        item.assigned_to?.profile?.full_name?.toLowerCase().includes(searchStr);
 
       const matchesStatus = !selectedStatus || item.status === selectedStatus;
       const matchesPriority = !selectedPriority || item.priority === selectedPriority;
@@ -159,26 +198,19 @@ const TaskManagementPage: React.FC = () => {
     setCurrentPage(1);
   };
 
-  const getStatusBadge = (status: string) => {
-    const map: Record<string, { label: string; class: string }> = {
-      pending: { label: 'Menunggu', class: 'badge-soft--yellow' },
-      in_progress: { label: 'Dikerjakan', class: 'badge-soft--blue' },
-      completed: { label: 'Selesai', class: 'badge-soft--green' },
-      cancelled: { label: 'Dibatalkan', class: 'badge-soft--gray' },
-    };
-    const info = map[status] || { label: status, class: 'badge-soft--gray' };
-    return <span className={`badge-soft ${info.class}`}>{info.label}</span>;
-  };
-
   const getPriorityBadge = (priority: string) => {
     const map: Record<string, { label: string; class: string }> = {
       low: { label: 'Rendah', class: 'badge-soft--green' },
-      medium: { label: 'Sedang', class: 'badge-soft--yellow' },
-      high: { label: 'Tinggi', class: 'badge-soft--orange' },
+      medium: { label: 'Sedang', class: 'badge-soft--orange' },
+      high: { label: 'Tinggi', class: 'badge-soft--red' },
       urgent: { label: 'Mendesak', class: 'badge-soft--red' },
     };
     const info = map[priority] || { label: priority, class: 'badge-soft--gray' };
-    return <span className={`badge-soft ${info.class}`}>{info.label}</span>;
+    return (
+      <span className={`badge-soft ${info.class}`}>
+        {info.label}
+      </span>
+    );
   };
 
   const formatDate = (dateStr: string) => {
@@ -186,8 +218,13 @@ const TaskManagementPage: React.FC = () => {
     return new Date(dateStr).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
   };
 
+  const getInitial = (name: string) => {
+    return name ? name.charAt(0).toUpperCase() : 'T';
+  };
+
   return (
     <div className="crud-page">
+      {/* Header - Same style as EmployeesPage */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -211,7 +248,8 @@ const TaskManagementPage: React.FC = () => {
         </div>
       </Card>
 
-      <div className="overview-summary-wrapper">
+      {/* Summary Cards */}
+      <div className="employee-summary-wrapper">
         {summaryCards.map((card) => {
           const Icon = card.icon;
           return (
@@ -232,6 +270,7 @@ const TaskManagementPage: React.FC = () => {
         })}
       </div>
 
+      {/* Analytics Title Card */}
       <Card className="analytics-title-card">
         <div className="analytics-title-inner">
           <div className="analytics-icon">
@@ -239,13 +278,15 @@ const TaskManagementPage: React.FC = () => {
           </div>
           <div>
             <h2 className="analytics-title">Daftar Tugas</h2>
-            <p className="analytics-subtitle">Kelola semua tugas yang ditugaskan ke karyawan</p>
+            <p className="analytics-subtitle">Kelola dan lihat semua tugas</p>
           </div>
         </div>
       </Card>
 
+      {/* Control Section */}
       <Card className="control-section-card">
         <div className="control-section-inner">
+          {/* Tabs */}
           <div className="elyra-tabs">
             {[
               { value: '', label: 'Semua' },
@@ -257,13 +298,14 @@ const TaskManagementPage: React.FC = () => {
               <button
                 key={tab.value}
                 className={`elyra-tab ${selectedStatus === tab.value ? 'active' : ''}`}
-                onClick={() => { setSelectedStatus(tab.value); setCurrentPage(1); }}
+                onClick={() => setSelectedStatus(tab.value)}
               >
                 {tab.label}
               </button>
             ))}
           </div>
 
+          {/* Search & Filter */}
           <div className="control-actions">
             <div className="search-box">
               <div className="search-icon-inside"><Search size={18} /></div>
@@ -271,7 +313,7 @@ const TaskManagementPage: React.FC = () => {
                 type="text"
                 placeholder="Cari tugas..."
                 value={searchText}
-                onChange={(e) => { setSearchText(e.target.value); setCurrentPage(1); }}
+                onChange={(e) => setSearchText(e.target.value)}
                 className="search-input-pill"
               />
             </div>
@@ -285,17 +327,38 @@ const TaskManagementPage: React.FC = () => {
           </div>
         </div>
 
+        {/* Filter Panel */}
         {showFilters && (
           <div className="filter-dropdown">
             <div className="filter-row">
-              <div className="filter-item">
+              <div className="filter-group">
+                <label>Status</label>
+                <select
+                  value={selectedStatus}
+                  onChange={(e) => setSelectedStatus(e.target.value)}
+                  className="filter-select-premium"
+                >
+                  <option value="">Semua Status</option>
+                  {uniqueStatuses.map((status) => (
+                    <option key={status} value={status}>
+                      {status === 'pending' ? 'Menunggu' : status === 'in_progress' ? 'Dikerjakan' : status === 'completed' ? 'Selesai' : status === 'cancelled' ? 'Dibatalkan' : status}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="filter-group">
                 <label>Prioritas</label>
-                <select value={selectedPriority} onChange={(e) => { setSelectedPriority(e.target.value); setCurrentPage(1); }}>
-                  <option value="">Semua</option>
-                  <option value="low">Rendah</option>
-                  <option value="medium">Sedang</option>
-                  <option value="high">Tinggi</option>
-                  <option value="urgent">Mendesak</option>
+                <select
+                  value={selectedPriority}
+                  onChange={(e) => setSelectedPriority(e.target.value)}
+                  className="filter-select-premium"
+                >
+                  <option value="">Semua Prioritas</option>
+                  {uniquePriorities.map((priority) => (
+                    <option key={priority} value={priority}>
+                      {priority === 'low' ? 'Rendah' : priority === 'medium' ? 'Sedang' : priority === 'high' ? 'Tinggi' : priority === 'urgent' ? 'Mendesak' : priority}
+                    </option>
+                  ))}
                 </select>
               </div>
               {(searchText || selectedStatus || selectedPriority) && (
@@ -308,52 +371,77 @@ const TaskManagementPage: React.FC = () => {
         )}
       </Card>
 
+      {/* Table Section */}
       <div className="table-section">
         <div className="wuw-table-area">
           {loading && <LoadingState message="Memuat tugas..." />}
-          {errorMessage && !loading && <ErrorState message={errorMessage} onRetry={fetchData} />}
+          {!loading && errorMessage && (
+            <ErrorState message="Koneksi Terputus" error={errorMessage} onRetry={fetchData} />
+          )}
+
           {!loading && !errorMessage && paginatedItems.length === 0 && (
             <div style={{ padding: '5rem 0' }}>
-              <EmptyState title="Tidak Ada Tugas" message="Belum ada tugas yang dibuat." actionLabel="Buat Tugas" onAction={() => setIsModalOpen(true)} />
+              <EmptyState
+                title="Pencarian Kosong"
+                message="Kami tidak menemukan tugas yang sesuai dengan kriteria Anda."
+                actionLabel="Bersihkan Filter"
+                onAction={clearFilters}
+              />
             </div>
           )}
+
           {!loading && !errorMessage && paginatedItems.length > 0 && (
             <>
               <div className="table-wrap">
                 <table className="data-table">
                   <thead>
                     <tr>
-                      <th style={{ width: '300px' }}>Tugas</th>
+                      <th style={{ width: '400px' }}>Tugas</th>
                       <th>Ditugaskan Ke</th>
                       <th>Prioritas</th>
                       <th>Status</th>
                       <th>Deadline</th>
-                      <th className="th-center" style={{ width: '180px' }}>Aksi</th>
+                      <th className="th-center">Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
                     {paginatedItems.map((task) => (
                       <tr key={task.id}>
                         <td>
-                          <div className="cell-stacked">
-                            <span className="cell-stacked__main">{task.title}</span>
-                            <span className="cell-stacked__sub">{task.description?.substring(0, 60)}{task.description?.length > 60 ? '...' : ''}</span>
+                          <div className="cell-name">
+                            <div className="cell-avatar">
+                              {getInitial(task.title)}
+                            </div>
+                            <div className="cell-stacked">
+                              <span className="cell-name-text">{task.title}</span>
+                              <span className="cell-stacked__sub">{task.description?.substring(0, 60) || 'No description'}</span>
+                            </div>
                           </div>
                         </td>
-        <td>
-          <div className="cell-stacked">
-            <span className="cell-stacked__main">
-              {task.assigned_to?.name || task.assigned_to?.profile?.full_name || '-'}
-            </span>
-            <span className="cell-stacked__sub">oleh {task.assigned_by?.name || '-'}</span>
-          </div>
-        </td>
+                        <td>
+                          <div className="cell-stacked">
+                            <span className="cell-stacked__main" style={{ fontSize: '0.85rem' }}>
+                              {task.assigned_to?.name || task.assigned_to?.profile?.full_name || '-'}
+                            </span>
+                            <span className="cell-stacked__sub">oleh {task.assigned_by?.name || '-'}</span>
+                          </div>
+                        </td>
                         <td>{getPriorityBadge(task.priority)}</td>
-                        <td>{getStatusBadge(task.status)}</td>
+                        <td>
+                          <span className={`badge-soft ${
+                            task.status === 'pending' ? 'badge-soft--orange' :
+                            task.status === 'in_progress' ? 'badge-soft--blue' :
+                            task.status === 'completed' ? 'badge-soft--green' : 'badge-soft--red'
+                          }`}>
+                            {task.status === 'pending' ? 'Menunggu' :
+                             task.status === 'in_progress' ? 'Dikerjakan' :
+                             task.status === 'completed' ? 'Selesai' : 'Dibatalkan'}
+                          </span>
+                        </td>
                         <td>
                           <div className="cell-stacked">
                             <span className="cell-stacked__main" style={{ fontSize: '0.85rem' }}>{formatDate(task.due_date)}</span>
-                            {task.completed_at && <span className="cell-stacked__sub">Selesai: {formatDate(task.completed_at)}</span>}
+                            <span className="cell-stacked__sub">{task.completed_at ? 'Selesai: ' + formatDate(task.completed_at) : 'Deadline'}</span>
                           </div>
                         </td>
                         <td className="td-center">
@@ -361,7 +449,7 @@ const TaskManagementPage: React.FC = () => {
                             {task.status === 'pending' && (
                               <button
                                 className="action-btn"
-                                style={{ background: '#dbeafe', color: '#2563eb' }}
+                                style={{ background: '#fef3c7', color: '#b45309' }}
                                 onClick={() => handleStatusChange(task, 'in_progress')}
                                 title="Mulai Dikerjakan"
                               >
@@ -371,8 +459,8 @@ const TaskManagementPage: React.FC = () => {
                             {(task.status === 'in_progress' || task.status === 'pending') && (
                               <button
                                 className="action-btn"
-                                style={{ background: '#dcfce7', color: '#16a34a' }}
-                                onClick={() => handleStatusChange(task, 'completed')}
+                                style={{ background: '#d1fae5', color: '#059669' }}
+                                onClick={() => openCompletionModal(task)}
                                 title="Tandai Selesai"
                               >
                                 <CheckCircle size={16} />
@@ -400,6 +488,7 @@ const TaskManagementPage: React.FC = () => {
                 </table>
               </div>
 
+              {/* Pagination */}
               <div className="table-pagination">
                 <div className="pagination-info">
                   Menampilkan <strong>{paginatedItems.length}</strong> dari <strong>{sortedItems.length}</strong> tugas
@@ -412,7 +501,7 @@ const TaskManagementPage: React.FC = () => {
                   >
                     ‹
                   </button>
-                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + 1).map((page) => (
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                     <button
                       key={page}
                       className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
@@ -436,6 +525,47 @@ const TaskManagementPage: React.FC = () => {
       </div>
 
       <TaskModal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingTask(null); }} onSave={handleSave} initialData={editingTask} />
+
+      {/* Completion Modal Overlay */}
+      {completingTask && (
+        <div className="modal-overlay" onClick={closeCompletionModal}>
+          <div className="modal-completion" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-completion-header">
+              <div className="modal-completion-icon">
+                <Sparkles size={24} />
+              </div>
+              <div>
+                <h3 className="modal-completion-title">Tandai Tugas Selesai</h3>
+                <p className="modal-completion-task">{completingTask.title}</p>
+              </div>
+              <button className="modal-close-btn" onClick={closeCompletionModal}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-completion-body">
+              <label className="modal-completion-label">Catatan Penyelesaian</label>
+              <textarea
+                className="modal-completion-textarea"
+                placeholder="Tulis catatan singkat tentang hasil pengerjaan tugas ini..."
+                value={completionNotes}
+                onChange={(e) => setCompletionNotes(e.target.value)}
+                rows={4}
+              />
+              <p className="modal-completion-hint">Opsional. Anda bisa mengosongkan jika tidak ada catatan.</p>
+            </div>
+            <div className="modal-completion-footer">
+              <button className="modal-btn-cancel" onClick={closeCompletionModal}>Batal</button>
+              <button className="modal-btn-confirm" onClick={handleCompleteTask} disabled={submittingCompletion}>
+                {submittingCompletion ? (
+                  <><RefreshCw size={16} className="animate-spin" /> Menyimpan...</>
+                ) : (
+                  <><CheckCircle size={16} /> Tandai Selesai</>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

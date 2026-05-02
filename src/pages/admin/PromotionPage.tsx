@@ -30,7 +30,9 @@ const PromotionPage: React.FC = () => {
 
       const response = await promotionService.getPromotions(params);
       let data: any[] = [];
-      if (response?.data?.data && Array.isArray(response.data.data)) {
+      if (response?.data?.data?.data && Array.isArray(response.data.data.data)) {
+        data = response.data.data.data;
+      } else if (response?.data?.data && Array.isArray(response.data.data)) {
         data = response.data.data;
       } else if (response?.data && Array.isArray(response.data)) {
         data = response.data;
@@ -211,7 +213,7 @@ const PromotionPage: React.FC = () => {
         </div>
       </Card>
 
-      <div className="overview-summary-wrapper">
+      <div className="employee-summary-wrapper">
         {summaryCards.map((card) => {
           const Icon = card.icon;
           return (

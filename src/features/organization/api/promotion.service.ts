@@ -5,6 +5,10 @@ export const promotionService = {
     return api.get('/promotions', { params });
   },
 
+  getMyPromotions: (params?: Record<string, string>) => {
+    return api.get('/my/promotions', { params });
+  },
+
   createPromotion: (data: any) => {
     return api.post('/promotions', data);
   },

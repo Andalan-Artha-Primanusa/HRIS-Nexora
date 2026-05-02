@@ -1,30 +1,26 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { RefreshCw, ArrowUpRight, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { Search, RefreshCw, ArrowUpRight, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { promotionService } from '@/features/organization/api/promotion.service';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/employee/EmployeesPage.css';
 
 const MyPromotionsPage: React.FC = () => {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [searchText, setSearchText] = useState('');
+  const [activeTab, setActiveTab] = useState('Semua');
 
   const fetchData = async () => {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const response = await promotionService.getPromotions();
-      let data: any[] = [];
-      if (response?.data?.data && Array.isArray(response.data.data)) {
-        data = response.data.data;
-      } else if (response?.data && Array.isArray(response.data)) {
-        data = response.data;
-      } else if (Array.isArray(response)) {
-        data = response;
-      }
-      setItems(data);
+      const response = await promotionService.getMyPromotions();
+      const payload = response?.data?.data || response?.data || response;
+      setItems(payload?.promotions || []);
     } catch (error: any) {
       setErrorMessage(error?.response?.data?.message || 'Gagal memuat data promosi');
     } finally {
@@ -36,22 +32,70 @@ const MyPromotionsPage: React.FC = () => {
     fetchData();
   }, []);
 
-  const summaryCards = useMemo(() => {
-    const total = items.length;
-    const approved = items.filter((i) => i.status === 'approved').length;
-    const pending = items.filter((i) => i.status === 'pending').length;
-    const rejected = items.filter((i) => i.status === 'rejected').length;
-    return [
-      { label: 'Total Promosi', value: total, tone: 'blue', icon: ArrowUpRight },
-      { label: 'Disetujui', value: approved, tone: 'green', icon: CheckCircle },
-      { label: 'Menunggu', value: pending, tone: 'yellow', icon: Clock },
-      { label: 'Ditolak', value: rejected, tone: 'red', icon: XCircle },
-    ];
-  }, [items]);
+  const filteredItems = useMemo(() => {
+    return items.filter((item) => {
+      const searchStr = searchText.toLowerCase();
+      const matchesSearch =
+        !searchText ||
+        item.from_value?.toLowerCase().includes(searchStr) ||
+        item.to_value?.toLowerCase().includes(searchStr) ||
+        item.reason?.toLowerCase().includes(searchStr);
+
+      let tabMatch = true;
+      if (activeTab === 'Disetujui') tabMatch = item.status === 'approved';
+      else if (activeTab === 'Menunggu') tabMatch = item.status === 'pending';
+      else if (activeTab === 'Ditolak') tabMatch = item.status === 'rejected';
+
+      return matchesSearch && tabMatch;
+    });
+  }, [items, searchText, activeTab]);
+
+  const summaryCards = useMemo(
+    () => [
+      {
+        label: 'Total Promosi',
+        subtitle: 'Seluruh riwayat promosi',
+        value: String(items.length),
+        change: 'Data promosi tersimpan',
+        tone: 'blue' as const,
+        icon: ArrowUpRight,
+      },
+      {
+        label: 'Disetujui',
+        subtitle: 'Promosi disetujui',
+        value: String(items.filter((i) => i.status === 'approved').length),
+        change: 'Tuntas',
+        tone: 'green' as const,
+        icon: CheckCircle,
+      },
+      {
+        label: 'Menunggu',
+        subtitle: 'Menunggu persetujuan',
+        value: String(items.filter((i) => i.status === 'pending').length),
+        change: 'Perlu tindak lanjut',
+        tone: 'orange' as const,
+        icon: Clock,
+      },
+      {
+        label: 'Ditolak',
+        subtitle: 'Promosi ditolak',
+        value: String(items.filter((i) => i.status === 'rejected').length),
+        change: 'Tidak disetujui',
+        tone: 'red' as const,
+        icon: XCircle,
+      },
+    ],
+    [items],
+  );
+
+  const clearFilters = () => {
+    setSearchText('');
+    setActiveTab('Semua');
+  };
 
   const getStatusBadge = (status: string) => {
     const map: Record<string, { label: string; class: string }> = {
-      pending: { label: 'Menunggu', class: 'badge-soft--yellow' },
+      pending: { label: 'Menunggu', class: 'badge-soft--orange' },
       approved: { label: 'Disetujui', class: 'badge-soft--green' },
       rejected: { label: 'Ditolak', class: 'badge-soft--red' },
     };
@@ -94,7 +138,7 @@ const MyPromotionsPage: React.FC = () => {
         </div>
       </Card>
 
-      <div className="overview-summary-wrapper">
+      <div className="employee-summary-wrapper">
         {summaryCards.map((card) => {
           const Icon = card.icon;
           return (
@@ -102,41 +146,86 @@ const MyPromotionsPage: React.FC = () => {
               <div className="employee-summary-header">
                 <div>
                   <p className="employee-summary-label">{card.label}</p>
+                  <p className="employee-summary-subtitle">{card.subtitle}</p>
                 </div>
                 <div className={`employee-summary-icon-wrapper employee-icon-${card.tone}`}>
                   <Icon size={28} />
                 </div>
               </div>
               <div className={`employee-summary-value employee-value-${card.tone}`}>{card.value}</div>
+              <p className="employee-summary-trend">{card.change}</p>
             </div>
           );
         })}
       </div>
 
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <ArrowUpRight size={24} />
+          </div>
+          <div>
+            <h2 className="analytics-title">Riwayat Promosi</h2>
+            <p className="analytics-subtitle">Kelola dan lihat semua promosi Anda</p>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="control-section-card">
+        <div className="control-section-inner">
+          <div className="elyra-tabs">
+            {['Semua', 'Menunggu', 'Disetujui', 'Ditolak'].map((tab) => (
+              <button
+                key={tab}
+                className={`elyra-tab ${activeTab === tab ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          <div className="control-actions">
+            <div className="search-box">
+              <div className="search-icon-inside"><Search size={18} /></div>
+              <input
+                type="text"
+                placeholder="Cari promosi..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="search-input-pill"
+              />
+            </div>
+          </div>
+        </div>
+      </Card>
+
       <div className="table-section">
         <div className="wuw-table-area">
           {loading && <LoadingState message="Memuat riwayat promosi..." />}
-          {errorMessage && !loading && <ErrorState message={errorMessage} onRetry={fetchData} />}
-          {!loading && !errorMessage && items.length === 0 && (
+          {!loading && errorMessage && <ErrorState message="Koneksi Terputus" error={errorMessage} onRetry={fetchData} />}
+
+          {!loading && !errorMessage && filteredItems.length === 0 && (
             <div style={{ padding: '5rem 0' }}>
-              <EmptyState title="Belum Ada Promosi" message="Anda belum memiliki riwayat promosi." />
+              <EmptyState title="Belum Ada Promosi" message="Anda belum memiliki riwayat promosi." actionLabel="Bersihkan Filter" onAction={clearFilters} />
             </div>
           )}
-          {!loading && !errorMessage && items.length > 0 && (
+
+          {!loading && !errorMessage && filteredItems.length > 0 && (
             <div className="table-wrap">
               <table className="data-table">
                 <thead>
                   <tr>
-                    <th style={{ width: '200px' }}>Jabatan</th>
+                    <th style={{ width: '250px' }}>Jabatan</th>
                     <th>Alasan</th>
                     <th>Tanggal Efektif</th>
                     <th>Disetujui Oleh</th>
                     <th>Tanggal Disetujui</th>
-                    <th>Status</th>
+                    <th className="th-center">Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {items.map((promo) => {
+                  {filteredItems.map((promo) => {
                     const remarks = getRemarks(promo.remarks);
                     return (
                       <tr key={promo.id}>
@@ -161,7 +250,7 @@ const MyPromotionsPage: React.FC = () => {
                         </td>
                         <td>
                           <div style={{ maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#64748b', fontSize: '0.85rem' }} title={promo.reason}>
-                            {promo.reason}
+                            {promo.reason || '-'}
                           </div>
                         </td>
                         <td>
@@ -179,7 +268,7 @@ const MyPromotionsPage: React.FC = () => {
                             {promo.approval_date ? formatDate(promo.approval_date) : '-'}
                           </span>
                         </td>
-                        <td>{getStatusBadge(promo.status)}</td>
+                        <td className="td-center">{getStatusBadge(promo.status)}</td>
                       </tr>
                     );
                   })}

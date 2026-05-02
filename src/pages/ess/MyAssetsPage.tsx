@@ -1,36 +1,40 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Briefcase, Calendar, ShieldCheck, Info, Package, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { RefreshCw, Package, Laptop, Monitor, Smartphone, Briefcase, ArrowUpFromLine, X, CheckCircle, Clock, Search } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
+import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { assetService } from '@/features/assets/api/asset.service';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
-import '@/pages/payroll/PayrollShared.css';
+import '@/pages/employee/EmployeesPage.css';
 
 const MyAssetsPage: React.FC = () => {
   const [assets, setAssets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('Semua');
+  const [searchText, setSearchText] = useState('');
+
+  const [returnModal, setReturnModal] = useState(false);
+  const [selectedAssignment, setSelectedAssignment] = useState<any>(null);
+  const [returnNote, setReturnNote] = useState('');
+  const [returningLoading, setReturningLoading] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
+    setErrorMessage(null);
     try {
       const response = await assetService.getMyAssets();
-      
-      const extractArray = (res: any): any[] => {
-        if (Array.isArray(res)) return res;
-        if (res && typeof res === 'object') {
-          if (Array.isArray(res.data)) return res.data;
-          if (Array.isArray(res.items)) return res.items;
-          if (res.data && typeof res.data === 'object') {
-            if (Array.isArray(res.data.items)) return res.data.items;
-            if (Array.isArray(res.data.data)) return res.data.data;
-          }
-        }
-        return [];
-      };
-
-      setAssets(extractArray(response));
-    } catch (err) {
-      console.error(err);
+      let data: any[] = [];
+      if (response?.data?.data && Array.isArray(response.data.data)) {
+        data = response.data.data;
+      } else if (response?.data && Array.isArray(response.data)) {
+        data = response.data;
+      } else if (Array.isArray(response)) {
+        data = response;
+      }
+      setAssets(data);
+    } catch (error: any) {
+      setErrorMessage(error?.response?.data?.message || 'Gagal memuat aset');
       setAssets([]);
     } finally {
       setLoading(false);
@@ -40,6 +44,104 @@ const MyAssetsPage: React.FC = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const getAsset = (item: any) => {
+    return item.asset || item;
+  };
+
+  const filteredAssets = useMemo(() => {
+    return assets.filter((item) => {
+      const asset = getAsset(item);
+      const searchStr = searchText.toLowerCase();
+      const matchesSearch =
+        !searchText ||
+        asset.name?.toLowerCase().includes(searchStr) ||
+        asset.code?.toLowerCase().includes(searchStr) ||
+        asset.serial_number?.toLowerCase().includes(searchStr);
+
+      let tabMatch = true;
+      if (activeTab === 'Aktif') tabMatch = item.status === 'assigned';
+      else if (activeTab === 'Dikembalikan') tabMatch = item.status === 'returned';
+
+      return matchesSearch && tabMatch;
+    });
+  }, [assets, searchText, activeTab]);
+
+  const summaryCards = useMemo(
+    () => [
+      {
+        label: 'Total Aset',
+        subtitle: 'Aset yang pernah Anda gunakan',
+        value: String(assets.length),
+        change: 'Data aset tersimpan',
+        tone: 'blue' as const,
+        icon: Package,
+      },
+      {
+        label: 'Sedang Dipakai',
+        subtitle: 'Aset dalam penggunaan Anda',
+        value: String(assets.filter((a) => a.status === 'assigned').length),
+        change: 'Aktif digunakan',
+        tone: 'green' as const,
+        icon: CheckCircle,
+      },
+      {
+        label: 'Sudah Dikembalikan',
+        subtitle: 'Aset yang sudah dikembalikan',
+        value: String(assets.filter((a) => a.status === 'returned').length),
+        change: 'Telah dikembalikan',
+        tone: 'orange' as const,
+        icon: Clock,
+      },
+    ],
+    [assets],
+  );
+
+  const clearFilters = () => {
+    setSearchText('');
+    setActiveTab('Semua');
+  };
+
+  const getAssetIcon = (asset: any) => {
+    const c = asset.category?.toLowerCase() || '';
+    if (c.includes('laptop') || c.includes('macbook') || c.includes('electronics')) return Laptop;
+    if (c.includes('mobile') || c.includes('phone') || c.includes('smartphone')) return Smartphone;
+    if (c.includes('monitor') || c.includes('display')) return Monitor;
+    return Briefcase;
+  };
+
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return '-';
+    return new Date(dateStr).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+  };
+
+  const openReturnModal = (item: any) => {
+    setSelectedAssignment(item);
+    setReturnNote('');
+    setReturnModal(true);
+  };
+
+  const closeReturnModal = () => {
+    setReturnModal(false);
+    setSelectedAssignment(null);
+    setReturnNote('');
+  };
+
+  const handleReturn = async () => {
+    if (!selectedAssignment) return;
+    setReturningLoading(true);
+    try {
+      await assetService.returnAssetByEmployee(selectedAssignment.id, {
+        return_note: returnNote,
+      });
+      closeReturnModal();
+      fetchData();
+    } catch (error) {
+      console.error('Failed to return asset:', error);
+    } finally {
+      setReturningLoading(false);
+    }
+  };
 
   return (
     <div className="crud-page">
@@ -51,9 +153,7 @@ const MyAssetsPage: React.FC = () => {
               <span>Employee Self Service</span>
             </div>
             <h1 className="hero-title">Aset Saya</h1>
-            <p className="hero-subtitle">
-              Daftar properti perusahaan yang saat ini ditugaskan kepada Anda.
-            </p>
+            <p className="hero-subtitle">Daftar properti perusahaan yang saat ini atau pernah ditugaskan kepada Anda.</p>
           </div>
           <div className="hero-actions">
             <button className="btn-outline" onClick={fetchData} disabled={loading}>
@@ -64,56 +164,211 @@ const MyAssetsPage: React.FC = () => {
         </div>
       </Card>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem' }}>
-        {loading ? (
-          <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '3rem' }}>Loading your assets...</div>
-        ) : assets.length === 0 ? (
-          <Card glass style={{ gridColumn: '1/-1', textAlign: 'center', padding: '5rem' }}>
-            <Box size={48} color="#cbd5e1" style={{ marginBottom: '1rem' }} />
-            <h3 style={{ color: '#475569' }}>No assets assigned</h3>
-            <p style={{ color: '#64748b' }}>You currently don't have any company property assigned to your name.</p>
-          </Card>
-        ) : assets.map((asset) => (
-          <Card key={asset.id} glass style={{ padding: '1.75rem', borderRadius: '24px' }}>
-            <div style={{ display: 'flex', gap: '16px', marginBottom: '1.5rem' }}>
-              <div style={{ padding: '12px', background: 'linear-gradient(135deg, #f8fafc, #f1f5f9)', borderRadius: '14px', color: '#2563eb', border: '1px solid #e2e8f0' }}>
-                <Briefcase size={24} />
+      <div className="employee-summary-wrapper">
+        {summaryCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <div key={card.label} className="employee-summary-card">
+              <div className="employee-summary-header">
+                <div>
+                  <p className="employee-summary-label">{card.label}</p>
+                  <p className="employee-summary-subtitle">{card.subtitle}</p>
+                </div>
+                <div className={`employee-summary-icon-wrapper employee-icon-${card.tone}`}>
+                  <Icon size={28} />
+                </div>
+              </div>
+              <div className={`employee-summary-value employee-value-${card.tone}`}>{card.value}</div>
+              <p className="employee-summary-trend">{card.change}</p>
+            </div>
+          );
+        })}
+      </div>
+
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <Package size={24} />
+          </div>
+          <div>
+            <h2 className="analytics-title">Daftar Aset Saya</h2>
+            <p className="analytics-subtitle">Semua aset perusahaan yang Anda gunakan</p>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="control-section-card">
+        <div className="control-section-inner">
+          <div className="elyra-tabs">
+            {[
+              { value: 'Semua', label: 'Semua' },
+              { value: 'Aktif', label: 'Sedang Dipakai' },
+              { value: 'Dikembalikan', label: 'Dikembalikan' },
+            ].map((tab) => (
+              <button
+                key={tab.value}
+                className={`elyra-tab ${activeTab === tab.value ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab.value)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="control-actions">
+            <div className="search-box">
+              <div className="search-icon-inside"><Search size={18} /></div>
+              <input
+                type="text"
+                placeholder="Cari aset..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="search-input-pill"
+              />
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      <div className="table-section">
+        <div className="wuw-table-area">
+          {loading && <LoadingState message="Memuat aset..." />}
+          {!loading && errorMessage && <ErrorState message="Koneksi Terputus" error={errorMessage} onRetry={fetchData} />}
+
+          {!loading && !errorMessage && filteredAssets.length === 0 && (
+            <div style={{ padding: '5rem 0' }}>
+              <EmptyState title="Tidak Ada Aset" message="Anda belum memiliki aset perusahaan yang ditugaskan." actionLabel="Bersihkan Filter" onAction={clearFilters} />
+            </div>
+          )}
+
+          {!loading && !errorMessage && filteredAssets.length > 0 && (
+            <div className="table-wrap">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: '300px' }}>Aset</th>
+                    <th>Kategori</th>
+                    <th>Tanggal Diberikan</th>
+                    <th>Serial Number</th>
+                    <th className="th-center">Status</th>
+                    <th className="th-center" style={{ width: '100px' }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredAssets.map((item) => {
+                    const asset = getAsset(item);
+                    const IconComponent = getAssetIcon(asset);
+                    return (
+                      <tr key={item.id}>
+                        <td>
+                          <div className="cell-name">
+                            <div className="cell-avatar">
+                              <IconComponent size={20} />
+                            </div>
+                            <div className="cell-stacked">
+                              <span className="cell-name-text">{asset.name || '-'}</span>
+                              <span className="cell-stacked__sub">{asset.code || '-'}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <span className="badge-soft badge-soft--purple">{asset.category || '-'}</span>
+                        </td>
+                        <td>
+                          <div className="cell-stacked">
+                            <span className="cell-stacked__main" style={{ fontSize: '0.85rem' }}>
+                              {formatDate(item.assigned_at || item.created_at)}
+                            </span>
+                            <span className="cell-stacked__sub">
+                              {item.status === 'assigned' ? 'Sedang dipakai' : 'Dikembalikan'}
+                            </span>
+                          </div>
+                        </td>
+                        <td>
+                          <span style={{ color: '#64748b', fontWeight: 500, fontSize: '0.85rem' }}>
+                            {asset.serial_number || '-'}
+                          </span>
+                        </td>
+                        <td className="td-center">
+                          <span className={`badge-soft ${
+                            item.status === 'assigned' ? 'badge-soft--green' : 'badge-soft--gray'
+                          }`}>
+                            {item.status === 'assigned' ? 'Aktif' : 'Dikembalikan'}
+                          </span>
+                        </td>
+                        <td className="td-center">
+                          <div className="action-btn-group">
+                            {item.status === 'assigned' && (
+                              <button
+                                className="action-btn"
+                                style={{ background: '#fef3c7', color: '#d97706' }}
+                                onClick={() => openReturnModal(item)}
+                                title="Kembalikan Aset"
+                              >
+                                <ArrowUpFromLine size={16} />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Return Modal */}
+      {returnModal && selectedAssignment && (
+        <div className="modal-overlay" onClick={closeReturnModal}>
+          <div className="modal-completion" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-completion-header">
+              <div className="modal-completion-icon" style={{ background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)', color: '#d97706' }}>
+                <ArrowUpFromLine size={24} />
               </div>
               <div>
-                <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700 }}>{asset.name}</h3>
-                <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Code: {asset.code || 'N/A'}</div>
+                <h3 className="modal-completion-title">Kembalikan Aset</h3>
+                <p className="modal-completion-task">
+                  {getAsset(selectedAssignment).name} ({getAsset(selectedAssignment).code})
+                </p>
               </div>
+              <button className="modal-close-btn" onClick={closeReturnModal}>
+                <X size={20} />
+              </button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: 'rgba(248, 250, 252, 0.5)', padding: '1.25rem', borderRadius: '16px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '0.9rem' }}>
-                <Calendar size={16} color="#64748b" />
-                <span style={{ color: '#64748b', width: '100px' }}>Assigned Date:</span>
-                <span style={{ fontWeight: 600 }}>
-                  {asset.assigned_at || asset.assignment_date || asset.created_at?.split('T')[0] || 'N/A'}
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '0.9rem' }}>
-                <ShieldCheck size={16} color="#64748b" />
-                <span style={{ color: '#64748b', width: '100px' }}>Serial Number:</span>
-                <span style={{ fontWeight: 600 }}>{asset.serial_number || 'N/A'}</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '0.9rem' }}>
-                <Info size={16} style={{ marginTop: '2px', color: '#64748b' }} />
-                <span style={{ color: '#64748b', width: '100px' }}>Note:</span>
-                <span style={{ fontWeight: 500, flex: 1 }}>{asset.assignment_note || 'Official property.'}</span>
-              </div>
+            <div className="modal-completion-body">
+              <label className="modal-completion-label">Catatan Pengembalian</label>
+              <textarea
+                className="modal-completion-textarea"
+                placeholder="Kondisi aset saat dikembalikan..."
+                value={returnNote}
+                onChange={(e) => setReturnNote(e.target.value)}
+                rows={3}
+              />
+              <p className="modal-completion-hint">Opsional. Kosongkan jika tidak ada catatan.</p>
             </div>
 
-            <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #f1f5f9' }}>
-               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#16a34a', fontSize: '0.85rem', fontWeight: 600 }}>
-                 <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#16a34a' }}></div>
-                 Currently in your possession
-               </div>
+            <div className="modal-completion-footer">
+              <button className="modal-btn-cancel" onClick={closeReturnModal}>Batal</button>
+              <button
+                className="modal-btn-confirm"
+                onClick={handleReturn}
+                disabled={returningLoading}
+                style={{ background: 'linear-gradient(135deg, #d97706 0%, #b45309 100%)', boxShadow: '0 4px 14px rgba(217, 119, 6, 0.3)' }}
+              >
+                {returningLoading ? (
+                  <><RefreshCw size={16} className="animate-spin" /> Memproses...</>
+                ) : (
+                  <><ArrowUpFromLine size={16} /> Kembalikan Aset</>
+                )}
+              </button>
             </div>
-          </Card>
-        ))}
-      </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

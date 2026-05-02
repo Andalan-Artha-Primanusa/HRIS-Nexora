@@ -45,6 +45,13 @@ export const assetService = {
     const response = await api.put(`/assets/assignments/${assignmentId}/return`, data);
     return response.data;
   },
+  returnAssetByEmployee: async (assignmentId: string | number, data: {
+    return_note?: string;
+    returned_at?: string;
+  }) => {
+    const response = await api.put(`/assets/assignments/${assignmentId}/return-ess`, data);
+    return response.data;
+  },
 
   // --- ESS (Employee Self Service) ---
   getMyAssets: async () => {
