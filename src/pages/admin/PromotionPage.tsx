@@ -160,7 +160,7 @@ const PromotionPage: React.FC = () => {
 
   const sortedItems = useMemo(() => {
     return [...filteredItems].sort((a, b) => {
-      const statusOrder: Record<string, number> = { pending: 0, approved: 1, rejected: 2 };
+      const statusOrder: Record<string, number> = { pending: 0, approved: 1, rejected: 2, completed: 3 };
       const aStatus = statusOrder[a.status] ?? 3;
       const bStatus = statusOrder[b.status] ?? 3;
       if (aStatus !== bStatus) return aStatus - bStatus;
@@ -208,6 +208,14 @@ const PromotionPage: React.FC = () => {
         change: 'Pending review',
         tone: 'purple' as const,
         icon: Filter,
+      },
+      {
+        label: 'Selesai',
+        subtitle: 'Naik jabatan berhasil',
+        value: String(items.filter((i) => i.status === 'completed').length),
+        change: 'Laporan disetujui',
+        tone: 'blue' as const,
+        icon: CheckCircle,
       },
     ],
     [items, sortedItems.length, paginatedItems.length],
@@ -328,6 +336,7 @@ const PromotionPage: React.FC = () => {
               { value: '', label: 'Semua' },
               { value: 'pending', label: 'Menunggu' },
               { value: 'approved', label: 'Disetujui' },
+              { value: 'completed', label: 'Selesai' },
               { value: 'rejected', label: 'Ditolak' },
             ].map((tab) => (
               <button

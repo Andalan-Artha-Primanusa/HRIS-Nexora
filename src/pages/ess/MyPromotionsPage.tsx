@@ -50,6 +50,7 @@ const MyPromotionsPage: React.FC = () => {
       if (activeTab === 'Disetujui') tabMatch = item.status === 'approved';
       else if (activeTab === 'Menunggu') tabMatch = item.status === 'pending';
       else if (activeTab === 'Ditolak') tabMatch = item.status === 'rejected';
+      else if (activeTab === 'Selesai') tabMatch = item.status === 'completed';
 
       return matchesSearch && tabMatch;
     });
@@ -88,6 +89,14 @@ const MyPromotionsPage: React.FC = () => {
         change: 'Tidak disetujui',
         tone: 'red' as const,
         icon: XCircle,
+      },
+      {
+        label: 'Selesai',
+        subtitle: 'Naik jabatan berhasil',
+        value: String(items.filter((i) => i.status === 'completed').length),
+        change: 'Tuntas',
+        tone: 'blue' as const,
+        icon: CheckCircle,
       },
     ],
     [items],
@@ -227,7 +236,7 @@ const MyPromotionsPage: React.FC = () => {
       <Card className="control-section-card">
         <div className="control-section-inner">
           <div className="elyra-tabs">
-            {['Semua', 'Menunggu', 'Disetujui', 'Ditolak'].map((tab) => (
+            {['Semua', 'Menunggu', 'Disetujui', 'Selesai', 'Ditolak'].map((tab) => (
               <button
                 key={tab}
                 className={`elyra-tab ${activeTab === tab ? 'active' : ''}`}
