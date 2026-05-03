@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Filter, Plus, RefreshCw, CheckCircle, XCircle, Trash2, ArrowUpRight } from 'lucide-react';
+import { Search, Filter, Plus, RefreshCw, CheckCircle, XCircle, Trash2, ArrowUpRight, FileText, X } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
@@ -19,6 +19,12 @@ const PromotionPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [reportModal, setReportModal] = useState(false);
+  const [selectedPromo, setSelectedPromo] = useState<any>(null);
+  const [viewingReport, setViewingReport] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [reportActionLoading, setReportActionLoading] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -85,6 +91,55 @@ const PromotionPage: React.FC = () => {
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const openViewReport = (promo: any) => {
+    setSelectedPromo(promo);
+    setViewingReport(true);
+    setReportModal(true);
+  };
+
+  const handleApproveReport = async (id: string | number) => {
+    if (!window.confirm('Setujui laporan kegiatan ini? Promosi akan dinyatakan selesai.')) return;
+    setReportActionLoading(true);
+    try {
+      await promotionService.approveReport(id);
+      fetchData();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setReportActionLoading(false);
+    }
+  };
+
+  const handleRejectReport = async (id: string | number) => {
+    setSelectedPromo(items.find((p) => p.id === id));
+    setRejectionReason('');
+    setViewingReport(false);
+    setReportModal(true);
+  };
+
+  const submitRejectReport = async () => {
+    if (!selectedPromo || !rejectionReason.trim()) return;
+    setReportActionLoading(true);
+    try {
+      await promotionService.rejectReport(selectedPromo.id, {
+        rejection_reason: rejectionReason,
+      });
+      closeReportModal();
+      fetchData();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setReportActionLoading(false);
+    }
+  };
+
+  const closeReportModal = () => {
+    setReportModal(false);
+    setSelectedPromo(null);
+    setViewingReport(false);
+    setRejectionReason('');
   };
 
   const filteredItems = useMemo(() => {
@@ -169,8 +224,28 @@ const PromotionPage: React.FC = () => {
       pending: { label: 'Menunggu', class: 'badge-soft--yellow' },
       approved: { label: 'Disetujui', class: 'badge-soft--green' },
       rejected: { label: 'Ditolak', class: 'badge-soft--red' },
+      completed: { label: 'Naik Jabatan Berhasil', class: 'badge-soft--blue' },
     };
     const info = map[status] || { label: status, class: 'badge-soft--gray' };
+    return <span className={`badge-soft ${info.class}`}>{info.label}</span>;
+  };
+
+  const getReportBadge = (reportStatus: string | null, promoStatus: string) => {
+    if (promoStatus === 'completed') {
+      return <span className="badge-soft badge-soft--blue"><CheckCircle size={12} style={{ display: 'inline', marginRight: '4px' }} />Selesai</span>;
+    }
+    if (!reportStatus) {
+      if (promoStatus === 'approved') {
+        return <span className="badge-soft badge-soft--orange">Perlu Laporan</span>;
+      }
+      return <span className="badge-soft badge-soft--gray">-</span>;
+    }
+    const map: Record<string, { label: string; class: string }> = {
+      submitted: { label: 'Dikirim', class: 'badge-soft--purple' },
+      approved: { label: 'Disetujui', class: 'badge-soft--blue' },
+      rejected: { label: 'Ditolak', class: 'badge-soft--red' },
+    };
+    const info = map[reportStatus] || { label: reportStatus, class: 'badge-soft--gray' };
     return <span className={`badge-soft ${info.class}`}>{info.label}</span>;
   };
 
@@ -319,6 +394,7 @@ const PromotionPage: React.FC = () => {
                       <th>Alasan</th>
                       <th>Tanggal Efektif</th>
                       <th>Status</th>
+                      <th>Laporan</th>
                       <th className="th-center" style={{ width: '160px' }}>Aksi</th>
                     </tr>
                   </thead>
@@ -362,6 +438,7 @@ const PromotionPage: React.FC = () => {
                             </div>
                           </td>
                           <td>{getStatusBadge(promo.status)}</td>
+                          <td className="td-center">{getReportBadge(promo.report_status, promo.status)}</td>
                           <td className="td-center">
                             <div className="action-btn-group">
                               {promo.status === 'pending' && (
@@ -382,16 +459,42 @@ const PromotionPage: React.FC = () => {
                                   >
                                     <XCircle size={16} />
                                   </button>
+                                  <button
+                                    className="action-btn action-btn-delete"
+                                    onClick={() => handleDelete(promo.id)}
+                                    title="Hapus"
+                                  >
+                                    <Trash2 size={16} />
+                                  </button>
                                 </>
                               )}
-                              {promo.status === 'pending' && (
-                                <button
-                                  className="action-btn action-btn-delete"
-                                  onClick={() => handleDelete(promo.id)}
-                                  title="Hapus"
-                                >
-                                  <Trash2 size={16} />
-                                </button>
+                              {promo.report_status === 'submitted' && (
+                                <>
+                                  <button
+                                    className="action-btn"
+                                    style={{ background: '#dbeafe', color: '#2563eb' }}
+                                    onClick={() => openViewReport(promo)}
+                                    title="Lihat Laporan"
+                                  >
+                                    <FileText size={16} />
+                                  </button>
+                                  <button
+                                    className="action-btn"
+                                    style={{ background: '#dcfce7', color: '#16a34a' }}
+                                    onClick={() => handleApproveReport(promo.id)}
+                                    title="Setujui Laporan"
+                                  >
+                                    <CheckCircle size={16} />
+                                  </button>
+                                  <button
+                                    className="action-btn"
+                                    style={{ background: '#fee2e2', color: '#dc2626' }}
+                                    onClick={() => handleRejectReport(promo.id)}
+                                    title="Tolak Laporan"
+                                  >
+                                    <XCircle size={16} />
+                                  </button>
+                                </>
                               )}
                             </div>
                           </td>
@@ -438,6 +541,84 @@ const PromotionPage: React.FC = () => {
       </div>
 
       <PromotionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleSave} />
+
+      {/* Report Modal */}
+      {reportModal && selectedPromo && (
+        <div className="modal-overlay" onClick={closeReportModal}>
+          <div className="modal-completion" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-completion-header">
+              <div className="modal-completion-icon" style={{ background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)', color: viewingReport ? '#2563eb' : '#dc2626' }}>
+                <FileText size={24} />
+              </div>
+              <div>
+                <h3 className="modal-completion-title">
+                  {viewingReport ? 'Laporan Kegiatan' : 'Tolak Laporan'}
+                </h3>
+                <p className="modal-completion-task">
+                  {selectedPromo.employee?.user?.name || '-'} → {selectedPromo.to_value}
+                </p>
+              </div>
+              <button className="modal-close-btn" onClick={closeReportModal}>
+                <X size={20} />
+              </button>
+            </div>
+
+            {viewingReport ? (
+              <>
+                <div className="modal-completion-body">
+                  <label className="modal-completion-label">Isi Laporan</label>
+                  <div className="modal-completion-textarea" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '12px', borderRadius: '8px', minHeight: '120px', whiteSpace: 'pre-wrap' }}>
+                    {selectedPromo.activity_report || 'Tidak ada laporan.'}
+                  </div>
+                </div>
+                <div className="modal-completion-footer">
+                  <button className="modal-btn-cancel" onClick={closeReportModal}>Tutup</button>
+                  <button
+                    className="modal-btn-confirm"
+                    onClick={() => handleApproveReport(selectedPromo.id)}
+                    disabled={reportActionLoading}
+                    style={{ background: 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)', boxShadow: '0 4px 14px rgba(22, 163, 74, 0.3)' }}
+                  >
+                    {reportActionLoading ? (
+                      <><RefreshCw size={16} className="animate-spin" /> Memproses...</>
+                    ) : (
+                      <><CheckCircle size={16} /> Setujui Laporan</>
+                    )}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="modal-completion-body">
+                  <label className="modal-completion-label">Alasan Penolakan</label>
+                  <textarea
+                    className="modal-completion-textarea"
+                    placeholder="Jelaskan alasan penolakan laporan ini..."
+                    value={rejectionReason}
+                    onChange={(e) => setRejectionReason(e.target.value)}
+                    rows={4}
+                  />
+                </div>
+                <div className="modal-completion-footer">
+                  <button className="modal-btn-cancel" onClick={closeReportModal}>Batal</button>
+                  <button
+                    className="modal-btn-confirm"
+                    onClick={submitRejectReport}
+                    disabled={reportActionLoading || !rejectionReason.trim()}
+                    style={{ background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)', boxShadow: '0 4px 14px rgba(220, 38, 38, 0.3)' }}
+                  >
+                    {reportActionLoading ? (
+                      <><RefreshCw size={16} className="animate-spin" /> Memproses...</>
+                    ) : (
+                      <><XCircle size={16} /> Tolak Laporan</>
+                    )}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

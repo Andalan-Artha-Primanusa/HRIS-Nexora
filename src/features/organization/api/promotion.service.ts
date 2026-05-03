@@ -24,4 +24,16 @@ export const promotionService = {
   deletePromotion: (id: string | number) => {
     return api.delete(`/promotions/${id}`);
   },
+
+  submitReport: (id: string | number, data: { activity_report: string }) => {
+    return api.post(`/my/promotions/${id}/report/submit`, data);
+  },
+
+  approveReport: (id: string | number) => {
+    return api.post(`/promotions/${id}/report/approve`);
+  },
+
+  rejectReport: (id: string | number, data: { rejection_reason: string }) => {
+    return api.post(`/promotions/${id}/report/reject`, data);
+  },
 };

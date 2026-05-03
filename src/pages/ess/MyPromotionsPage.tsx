@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, RefreshCw, ArrowUpRight, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { Search, RefreshCw, ArrowUpRight, CheckCircle, Clock, XCircle, FileText, X } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { promotionService } from '@/features/organization/api/promotion.service';
@@ -13,6 +13,11 @@ const MyPromotionsPage: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [searchText, setSearchText] = useState('');
   const [activeTab, setActiveTab] = useState('Semua');
+
+  const [reportModal, setReportModal] = useState(false);
+  const [selectedPromo, setSelectedPromo] = useState<any>(null);
+  const [reportContent, setReportContent] = useState('');
+  const [submittingReport, setSubmittingReport] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -93,13 +98,61 @@ const MyPromotionsPage: React.FC = () => {
     setActiveTab('Semua');
   };
 
+  const openReportModal = (promo: any) => {
+    setSelectedPromo(promo);
+    setReportContent('');
+    setReportModal(true);
+  };
+
+  const closeReportModal = () => {
+    setReportModal(false);
+    setSelectedPromo(null);
+    setReportContent('');
+  };
+
+  const handleSubmitReport = async () => {
+    if (!selectedPromo || !reportContent.trim()) return;
+    setSubmittingReport(true);
+    try {
+      await promotionService.submitReport(selectedPromo.id, {
+        activity_report: reportContent,
+      });
+      closeReportModal();
+      fetchData();
+    } catch (error) {
+      console.error('Failed to submit report:', error);
+    } finally {
+      setSubmittingReport(false);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const map: Record<string, { label: string; class: string }> = {
       pending: { label: 'Menunggu', class: 'badge-soft--orange' },
       approved: { label: 'Disetujui', class: 'badge-soft--green' },
       rejected: { label: 'Ditolak', class: 'badge-soft--red' },
+      completed: { label: 'Naik Jabatan Berhasil', class: 'badge-soft--blue' },
     };
     const info = map[status] || { label: status, class: 'badge-soft--gray' };
+    return <span className={`badge-soft ${info.class}`}>{info.label}</span>;
+  };
+
+  const getReportBadge = (reportStatus: string | null, promoStatus: string) => {
+    if (promoStatus === 'completed') {
+      return <span className="badge-soft badge-soft--blue"><CheckCircle size={12} style={{ display: 'inline', marginRight: '4px' }} />Selesai</span>;
+    }
+    if (!reportStatus) {
+      if (promoStatus === 'approved') {
+        return <span className="badge-soft badge-soft--orange">Perlu Laporan</span>;
+      }
+      return <span className="badge-soft badge-soft--gray">-</span>;
+    }
+    const map: Record<string, { label: string; class: string }> = {
+      submitted: { label: 'Dikirim', class: 'badge-soft--purple' },
+      approved: { label: 'Disetujui', class: 'badge-soft--blue' },
+      rejected: { label: 'Ditolak', class: 'badge-soft--red' },
+    };
+    const info = map[reportStatus] || { label: reportStatus, class: 'badge-soft--gray' };
     return <span className={`badge-soft ${info.class}`}>{info.label}</span>;
   };
 
@@ -220,8 +273,9 @@ const MyPromotionsPage: React.FC = () => {
                     <th>Alasan</th>
                     <th>Tanggal Efektif</th>
                     <th>Disetujui Oleh</th>
-                    <th>Tanggal Disetujui</th>
                     <th className="th-center">Status</th>
+                    <th className="th-center">Laporan</th>
+                    <th className="th-center" style={{ width: '100px' }}>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -263,12 +317,72 @@ const MyPromotionsPage: React.FC = () => {
                             {promo.approver?.name || '-'}
                           </span>
                         </td>
-                        <td>
-                          <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
-                            {promo.approval_date ? formatDate(promo.approval_date) : '-'}
-                          </span>
-                        </td>
                         <td className="td-center">{getStatusBadge(promo.status)}</td>
+                        <td className="td-center">{getReportBadge(promo.report_status, promo.status)}</td>
+                        <td className="td-center">
+                          <div className="action-btn-group">
+                            {promo.status === 'approved' && !promo.report_status && (
+                              <button
+                                className="action-btn"
+                                style={{ background: '#dbeafe', color: '#2563eb' }}
+                                onClick={() => openReportModal(promo)}
+                                title="Submit Laporan"
+                              >
+                                <FileText size={16} />
+                              </button>
+      )}
+
+      {/* Report Modal */}
+      {reportModal && selectedPromo && (
+        <div className="modal-overlay" onClick={closeReportModal}>
+          <div className="modal-completion" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-completion-header">
+              <div className="modal-completion-icon" style={{ background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)', color: '#2563eb' }}>
+                <FileText size={24} />
+              </div>
+              <div>
+                <h3 className="modal-completion-title">Submit Laporan Kegiatan</h3>
+                <p className="modal-completion-task">
+                  {selectedPromo.to_value}
+                </p>
+              </div>
+              <button className="modal-close-btn" onClick={closeReportModal}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="modal-completion-body">
+              <label className="modal-completion-label">Laporan Kegiatan</label>
+              <textarea
+                className="modal-completion-textarea"
+                placeholder="Deskripsikan kegiatan dan pencapaian Anda setelah promosi..."
+                value={reportContent}
+                onChange={(e) => setReportContent(e.target.value)}
+                rows={5}
+              />
+              <p className="modal-completion-hint">Laporan akan direview oleh HR/Admin sebelum promosi dinyatakan selesai.</p>
+            </div>
+
+            <div className="modal-completion-footer">
+              <button className="modal-btn-cancel" onClick={closeReportModal}>Batal</button>
+              <button
+                className="modal-btn-confirm"
+                onClick={handleSubmitReport}
+                disabled={submittingReport || !reportContent.trim()}
+                style={{ background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.3)' }}
+              >
+                {submittingReport ? (
+                  <><RefreshCw size={16} className="animate-spin" /> Mengirim...</>
+                ) : (
+                  <><FileText size={16} /> Submit Laporan</>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+                        </td>
                       </tr>
                     );
                   })}

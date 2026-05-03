@@ -49,7 +49,7 @@ export const assetService = {
     return_note?: string;
     returned_at?: string;
   }) => {
-    const response = await api.put(`/assets/assignments/${assignmentId}/return-ess`, data);
+    const response = await api.put(`/my/assets/return/${assignmentId}`, data);
     return response.data;
   },
 
