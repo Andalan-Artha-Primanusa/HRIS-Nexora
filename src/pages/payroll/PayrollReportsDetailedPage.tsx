@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, RefreshCw, FileText, DollarSign, Receipt, Users, Eye } from 'lucide-react';
+import { Search, RefreshCw, FileText, DollarSign, Receipt, Users, Eye, Download, X, AlertCircle } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Badge } from '@/shared/ui/Badge';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
@@ -19,6 +19,7 @@ const formatCurrency = (value: number | string) => {
 const PayrollReportsDetailedPage: React.FC = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Search & Filter
   const [searchText, setSearchText] = useState("");
@@ -28,16 +29,86 @@ const PayrollReportsDetailedPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
 
+  // Export
+  const [exportModal, setExportModal] = useState(false);
+  const [exportPeriod, setExportPeriod] = useState(new Date().toISOString().slice(0, 7));
+  const [exportType, setExportType] = useState<"bca" | "summary">("bca");
+  const [exportLoading, setExportLoading] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+
+  // Detail Modal
+  const [detailModal, setDetailModal] = useState(false);
+  const [selectedPayroll, setSelectedPayroll] = useState<any>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+
   const loadData = async () => {
     setLoading(true);
+    setError(null);
     try {
       const response = await payrollService.getPayrollList();
       setData(toSafeArray(response));
     } catch (err: any) {
-      console.error("Failed to load payroll reports:", err);
+      setError(err?.response?.data?.message || err.message || 'Gagal memuat data payroll');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleExport = async () => {
+    if (!exportPeriod) return;
+    setExportLoading(true);
+    try {
+      const token = sessionStorage.getItem("token") || "";
+      const baseUrl = import.meta.env.VITE_API_URL || "https://moccasin-crab-693879.hostingersite.com/api";
+
+      const endpoint = exportType === "bca"
+        ? `/payroll/export/bca-klikpay?period=${exportPeriod}`
+        : `/payroll/export/summary?period=${exportPeriod}`;
+
+      const url = `${baseUrl}${endpoint}`;
+
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Gagal mengunduh file export");
+      }
+
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = exportType === "bca"
+        ? `bca-klikpay-${exportPeriod}.csv`
+        : `payroll-summary-${exportPeriod}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+
+      setExportModal(false);
+    } catch (err: any) {
+      setExportError(err.message || 'Gagal export');
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  const openDetail = async (item: any) => {
+    setDetailLoading(true);
+    setSelectedPayroll(item);
+    try {
+      const response = await payrollService.getPayrollSlip(item.id);
+      setSelectedPayroll(response?.data ?? response);
+    } catch (err: any) {
+      console.error("Failed to load payroll detail:", err);
+    } finally {
+      setDetailLoading(false);
+    }
+    setDetailModal(true);
   };
 
   useEffect(() => {
@@ -111,9 +182,25 @@ const PayrollReportsDetailedPage: React.FC = () => {
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan
             </button>
+            <button
+              className="btn-outline"
+              onClick={() => setExportModal(true)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.25rem', borderRadius: '10px', border: '1px solid #cbd5e1', background: '#fff', color: '#059669', fontSize: '0.9rem', fontWeight: '600', fontFamily: "'Poppins', sans-serif", cursor: 'pointer' }}
+            >
+              <Download size={16} />
+              Export Payroll
+            </button>
           </div>
         </div>
       </Card>
+
+      {/* Error Message */}
+      {error && (
+        <div className="alert alert-error" style={{ marginBottom: 24 }}>
+          <span>{error}</span>
+          <button onClick={() => setError(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', fontSize: 18 }}>×</button>
+        </div>
+      )}
 
       {/* Summary Cards */}
       <div className="employee-summary-wrapper">
@@ -188,7 +275,18 @@ const PayrollReportsDetailedPage: React.FC = () => {
         <div className="wuw-table-area">
           {loading && <LoadingState message="Memuat laporan payroll..." />}
 
-          {!loading && paginatedData.length === 0 && (
+          {!loading && error && (
+            <div style={{ padding: '5rem 0' }}>
+              <EmptyState
+                title="Akses Ditolak"
+                message={error}
+                actionLabel="Segarkan"
+                onAction={() => void loadData()}
+              />
+            </div>
+          )}
+
+          {!loading && !error && paginatedData.length === 0 && (
             <div style={{ padding: '5rem 0' }}>
               <EmptyState
                 title="Belum Ada Data"
@@ -242,6 +340,7 @@ const PayrollReportsDetailedPage: React.FC = () => {
                             <button
                               className="action-btn action-btn-edit"
                               title="Lihat Detail"
+                              onClick={() => openDetail(item)}
                             >
                               <Eye size={16} />
                             </button>
@@ -288,6 +387,216 @@ const PayrollReportsDetailedPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Export Modal */}
+      {exportModal && (
+        <div className="modal-overlay" onClick={() => setExportModal(false)}>
+          <div className="modal-completion" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-completion-header">
+              <div className="modal-completion-icon" style={{ background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)', color: '#2563eb' }}>
+                <Download size={24} />
+              </div>
+              <div>
+                <h3 className="modal-completion-title">Export Payroll</h3>
+                <p className="modal-completion-task">Pilih tipe export dan periode</p>
+              </div>
+              <button className="modal-close-btn" onClick={() => setExportModal(false)}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="modal-completion-body">
+              <label className="modal-completion-label">Tipe Export</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '8px' }}>
+                <label
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '12px',
+                    padding: '12px 16px', borderRadius: '12px',
+                    border: exportType === 'bca' ? '2px solid #2563eb' : '2px solid #e2e8f0',
+                    background: exportType === 'bca' ? '#eff6ff' : '#fff',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => setExportType('bca')}
+                >
+                  <input type="radio" name="exportTypeReport" checked={exportType === 'bca'} onChange={() => setExportType('bca')} style={{ accentColor: '#2563eb' }} />
+                  <DollarSign size={20} color="#2563eb" />
+                  <div>
+                    <div style={{ fontWeight: 600, color: '#1e293b' }}>BCA KlikPay CSV</div>
+                    <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Format siap import ke BCA KlikPay</div>
+                  </div>
+                </label>
+
+                <label
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '12px',
+                    padding: '12px 16px', borderRadius: '12px',
+                    border: exportType === 'summary' ? '2px solid #2563eb' : '2px solid #e2e8f0',
+                    background: exportType === 'summary' ? '#eff6ff' : '#fff',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => setExportType('summary')}
+                >
+                  <input type="radio" name="exportTypeReport" checked={exportType === 'summary'} onChange={() => setExportType('summary')} style={{ accentColor: '#2563eb' }} />
+                  <FileText size={20} color="#2563eb" />
+                  <div>
+                    <div style={{ fontWeight: 600, color: '#1e293b' }}>Summary Lengkap</div>
+                    <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Detail gaji, tunjangan, potongan, BPJS, PPh21</div>
+                  </div>
+                </label>
+              </div>
+
+              <label className="modal-completion-label" style={{ marginTop: '16px' }}>Periode</label>
+              <input
+                type="month"
+                className="crud-input"
+                value={exportPeriod}
+                onChange={(e) => setExportPeriod(e.target.value)}
+                style={{ width: '100%', marginTop: '8px' }}
+              />
+            </div>
+
+            <div className="modal-completion-footer">
+              <button className="modal-btn-cancel" onClick={() => setExportModal(false)}>Batal</button>
+              <button
+                className="modal-btn-confirm"
+                onClick={handleExport}
+                disabled={exportLoading}
+                style={{ background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.3)' }}
+              >
+                {exportLoading ? (
+                  <><RefreshCw size={16} className="animate-spin" /> Memproses...</>
+                ) : (
+                  <><Download size={16} /> Download CSV</>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Export Error Popup */}
+      {exportError && (
+        <div className="modal-overlay" onClick={() => setExportError(null)}>
+          <div className="modal-completion" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px' }}>
+            <div className="modal-completion-header">
+              <div className="modal-completion-icon" style={{ background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)', color: '#dc2626' }}>
+                <AlertCircle size={24} />
+              </div>
+              <div>
+                <h3 className="modal-completion-title">Export Gagal</h3>
+                <p className="modal-completion-task">Tidak bisa mengunduh file</p>
+              </div>
+              <button className="modal-close-btn" onClick={() => setExportError(null)}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="modal-completion-body">
+              <div style={{ padding: '16px', background: '#fef2f2', borderRadius: '12px', border: '1px solid #fecaca' }}>
+                <p style={{ color: '#991b1b', fontWeight: 600, margin: '0 0 8px' }}>Penyebab:</p>
+                <p style={{ color: '#7f1d1d', margin: 0, fontSize: '0.9rem', lineHeight: '1.6' }}>{exportError}</p>
+              </div>
+              <div style={{ marginTop: '12px', padding: '12px', background: '#f8fafc', borderRadius: '8px', fontSize: '0.85rem', color: '#475569', lineHeight: '1.6' }}>
+                <strong>Solusi:</strong> Pastikan sudah generate payroll untuk periode <strong>{exportPeriod}</strong> dan statusnya sudah approved/paid.
+              </div>
+            </div>
+
+            <div className="modal-completion-footer">
+              <button className="modal-btn-cancel" onClick={() => setExportError(null)}>Tutup</button>
+              <button
+                className="modal-btn-confirm"
+                onClick={() => { setExportError(null); setExportModal(true); }}
+                style={{ background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)' }}
+              >
+                Coba Lagi
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Detail Modal */}
+      {detailModal && selectedPayroll && (
+        <div className="modal-overlay" onClick={() => setDetailModal(false)}>
+          <div className="modal-completion" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px' }}>
+            <div className="modal-completion-header">
+              <div className="modal-completion-icon" style={{ background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)', color: '#2563eb' }}>
+                <FileText size={24} />
+              </div>
+              <div>
+                <h3 className="modal-completion-title">Detail Payroll</h3>
+                <p className="modal-completion-task">
+                  {selectedPayroll?.employee?.name || selectedPayroll?.employee?.user?.name || '-'} • {selectedPayroll?.period || '-'}
+                </p>
+              </div>
+              <button className="modal-close-btn" onClick={() => setDetailModal(false)}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="modal-completion-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {detailLoading ? (
+                <div style={{ textAlign: 'center', padding: '24px', color: '#64748b' }}>
+                  <RefreshCw size={24} className="animate-spin" style={{ margin: '0 auto 8px' }} />
+                  <p>Memuat detail...</p>
+                </div>
+              ) : (
+                <>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div style={{ padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
+                      <p style={{ fontSize: '0.75rem', color: '#64748b', margin: 0 }}>Gaji Pokok</p>
+                      <p style={{ fontWeight: 600, color: '#1e293b', margin: '4px 0 0' }}>{formatCurrency(selectedPayroll?.summary?.basic_salary ?? selectedPayroll?.basic_salary ?? 0)}</p>
+                    </div>
+                    <div style={{ padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
+                      <p style={{ fontSize: '0.75rem', color: '#64748b', margin: 0 }}>Tunjangan</p>
+                      <p style={{ fontWeight: 600, color: '#1e293b', margin: '4px 0 0' }}>{formatCurrency(selectedPayroll?.summary?.allowance ?? selectedPayroll?.allowance ?? 0)}</p>
+                    </div>
+                    <div style={{ padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
+                      <p style={{ fontSize: '0.75rem', color: '#64748b', margin: 0 }}>Bonus</p>
+                      <p style={{ fontWeight: 600, color: '#1e293b', margin: '4px 0 0' }}>{formatCurrency(selectedPayroll?.summary?.bonus ?? selectedPayroll?.bonus ?? 0)}</p>
+                    </div>
+                    <div style={{ padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
+                      <p style={{ fontSize: '0.75rem', color: '#64748b', margin: 0 }}>Gross Pay</p>
+                      <p style={{ fontWeight: 600, color: '#1e293b', margin: '4px 0 0' }}>{formatCurrency(selectedPayroll?.summary?.gross_pay ?? 0)}</p>
+                    </div>
+                  </div>
+
+                  <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '12px' }}>
+                    <p style={{ fontWeight: 600, color: '#1e293b', marginBottom: '8px' }}>Potongan</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: '#fef2f2', borderRadius: '8px' }}>
+                        <span style={{ color: '#64748b' }}>PPh 21</span>
+                        <span style={{ fontWeight: 600, color: '#e11d48' }}>{formatCurrency(selectedPayroll?.summary?.pph21 ?? selectedPayroll?.pph21 ?? 0)}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: '#fef2f2', borderRadius: '8px' }}>
+                        <span style={{ color: '#64748b' }}>BPJS Kesehatan</span>
+                        <span style={{ fontWeight: 600, color: '#e11d48' }}>{formatCurrency(selectedPayroll?.summary?.bpjs_kesehatan ?? selectedPayroll?.bpjs_kesehatan ?? 0)}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: '#fef2f2', borderRadius: '8px' }}>
+                        <span style={{ color: '#64748b' }}>BPJS Ketenagakerjaan</span>
+                        <span style={{ fontWeight: 600, color: '#e11d48' }}>{formatCurrency(selectedPayroll?.summary?.bpjs_ketenagakerjaan ?? selectedPayroll?.bpjs_ketenagakerjaan ?? 0)}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: '#fee2e2', borderRadius: '8px', fontWeight: 600 }}>
+                        <span style={{ color: '#991b1b' }}>Total Potongan</span>
+                        <span style={{ color: '#dc2626' }}>{formatCurrency(selectedPayroll?.summary?.total_deduction ?? selectedPayroll?.total_deduction ?? 0)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ padding: '16px', background: '#f0fdf4', borderRadius: '12px', textAlign: 'center' }}>
+                    <p style={{ fontSize: '0.75rem', color: '#166534', margin: 0 }}>Take Home Pay</p>
+                    <p style={{ fontSize: '1.5rem', fontWeight: 700, color: '#059669', margin: '4px 0 0' }}>{formatCurrency(selectedPayroll?.summary?.take_home_pay ?? selectedPayroll?.take_home_pay ?? 0)}</p>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="modal-completion-footer">
+              <button className="modal-btn-cancel" onClick={() => setDetailModal(false)}>Tutup</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

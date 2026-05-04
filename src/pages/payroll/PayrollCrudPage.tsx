@@ -177,8 +177,8 @@ const PayrollCrudPage = () => {
     }
     setExportLoading(true);
     try {
-      const baseUrl = import.meta.env.VITE_API_BASE_URL || "";
-      const token = localStorage.getItem("auth:token") || "";
+      const token = sessionStorage.getItem("token") || "";
+      const baseUrl = import.meta.env.VITE_API_URL || "https://moccasin-crab-693879.hostingersite.com/api";
 
       const endpoint = exportType === "bca"
         ? `/payroll/export/bca-klikpay?period=${exportPeriod}`
