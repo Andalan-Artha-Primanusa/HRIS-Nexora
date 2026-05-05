@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import DOMPurify from "dompurify";
 import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
@@ -292,7 +293,7 @@ const AdminEmailSendPage = () => {
                   </div>
                   <div 
                     className="email-preview-content"
-                    dangerouslySetInnerHTML={{ __html: htmlPreview }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(htmlPreview || "") }}
                     style={{ fontSize: '0.9rem', color: '#334155', lineHeight: 1.6 }}
                   />
                 </div>
