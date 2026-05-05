@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { BarChart3, CalendarDays, CheckCircle2, RefreshCw, Zap, Clock, Wallet, LayoutDashboard } from "lucide-react";
 import { Card } from "@/shared/ui/Card";
+import { PaginationWithSize } from "@/shared/ui/Pagination";
 import { Modal } from "@/shared/ui/Modal";
 import { PayrollStatusBadge } from "@/shared/ui/PayrollStatusBadge";
 import {
@@ -21,6 +22,8 @@ const formatCurrency = (value: unknown): string => {
 
 const PayrollGeneratePage = () => {
   const [items, setItems] = useState<PayrollItem[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [period, setPeriod] = useState(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -125,6 +128,9 @@ const PayrollGeneratePage = () => {
   useEffect(() => {
     void loadPayroll();
   }, []);
+
+  const totalPages = Math.max(1, Math.ceil(items.length / itemsPerPage));
+  const paginatedItems = items.slice((currentPage - 1) * itemsPerPage, (currentPage - 1) * itemsPerPage + itemsPerPage);
 
   const renderCell = (item: any, columnKey: string) => {
     const value = item[columnKey];
@@ -294,7 +300,7 @@ const PayrollGeneratePage = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {items.slice(0, 10).map((item, index) => (
+                    {paginatedItems.map((item, index) => (
                       <tr key={String(item.id ?? index)}>
                         {columns.map((col) => (
                           <td key={`${String(item.id ?? index)}-${col.key}`}>
@@ -306,10 +312,17 @@ const PayrollGeneratePage = () => {
                   </tbody>
                 </table>
               </div>
-              {items.length > 10 && (
-                <p style={{ marginTop: '1rem', fontSize: '0.85rem', color: '#64748b', textAlign: 'right' }}>
-                  Menampilkan 10 data terbaru dari total {items.length} records.
-                </p>
+              {items.length > itemsPerPage && (
+                <div style={{ marginTop: 12, display: 'flex', justifyContent: 'flex-end' }}>
+                  <PaginationWithSize
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={(p) => setCurrentPage(p)}
+                    totalItems={items.length}
+                    itemsPerPage={itemsPerPage}
+                    onItemsPerPageChange={(s) => setItemsPerPage(s)}
+                  />
+                </div>
               )}
             </>
           ) : (

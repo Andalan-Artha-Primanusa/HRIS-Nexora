@@ -6,6 +6,7 @@ import { Modal } from "@/shared/ui/Modal";
 import { payrollService, toSafeArray } from "@/features/payroll/api/payroll.service";
 import { getAllEmployees } from "@/features/employee/api/employee.service";
 import type { PayrollCreatePayload, PayrollUpdatePayload, PayrollItem } from "@/features/payroll/types/payroll.types";
+import { PaginationWithSize } from "@/shared/ui/Pagination";
 import type { EmployeeItem } from "@/features/employee/types/employee.types";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
@@ -30,6 +31,8 @@ const DEFAULT_FORM: PayrollFormState = {
 const PayrollCrudPage = () => {
   const [employees, setEmployees] = useState<EmployeeItem[]>([]);
   const [payrolls, setPayrolls] = useState<PayrollItem[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [form, setForm] = useState<PayrollFormState>(DEFAULT_FORM);
   const [view, setView] = useState<"list" | "form">("list");
   const [selectedPayrollId, setSelectedPayrollId] = useState<string>("");
@@ -221,6 +224,13 @@ const PayrollCrudPage = () => {
     void loadData();
   }, []);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [payrolls, itemsPerPage]);
+
+  const totalPages = Math.max(1, Math.ceil(payrolls.length / itemsPerPage));
+  const paginatedPayrolls = payrolls.slice((currentPage - 1) * itemsPerPage, (currentPage - 1) * itemsPerPage + itemsPerPage);
+
   const getEmployeeName = (empId: string) => {
     const employee = employees.find((entry) => String(entry.id) === empId);
     return employee ? `${employee.employee_code} - ${employee.user?.name || "Unknown"}` : "N/A";
@@ -317,8 +327,8 @@ const PayrollCrudPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {payrolls.length > 0 ? (
-                    payrolls.map((payroll) => (
+                  {paginatedPayrolls.length > 0 ? (
+                    paginatedPayrolls.map((payroll) => (
                       <tr key={payroll.id} className={selectedPayrollId === String(payroll.id) ? "is-selected" : ""}>
                         <td>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -352,9 +362,22 @@ const PayrollCrudPage = () => {
                     <td colSpan={7} className="crud-empty-row">Belum ada data payroll. Klik "Tambah Payroll" untuk memulai.</td>
                   </tr>
                 )}
-              </tbody>
+                </tbody>
             </table>
             </div>
+
+            {payrolls.length > itemsPerPage && (
+              <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'flex-end' }}>
+                <PaginationWithSize
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={(p) => setCurrentPage(p)}
+                  totalItems={payrolls.length}
+                  itemsPerPage={itemsPerPage}
+                  onItemsPerPageChange={(size) => setItemsPerPage(size)}
+                />
+              </div>
+            )}
           </Card>
         </>
       )}

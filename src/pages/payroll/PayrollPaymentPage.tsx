@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BarChart3, CreditCard, FileText, ShieldCheck, RefreshCw, CheckCircle, DollarSign } from "lucide-react";
 import { Card } from "@/shared/ui/Card";
+import { PaginationWithSize } from "@/shared/ui/Pagination";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
 import { PayrollStatusBadge } from "@/shared/ui/PayrollStatusBadge";
@@ -20,6 +21,8 @@ const PayrollPaymentPage = () => {
   const [selectedPayroll, setSelectedPayroll] = useState<PayrollItem | null>(null);
   const [employees, setEmployees] = useState<EmployeeItem[]>([]);
   const [allPayrolls, setAllPayrolls] = useState<PayrollItem[]>([]);
+  const [currentPageRecent, setCurrentPageRecent] = useState(1);
+  const [itemsPerPageRecent, setItemsPerPageRecent] = useState(5);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [errorModal, setErrorModal] = useState<{ isOpen: boolean; title: string; message: string }>({
@@ -171,7 +174,8 @@ const PayrollPaymentPage = () => {
     },
   ];
 
-  const recentPayrolls = safePayrolls.slice(0, 5);
+  const totalPagesRecent = Math.max(1, Math.ceil(safePayrolls.length / itemsPerPageRecent));
+  const recentPayrolls = safePayrolls.slice((currentPageRecent - 1) * itemsPerPageRecent, (currentPageRecent - 1) * itemsPerPageRecent + itemsPerPageRecent);
 
   return (
     <div className="crud-page">
@@ -299,6 +303,18 @@ const PayrollPaymentPage = () => {
                 </button>
               ))}
             </div>
+            {safePayrolls.length > itemsPerPageRecent && (
+              <div style={{ marginTop: 8, display: 'flex', justifyContent: 'flex-end' }}>
+                <PaginationWithSize
+                  currentPage={currentPageRecent}
+                  totalPages={totalPagesRecent}
+                  onPageChange={(p) => setCurrentPageRecent(p)}
+                  totalItems={safePayrolls.length}
+                  itemsPerPage={itemsPerPageRecent}
+                  onItemsPerPageChange={(s) => setItemsPerPageRecent(s)}
+                />
+              </div>
+            )}
           </div>
         </div>
       </Card>

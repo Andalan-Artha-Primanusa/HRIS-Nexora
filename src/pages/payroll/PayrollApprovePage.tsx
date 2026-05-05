@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BarChart3, CheckCircle2, Clock3, CreditCard, ShieldCheck, RefreshCw, CheckCircle, Eye, FileCheck } from "lucide-react";
 import { Card } from "@/shared/ui/Card";
+import { PaginationWithSize } from "@/shared/ui/Pagination";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
 import { PayrollStatusBadge } from "@/shared/ui/PayrollStatusBadge";
@@ -18,6 +19,10 @@ const PayrollApprovePage = () => {
   const navigate = useNavigate();
   const [payrolls, setPayrolls] = useState<PayrollItem[]>([]);
   const [employees, setEmployees] = useState<EmployeeItem[]>([]);
+  const [currentPagePending, setCurrentPagePending] = useState(1);
+  const [itemsPerPagePending, setItemsPerPagePending] = useState(10);
+  const [currentPageOther, setCurrentPageOther] = useState(1);
+  const [itemsPerPageOther, setItemsPerPageOther] = useState(5);
   const [selectedPayrollId, setSelectedPayrollId] = useState<string>("");
   const [selectedPayroll, setSelectedPayroll] = useState<PayrollItem | null>(null);
   const [loading, setLoading] = useState(false);
@@ -175,6 +180,12 @@ const PayrollApprovePage = () => {
   const pendingPayrolls = safePayrolls.filter((p) => p.status === "draft" || p.status === "pending");
   const otherPayrolls = safePayrolls.filter((p) => p.status === "approved" || p.status === "paid");
 
+  const totalPagesPending = Math.max(1, Math.ceil(pendingPayrolls.length / itemsPerPagePending));
+  const paginatedPending = pendingPayrolls.slice((currentPagePending - 1) * itemsPerPagePending, (currentPagePending - 1) * itemsPerPagePending + itemsPerPagePending);
+
+  const totalPagesOther = Math.max(1, Math.ceil(otherPayrolls.length / itemsPerPageOther));
+  const paginatedOther = otherPayrolls.slice((currentPageOther - 1) * itemsPerPageOther, (currentPageOther - 1) * itemsPerPageOther + itemsPerPageOther);
+
   const summaryCards = [
     {
       label: "Pending Review",
@@ -302,7 +313,7 @@ const PayrollApprovePage = () => {
               </tr>
             </thead>
             <tbody>
-              {pendingPayrolls.map((p) => (
+              {paginatedPending.map((p) => (
                 <tr
                   key={p.id}
                   className={selectedPayrollId === String(p.id) ? "is-selected" : ""}
@@ -355,6 +366,18 @@ const PayrollApprovePage = () => {
             </tbody>
           </table>
         </div>
+        {pendingPayrolls.length > itemsPerPagePending && (
+          <div style={{ marginTop: 12, display: 'flex', justifyContent: 'flex-end' }}>
+            <PaginationWithSize
+              currentPage={currentPagePending}
+              totalPages={totalPagesPending}
+              onPageChange={(p) => setCurrentPagePending(p)}
+              totalItems={pendingPayrolls.length}
+              itemsPerPage={itemsPerPagePending}
+              onItemsPerPageChange={(s) => setItemsPerPagePending(s)}
+            />
+          </div>
+        )}
       </Card>
 
       {/* Approval Modal */}
@@ -457,7 +480,7 @@ const PayrollApprovePage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {otherPayrolls.slice(0, 5).map((p) => (
+                  {paginatedOther.map((p) => (
                     <tr key={p.id}>
 <td className="crud-table-name">
                       <div className="crud-table-avatar">
