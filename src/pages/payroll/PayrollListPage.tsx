@@ -429,7 +429,6 @@ const PayrollListPage: React.FC = () => {
                     totalItems={sortedItems.length}
                     itemsPerPage={itemsPerPage}
                     onItemsPerPageChange={(size) => { setItemsPerPage(size); setCurrentPage(1); }}
-                    alignment="end"
                   />
                 </div>
               </div>

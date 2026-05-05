@@ -21,7 +21,7 @@ import {
   getAllPayroll,
   toSafeArray,
 } from "@/features/payroll/api/payroll.service";
-import type { PayrollItem } from "@/features/payroll/types/payroll.types";
+import type { PayrollItem, PayrollStatus } from "@/features/payroll/types/payroll.types";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "./PayrollGeneratePage.css";
@@ -588,15 +588,15 @@ const PayrollGeneratePage = () => {
   ];
 
   const renderCell = (item: PayrollItem, key: string) => {
-    const val = (item as Record<string, unknown>)[key];
+    const val = (item as unknown as Record<string, unknown>)[key];
     switch (key) {
       case "id":
         return (
           <span style={S.cellId}>#{String(val ?? "").padStart(3, "0")}</span>
         );
       case "employee_id": {
-        const emp = (item as Record<string, unknown>).employee as
-          | Record<string, Record<string, string>>
+        const emp = (item as unknown as Record<string, any>).employee as
+          | Record<string, any>
           | undefined;
         return (
           <span style={S.cellName}>
@@ -627,8 +627,10 @@ const PayrollGeneratePage = () => {
             {formatCurrency(val)}
           </span>
         );
-      case "status":
-        return <PayrollStatusBadge status={String(val)} size="sm" />;
+      case "status": {
+        const statusVal = String(val) as PayrollStatus;
+        return <PayrollStatusBadge status={statusVal} size="sm" />;
+      }
       default:
         return <span>{String(val ?? "-")}</span>;
     }
