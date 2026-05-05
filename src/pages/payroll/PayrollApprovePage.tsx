@@ -23,6 +23,7 @@ const PayrollApprovePage = () => {
   const [itemsPerPagePending, setItemsPerPagePending] = useState(10);
   const [currentPageOther, setCurrentPageOther] = useState(1);
   const [itemsPerPageOther, setItemsPerPageOther] = useState(5);
+  const [paymentFilter, setPaymentFilter] = useState<'all' | 'paid' | 'unpaid'>('all');
   const [selectedPayrollId, setSelectedPayrollId] = useState<string>("");
   const [selectedPayroll, setSelectedPayroll] = useState<PayrollItem | null>(null);
   const [loading, setLoading] = useState(false);
@@ -175,10 +176,16 @@ const PayrollApprovePage = () => {
 
   // Ensure payrolls is always an array before filtering
   const safePayrolls = Array.isArray(payrolls) ? payrolls : [];
-  
+
+  const filteredPayrolls = safePayrolls.filter((p) => {
+    if (paymentFilter === 'all') return true;
+    if (paymentFilter === 'paid') return String(p.status).toLowerCase() === 'paid';
+    return String(p.status).toLowerCase() !== 'paid';
+  });
+
   // Filter payrolls that are pending approval
-  const pendingPayrolls = safePayrolls.filter((p) => p.status === "draft" || p.status === "pending");
-  const otherPayrolls = safePayrolls.filter((p) => p.status === "approved" || p.status === "paid");
+  const pendingPayrolls = filteredPayrolls.filter((p) => p.status === "draft" || p.status === "pending");
+  const otherPayrolls = filteredPayrolls.filter((p) => p.status === "approved" || p.status === "paid");
 
   const totalPagesPending = Math.max(1, Math.ceil(pendingPayrolls.length / itemsPerPagePending));
   const paginatedPending = pendingPayrolls.slice((currentPagePending - 1) * itemsPerPagePending, (currentPagePending - 1) * itemsPerPagePending + itemsPerPagePending);
@@ -294,10 +301,19 @@ const PayrollApprovePage = () => {
       {/* Data Table */}
       <Card className="data-table-card">
         <div className="data-table-header">
-          <h3 className="data-table-title">
-            Menunggu Persetujuan
-            <span className="data-table-count">{pendingPayrolls.length} payroll</span>
-          </h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+            <h3 className="data-table-title">
+              Menunggu Persetujuan
+              <span className="data-table-count">{pendingPayrolls.length} payroll</span>
+            </h3>
+            <div>
+              <select value={paymentFilter} onChange={(e) => { setPaymentFilter(e.target.value as any); setCurrentPagePending(1); setCurrentPageOther(1); }} className="sort-select">
+                <option value="all">Semua Status</option>
+                <option value="unpaid">Belum Dibayar</option>
+                <option value="paid">Sudah Dibayar</option>
+              </select>
+            </div>
+          </div>
         </div>
 
         <div className="table-wrap">

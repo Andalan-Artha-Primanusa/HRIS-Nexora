@@ -1,7 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
-import { BarChart3, CalendarDays, CheckCircle2, RefreshCw, Zap, Clock, Wallet, LayoutDashboard } from "lucide-react";
+import {
+  BarChart3,
+  CalendarDays,
+  CheckCircle2,
+  RefreshCw,
+  Zap,
+  Clock,
+  Wallet,
+  LayoutDashboard,
+  ChevronLeft,
+  ChevronRight,
+  AlertCircle,
+  X,
+} from "lucide-react";
 import { Card } from "@/shared/ui/Card";
-import { PaginationWithSize } from "@/shared/ui/Pagination";
 import { Modal } from "@/shared/ui/Modal";
 import { PayrollStatusBadge } from "@/shared/ui/PayrollStatusBadge";
 import {
@@ -12,96 +24,438 @@ import {
 import type { PayrollItem } from "@/features/payroll/types/payroll.types";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
+import "./PayrollGeneratePage.css";
 import "./PayrollListPage.css";
 
+/* ─────────────────────────────────────────────────────────────
+   Helpers
+───────────────────────────────────────────────────────────── */
 const formatCurrency = (value: unknown): string => {
-  const num = typeof value === 'string' ? parseFloat(value) : Number(value);
+  const num = typeof value === "string" ? parseFloat(value) : Number(value);
   if (isNaN(num)) return "Rp 0";
-  return `Rp ${num.toLocaleString('id-ID')}`;
+  return `Rp ${num.toLocaleString("id-ID")}`;
 };
 
+const MONTHS = [
+  { value: "01", label: "Januari" },
+  { value: "02", label: "Februari" },
+  { value: "03", label: "Maret" },
+  { value: "04", label: "April" },
+  { value: "05", label: "Mei" },
+  { value: "06", label: "Juni" },
+  { value: "07", label: "Juli" },
+  { value: "08", label: "Agustus" },
+  { value: "09", label: "September" },
+  { value: "10", label: "Oktober" },
+  { value: "11", label: "November" },
+  { value: "12", label: "Desember" },
+];
+
+const CURRENT_YEAR = new Date().getFullYear();
+const YEARS = Array.from({ length: 5 }, (_, i) => CURRENT_YEAR - i);
+const PER_PAGE_OPTIONS = [5, 10, 25, 50];
+
+/* ─────────────────────────────────────────────────────────────
+   Inline style helpers
+───────────────────────────────────────────────────────────── */
+const TONE_COLORS: Record<string, string> = {
+  blue: "#3b82f6",
+  orange: "#f97316",
+  green: "#22c55e",
+  purple: "#8b5cf6",
+};
+const TONE_BG: Record<string, string> = {
+  blue: "rgba(59,130,246,0.08)",
+  orange: "rgba(249,115,22,0.08)",
+  green: "rgba(34,197,94,0.08)",
+  purple: "rgba(139,92,246,0.08)",
+};
+
+const S = {
+  page: {
+    display: "flex",
+    flexDirection: "column" as const,
+    gap: "1.25rem",
+    fontFamily: "'Poppins', sans-serif",
+  },
+
+  twoCol: {
+    display: "grid",
+    gridTemplateColumns: "340px 1fr",
+    gap: "1.25rem",
+    alignItems: "start",
+  } as React.CSSProperties,
+
+  /* hero */
+  heroInner: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "1rem",
+    flexWrap: "wrap" as const,
+  },
+  heroBadge: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "6px",
+    padding: "4px 12px",
+    borderRadius: "20px",
+    background: "rgba(37,99,235,0.08)",
+    color: "#2563eb",
+    fontSize: "12px",
+    fontWeight: 600,
+    marginBottom: "10px",
+  },
+  heroTitle: {
+    fontSize: "1.5rem",
+    fontWeight: 700,
+    color: "#0f172a",
+    margin: "0 0 6px",
+    lineHeight: 1.2,
+  },
+  heroSubtitle: { fontSize: "0.875rem", color: "#64748b", margin: 0 },
+
+  /* summary */
+  summaryGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+    gap: "1.5rem",
+    marginBottom: "2rem",
+  },
+  summaryCard: (tone: string): React.CSSProperties => ({
+    background: "#fff",
+    border: "1px solid #e2e8f0",
+    borderRadius: "16px",
+    padding: "1.5rem",
+    borderTop: `3px solid ${TONE_COLORS[tone] ?? "#94a3b8"}`,
+    fontFamily: "'Poppins', sans-serif",
+  }),
+  summaryLabel: {
+    fontSize: "0.875rem",
+    color: "#64748b",
+    fontWeight: 500,
+    marginBottom: "0.25rem",
+  },
+  summarySubtitle: { fontSize: "0.8rem", color: "#94a3b8", margin: 0 },
+  summaryValueRow: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: "0.5rem",
+  },
+  summaryValue: (tone: string): React.CSSProperties => ({
+    fontSize: "1.75rem",
+    fontWeight: 700,
+    color: TONE_COLORS[tone] ?? "#334155",
+    lineHeight: 1.2,
+    fontFamily: "'Poppins', sans-serif",
+  }),
+  summaryIconBox: (tone: string): React.CSSProperties => ({
+    width: 64,
+    height: 64,
+    borderRadius: "16px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: TONE_BG[tone] ?? "rgba(148,163,184,0.08)",
+    color: TONE_COLORS[tone] ?? "#94a3b8",
+    flexShrink: 0,
+  }),
+  summaryTrend: {
+    fontSize: "0.75rem",
+    color: "#64748b",
+    margin: 0,
+    paddingTop: "1rem",
+    borderTop: "1px solid #e2e8f0",
+    fontFamily: "'Poppins', sans-serif",
+  },
+
+  /* config card */
+  cardTitle: {
+    fontSize: "1.25rem",
+    fontWeight: 700,
+    color: "#1e293b",
+    margin: "0 0 1.25rem",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    fontFamily: "'Poppins', sans-serif",
+  },
+  formLabel: {
+    display: "block",
+    fontSize: "0.7rem",
+    fontWeight: 800,
+    color: "#94a3b8",
+    textTransform: "uppercase" as const,
+    letterSpacing: "0.05em",
+    marginBottom: "6px",
+    fontFamily: "'Poppins', sans-serif",
+  },
+  select: {
+    width: "100%",
+    padding: "9px 12px",
+    borderRadius: "10px",
+    border: "1px solid #e2e8f0",
+    fontSize: "13px",
+    fontFamily: "'Poppins', sans-serif",
+    background: "#fff",
+    color: "#1e293b",
+    cursor: "pointer",
+  },
+  periodPreview: {
+    padding: "10px 12px",
+    borderRadius: "10px",
+    border: "1px solid #e0e7ff",
+    background: "#eef2ff",
+    fontSize: "15px",
+    fontWeight: 800,
+    color: "#6366f1",
+    letterSpacing: "0.08em",
+    textAlign: "center" as const,
+    marginTop: "8px",
+    fontFamily: "'Poppins', sans-serif",
+  },
+  infoBox: {
+    display: "flex",
+    alignItems: "flex-start",
+    gap: "10px",
+    background: "#f0f9ff",
+    border: "1px solid #bae6fd",
+    borderRadius: "10px",
+    padding: "12px",
+    marginTop: "1rem",
+    marginBottom: "1.25rem",
+  },
+  infoText: { fontSize: "12px", color: "#0369a1", lineHeight: 1.6, margin: 0 },
+  btnGenerate: {
+    width: "100%",
+    padding: "12px",
+    borderRadius: "12px",
+    border: "none",
+    background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
+    color: "#fff",
+    fontSize: "14px",
+    fontWeight: 700,
+    fontFamily: "'Poppins', sans-serif",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "8px",
+  },
+  btnOutline: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "6px",
+    padding: "8px 16px",
+    borderRadius: "10px",
+    border: "1.5px solid #e2e8f0",
+    background: "#fff",
+    color: "#64748b",
+    fontSize: "13px",
+    fontWeight: 600,
+    cursor: "pointer",
+    fontFamily: "'Poppins', sans-serif",
+  },
+  divider: { border: "none", borderTop: "1px solid #f1f5f9", margin: "1.25rem 0" },
+
+  /* success bar */
+  successBar: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    padding: "12px 16px",
+    background: "#f0fdf4",
+    border: "1px solid #bbf7d0",
+    borderRadius: "12px",
+  },
+
+  /* table toolbar */
+  tableHeader: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "12px",
+    marginBottom: "1rem",
+    flexWrap: "wrap" as const,
+  },
+  filterBar: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    flexWrap: "wrap" as const,
+  },
+  filterChip: (active: boolean): React.CSSProperties => ({
+    padding: "5px 14px",
+    borderRadius: "20px",
+    border: active ? "1.5px solid #6366f1" : "1.5px solid #e2e8f0",
+    background: active ? "#eef2ff" : "#fff",
+    color: active ? "#6366f1" : "#94a3b8",
+    fontSize: "12px",
+    fontWeight: 600,
+    cursor: "pointer",
+    fontFamily: "'Poppins', sans-serif",
+    transition: "all 0.15s",
+  }),
+  filterSelect: {
+    padding: "5px 10px",
+    borderRadius: "8px",
+    border: "1.5px solid #e2e8f0",
+    fontSize: "12px",
+    color: "#64748b",
+    fontFamily: "'Poppins', sans-serif",
+    background: "#fff",
+    cursor: "pointer",
+  },
+
+  /* table */
+  tableWrap: {
+    border: "1px solid #e2e8f0",
+    borderRadius: "12px",
+    overflowX: "auto" as const,
+  },
+  th: {
+    padding: "10px 12px",
+    textAlign: "left" as const,
+    fontSize: "11px",
+    fontWeight: 700,
+    color: "#94a3b8",
+    textTransform: "uppercase" as const,
+    letterSpacing: "0.06em",
+    borderBottom: "1px solid #e2e8f0",
+    whiteSpace: "nowrap" as const,
+    background: "#f8fafc",
+  },
+  td: { padding: "11px 12px", verticalAlign: "middle" as const },
+
+  /* cells */
+  cellId: { fontSize: "12px", color: "#cbd5e1", fontFamily: "monospace" },
+  cellName: {
+    fontWeight: 600,
+    fontSize: "13px",
+    color: "#1e293b",
+    whiteSpace: "nowrap" as const,
+    fontFamily: "'Poppins', sans-serif",
+  },
+  cellPeriod: {
+    display: "inline-block",
+    padding: "3px 9px",
+    borderRadius: "6px",
+    background: "#f1f5f9",
+    border: "1px solid #e2e8f0",
+    fontSize: "11px",
+    color: "#64748b",
+    fontFamily: "monospace",
+    letterSpacing: "0.04em",
+    whiteSpace: "nowrap" as const,
+  },
+  cellMoney: {
+    fontFamily: "'Poppins', sans-serif",
+    fontSize: "12px",
+    whiteSpace: "nowrap" as const,
+  },
+
+  /* pagination */
+  paginationBar: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: "1rem",
+    flexWrap: "wrap" as const,
+    gap: "8px",
+  },
+  paginationInfo: { fontSize: "12px", color: "#94a3b8", fontFamily: "'Poppins', sans-serif" },
+  paginationControls: { display: "flex", alignItems: "center", gap: "4px" },
+  pageBtn: (active: boolean, disabled?: boolean): React.CSSProperties => ({
+    minWidth: 32,
+    height: 32,
+    padding: "0 6px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: "8px",
+    border: active ? "none" : "1.5px solid #e2e8f0",
+    background: active ? "#6366f1" : "#fff",
+    color: active ? "#fff" : disabled ? "#cbd5e1" : "#64748b",
+    fontSize: "12px",
+    fontWeight: active ? 700 : 500,
+    cursor: disabled ? "not-allowed" : "pointer",
+    fontFamily: "'Poppins', sans-serif",
+    opacity: disabled ? 0.5 : 1,
+  }),
+  perPageSelect: {
+    padding: "5px 10px",
+    borderRadius: "8px",
+    border: "1.5px solid #e2e8f0",
+    fontSize: "12px",
+    color: "#64748b",
+    fontFamily: "'Poppins', sans-serif",
+    background: "#fff",
+    cursor: "pointer",
+  },
+  emptyState: {
+    padding: "3rem 1rem",
+    textAlign: "center" as const,
+    color: "#cbd5e1",
+    fontSize: "13px",
+  },
+};
+
+/* ─────────────────────────────────────────────────────────────
+   Pagination helper
+───────────────────────────────────────────────────────────── */
+function buildPageNumbers(current: number, total: number): (number | "...")[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const pages: (number | "...")[] = [];
+  const push = (p: number) => { if (!pages.includes(p)) pages.push(p); };
+  push(1);
+  if (current > 3) pages.push("...");
+  for (let p = Math.max(2, current - 1); p <= Math.min(total - 1, current + 1); p++) push(p);
+  if (current < total - 2) pages.push("...");
+  push(total);
+  return pages;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Component
+───────────────────────────────────────────────────────────── */
 const PayrollGeneratePage = () => {
+  const now = new Date();
+
   const [items, setItems] = useState<PayrollItem[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [period, setPeriod] = useState(() => {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
-  const [errorModal, setErrorModal] = useState<{ isOpen: boolean; title: string; message: string }>({
-    isOpen: false,
-    title: "",
-    message: "",
-  });
+  const [errorModal, setErrorModal] = useState({ isOpen: false, title: "", message: "" });
 
-  const showErrorModal = (title: string, message: string) => {
-    setErrorModal({ isOpen: true, title, message });
-  };
+  /* period selectors */
+  const [selectedYear, setSelectedYear] = useState(String(now.getFullYear()));
+  const [selectedMonth, setSelectedMonth] = useState(
+    String(now.getMonth() + 1).padStart(2, "0")
+  );
+  const period = `${selectedYear}-${selectedMonth}`;
 
-  const columns = useMemo(() => [
-    { key: "id", label: "ID" },
-    { key: "employee_id", label: "Karyawan" },
-      { key: "period", label: "Period" },
-    { key: "basic_salary", label: "Gaji Pokok" },
-    { key: "allowance", label: "Tunjangan" },
-    { key: "bonus", label: "Bonus" },
-    { key: "total_deduction", label: "Potongan" },
-    { key: "take_home_pay", label: "Gaji Bersih" },
-    { key: "status", label: "Status" },
-  ], []);
+  /* filters */
+  const [paymentFilter, setPaymentFilter] = useState<"all" | "paid" | "unpaid">("all");
+  const [yearFilter, setYearFilter] = useState<string>("all");
 
-  const summaryCards = useMemo(() => {
-    const paidCount = items.filter((item) => String(item.status).toLowerCase() === "paid").length;
-    const pendingCount = items.filter((item) => ["pending", "draft"].includes(String(item.status).toLowerCase())).length;
-    const totalPayroll = items.reduce((sum, item) => sum + (Number(item.take_home_pay) || 0), 0);
+  /* pagination */
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
-    return [
-      {
-        label: "Total Payroll",
-        subtitle: "Semua data payroll",
-        value: String(items.length),
-        change: `${formatCurrency(totalPayroll)} total`,
-        tone: "blue" as const,
-        icon: LayoutDashboard,
-      },
-      {
-        label: "Draft/Pending",
-        subtitle: "Menunggu proses",
-        value: String(pendingCount),
-        change: "Perlu approval",
-        tone: "orange" as const,
-        icon: Clock,
-      },
-      {
-        label: "Paid",
-        subtitle: "Sudah dibayarkan",
-        value: String(paidCount),
-        change: "Batch selesai",
-        tone: "green" as const,
-        icon: Wallet,
-      },
-      {
-        label: "Periode Aktif",
-        subtitle: "Target bulan ini",
-        value: period,
-        change: "Fokus operasional",
-        tone: "purple" as const,
-        icon: CalendarDays,
-      },
-    ];
-  }, [items, period]);
+  /* ── API ── */
+  const showErrorModal = (title: string, msg: string) =>
+    setErrorModal({ isOpen: true, title, message: msg });
 
   const loadPayroll = async () => {
     setLoading(true);
     try {
       const result = await getAllPayroll();
-      const normalized = toSafeArray(result);
-      setItems(normalized);
-    } catch (error: unknown) {
-      const errorText = error instanceof Error ? error.message : "Gagal memuat payroll";
-      showErrorModal("Error Muat Data", errorText);
+      setItems(toSafeArray(result));
+    } catch (err) {
+      showErrorModal(
+        "Error Muat Data",
+        err instanceof Error ? err.message : "Gagal memuat payroll"
+      );
     } finally {
       setLoading(false);
     }
@@ -115,11 +469,16 @@ const PayrollGeneratePage = () => {
     setLoading(true);
     try {
       await generateMonthlyPayroll({ period });
-      setMessage({ type: "success", text: `Payroll berhasil di-generate untuk periode ${period}` });
+      setMessage({
+        type: "success",
+        text: `Payroll berhasil di-generate untuk periode ${period}`,
+      });
       await loadPayroll();
-    } catch (error: unknown) {
-      const errorText = error instanceof Error ? error.message : "Gagal generate payroll";
-      showErrorModal("Error Generate", errorText);
+    } catch (err) {
+      showErrorModal(
+        "Error Generate",
+        err instanceof Error ? err.message : "Gagal generate payroll"
+      );
     } finally {
       setLoading(false);
     }
@@ -129,205 +488,465 @@ const PayrollGeneratePage = () => {
     void loadPayroll();
   }, []);
 
-  const totalPages = Math.max(1, Math.ceil(items.length / itemsPerPage));
-  const paginatedItems = items.slice((currentPage - 1) * itemsPerPage, (currentPage - 1) * itemsPerPage + itemsPerPage);
+  /* ── Derived ── */
+  const summaryCards = useMemo(() => {
+    const paidCount = items.filter(
+      (i) => String(i.status).toLowerCase() === "paid"
+    ).length;
+    const pendingCount = items.filter((i) =>
+      ["pending", "draft"].includes(String(i.status).toLowerCase())
+    ).length;
+    const totalPayroll = items.reduce(
+      (sum, i) => sum + (Number(i.take_home_pay) || 0),
+      0
+    );
+    return [
+      {
+        label: "Total Payroll",
+        subtitle: "Semua data payroll",
+        value: String(items.length),
+        change: `${formatCurrency(totalPayroll)} total`,
+        tone: "blue",
+        icon: LayoutDashboard,
+      },
+      {
+        label: "Draft / Pending",
+        subtitle: "Menunggu proses",
+        value: String(pendingCount),
+        change: "Perlu approval",
+        tone: "orange",
+        icon: Clock,
+      },
+      {
+        label: "Sudah Dibayar",
+        subtitle: "Batch selesai",
+        value: String(paidCount),
+        change: "Pembayaran selesai",
+        tone: "green",
+        icon: Wallet,
+      },
+      {
+        label: "Periode Aktif",
+        subtitle: "Target bulan ini",
+        value: period,
+        change: "Fokus operasional",
+        tone: "purple",
+        icon: CalendarDays,
+      },
+    ];
+  }, [items, period]);
 
-  const renderCell = (item: any, columnKey: string) => {
-    const value = item[columnKey];
-    
-    switch (columnKey) {
+  const filteredItems = useMemo(
+    () =>
+      items.filter((it) => {
+        const s = String(it.status).toLowerCase();
+        const statusOk =
+          paymentFilter === "all"
+            ? true
+            : paymentFilter === "paid"
+            ? s === "paid"
+            : s !== "paid";
+        const yearOk =
+          yearFilter === "all" ||
+          String(it.period ?? "").startsWith(yearFilter);
+        return statusOk && yearOk;
+      }),
+    [items, paymentFilter, yearFilter]
+  );
+
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / itemsPerPage));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedItems = filteredItems.slice(
+    (safePage - 1) * itemsPerPage,
+    safePage * itemsPerPage
+  );
+
+  const handleFilterChange = (f: "all" | "paid" | "unpaid") => {
+    setPaymentFilter(f);
+    setCurrentPage(1);
+  };
+  const handleYearFilter = (v: string) => {
+    setYearFilter(v);
+    setCurrentPage(1);
+  };
+  const handlePerPage = (v: number) => {
+    setItemsPerPage(v);
+    setCurrentPage(1);
+  };
+
+  /* ── Columns ── */
+  const columns = [
+    { key: "id", label: "ID" },
+    { key: "employee_id", label: "Karyawan" },
+    { key: "period", label: "Periode" },
+    { key: "basic_salary", label: "Gaji Pokok" },
+    { key: "allowance", label: "Tunjangan" },
+    { key: "bonus", label: "Bonus" },
+    { key: "total_deduction", label: "Potongan" },
+    { key: "take_home_pay", label: "Gaji Bersih" },
+    { key: "status", label: "Status" },
+  ];
+
+  const renderCell = (item: PayrollItem, key: string) => {
+    const val = (item as Record<string, unknown>)[key];
+    switch (key) {
       case "id":
-        return <span className="cell-id">#{value}</span>;
-      
-      case "employee_id":
         return (
-          <div style={{ fontWeight: '600', whiteSpace: 'nowrap' }}>
-            {item.employee?.user?.name || `EMP-${String(value).padStart(3, '0')}`}
-          </div>
+          <span style={S.cellId}>#{String(val ?? "").padStart(3, "0")}</span>
         );
-      
+      case "employee_id": {
+        const emp = (item as Record<string, unknown>).employee as
+          | Record<string, Record<string, string>>
+          | undefined;
+        return (
+          <span style={S.cellName}>
+            {emp?.user?.name ?? `EMP-${String(val).padStart(3, "0")}`}
+          </span>
+        );
+      }
       case "period":
-        return (
-          <span className="crud-table-tag">{value || '-'}</span>
-        );
-      
+        return <span style={S.cellPeriod}>{String(val ?? "-")}</span>;
       case "basic_salary":
       case "allowance":
       case "bonus":
       case "total_deduction":
       case "take_home_pay":
         return (
-          <span style={{ 
-            color: columnKey === 'take_home_pay' ? '#6366f1' : columnKey === 'total_deduction' ? '#f43f5e' : 'inherit',
-            fontWeight: columnKey === 'take_home_pay' ? '700' : '500',
-            whiteSpace: 'nowrap'
-          }}>
-            {formatCurrency(value)}
+          <span
+            style={{
+              ...S.cellMoney,
+              color:
+                key === "take_home_pay"
+                  ? "#6366f1"
+                  : key === "total_deduction"
+                  ? "#f43f5e"
+                  : "#334155",
+              fontWeight: key === "take_home_pay" ? 700 : 500,
+            }}
+          >
+            {formatCurrency(val)}
           </span>
         );
-      
       case "status":
-        return <PayrollStatusBadge status={value} size="sm" />;
-      
+        return <PayrollStatusBadge status={String(val)} size="sm" />;
       default:
-        return <span>{String(value ?? '-')}</span>;
+        return <span>{String(val ?? "-")}</span>;
     }
   };
 
+  /* ─────────────────── JSX ─────────────────── */
   return (
-    <div className="crud-page">
+    <div className="crud-page payroll-page" style={S.page}>
+      {/* Error modal */}
       <Modal
         isOpen={errorModal.isOpen}
         onClose={() => setErrorModal({ ...errorModal, isOpen: false })}
         title={errorModal.title}
         size="md"
       >
-        <div className="payroll-generate-modal-content">
-          <p>{errorModal.message}</p>
+        <div
+          style={{ display: "flex", gap: "12px", alignItems: "flex-start", padding: "4px 0" }}
+        >
+          <AlertCircle size={20} color="#f43f5e" style={{ flexShrink: 0, marginTop: 2 }} />
+          <p style={{ fontSize: "14px", color: "#475569", lineHeight: 1.6 }}>
+            {errorModal.message}
+          </p>
         </div>
       </Modal>
 
-      {/* Header */}
+      {/* ── Hero ── */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
             <div className="hero-badge">
-              <Zap size={16} />
-              <span>Operasi Penggajian</span>
+              <Zap size={13} />
+              Operasi Penggajian
             </div>
             <h1 className="hero-title">Generate Payroll Bulanan</h1>
             <p className="hero-subtitle">
-              Sistem otomatisasi penggajian karyawan secara massal untuk periode tertentu dengan akurasi data real-time.
+              Sistem otomatisasi penggajian karyawan secara massal untuk periode tertentu
+              dengan akurasi data real-time.
             </p>
           </div>
           <div className="hero-actions">
-            <button className="btn-outline" onClick={() => void loadPayroll()} disabled={loading}>
-              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            <button
+              className="btn-outline"
+              onClick={() => void loadPayroll()}
+              disabled={loading}
+            >
+              <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
               Sync Data
             </button>
           </div>
         </div>
       </Card>
 
-      {message && message.type === "success" && (
-        <Card className="crud-card payroll-generate-message">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <CheckCircle2 color="#0ea5e9" size={20} />
-            <p>{message.text}</p>
-          </div>
-        </Card>
+      {/* ── Success message ── */}
+      {message?.type === "success" && (
+        <div style={S.successBar}>
+          <CheckCircle2 size={18} color="#22c55e" style={{ flexShrink: 0 }} />
+          <span style={{ fontSize: "13px", color: "#15803d", fontWeight: 500, flex: 1 }}>
+            {message.text}
+          </span>
+          <button
+            onClick={() => setMessage(null)}
+            style={{ background: "none", border: "none", cursor: "pointer", color: "#86efac" }}
+          >
+            <X size={16} />
+          </button>
+        </div>
       )}
 
-      {/* Summary Cards */}
-      <div className="payroll-summary-wrapper">
+      {/* ── Summary cards ── */}
+      <div style={S.summaryGrid}>
         {summaryCards.map((card) => {
           const Icon = card.icon;
           return (
-            <div key={card.label} className="payroll-summary-card">
-              <div className="payroll-summary-header">
-                <div>
-                  <p className="payroll-summary-label">{card.label}</p>
-                  <p className="payroll-summary-subtitle">{card.subtitle}</p>
-                </div>
-                <div className={`payroll-summary-icon-wrapper payroll-icon-${card.tone}`}>
-                  <Icon size={28} />
+            <div key={card.label} style={S.summaryCard(card.tone)}>
+              <p style={S.summaryLabel}>{card.label}</p>
+              <p style={S.summarySubtitle}>{card.subtitle}</p>
+              <div style={S.summaryValueRow}>
+                <div style={S.summaryValue(card.tone)}>{card.value}</div>
+                <div style={S.summaryIconBox(card.tone)}>
+                  <Icon size={22} />
                 </div>
               </div>
-              <div className={`payroll-summary-value payroll-value-${card.tone}`}>{card.value}</div>
-              <p className="payroll-summary-trend">{card.change}</p>
+              <p style={S.summaryTrend}>{card.change}</p>
             </div>
           );
         })}
       </div>
 
-      {/* Analytics Title Card */}
-      <Card className="analytics-title-card">
-        <div className="analytics-title-inner">
-          <div className="analytics-icon">
-            <Zap size={24} />
-          </div>
-          <div>
-            <h2 className="analytics-title">Generate Payroll</h2>
-            <p className="analytics-subtitle">{items.length} Total Records</p>
-          </div>
-        </div>
-      </Card>
+      {/* ── Two-column layout ── */}
+      <div style={S.twoCol}>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1.5rem', alignItems: 'start' }}>
-        {/* Configuration Card */}
+        {/* ── Konfigurasi Batch ── */}
         <Card className="crud-table-card">
-          <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem', fontWeight: '700', color: '#1e293b' }}>Konfigurasi Batch</h3>
-          <div style={{ display: 'grid', gap: '1rem' }}>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <strong style={{ fontSize: '0.85rem', color: '#64748b' }}>Periode Pembayaran (YYYY-MM)</strong>
-              <input
-                style={{ padding: '0.75rem 1rem', borderRadius: '10px', border: '1px solid #e2e8f0', fontSize: '0.95rem', fontFamily: "'Poppins', sans-serif" }}
-                value={period}
-                onChange={(event) => setPeriod(event.target.value)}
-                placeholder="Contoh: 2026-04"
-              />
-            </label>
+          <p style={S.cardTitle}>
+            <Zap size={15} color="#6366f1" />
+            Konfigurasi Batch
+          </p>
+
+          {/* Tahun */}
+          <label style={{ display: "block", marginBottom: "1rem" }}>
+            <span style={S.formLabel}>Tahun</span>
+            <select
+              style={S.select}
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(e.target.value)}
+            >
+              {YEARS.map((y) => (
+                <option key={y} value={String(y)}>
+                  {y}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          {/* Bulan */}
+          <label style={{ display: "block", marginBottom: "1rem" }}>
+            <span style={S.formLabel}>Bulan</span>
+            <select
+              style={S.select}
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+            >
+              {MONTHS.map((m) => (
+                <option key={m.value} value={m.value}>
+                  {m.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          {/* Preview */}
+          <span style={S.formLabel}>Periode terpilih</span>
+          <div style={S.periodPreview}>{period}</div>
+
+          <hr style={S.divider} />
+
+          {/* Info box */}
+          <div style={S.infoBox}>
+            <AlertCircle size={15} color="#0369a1" style={{ flexShrink: 0, marginTop: 1 }} />
+            <p style={S.infoText}>
+              Proses ini akan mengkalkulasi tunjangan, bonus, dan potongan untuk{" "}
+              <strong>semua karyawan aktif</strong> di periode {period}.
+            </p>
           </div>
 
-          <div style={{ marginTop: '1.5rem' }}>
-            <button 
-              onClick={() => void generateMonthly()} 
-              disabled={loading}
-              style={{ width: '100%', padding: '0.875rem 1.5rem', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', color: '#fff', fontSize: '0.95rem', fontWeight: '700', fontFamily: "'Poppins', sans-serif", cursor: 'pointer' }}
-            >
-              {loading ? "Processing..." : "Generate Payroll Sekarang"}
-            </button>
-          </div>
-          <p style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#94a3b8', textAlign: 'center' }}>
-            Tindakan ini akan mengalkulasi tunjangan, bonus, dan potongan untuk semua karyawan aktif.
-          </p>
+          {/* CTA */}
+          <button
+            style={S.btnGenerate}
+            onClick={() => void generateMonthly()}
+            disabled={loading}
+          >
+            {loading ? (
+              <RefreshCw size={15} className="animate-spin" />
+            ) : (
+              <Zap size={15} />
+            )}
+            {loading ? "Memproses..." : "Generate Payroll Sekarang"}
+          </button>
         </Card>
 
-        {/* Payroll List Card */}
+        {/* ── Daftar Payroll Terbaru ── */}
         <Card className="crud-table-card">
-          <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem', fontWeight: '700', color: '#1e293b' }}>Daftar Payroll Terbaru</h3>
+          {/* Toolbar */}
+          <div style={S.tableHeader}>
+            <p style={{ ...S.cardTitle, margin: 0 }}>
+              <BarChart3 size={15} color="#6366f1" />
+              Daftar Payroll
+              <span style={{ fontSize: "11px", color: "#94a3b8", fontWeight: 400, marginLeft: 4 }}>
+                ({filteredItems.length} records)
+              </span>
+            </p>
+
+            <div style={S.filterBar}>
+              {/* Per-page */}
+              <select
+                style={S.perPageSelect}
+                value={itemsPerPage}
+                onChange={(e) => handlePerPage(Number(e.target.value))}
+              >
+                {PER_PAGE_OPTIONS.map((n) => (
+                  <option key={n} value={n}>
+                    {n} / hal
+                  </option>
+                ))}
+              </select>
+
+              {/* Year filter */}
+              <select
+                style={S.filterSelect}
+                value={yearFilter}
+                onChange={(e) => handleYearFilter(e.target.value)}
+              >
+                <option value="all">Semua Tahun</option>
+                {YEARS.map((y) => (
+                  <option key={y} value={String(y)}>
+                    {y}
+                  </option>
+                ))}
+              </select>
+
+              {/* Status chips */}
+              {(["all", "paid", "unpaid"] as const).map((f) => (
+                <button
+                  key={f}
+                  style={S.filterChip(paymentFilter === f)}
+                  onClick={() => handleFilterChange(f)}
+                >
+                  {f === "all" ? "Semua" : f === "paid" ? "Dibayar" : "Tertunda"}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Table */}
           {loading ? (
-            <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>Memuat data...</div>
-          ) : items.length > 0 ? (
-            <>
-              <div className="crud-table-wrap" style={{ border: 'none', boxShadow: 'none', overflowX: 'auto' }}>
-                <table className="crud-table">
-                  <thead>
-                    <tr>
+            <div style={S.emptyState}>
+              <RefreshCw
+                size={20}
+                className="animate-spin"
+                style={{ display: "block", margin: "0 auto 8px", color: "#6366f1" }}
+              />
+              Memuat data...
+            </div>
+          ) : paginatedItems.length === 0 ? (
+            <div style={S.emptyState}>Tidak ada data payroll yang ditemukan.</div>
+          ) : (
+            <div style={S.tableWrap}>
+              <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 720 }}>
+                <thead>
+                  <tr>
+                    {columns.map((col) => (
+                      <th key={col.key} style={S.th}>
+                        {col.label}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedItems.map((item, idx) => (
+                    <tr
+                      key={String(item.id ?? idx)}
+                      style={{ borderBottom: "1px solid #f1f5f9", transition: "background 0.1s" }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.background = "#fafafa")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.background = "transparent")
+                      }
+                    >
                       {columns.map((col) => (
-                        <th key={col.key}>{col.label}</th>
+                        <td key={`${String(item.id ?? idx)}-${col.key}`} style={S.td}>
+                          {renderCell(item, col.key)}
+                        </td>
                       ))}
                     </tr>
-                  </thead>
-                  <tbody>
-                    {paginatedItems.map((item, index) => (
-                      <tr key={String(item.id ?? index)}>
-                        {columns.map((col) => (
-                          <td key={`${String(item.id ?? index)}-${col.key}`}>
-                            {renderCell(item, col.key)}
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Pagination */}
+          {filteredItems.length > 0 && (
+            <div style={S.paginationBar}>
+              <span style={S.paginationInfo}>
+                Menampilkan{" "}
+                <strong style={{ color: "#475569" }}>
+                  {(safePage - 1) * itemsPerPage + 1}–
+                  {Math.min(safePage * itemsPerPage, filteredItems.length)}
+                </strong>{" "}
+                dari{" "}
+                <strong style={{ color: "#475569" }}>{filteredItems.length}</strong> data
+              </span>
+
+              <div style={S.paginationControls}>
+                <button
+                  style={S.pageBtn(false, safePage === 1)}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={safePage === 1}
+                >
+                  <ChevronLeft size={14} />
+                </button>
+
+                {buildPageNumbers(safePage, totalPages).map((p, i) =>
+                  p === "..." ? (
+                    <span
+                      key={`ellipsis-${i}`}
+                      style={{
+                        minWidth: 32,
+                        height: 32,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "12px",
+                        color: "#cbd5e1",
+                      }}
+                    >
+                      …
+                    </span>
+                  ) : (
+                    <button
+                      key={p}
+                      style={S.pageBtn(p === safePage)}
+                      onClick={() => setCurrentPage(p as number)}
+                    >
+                      {p}
+                    </button>
+                  )
+                )}
+
+                <button
+                  style={S.pageBtn(false, safePage === totalPages)}
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={safePage === totalPages}
+                >
+                  <ChevronRight size={14} />
+                </button>
               </div>
-              {items.length > itemsPerPage && (
-                <div style={{ marginTop: 12, display: 'flex', justifyContent: 'flex-end' }}>
-                  <PaginationWithSize
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={(p) => setCurrentPage(p)}
-                    totalItems={items.length}
-                    itemsPerPage={itemsPerPage}
-                    onItemsPerPageChange={(s) => setItemsPerPage(s)}
-                  />
-                </div>
-              )}
-            </>
-          ) : (
-            <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>
-              Tidak ada data payroll yang ditemukan.
             </div>
           )}
         </Card>

@@ -64,6 +64,7 @@ const PayrollDetailsPage = () => {
 
   const [items, setItems] = useState<PayrollDetail[]>([]);
   const [payrollId, setPayrollId] = useState("");
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
   const [detailId, setDetailId] = useState("");
   const [detailType, setDetailType] = useState(defaultType);
   const [detailDescription, setDetailDescription] = useState(defaultType === "deduction" ? "Tax" : "Housing Allowance");
@@ -76,6 +77,10 @@ const PayrollDetailsPage = () => {
   const [activeTab, setActiveTab] = useState<"overview" | "add" | "manage">("overview");
   const [manageTab, setManageTab] = useState<"single" | "bulk">("single");
   const [manageItems, setManageItems] = useState<PayrollDetail[]>([]);
+  const [overviewSearch, setOverviewSearch] = useState("");
+  const [overviewTypeFilter, setOverviewTypeFilter] = useState<"all" | "allowance" | "deduction">("all");
+  const [currentPageOverview, setCurrentPageOverview] = useState(1);
+  const [itemsPerPageOverview, setItemsPerPageOverview] = useState(10);
   const [statusMessage, setStatusMessage] = useState("Ready to call payroll details API");
   const [loading, setLoading] = useState(false);
   const [errorModal, setErrorModal] = useState<{ isOpen: boolean; title: string; message: string }>({
@@ -124,6 +129,19 @@ const PayrollDetailsPage = () => {
 
 
   const columns = useMemo(() => getColumns(items), [items]);
+  const filteredOverviewItems = useMemo(() => {
+    let list = Array.isArray(items) ? items.slice() : [];
+    if (overviewTypeFilter !== 'all') {
+      list = list.filter(i => String(i.type).toLowerCase() === overviewTypeFilter);
+    }
+    if (overviewSearch.trim()) {
+      const q = overviewSearch.toLowerCase();
+      list = list.filter(i => String(i.description || '').toLowerCase().includes(q) || String(i.id || '').toLowerCase().includes(q));
+    }
+    return list;
+  }, [items, overviewTypeFilter, overviewSearch]);
+  const totalPagesOverview = Math.max(1, Math.ceil(filteredOverviewItems.length / itemsPerPageOverview));
+  const paginatedOverview = filteredOverviewItems.slice((currentPageOverview - 1) * itemsPerPageOverview, (currentPageOverview - 1) * itemsPerPageOverview + itemsPerPageOverview);
   const componentSummaryCards = useMemo(() => {
     const allowanceCount = items.filter((item) => String(item.type).toLowerCase() === "allowance").length;
     const deductionCount = items.filter((item) => String(item.type).toLowerCase() === "deduction").length;
@@ -389,7 +407,19 @@ const PayrollDetailsPage = () => {
           <Card className="crud-card payroll-details-card" glass>
             <div className="payroll-details-list-header">
               <h2>Komponen Payroll</h2>
-              <div className="payroll-details-search-mini">
+              <div className="payroll-details-search-mini" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <select
+                  className="crud-input crud-input--sm"
+                  style={{ minWidth: '220px' }}
+                  value={selectedEmployeeId}
+                  onChange={(event) => { setSelectedEmployeeId(event.target.value); setPayrollId(''); }}
+                >
+                  <option value="">-- Pilih Karyawan (opsional) --</option>
+                  {allEmployees.map(emp => (
+                    <option key={String(emp.id)} value={String(emp.id)}>{emp.user?.name || emp.employee_code || String(emp.id)}</option>
+                  ))}
+                </select>
+
                 <select
                   className="crud-input crud-input--sm"
                   style={{ minWidth: '220px' }}
@@ -397,13 +427,28 @@ const PayrollDetailsPage = () => {
                   onChange={(event) => setPayrollId(event.target.value)}
                 >
                   <option value="">-- Pilih Payroll --</option>
-                  {allPayrolls.map(p => (
-                    <option key={p.id} value={String(p.id)}>{getPayrollLabel(p)}</option>
+                  {allPayrolls
+                    .filter(p => !selectedEmployeeId || String(p.employee_id) === selectedEmployeeId)
+                    .map(p => (
+                      <option key={p.id} value={String(p.id)}>{getPayrollLabel(p)}</option>
                   ))}
                 </select>
+
                 <Button variant="primary" size="sm" onClick={() => void loadPayrollDetails()} disabled={loading}>
                   Cari
                 </Button>
+                <input
+                  className="crud-input crud-input--sm"
+                  placeholder="Cari nama komponen atau ID"
+                  value={overviewSearch}
+                  onChange={(e) => { setOverviewSearch(e.target.value); setCurrentPageOverview(1); }}
+                  style={{ minWidth: 200 }}
+                />
+                <select className="crud-input crud-input--sm" value={overviewTypeFilter} onChange={(e) => { setOverviewTypeFilter(e.target.value as any); setCurrentPageOverview(1); }}>
+                  <option value="all">Semua Tipe</option>
+                  <option value="allowance">Allowance</option>
+                  <option value="deduction">Deduction</option>
+                </select>
               </div>
             </div>
             
@@ -424,8 +469,8 @@ const PayrollDetailsPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {items.length > 0 ? (
-                    items.map((item, index) => (
+                  {paginatedOverview.length > 0 ? (
+                    paginatedOverview.map((item, index) => (
                       <tr key={String(item.id ?? index)}>
                         {columns.map((column) => (
                           <td key={`${String(item.id ?? index)}-${column}`}>
@@ -437,13 +482,30 @@ const PayrollDetailsPage = () => {
                   ) : (
                     <tr>
                       <td colSpan={columns.length} className="payroll-details-empty-row">
-                        {payrollId ? `Tidak ada data komponen payroll untuk ID ${payrollId}.` : "Pilih Payroll untuk melihat rincian."}
+                        {items.length > 0 ? "Tidak ada komponen yang cocok dengan filter." : (payrollId ? `Tidak ada data komponen payroll untuk ID ${payrollId}.` : "Pilih Payroll untuk melihat rincian.")}
                       </td>
                     </tr>
                   )}
                 </tbody>
               </table>
             </div>
+
+            {filteredOverviewItems.length > itemsPerPageOverview && (
+              <div style={{ marginTop: 8, display: 'flex', justifyContent: 'flex-end' }}>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <select className="crud-input crud-input--sm" value={itemsPerPageOverview} onChange={(e) => { setItemsPerPageOverview(Number(e.target.value)); setCurrentPageOverview(1); }}>
+                    <option value={5}>5 / halaman</option>
+                    <option value={10}>10 / halaman</option>
+                    <option value={25}>25 / halaman</option>
+                  </select>
+                  <div>
+                    <button className="btn-outline" onClick={() => setCurrentPageOverview(Math.max(1, currentPageOverview - 1))}>&lt;</button>
+                    <span style={{ margin: '0 8px' }}>{currentPageOverview} / {totalPagesOverview}</span>
+                    <button className="btn-outline" onClick={() => setCurrentPageOverview(Math.min(totalPagesOverview, currentPageOverview + 1))}>&gt;</button>
+                  </div>
+                </div>
+              </div>
+            )}
           </Card>
         </div>
       )}
@@ -455,16 +517,32 @@ const PayrollDetailsPage = () => {
             <div className="crud-form-grid">
               <label className="crud-form-full">
                 <strong>ID Payroll Tujuan</strong>
-                <select
-                  className="crud-input"
-                  value={payrollId}
-                  onChange={(event) => setPayrollId(event.target.value)}
-                >
-                  <option value="">-- Pilih Payroll --</option>
-                  {allPayrolls.map(p => (
-                    <option key={p.id} value={String(p.id)}>{getPayrollLabel(p)}</option>
-                  ))}
-                </select>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <select
+                    className="crud-input"
+                    value={selectedEmployeeId}
+                    onChange={(e) => { setSelectedEmployeeId(e.target.value); setPayrollId(''); }}
+                    style={{ minWidth: 180 }}
+                  >
+                    <option value="">-- Pilih Karyawan (opsional) --</option>
+                    {allEmployees.map(emp => (
+                      <option key={String(emp.id)} value={String(emp.id)}>{emp.user?.name || emp.employee_code || String(emp.id)}</option>
+                    ))}
+                  </select>
+
+                  <select
+                    className="crud-input"
+                    value={payrollId}
+                    onChange={(event) => setPayrollId(event.target.value)}
+                  >
+                    <option value="">-- Pilih Payroll --</option>
+                    {allPayrolls
+                      .filter(p => !selectedEmployeeId || String(p.employee_id) === selectedEmployeeId)
+                      .map(p => (
+                        <option key={p.id} value={String(p.id)}>{getPayrollLabel(p)}</option>
+                    ))}
+                  </select>
+                </div>
               </label>
             </div>
 
@@ -549,17 +627,33 @@ const PayrollDetailsPage = () => {
               <div className="payroll-details-manage-header">
                 <h2>Update / Hapus Komponen</h2>
                 <div className="payroll-details-search-mini">
-                  <select
-                    className="crud-input crud-input--sm"
-                    style={{ minWidth: '220px' }}
-                    value={payrollId}
-                    onChange={(event) => setPayrollId(event.target.value)}
-                  >
-                    <option value="">-- Pilih Payroll --</option>
-                    {allPayrolls.map(p => (
-                      <option key={p.id} value={String(p.id)}>{getPayrollLabel(p)}</option>
-                    ))}
-                  </select>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <select
+                      className="crud-input crud-input--sm"
+                      value={selectedEmployeeId}
+                      onChange={(e) => { setSelectedEmployeeId(e.target.value); setPayrollId(''); }}
+                      style={{ minWidth: 180 }}
+                    >
+                      <option value="">-- Pilih Karyawan (opsional) --</option>
+                      {allEmployees.map(emp => (
+                        <option key={String(emp.id)} value={String(emp.id)}>{emp.user?.name || emp.employee_code || String(emp.id)}</option>
+                      ))}
+                    </select>
+
+                    <select
+                      className="crud-input crud-input--sm"
+                      style={{ minWidth: '220px' }}
+                      value={payrollId}
+                      onChange={(event) => setPayrollId(event.target.value)}
+                    >
+                      <option value="">-- Pilih Payroll --</option>
+                      {allPayrolls
+                        .filter(p => !selectedEmployeeId || String(p.employee_id) === selectedEmployeeId)
+                        .map(p => (
+                          <option key={p.id} value={String(p.id)}>{getPayrollLabel(p)}</option>
+                      ))}
+                    </select>
+                  </div>
                   <Button variant="outline" size="sm" onClick={() => void loadPayrollDetails()} disabled={loading}>
                     Muat
                   </Button>
@@ -642,17 +736,33 @@ const PayrollDetailsPage = () => {
               <div className="payroll-details-manage-header">
                 <h2>Bulk Adjust Amounts</h2>
                 <div className="payroll-details-search-mini">
-                  <select
-                    className="crud-input crud-input--sm"
-                    style={{ minWidth: '220px' }}
-                    value={payrollId}
-                    onChange={(event) => setPayrollId(event.target.value)}
-                  >
-                    <option value="">-- Pilih Payroll --</option>
-                    {allPayrolls.map(p => (
-                      <option key={p.id} value={String(p.id)}>{getPayrollLabel(p)}</option>
-                    ))}
-                  </select>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <select
+                      className="crud-input crud-input--sm"
+                      value={selectedEmployeeId}
+                      onChange={(e) => { setSelectedEmployeeId(e.target.value); setPayrollId(''); }}
+                      style={{ minWidth: 180 }}
+                    >
+                      <option value="">-- Pilih Karyawan (opsional) --</option>
+                      {allEmployees.map(emp => (
+                        <option key={String(emp.id)} value={String(emp.id)}>{emp.user?.name || emp.employee_code || String(emp.id)}</option>
+                      ))}
+                    </select>
+
+                    <select
+                      className="crud-input crud-input--sm"
+                      style={{ minWidth: '220px' }}
+                      value={payrollId}
+                      onChange={(event) => setPayrollId(event.target.value)}
+                    >
+                      <option value="">-- Pilih Payroll --</option>
+                      {allPayrolls
+                        .filter(p => !selectedEmployeeId || String(p.employee_id) === selectedEmployeeId)
+                        .map(p => (
+                          <option key={p.id} value={String(p.id)}>{getPayrollLabel(p)}</option>
+                      ))}
+                    </select>
+                  </div>
                   <Button variant="outline" size="sm" onClick={() => void loadPayrollDetails()} disabled={loading}>
                     Muat
                   </Button>

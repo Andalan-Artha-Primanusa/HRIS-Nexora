@@ -153,7 +153,7 @@
 
 .payroll-payment-input-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
+  grid-template-columns: 1fr;
   gap: 1rem;
   align-items: start;
 }
@@ -355,5 +355,76 @@
 
   .payroll-payment-actions .ui-button {
     width: 100%;
+  }
+}
+
+/* Table improvements for payroll payment */
+.crud-table.payroll-payment-table {
+  border-collapse: separate;
+  border-spacing: 0 8px;
+  width: 100%;
+}
+
+.crud-table.payroll-payment-table thead th {
+  background: transparent;
+  color: #1e293b;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-align: left;
+  padding: 10px 12px;
+  vertical-align: middle;
+}
+
+.crud-table.payroll-payment-table tbody tr {
+  background: #fff;
+  box-shadow: 0 6px 12px rgba(15, 23, 42, 0.04);
+  border-radius: 8px;
+}
+
+.crud-table.payroll-payment-table tbody td {
+  padding: 12px 14px;
+  vertical-align: middle;
+  border: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 1rem;
+}
+
+.crud-table.payroll-payment-table tbody tr:nth-child(even) {
+  background: #fbfdff;
+}
+
+.crud-table-wrap {
+  width: 100%;
+}
+
+.crud-table.payroll-payment-table tbody td.numeric,
+.crud-table.payroll-payment-table thead th.numeric {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.crud-table.payroll-payment-table tbody tr.is-selected-row {
+  outline: 2px solid rgba(37, 99, 235, 0.12);
+  background: linear-gradient(90deg, rgba(219, 234, 254, 0.6), rgba(255,255,255,0.6));
+}
+
+.payroll-payment-quick-panel .crud-input {
+  width: 100%;
+}
+
+.payroll-payment-quick-panel .sort-select {
+  min-width: 140px;
+}
+
+.payroll-payment-quick-panel .ui-button {
+  min-width: 92px;
+}
+
+@media (max-width: 900px) {
+  .crud-table.payroll-payment-table thead th,
+  .crud-table.payroll-payment-table tbody td {
+    padding: 8px 10px;
   }
 }

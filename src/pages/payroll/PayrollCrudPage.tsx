@@ -4,6 +4,7 @@ import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
 import { payrollService, toSafeArray } from "@/features/payroll/api/payroll.service";
+import { PayrollStatusBadge } from '@/shared/ui/PayrollStatusBadge';
 import { getAllEmployees } from "@/features/employee/api/employee.service";
 import type { PayrollCreatePayload, PayrollUpdatePayload, PayrollItem } from "@/features/payroll/types/payroll.types";
 import { PaginationWithSize } from "@/shared/ui/Pagination";
@@ -33,6 +34,7 @@ const PayrollCrudPage = () => {
   const [payrolls, setPayrolls] = useState<PayrollItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [paymentFilter, setPaymentFilter] = useState<'all' | 'paid' | 'unpaid'>('all');
   const [form, setForm] = useState<PayrollFormState>(DEFAULT_FORM);
   const [view, setView] = useState<"list" | "form">("list");
   const [selectedPayrollId, setSelectedPayrollId] = useState<string>("");
@@ -226,10 +228,16 @@ const PayrollCrudPage = () => {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [payrolls, itemsPerPage]);
+  }, [payrolls, itemsPerPage, paymentFilter]);
 
-  const totalPages = Math.max(1, Math.ceil(payrolls.length / itemsPerPage));
-  const paginatedPayrolls = payrolls.slice((currentPage - 1) * itemsPerPage, (currentPage - 1) * itemsPerPage + itemsPerPage);
+  const filteredPayrolls = payrolls.filter((p) => {
+    if (paymentFilter === 'all') return true;
+    if (paymentFilter === 'paid') return String(p.status).toLowerCase() === 'paid';
+    return String(p.status).toLowerCase() !== 'paid';
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filteredPayrolls.length / itemsPerPage));
+  const paginatedPayrolls = filteredPayrolls.slice((currentPage - 1) * itemsPerPage, (currentPage - 1) * itemsPerPage + itemsPerPage);
 
   const getEmployeeName = (empId: string) => {
     const employee = employees.find((entry) => String(entry.id) === empId);
@@ -301,7 +309,7 @@ const PayrollCrudPage = () => {
       {view === "list" && (
         <>
           <Card className="analytics-title-card">
-            <div className="analytics-title-inner">
+              <div className="analytics-title-inner">
               <div className="analytics-icon">
                 <LayoutDashboard size={24} />
               </div>
@@ -310,6 +318,16 @@ const PayrollCrudPage = () => {
                 <p className="analytics-subtitle">{payrolls.length} Total</p>
               </div>
             </div>
+              <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem' }}>
+                  <span style={{ color: '#64748b' }}>Filter:</span>
+                  <select value={paymentFilter} onChange={(e) => setPaymentFilter(e.target.value as any)} className="sort-select">
+                    <option value="all">Semua Status</option>
+                    <option value="unpaid">Belum Dibayar</option>
+                    <option value="paid">Sudah Dibayar</option>
+                  </select>
+                </label>
+              </div>
           </Card>
 
           <Card className="crud-table-card">
@@ -323,12 +341,13 @@ const PayrollCrudPage = () => {
                     <th>Tunjangan</th>
                     <th>Bonus</th>
                     <th>Take Home Pay</th>
+                    <th>Status</th>
                     <th style={{ textAlign: 'center' }}>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {paginatedPayrolls.length > 0 ? (
-                    paginatedPayrolls.map((payroll) => (
+                      {paginatedPayrolls.length > 0 ? (
+                        paginatedPayrolls.map((payroll) => (
                       <tr key={payroll.id} className={selectedPayrollId === String(payroll.id) ? "is-selected" : ""}>
                         <td>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -345,6 +364,9 @@ const PayrollCrudPage = () => {
                         <td>Rp {Number(payroll.allowance || 0).toLocaleString("id-ID")}</td>
                         <td style={{ color: '#10b981', fontWeight: '600' }}>Rp {Number(payroll.bonus || 0).toLocaleString("id-ID")}</td>
                         <td style={{ fontWeight: '800', color: 'var(--primary)' }}>Rp {Number(payroll.take_home_pay || 0).toLocaleString("id-ID")}</td>
+                        <td>
+                          <PayrollStatusBadge status={payroll.status as any} size="sm" />
+                        </td>
                         <td style={{ textAlign: 'center' }}>
                           <div className="action-btn-group" style={{ justifyContent: 'center' }}>
                             <button onClick={() => selectPayroll(payroll, "edit")} className="action-btn action-btn-edit" title="Edit">
@@ -366,13 +388,13 @@ const PayrollCrudPage = () => {
             </table>
             </div>
 
-            {payrolls.length > itemsPerPage && (
+            {filteredPayrolls.length > itemsPerPage && (
               <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'flex-end' }}>
                 <PaginationWithSize
                   currentPage={currentPage}
                   totalPages={totalPages}
                   onPageChange={(p) => setCurrentPage(p)}
-                  totalItems={payrolls.length}
+                  totalItems={filteredPayrolls.length}
                   itemsPerPage={itemsPerPage}
                   onItemsPerPageChange={(size) => setItemsPerPage(size)}
                 />

@@ -23,6 +23,9 @@ const PayrollPaymentPage = () => {
   const [allPayrolls, setAllPayrolls] = useState<PayrollItem[]>([]);
   const [currentPageRecent, setCurrentPageRecent] = useState(1);
   const [itemsPerPageRecent, setItemsPerPageRecent] = useState(5);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [periodFilter, setPeriodFilter] = useState<string>("all");
+  const [paymentFilter, setPaymentFilter] = useState<'all' | 'paid' | 'unpaid'>('all');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [errorModal, setErrorModal] = useState<{ isOpen: boolean; title: string; message: string }>({
@@ -174,8 +177,23 @@ const PayrollPaymentPage = () => {
     },
   ];
 
-  const totalPagesRecent = Math.max(1, Math.ceil(safePayrolls.length / itemsPerPageRecent));
-  const recentPayrolls = safePayrolls.slice((currentPageRecent - 1) * itemsPerPageRecent, (currentPageRecent - 1) * itemsPerPageRecent + itemsPerPageRecent);
+  const filteredPayrolls = safePayrolls.filter((p) => {
+    if (paymentFilter === 'paid' && String(p.status).toLowerCase() !== 'paid') return false;
+    if (paymentFilter === 'unpaid' && String(p.status).toLowerCase() === 'paid') return false;
+    if (periodFilter !== 'all' && String(p.period) !== periodFilter) return false;
+    if (searchTerm.trim()) {
+      const q = searchTerm.toLowerCase();
+      const emp = safeEmployees.find(e => String(e.id) === String(p.employee_id) || e.employee_code === String(p.employee_id));
+      const name = emp?.user?.name || emp?.employee_code || "";
+      if (!String(p.id).toLowerCase().includes(q) && !String(p.period || "").toLowerCase().includes(q) && !name.toLowerCase().includes(q)) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  const totalPagesRecent = Math.max(1, Math.ceil(filteredPayrolls.length / itemsPerPageRecent));
+  const recentPayrolls = filteredPayrolls.slice((currentPageRecent - 1) * itemsPerPageRecent, (currentPageRecent - 1) * itemsPerPageRecent + itemsPerPageRecent);
 
   return (
     <div className="crud-page">
@@ -257,59 +275,90 @@ const PayrollPaymentPage = () => {
         </div>
       </Card>
 
-      <Card className="crud-table-card">
+      <Card className="crud-table-card" style={{ minHeight: 160 }}>
         <div className="payroll-payment-input-grid">
-          <div className="payroll-payment-input-panel">
-            <label>
-              <strong>PAYROLL ID *</strong>
-              <input
-                type="text"
-                className="crud-input"
-                value={payrollId}
-                onChange={(e) => setPayrollId(e.target.value)}
-                placeholder="Contoh: 1, 2, 3, ..."
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    void handleViewDetail();
-                  }
-                }}
-              />
-            </label>
-            <Button
-              variant="primary"
-              size="md"
-              onClick={() => void handleViewDetail()}
-              disabled={loading || !payrollId.trim()}
-            >
-              Lihat Detail
-            </Button>
-          </div>
-
-          <div className="payroll-payment-quick-panel">
-            <p className="payroll-payment-quick-title">Payroll Terbaru</p>
-            <div className="payroll-payment-quick-list">
-              {recentPayrolls.map((payroll) => (
-                <button
-                  type="button"
-                  key={payroll.id}
-                  onClick={() => {
-                    setPayrollId(String(payroll.id));
-                    setSelectedPayroll(payroll);
-                  }}
-                  className={`payroll-payment-quick-item${selectedPayroll?.id === payroll.id ? " is-selected" : ""}`}
-                >
-                  <div className="payroll-payment-quick-item-id">ID: {payroll.id}</div>
-                  <div className="payroll-payment-quick-item-name">{getEmployeeName(payroll.employee_id)}</div>
-                </button>
-              ))}
+          <div className="payroll-payment-quick-panel" style={{ flex: 1, minHeight: 160 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 8 }}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <p className="payroll-payment-quick-title" style={{ margin: 0 }}>Payroll</p>
+                <input
+                  placeholder="Cari ID, karyawan, atau periode"
+                  className="crud-input crud-input--sm"
+                  value={searchTerm}
+                  onChange={(e) => { setSearchTerm(e.target.value); setCurrentPageRecent(1); }}
+                  style={{ minWidth: 220 }}
+                />
+              </div>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <select value={paymentFilter} onChange={(e) => { setPaymentFilter(e.target.value as any); setCurrentPageRecent(1); }} className="sort-select">
+                  <option value="all">Semua Status</option>
+                  <option value="unpaid">Belum Dibayar</option>
+                  <option value="paid">Sudah Dibayar</option>
+                </select>
+                <select value={periodFilter} onChange={(e) => { setPeriodFilter(e.target.value); setCurrentPageRecent(1); }} className="sort-select">
+                  <option value="all">Semua Periode</option>
+                  {Array.from(new Set(safePayrolls.map(p => p.period).filter(Boolean))).map((prd) => (
+                    <option key={String(prd)} value={String(prd)}>{String(prd)}</option>
+                  ))}
+                </select>
+              </div>
             </div>
-            {safePayrolls.length > itemsPerPageRecent && (
+
+            <div className="crud-table-wrap" style={{ minHeight: 160 }}>
+              <table className="crud-table payroll-payment-table" style={{ width: '100%', fontSize: '0.95rem' }}>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Karyawan</th>
+                    <th>Periode</th>
+                    <th className="numeric">Gaji Pokok</th>
+                    <th className="numeric">Take Home Pay</th>
+                    <th>Status</th>
+                    <th style={{ textAlign: 'right' }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentPayrolls.length > 0 ? (
+                    recentPayrolls.map((payroll) => (
+                      <tr key={payroll.id} className={selectedPayroll?.id === payroll.id ? 'is-selected-row' : ''}>
+                        <td>{payroll.id}</td>
+                        <td title={getEmployeeName(payroll.employee_id)}>{getEmployeeName(payroll.employee_id)}</td>
+                        <td>{payroll.period}</td>
+                        <td className="numeric">Rp {Number(payroll.basic_salary || 0).toLocaleString('id-ID')}</td>
+                        <td className="numeric">Rp {Number(payroll.take_home_pay || payroll.net_salary || 0).toLocaleString('id-ID')}</td>
+                        <td><PayrollStatusBadge status={payroll.status || 'pending'} size="sm" /></td>
+                        <td style={{ textAlign: 'right' }}>
+                          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                            <Button variant="outline" size="sm" onClick={() => { setPayrollId(String(payroll.id)); setSelectedPayroll(payroll); }}>
+                              Lihat
+                            </Button>
+                            {String(payroll.status).toLowerCase() !== 'paid' && (
+                              <Button variant="primary" size="sm" onClick={() => { setPayrollId(String(payroll.id)); setSelectedPayroll(payroll); }}>
+                                Tandai Dibayar
+                              </Button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={7} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                        Tidak ada payroll untuk kriteria ini.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {filteredPayrolls.length > itemsPerPageRecent && (
               <div style={{ marginTop: 8, display: 'flex', justifyContent: 'flex-end' }}>
                 <PaginationWithSize
                   currentPage={currentPageRecent}
                   totalPages={totalPagesRecent}
                   onPageChange={(p) => setCurrentPageRecent(p)}
-                  totalItems={safePayrolls.length}
+                  totalItems={filteredPayrolls.length}
                   itemsPerPage={itemsPerPageRecent}
                   onItemsPerPageChange={(s) => setItemsPerPageRecent(s)}
                 />
