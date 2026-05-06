@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Plus, RefreshCw, Wallet, Search, Eye, Pencil, Trash2, Send, CheckCircle2, Clock, TrendingUp } from 'lucide-react';
 import { Card, CardHeader } from '@/shared/ui';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
+import { ReimbursementDetailModal } from '@/features/reimbursement/components/ReimbursementDetailModal';
+import { ReimbursementModal } from '@/features/reimbursement/components/ReimbursementModal';
 import {
   getMyReimbursements,
   createMyReimbursement,
@@ -10,8 +12,10 @@ import {
   submitMyReimbursement
 } from '../../features/reimbursement/api/reimbursement.service';
 import type { ReimbursementItem } from '../../features/reimbursement/types/reimbursement.types';
+import { showToast } from '@/shared/ui/toast';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/features/reimbursement/Reimbursement.css';
 
 const getStatusClass = (status?: string) => {
   const normalized = String(status || "").toLowerCase();
@@ -35,8 +39,8 @@ const formatDate = (value?: string) => {
 const MyReimbursementsPage: React.FC = () => {
   const [items, setItems] = useState<ReimbursementItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [_isModalOpen, ____setIsModalOpen] = useState(false);
-  const [_isDetailOpen, ____setIsDetailOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<ReimbursementItem | null>(null);
 
   // Search & Filter
@@ -104,31 +108,47 @@ const MyReimbursementsPage: React.FC = () => {
 
   const handleOpenCreate = () => {
     setSelectedItem(null);
-    ____setIsModalOpen(true);
+    setIsModalOpen(true);
   };
 
   const handleOpenEdit = (item: ReimbursementItem) => {
     setSelectedItem(item);
-    ____setIsModalOpen(true);
+    setIsModalOpen(true);
   };
 
   const handleOpenDetail = (item: ReimbursementItem) => {
     setSelectedItem(item);
-    ____setIsDetailOpen(true);
+    setIsDetailOpen(true);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _handleSave = async (data: any) => {
+  const handleSave = async (data: any) => {
     try {
-      if (selectedItem) {
-        await updateReimbursement(String(selectedItem.id), data);
-      } else {
-        await createMyReimbursement(data);
+      const payload = {
+        title: String(data.title || "").trim(),
+        description: String(data.description || "").trim(),
+        amount: Number(data.amount),
+        category: String(data.category || "other"),
+        expense_date: String(data.expense_date || ""),
+        receipt_path: String(data.receipt_path || "").trim(),
+      };
+
+      if (!payload.title || !payload.amount || !payload.category || !payload.expense_date) {
+        showToast("Judul, jumlah, kategori, dan tanggal pengeluaran wajib diisi.", "error");
+        return;
       }
-      ____setIsModalOpen(false);
-      fetchData();
-    } catch (error) {
+
+      if (selectedItem) {
+        await updateReimbursement(String(selectedItem.id), payload);
+        showToast("Klaim reimbursement berhasil diperbarui.", "success");
+      } else {
+        await createMyReimbursement(payload);
+        showToast("Klaim reimbursement berhasil dibuat sebagai draft.", "success");
+      }
+      setIsModalOpen(false);
+      await fetchData();
+    } catch (error: any) {
       console.error('Failed to save reimbursement:', error);
+      showToast(error?.response?.data?.message || error?.message || "Gagal menyimpan klaim reimbursement.", "error");
     }
   };
 
@@ -136,9 +156,11 @@ const MyReimbursementsPage: React.FC = () => {
     if (window.confirm('Apakah Anda yakin ingin menghapus klaim ini?')) {
       try {
         await deleteReimbursement(String(item.id));
-        fetchData();
-      } catch (error) {
+        await fetchData();
+        showToast("Klaim reimbursement berhasil dihapus.", "success");
+      } catch (error: any) {
         console.error('Failed to delete reimbursement:', error);
+        showToast(error?.response?.data?.message || error?.message || "Gagal menghapus klaim reimbursement.", "error");
       }
     }
   };
@@ -147,9 +169,11 @@ const MyReimbursementsPage: React.FC = () => {
     if (window.confirm('Ajukan klaim ini untuk persetujuan?')) {
       try {
         await submitMyReimbursement(String(item.id));
-        fetchData();
-      } catch (error) {
+        await fetchData();
+        showToast("Klaim reimbursement berhasil diajukan.", "success");
+      } catch (error: any) {
         console.error('Failed to submit reimbursement:', error);
+        showToast(error?.response?.data?.message || error?.message || "Gagal mengajukan klaim reimbursement.", "error");
       }
     }
   };
@@ -403,6 +427,19 @@ const MyReimbursementsPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      <ReimbursementModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSave}
+        initialData={selectedItem}
+      />
+
+      <ReimbursementDetailModal
+        isOpen={isDetailOpen}
+        onClose={() => setIsDetailOpen(false)}
+        item={selectedItem}
+      />
     </div>
   );
 };

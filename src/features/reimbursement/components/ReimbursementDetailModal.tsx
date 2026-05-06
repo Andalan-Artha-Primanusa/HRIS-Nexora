@@ -47,6 +47,8 @@ export const ReimbursementDetailModal: React.FC<ReimbursementDetailModalProps> =
   };
 
   const status = (item.status as string || '').toLowerCase();
+  const receiptPath = String(item.receipt_path || '');
+  const isImageReceipt = receiptPath.startsWith('data:image') || /\.(png|jpe?g|webp|gif)(\?.*)?$/i.test(receiptPath);
 
   return (
     <div className="reimb-modal-overlay" onClick={onClose}>
@@ -101,14 +103,18 @@ export const ReimbursementDetailModal: React.FC<ReimbursementDetailModalProps> =
               </div>
             </div>
 
-            {item.receipt_path && (
+            {receiptPath && (
               <div style={{ marginTop: '1rem' }}>
                 <label className="detail-label" style={{ display: 'block', marginBottom: '0.5rem' }}>Receipt Attachment</label>
-                <div className="receipt-preview">
-                  <img src={item.receipt_path as string} alt="Receipt" />
-                </div>
+                {isImageReceipt ? (
+                  <div className="receipt-preview">
+                    <img src={receiptPath} alt="Receipt" />
+                  </div>
+                ) : (
+                  <div className="no-receipt">Attachment ready to open</div>
+                )}
                 <a 
-                  href={item.receipt_path as string} 
+                  href={receiptPath} 
                   target="_blank" 
                   rel="noreferrer"
                   style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#2563eb', fontSize: '0.85rem', marginTop: '0.5rem', textDecoration: 'none' }}

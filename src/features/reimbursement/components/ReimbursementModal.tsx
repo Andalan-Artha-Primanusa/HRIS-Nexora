@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save } from 'lucide-react';
+import { Upload, X, Save } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
+import { isValidFileUpload } from '@/shared/utils/sanitize';
 import type { ReimbursementItem } from '../types/reimbursement.types';
 
 interface ReimbursementModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: any) => void;
+  onSave: (data: any) => void | Promise<void>;
   initialData?: ReimbursementItem | null;
   employees?: any[]; // Only for admin
   isAdmin?: boolean;
@@ -31,6 +32,8 @@ export const ReimbursementModal: React.FC<ReimbursementModalProps> = ({
   employees = [],
   isAdmin = false
 }) => {
+  const [isSaving, setIsSaving] = useState(false);
+  const [fileError, setFileError] = useState('');
   const [formData, setFormData] = useState<any>({
     title: '',
     description: '',
@@ -38,6 +41,7 @@ export const ReimbursementModal: React.FC<ReimbursementModalProps> = ({
     category: 'other',
     expense_date: new Date().toISOString().split('T')[0],
     employee_id: '',
+    receipt_path: '',
   });
 
   useEffect(() => {
@@ -49,6 +53,7 @@ export const ReimbursementModal: React.FC<ReimbursementModalProps> = ({
         category: initialData.category || 'other',
         expense_date: initialData.expense_date ? new Date(initialData.expense_date as string).toISOString().split('T')[0] : '',
         employee_id: initialData.employee_id || '',
+        receipt_path: initialData.receipt_path || '',
       });
     } else {
       setFormData({
@@ -58,8 +63,10 @@ export const ReimbursementModal: React.FC<ReimbursementModalProps> = ({
         category: 'other',
         expense_date: new Date().toISOString().split('T')[0],
         employee_id: '',
+        receipt_path: '',
       });
     }
+    setFileError('');
   }, [initialData, isOpen]);
 
   if (!isOpen) return null;
@@ -69,16 +76,45 @@ export const ReimbursementModal: React.FC<ReimbursementModalProps> = ({
     setFormData((prev: any) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleReceiptFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    if (!file) return;
+
+    const validation = isValidFileUpload(file, 5, ['image/jpeg', 'image/png', 'application/pdf']);
+    if (!validation.valid) {
+      setFileError(validation.error || 'File bukti tidak valid.');
+      e.target.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setFormData((prev: any) => ({
+        ...prev,
+        receipt_path: typeof reader.result === 'string' ? reader.result : file.name,
+        receipt_filename: file.name,
+      }));
+      setFileError('');
+    };
+    reader.onerror = () => setFileError('Gagal membaca file bukti.');
+    reader.readAsDataURL(file);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData);
+    setIsSaving(true);
+    try {
+      await onSave(formData);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
     <div className="reimb-modal-overlay" onClick={onClose}>
       <div className="reimb-modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="reimb-modal-header">
-          <h2>{initialData ? 'Edit Reimbursement' : 'New Reimbursement'}</h2>
+          <h2>{initialData ? 'Edit Klaim Reimbursement' : 'Klaim Reimbursement Baru'}</h2>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}>
             <X size={24} />
           </button>
@@ -89,7 +125,7 @@ export const ReimbursementModal: React.FC<ReimbursementModalProps> = ({
             <div className="form-grid">
               {isAdmin && !initialData && (
                 <div className="form-group full">
-                  <label>Employee</label>
+                  <label>Karyawan</label>
                   <select 
                     name="employee_id" 
                     className="form-control" 
@@ -97,7 +133,7 @@ export const ReimbursementModal: React.FC<ReimbursementModalProps> = ({
                     onChange={handleChange}
                     required
                   >
-                    <option value="">Select Employee</option>
+                    <option value="">Pilih Karyawan</option>
                     {employees.map(emp => (
                       <option key={emp.id} value={emp.id}>
                         {emp.full_name} ({emp.employee_id})
@@ -108,12 +144,12 @@ export const ReimbursementModal: React.FC<ReimbursementModalProps> = ({
               )}
 
               <div className="form-group full">
-                <label>Title</label>
+                <label>Judul</label>
                 <input 
                   type="text" 
                   name="title" 
                   className="form-control" 
-                  placeholder="e.g., Client Meeting Lunch"
+                  placeholder="Contoh: Makan siang meeting klien"
                   value={formData.title}
                   onChange={handleChange}
                   required 
@@ -121,7 +157,7 @@ export const ReimbursementModal: React.FC<ReimbursementModalProps> = ({
               </div>
 
               <div className="form-group">
-                <label>Category</label>
+                <label>Kategori</label>
                 <select 
                   name="category" 
                   className="form-control" 
@@ -136,7 +172,7 @@ export const ReimbursementModal: React.FC<ReimbursementModalProps> = ({
               </div>
 
               <div className="form-group">
-                <label>Amount (IDR)</label>
+                <label>Jumlah (Rp)</label>
                 <input 
                   type="number" 
                   name="amount" 
@@ -149,7 +185,7 @@ export const ReimbursementModal: React.FC<ReimbursementModalProps> = ({
               </div>
 
               <div className="form-group">
-                <label>Expense Date</label>
+                <label>Tanggal Pengeluaran</label>
                 <input 
                   type="date" 
                   name="expense_date" 
@@ -161,25 +197,38 @@ export const ReimbursementModal: React.FC<ReimbursementModalProps> = ({
               </div>
 
               <div className="form-group full">
-                <label>Description</label>
+                <label>Deskripsi</label>
                 <textarea 
                   name="description" 
                   className="form-control" 
                   rows={3} 
-                  placeholder="Provide more details about this expense..."
+                  placeholder="Jelaskan detail pengeluaran..."
                   value={formData.description}
                   onChange={handleChange}
                 ></textarea>
               </div>
 
               <div className="form-group full">
-                <label>Receipt URL (Optional)</label>
-                <input 
-                  type="text" 
-                  name="receipt_path" 
-                  className="form-control" 
-                  placeholder="Link to receipt image/file"
-                  value={formData.receipt_path || ''}
+                <label>Bukti / Struk Pembayaran</label>
+                <div className="receipt-upload-box">
+                  <Upload size={18} />
+                  <div>
+                    <strong>{formData.receipt_filename || 'Pilih file bukti'}</strong>
+                    <span>JPG, PNG, atau PDF maksimal 5MB</span>
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,application/pdf"
+                    onChange={handleReceiptFileChange}
+                  />
+                </div>
+                {fileError && <p className="receipt-upload-error">{fileError}</p>}
+                <input
+                  type="text"
+                  name="receipt_path"
+                  className="form-control"
+                  placeholder="Atau tempel URL/path bukti pembayaran"
+                  value={String(formData.receipt_path || '').startsWith('data:') ? formData.receipt_filename || 'File bukti dipilih' : formData.receipt_path || ''}
                   onChange={handleChange}
                 />
               </div>
@@ -187,10 +236,10 @@ export const ReimbursementModal: React.FC<ReimbursementModalProps> = ({
           </div>
 
           <div className="reimb-modal-footer">
-            <Button variant="ghost" onClick={onClose}>Cancel</Button>
-            <Button variant="primary" type="submit">
+            <Button variant="ghost" type="button" onClick={onClose} disabled={isSaving}>Batal</Button>
+            <Button variant="primary" type="submit" loading={isSaving}>
               <Save size={18} style={{ marginRight: '8px' }} />
-              {initialData ? 'Update' : 'Save as Draft'}
+              {initialData ? 'Update' : 'Simpan Draft'}
             </Button>
           </div>
         </form>

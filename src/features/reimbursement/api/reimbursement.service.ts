@@ -143,6 +143,6 @@ export const createMyReimbursement = async (payload: Omit<ReimbursementCreatePay
 
 /** POST /reimbursements/{id}/submit → submit() */
 export const submitMyReimbursement = async (id: string) => {
-  const response = await api.post(`/reimbursements/${id}/submit`);
+  const response = await api.post(`/my/reimbursements/${id}/submit`);
   return { raw: response.data };
 };
