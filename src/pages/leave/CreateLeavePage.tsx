@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { Alert } from '@/shared/ui/Alert';
@@ -11,6 +11,8 @@ import './LeavePages.css';
 
 const CreateLeavePage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnPath = location.pathname === '/leave/request' ? '/leave/my-leave' : '/leave/requests';
   const [formData, setFormData] = useState({
     type: 'annual',
     start_date: new Date().toISOString().split('T')[0],
@@ -78,7 +80,7 @@ const CreateLeavePage = () => {
       setAlertMessage('Pengajuan cuti berhasil dibuat!');
       setAlertType('success');
       setTimeout(() => {
-        navigate('/leave/requests');
+        navigate(returnPath);
       }, 1500);
     } catch (err: any) {
       const message = err.response?.data?.message || err.message || 'Gagal membuat pengajuan cuti';
@@ -90,7 +92,7 @@ const CreateLeavePage = () => {
   };
 
   const handleCancel = () => {
-    navigate('/leave/requests');
+    navigate(returnPath);
   };
 
   return (

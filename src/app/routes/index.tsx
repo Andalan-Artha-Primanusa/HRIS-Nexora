@@ -466,6 +466,16 @@ export const router = createBrowserRouter([
         ],
       },
       {
+        path: "/leave/request",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <CreateLeavePage />,
+          },
+        ],
+      },
+      {
         path: "/leave/requests/edit/:id",
         element: <DashboardLayout />,
         children: [
