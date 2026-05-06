@@ -61,6 +61,8 @@ const LoginPage = () => {
       return;
     }
 
+    setIsSubmitting(true);
+
     try {
       const result = await handleLogin({ email: email.trim(), password });
       
@@ -182,7 +184,7 @@ const LoginPage = () => {
         <button
           type="button"
           className="auth-link-button"
-          onClick={() => setFormError("Fitur Forgot Password belum tersedia.")}
+          onClick={() => navigate('/forgot-password')}
         >
           Forgot Password?
         </button>

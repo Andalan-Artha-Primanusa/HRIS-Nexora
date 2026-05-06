@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Menu, Bell, Sun, LogOut, Settings, UserCircle, RotateCw } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Menu, Bell, Sun, Moon, LogOut, Settings, UserCircle, RotateCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/app/store/auth.store';
 import { useAuth } from '@/features/auth/hooks/useAuth';
@@ -55,6 +55,7 @@ const getInitials = (name: string) => {
 export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
   const [openDropdown, setOpenDropdown] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => document.documentElement.dataset.theme === 'dark');
   const user = useAuthStore((state) => state.user);
   const { handleLogout } = useAuth();
   const { refreshUserData } = useRefreshUser();
@@ -94,6 +95,11 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
       return () => clearInterval(interval);
     }
   }, [user]);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = isDarkMode ? 'dark' : 'light';
+    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+  }, [isDarkMode]);
 
   const markAsRead = async (id: number) => {
     try {
@@ -158,8 +164,13 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
             <RotateCw size={24} className={isRefreshing ? 'rotating header-action-icon' : 'header-action-icon'} />
           </button>
 
-          <button className="icon-button" aria-label="Toggle Dark Mode">
-            <Sun size={24} className="header-action-icon" />
+          <button
+            className="icon-button"
+            aria-label="Toggle Dark Mode"
+            title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            onClick={() => setIsDarkMode((prev) => !prev)}
+          >
+            {isDarkMode ? <Moon size={24} className="header-action-icon" /> : <Sun size={24} className="header-action-icon" />}
           </button>
           
           <div className="notification-wrapper">

@@ -6,6 +6,14 @@ import { ToastProvider } from "@/app/layouts/ToastProvider";
 import "./index.css";
 import "./shared/styles/submenu-table.css";
 
+const storedTheme = localStorage.getItem('theme');
+const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+const initialTheme = storedTheme === 'dark' || storedTheme === 'light'
+  ? storedTheme
+  : (prefersDark ? 'dark' : 'light');
+
+document.documentElement.dataset.theme = initialTheme;
+
 class ErrorBoundary extends React.Component<{children: any}, {hasError: boolean, error: any}> {
   constructor(props: any) {
     super(props);

@@ -6,6 +6,8 @@ import { useAuthSession } from "./useAuthSession";
 import LoginPage from "../../pages/auth/login/LoginPage";
 import GoogleCallbackPage from "../../pages/auth/login/GoogleCallbackPage";
 import RegisterPage from "../../pages/auth/register/RegisterPage";
+import ForgotPasswordPage from "../../pages/auth/login/ForgotPasswordPage";
+import ResetPasswordPage from "../../pages/auth/login/ResetPasswordPage";
 import DashboardLayout from "../layouts/DashboardLayout";
 const OverviewPage = lazy(() => import("../../pages/dashboard/overview/OverviewPage"));
 const AttendanceOverviewPage = lazy(() => import("../../pages/attendance/AttendanceOverviewPage"));
@@ -251,6 +253,14 @@ export const router = createBrowserRouter([
       {
         path: "/register",
         element: <RegisterPage />,
+      },
+      {
+        path: "/forgot-password",
+        element: <ForgotPasswordPage />,
+      },
+      {
+        path: "/reset-password",
+        element: <ResetPasswordPage />,
       },
     ],
   },

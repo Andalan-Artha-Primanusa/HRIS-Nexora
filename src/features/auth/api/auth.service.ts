@@ -16,6 +16,17 @@ export interface RegisterPayload {
   password_confirmation: string;
 }
 
+export interface ForgotPasswordPayload {
+  email: string;
+}
+
+export interface ResetPasswordPayload {
+  token: string;
+  email: string;
+  password: string;
+  password_confirmation: string;
+}
+
 export interface GoogleAuthCallbackPayload {
   code: string;
   state?: string;
@@ -75,5 +86,21 @@ export const logout = async () => {
  */
 export const verifyToken = async () => {
   const response = await api.get("/me");
+  return response.data;
+};
+
+/**
+ * Request reset password link
+ */
+export const forgotPassword = async (payload: ForgotPasswordPayload) => {
+  const response = await api.post('/forgot-password', payload);
+  return response.data;
+};
+
+/**
+ * Reset password using token
+ */
+export const resetPassword = async (payload: ResetPasswordPayload) => {
+  const response = await api.post('/reset-password', payload);
   return response.data;
 };
