@@ -1,17 +1,40 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { RefreshCw, GraduationCap, Clock, CheckCircle, BookOpen, Play, BookTemplate, Search, Award, FileText, Star, X, ExternalLink, Eye } from 'lucide-react';
+import { useAuthStore } from '@/app/store/auth.store';
 import { Card, CardHeader } from '@/shared/ui';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { trainingService } from '@/features/training/api/training.service';
+import { RBACUtils } from '@/shared/hooks/rbac';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
 
 const MyTrainingsPage: React.FC = () => {
+  const user = useAuthStore((state) => state.user);
   const [trainings, setTrainings] = useState<any[]>([]);
   const [availableTrainings, setAvailableTrainings] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const canSelfEnroll = RBACUtils.hasRole(user, 'employee');
+  const canUseAdminTrainingView = RBACUtils.isAdmin(user) || RBACUtils.isHR(user) || RBACUtils.isSuperAdmin(user);
+
+  const normalizeProgram = (program: any) => ({
+    id: program.id,
+    title: program.title ?? program.name ?? 'Training',
+    category: program.category ?? program.type ?? '-',
+    status: program.status ?? 'active',
+    progress: program.progress ?? 0,
+    program,
+  });
+
+  const normalizeEnrollment = (enrollment: any) => ({
+    ...enrollment,
+    program: enrollment.program ?? enrollment.training_program ?? enrollment.training ?? null,
+    title: enrollment.title ?? enrollment.program?.title ?? enrollment.training_program?.title,
+    category: enrollment.category ?? enrollment.program?.category ?? enrollment.training_program?.category ?? '-',
+    status: enrollment.status ?? 'pending',
+    progress: enrollment.progress ?? 0,
+  });
 
   // Search & Filter
   const [searchText, setSearchText] = useState('');
@@ -29,13 +52,45 @@ const MyTrainingsPage: React.FC = () => {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const [myRes, availRes] = await Promise.all([
-        trainingService.getMyTrainings(),
-        trainingService.getAvailableTrainings()
-      ]);
-      
-      setTrainings(Array.isArray(myRes) ? myRes : Array.isArray(myRes?.data) ? myRes.data : []);
-      setAvailableTrainings(Array.isArray(availRes) ? availRes : Array.isArray(availRes?.data?.data) ? availRes.data.data : Array.isArray(availRes?.data) ? availRes.data : []);
+      if (canSelfEnroll) {
+        const [myRes, availRes] = await Promise.all([
+          trainingService.getMyTrainings(),
+          trainingService.getAvailableTrainings(),
+        ]);
+
+        setTrainings(Array.isArray(myRes) ? myRes : Array.isArray(myRes?.data) ? myRes.data : []);
+        setAvailableTrainings(Array.isArray(availRes) ? availRes : Array.isArray(availRes?.data?.data) ? availRes.data.data : Array.isArray(availRes?.data) ? availRes.data : []);
+        return;
+      }
+
+      if (canUseAdminTrainingView) {
+        const [programsRes, enrollmentsRes] = await Promise.all([
+          trainingService.getPrograms(),
+          trainingService.getEnrollments(),
+        ]);
+
+        const programItems = Array.isArray(programsRes)
+          ? programsRes.map(normalizeProgram)
+          : Array.isArray(programsRes?.data)
+            ? programsRes.data.map(normalizeProgram)
+            : Array.isArray(programsRes?.data?.data)
+              ? programsRes.data.data.map(normalizeProgram)
+              : [];
+
+        const enrollmentItems = Array.isArray(enrollmentsRes)
+          ? enrollmentsRes.map(normalizeEnrollment)
+          : Array.isArray(enrollmentsRes?.data)
+            ? enrollmentsRes.data.map(normalizeEnrollment)
+            : Array.isArray(enrollmentsRes?.data?.data)
+              ? enrollmentsRes.data.data.map(normalizeEnrollment)
+              : [];
+
+        setTrainings(enrollmentItems);
+        setAvailableTrainings(programItems);
+        return;
+      }
+
+      setErrorMessage('Akses pelatihan hanya tersedia untuk employee, admin, atau HR.');
     } catch (error) {
       console.error('Error fetching trainings:', error);
       setErrorMessage('Gagal memuat pelatihan');
@@ -178,11 +233,13 @@ const MyTrainingsPage: React.FC = () => {
           <div className="hero-content">
             <div className="hero-badge">
               <BookTemplate size={16} />
-              <span>Layanan Mandiri</span>
+              <span>{canSelfEnroll ? 'Layanan Mandiri' : 'Admin/HR Training View'}</span>
             </div>
             <h1 className="hero-title">Pelatihan Saya</h1>
             <p className="hero-subtitle">
-              Lacak pendaftaran pelatihan, kemajuan, dan kursus yang telah selesai.
+              {canSelfEnroll
+                ? 'Lacak pendaftaran pelatihan, kemajuan, dan kursus yang telah selesai.'
+                : 'Lihat program pelatihan dan enrollment tanpa batasan employee-only.'}
             </p>
           </div>
           <div className="hero-actions">
@@ -323,9 +380,13 @@ const MyTrainingsPage: React.FC = () => {
                           </td>
                            <td className="td-center">
                             {activeTab === 'Tersedia' ? (
-                              <button className="btn-primary" style={{ padding: '6px 12px', fontSize: '0.75rem' }} onClick={() => handleEnroll(training.id)}>
-                                Daftar
-                              </button>
+                              canSelfEnroll ? (
+                                <button className="btn-primary" style={{ padding: '6px 12px', fontSize: '0.75rem' }} onClick={() => handleEnroll(training.id)}>
+                                  Daftar
+                                </button>
+                              ) : (
+                                <span className="badge-soft badge-soft--blue">Akses Admin/HR</span>
+                              )
                             ) : training.status === 'completed' ? (
                               <button className="btn-outline" style={{ padding: '6px 12px', fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }} onClick={() => handleViewResult(training)}>
                                 <Eye size={14} /> Lihat Hasil
