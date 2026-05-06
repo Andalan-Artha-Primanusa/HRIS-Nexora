@@ -476,6 +476,16 @@ export const router = createBrowserRouter([
         ],
       },
       {
+        path: "/leave/request/:id",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <UpdateLeavePage />,
+          },
+        ],
+      },
+      {
         path: "/leave/calendar",
         element: <DashboardLayout />,
         children: [

@@ -108,20 +108,24 @@ const EmployeeEditPage = () => {
     try {
       const payload: EmployeeUpdatePayload = {
         name: updateForm.name,
-        user_id: updateForm.user_id ? Number(updateForm.user_id) : null,
-        employee_code: updateForm.employee_code || "",
-        hire_date: updateForm.hire_date || "",
-        position: updateForm.position || "",
-        department: updateForm.department || "",
-        salary: updateForm.salary ? Number(updateForm.salary) : 0,
+        user_id: updateForm.user_id ? Number(updateForm.user_id) : undefined,
+        employee_code: updateForm.employee_code || undefined,
+        hire_date: updateForm.hire_date || undefined,
+        position: updateForm.position || undefined,
+        department: updateForm.department || undefined,
+        salary: updateForm.salary ? Number(updateForm.salary) : undefined,
         status: updateForm.status || "pending",
-        probation_end_date: updateForm.probation_end_date || null,
-        location_id: updateForm.location_id ? Number(updateForm.location_id) : null,
-        manager_id: updateForm.manager_id ? Number(updateForm.manager_id) : null,
-        work_schedule_id: updateForm.work_schedule_id ? Number(updateForm.work_schedule_id) : null,
+        probation_end_date: updateForm.probation_end_date || undefined,
+        location_id: updateForm.location_id ? Number(updateForm.location_id) : undefined,
+        manager_id: updateForm.manager_id ? Number(updateForm.manager_id) : undefined,
+        work_schedule_id: updateForm.work_schedule_id ? Number(updateForm.work_schedule_id) : undefined,
       };
 
-      await updateEmployee(targetId, payload);
+      const cleanPayload = Object.fromEntries(
+        Object.entries(payload).filter(([, v]) => v !== undefined)
+      ) as EmployeeUpdatePayload;
+
+      await updateEmployee(targetId, cleanPayload);
       navigate("/employees");
     } catch (error: any) {
       if (error.type === "validation" && error.errors) {

@@ -7,7 +7,9 @@ import {
 } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
+import { Alert } from '@/shared/ui/Alert';
 import { employeeService } from '@/features/employee/api/employee.service';
+import { workforceService } from '@/features/workforce/api/workforce.service';
 import './AdminWorkforcePages.css';
 import '../dashboard/overview/OverviewPage.css';
 
@@ -17,16 +19,17 @@ const ShiftSwapFormPage: React.FC = () => {
   const isEdit = !!id;
 
   const [formData, setFormData] = useState({
-    requester_id: '',
+    requester_employee_id: '',
     target_employee_id: '',
-    shift_date: '',
-    shift_name: 'Pagi',
+    swap_date: '',
     reason: '',
   });
 
   const [employees, setEmployees] = useState<any[]>([]);
   const [_loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
+  const [statusType, setStatusType] = useState<"success" | "error" | "info">("error");
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -46,15 +49,21 @@ const ShiftSwapFormPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    setStatusMessage("");
     try {
-      // Simulate API call for now or use actual service if available
-      // await workforceService.createShiftSwap(formData);
-      setTimeout(() => {
-        setSaving(false);
-        navigate('/workforce/shift-swaps');
-      }, 1000);
-    } catch (err) {
-      console.error(err);
+      const payload = {
+        requester_employee_id: Number(formData.requester_employee_id),
+        target_employee_id: Number(formData.target_employee_id),
+        swap_date: formData.swap_date,
+        reason: formData.reason,
+      };
+      await workforceService.createShiftSwap(payload);
+      setStatusMessage("Permintaan tukar shift berhasil dibuat");
+      setStatusType("success");
+      setTimeout(() => navigate('/workforce/shift-swaps'), 1500);
+    } catch (err: any) {
+      setStatusMessage(err.message || "Gagal membuat permintaan tukar shift");
+      setStatusType("error");
       setSaving(false);
     }
   };
@@ -87,6 +96,15 @@ const ShiftSwapFormPage: React.FC = () => {
         </div>
       </Card>
 
+      {statusMessage && (
+        <Alert
+          type={statusType}
+          message={statusMessage}
+          onClose={() => setStatusMessage("")}
+          dismissible
+        />
+      )}
+
       <form onSubmit={handleSubmit}>
         <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '2rem' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -99,14 +117,15 @@ const ShiftSwapFormPage: React.FC = () => {
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-                <div className="form-group">
+                  <div className="form-group">
                   <label style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b', marginBottom: '8px', display: 'block' }}>Pemohon (Requester)</label>
                   <div style={{ position: 'relative' }}>
                     <User size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                     <select 
-                      value={formData.requester_id}
-                      onChange={(e) => setFormData({ ...formData, requester_id: e.target.value })}
+                      value={formData.requester_employee_id}
+                      onChange={(e) => setFormData({ ...formData, requester_employee_id: e.target.value })}
                       required
+                      disabled={saving}
                       style={{ width: '100%', height: '50px', padding: '0 16px 0 48px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '1rem', color: '#0f172a', boxSizing: 'border-box' }}
                     >
                       <option value="">Pilih Karyawan</option>
@@ -125,6 +144,7 @@ const ShiftSwapFormPage: React.FC = () => {
                       value={formData.target_employee_id}
                       onChange={(e) => setFormData({ ...formData, target_employee_id: e.target.value })}
                       required
+                      disabled={saving}
                       style={{ width: '100%', height: '50px', padding: '0 16px 0 48px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '1rem', color: '#0f172a', boxSizing: 'border-box' }}
                     >
                       <option value="">Pilih Karyawan</option>
@@ -141,28 +161,12 @@ const ShiftSwapFormPage: React.FC = () => {
                     <Calendar size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                     <input 
                       type="date" 
-                      value={formData.shift_date}
-                      onChange={(e) => setFormData({ ...formData, shift_date: e.target.value })}
+                      value={formData.swap_date}
+                      onChange={(e) => setFormData({ ...formData, swap_date: e.target.value })}
                       required
+                      disabled={saving}
                       style={{ width: '100%', height: '50px', padding: '0 16px 0 48px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '1rem', color: '#0f172a', boxSizing: 'border-box' }}
                     />
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b', marginBottom: '8px', display: 'block' }}>Shift Kerja</label>
-                  <div style={{ position: 'relative' }}>
-                    <Clock size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                    <select 
-                      value={formData.shift_name}
-                      onChange={(e) => setFormData({ ...formData, shift_name: e.target.value })}
-                      required
-                      style={{ width: '100%', height: '50px', padding: '0 16px 0 48px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '1rem', color: '#0f172a', boxSizing: 'border-box' }}
-                    >
-                      <option value="Pagi">Shift Pagi (08:00 - 16:00)</option>
-                      <option value="Sore">Shift Sore (16:00 - 00:00)</option>
-                      <option value="Malam">Shift Malam (00:00 - 08:00)</option>
-                    </select>
                   </div>
                 </div>
 
@@ -172,6 +176,7 @@ const ShiftSwapFormPage: React.FC = () => {
                     value={formData.reason}
                     onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
                     placeholder="Berikan alasan mengapa penukaran ini diperlukan..."
+                    disabled={saving}
                     style={{ width: '100%', padding: '16px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '1rem', color: '#0f172a', minHeight: '120px', resize: 'vertical', boxSizing: 'border-box' }}
                   />
                 </div>
@@ -205,7 +210,7 @@ const ShiftSwapFormPage: React.FC = () => {
                     <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#2563eb', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 800 }}>A</div>
                     <div>
                       <p style={{ margin: 0, fontSize: '0.7rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Dari Pemohon</p>
-                      <p style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#1e293b' }}>{getEmployeeName(formData.requester_id)}</p>
+                      <p style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#1e293b' }}>{getEmployeeName(formData.requester_employee_id)}</p>
                     </div>
                   </div>
 

@@ -20,6 +20,7 @@ const routePrefetchers: Record<string, () => Promise<unknown>> = {
   '/my/reimbursements': () => import('@/pages/ess/MyReimbursementsPage'),
   '/leave/my-leave': () => import('@/pages/ess/MyLeavesPage'),
   '/employees': () => import('@/pages/employee/EmployeesPage'),
+  '/employees/update/:id': () => import('@/pages/employee/EmployeeEditPage'),
   '/profiles': () => import('@/pages/profiles/ProfilesPage'),
   '/reimbursements': () => import('@/pages/reimbursements/ReimbursementsManagementPage'),
   '/payroll/list': () => import('@/pages/payroll/PayrollListPage'),
