@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuthStore } from "@/app/store/auth.store";
-import { Card } from "@/shared/ui/Card";
+import { Card, CardHeader } from "@/shared/ui";
 import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { RBACUtils } from "@/shared/hooks/rbac";
 import { getAllPermissions } from "@/features/admin/api/admin.service";

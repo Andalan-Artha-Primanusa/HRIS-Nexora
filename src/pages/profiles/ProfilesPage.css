@@ -294,6 +294,10 @@ input[type="date"].profiles-input {
 
 .profile-details-card {
   padding: 1.5rem;
+  border-radius: 16px;
+  border: 1px solid var(--gray-200);
+  background: #ffffff;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
 }
 
 .card-header-flex {
@@ -423,12 +427,13 @@ input[type="date"].profiles-input {
 
 .profile-card-item {
   border: 1px solid var(--gray-200);
-  border-radius: 0.8rem;
-  background: var(--gray-50);
+  border-radius: 16px;
+  background: #ffffff;
   padding: 0.75rem;
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
 }
 
 .profile-card-content {
@@ -475,14 +480,15 @@ input[type="date"].profiles-input {
 }
 
 .activity-placeholder {
-  margin: 0;
+  margin:0;
   border: 1px dashed var(--gray-300);
-  border-radius: 0.85rem;
+  border-radius: 16px;
   background: var(--gray-50);
   padding: 1rem;
   text-align: center;
   color: var(--gray-500);
   font-size: 0.9rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
 }
 
 .profiles-pagination {
@@ -518,10 +524,10 @@ input[type="date"].profiles-input {
 .error-modal {
   width: 100%;
   max-width: 520px;
-  border-radius: 1rem;
+  border-radius: 16px;
   border: 1px solid var(--gray-200);
   background: var(--white);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
   overflow: hidden;
 }
 
@@ -1035,7 +1041,7 @@ input[type="date"].profiles-input {
   gap: 1rem;
   padding: 1.5rem;
   background: var(--surface);
-  border-radius: 24px;
+  border-radius: 16px;
   position: relative;
 }
 
@@ -1065,10 +1071,10 @@ input[type="date"].profiles-input {
   align-items: center;
   gap: 1.25rem;
   padding: 1.35rem 1.5rem;
-  border-radius: 18px;
+  border-radius: 16px;
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.08);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
 }
 
 .profiles-list-title {
@@ -1107,10 +1113,10 @@ input[type="date"].profiles-input {
 
 .profiles-summary-card {
   padding: 1.35rem;
-  border-radius: 18px;
+  border-radius: 16px;
   background: linear-gradient(135deg, #ffffff 0%, #f8faff 100%);
   border: 1px solid rgba(37, 99, 235, 0.12);
-  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.08);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   position: relative;
@@ -1221,9 +1227,9 @@ input[type="date"].profiles-input {
 .profile-details-card,
 .profile-card-section {
   border: 1px solid var(--border);
-  border-radius: 18px;
+  border-radius: 16px;
   background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.08);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
 }
 
 .profiles-status-card,
@@ -1560,7 +1566,7 @@ input[type="date"].profiles-input {
   .profiles-page,
   .crud-page {
     padding: 1rem;
-    border-radius: 20px;
+    border-radius: 16px;
   }
 
   .profiles-list-header {
@@ -1630,7 +1636,7 @@ input[type="date"].profiles-input {
   .profiles-page,
   .crud-page {
     padding: 0.85rem;
-    border-radius: 18px;
+    border-radius: 16px;
   }
 
   .profiles-summary-grid {

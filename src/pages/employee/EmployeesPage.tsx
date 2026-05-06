@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { api } from "@/shared/api/httpClient";
 import { getAllLocations } from "@/features/location/api/location.service";
 import { useNavigate } from "react-router-dom";
-import { Card } from "@/shared/ui/Card";
+import { Card, CardHeader } from "@/shared/ui";
 import { Button } from "@/shared/ui/Button";
 import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import {
@@ -380,15 +380,13 @@ const EmployeesPage = () => {
 
       {/* Analytics Title Card */}
       <Card className="analytics-title-card">
-        <div className="analytics-title-inner">
-          <div className="analytics-icon">
-            <Users size={24} />
-          </div>
-          <div>
-            <h2 className="analytics-title">Daftar Karyawan</h2>
-            <p className="analytics-subtitle">Kelola dan lihat semua karyawan</p>
-          </div>
-        </div>
+        <CardHeader
+          icon={Users}
+          title="Daftar Karyawan"
+          subtitle="Kelola dan lihat semua karyawan"
+          iconColor="#1d4ed8"
+          iconBgColor="#dbeafe"
+        />
       </Card>
 
       {/* Control Section */}

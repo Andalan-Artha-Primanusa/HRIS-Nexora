@@ -2,7 +2,8 @@ import { useEffect, useState, useMemo } from 'react';
 import { Card } from '@/shared/ui/Card';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
-import { Clock, RefreshCw, Calendar, Timer, AlertCircle, CheckCircle, XCircle, Search, MessageSquare } from 'lucide-react';
+import overtimeService from '@/features/attendance/api/overtime.service';
+import { Clock, RefreshCw, Calendar, Timer, AlertCircle, CheckCircle, XCircle, Search, MessageSquare, Eye } from 'lucide-react';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import './AttendanceShared.css';
@@ -59,6 +60,57 @@ const OvertimePage = () => {
       loadRecords();
     } catch (error: any) {
       alert(error.response?.data?.message || 'Gagal menambahkan alasan');
+    }
+  };
+
+  const handleUploadEvidence = async (id: number) => {
+    try {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '*/*';
+      input.onchange = async () => {
+        const file = input.files?.[0];
+        if (!file) return;
+        if (file.size > 10 * 1024 * 1024) {
+          alert('Ukuran file maksimal 10MB');
+          return;
+        }
+        try {
+          await overtimeService.uploadEvidence(id, file);
+          alert('Bukti berhasil diunggah');
+          void loadRecords();
+        } catch (err: any) {
+          console.error(err);
+          alert(err?.response?.data?.message || 'Gagal mengunggah bukti');
+        }
+      };
+      input.click();
+    } catch (err) {
+      console.error(err);
+      alert('Gagal membuka dialog file');
+    }
+  };
+
+  const handleViewMyEvidences = async (id: number) => {
+    try {
+      const res = await overtimeService.getMyEvidences(id);
+      const payload = res?.data?.data ?? res?.data ?? res;
+      const list = Array.isArray(payload) ? payload : [];
+      if (list.length === 0) {
+        alert('Belum ada bukti untuk lembur ini');
+        return;
+      }
+      const names = list.map((e: any, i: number) => `${i + 1}. ${e.filename || e.name || e.file_name || 'file'}`);
+      const pick = window.prompt('Bukti:\n' + names.join('\n') + '\n\nMasukkan nomor untuk membuka (kosong = batalkan)');
+      if (!pick) return;
+      const idx = parseInt(pick, 10) - 1;
+      if (Number.isNaN(idx) || idx < 0 || idx >= list.length) return alert('Pilihan tidak valid');
+      const url = list[idx].url || list[idx].file_url || list[idx].path;
+      if (!url) return alert('Tidak ada URL untuk file ini');
+      window.open(url, '_blank');
+    } catch (err: any) {
+      console.error(err);
+      alert('Gagal mengambil bukti');
     }
   };
 
@@ -277,6 +329,24 @@ const OvertimePage = () => {
                                 <MessageSquare size={16} />
                               </button>
                             )}
+                            {record.status !== 'approved' && (
+                              <button
+                                className="action-btn"
+                                style={{ color: '#06b6d4', background: '#ecfeff' }}
+                                onClick={() => handleUploadEvidence(record.id)}
+                                title="Unggah Bukti"
+                              >
+                                <MessageSquare size={16} />
+                              </button>
+                            )}
+                            <button
+                              className="action-btn"
+                              style={{ color: '#0f172a', background: '#f1f5f9' }}
+                              onClick={() => void handleViewMyEvidences(record.id)}
+                              title="Lihat Bukti"
+                            >
+                              <Eye size={16} />
+                            </button>
                             {record.status === 'rejected' && record.reject_reason && (
                               <button
                                 className="action-btn"

@@ -21,8 +21,7 @@ const OvertimeRulesPage: React.FC = () => {
     setLoading(true);
     try {
       const data = await workforceService.getOvertimeRules();
-      const rulesArray = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
-      setRules(rulesArray);
+      setRules(Array.isArray(data.items) ? data.items : []);
     } catch (err) {
       console.error(err);
       setRules([]);

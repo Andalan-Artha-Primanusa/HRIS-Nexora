@@ -426,7 +426,7 @@
 .crud-table-tag {
   display: inline-block;
   padding: 0.35rem 0.75rem;
-  border-radius: 20px;
+  border-radius: 999px;
   background: #f1f5f9;
   color: #64748b;
   font-size: 0.8rem;
@@ -474,11 +474,11 @@
 .payroll-hero-card,
 .hero-card {
   background: linear-gradient(135deg, #2563eb, #1d4ed8);
-  border-radius: 20px;
+  border-radius: 16px;
   padding: 2rem;
   color: #fff;
   margin-bottom: 1.5rem;
-  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
 }
 
 .hero-card-inner {

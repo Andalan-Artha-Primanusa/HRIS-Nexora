@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { RefreshCw, GraduationCap, Clock, CheckCircle, BookOpen, Play, BookTemplate, Search, Award, FileText, Star, X, ExternalLink, Eye } from 'lucide-react';
-import { Card } from '@/shared/ui/Card';
+import { Card, CardHeader } from '@/shared/ui';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { trainingService } from '@/features/training/api/training.service';
 import '@/shared/styles/CrudPage.css';

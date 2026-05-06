@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Plus, RefreshCw, Wallet, Search, Eye, Pencil, Trash2, Send, CheckCircle2, Clock, TrendingUp } from 'lucide-react';
-import { Card } from '@/shared/ui/Card';
+import { Card, CardHeader } from '@/shared/ui';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import {
   getMyReimbursements,

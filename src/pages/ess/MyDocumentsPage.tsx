@@ -13,7 +13,7 @@ import {
   FileBadge,
   Eye
 } from 'lucide-react';
-import { Card } from '@/shared/ui/Card';
+import { Card, CardHeader } from '@/shared/ui';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { documentService } from '@/features/employee/api/document.service';
 import type { EmployeeDocument } from '@/features/employee/types/document.types';

@@ -20,7 +20,7 @@ class ErrorBoundary extends React.Component<{children: any}, {hasError: boolean,
       const isDev = import.meta.env.DEV;
       
       return (
-        <div style={{ padding: 20, color: 'red', fontFamily: 'sans-serif' }}>
+        <div style={{ padding: 20, color: 'red', fontFamily: "'Poppins', sans-serif" }}>
           <h2>⚠️ Something went wrong</h2>
           <p>An unexpected error occurred. Please refresh the page and try again.</p>
           {isDev && (

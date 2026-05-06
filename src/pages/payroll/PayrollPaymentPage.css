@@ -15,7 +15,7 @@
   gap: 1rem;
   padding: 1.5rem;
   background: var(--surface);
-  border-radius: 24px;
+  border-radius: 16px;
 }
 
 .crud-page::before {
@@ -29,9 +29,9 @@
 .payroll-payment-detail-card,
 .payroll-payment-empty-card {
   border: 1px solid var(--border);
-  border-radius: 18px;
+  border-radius: 16px;
   background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.08);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
 }
 
 .payroll-payment-hero {
@@ -208,10 +208,11 @@
   width: 100%;
   padding: 0.8rem 0.9rem;
   border: 1px solid rgba(37, 99, 235, 0.12);
-  border-radius: 14px;
+  border-radius: 16px;
   background: rgba(255, 255, 255, 0.95);
   cursor: pointer;
   text-align: left;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
   transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -293,11 +294,12 @@
 }
 
 .payroll-payment-total-box {
-  padding: 1rem;
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
   border-radius: 16px;
-  border: 1px solid rgba(16, 185, 129, 0.18);
-  background: linear-gradient(135deg, rgba(240, 253, 244, 0.95), rgba(220, 252, 231, 0.95));
-  margin-top: 0.25rem;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
 }
 
 .payroll-payment-total-value {
@@ -334,7 +336,7 @@
 @media (max-width: 900px) {
   .crud-page {
     padding: 1rem;
-    border-radius: 20px;
+    border-radius: 16px;
   }
 
   .payroll-payment-input-grid,

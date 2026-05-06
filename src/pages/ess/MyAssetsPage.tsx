@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { RefreshCw, Package, Laptop, Monitor, Smartphone, Briefcase, ArrowUpFromLine, X, CheckCircle, Clock, Search } from 'lucide-react';
-import { Card } from '@/shared/ui/Card';
+import { Card, CardHeader } from '@/shared/ui';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { assetService } from '@/features/assets/api/asset.service';
 import '@/shared/styles/CrudPage.css';

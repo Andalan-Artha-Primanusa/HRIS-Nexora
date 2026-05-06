@@ -298,7 +298,7 @@ const AdminRoleAssignPermissionsPage = () => {
                           <div style={{ fontSize: '0.85rem', fontWeight: 600, color: selectedPermissionIds.includes(perm.id) ? 'var(--primary)' : 'var(--text)' }}>
                             {perm.display_name || perm.name.split('.').pop()?.replace(/_/g, ' ')}
                           </div>
-                          <div style={{ fontSize: '0.65rem', opacity: 0.6, fontFamily: 'sans-serif' }}>{perm.name}</div>
+                          <div style={{ fontSize: '0.65rem', opacity: 0.6, fontFamily: "'Poppins', sans-serif" }}>{perm.name}</div>
                         </div>
                       </div>
                     ))}

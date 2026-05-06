@@ -15,7 +15,7 @@
   border-radius: 16px;
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
   transition: all 0.2s ease;
   display: flex;
   flex-direction: column;
@@ -23,7 +23,7 @@
 
 .employee-summary-card:hover {
   transform: translateY(-4px);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
   border-color: #2563eb;
 }
 
@@ -785,10 +785,10 @@
 
 .modal-completion {
   background: #ffffff;
-  border-radius: 24px;
+  border-radius: 16px;
   width: 100%;
   max-width: 520px;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
   animation: modalSlideUp 0.3s ease;
   overflow: hidden;
 }

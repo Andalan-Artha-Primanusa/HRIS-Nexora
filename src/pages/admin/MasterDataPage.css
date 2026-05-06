@@ -35,7 +35,7 @@
   align-items: center;
   justify-content: center;
   background: #f1f5f9;
-  border-radius: 20px;
+  border-radius: 16px;
   color: var(--text-secondary);
 }
 
@@ -210,12 +210,12 @@
 
 .modal-content {
   background: white;
-  border-radius: 20px;
+  border-radius: 16px;
   width: 100%;
   max-width: 480px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
 }
 
 .modal-header {

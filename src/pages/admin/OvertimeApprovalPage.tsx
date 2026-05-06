@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { RefreshCw, Timer, Search, CheckCircle, XCircle, Users, AlertCircle, Eye } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
+import overtimeService from '@/features/attendance/api/overtime.service';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
 import '@/shared/styles/CrudPage.css';
@@ -78,6 +79,46 @@ const OvertimeApprovalPage: React.FC = () => {
       console.error(error);
       alert('Gagal menolak lembur');
       setLoading(false);
+    }
+  };
+
+  const handleViewEvidencesForRequest = async (requestId: number) => {
+    try {
+      const res = await overtimeService.getEvidencesForRequest(requestId);
+      const payload = res?.data?.data ?? res?.data ?? res;
+      const list = Array.isArray(payload) ? payload : [];
+      if (list.length === 0) {
+        alert('Tidak ada bukti untuk pengajuan ini');
+        return;
+      }
+      const names = list.map((e: any, i: number) => `${i + 1}. ${e.filename || e.name || e.file_name || 'file'} [${e.status || '-'}]`);
+      const pick = window.prompt('Bukti:\n' + names.join('\n') + '\n\nMasukkan nomor untuk membuka/kelola (kosong = batalkan)');
+      if (!pick) return;
+      const idx = parseInt(pick, 10) - 1;
+      if (Number.isNaN(idx) || idx < 0 || idx >= list.length) return alert('Pilihan tidak valid');
+      const ev = list[idx];
+      const url = ev.url || ev.file_url || ev.path;
+      if (url) window.open(url, '_blank');
+
+      if (ev.status === 'approved') return alert('Bukti sudah disetujui');
+
+      const action = window.prompt('Ketik "approve" untuk setujui, "reject" untuk tolak (kosong = batal)');
+      if (!action) return;
+      if (action.toLowerCase() === 'approve') {
+        await overtimeService.approveEvidence(ev.id);
+        alert('Bukti disetujui');
+        fetchData();
+      } else if (action.toLowerCase() === 'reject') {
+        const reason = window.prompt('Alasan penolakan (opsional):');
+        await overtimeService.rejectEvidence(ev.id, reason || undefined);
+        alert('Bukti ditolak');
+        fetchData();
+      } else {
+        alert('Perintah tidak dikenal');
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert('Gagal mengambil bukti');
     }
   };
 
@@ -316,6 +357,14 @@ const OvertimeApprovalPage: React.FC = () => {
                                 </button>
                               </>
                             )}
+                            <button
+                              className="action-btn"
+                              style={{ color: '#0f172a', background: '#f1f5f9' }}
+                              onClick={() => void handleViewEvidencesForRequest(req.id)}
+                              title="Lihat Bukti"
+                            >
+                              <Eye size={16} />
+                            </button>
                             {req.status !== 'pending' && (
                               <button
                                 className="action-btn action-btn-edit"

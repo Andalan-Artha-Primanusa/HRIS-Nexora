@@ -12,8 +12,29 @@
   --border: rgba(37, 99, 235, 0.14);
   padding: 1.5rem;
   background: var(--surface);
-  border-radius: 24px;
+  border-radius: 16px;
   position: relative;
+}
+
+.ess-page::before {
+  content: "";
+  position: absolute;
+  inset:0;
+  pointer-events: none;
+  border-radius: inherit;
+  border: 1px solid rgba(37, 99, 235, 0.12);
+}
+
+.ess-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.35rem 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
 }
 
 .ess-page::before {
@@ -32,9 +53,9 @@
   gap: 1rem;
   padding: 1.35rem 1.5rem;
   border: 1px solid var(--border);
-  border-radius: 18px;
+  border-radius: 16px;
   background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.08);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
 }
 
 .ess-header-copy {
@@ -76,9 +97,9 @@
 .ess-card {
   padding: 1.35rem;
   border: 1px solid var(--border);
-  border-radius: 18px;
+  border-radius: 16px;
   background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.08);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
 }
 
 .ess-card h2 {
@@ -243,10 +264,10 @@
 
 .ess-summary-card {
   padding: 1.35rem;
-  border-radius: 18px;
+  border-radius: 16px;
   background: linear-gradient(135deg, #ffffff 0%, #f8faff 100%);
   border: 1px solid rgba(37, 99, 235, 0.12);
-  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.08);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   position: relative;
@@ -469,7 +490,7 @@
 @media (max-width: 900px) {
   .ess-page {
     padding: 1rem;
-    border-radius: 20px;
+    border-radius: 16px;
   }
 
   .ess-header {
@@ -481,7 +502,7 @@
 @media (max-width: 640px) {
   .ess-page {
     padding: 0.85rem;
-    border-radius: 18px;
+    border-radius: 16px;
   }
 
   .ess-summary-grid {

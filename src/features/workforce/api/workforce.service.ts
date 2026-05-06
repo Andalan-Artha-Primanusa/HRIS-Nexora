@@ -1,71 +1,143 @@
 import { api } from "@/shared/api/httpClient";
 
+type UnknownRecord = Record<string, unknown>;
+
+const toRecord = (value: unknown): UnknownRecord =>
+  value && typeof value === "object" ? (value as UnknownRecord) : {};
+
+const extractArrayPayload = (raw: unknown) => {
+  if (Array.isArray(raw)) return raw;
+
+  const root = toRecord(raw);
+  for (const key of ["data", "items", "rows", "results"]) {
+    const level1 = root[key];
+    if (Array.isArray(level1)) return level1;
+
+    if (level1 && typeof level1 === "object") {
+      const nested = toRecord(level1);
+      for (const key2 of ["data", "items", "rows", "results"]) {
+        if (Array.isArray(nested[key2])) return nested[key2];
+      }
+    }
+  }
+
+  return [];
+};
+
+const extractPayload = (raw: unknown) => {
+  const root = toRecord(raw);
+  return root.data ?? raw;
+};
+
 export const workforceService = {
   // Holidays
   getHolidays: async () => {
     const response = await api.get('/workforce/holidays');
-    return response.data;
+    return {
+      items: extractArrayPayload(response.data),
+      raw: response.data,
+    };
   },
   createHoliday: async (data: any) => {
     const response = await api.post('/workforce/holidays', data);
-    return response.data;
+    return {
+      payload: extractPayload(response.data),
+      raw: response.data,
+    };
   },
   getHoliday: async (id: string | number) => {
     const response = await api.get(`/workforce/holidays/${id}`);
-    return response.data;
+    return {
+      payload: extractPayload(response.data),
+      raw: response.data,
+    };
   },
   updateHoliday: async (id: string | number, data: any) => {
     const response = await api.put(`/workforce/holidays/${id}`, data);
-    return response.data;
+    return {
+      payload: extractPayload(response.data),
+      raw: response.data,
+    };
   },
   deleteHoliday: async (id: string | number) => {
     const response = await api.delete(`/workforce/holidays/${id}`);
-    return response.data;
+    return {
+      raw: response.data,
+    };
   },
 
   // Shift Swaps
   getShiftSwaps: async () => {
     const response = await api.get('/workforce/shift-swaps');
-    return response.data;
+    return {
+      items: extractArrayPayload(response.data),
+      raw: response.data,
+    };
   },
   createShiftSwap: async (data: any) => {
     const response = await api.post('/workforce/shift-swaps', data);
-    return response.data;
+    return {
+      payload: extractPayload(response.data),
+      raw: response.data,
+    };
   },
   approveShiftSwap: async (id: string | number) => {
     const response = await api.put(`/workforce/shift-swaps/${id}`);
-    return response.data;
+    return {
+      payload: extractPayload(response.data),
+      raw: response.data,
+    };
   },
 
   // Overtime Rules
   getOvertimeRules: async () => {
     const response = await api.get('/workforce/overtime-rules');
-    return response.data;
+    return {
+      items: extractArrayPayload(response.data),
+      raw: response.data,
+    };
   },
   getOvertimeRule: async (id: string | number) => {
     const response = await api.get(`/workforce/overtime-rules/${id}`);
-    return response.data;
+    return {
+      payload: extractPayload(response.data),
+      raw: response.data,
+    };
   },
   createOvertimeRule: async (data: any) => {
     const response = await api.post('/workforce/overtime-rules', data);
-    return response.data;
+    return {
+      payload: extractPayload(response.data),
+      raw: response.data,
+    };
   },
   updateOvertimeRule: async (id: string | number, data: any) => {
     const response = await api.put(`/workforce/overtime-rules/${id}`, data);
-    return response.data;
+    return {
+      payload: extractPayload(response.data),
+      raw: response.data,
+    };
   },
   deleteOvertimeRule: async (id: string | number) => {
     const response = await api.delete(`/workforce/overtime-rules/${id}`);
-    return response.data;
+    return {
+      raw: response.data,
+    };
   },
 
   // Compliance
   getComplianceStats: async () => {
     const response = await api.get('/workforce/compliance/stats');
-    return response.data;
+    return {
+      payload: extractPayload(response.data),
+      raw: response.data,
+    };
   },
   getComplianceDocuments: async () => {
     const response = await api.get('/workforce/compliance/documents');
-    return response.data;
+    return {
+      items: extractArrayPayload(response.data),
+      raw: response.data,
+    };
   }
 };

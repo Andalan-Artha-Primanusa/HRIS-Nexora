@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Card } from '@/shared/ui/Card';
+import { Card, CardHeader } from '@/shared/ui';
 import { Alert } from '@/shared/ui/Alert';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
@@ -153,15 +153,13 @@ const TimesheetPage = () => {
 
       {/* Analytics Title Card */}
       <Card className="analytics-title-card">
-        <div className="analytics-title-inner">
-          <div className="analytics-icon">
-            <History size={24} />
-          </div>
-          <div>
-            <h2 className="analytics-title">Daftar Timesheet</h2>
-            <p className="analytics-subtitle">Riwayat kehadiran harian</p>
-          </div>
-        </div>
+        <CardHeader
+          icon={History}
+          title="Daftar Timesheet"
+          subtitle="Riwayat kehadiran harian"
+          iconColor="#1d4ed8"
+          iconBgColor="#dbeafe"
+        />
       </Card>
 
       {/* Table Section */}

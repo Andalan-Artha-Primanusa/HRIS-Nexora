@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card } from '@/shared/ui/Card';
+import { Card, CardHeader } from '@/shared/ui';
 import { Button } from '@/shared/ui/Button';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { getAllLocations, deleteLocation } from '@/features/location/api/location.service';
@@ -184,15 +184,13 @@ const LocationsPage = () => {
 
       {/* Analytics Title Card */}
       <Card className="analytics-title-card">
-        <div className="analytics-title-inner">
-          <div className="analytics-icon">
-            <MapPinned size={24} />
-          </div>
-          <div>
-            <h2 className="analytics-title">Daftar Lokasi</h2>
-            <p className="analytics-subtitle">Kelola dan lihat semua lokasi</p>
-          </div>
-        </div>
+        <CardHeader
+          icon={MapPinned}
+          title="Daftar Lokasi"
+          subtitle="Kelola dan lihat semua lokasi"
+          iconColor="#1d4ed8"
+          iconBgColor="#dbeafe"
+        />
       </Card>
 
       {/* Control Section */}

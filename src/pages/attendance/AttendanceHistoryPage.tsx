@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Card } from '@/shared/ui/Card';
+import { Card, CardHeader } from '@/shared/ui';
 import { Button } from '@/shared/ui/Button';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
@@ -187,15 +187,13 @@ const AttendanceHistoryPage = () => {
 
       {/* Analytics Title Card */}
       <Card className="analytics-title-card">
-        <div className="analytics-title-inner">
-          <div className="analytics-icon">
-            <CalendarDays size={24} />
-          </div>
-          <div>
-            <h2 className="analytics-title">Riwayat Kehadiran</h2>
-            <p className="analytics-subtitle">Kelola dan lihat semua riwayat kehadiran</p>
-          </div>
-        </div>
+        <CardHeader
+          icon={CalendarDays}
+          title="Riwayat Kehadiran"
+          subtitle="Kelola dan lihat semua riwayat kehadiran"
+          iconColor="#1d4ed8"
+          iconBgColor="#dbeafe"
+        />
       </Card>
 
       {/* Control Section */}

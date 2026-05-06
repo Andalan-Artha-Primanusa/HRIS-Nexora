@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Card } from "@/shared/ui/Card";
+import { Card, CardHeader } from "@/shared/ui";
 import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import {
   deleteAttendanceRecord,
@@ -115,15 +115,13 @@ const AttendanceAdminPage = () => {
 
       {/* Analytics Title Card */}
       <Card className="analytics-title-card">
-        <div className="analytics-title-inner">
-          <div className="analytics-icon">
-            <Users size={24} />
-          </div>
-          <div>
-            <h2 className="analytics-title">Daftar Kehadiran</h2>
-            <p className="analytics-subtitle">Log kehadiran harian karyawan</p>
-          </div>
-        </div>
+        <CardHeader
+          icon={Users}
+          title="Daftar Kehadiran"
+          subtitle="Log kehadiran harian karyawan"
+          iconColor="#1d4ed8"
+          iconBgColor="#dbeafe"
+        />
       </Card>
 
       {/* Control Section */}

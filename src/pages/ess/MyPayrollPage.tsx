@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { Card } from "@/shared/ui/Card";
+import { Card, CardHeader } from "@/shared/ui";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
 import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { BarChart3, CheckCircle2, Receipt, Wallet, Download, Printer, RefreshCw, Search, Eye } from "lucide-react";
-import { getMyPayroll, getMyPayrollSlip, exportMyPayrollPdf } from "@/features/ess/api/ess.service";
+import { getMyPayroll, getMyPayrollSlip, exportMyPayrollCsv, exportMyPayrollPdf } from "@/features/ess/api/ess.service";
 import type { GenericApiItem } from "@/features/ess/types/ess.types";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -120,6 +120,23 @@ const MyPayrollPage = () => {
     } catch (error) {
       console.error("Failed to download PDF:", error);
       alert('Gagal mengunduh PDF. Silakan coba lagi.');
+    }
+  };
+
+  const handleDownloadCsv = async (id: string) => {
+    try {
+      const blob = await exportMyPayrollCsv(id);
+      const url = window.URL.createObjectURL(new Blob([blob], { type: 'text/csv;charset=utf-8;' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Slip_Gaji_${selectedSlip?.period || id}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Failed to download CSV:", error);
+      alert('Gagal mengunduh CSV. Silakan coba lagi.');
     }
   };
 
@@ -651,6 +668,9 @@ const MyPayrollPage = () => {
             }}>
               <Button variant="outline" size="md" onClick={() => window.print()}>
                 <Printer size={16} style={{ marginRight: '8px' }} /> Cetak
+              </Button>
+              <Button variant="outline" size="md" onClick={() => void handleDownloadCsv(String(selectedSlip.id))}>
+                <Download size={16} style={{ marginRight: '8px' }} /> Download CSV
               </Button>
               <Button variant="primary" size="md" onClick={() => {
                 generateSlipPDF(selectedSlip);

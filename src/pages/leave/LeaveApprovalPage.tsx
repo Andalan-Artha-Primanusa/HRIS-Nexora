@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { Card } from "@/shared/ui/Card";
+import { Card, CardHeader } from "@/shared/ui";
 import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { approveLeave, getLeaveRequests, rejectLeave } from "@/features/leave/api/leave.service";
 import type { LeaveItem } from "@/features/leave/types/leave.types";

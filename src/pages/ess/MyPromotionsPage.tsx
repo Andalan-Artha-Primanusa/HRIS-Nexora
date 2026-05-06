@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, RefreshCw, ArrowUpRight, CheckCircle, Clock, XCircle, FileText, X } from 'lucide-react';
-import { Card } from '@/shared/ui/Card';
+import { Card, CardHeader } from '@/shared/ui';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { promotionService } from '@/features/organization/api/promotion.service';
 import '@/shared/styles/CrudPage.css';

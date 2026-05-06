@@ -7,6 +7,16 @@ import './AdminWorkforcePages.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
 
+const toOvertimeRuleFormState = (value: any) => ({
+  name: String(value?.name || ''),
+  multiplier: Number(value?.multiplier ?? 1.5),
+  max_hours_per_day: Number(value?.max_hours_per_day ?? 4),
+  max_hours_per_week: Number(value?.max_hours_per_week ?? 14),
+  eligibility: String(value?.eligibility || value?.department || 'All Staff'),
+  description: String(value?.description || ''),
+  status: String(value?.status || (value?.active === false ? 'Inactive' : 'Active')),
+});
+
 const OvertimeRuleFormPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -30,7 +40,7 @@ const OvertimeRuleFormPage: React.FC = () => {
         setFetching(true);
         try {
           const res = await workforceService.getOvertimeRule(id);
-          setFormData(res.data || res);
+          setFormData(toOvertimeRuleFormState(res?.payload || res));
         } catch (err) {
           console.error(err);
         } finally {
@@ -45,10 +55,15 @@ const OvertimeRuleFormPage: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     try {
+      const payload = {
+        ...formData,
+        active: formData.status !== 'Inactive',
+      };
+
       if (isEdit) {
-        await workforceService.updateOvertimeRule(id, formData);
+        await workforceService.updateOvertimeRule(id, payload);
       } else {
-        await workforceService.createOvertimeRule(formData);
+        await workforceService.createOvertimeRule(payload);
       }
       navigate('/workforce/overtime-rules');
     } catch (err) {

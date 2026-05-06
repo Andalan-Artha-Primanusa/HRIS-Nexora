@@ -204,7 +204,7 @@
   /* Card Tokens */
   --card-bg: var(--color-white);
   --card-border: 1px solid var(--color-border);
-  --card-border-radius: var(--radius-md);
+  --card-border-radius: var(--radius-lg);
   --card-padding: var(--padding-md);
   --card-shadow: var(--shadow-sm);
   --card-hover-shadow: var(--shadow-md);

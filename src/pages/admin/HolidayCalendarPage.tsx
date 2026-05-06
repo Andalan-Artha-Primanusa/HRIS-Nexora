@@ -26,8 +26,7 @@ const HolidayCalendarPage: React.FC = () => {
     setErrorMessage(null);
     try {
       const data = await workforceService.getHolidays();
-      const holidaysArray = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
-      setHolidays(holidaysArray);
+      setHolidays(Array.isArray(data.items) ? data.items : []);
     } catch (err) {
       console.error(err);
       setErrorMessage('Gagal memuat hari libur');

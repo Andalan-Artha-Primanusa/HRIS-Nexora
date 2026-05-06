@@ -340,7 +340,7 @@
   position: relative;
   z-index: 1;
   width: min(470px, 100%);
-  border-radius: 24px;
+  border-radius: 16px;
   padding: clamp(1.35rem, 2.8vw, 2.2rem);
   background: linear-gradient(
     165deg,
@@ -348,7 +348,7 @@
     rgba(255, 255, 255, 0.9) 100%
   );
   border: 1px solid rgba(226, 232, 240, 0.92);
-  box-shadow: 0 26px 52px rgba(15, 23, 42, 0.18);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
   backdrop-filter: blur(8px);
   transform: perspective(1200px) rotateX(var(--tilt-x-soft)) rotateY(var(--tilt-y-soft));
   transition: transform 0.18s ease-out;

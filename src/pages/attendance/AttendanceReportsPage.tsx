@@ -8,6 +8,7 @@ import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import './AttendanceShared.css';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { CardHeader } from '@/shared/ui';
 
 interface ReportRecord {
   id?: number;
@@ -155,15 +156,13 @@ const AttendanceReportsPage = () => {
 
       {/* Analytics Title Card */}
       <Card className="analytics-title-card">
-        <div className="analytics-title-inner">
-          <div className="analytics-icon">
-            <BarChart3 size={24} />
-          </div>
-          <div>
-            <h2 className="analytics-title">Analitik Kehadiran</h2>
-            <p className="analytics-subtitle">Tren kehadiran 30 hari terakhir</p>
-          </div>
-        </div>
+        <CardHeader
+          icon={BarChart3}
+          title="Analitik Kehadiran"
+          subtitle="Laporan dan tren kehadiran"
+          iconColor="#1d4ed8"
+          iconBgColor="#dbeafe"
+        />
       </Card>
 
       {/* Chart Section */}

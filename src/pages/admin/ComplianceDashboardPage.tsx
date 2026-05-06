@@ -28,8 +28,8 @@ const ComplianceDashboardPage: React.FC = () => {
     try {
       const statsData = await workforceService.getComplianceStats();
       const docsData = await workforceService.getComplianceDocuments();
-      const statsArray = Array.isArray(statsData) ? statsData : Array.isArray(statsData?.data) ? statsData.data : [];
-      const docsArray = Array.isArray(docsData) ? docsData : Array.isArray(docsData?.data) ? docsData.data : [];
+      const statsArray = Array.isArray(statsData?.payload) ? statsData.payload : [];
+      const docsArray = Array.isArray(docsData?.items) ? docsData.items : [];
       setStats(statsArray);
       setDocuments(docsArray);
     } catch (err) {

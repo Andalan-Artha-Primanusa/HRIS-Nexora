@@ -35,7 +35,7 @@
   align-items: center;
   justify-content: center;
   background: #f1f5f9;
-  border-radius: 20px;
+  border-radius: 16px;
   color: var(--text-secondary);
 }
 
@@ -62,7 +62,7 @@
   border: 1px solid var(--border-color);
   background: white;
   color: var(--text-secondary);
-  border-radius: 20px;
+  border-radius: 999px;
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
@@ -93,9 +93,12 @@
 }
 
 .enrollment-card {
-  padding: 1.5rem;
+  background: white;
+  border: 1px solid var(--border-color);
   border-radius: 16px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  padding: 1.25rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
 }
 
 .enrollment-card:hover {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card } from "@/shared/ui/Card";
+import { Card, CardHeader } from "@/shared/ui";
 import { Button } from "@/shared/ui/Button";
 import { Alert } from "@/shared/ui/Alert";
 import { getAllWorkSchedules, deleteWorkSchedule } from "@/features/work-schedule/api/work-schedule.service";
@@ -238,15 +238,13 @@ const WorkSchedulesPage = () => {
       )}
 
       <Card className="analytics-title-card">
-        <div className="analytics-title-inner">
-          <div className="analytics-icon">
-            <CalendarDays size={24} />
-          </div>
-          <div>
-            <h2 className="analytics-title">Daftar Shift & Jadwal</h2>
-            <p className="analytics-subtitle">Pantau konfigurasi jam kerja yang digunakan karyawan.</p>
-          </div>
-        </div>
+        <CardHeader
+          icon={CalendarDays}
+          title="Daftar Shift & Jadwal"
+          subtitle="Pantau konfigurasi jam kerja yang digunakan karyawan."
+          iconColor="#1d4ed8"
+          iconBgColor="#dbeafe"
+        />
       </Card>
 
       <Card className="table-card work-table-card">

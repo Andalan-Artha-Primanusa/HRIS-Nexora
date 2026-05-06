@@ -7,6 +7,15 @@ import { workforceService } from '@/features/workforce/api/workforce.service';
 import './AdminWorkforcePages.css';
 import '../dashboard/overview/OverviewPage.css';
 
+const toHolidayFormState = (value: any) => ({
+  name: String(value?.name || ''),
+  date: String(value?.date || value?.holiday_date || ''),
+  type: String(value?.type || (value?.is_national === false ? 'Company Holiday' : 'National Holiday')),
+  description: String(value?.description || value?.name || ''),
+  is_recurring: Boolean(value?.is_recurring),
+  applicable_locations: Array.isArray(value?.applicable_locations) ? value.applicable_locations : ['All'],
+});
+
 const HolidayFormPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -29,7 +38,7 @@ const HolidayFormPage: React.FC = () => {
         setFetching(true);
         try {
           const res = await workforceService.getHoliday(id);
-          setFormData(res.data || res);
+          setFormData(toHolidayFormState(res?.payload || res));
         } catch (err) {
           console.error(err);
         } finally {
@@ -44,10 +53,15 @@ const HolidayFormPage: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     try {
+      const payload = {
+        ...formData,
+        type: formData.type === 'Company Holiday' ? 'company' : 'national',
+      };
+
       if (isEdit) {
-        await workforceService.updateHoliday(id, formData);
+        await workforceService.updateHoliday(id, payload);
       } else {
-        await workforceService.createHoliday(formData);
+        await workforceService.createHoliday(payload);
       }
       navigate('/workforce/holidays');
     } catch (err) {
@@ -106,8 +120,6 @@ const HolidayFormPage: React.FC = () => {
                        <select name="type" value={formData.type} onChange={handleChange} style={{ width: '100%', padding: '0 16px', height: '50px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '1rem', color: '#0f172a', transition: 'all 0.2s', boxSizing: 'border-box' }}>
                           <option>National Holiday</option>
                           <option>Company Holiday</option>
-                          <option>Regional Holiday</option>
-                          <option>Other</option>
                        </select>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', gridColumn: '1 / -1' }}>

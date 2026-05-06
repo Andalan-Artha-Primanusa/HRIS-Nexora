@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, RefreshCw, Clock, CheckCircle, AlertCircle, Flag, X, Sparkles } from 'lucide-react';
-import { Card } from '@/shared/ui/Card';
+import { Card, CardHeader } from '@/shared/ui';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { taskService } from '@/features/tasks/api/task.service';
 import '@/shared/styles/CrudPage.css';

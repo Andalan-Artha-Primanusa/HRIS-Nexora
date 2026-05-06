@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Card } from "@/shared/ui/Card";
+import { Card, CardHeader } from "@/shared/ui";
 import { Alert } from "@/shared/ui/Alert";
 import { getLeaveCalendar } from "@/features/leave/api/leave.service";
 

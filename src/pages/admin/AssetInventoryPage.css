@@ -24,13 +24,13 @@
   border-radius: 16px;
   padding: 1.5rem;
   border: 1px solid #e2e8f0;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  transition: all 0.3s ease;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
 }
 
 .asset-summary-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
 }
 
 .asset-summary-header {
@@ -124,10 +124,10 @@
 
 .control-section-card {
   padding: 1.35rem !important;
-  border-radius: 18px !important;
+  border-radius: 16px !important;
   border: 1px solid rgba(37, 99, 235, 0.14) !important;
   background: rgba(255, 255, 255, 0.95) !important;
-  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.08) !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04) !important;
   margin-bottom: 1.5rem;
 }
 
@@ -284,9 +284,9 @@
 
 .table-section {
   background: #ffffff;
-  border-radius: 20px;
+  border-radius: 16px;
   border: 1px solid rgba(37, 99, 235, 0.14);
-  box-shadow: 0 10px 30px rgba(37, 99, 235, 0.04);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
   overflow: hidden;
 }
 

@@ -99,9 +99,9 @@
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--glass-border) !important;
-  box-shadow: var(--card-shadow) !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04) !important;
   padding: 2rem;
-  border-radius: 24px;
+  border-radius: 16px;
 }
 
 .crud-card h2 {

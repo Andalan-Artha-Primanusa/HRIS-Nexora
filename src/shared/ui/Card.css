@@ -1,14 +1,14 @@
 .ui-card {
   background: var(--white);
-  border-radius: var(--radius-lg);
+  border-radius: 16px;
   border: 1px solid var(--gray-200);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
   padding: 1.5rem;
   transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
 }
 
 .ui-card:hover {
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
   border-color: var(--primary-blue);
-  transform: translateY(-2px);
+  transform: translateY(-4px);
 }

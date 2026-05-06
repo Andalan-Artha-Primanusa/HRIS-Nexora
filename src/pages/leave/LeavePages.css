@@ -14,8 +14,26 @@
   --border: rgba(37, 99, 235, 0.14);
   padding: 1.5rem;
   background: var(--surface);
-  border-radius: 24px;
+  border-radius: 16px;
   position: relative;
+}
+
+.leave-page::before {
+  content: "";
+  position: absolute;
+  inset:0;
+  pointer-events: none;
+  border-radius: inherit;
+  border: 1px solid rgba(37, 99, 235, 0.12);
+}
+
+.leave-hero-card,
+.leave-card {
+  padding: 1.35rem;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
 }
 
 .leave-page::before {
@@ -31,9 +49,9 @@
 .leave-card {
   padding: 1.35rem;
   border: 1px solid var(--border);
-  border-radius: 18px;
+  border-radius: 16px;
   background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.08);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
 }
 
 .leave-hero-card {
@@ -126,10 +144,10 @@
 
 .leave-summary-card {
   padding: 1.35rem;
-  border-radius: 18px;
+  border-radius: 16px;
   background: linear-gradient(135deg, #ffffff 0%, #f8faff 100%);
   border: 1px solid rgba(37, 99, 235, 0.12);
-  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.08);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   position: relative;
@@ -949,7 +967,7 @@
 @media (max-width: 768px) {
   .leave-page {
     padding: 1rem;
-    border-radius: 20px;
+    border-radius: 16px;
   }
 
   .leave-hero-card {

@@ -21,7 +21,7 @@ const ShiftSwapsPage: React.FC = () => {
     setLoading(true);
     try {
       const data = await workforceService.getShiftSwaps();
-      const swapsArray = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+      const swapsArray = Array.isArray(data?.items) ? data.items : [];
       setSwaps(swapsArray);
     } catch (err) {
       console.error(err);

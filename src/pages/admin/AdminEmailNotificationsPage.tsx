@@ -345,7 +345,7 @@ const AdminEmailNotificationsPage = () => {
                     onChange={e => setNewTemplate({...newTemplate, html_body: e.target.value})}
                     required 
                     placeholder="<h1>Halo {{name}},</h1><p>Permohonan cuti Anda telah disetujui...</p>"
-                    style={{ resize: 'vertical', fontFamily: 'monospace' }}
+                    style={{ resize: 'vertical', fontFamily: "'Poppins', sans-serif" }}
                   />
                 </div>
 

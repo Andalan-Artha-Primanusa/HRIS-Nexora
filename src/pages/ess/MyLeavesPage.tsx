@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Card } from "@/shared/ui/Card";
+import { Card, CardHeader } from "@/shared/ui";
 import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
 
 import { Calendar, RefreshCw, Clock3, CircleCheckBig, CircleX, Wallet, Search, Filter, Plus, Clock } from "lucide-react";

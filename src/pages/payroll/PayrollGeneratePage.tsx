@@ -99,7 +99,7 @@ const S = {
     alignItems: "center",
     gap: "6px",
     padding: "4px 12px",
-    borderRadius: "20px",
+    borderRadius: "16px",
     background: "rgba(37,99,235,0.08)",
     color: "#2563eb",
     fontSize: "12px",
@@ -287,7 +287,7 @@ const S = {
   },
   filterChip: (active: boolean): React.CSSProperties => ({
     padding: "5px 14px",
-    borderRadius: "20px",
+    borderRadius: "16px",
     border: active ? "1.5px solid #6366f1" : "1.5px solid #e2e8f0",
     background: active ? "#eef2ff" : "#fff",
     color: active ? "#6366f1" : "#94a3b8",
@@ -329,7 +329,7 @@ const S = {
   td: { padding: "11px 12px", verticalAlign: "middle" as const },
 
   /* cells */
-  cellId: { fontSize: "12px", color: "#cbd5e1", fontFamily: "monospace" },
+  cellId: { fontSize: "12px", color: "#cbd5e1", fontFamily: "'Poppins', sans-serif" },
   cellName: {
     fontWeight: 600,
     fontSize: "13px",
@@ -345,7 +345,7 @@ const S = {
     border: "1px solid #e2e8f0",
     fontSize: "11px",
     color: "#64748b",
-    fontFamily: "monospace",
+    fontFamily: "'Poppins', sans-serif",
     letterSpacing: "0.04em",
     whiteSpace: "nowrap" as const,
   },
