@@ -81,7 +81,7 @@ const ComplianceSettingsPage: React.FC = () => {
       await api.post('/enterprise/compliance/retention-policies', policyForm);
       setAlertMessage('Kebijakan retensi berhasil dibuat');
       setAlertType('success');
-      setShowRetentionPolicyForm(false);
+      // Reset form but keep it open for multiple creates
       setPolicyForm({ module: '', retain_days: 365, anonymize_after_expiry: false });
       await fetchData();
     } catch (err: any) {
@@ -103,7 +103,7 @@ const ComplianceSettingsPage: React.FC = () => {
       await api.post('/enterprise/compliance/privacy-requests', privacyForm);
       setAlertMessage('Permintaan privasi berhasil diajukan');
       setAlertType('success');
-      setShowPrivacyForm(false);
+      // Reset form but keep it open for multiple creates
       setPrivacyForm({ request_type: 'delete', description: '' });
       await fetchData();
     } catch (err: any) {
