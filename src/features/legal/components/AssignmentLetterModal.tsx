@@ -8,10 +8,12 @@ import { User, FileText, Calendar, MapPin, AlignLeft, Lock } from 'lucide-react'
 export const AssignmentLetterModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: any) => void;
+  onSave: (data: any) => void | Promise<void>;
 }> = ({ isOpen, onClose, onSave }) => {
   const user = useAuthStore((state) => state.user);
-  const isAdminOrHR = user?.roles?.some((r: any) => ['admin', 'hr', 'super_admin'].includes(r.name));
+  const isAdminOrHR = user?.roles?.some((r: any) =>
+    ['admin', 'hr', 'super_admin'].includes(String(r.name ?? '').toLowerCase())
+  );
 
   const [employees, setEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -28,7 +30,7 @@ export const AssignmentLetterModal: React.FC<{
     if (isOpen) {
       fetchEmployees();
       setFormData({
-        user_id: isAdminOrHR ? '' : String(user?.id ?? ''),
+        user_id: '',
         title: '',
         description: '',
         start_date: '',
@@ -66,7 +68,16 @@ export const AssignmentLetterModal: React.FC<{
     e.preventDefault();
     setLoading(true);
     try {
-      await onSave(formData);
+      const payload = isAdminOrHR
+        ? formData
+        : {
+            title: formData.title,
+            description: formData.description,
+            start_date: formData.start_date,
+            end_date: formData.end_date,
+            location: formData.location,
+          };
+      await onSave(payload);
       onClose();
     } catch (error) {
       console.error(error);
