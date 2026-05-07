@@ -141,6 +141,18 @@ export const createMyReimbursement = async (payload: Omit<ReimbursementCreatePay
   return { raw: response.data };
 };
 
+/** PUT /my/reimbursements/{id} → updateMyReimbursement() */
+export const updateMyReimbursement = async (id: string, payload: ReimbursementUpdatePayload) => {
+  const response = await api.put(`/my/reimbursements/${id}`, payload);
+  return { raw: response.data };
+};
+
+/** DELETE /my/reimbursements/{id} → deleteMyReimbursement() */
+export const deleteMyReimbursement = async (id: string) => {
+  const response = await api.delete(`/my/reimbursements/${id}`);
+  return { raw: response.data };
+};
+
 /** POST /reimbursements/{id}/submit → submit() */
 export const submitMyReimbursement = async (id: string) => {
   const response = await api.post(`/my/reimbursements/${id}/submit`);

@@ -7,8 +7,8 @@ import { ReimbursementModal } from '@/features/reimbursement/components/Reimburs
 import {
   getMyReimbursements,
   createMyReimbursement,
-  updateReimbursement,
-  deleteReimbursement,
+  updateMyReimbursement,
+  deleteMyReimbursement,
   submitMyReimbursement
 } from '../../features/reimbursement/api/reimbursement.service';
 import type { ReimbursementItem } from '../../features/reimbursement/types/reimbursement.types';
@@ -138,7 +138,7 @@ const MyReimbursementsPage: React.FC = () => {
       }
 
       if (selectedItem) {
-        await updateReimbursement(String(selectedItem.id), payload);
+        await updateMyReimbursement(String(selectedItem.id), payload);
         showToast("Klaim reimbursement berhasil diperbarui.", "success");
       } else {
         await createMyReimbursement(payload);
@@ -155,7 +155,7 @@ const MyReimbursementsPage: React.FC = () => {
   const handleDelete = async (item: ReimbursementItem) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus klaim ini?')) {
       try {
-        await deleteReimbursement(String(item.id));
+        await deleteMyReimbursement(String(item.id));
         await fetchData();
         showToast("Klaim reimbursement berhasil dihapus.", "success");
       } catch (error: any) {
