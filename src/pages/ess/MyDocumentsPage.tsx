@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   FileText, 
   Search, 
@@ -11,20 +11,351 @@ import {
   Shield,
   RefreshCw,
   FileBadge,
-  Eye
+  Eye,
+  X,
+  FileUp,
+  Loader2
 } from 'lucide-react';
 import { Card, CardHeader } from '@/shared/ui';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { documentService } from '@/features/employee/api/document.service';
 import type { EmployeeDocument } from '@/features/employee/types/document.types';
+import { api } from '@/shared/api/httpClient';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 
 type TabType = "Semua" | "contract" | "letter" | "identity" | "pending" | "approved";
 
+/* =================================================================
+   Upload Modal Component
+   ================================================================= */
+interface UploadModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+const DOCUMENT_TYPES = [
+  { value: 'identity', label: 'Identitas (KTP/SIM/Paspor)' },
+  { value: 'contract', label: 'Kontrak Kerja' },
+  { value: 'letter', label: 'Surat Keterangan' },
+  { value: 'certificate', label: 'Sertifikat' },
+  { value: 'education', label: 'Ijazah / Pendidikan' },
+  { value: 'tax', label: 'Pajak (NPWP, dll)' },
+  { value: 'insurance', label: 'Asuransi / BPJS' },
+  { value: 'other', label: 'Lainnya' },
+];
+
+const CATEGORIES = [
+  { value: 'personal', label: 'Personal' },
+  { value: 'employment', label: 'Kepegawaian' },
+  { value: 'contract', label: 'Kontrak' },
+  { value: 'training', label: 'Pelatihan' },
+  { value: 'legal', label: 'Legal' },
+  { value: 'other', label: 'Lainnya' },
+];
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
+const UploadDocumentModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSuccess }) => {
+  const [title, setTitle] = useState('');
+  const [documentType, setDocumentType] = useState('');
+  const [category, setCategory] = useState('');
+  const [expiresAt, setExpiresAt] = useState('');
+  const [file, setFile] = useState<File | null>(null);
+  const [dragActive, setDragActive] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Reset form when modal opens/closes
+  useEffect(() => {
+    if (!isOpen) {
+      setTitle('');
+      setDocumentType('');
+      setCategory('');
+      setExpiresAt('');
+      setFile(null);
+      setDragActive(false);
+      setSubmitting(false);
+      setErrors({});
+    }
+  }, [isOpen]);
+
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+    
+    if (!title.trim()) newErrors.title = 'Judul dokumen wajib diisi';
+    if (!documentType) newErrors.documentType = 'Tipe dokumen wajib dipilih';
+    if (!file) newErrors.file = 'File wajib diunggah';
+    if (file && file.size > MAX_FILE_SIZE) {
+      newErrors.file = 'Ukuran file maksimal 10MB';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleFileChange = (selectedFile: File | null) => {
+    if (!selectedFile) return;
+    
+    if (selectedFile.size > MAX_FILE_SIZE) {
+      setErrors(prev => ({ ...prev, file: 'Ukuran file maksimal 10MB' }));
+      return;
+    }
+
+    setFile(selectedFile);
+    setErrors(prev => {
+      const { file: _, ...rest } = prev;
+      return rest;
+    });
+
+    // Auto-fill title from filename if empty
+    if (!title.trim()) {
+      const nameWithoutExt = selectedFile.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+      setTitle(nameWithoutExt);
+    }
+  };
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true);
+    } else if (e.type === 'dragleave') {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFileChange(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) return;
+    
+    setSubmitting(true);
+    try {
+      const formData = new FormData();
+      formData.append('title', title.trim());
+      formData.append('document_type', documentType);
+      if (category) formData.append('category', category);
+      if (expiresAt) formData.append('expires_at', expiresAt);
+      formData.append('file', file!);
+
+      await documentService.uploadDocument(formData);
+      onSuccess();
+      onClose();
+    } catch (err: any) {
+      console.error('Upload failed', err);
+      // Handle validation errors from API
+      if (err?.errors) {
+        const apiErrors: Record<string, string> = {};
+        for (const [key, messages] of Object.entries(err.errors)) {
+          apiErrors[key] = Array.isArray(messages) ? messages[0] : String(messages);
+        }
+        setErrors(apiErrors);
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="modal-container upload-modal" onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
+        <div className="modal-header">
+          <div className="modal-header-content">
+            <div className="modal-header-icon">
+              <Upload size={20} />
+            </div>
+            <div>
+              <h2 className="modal-title">Unggah Dokumen</h2>
+              <p className="modal-subtitle">Upload dokumen resmi ke file karyawan Anda</p>
+            </div>
+          </div>
+          <button className="modal-close-btn" onClick={onClose} type="button" disabled={submitting}>
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="modal-body">
+          {/* Drop zone */}
+          <div
+            className={`upload-dropzone ${dragActive ? 'upload-dropzone--active' : ''} ${file ? 'upload-dropzone--has-file' : ''} ${errors.file ? 'upload-dropzone--error' : ''}`}
+            onDragEnter={handleDrag}
+            onDragLeave={handleDrag}
+            onDragOver={handleDrag}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="upload-file-input"
+              onChange={(e) => handleFileChange(e.target.files?.[0] || null)}
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.webp"
+            />
+            {file ? (
+              <div className="upload-file-preview">
+                <div className="upload-file-icon">
+                  <FileUp size={28} />
+                </div>
+                <div className="upload-file-info">
+                  <span className="upload-file-name">{file.name}</span>
+                  <span className="upload-file-size">{formatFileSize(file.size)}</span>
+                </div>
+                <button
+                  type="button"
+                  className="upload-file-remove"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setFile(null);
+                  }}
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            ) : (
+              <div className="upload-dropzone-content">
+                <div className="upload-dropzone-icon">
+                  <FileUp size={36} />
+                </div>
+                <p className="upload-dropzone-text">
+                  <strong>Klik untuk pilih file</strong> atau seret & lepas di sini
+                </p>
+                <p className="upload-dropzone-hint">
+                  PDF, DOC, DOCX, XLS, XLSX, JPG, PNG — Maks. 10MB
+                </p>
+              </div>
+            )}
+          </div>
+          {errors.file && <p className="field-error">{errors.file}</p>}
+
+          {/* Form fields */}
+          <div className="form-grid">
+            {/* Title */}
+            <div className="form-group form-group--full">
+              <label className="form-label">
+                Judul Dokumen <span className="required">*</span>
+              </label>
+              <input
+                type="text"
+                className={`form-input ${errors.title ? 'form-input--error' : ''}`}
+                placeholder="Contoh: KTP, Ijazah S1, Sertifikat PMP"
+                value={title}
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                  if (errors.title) setErrors(prev => { const { title: _, ...rest } = prev; return rest; });
+                }}
+                disabled={submitting}
+              />
+              {errors.title && <p className="field-error">{errors.title}</p>}
+            </div>
+
+            {/* Document Type */}
+            <div className="form-group">
+              <label className="form-label">
+                Tipe Dokumen <span className="required">*</span>
+              </label>
+              <select
+                className={`form-input ${errors.documentType ? 'form-input--error' : ''}`}
+                value={documentType}
+                onChange={(e) => {
+                  setDocumentType(e.target.value);
+                  if (errors.documentType) setErrors(prev => { const { documentType: _, ...rest } = prev; return rest; });
+                }}
+                disabled={submitting}
+              >
+                <option value="">Pilih tipe dokumen</option>
+                {DOCUMENT_TYPES.map(dt => (
+                  <option key={dt.value} value={dt.value}>{dt.label}</option>
+                ))}
+              </select>
+              {errors.documentType && <p className="field-error">{errors.documentType}</p>}
+            </div>
+
+            {/* Category */}
+            <div className="form-group">
+              <label className="form-label">Kategori</label>
+              <select
+                className="form-input"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                disabled={submitting}
+              >
+                <option value="">Pilih kategori (opsional)</option>
+                {CATEGORIES.map(c => (
+                  <option key={c.value} value={c.value}>{c.label}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Expiry Date */}
+            <div className="form-group">
+              <label className="form-label">Tanggal Kadaluarsa</label>
+              <input
+                type="date"
+                className="form-input"
+                value={expiresAt}
+                onChange={(e) => setExpiresAt(e.target.value)}
+                disabled={submitting}
+              />
+              <p className="field-hint">Kosongkan jika tidak ada masa berlaku</p>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="modal-footer">
+            <button type="button" className="btn-outline" onClick={onClose} disabled={submitting}>
+              Batal
+            </button>
+            <button type="submit" className="btn-primary" disabled={submitting || !file}>
+              {submitting ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  Mengunggah...
+                </>
+              ) : (
+                <>
+                  <Upload size={16} />
+                  Unggah Dokumen
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+
+/* =================================================================
+   Main Page Component
+   ================================================================= */
 const MyDocumentsPage: React.FC = () => {
   const [documents, setDocuments] = useState<EmployeeDocument[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showUploadModal, setShowUploadModal] = useState(false);
 
   const [searchText, setSearchText] = useState("");
   const [activeTab, setActiveTab] = useState<TabType>("Semua");
@@ -113,27 +444,30 @@ const MyDocumentsPage: React.FC = () => {
 
   const handleDownload = async (doc: EmployeeDocument) => {
     try {
-      const token = localStorage.getItem('token');
-      const filename = doc.file_url.split('/').pop();
-      const res = await fetch(
-        `https://moccasin-crab-693879.hostingersite.com/api/documents/${filename}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      if (!res.ok) throw new Error("Download gagal");
-      const blob = await res.blob();
+      const response = await api.get(`/documents/${doc.id}/download`, {
+        responseType: 'blob'
+      });
+      
+      const blob = new Blob([response.data]);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = filename || "file.pdf";
+      a.download = doc.file_name || "document.pdf";
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     } catch (err) {
       console.error(err);
-      alert("Gagal download file");
+      alert("Gagal download file. Pastikan dokumen fisik tersedia di server.");
     }
   };
 
   const isExpired = (dateStr: string) => new Date(dateStr) < new Date();
+
+  const handleUploadSuccess = () => {
+    fetchDocuments();
+  };
 
   return (
     <div className="crud-page">
@@ -155,7 +489,7 @@ const MyDocumentsPage: React.FC = () => {
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan
             </button>
-            <button className="btn-primary" onClick={() => {}}>
+            <button className="btn-primary" onClick={() => setShowUploadModal(true)}>
               <Upload size={16} />
               Unggah Dokumen
             </button>
@@ -247,7 +581,7 @@ const MyDocumentsPage: React.FC = () => {
                     : "Anda belum memiliki dokumen. Unggah dokumen pertama untuk memulai."
                 }
                 actionLabel="Unggah Dokumen"
-                onAction={() => {}}
+                onAction={() => setShowUploadModal(true)}
               />
             </div>
           )}
@@ -388,6 +722,13 @@ const MyDocumentsPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Upload Modal */}
+      <UploadDocumentModal
+        isOpen={showUploadModal}
+        onClose={() => setShowUploadModal(false)}
+        onSuccess={handleUploadSuccess}
+      />
     </div>
   );
 };
