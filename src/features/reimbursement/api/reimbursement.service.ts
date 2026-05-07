@@ -141,9 +141,10 @@ export const createMyReimbursement = async (payload: Omit<ReimbursementCreatePay
   return { raw: response.data };
 };
 
-/** Employee draft updates use the shared reimbursement update route. */
+/** PUT /my/reimbursements/{id} → updateMyReimbursement() */
 export const updateMyReimbursement = async (id: string, payload: ReimbursementUpdatePayload) => {
-  return updateReimbursement(id, payload);
+  const response = await api.put(`/my/reimbursements/${id}`, payload);
+  return { raw: response.data };
 };
 
 /** Employee draft deletes use the shared reimbursement delete route. */

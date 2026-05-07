@@ -33,6 +33,15 @@ export const parseApiError = (error: unknown): ApiError => {
     };
   }
 
+  if (status === 403) {
+    return {
+      type: "general",
+      message: data?.message && data.message !== "Forbidden"
+        ? data.message
+        : "Anda tidak memiliki izin untuk melakukan aksi ini.",
+    };
+  }
+
   // 3. General Error
   return {
     type: "general",

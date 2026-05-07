@@ -36,6 +36,11 @@ const formatDate = (value?: string) => {
   return date.toLocaleDateString("id-ID", { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
+const getActionErrorMessage = (error: any, fallback: string) => {
+  const message = error?.response?.data?.message || error?.message;
+  return message === "Forbidden" ? fallback : message || fallback;
+};
+
 const MyReimbursementsPage: React.FC = () => {
   const [items, setItems] = useState<ReimbursementItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -148,10 +153,7 @@ const MyReimbursementsPage: React.FC = () => {
       await fetchData();
     } catch (error: any) {
       console.error('Failed to save reimbursement:', error);
-      const message = error?.message === "Forbidden"
-        ? "Backend menolak update klaim employee. Pastikan route PUT /reimbursements/{id} mengizinkan owner klaim draft untuk update."
-        : error?.response?.data?.message || error?.message || "Gagal menyimpan klaim reimbursement.";
-      showToast(message, "error");
+      showToast(getActionErrorMessage(error, "Gagal menyimpan klaim reimbursement."), "error");
     }
   };
 
@@ -163,10 +165,7 @@ const MyReimbursementsPage: React.FC = () => {
         showToast("Klaim reimbursement berhasil dihapus.", "success");
       } catch (error: any) {
         console.error('Failed to delete reimbursement:', error);
-        const message = error?.message === "Forbidden"
-          ? "Backend menolak hapus klaim employee. Pastikan route DELETE /reimbursements/{id} mengizinkan owner klaim draft untuk hapus."
-          : error?.response?.data?.message || error?.message || "Gagal menghapus klaim reimbursement.";
-        showToast(message, "error");
+        showToast(getActionErrorMessage(error, "Gagal menghapus klaim reimbursement."), "error");
       }
     }
   };
@@ -179,7 +178,7 @@ const MyReimbursementsPage: React.FC = () => {
         showToast("Klaim reimbursement berhasil diajukan.", "success");
       } catch (error: any) {
         console.error('Failed to submit reimbursement:', error);
-        showToast(error?.response?.data?.message || error?.message || "Gagal mengajukan klaim reimbursement.", "error");
+        showToast(getActionErrorMessage(error, "Gagal mengajukan klaim reimbursement."), "error");
       }
     }
   };
