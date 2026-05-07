@@ -148,7 +148,10 @@ const MyReimbursementsPage: React.FC = () => {
       await fetchData();
     } catch (error: any) {
       console.error('Failed to save reimbursement:', error);
-      showToast(error?.response?.data?.message || error?.message || "Gagal menyimpan klaim reimbursement.", "error");
+      const message = error?.message === "Forbidden"
+        ? "Backend menolak update klaim employee. Pastikan route PUT /reimbursements/{id} mengizinkan owner klaim draft untuk update."
+        : error?.response?.data?.message || error?.message || "Gagal menyimpan klaim reimbursement.";
+      showToast(message, "error");
     }
   };
 
@@ -160,7 +163,10 @@ const MyReimbursementsPage: React.FC = () => {
         showToast("Klaim reimbursement berhasil dihapus.", "success");
       } catch (error: any) {
         console.error('Failed to delete reimbursement:', error);
-        showToast(error?.response?.data?.message || error?.message || "Gagal menghapus klaim reimbursement.", "error");
+        const message = error?.message === "Forbidden"
+          ? "Backend menolak hapus klaim employee. Pastikan route DELETE /reimbursements/{id} mengizinkan owner klaim draft untuk hapus."
+          : error?.response?.data?.message || error?.message || "Gagal menghapus klaim reimbursement.";
+        showToast(message, "error");
       }
     }
   };
