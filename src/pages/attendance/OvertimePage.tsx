@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { Card } from '@/shared/ui/Card';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
+import { attendanceService } from '@/features/attendance/api/attendance.service';
 import overtimeService from '@/features/attendance/api/overtime.service';
 import { Clock, RefreshCw, Calendar, Timer, AlertCircle, CheckCircle, XCircle, Search, MessageSquare, Eye } from 'lucide-react';
 import '@/shared/styles/CrudPage.css';
@@ -10,11 +11,15 @@ import './AttendanceShared.css';
 
 interface OvertimeRecord {
   id: number;
+  attendance_id?: number;
   date: string;
-  scheduled_checkout: string;
+  scheduled_checkout?: string;
+  scheduled_check_out?: string;
   actual_checkout: string;
   overtime_minutes: number;
   status: string;
+  request_id?: number;
+  request_status?: string | null;
   reason: string | null;
   reject_reason: string | null;
   approved_by: number | null;
@@ -34,9 +39,40 @@ const OvertimePage = () => {
   const loadRecords = async () => {
     setLoading(true);
     try {
-      const result = await api.get('/my/overtime');
-      const payload = result.data?.data ?? result.data;
-      setRecords(Array.isArray(payload) ? payload : []);
+      const [summaryResult, requestResult] = await Promise.all([
+        attendanceService.getOvertimeSummary(30),
+        api.get('/my/overtime'),
+      ]);
+
+      const summaryPayload = summaryResult.payload as any;
+      const overtimeRows = Array.isArray(summaryPayload?.records) ? summaryPayload.records : [];
+
+      const requestPayload = requestResult.data?.data ?? requestResult.data;
+      const requests = Array.isArray(requestPayload) ? requestPayload : [];
+      const requestByAttendanceId = new Map(
+        requests.map((request: any) => [String(request.attendance_id), request])
+      );
+
+      const mergedRecords = overtimeRows
+        .filter((record: any) => Number(record.overtime_minutes || 0) > 0)
+        .map((record: any) => {
+          const request = requestByAttendanceId.get(String(record.id));
+          return {
+            ...record,
+            attendance_id: request?.attendance_id ?? record.attendance_id ?? record.id,
+            request_id: request?.id ?? null,
+            request_status: request?.status ?? null,
+            reason: request?.reason ?? record.reason ?? null,
+            reject_reason: request?.reject_reason ?? null,
+            approved_by: request?.approved_by ?? null,
+            approved_at: request?.approved_at ?? null,
+            approver: request?.approver ?? null,
+            evidences: request?.evidences ?? [],
+            status: request?.status ?? (Number(record.overtime_minutes || 0) > 0 ? 'pending' : 'draft'),
+          };
+        });
+
+      setRecords(mergedRecords);
     } catch (error: any) {
       console.error('Failed to load overtime:', error);
     } finally {
@@ -52,18 +88,30 @@ const OvertimePage = () => {
     setCurrentPage(1);
   }, [searchText, activeTab]);
 
-  const handleAddReason = async (id: number) => {
+  const handleAddReason = async (record: OvertimeRecord) => {
+    const requestId = record.request_id;
+    if (!requestId) {
+      alert('Data lembur belum punya request untuk diisi alasan.');
+      return;
+    }
+
     const reason = window.prompt('Masukkan alasan lembur:');
     if (!reason) return;
     try {
-      await api.put(`/my/overtime/${id}/reason`, { reason });
+      await api.put(`/my/overtime/${requestId}/reason`, { reason });
       loadRecords();
     } catch (error: any) {
       alert(error.response?.data?.message || 'Gagal menambahkan alasan');
     }
   };
 
-  const handleUploadEvidence = async (id: number) => {
+  const handleUploadEvidence = async (record: OvertimeRecord) => {
+    const requestId = record.request_id;
+    if (!requestId) {
+      alert('Request lembur belum tersedia untuk upload bukti.');
+      return;
+    }
+
     try {
       const input = document.createElement('input');
       input.type = 'file';
@@ -76,7 +124,7 @@ const OvertimePage = () => {
           return;
         }
         try {
-          await overtimeService.uploadEvidence(id, file);
+          await overtimeService.uploadEvidence(requestId, file);
           alert('Bukti berhasil diunggah');
           void loadRecords();
         } catch (err: any) {
@@ -91,9 +139,15 @@ const OvertimePage = () => {
     }
   };
 
-  const handleViewMyEvidences = async (id: number) => {
+  const handleViewMyEvidences = async (record: OvertimeRecord) => {
+    const requestId = record.request_id;
+    if (!requestId) {
+      alert('Request lembur belum tersedia untuk melihat bukti.');
+      return;
+    }
+
     try {
-      const res = await overtimeService.getMyEvidences(id);
+      const res = await overtimeService.getMyEvidences(requestId);
       const payload = res?.data?.data ?? res?.data ?? res;
       const list = Array.isArray(payload) ? payload : [];
       if (list.length === 0) {
@@ -136,14 +190,30 @@ const OvertimePage = () => {
 
   const totalPages = Math.ceil(filteredRecords.length / pageSize);
 
-  const pendingCount = records.filter(r => r.status === 'pending').length;
-  const approvedCount = records.filter(r => r.status === 'approved').length;
-  const totalMinutes = records.filter(r => r.status === 'approved').reduce((sum, r) => sum + (r.overtime_minutes || 0), 0);
+  const pendingCount = records.filter(r => r.request_status === 'pending' || r.status === 'pending').length;
+  const approvedCount = records.filter(r => r.request_status === 'approved' || r.status === 'approved').length;
+  const rejectedCount = records.filter(r => r.request_status === 'rejected' || r.status === 'rejected').length;
+  const totalMinutes = records.reduce((sum, r) => sum + (r.overtime_minutes || 0), 0);
+  const totalOvertimeDays = records.length;
 
   const formatDuration = (minutes: number) => {
     const h = Math.floor(minutes / 60);
     const m = minutes % 60;
     return `${h}j ${m}m`;
+  };
+
+  const formatTime = (timeStr: string | undefined) => {
+    if (!timeStr) return '-';
+    try {
+      const date = new Date(timeStr);
+      if (!Number.isNaN(date.getTime())) {
+        return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
+      }
+      const [hours, minutes] = timeStr.split(':');
+      return `${hours}:${minutes}`;
+    } catch {
+      return timeStr;
+    }
   };
 
   const formatDate = (dateStr: string | undefined) => {
@@ -162,15 +232,15 @@ const OvertimePage = () => {
       'approved': { label: 'Disetujui', tone: 'green' },
       'rejected': { label: 'Ditolak', tone: 'red' },
     };
-    const config = map[status] || { label: status, tone: 'orange' };
+    const config = map[status] || { label: 'Tercatat', tone: 'blue' };
     return <span className={`badge-soft badge-soft--${config.tone}`}>{config.label}</span>;
   };
 
   const summaryCards = [
-    { label: 'Total Pengajuan', subtitle: 'Seluruh lembur', value: String(records.length), tone: 'blue' as const, icon: Clock },
+    { label: 'Hari Lembur', subtitle: 'Checkout melebihi jadwal', value: String(totalOvertimeDays), tone: 'blue' as const, icon: Clock },
     { label: 'Menunggu Persetujuan', subtitle: 'Pending approval', value: String(pendingCount), tone: 'orange' as const, icon: AlertCircle },
     { label: 'Disetujui', subtitle: 'Sudah approved', value: String(approvedCount), tone: 'green' as const, icon: CheckCircle },
-    { label: 'Total Jam Approved', subtitle: 'Total jam disetujui', value: formatDuration(totalMinutes), tone: 'purple' as const, icon: Timer },
+    { label: 'Total Jam Lembur', subtitle: 'Akumulasi overtime', value: formatDuration(totalMinutes), tone: 'purple' as const, icon: Timer },
   ];
 
   return (
@@ -184,7 +254,7 @@ const OvertimePage = () => {
             </div>
             <h1 className="hero-title">Lembur Saya</h1>
             <p className="hero-subtitle">
-              Riwayat dan status pengajuan lembur Anda. Lembur otomatis tercatat saat Anda checkout melebihi jam kerja.
+              Riwayat lembur diambil dari checkout yang melewati jadwal pulang, lalu dicocokkan dengan request bukti lembur.
             </p>
           </div>
           <div className="hero-actions">
@@ -226,7 +296,7 @@ const OvertimePage = () => {
           </div>
           <div>
             <h2 className="analytics-title">Daftar Lembur</h2>
-            <p className="analytics-subtitle">Riwayat pengajuan lembur otomatis dari sistem absensi</p>
+            <p className="analytics-subtitle">Checkout terlambat dan status request bukti lembur</p>
           </div>
         </div>
       </Card>
@@ -244,7 +314,7 @@ const OvertimePage = () => {
                 {tab}
                 {tab !== 'Semua' && (
                   <span className="tab-count">
-                    {tab === 'Pending' ? pendingCount : tab === 'Approved' ? approvedCount : records.filter(r => r.status === 'rejected').length}
+                    {tab === 'Pending' ? pendingCount : tab === 'Approved' ? approvedCount : rejectedCount}
                   </span>
                 )}
               </button>
@@ -304,8 +374,8 @@ const OvertimePage = () => {
                             {formatDate(record.date)}
                           </div>
                         </td>
-                        <td style={{ fontWeight: 500, color: '#475569' }}>{record.scheduled_checkout || '-'}</td>
-                        <td style={{ fontWeight: 600, color: '#0f172a' }}>{record.actual_checkout || '-'}</td>
+                        <td style={{ fontWeight: 500, color: '#475569' }}>{formatTime(record.scheduled_check_out || record.scheduled_checkout)}</td>
+                        <td style={{ fontWeight: 600, color: '#0f172a' }}>{formatTime(record.actual_checkout)}</td>
                         <td>
                           <span style={{ fontWeight: 700, color: '#7c3aed' }}>
                             {formatDuration(record.overtime_minutes)}
@@ -315,25 +385,25 @@ const OvertimePage = () => {
                           {record.reason || <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>Belum diisi</span>}
                         </td>
                         <td className="td-center">
-                          {getStatusBadge(record.status)}
+                          {getStatusBadge(record.request_status || record.status)}
                         </td>
                         <td className="td-center">
                           <div className="action-btn-group">
-                            {record.status === 'pending' && !record.reason && (
+                            {record.request_id && (record.request_status === 'pending' || !record.reason) && (
                               <button
                                 className="action-btn"
                                 style={{ color: '#6366f1', background: '#eef2ff' }}
-                                onClick={() => handleAddReason(record.id)}
+                                onClick={() => void handleAddReason(record)}
                                 title="Tambah Alasan"
                               >
                                 <MessageSquare size={16} />
                               </button>
                             )}
-                            {record.status !== 'approved' && (
+                            {record.request_id && record.request_status !== 'approved' && (
                               <button
                                 className="action-btn"
                                 style={{ color: '#06b6d4', background: '#ecfeff' }}
-                                onClick={() => handleUploadEvidence(record.id)}
+                                onClick={() => void handleUploadEvidence(record)}
                                 title="Unggah Bukti"
                               >
                                 <MessageSquare size={16} />
@@ -342,12 +412,13 @@ const OvertimePage = () => {
                             <button
                               className="action-btn"
                               style={{ color: '#0f172a', background: '#f1f5f9' }}
-                              onClick={() => void handleViewMyEvidences(record.id)}
+                              onClick={() => void handleViewMyEvidences(record)}
                               title="Lihat Bukti"
+                              disabled={!record.request_id}
                             >
                               <Eye size={16} />
                             </button>
-                            {record.status === 'rejected' && record.reject_reason && (
+                            {record.request_status === 'rejected' && record.reject_reason && (
                               <button
                                 className="action-btn"
                                 style={{ color: '#ef4444', background: '#fef2f2' }}
@@ -368,7 +439,7 @@ const OvertimePage = () => {
               {/* Pagination */}
               <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan <strong>{paginatedRecords.length}</strong> dari <strong>{filteredRecords.length}</strong> lembur
+                  Menampilkan <strong>{paginatedRecords.length}</strong> dari <strong>{filteredRecords.length}</strong> hari lembur
                 </div>
                 <div className="pagination-controls">
                   <button

@@ -226,12 +226,11 @@ export const menuItems: MenuItem[] = [
         ]
       },
       {
-        label: 'Absensi & Cuti',
+        label: 'Absensi',
         subItems: [
           { label: 'Absen Masuk', path: '/attendance/check-in' },
           { label: 'Absen Pulang', path: '/attendance/check-out' },
           { label: 'Riwayat Absensi', path: '/attendance/history' },
-          { label: 'Cuti Saya', path: '/leave/my-leave' },
         ]
       },
       {

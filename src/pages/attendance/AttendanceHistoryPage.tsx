@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { Card, CardHeader } from '@/shared/ui';
 import { Button } from '@/shared/ui/Button';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
-import { api } from '@/shared/api/httpClient';
+import { attendanceService } from '@/features/attendance/api/attendance.service';
 import { CalendarDays, CheckCircle2, Clock, RefreshCw, XCircle, Search } from 'lucide-react';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
@@ -32,11 +32,12 @@ const AttendanceHistoryPage = () => {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const result = await api.get('/attendance/history');
-      const payload = result.data?.data ?? result.data;
-      setHistory(Array.isArray(payload) ? payload : [payload]);
+      const result = await attendanceService.getHistory();
+      console.log('Attendance history response:', result);
+      setHistory(result.items);
     } catch (error: any) {
       const message = error.response?.data?.message || error.message || 'Terjadi kesalahan';
+      console.error('Attendance history error:', error);
       setErrorMessage(message);
       setHistory([]);
     } finally {
@@ -100,8 +101,15 @@ const AttendanceHistoryPage = () => {
   const formatTime = (timeStr: string | undefined) => {
     if (!timeStr) return '-';
     try {
-      const [hours, minutes] = timeStr.split(':');
-      return `${hours}:${minutes}`;
+      // Handle both ISO datetime (2026-05-07T21:37:00) and time-only (21:37) formats
+      const date = new Date(timeStr);
+      if (isNaN(date.getTime())) {
+        // If datetime parsing fails, try time-only format
+        const [hours, minutes] = timeStr.split(':');
+        return `${hours}:${minutes}`;
+      }
+      // Format ISO datetime to HH:MM
+      return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
     } catch {
       return timeStr;
     }
@@ -110,6 +118,7 @@ const AttendanceHistoryPage = () => {
   const formatDate = (dateStr: string | undefined) => {
     if (!dateStr) return '-';
     try {
+      // Handle both ISO datetime and date-only formats
       const date = new Date(dateStr);
       return date.toLocaleDateString('id-ID', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
     } catch {
