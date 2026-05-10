@@ -19,13 +19,13 @@ const extractArrayPayload = (raw: any): GenericApiItem[] => {
 
   // Pattern 2: Laravel standard { data: [...] } or { items: [...] }
   const root = typeof raw === 'object' ? raw : {};
-  for (const key of ['data', 'items', 'rows', 'results']) {
+  for (const key of ['data', 'items', 'rows', 'results', 'kpis', 'periods', 'kpi_periods', 'kpiPeriods']) {
     const level1 = root[key];
     if (Array.isArray(level1)) return level1;
     
     // Pattern 3: Laravel Paginated { data: { data: [...] } }
     if (level1 && typeof level1 === 'object' && !Array.isArray(level1)) {
-      for (const key2 of ['data', 'items', 'rows']) {
+      for (const key2 of ['data', 'items', 'rows', 'results', 'kpis', 'periods', 'kpi_periods', 'kpiPeriods']) {
         if (Array.isArray(level1[key2])) return level1[key2];
       }
     }
@@ -51,8 +51,49 @@ export const getMyKpi = async () => {
   };
 };
 
-export const submitMyKpi = async (id: string) => {
-  const response = await api.post(`/my/kpi/${id}/submit`);
+export const getMyKpiPeriods = async () => {
+  const token = sessionStorage.getItem("token");
+
+  const response = await api.get("/my/kpi-periods", {
+    headers: {
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    validateStatus: (status) => (status >= 200 && status < 300) || status === 500
+  });
+
+  return {
+    items: extractArrayPayload(response.data),
+    raw: response.data,
+  };
+};
+
+export const submitMyKpiPeriod = async (id: string, itemId?: number) => {
+  const token = sessionStorage.getItem("token");
+  const response = await api.post(`/my/kpi-periods/${id}/submit`, itemId ? { item_id: itemId } : {}, {
+    headers: {
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+  });
+  return {
+    raw: response.data,
+  };
+};
+
+export const updateMyKpiPeriodItems = async (
+  id: string,
+  items: Array<{ id: number; achievement: number }>
+) => {
+  const token = sessionStorage.getItem("token");
+
+  const response = await api.put(`/my/kpi-periods/${id}/items`, { items }, {
+    headers: {
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+  });
+
   return {
     raw: response.data,
   };

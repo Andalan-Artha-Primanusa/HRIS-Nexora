@@ -4,6 +4,7 @@ import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { Alert } from '@/shared/ui/Alert';
 import { getLeaveDetail, updateLeaveRequest } from '@/features/leave/api/leave.service';
+import { api } from '@/shared/api/httpClient';
 import type { LeaveUpdatePayload } from '@/features/leave/types/leave.types';
 import { Calendar, ChevronLeft } from 'lucide-react';
 import '../dashboard/overview/OverviewPage.css';
@@ -16,12 +17,14 @@ const UpdateLeavePage = () => {
   const isViewMode = location.pathname.includes('/view/');
   
   const [formData, setFormData] = useState({
+    leave_type_id: 0,
     type: 'annual',
     start_date: '',
     end_date: '',
     total_days: 1,
     reason: '',
   });
+  const [leaveTypes, setLeaveTypes] = useState<{ id: number; name: string; code: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('error');
@@ -36,10 +39,16 @@ const UpdateLeavePage = () => {
       }
 
       try {
-        const result = await getLeaveDetail(id);
-        const payload = result.payload as Record<string, any>;
+        const [detailResult, typesRes] = await Promise.all([
+          getLeaveDetail(id),
+          api.get('/leave-types').catch(() => ({ data: { data: [] } })),
+        ]);
+        const payload = detailResult.payload as Record<string, any>;
+        const types = typesRes.data?.data ?? [];
+        setLeaveTypes(types);
 
         setFormData({
+          leave_type_id: payload.leave_type_id || 0,
           type: payload.type || 'annual',
           start_date: payload.start_date || '',
           end_date: payload.end_date || '',
@@ -194,21 +203,16 @@ const UpdateLeavePage = () => {
               Tipe Cuti
               <span className="leave-required">*</span>
             </label>
-            <select
+            <input
               id="type"
-              name="type"
               className="leave-input"
-              value={formData.type}
-              onChange={handleInputChange}
-              disabled={isViewMode || loading}
-            >
-              <option value="annual">Cuti Tahunan</option>
-              <option value="sick">Cuti Sakit</option>
-              <option value="personal">Cuti Pribadi</option>
-              <option value="maternity">Cuti Melahirkan</option>
-              <option value="parental">Cuti Orang Tua</option>
-              <option value="unpaid">Cuti Tanpa Gaji</option>
-            </select>
+              value={(() => {
+                const matched = leaveTypes.find(lt => lt.id === formData.leave_type_id);
+                return matched ? matched.name : (formData.type?.toUpperCase() || '-');
+              })()}
+              disabled
+              style={{ opacity: 0.7 }}
+            />
           </div>
 
           {/* Dates */}

@@ -44,11 +44,11 @@ export const LeaveDetailModal: React.FC<LeaveDetailModalProps> = ({ isOpen, onCl
               <label style={{ display: 'block', fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Pemohon</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
-                  {String(item.employee?.full_name || 'E').charAt(0)}
+                  {String(item.employee?.full_name || item.user?.name || 'E').charAt(0)}
                 </div>
                 <div>
-                  <div style={{ fontWeight: 600, color: '#1e293b' }}>{item.employee?.full_name || item.employee_name || 'Unknown'}</div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{item.employee?.position || 'Employee'}</div>
+                  <div style={{ fontWeight: 600, color: '#1e293b' }}>{item.employee?.full_name || item.employee_name || item.user?.name || 'Unknown'}</div>
+                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{item.employee?.position || item.employee?.position_name || item.department_name || 'Employee'}</div>
                 </div>
               </div>
             </div>
@@ -77,7 +77,7 @@ export const LeaveDetailModal: React.FC<LeaveDetailModalProps> = ({ isOpen, onCl
               </div>
               <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', color: '#64748b', marginBottom: '0.25rem' }}>Jenis Cuti</label>
-                <div style={{ fontWeight: 600, color: '#2563eb' }}>{item.type?.toUpperCase()}</div>
+                <div style={{ fontWeight: 600, color: '#2563eb' }}>{item.leave_type?.name || item.type?.toUpperCase()}</div>
               </div>
             </div>
           </div>

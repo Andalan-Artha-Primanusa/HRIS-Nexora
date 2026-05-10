@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader } from "@/shared/ui";
 import { Button } from "@/shared/ui/Button";
@@ -88,6 +88,14 @@ const WorkSchedulesPage = () => {
   const [statusMessage, setStatusMessage] = useState("");
   const [statusType, setStatusType] = useState<"success" | "error" | "info">("info");
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
+
+  const paginatedSchedules = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return schedules.slice(startIndex, startIndex + pageSize);
+  }, [schedules, currentPage, pageSize]);
+  const totalPages = Math.ceil(schedules.length / pageSize);
 
   const loadSchedules = async (options: { clearMessage?: boolean } = {}) => {
     const { clearMessage = true } = options;
@@ -259,7 +267,8 @@ const WorkSchedulesPage = () => {
             <p>Memuat jadwal kerja...</p>
           </div>
         ) : schedules.length > 0 ? (
-          <div className="table-wrap">
+          <>
+            <div className="table-wrap">
             <table className="data-table">
               <thead>
                 <tr>
@@ -271,7 +280,7 @@ const WorkSchedulesPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {schedules.map((schedule) => (
+                {paginatedSchedules.map((schedule) => (
                   <tr key={schedule.id}>
                     <td>
                       <div className="cell-name">
@@ -342,6 +351,25 @@ const WorkSchedulesPage = () => {
               </tbody>
             </table>
           </div>
+          {totalPages > 1 && (
+            <div className="table-pagination">
+              <div className="pagination-info">
+                Menampilkan {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, schedules.length)} dari {schedules.length}
+              </div>
+              <div className="pagination-controls">
+                <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)}>
+                  Sebelumnya
+                </Button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  <button key={page} className={`pagination-page-btn ${currentPage === page ? 'active' : ''}`} onClick={() => setCurrentPage(page)}>{page}</button>
+                ))}
+                <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage(prev => prev + 1)}>
+                  Selanjutnya
+                </Button>
+              </div>
+            </div>
+          )}
+        </>
         ) : (
           <div className="empty-state work-empty-state">
             <Clock size={48} />

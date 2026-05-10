@@ -1,75 +1,154 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Card } from '@/shared/ui/Card';
-import { Alert } from '@/shared/ui/Alert';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
-import { BarChart3, RefreshCw, Users, TrendingUp, Clock, FileText } from 'lucide-react';
+import {
+  deleteAttendanceRecord,
+  getAllAttendanceRecords,
+  getAttendanceDetail,
+  type AttendanceItem,
+} from '@/features/attendance/api/attendance-admin.service';
+import { AttendanceSummary } from '@/features/attendance/components/AttendanceSummary';
+import { AttendanceTable } from '@/features/attendance/components/AttendanceTable';
+import { AttendanceDetailModal } from '@/features/attendance/components/AttendanceDetailModal';
+import {
+  RefreshCw, FileText, Search, Filter, Download,
+} from 'lucide-react';
+import { showToast } from '@/shared/ui/toast';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import './AttendanceShared.css';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { CardHeader } from '@/shared/ui';
+import './AttendanceAdminPage.css';
 
-interface ReportRecord {
-  id?: number;
-  date?: string;
-  total_present?: number;
-  total_absent?: number;
-  total_late?: number;
-  department?: string;
-  [key: string]: any;
-}
 
 const AttendanceReportsPage = () => {
-  const [records, setRecords] = useState<ReportRecord[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [alertMessage, setAlertMessage] = useState('');
-  const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('error');
+  const [totalEmployees, setTotalEmployees] = useState(0);
+  const [adminItems, setAdminItems] = useState<AttendanceItem[]>([]);
+  const [adminLoading, setAdminLoading] = useState(false);
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+  const [filterDate, setFilterDate] = useState(todayStr);
+  const [selectedDetail, setSelectedDetail] = useState<any | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
-  const loadRecords = async () => {
-    setLoading(true);
-    setAlertMessage('');
+  const loadAdminRecords = async () => {
+    setAdminLoading(true);
     try {
-      const result = await api.get('/attendance/intelligence', { params: { days: 30 } });
-      const payload = result.data?.data ?? result.data;
-      setRecords(Array.isArray(payload) ? payload : []);
+      const result = await getAllAttendanceRecords({
+        date_from: filterDate,
+        date_to: filterDate,
+      });
+      setAdminItems(result.items);
     } catch (error: any) {
-      const message = error.response?.data?.message || error.message || 'Terjadi kesalahan';
-      setAlertMessage(message);
-      setAlertType('error');
+      showToast(error.message || "Gagal memuat data kehadiran", "error");
     } finally {
-      setLoading(false);
+      setAdminLoading(false);
+    }
+  };
+
+  const handleViewDetail = async (id: string) => {
+    setAdminLoading(true);
+    try {
+      const result = await getAttendanceDetail(id);
+      setSelectedDetail(result.payload);
+      setIsDetailModalOpen(true);
+    } catch (error: any) {
+      showToast(error.message || "Gagal memuat detail", "error");
+    } finally {
+      setAdminLoading(false);
+    }
+  };
+
+  const handleDeleteRecord = async (id: string) => {
+    if (!window.confirm("Apakah Anda yakin ingin menghapus catatan kehadiran ini?")) return;
+    setAdminLoading(true);
+    try {
+      await deleteAttendanceRecord(id);
+      showToast("Catatan kehadiran berhasil dihapus", "success");
+      await loadAdminRecords();
+    } catch (error: any) {
+      showToast(error.message || "Gagal menghapus catatan", "error");
+    } finally {
+      setAdminLoading(false);
+    }
+  };
+
+  const fmtTime = (time: any) => {
+    if (!time) return '--:--';
+    try {
+      const d = new Date(time);
+      if (isNaN(d.getTime())) return String(time);
+      const h = String(d.getHours()).padStart(2, '0');
+      const m = String(d.getMinutes()).padStart(2, '0');
+      return `${h}:${m}`;
+    } catch { return String(time); }
+  };
+
+  const csvVal = (v: any) => {
+    const s = String(v ?? '');
+    return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+
+  const exportCSV = () => {
+    const headers = ['Karyawan', 'Tanggal', 'Jam Masuk', 'Jam Pulang', 'Status'];
+    const rows = filteredItems.map((item: any) => [
+      item.employee_name || item.employee?.full_name || item.employee?.name || '-',
+      item.date ? new Date(item.date).toLocaleDateString('id-ID') : '-',
+      fmtTime(item.check_in),
+      fmtTime(item.check_out),
+      item.status || '-',
+    ]);
+    const csv = [headers.map(csvVal), ...rows.map(r => r.map(csvVal))].map(r => r.join(',')).join('\n');
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'data-kehadiran.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const loadTotalEmployees = async () => {
+    try {
+      const res = await api.get('/employees', { params: { per_page: 1 } });
+      const total = res.data?.data?.total ?? 0;
+      setTotalEmployees(total);
+    } catch {
+      // silent
     }
   };
 
   useEffect(() => {
-    void loadRecords();
-  }, []);
+    void loadAdminRecords();
+    void loadTotalEmployees();
+  }, [filterDate]);
 
-  const formatDate = (dateStr: string | undefined) => {
-    if (!dateStr) return '-';
-    try {
-      const date = new Date(dateStr);
-      return date.toLocaleDateString('id-ID', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
-    } catch {
-      return dateStr;
-    }
-  };
+  const adminStats = useMemo(() => {
+    const total = totalEmployees;
+    const present = adminItems.filter((i: any) => {
+      const s = String(i.status || '').toLowerCase();
+      return s.includes('present') || s === 'active' || s === 'on_time';
+    }).length;
+    const late = adminItems.filter((i: any) => String(i.status || '').toLowerCase().includes('late') || String(i.status || '').toLowerCase().includes('terlambat')).length;
+    const absent = 0;
+    return { total, present, late, absent };
+  }, [adminItems, totalEmployees]);
 
-  const totalPresent = records.reduce((sum, r) => sum + (r.total_present || 0), 0);
-  const totalAbsent = records.reduce((sum, r) => sum + (r.total_absent || 0), 0);
-  const totalLate = records.reduce((sum, r) => sum + (r.total_late || 0), 0);
-
-  const chartData = records.slice(0, 7).map(r => ({
-    name: r.date ? new Date(r.date).toLocaleDateString('id-ID', { weekday: 'short' }) : 'N/A',
-    hadir: r.total_present || 0,
-    absent: r.total_absent || 0,
-    late: r.total_late || 0,
-  }));
+  const filteredItems = useMemo(() => {
+    return adminItems.filter((item: any) => {
+      const q = searchQuery.toLowerCase();
+      const name = String(item.employee_name || item.employee?.full_name || '').toLowerCase();
+      const id = String(item.employee_id || '').toLowerCase();
+      const status = String(item.status || '').toLowerCase();
+      const matchesSearch = name.includes(q) || id.includes(q);
+      const matchesStatus = !filterStatus || status.includes(filterStatus.toLowerCase());
+      return matchesSearch && matchesStatus;
+    });
+  }, [adminItems, searchQuery, filterStatus]);
 
   return (
     <div className="crud-page">
-      {/* Header - Same style as Dashboard */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -81,127 +160,83 @@ const AttendanceReportsPage = () => {
             <p className="hero-subtitle">Analitik dan laporan kehadiran karyawan.</p>
           </div>
           <div className="hero-actions">
-            <button className="btn-outline" onClick={() => void loadRecords()}>
-              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            <button className="btn-outline" onClick={exportCSV}>
+              <Download size={16} />
+              Export Data Karyawan
+            </button>
+            <button className="btn-outline" onClick={() => void loadAdminRecords()}>
+              <RefreshCw size={16} className={adminLoading ? 'animate-spin' : ''} />
               Segarkan
             </button>
           </div>
         </div>
       </Card>
 
-      {alertMessage && (
-        <Alert variant={alertType === 'success' ? 'success' : 'error'} title={alertType === 'success' ? 'Berhasil' : 'Kesalahan'}>
-          {alertMessage}
-        </Alert>
-      )}
+      <AttendanceSummary stats={adminStats} />
 
-      {/* Summary Cards */}
-      <div className="attendance-reports-wrapper">
-        <div className="attendance-summary-card">
-          <div className="attendance-summary-header">
-            <div>
-              <p className="attendance-summary-label">Total Records</p>
-              <p className="attendance-summary-subtitle">Semua laporan</p>
+      <Card className="control-section-card">
+        <div className="control-section-inner">
+          <div className="control-actions">
+            <div className="search-box">
+              <div className="search-icon-inside"><Search size={18} /></div>
+              <input
+                type="text"
+                placeholder="Cari nama atau ID karyawan..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="search-input-pill"
+              />
             </div>
-            <div className="attendance-summary-icon-wrapper attendance-icon-blue">
-              <BarChart3 size={28} />
+            <div className="filter-btn-rounded">
+              <Filter size={18} />
+              <span>Filter</span>
             </div>
+            <input
+              type="date"
+              value={filterDate}
+              onChange={(e) => setFilterDate(e.target.value)}
+              className="filter-select-premium"
+              style={{ height: '44px', minWidth: '160px' }}
+            />
           </div>
-          <div className="attendance-summary-value attendance-value-blue">{records.length}</div>
-          <p className="attendance-summary-trend">Data 30 hari terakhir</p>
+          <select
+            className="filter-select-premium"
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            style={{ height: '44px', minWidth: '180px' }}
+          >
+            <option value="">Semua Status</option>
+            <option value="on_time">Hadir</option>
+            <option value="late">Terlambat</option>
+            <option value="absent">Absen</option>
+          </select>
         </div>
-
-        <div className="attendance-summary-card">
-          <div className="attendance-summary-header">
-            <div>
-              <p className="attendance-summary-label">Hadir</p>
-              <p className="attendance-summary-subtitle">Total kehadiran</p>
-            </div>
-            <div className="attendance-summary-icon-wrapper attendance-icon-green">
-              <Users size={28} />
-            </div>
-          </div>
-          <div className="attendance-summary-value attendance-value-green">{totalPresent}</div>
-          <p className="attendance-summary-trend">Total check-in</p>
-        </div>
-
-        <div className="attendance-summary-card">
-          <div className="attendance-summary-header">
-            <div>
-              <p className="attendance-summary-label">Tidak Hadir</p>
-              <p className="attendance-summary-subtitle">Total absen</p>
-            </div>
-            <div className="attendance-summary-icon-wrapper attendance-icon-red">
-              <Clock size={28} />
-            </div>
-          </div>
-          <div className="attendance-summary-value attendance-value-red">{totalAbsent}</div>
-          <p className="attendance-summary-trend">Tanpa keterangan</p>
-        </div>
-
-        <div className="attendance-summary-card">
-          <div className="attendance-summary-header">
-            <div>
-              <p className="attendance-summary-label">Terlambat</p>
-              <p className="attendance-summary-subtitle">Total late</p>
-            </div>
-            <div className="attendance-summary-icon-wrapper attendance-icon-orange">
-              <TrendingUp size={28} />
-            </div>
-          </div>
-          <div className="attendance-summary-value attendance-value-orange">{totalLate}</div>
-          <p className="attendance-summary-trend">Tidak tepat waktu</p>
-        </div>
-      </div>
-
-      {/* Analytics Title Card */}
-      <Card className="analytics-title-card">
-        <CardHeader
-          icon={BarChart3}
-          title="Analitik Kehadiran"
-          subtitle="Laporan dan tren kehadiran"
-          iconColor="#1d4ed8"
-          iconBgColor="#dbeafe"
-        />
       </Card>
 
-      {/* Chart Section */}
-      <div className="chart-section">
-        <Card className="chart-card">
-          {loading && <LoadingState message="Memuat laporan..." />}
-          {!loading && records.length === 0 && (
+      <div className="table-section">
+        <div className="table-wrap">
+          {adminLoading && adminItems.length === 0 ? (
+            <LoadingState message="Memuat data kehadiran..." />
+          ) : filteredItems.length === 0 ? (
             <div className="empty-state">
-              <EmptyState title="Tidak Ada Data" message="Belum ada data laporan." />
+              <EmptyState title="Tidak ada data" message="Coba ubah kriteria pencarian atau filter Anda." />
             </div>
+          ) : (
+            <AttendanceTable
+              items={filteredItems}
+              onView={handleViewDetail}
+              onDelete={handleDeleteRecord}
+              loading={adminLoading}
+            />
           )}
-          {!loading && records.length > 0 && (
-            <>
-              <div className="chart-header">
-                <h3 className="chart-title">Tren Kehadiran Mingguan</h3>
-                <p className="chart-subtitle">Perbandingan kehadiran karyawan</p>
-              </div>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(37, 99, 235, 0.1)" />
-                  <XAxis dataKey="name" stroke="#1e40af" style={{ fontSize: '12px' }} />
-                  <YAxis stroke="#1e40af" style={{ fontSize: '12px' }} />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#fff', 
-                      border: '1px solid #dbeafe',
-                      borderRadius: '8px',
-                    }}
-                  />
-                  <Legend />
-                  <Bar dataKey="hadir" fill="#10b981" radius={[4, 4, 0, 0]} name="Hadir" />
-                  <Bar dataKey="late" fill="#f59e0b" radius={[4, 4, 0, 0]} name="Terlambat" />
-                  <Bar dataKey="absent" fill="#ef4444" radius={[4, 4, 0, 0]} name="Absent" />
-                </BarChart>
-              </ResponsiveContainer>
-            </>
-          )}
-        </Card>
+        </div>
       </div>
+
+      <AttendanceDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        item={selectedDetail}
+      />
     </div>
   );
 };

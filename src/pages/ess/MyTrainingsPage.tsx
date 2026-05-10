@@ -1,399 +1,242 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { RefreshCw, GraduationCap, Clock, CheckCircle, BookOpen, Play, BookTemplate, Search, Award, FileText, Star, X, ExternalLink, Eye } from 'lucide-react';
+import { RefreshCw, GraduationCap, Clock, CheckCircle, BookOpen, Play, Search, Award, FileText, Star, X, Eye } from 'lucide-react';
 import { useAuthStore } from '@/app/store/auth.store';
-import { Card, CardHeader } from '@/shared/ui';
+import { Card } from '@/shared/ui';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { trainingService } from '@/features/training/api/training.service';
 import { RBACUtils } from '@/shared/hooks/rbac';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
-import '@/pages/payroll/PayrollShared.css';
+
+const statusConfig: Record<string, { label: string; color: string; bg: string }> = {
+  completed: { label: 'Selesai', color: '#10b981', bg: '#ecfdf5' },
+  in_progress: { label: 'Berlangsung', color: '#f59e0b', bg: '#fffbeb' },
+  ongoing: { label: 'Berlangsung', color: '#f59e0b', bg: '#fffbeb' },
+  enrolled: { label: 'Terdaftar', color: '#6366f1', bg: '#eef2ff' },
+  pending: { label: 'Menunggu', color: '#f59e0b', bg: '#fffbeb' },
+  active: { label: 'Aktif', color: '#3b82f6', bg: '#eff6ff' },
+};
 
 const MyTrainingsPage: React.FC = () => {
-  const user = useAuthStore((state) => state.user);
+  const user = useAuthStore((s) => s.user);
   const [trainings, setTrainings] = useState<any[]>([]);
-  const [availableTrainings, setAvailableTrainings] = useState<any[]>([]);
+  const [available, setAvailable] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const canSelfEnroll = RBACUtils.hasRole(user, 'employee');
-  const canUseAdminTrainingView = RBACUtils.isAdmin(user) || RBACUtils.isHR(user) || RBACUtils.isSuperAdmin(user);
+  const [search, setSearch] = useState('');
+  const [tab, setTab] = useState<'Semua' | 'Tersedia' | 'Berlangsung' | 'Selesai'>('Semua');
+  const [page, setPage] = useState(1);
+  const [resultModal, setResultModal] = useState<any>(null);
+  const pageSize = 10;
 
-  const normalizeProgram = (program: any) => ({
-    id: program.id,
-    title: program.title ?? program.name ?? 'Training',
-    category: program.category ?? program.type ?? '-',
-    status: program.status ?? 'active',
-    progress: program.progress ?? 0,
-    program,
-  });
-
-  const normalizeEnrollment = (enrollment: any) => ({
-    ...enrollment,
-    program: enrollment.program ?? enrollment.training_program ?? enrollment.training ?? null,
-    title: enrollment.title ?? enrollment.program?.title ?? enrollment.training_program?.title,
-    category: enrollment.category ?? enrollment.program?.category ?? enrollment.training_program?.category ?? '-',
-    status: enrollment.status ?? 'pending',
-    progress: enrollment.progress ?? 0,
-  });
-
-  // Search & Filter
-  const [searchText, setSearchText] = useState('');
-  const [activeTab, setActiveTab] = useState<'Semua' | 'In Progress' | 'Completed' | 'Tersedia' | 'Pending'>('Semua');
-
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(10);
-
-  // Result Modal
-  const [showResultModal, setShowResultModal] = useState(false);
-  const [selectedResult, setSelectedResult] = useState<any>(null);
+  const isEmployee = RBACUtils.hasRole(user, 'employee');
+  const isAdmin = RBACUtils.isAdmin(user) || RBACUtils.isHR(user) || RBACUtils.isSuperAdmin(user);
 
   const fetchData = async () => {
     setLoading(true);
     setErrorMessage(null);
     try {
-      if (canSelfEnroll) {
+      if (isEmployee) {
         const [myRes, availRes] = await Promise.all([
           trainingService.getMyTrainings(),
           trainingService.getAvailableTrainings(),
         ]);
-
         setTrainings(Array.isArray(myRes) ? myRes : Array.isArray(myRes?.data) ? myRes.data : []);
-        setAvailableTrainings(Array.isArray(availRes) ? availRes : Array.isArray(availRes?.data?.data) ? availRes.data.data : Array.isArray(availRes?.data) ? availRes.data : []);
-        return;
-      }
-
-      if (canUseAdminTrainingView) {
-        const [programsRes, enrollmentsRes] = await Promise.all([
+        setAvailable(Array.isArray(availRes) ? availRes : Array.isArray(availRes?.data?.data) ? availRes.data.data : Array.isArray(availRes?.data) ? availRes.data : []);
+      } else if (isAdmin) {
+        const [progRes, enrollRes] = await Promise.all([
           trainingService.getPrograms(),
           trainingService.getEnrollments(),
         ]);
-
-        const programItems = Array.isArray(programsRes)
-          ? programsRes.map(normalizeProgram)
-          : Array.isArray(programsRes?.data)
-            ? programsRes.data.map(normalizeProgram)
-            : Array.isArray(programsRes?.data?.data)
-              ? programsRes.data.data.map(normalizeProgram)
-              : [];
-
-        const enrollmentItems = Array.isArray(enrollmentsRes)
-          ? enrollmentsRes.map(normalizeEnrollment)
-          : Array.isArray(enrollmentsRes?.data)
-            ? enrollmentsRes.data.map(normalizeEnrollment)
-            : Array.isArray(enrollmentsRes?.data?.data)
-              ? enrollmentsRes.data.data.map(normalizeEnrollment)
-              : [];
-
-        setTrainings(enrollmentItems);
-        setAvailableTrainings(programItems);
-        return;
+        const programs = Array.isArray(progRes) ? progRes : Array.isArray(progRes?.data) ? progRes.data : Array.isArray(progRes?.data?.data) ? progRes.data.data : [];
+        const enrollments = Array.isArray(enrollRes) ? enrollRes : Array.isArray(enrollRes?.data) ? enrollRes.data : Array.isArray(enrollRes?.data?.data) ? enrollRes.data.data : [];
+        setTrainings(enrollments);
+        setAvailable(programs);
+      } else {
+        setErrorMessage('Akses terbatas');
       }
-
-      setErrorMessage('Akses pelatihan hanya tersedia untuk employee, admin, atau HR.');
-    } catch (error) {
-      console.error('Error fetching trainings:', error);
-      setErrorMessage('Gagal memuat pelatihan');
+    } catch (e) {
+      console.error(e);
+      setErrorMessage('Gagal memuat data');
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useEffect(() => { fetchData(); }, []);
 
   const handleEnroll = async (id: number) => {
-    if (!window.confirm('Apakah Anda yakin ingin mendaftar pelatihan ini?')) return;
+    if (!window.confirm('Daftar pelatihan ini?')) return;
     try {
       setLoading(true);
       await trainingService.selfEnroll(id);
-      alert('Berhasil mengajukan pendaftaran pelatihan. Menunggu approval.');
+      alert('Pendaftaran berhasil diajukan');
       fetchData();
-    } catch (error: any) {
-      alert(error.response?.data?.message || 'Gagal mendaftar pelatihan');
+    } catch (e: any) {
+      alert(e.response?.data?.message || 'Gagal mendaftar');
       setLoading(false);
     }
   };
 
-  const handleViewResult = (training: any) => {
-    setSelectedResult(training);
-    setShowResultModal(true);
-  };
+  const list = tab === 'Tersedia' ? available : trainings;
 
-  // Filter & Sort & Paginate
-  const currentList = useMemo(() => activeTab === 'Tersedia' ? availableTrainings : trainings, [activeTab, availableTrainings, trainings]);
-
-  const filteredTrainings = useMemo(() => {
-    return currentList.filter((training) => {
-      const searchStr = searchText.toLowerCase();
-      const nameMatch = (training.program?.title || training.title || '').toLowerCase().includes(searchStr);
-      const categoryMatch = (training.category || training.program?.category || '').toLowerCase().includes(searchStr);
-      const textMatch = nameMatch || categoryMatch;
-
-      let statusMatch = true;
-      if (activeTab === 'In Progress') statusMatch = training.status === 'in_progress' || training.status === 'ongoing' || training.status === 'enrolled';
-      else if (activeTab === 'Completed') statusMatch = training.status === 'completed';
-      else if (activeTab === 'Pending') statusMatch = training.status === 'pending';
-
-      return textMatch && statusMatch;
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase();
+    return list.filter((t: any) => {
+      const title = (t.program?.title || t.title || '').toLowerCase();
+      const cat = (t.category || t.program?.category || '').toLowerCase();
+      const matchText = title.includes(q) || cat.includes(q);
+      let matchStatus = true;
+      if (tab === 'Berlangsung') matchStatus = ['in_progress', 'ongoing', 'enrolled'].includes(t.status);
+      else if (tab === 'Selesai') matchStatus = t.status === 'completed';
+      return matchText && matchStatus;
     });
-  }, [currentList, searchText, activeTab]);
+  }, [list, search, tab]);
 
-  const sortedTrainings = useMemo(() => {
-    return [...filteredTrainings].sort((a, b) => {
-      const nameA = (a.program?.title || a.title || '').toLowerCase();
-      const nameB = (b.program?.title || b.title || '').toLowerCase();
-      return nameA.localeCompare(nameB);
-    });
-  }, [filteredTrainings]);
+  const sorted = useMemo(() => [...filtered].sort((a: any, b: any) => (a.program?.title || a.title || '').localeCompare(b.program?.title || b.title || '')), [filtered]);
+  const paginated = useMemo(() => sorted.slice((page - 1) * pageSize, page * pageSize), [sorted, page, pageSize]);
 
-  const paginatedTrainings = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return sortedTrainings.slice(startIndex, startIndex + pageSize);
-  }, [sortedTrainings, currentPage, pageSize]);
+  useEffect(() => { setPage(1); }, [search, tab]);
 
-  const totalPages = Math.ceil(sortedTrainings.length / pageSize);
-
-  const completedCount = useMemo(() => trainings.filter(t => t.status === 'completed').length, [trainings]);
-  const inProgressCount = useMemo(() => trainings.filter(t => t.status === 'in_progress' || t.status === 'ongoing').length, [trainings]);
-
-  const clearFilters = () => {
-    setSearchText('');
-    setActiveTab('Semua');
-    setCurrentPage(1);
-  };
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchText, activeTab]);
-
-  const getStatusStyle = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case 'completed': return { icon: CheckCircle, color: '#10b981', bg: '#ecfdf5' };
-      case 'in_progress': case 'ongoing': case 'enrolled': return { icon: Play, color: '#f59e0b', bg: '#fffbeb' };
-      case 'upcoming': case 'scheduled': return { icon: Clock, color: '#6366f1', bg: '#eef2ff' };
-      case 'pending': return { icon: Clock, color: '#f59e0b', bg: '#fffbeb' };
-      case 'active': return { icon: BookOpen, color: '#3b82f6', bg: '#eff6ff' };
-      default: return { icon: Clock, color: '#64748b', bg: '#f1f5f9' };
-    }
-  };
-
-  const summaryCards = useMemo(
-    () => [
-      {
-        label: 'Total Pelatihan',
-        subtitle: 'Seluruh pelatihan',
-        value: String(trainings.length),
-        change: 'Data tersimpan di sistem',
-        tone: 'blue' as const,
-        icon: GraduationCap,
-      },
-      {
-        label: 'Hasil Filter',
-        subtitle: 'Pelatihan sesuai pencarian',
-        value: String(sortedTrainings.length),
-        change: `${paginatedTrainings.length} data per halaman`,
-        tone: 'green' as const,
-        icon: Search,
-      },
-      {
-        label: 'Sedang Berlangsung',
-        subtitle: 'Pelatihan aktif',
-        value: String(inProgressCount),
-        change: 'In progress',
-        tone: 'orange' as const,
-        icon: Play,
-      },
-      {
-        label: 'Menunggu Persetujuan',
-        subtitle: 'Pengajuan pelatihan',
-        value: String(trainings.filter(t => t.status === 'pending').length),
-        change: 'Pending approval',
-        tone: 'orange' as const,
-        icon: Clock,
-      },
-      {
-        label: 'Selesai',
-        subtitle: 'Pelatihan selesai',
-        value: String(completedCount),
-        change: 'Completed',
-        tone: 'purple' as const,
-        icon: CheckCircle,
-      },
-    ],
-    [trainings.length, completedCount, inProgressCount, sortedTrainings.length, paginatedTrainings.length]
-  );
+  const totalActive = trainings.filter((t: any) => ['in_progress', 'ongoing', 'enrolled'].includes(t.status)).length;
+  const totalDone = trainings.filter((t: any) => t.status === 'completed').length;
 
   return (
     <div className="crud-page">
-      {/* Header */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
-            <div className="hero-badge">
-              <BookTemplate size={16} />
-              <span>{canSelfEnroll ? 'Layanan Mandiri' : 'Admin/HR Training View'}</span>
-            </div>
+            <div className="hero-badge"><GraduationCap size={16} /><span>Pengembangan Diri</span></div>
             <h1 className="hero-title">Pelatihan Saya</h1>
             <p className="hero-subtitle">
-              {canSelfEnroll
-                ? 'Lacak pendaftaran pelatihan, kemajuan, dan kursus yang telah selesai.'
-                : 'Lihat program pelatihan dan enrollment tanpa batasan employee-only.'}
+              {isEmployee ? 'Ikuti pelatihan dan lacak kemajuan belajar Anda.' : 'Lihat program pelatihan dan enrollment.'}
             </p>
           </div>
           <div className="hero-actions">
             <button className="btn-outline" onClick={fetchData} disabled={loading}>
-              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-              Segarkan
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} /> Segarkan
             </button>
           </div>
         </div>
       </Card>
 
-      {/* Summary Cards */}
       <div className="employee-summary-wrapper">
-        {summaryCards.map((card) => {
-          const Icon = card.icon;
-          return (
-            <div key={card.label} className="employee-summary-card">
-              <div className="employee-summary-header">
-                <div>
-                  <p className="employee-summary-label">{card.label}</p>
-                  <p className="employee-summary-subtitle">{card.subtitle}</p>
-                </div>
-                <div className={`employee-summary-icon-wrapper employee-icon-${card.tone}`}>
-                  <Icon size={28} />
-                </div>
-              </div>
-              <div className={`employee-summary-value employee-value-${card.tone}`}>{card.value}</div>
-              <p className="employee-summary-trend">{card.change}</p>
-            </div>
-          );
-        })}
+        <div className="employee-summary-card">
+          <div className="employee-summary-header">
+            <div><p className="employee-summary-label">Total Pelatihan</p><p className="employee-summary-subtitle">Semua pelatihan</p></div>
+            <div className="employee-summary-icon-wrapper employee-icon-blue"><GraduationCap size={28} /></div>
+          </div>
+          <div className="employee-summary-value employee-value-blue">{trainings.length}</div>
+          <p className="employee-summary-trend">Data tersimpan</p>
+        </div>
+        <div className="employee-summary-card">
+          <div className="employee-summary-header">
+            <div><p className="employee-summary-label">Sedang Berlangsung</p><p className="employee-summary-subtitle">Pelatihan aktif</p></div>
+            <div className="employee-summary-icon-wrapper employee-icon-orange"><Play size={28} /></div>
+          </div>
+          <div className="employee-summary-value employee-value-orange">{totalActive}</div>
+          <p className="employee-summary-trend">Dalam proses</p>
+        </div>
+        <div className="employee-summary-card">
+          <div className="employee-summary-header">
+            <div><p className="employee-summary-label">Selesai</p><p className="employee-summary-subtitle">Pelatihan selesai</p></div>
+            <div className="employee-summary-icon-wrapper employee-icon-green"><CheckCircle size={28} /></div>
+          </div>
+          <div className="employee-summary-value employee-value-green">{totalDone}</div>
+          <p className="employee-summary-trend">Completed</p>
+        </div>
       </div>
 
-      {/* Analytics Title Card */}
-      <Card className="analytics-title-card">
-        <div className="analytics-title-inner">
-          <div className="analytics-icon">
-            <GraduationCap size={24} />
-          </div>
-          <div>
-            <h2 className="analytics-title">Daftar Pelatihan</h2>
-            <p className="analytics-subtitle">Kelola dan lihat semua pelatihan Anda</p>
-          </div>
-        </div>
-      </Card>
-
-      {/* Control Section */}
       <Card className="control-section-card">
         <div className="control-section-inner">
-          {/* Tabs */}
           <div className="elyra-tabs">
-            {(['Semua', 'Tersedia', 'Pending', 'In Progress', 'Completed'] as const).map((tab) => (
-              <button key={tab} className={`elyra-tab ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
-                {tab}
-              </button>
+            {(['Semua', 'Tersedia', 'Berlangsung', 'Selesai'] as const).map((t) => (
+              <button key={t} className={`elyra-tab ${tab === t ? 'active' : ''}`} onClick={() => setTab(t)}>{t}</button>
             ))}
           </div>
-
-          {/* Search */}
           <div className="control-actions">
             <div className="search-box">
               <div className="search-icon-inside"><Search size={18} /></div>
-              <input
-                type="text"
-                placeholder="Cari pelatihan..."
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                className="search-input-pill"
-              />
+              <input type="text" placeholder="Cari pelatihan..." value={search} onChange={(e) => setSearch(e.target.value)} className="search-input-pill" />
             </div>
-            {(searchText || activeTab !== 'Semua') && (
-              <button className="btn-clear-filter" onClick={clearFilters}>
-                Hapus Filter
-              </button>
+            {(search || tab !== 'Semua') && (
+              <button className="btn-clear-filter" onClick={() => { setSearch(''); setTab('Semua'); }}>Hapus Filter</button>
             )}
           </div>
         </div>
       </Card>
 
-      {/* Table Section */}
       <div className="table-section">
         <div className="wuw-table-area">
           {loading && <LoadingState message="Memuat pelatihan..." />}
-          {!loading && errorMessage && <ErrorState message="Koneksi Terputus" error={errorMessage} onRetry={fetchData} />}
-
-          {!loading && !errorMessage && paginatedTrainings.length === 0 && (
+          {!loading && errorMessage && <ErrorState message="Terjadi Kesalahan" error={errorMessage} onRetry={fetchData} />}
+          {!loading && !errorMessage && paginated.length === 0 && (
             <div style={{ padding: '5rem 0' }}>
-              <EmptyState
-                title="Pencarian Kosong"
-                message="Kami tidak menemukan pelatihan yang sesuai dengan kriteria Anda."
-                actionLabel="Bersihkan Filter"
-                onAction={clearFilters}
-              />
+              <EmptyState title="Tidak Ada Data" message={search || tab !== 'Semua' ? 'Tidak ada hasil yang sesuai.' : 'Belum ada pelatihan.'} actionLabel={search || tab !== 'Semua' ? 'Hapus Filter' : undefined} onAction={() => { setSearch(''); setTab('Semua'); }} />
             </div>
           )}
 
-          {!loading && !errorMessage && paginatedTrainings.length > 0 && (
+          {!loading && !errorMessage && paginated.length > 0 && (
             <>
               <div className="table-wrap">
                 <table className="data-table">
                   <thead>
                     <tr>
-                      <th>Pelatihan</th>
+                      <th style={{ width: '380px' }}>Pelatihan</th>
                       <th>Kategori</th>
                       <th>Status</th>
                       <th>Progress</th>
-                      <th className="th-center" style={{ width: '120px' }}>Aksi</th>
+                      <th className="th-center" style={{ width: '110px' }}>Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {paginatedTrainings.map((training) => {
-                      const statusStyle = getStatusStyle(training.status);
-                      const StatusIcon = statusStyle.icon;
+                    {paginated.map((t: any) => {
+                      const cfg = statusConfig[t.status] || { label: t.status, color: '#64748b', bg: '#f1f5f9' };
+                      const title = t.program?.title || t.title || 'Training';
+                      const category = t.category || t.program?.category || '-';
                       return (
-                        <tr key={training.id}>
+                        <tr key={t.id}>
                           <td>
                             <div className="cell-name">
-                              <div className="cell-avatar" style={{ background: statusStyle.bg, color: statusStyle.color }}>
+                              <div className="cell-avatar" style={{ background: cfg.bg, color: cfg.color }}>
                                 <BookOpen size={18} />
                               </div>
                               <div className="cell-stacked">
-                                <span className="cell-name-text">{training.program?.title || training.title || 'Training'}</span>
-                                <span className="cell-stacked__sub">{training.category || training.program?.category || '-'}</span>
+                                <span className="cell-name-text">{title}</span>
+                                <span className="cell-stacked__sub">{category}</span>
                               </div>
                             </div>
                           </td>
-                          <td><span style={{ color: '#475569', fontWeight: 600 }}>{training.category || training.program?.category || '-'}</span></td>
+                          <td><span style={{ color: '#475569', fontWeight: 600 }}>{category}</span></td>
                           <td>
-                            <span style={{ padding: '4px 10px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, background: statusStyle.bg, color: statusStyle.color }}>
-                              <StatusIcon size={12} style={{ marginRight: '4px' }} />
-                              {activeTab === 'Tersedia' ? 'Tersedia' : (training.status || 'Pending')}
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 8, fontSize: '0.75rem', fontWeight: 600, background: cfg.bg, color: cfg.color }}>
+                              {tab === 'Tersedia' ? 'Tersedia' : cfg.label}
                             </span>
                           </td>
                           <td>
-                            {training.progress !== undefined && activeTab !== 'Tersedia' ? (
-                              <span style={{ color: '#64748b' }}>{training.progress}%</span>
-                            ) : '-'}
+                            {tab !== 'Tersedia' && t.progress !== undefined ? (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <div style={{ width: 64, height: 6, background: '#e2e8f0', borderRadius: 3, overflow: 'hidden' }}>
+                                  <div style={{ width: `${Math.min(t.progress, 100)}%`, height: '100%', background: '#10b981', borderRadius: 3 }} />
+                                </div>
+                                <span style={{ fontSize: '0.8rem', color: '#64748b' }}>{t.progress}%</span>
+                              </div>
+                            ) : <span style={{ color: '#94a3b8' }}>-</span>}
                           </td>
-                           <td className="td-center">
-                            {activeTab === 'Tersedia' ? (
-                              canSelfEnroll ? (
-                                <button className="btn-primary" style={{ padding: '6px 12px', fontSize: '0.75rem' }} onClick={() => handleEnroll(training.id)}>
-                                  Daftar
-                                </button>
+                          <td className="td-center">
+                            {tab === 'Tersedia' ? (
+                              isEmployee ? (
+                                <button className="btn-primary" style={{ padding: '6px 14px', fontSize: '0.75rem' }} onClick={() => handleEnroll(t.id)}>Daftar</button>
                               ) : (
-                                <span className="badge-soft badge-soft--blue">Akses Admin/HR</span>
+                                <span className="badge-soft badge-soft--blue">Admin</span>
                               )
-                            ) : training.status === 'completed' ? (
-                              <button className="btn-outline" style={{ padding: '6px 12px', fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }} onClick={() => handleViewResult(training)}>
-                                <Eye size={14} /> Lihat Hasil
+                            ) : t.status === 'completed' ? (
+                              <button className="btn-outline" style={{ padding: '6px 12px', fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: 4 }} onClick={() => setResultModal(t)}>
+                                <Eye size={14} /> Hasil
                               </button>
                             ) : (
-                              <span className={`badge-soft badge-soft--${training.status === 'completed' ? 'green' : training.status === 'pending' ? 'yellow' : 'blue'}`}>
-                                {training.status}
+                              <span className={`badge-soft badge-soft--${t.status === 'completed' ? 'green' : t.status === 'pending' ? 'yellow' : 'blue'}`}>
+                                {cfg.label}
                               </span>
                             )}
                           </td>
@@ -404,35 +247,14 @@ const MyTrainingsPage: React.FC = () => {
                 </table>
               </div>
 
-              {/* Pagination */}
               <div className="table-pagination">
-                <div className="pagination-info">
-                  Menampilkan <strong>{paginatedTrainings.length}</strong> dari <strong>{sortedTrainings.length}</strong> pelatihan
-                </div>
+                <div className="pagination-info">Menampilkan <strong>{paginated.length}</strong> dari <strong>{sorted.length}</strong> pelatihan</div>
                 <div className="pagination-controls">
-                  <button
-                    className="pagination-btn"
-                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                    disabled={currentPage === 1}
-                  >
-                    ‹
-                  </button>
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <button
-                      key={page}
-                      className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
-                      onClick={() => setCurrentPage(page)}
-                    >
-                      {page}
-                    </button>
+                  <button className="pagination-btn" onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1}>‹</button>
+                  {Array.from({ length: Math.ceil(sorted.length / pageSize) }, (_, i) => i + 1).map((p) => (
+                    <button key={p} className={`pagination-btn ${page === p ? 'active' : ''}`} onClick={() => setPage(p)}>{p}</button>
                   ))}
-                  <button
-                    className="pagination-btn"
-                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                    disabled={currentPage === totalPages}
-                  >
-                    ›
-                  </button>
+                  <button className="pagination-btn" onClick={() => setPage(Math.min(Math.ceil(sorted.length / pageSize), page + 1))} disabled={page === Math.ceil(sorted.length / pageSize)}>›</button>
                 </div>
               </div>
             </>
@@ -440,110 +262,50 @@ const MyTrainingsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Result Modal */}
-      {showResultModal && selectedResult && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }} onClick={() => setShowResultModal(false)}>
-          <Card glass style={{ maxWidth: '560px', width: '100%', position: 'relative', maxHeight: '90vh', overflowY: 'auto' }} onClick={(e) => e.stopPropagation()}>
+      {resultModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }} onClick={() => setResultModal(null)}>
+          <Card glass style={{ maxWidth: 520, width: '100%', position: 'relative', maxHeight: '90vh', overflowY: 'auto' }} onClick={(e) => e.stopPropagation()}>
             <div style={{ padding: '1.5rem' }}>
-              {/* Header */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <div style={{ background: '#ecfdf5', borderRadius: '12px', padding: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Award size={28} color="#10b981" />
-                  </div>
+                  <div style={{ background: '#ecfdf5', borderRadius: 12, padding: '0.75rem' }}><Award size={28} color="#10b981" /></div>
                   <div>
-                    <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#1e293b', fontWeight: 700 }}>Hasil Pelatihan</h3>
-                    <p style={{ margin: 0, fontSize: '0.875rem', color: '#64748b' }}>{selectedResult.program?.title || selectedResult.title}</p>
+                    <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#1e293b', fontWeight: 700 }}>Hasil Pelatihan</h3>
+                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>{resultModal.program?.title || resultModal.title}</p>
                   </div>
                 </div>
-                <button onClick={() => setShowResultModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '0.25rem' }}>
-                  <X size={20} />
-                </button>
+                <button onClick={() => setResultModal(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '0.25rem' }}><X size={20} /></button>
               </div>
 
-              {/* Score Card */}
-              {selectedResult.score !== null && selectedResult.score !== undefined && (
-                <div style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', borderRadius: '16px', padding: '1.5rem', marginBottom: '1.5rem', textAlign: 'center', color: '#fff' }}>
-                  <Star size={32} style={{ marginBottom: '0.5rem' }} fill="#fbbf24" color="#fbbf24" />
-                  <div style={{ fontSize: '3rem', fontWeight: 800 }}>{selectedResult.score}</div>
-                  <div style={{ fontSize: '0.875rem', opacity: 0.9 }}>Skor Akhir</div>
+              {resultModal.score !== null && resultModal.score !== undefined && (
+                <div style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', borderRadius: 16, padding: '1.5rem', marginBottom: '1.5rem', textAlign: 'center', color: '#fff' }}>
+                  <Star size={28} style={{ marginBottom: '0.5rem' }} fill="#fbbf24" color="#fbbf24" />
+                  <div style={{ fontSize: '2.5rem', fontWeight: 800 }}>{resultModal.score}</div>
+                  <div style={{ fontSize: '0.85rem', opacity: 0.9 }}>Skor Akhir</div>
                 </div>
               )}
 
-              {/* Details */}
-              <div style={{ background: '#f8fafc', borderRadius: '12px', padding: '1.25rem' }}>
-                <h4 style={{ margin: '0 0 1rem', fontSize: '0.9rem', fontWeight: 600, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Detail</h4>
-                
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  {/* Program */}
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-                    <div style={{ background: '#eff6ff', borderRadius: '8px', padding: '0.5rem', display: 'flex' }}>
-                      <BookOpen size={16} color="#3b82f6" />
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.125rem' }}>Program</div>
-                      <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1e293b' }}>{selectedResult.program?.title || selectedResult.title || '-'}</div>
-                    </div>
+              <div style={{ background: '#f8fafc', borderRadius: 12, padding: '1.25rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    <div style={{ background: '#eff6ff', borderRadius: 8, padding: '0.5rem' }}><BookOpen size={16} color="#3b82f6" /></div>
+                    <div><div style={{ fontSize: '0.75rem', color: '#64748b' }}>Program</div><div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#1e293b' }}>{resultModal.program?.title || resultModal.title || '-'}</div></div>
                   </div>
-
-                  {/* Category */}
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-                    <div style={{ background: '#f0fdf4', borderRadius: '8px', padding: '0.5rem', display: 'flex' }}>
-                      <GraduationCap size={16} color="#22c55e" />
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.125rem' }}>Kategori</div>
-                      <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1e293b' }}>{selectedResult.category || selectedResult.program?.category || '-'}</div>
-                    </div>
+                  <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    <div style={{ background: '#fef3c7', borderRadius: 8, padding: '0.5rem' }}><Clock size={16} color="#f59e0b" /></div>
+                    <div><div style={{ fontSize: '0.75rem', color: '#64748b' }}>Selesai</div><div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#1e293b' }}>{resultModal.completed_at ? new Date(resultModal.completed_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}</div></div>
                   </div>
-
-                  {/* Completed Date */}
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-                    <div style={{ background: '#fef3c7', borderRadius: '8px', padding: '0.5rem', display: 'flex' }}>
-                      <Clock size={16} color="#f59e0b" />
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.125rem' }}>Tanggal Selesai</div>
-                      <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1e293b' }}>{selectedResult.completed_at ? new Date(selectedResult.completed_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}</div>
-                    </div>
-                  </div>
-
-                  {/* Certificate */}
-                  {selectedResult.certificate_path && (
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-                      <div style={{ background: '#fdf2f8', borderRadius: '8px', padding: '0.5rem', display: 'flex' }}>
-                        <FileText size={16} color="#ec4899" />
-                      </div>
-                      <div>
-                        <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.125rem' }}>Sertifikat</div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1e293b' }}>Tersedia</span>
-                          <ExternalLink size={14} color="#6366f1" />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Notes */}
-                  {selectedResult.notes && (
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-                      <div style={{ background: '#f1f5f9', borderRadius: '8px', padding: '0.5rem', display: 'flex' }}>
-                        <FileText size={16} color="#64748b" />
-                      </div>
-                      <div>
-                        <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.125rem' }}>Catatan</div>
-                        <div style={{ fontSize: '0.875rem', color: '#334155' }}>{selectedResult.notes}</div>
-                      </div>
+                  {resultModal.notes && (
+                    <div style={{ display: 'flex', gap: '0.75rem' }}>
+                      <div style={{ background: '#f1f5f9', borderRadius: 8, padding: '0.5rem' }}><FileText size={16} color="#64748b" /></div>
+                      <div><div style={{ fontSize: '0.75rem', color: '#64748b' }}>Catatan</div><div style={{ fontSize: '0.85rem', color: '#334155' }}>{resultModal.notes}</div></div>
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Close Button */}
-              <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'flex-end' }}>
-                <button className="btn-primary" onClick={() => setShowResultModal(false)} style={{ padding: '0.625rem 1.5rem' }}>
-                  Tutup
-                </button>
+              <div style={{ marginTop: '1.25rem', display: 'flex', justifyContent: 'flex-end' }}>
+                <button className="btn-primary" onClick={() => setResultModal(null)} style={{ padding: '0.5rem 1.25rem' }}>Tutup</button>
               </div>
             </div>
           </Card>

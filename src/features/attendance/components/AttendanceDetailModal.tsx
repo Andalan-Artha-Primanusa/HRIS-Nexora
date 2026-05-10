@@ -47,7 +47,7 @@ export const AttendanceDetailModal: React.FC<AttendanceDetailModalProps> = ({ is
                   {String(item.employee?.full_name || 'E').charAt(0)}
                 </div>
                 <div>
-                   <div style={{ fontWeight: 600, color: '#1e293b' }}>{item.employee?.full_name || 'Unknown'}</div>
+                   <div style={{ fontWeight: 600, color: '#1e293b' }}>{item.employee?.full_name || item.employee_name || 'Unknown'}</div>
                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>ID: {item.employee_id}</div>
                 </div>
               </div>

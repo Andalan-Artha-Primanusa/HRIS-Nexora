@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { Alert } from '@/shared/ui/Alert';
 import { createLeaveRequest } from '@/features/leave/api/leave.service';
+import { api } from '@/shared/api/httpClient';
 import type { LeaveCreatePayload } from '@/features/leave/types/leave.types';
 import { Calendar, ChevronLeft } from 'lucide-react';
 import '../dashboard/overview/OverviewPage.css';
@@ -13,13 +14,33 @@ const CreateLeavePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const returnPath = location.pathname === '/leave/request' ? '/leave/my-leave' : '/leave/requests';
+  const [leaveTypes, setLeaveTypes] = useState<{ id: number; name: string; code: string }[]>([]);
+  const [typesLoading, setTypesLoading] = useState(true);
   const [formData, setFormData] = useState({
-    type: 'annual',
+    leave_type_id: 0,
     start_date: new Date().toISOString().split('T')[0],
     end_date: new Date().toISOString().split('T')[0],
     total_days: 1,
     reason: '',
   });
+
+  useEffect(() => {
+    const fetchLeaveTypes = async () => {
+      try {
+        const res = await api.get('/leave-types');
+        const data = res.data?.data ?? [];
+        setLeaveTypes(data);
+        if (data.length > 0) {
+          setFormData(prev => ({ ...prev, leave_type_id: data[0].id }));
+        }
+      } catch {
+        // fallback to empty
+      } finally {
+        setTypesLoading(false);
+      }
+    };
+    void fetchLeaveTypes();
+  }, []);
   const [loading, setLoading] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('error');
@@ -28,13 +49,13 @@ const CreateLeavePage = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === 'total_days' ? (parseInt(value) || 1) : value,
+      [name]: name === 'total_days' ? (parseInt(value) || 1) : name === 'leave_type_id' ? Number(value) : value,
     }));
   };
 
   const validateForm = (): boolean => {
-    if (!formData.type.trim()) {
-      setAlertMessage('Tipe leave wajib dipilih');
+    if (!formData.leave_type_id) {
+      setAlertMessage('Tipe cuti wajib dipilih');
       setAlertType('error');
       return false;
     }
@@ -69,7 +90,7 @@ const CreateLeavePage = () => {
 
     try {
       const payload: LeaveCreatePayload = {
-        type: formData.type,
+        leave_type_id: formData.leave_type_id,
         start_date: formData.start_date,
         end_date: formData.end_date,
         total_days: formData.total_days,
@@ -131,24 +152,25 @@ const CreateLeavePage = () => {
         <form className="leave-form" onSubmit={(e) => { e.preventDefault(); void handleCreateLeave(); }}>
           {/* Tipe Cuti */}
           <div className="leave-form-group">
-            <label htmlFor="type">
+            <label htmlFor="leave_type_id">
               Tipe Cuti
               <span className="leave-required">*</span>
             </label>
             <select
-              id="type"
-              name="type"
+              id="leave_type_id"
+              name="leave_type_id"
               className="leave-input"
-              value={formData.type}
+              value={formData.leave_type_id}
               onChange={handleInputChange}
-              disabled={loading}
+              disabled={loading || typesLoading}
             >
-              <option value="annual">Cuti Tahunan</option>
-              <option value="sick">Cuti Sakit</option>
-              <option value="personal">Cuti Pribadi</option>
-              <option value="maternity">Cuti Melahirkan</option>
-              <option value="parental">Cuti Orang Tua</option>
-              <option value="unpaid">Cuti Tanpa Gaji</option>
+              {typesLoading ? (
+                <option value="0">Memuat...</option>
+              ) : (
+                leaveTypes.map(lt => (
+                  <option key={lt.id} value={lt.id}>{lt.name}</option>
+                ))
+              )}
             </select>
           </div>
 

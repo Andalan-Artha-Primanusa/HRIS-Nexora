@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
 import { lazy } from "react";
+const NotFoundPage = lazy(() => import("../../pages/error/NotFoundPage"));
 import { getRoleBasedDashboardPathFromStorage } from "@/features/auth/utils/roleRedirect";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { useAuthSession } from "./useAuthSession";
@@ -15,8 +16,6 @@ const AttendanceCheckInPage = lazy(() => import("../../pages/attendance/Attendan
 const AttendanceCheckOutPage = lazy(() => import("../../pages/attendance/AttendanceCheckOutPage"));
 const AttendanceHistoryPage = lazy(() => import("../../pages/attendance/AttendanceHistoryPage"));
 const AttendanceTodayPage = lazy(() => import("../../pages/attendance/AttendanceTodayPage"));
-const AttendanceAdminPage = lazy(() => import("../../pages/attendance/AttendanceAdminPage"));
-const TimesheetPage = lazy(() => import("../../pages/attendance/TimesheetPage"));
 const OvertimePage = lazy(() => import("../../pages/attendance/OvertimePage"));
 const AttendanceReportsPage = lazy(() => import("../../pages/attendance/AttendanceReportsPage"));
 const KpiListPage = lazy(() => import("../../pages/admin/AdminKpiPage"));
@@ -59,18 +58,15 @@ const LeaveApprovalPage = lazy(() => import("../../pages/leave/LeaveApprovalPage
 const PayrollManagementPage = lazy(() => import("../../pages/payroll/PayrollManagementPage"));
 const PayrollDetailsPage = lazy(() => import("../../pages/payroll/PayrollDetailsPage"));
 const PayrollListPage = lazy(() => import("../../pages/payroll/PayrollListPage"));
-const PayrollCrudPage = lazy(() => import("../../pages/payroll/PayrollCrudPage"));
-const PayrollApprovePage = lazy(() => import("../../pages/payroll/PayrollApprovePage"));
-const PayrollPaymentPage = lazy(() => import("../../pages/payroll/PayrollPaymentPage"));
-const PayrollGeneratePage = lazy(() => import("../../pages/payroll/PayrollGeneratePage"));
+const PayrollProcessPage = lazy(() => import("../../pages/payroll/PayrollProcessPage"));
+const PayrollReportsPage = lazy(() => import("../../pages/payroll/PayrollReportsPage"));
 const PayrollDashboard = lazy(() => import("../../pages/payroll/PayrollDashboard"));
 const NotificationsPage = lazy(() => import("../../pages/notifications/NotificationsPage"));
 const ReportsDashboardPage = lazy(() => import("../../pages/reports/ReportsDashboardPage"));
 const ReportsAttendancePage = lazy(() => import("../../pages/reports/ReportsAttendancePage"));
 const ReportsLeavePage = lazy(() => import("../../pages/reports/ReportsLeavePage"));
 const ReportsPayrollPage = lazy(() => import("../../pages/reports/ReportsPayrollPage"));
-const PayrollTaxBPJSPage = lazy(() => import("../../pages/payroll/PayrollTaxPage"));
-const PayrollReportsDetailedPage = lazy(() => import("../../pages/payroll/PayrollReportsDetailedPage"));
+
 const ReportsAssetsPage = lazy(() => import("../../pages/reports/ReportsAssetsPage"));
 const ReportsEmployeePage = lazy(() => import("../../pages/reports/ReportsEmployeePage"));
 const WorkSchedulesPage = lazy(() => import("../../pages/work-schedule/WorkSchedulesPage"));
@@ -88,8 +84,7 @@ const OrgChartPage = lazy(() => import("../../pages/admin/OrgChartPage"));
 const HrRequestsPage = lazy(() => import("../../pages/admin/HrRequestsPage"));
 const ComplianceDashboardPage = lazy(() => import("../../pages/admin/ComplianceDashboardPage"));
 const HolidayCalendarPage = lazy(() => import("../../pages/admin/HolidayCalendarPage"));
-const TrainingProgramsPage = lazy(() => import("../../pages/admin/TrainingProgramsPage"));
-const TrainingEnrollmentsPage = lazy(() => import("../../pages/admin/TrainingEnrollmentsPage"));
+const TrainingManagementPage = lazy(() => import("../../pages/admin/TrainingManagementPage"));
 const CompetencyMatrixPage = lazy(() => import("../../pages/admin/CompetencyMatrixPage"));
 const ApprovalFlowPage = lazy(() => import("../../pages/admin/ApprovalFlowPage"));
 const ProgressiveTaxPage = lazy(() => import("../../pages/admin/ProgressiveTaxPage"));
@@ -102,31 +97,8 @@ const OvertimeRulesPage = lazy(() => import("../../pages/admin/OvertimeRulesPage
 const BiometricDevicesPage = lazy(() => import("../../pages/admin/BiometricDevicesPage"));
 const CompensationPage = lazy(() => import("../../pages/admin/CompensationPage"));
 const ComplianceSettingsPage = lazy(() => import("../../pages/admin/ComplianceSettingsPage"));
-const AssetInventoryPage = lazy(() => import("../../pages/admin/AssetInventoryPage"));
-const BenefitManagementPage = lazy(() => import("../../pages/admin/BenefitManagementPage"));
-const DetailedPeopleAnalyticsPage = lazy(() => import("../../pages/admin/DetailedPeopleAnalyticsPage"));
-const NotificationRulesPage = lazy(() => import("../../pages/admin/NotificationRulesPage"));
-const JobOpeningFormPage = lazy(() => import("../../pages/admin/JobOpeningFormPage"));
+const AssetManagementPage = lazy(() => import("../../pages/admin/AssetManagementPage"));
 const AssetFormPage = lazy(() => import("../../pages/admin/AssetFormPage"));
-const OkrFormPage = lazy(() => import("../../pages/admin/OkrFormPage"));
-const SurveyFormPage = lazy(() => import("../../pages/admin/SurveyFormPage"));
-const BenefitFormPage = lazy(() => import("../../pages/admin/BenefitFormPage"));
-
-const MasterDataPage = lazy(() => import("../../pages/admin/MasterDataPage"));
-const CompanySettingsPage = lazy(() => import("../../pages/admin/CompanySettingsPage"));
-const NotificationSettingsPage = lazy(() => import("../../pages/admin/NotificationSettingsPage"));
-const LeaveTypePage = lazy(() => import("../../pages/admin/LeaveTypePage"));
-const LeavePolicyPage = lazy(() => import("../../pages/admin/LeavePolicyPage"));
-const LeaveTypeFormPage = lazy(() => import("../../pages/admin/LeaveTypeFormPage"));
-const LeavePolicyFormPage = lazy(() => import("../../pages/admin/LeavePolicyFormPage"));
-const TrainingFormPage = lazy(() => import("../../pages/admin/TrainingFormPage.tsx"));
-const BiometricDeviceFormPage = lazy(() => import("../../pages/admin/BiometricDeviceFormPage.tsx"));
-const HolidayFormPage = lazy(() => import("../../pages/admin/HolidayFormPage.tsx"));
-const OvertimeRuleFormPage = lazy(() => import("../../pages/admin/OvertimeRuleFormPage.tsx"));
-const CalibrationFormPage = lazy(() => import("../../pages/admin/CalibrationFormPage.tsx"));
-const HrRequestFormPage = lazy(() => import("../../pages/admin/HrRequestFormPage.tsx"));
-const SlaPage = lazy(() => import("../../pages/admin/SlaPage.tsx"));
-const AssetAssignmentsPage = lazy(() => import("../../pages/admin/AssetAssignmentsPage.tsx"));
 const AssignmentLettersPage = lazy(() => import("../../pages/admin/AssignmentLettersPage.tsx"));
 const TaskManagementPage = lazy(() => import("../../pages/admin/TaskManagementPage.tsx"));
 const PromotionPage = lazy(() => import("../../pages/admin/PromotionPage.tsx"));
@@ -137,7 +109,27 @@ const MyTasksPage = lazy(() => import("../../pages/ess/MyTasksPage.tsx"));
 const MyPromotionsPage = lazy(() => import("../../pages/ess/MyPromotionsPage.tsx"));
 // const MyDocumentsPage = lazy(() => import("../../pages/ess/MyDocumentsPage.tsx"));
 const ShiftSwapFormPage = lazy(() => import("../../pages/admin/ShiftSwapFormPage.tsx"));
-const OvertimeApprovalPage = lazy(() => import("../../pages/admin/OvertimeApprovalPage.tsx"));
+const LeavePolicyPage = lazy(() => import("../../pages/admin/LeavePolicyPage"));
+const LeavePolicyFormPage = lazy(() => import("../../pages/admin/LeavePolicyFormPage"));
+const LeaveTypePage = lazy(() => import("../../pages/admin/LeaveTypePage"));
+const LeaveTypeFormPage = lazy(() => import("../../pages/admin/LeaveTypeFormPage"));
+const BiometricDeviceFormPage = lazy(() => import("../../pages/admin/BiometricDeviceFormPage.tsx"));
+const JobOpeningFormPage = lazy(() => import("../../pages/admin/JobOpeningFormPage.tsx"));
+const OkrFormPage = lazy(() => import("../../pages/admin/OkrFormPage.tsx"));
+const SurveyFormPage = lazy(() => import("../../pages/admin/SurveyFormPage.tsx"));
+const HrRequestFormPage = lazy(() => import("../../pages/admin/HrRequestFormPage.tsx"));
+const SlaPage = lazy(() => import("../../pages/admin/SlaPage.tsx"));
+const HolidayFormPage = lazy(() => import("../../pages/admin/HolidayFormPage.tsx"));
+const TrainingFormPage = lazy(() => import("../../pages/admin/TrainingFormPage.tsx"));
+const CalibrationFormPage = lazy(() => import("../../pages/admin/CalibrationFormPage.tsx"));
+const OvertimeRuleFormPage = lazy(() => import("../../pages/admin/OvertimeRuleFormPage.tsx"));
+const BenefitManagementPage = lazy(() => import("../../pages/admin/BenefitManagementPage.tsx"));
+const BenefitFormPage = lazy(() => import("../../pages/admin/BenefitFormPage.tsx"));
+const DetailedPeopleAnalyticsPage = lazy(() => import("../../pages/admin/DetailedPeopleAnalyticsPage.tsx"));
+const NotificationRulesPage = lazy(() => import("../../pages/admin/NotificationRulesPage.tsx"));
+const CompanySettingsPage = lazy(() => import("../../pages/admin/CompanySettingsPage.tsx"));
+const NotificationSettingsPage = lazy(() => import("../../pages/admin/NotificationSettingsPage.tsx"));
+const MasterDataPage = lazy(() => import("../../pages/admin/MasterDataPage.tsx"));
 
 
 
@@ -516,16 +508,6 @@ export const router = createBrowserRouter([
         ],
       },
       {
-        path: "/leave/approval",
-        element: <DashboardLayout />,
-        children: [
-          {
-            index: true,
-            element: <LeaveApprovalPage />,
-          },
-        ],
-      },
-      {
         path: "/leave/policy",
         element: <DashboardLayout />,
         children: [
@@ -697,8 +679,6 @@ export const router = createBrowserRouter([
         element: <DashboardLayout />,
         children: [
           { path: "/admin/biometric-devices", element: <AdminBiometricDevicesPage /> },
-          { path: "/admin/biometric-devices/create", element: <BiometricDeviceFormPage /> },
-          { path: "/admin/biometric-devices/edit/:id", element: <BiometricDeviceFormPage /> },
 
           { path: "/recruitment/openings", element: <JobOpeningsPage /> },
           { path: "/recruitment/openings/create", element: <JobOpeningFormPage /> },
@@ -733,10 +713,11 @@ export const router = createBrowserRouter([
           { path: "/workforce/holidays/create", element: <HolidayFormPage /> },
           { path: "/workforce/holidays/edit/:id", element: <HolidayFormPage /> },
 
-          { path: "/training/programs", element: <TrainingProgramsPage /> },
+          { path: "/training", element: <Navigate to="/training/programs" replace /> },
+          { path: "/training/programs", element: <TrainingManagementPage /> },
           { path: "/training/programs/create", element: <TrainingFormPage /> },
           { path: "/training/programs/edit/:id", element: <TrainingFormPage /> },
-          { path: "/training/enrollments", element: <TrainingEnrollmentsPage /> },
+          { path: "/training/enrollments", element: <Navigate to="/training/programs" replace /> },
 
           { path: "/competencies", element: <CompetencyMatrixPage /> },
           { path: "/career/succession", element: <SuccessionMatrixPage /> },
@@ -757,10 +738,9 @@ export const router = createBrowserRouter([
 
           { path: "/biometric/devices", element: <BiometricDevicesPage /> },
           { path: "/enterprise/compensation", element: <CompensationPage /> },
-          { path: "/overtime/approval", element: <OvertimeApprovalPage /> },
-          { path: "/inventory/assets", element: <AssetInventoryPage /> },
-          { path: "/assets", element: <AssetInventoryPage /> },
-          { path: "/assets/assignments", element: <AssetAssignmentsPage /> },
+          { path: "/inventory/assets", element: <AssetManagementPage /> },
+          { path: "/assets", element: <AssetManagementPage /> },
+          { path: "/assets/assignments", element: <Navigate to="/assets" replace /> },
           { path: "/inventory/assets/create", element: <AssetFormPage /> },
           { path: "/inventory/assets/edit/:id", element: <AssetFormPage /> },
           { path: "/tasks", element: <TaskManagementPage /> },
@@ -795,16 +775,6 @@ export const router = createBrowserRouter([
         ],
       },
       {
-        path: "/attendance/daily",
-        element: <DashboardLayout />,
-        children: [
-          {
-            index: true,
-            element: <AttendanceAdminPage />,
-          },
-        ],
-      },
-      {
         path: "/payroll",
         element: <DashboardLayout />,
         children: [
@@ -835,74 +805,39 @@ export const router = createBrowserRouter([
         ],
       },
       {
-        path: "/payroll/crud",
+        path: "/payroll/process",
         element: <DashboardLayout />,
         children: [
           {
             index: true,
-            element: <PayrollCrudPage />,
+            element: <PayrollProcessPage />,
           },
         ],
-      },
-      {
-        path: "/payroll/approve",
-        element: <DashboardLayout />,
-        children: [
-          {
-            index: true,
-            element: <PayrollApprovePage />,
-          },
-        ],
-      },
-      {
-        path: "/payroll/payment",
-        element: <DashboardLayout />,
-        children: [
-          {
-            index: true,
-            element: <PayrollPaymentPage />,
-          },
-        ],
-      },
-      {
-        path: "/payroll/generate",
-        element: <DashboardLayout />,
-        children: [
-          {
-            index: true,
-            element: <PayrollGeneratePage />,
-          },
-        ],
-      },
-      {
-        path: "/payroll/component/allowance",
-        element: <DashboardLayout />,
-        children: [
-          {
-            index: true,
-            element: <PayrollDetailsPage />,
-          },
-        ],
-      },
-      {
-        path: "/payroll/component/deduction",
-        element: <DashboardLayout />,
-        children: [
-          {
-            index: true,
-            element: <PayrollDetailsPage />,
-          },
-        ],
-      },
-      {
-        path: "/payroll/tax",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <PayrollTaxBPJSPage /> }],
       },
       {
         path: "/payroll/reports",
         element: <DashboardLayout />,
-        children: [{ index: true, element: <PayrollReportsDetailedPage /> }],
+        children: [{ index: true, element: <PayrollReportsPage /> }],
+      },
+      {
+        path: "/payroll/component",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <PayrollDetailsPage />,
+          },
+        ],
+      },
+      { path: "/payroll/crud", element: <DashboardLayout />, children: [{ index: true, element: <Navigate to="/payroll/list" replace /> }] },
+      { path: "/payroll/generate", element: <DashboardLayout />, children: [{ index: true, element: <Navigate to="/payroll/process" replace /> }] },
+      { path: "/payroll/approve", element: <DashboardLayout />, children: [{ index: true, element: <Navigate to="/payroll/process" replace /> }] },
+      { path: "/payroll/payment", element: <DashboardLayout />, children: [{ index: true, element: <Navigate to="/payroll/process" replace /> }] },
+      { path: "/payroll/tax", element: <DashboardLayout />, children: [{ index: true, element: <Navigate to="/payroll/reports" replace /> }] },
+      {
+        path: "/reports",
+        element: <DashboardLayout />,
+        children: [{ index: true, element: <Navigate to="/reports/dashboard-summary" replace /> }],
       },
       {
         path: "/reports/dashboard-summary",
@@ -912,32 +847,27 @@ export const router = createBrowserRouter([
       {
         path: "/reports/attendance",
         element: <DashboardLayout />,
-        children: [{ index: true, element: <ReportsAttendancePage /> }],
+        children: [{ index: true, element: <Navigate to="/reports/dashboard-summary" replace /> }],
       },
       {
         path: "/reports/leave",
         element: <DashboardLayout />,
-        children: [{ index: true, element: <ReportsLeavePage /> }],
+        children: [{ index: true, element: <Navigate to="/reports/dashboard-summary" replace /> }],
       },
       {
         path: "/reports/payroll",
         element: <DashboardLayout />,
-        children: [{ index: true, element: <ReportsPayrollPage /> }],
+        children: [{ index: true, element: <Navigate to="/reports/dashboard-summary" replace /> }],
       },
       {
         path: "/reports/assets",
         element: <DashboardLayout />,
-        children: [{ index: true, element: <ReportsAssetsPage /> }],
+        children: [{ index: true, element: <Navigate to="/reports/dashboard-summary" replace /> }],
       },
       {
         path: "/reports/employee",
         element: <DashboardLayout />,
-        children: [{ index: true, element: <ReportsEmployeePage /> }],
-      },
-      {
-        path: "/attendance/timesheet",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <TimesheetPage /> }],
+        children: [{ index: true, element: <Navigate to="/reports/dashboard-summary" replace /> }],
       },
       {
         path: "/attendance/overtime",
@@ -1008,7 +938,7 @@ export const router = createBrowserRouter([
   },
   {
     path: "*",
-    element: <Navigate to="/" replace />,
+    element: <NotFoundPage />,
   },
 ]);
 

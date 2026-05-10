@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
 import { Alert } from "@/shared/ui/Alert";
+import { Button } from "@/shared/ui/Button";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { ROLES } from "@/shared/types/rbac.types";
 import { MonitorCog, RefreshCw, Shield, Wifi, WifiOff, Plus, Edit2 } from "lucide-react";
@@ -72,6 +73,8 @@ const AdminBiometricDevicesPage = () => {
   const [syncingId, setSyncingId] = useState<string | number | null>(null);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertType, setAlertType] = useState<AlertType>("info");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
 
   const summary = useMemo(() => {
     const online = devices.filter((device) => normalizeBoolean((device as any).is_online ?? (device as any).online ?? (device as any).status === "online")).length;
@@ -81,6 +84,12 @@ const AdminBiometricDevicesPage = () => {
       offline: Math.max(devices.length - online, 0),
     };
   }, [devices]);
+
+  const paginatedDevices = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return devices.slice(startIndex, startIndex + pageSize);
+  }, [devices, currentPage, pageSize]);
+  const totalPages = Math.ceil(devices.length / pageSize);
 
   const loadDevices = async () => {
     setLoading(true);
@@ -211,7 +220,8 @@ const AdminBiometricDevicesPage = () => {
         </div>
 
         {devices.length > 0 ? (
-          <div className="table-card-inner">
+          <>
+            <div className="table-card-inner">
             <div className="table-wrap">
               <table className="data-table">
                 <thead>
@@ -226,7 +236,7 @@ const AdminBiometricDevicesPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {devices.map((device, index) => {
+                  {paginatedDevices.map((device, index) => {
                     const deviceId = (device as any).id ?? index;
                     const name = String((device as any).name || "Unnamed Device");
                     const ipAddress = String((device as any).ip_address || (device as any).ip || "-");
@@ -280,6 +290,25 @@ const AdminBiometricDevicesPage = () => {
               </table>
             </div>
           </div>
+          {totalPages > 1 && (
+            <div className="table-pagination">
+              <div className="pagination-info">
+                Menampilkan {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, devices.length)} dari {devices.length}
+              </div>
+              <div className="pagination-controls">
+                <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)}>
+                  Sebelumnya
+                </Button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  <button key={page} className={`pagination-page-btn ${currentPage === page ? 'active' : ''}`} onClick={() => setCurrentPage(page)}>{page}</button>
+                ))}
+                <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage(prev => prev + 1)}>
+                  Selanjutnya
+                </Button>
+              </div>
+            </div>
+          )}
+        </>
         ) : (
           <div className="table-card-inner">
             <div className="empty-state">

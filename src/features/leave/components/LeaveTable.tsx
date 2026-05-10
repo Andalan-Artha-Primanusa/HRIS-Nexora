@@ -11,7 +11,8 @@ interface LeaveTableProps {
   isAdmin?: boolean;
 }
 
-const getLeaveTypeLabel = (type: string) => {
+const getLeaveTypeLabel = (item: any) => {
+  if (item.leave_type?.name) return item.leave_type.name;
   const typeMap: Record<string, string> = {
     annual: 'Cuti Tahunan',
     sick: 'Cuti Sakit',
@@ -19,7 +20,7 @@ const getLeaveTypeLabel = (type: string) => {
     maternity: 'Cuti Melahirkan',
     unpaid: 'Cuti Tanpa Gaji',
   };
-  return typeMap[type?.toLowerCase()] || type;
+  return typeMap[item.type?.toLowerCase()] || item.type || '-';
 };
 
 const formatDate = (date: any) => {
@@ -57,7 +58,7 @@ export const LeaveTable: React.FC<LeaveTableProps> = ({ items, onView, onApprove
                     </div>
                   </div>
                 </td>
-                <td><span className="badge-soft badge-soft--blue">{getLeaveTypeLabel(item.type)}</span></td>
+                <td><span className="badge-soft badge-soft--blue">{getLeaveTypeLabel(item)}</span></td>
                 <td>
                   <div className="cell-stacked">
                     <span className="cell-stacked__main">{formatDate(item.start_date)}</span>

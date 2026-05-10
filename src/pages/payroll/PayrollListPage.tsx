@@ -1,49 +1,65 @@
 import { useState, useEffect, useMemo } from "react";
 import { Card } from "@/shared/ui/Card";
 import { Modal } from "@/shared/ui/Modal";
-import { ArrowDown, ArrowUp, Briefcase, Filter, RefreshCw, Search, ChevronDown } from "lucide-react";
+import { ArrowDown, ArrowUp, Briefcase, Filter, RefreshCw, Search, ChevronDown, Plus, Pencil, Trash2, ArrowLeft, AlertCircle, Download, Banknote, FileText, X, Info } from "lucide-react";
 import { PaginationWithSize } from '@/shared/ui/Pagination';
 import { payrollService, toSafeArray } from "@/features/payroll/api/payroll.service";
 import { getAllEmployees } from "@/features/employee/api/employee.service";
 import { PayrollStatusBadge } from "@/shared/ui/PayrollStatusBadge";
 import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
-import type { PayrollItem } from "@/features/payroll/types/payroll.types";
+import type { PayrollCreatePayload, PayrollUpdatePayload, PayrollItem } from "@/features/payroll/types/payroll.types";
 import type { EmployeeItem } from "@/features/employee/types/employee.types";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "./PayrollListPage.css";
+import "./PayrollShared.css";
+
+type PayrollFormState = {
+  id: string;
+  employee_id: string;
+  period: string;
+  allowance: string;
+  bonus: string;
+};
+
+const DEFAULT_FORM: PayrollFormState = {
+  id: "", employee_id: "", period: new Date().toISOString().slice(0, 7), allowance: "", bonus: "",
+};
 
 interface PayrollWithEmployeeName extends PayrollItem {
   employeeName?: string;
 }
 
-const PayrollListPage: React.FC = () => {
+const PayrollListPage = () => {
   const [items, setItems] = useState<PayrollWithEmployeeName[]>([]);
   const [employees, setEmployees] = useState<EmployeeItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [errorModal, setErrorModal] = useState<{ isOpen: boolean; title: string; message: string }>({
-    isOpen: false,
-    title: "",
-    message: "",
-  });
+  const [errorModal, setErrorModal] = useState<{ isOpen: boolean; title: string; message: string }>({ isOpen: false, title: "", message: "" });
 
-  // Filter states
   const [searchText, setSearchText] = useState("");
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
   const [selectedPeriod, setSelectedPeriod] = useState<string>("");
   const [selectedStatus, setSelectedStatus] = useState<string>("");
   const [showFilters, setShowFilters] = useState(false);
 
-  // Sorting
   const [sortBy, setSortBy] = useState<"id" | "employee" | "period" | "total">("period");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-
-  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  // Normalize API fields
+  const [view, setView] = useState<"list" | "form">("list");
+  const [form, setForm] = useState<PayrollFormState>(DEFAULT_FORM);
+  const [mode, setMode] = useState<"create" | "edit" | "delete">("create");
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  const [exportModal, setExportModal] = useState(false);
+  const [exportPeriod, setExportPeriod] = useState(new Date().toISOString().slice(0, 7));
+  const [exportType, setExportType] = useState<"bca" | "summary">("bca");
+  const [exportLoading, setExportLoading] = useState(false);
+
+  const showErrorModal = (title: string, msg: string) => setErrorModal({ isOpen: true, title, message: msg });
+
   const normalizePayroll = (payroll: any): any => ({
     ...payroll,
     basic_salary: payroll.basic_salary ?? payroll.gaji_pokok ?? 0,
@@ -67,375 +83,341 @@ const PayrollListPage: React.FC = () => {
   };
 
   const employeesWithNames = useMemo(() => {
-    return employees
-      .map((i: any) => ({ id: i.id, name: getEmployeeName(i) }))
-      .filter((i: any) => i.name && i.name.trim() !== "")
-      .sort((a: any, b: any) => a.name.localeCompare(b.name));
+    return employees.map((i: any) => ({ id: i.id, name: getEmployeeName(i) })).filter((i: any) => i.name && i.name.trim() !== "").sort((a: any, b: any) => a.name.localeCompare(b.name));
   }, [employees]);
 
   const uniquePeriods = useMemo(() => {
     const periods = new Set<string>();
-    items.forEach((item: any) => {
-      if (item.period) periods.add(item.period);
-    });
+    items.forEach((item: any) => { if (item.period) periods.add(item.period); });
     return Array.from(periods).sort().reverse();
   }, [items]);
 
   const uniqueStatuses = useMemo(() => {
-    const statuses = new Set<string>();
-    statuses.add("draft");
-    statuses.add("pending");
-    statuses.add("approved");
-    statuses.add("paid");
-    items.forEach((item: any) => {
-      if (item.status) statuses.add(item.status);
-    });
+    const statuses = new Set<string>(["draft", "pending", "approved", "paid"]);
+    items.forEach((item: any) => { if (item.status) statuses.add(item.status); });
     return Array.from(statuses).sort();
   }, [items]);
 
-  // Filter, Sort, Paginate
   const filteredItems = useMemo(() => {
     let filtered = items;
     if (searchText.trim()) {
-      const search = searchText.toLowerCase();
+      const q = searchText.toLowerCase();
       filtered = filtered.filter((item: any) =>
-        (item.employeeName && item.employeeName.toLowerCase().includes(search)) ||
-        String(item.id).toLowerCase().includes(search) ||
-        String(item.employee_id).toLowerCase().includes(search)
-      );
+        (item.employeeName && item.employeeName.toLowerCase().includes(q)) ||
+        String(item.id).toLowerCase().includes(q) ||
+        String(item.employee_id).toLowerCase().includes(q));
     }
-    if (selectedEmployeeId) {
-      filtered = filtered.filter((item: any) => String(item.employee_id) === selectedEmployeeId);
-    }
-    if (selectedPeriod) {
-      filtered = filtered.filter((item: any) => item.period === selectedPeriod);
-    }
-    if (selectedStatus) {
-      filtered = filtered.filter((item: any) => item.status === selectedStatus);
-    }
+    if (selectedEmployeeId) filtered = filtered.filter((item: any) => String(item.employee_id) === selectedEmployeeId);
+    if (selectedPeriod) filtered = filtered.filter((item: any) => item.period === selectedPeriod);
+    if (selectedStatus) filtered = filtered.filter((item: any) => item.status === selectedStatus);
     return filtered;
   }, [items, searchText, selectedEmployeeId, selectedPeriod, selectedStatus]);
 
   const sortedItems = useMemo(() => {
-    const sorted = [...filteredItems];
-    sorted.sort((a: any, b: any) => {
-      let compareA: any;
-      let compareB: any;
+    return [...filteredItems].sort((a: any, b: any) => {
+      let ca: any, cb: any;
       switch (sortBy) {
-        case "employee":
-          compareA = a.employeeName?.toLowerCase() || "";
-          compareB = b.employeeName?.toLowerCase() || "";
-          break;
-        case "period":
-          compareA = a.period || "";
-          compareB = b.period || "";
-          break;
-        case "total":
-          compareA = (Number(a.basic_salary) || 0) + (Number(a.allowance) || 0) + (Number(a.bonus) || 0);
-          compareB = (Number(b.basic_salary) || 0) + (Number(b.allowance) || 0) + (Number(b.bonus) || 0);
-          break;
-        case "id":
-        default:
-          compareA = String(a.id || "");
-          compareB = String(b.id || "");
+        case "employee": ca = a.employeeName?.toLowerCase() || ""; cb = b.employeeName?.toLowerCase() || ""; break;
+        case "period": ca = a.period || ""; cb = b.period || ""; break;
+        case "total": ca = (Number(a.basic_salary)||0)+(Number(a.allowance)||0)+(Number(a.bonus)||0); cb = (Number(b.basic_salary)||0)+(Number(b.allowance)||0)+(Number(b.bonus)||0); break;
+        default: ca = String(a.id||""); cb = String(b.id||"");
       }
-      if (compareA < compareB) return sortOrder === "asc" ? -1 : 1;
-      if (compareA > compareB) return sortOrder === "asc" ? 1 : -1;
-      return 0;
+      return ca < cb ? (sortOrder === "asc" ? -1 : 1) : ca > cb ? (sortOrder === "asc" ? 1 : -1) : 0;
     });
-    return sorted;
   }, [filteredItems, sortBy, sortOrder]);
 
-  const paginatedItems = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return sortedItems.slice(startIndex, startIndex + itemsPerPage);
-  }, [sortedItems, currentPage, itemsPerPage]);
-
+  const paginatedItems = sortedItems.slice((currentPage - 1) * itemsPerPage, (currentPage - 1) * itemsPerPage + itemsPerPage);
   const totalPages = Math.max(1, Math.ceil(sortedItems.length / itemsPerPage));
 
   useEffect(() => { setCurrentPage(1); }, [searchText, selectedEmployeeId, selectedPeriod, selectedStatus, sortBy, sortOrder]);
 
   const clearFilters = () => {
-    setSearchText("");
-    setSelectedEmployeeId("");
-    setSelectedPeriod("");
-    setSelectedStatus("");
-    setSortBy("period");
-    setSortOrder("desc");
+    setSearchText(""); setSelectedEmployeeId(""); setSelectedPeriod(""); setSelectedStatus(""); setSortBy("period"); setSortOrder("desc");
   };
 
   const loadData = async () => {
     setLoading(true);
     setErrorMessage(null);
-
     try {
-      const [payrollData, employeeData] = await Promise.all([
-        payrollService.getPayrollList(),
-        getAllEmployees()
-      ]);
-
+      const [payrollData, employeeData] = await Promise.all([payrollService.getPayrollList(), getAllEmployees()]);
       const safePayrollData = toSafeArray(payrollData).map(normalizePayroll);
       const safeEmployeeData = Array.isArray(employeeData) ? employeeData : toSafeArray(employeeData);
-
       setEmployees(safeEmployeeData);
-
       const enrichedPayroll = safePayrollData.map((payroll: any) => {
-        const employee = safeEmployeeData.find(
-          (emp: any) => String(emp.id) === String(payroll.employee_id)
-        );
-        return {
-          ...payroll,
-          employeeName: getEmployeeName(employee),
-        };
+        const employee = safeEmployeeData.find((emp: any) => String(emp.id) === String(payroll.employee_id));
+        return { ...payroll, employeeName: getEmployeeName(employee) };
       });
-
       setItems(enrichedPayroll);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to load payroll data";
-      setErrorMessage(errorMessage);
-      console.error("Load error:", err);
+      setErrorMessage(err instanceof Error ? err.message : "Failed to load payroll data");
     } finally {
       setLoading(false);
     }
   };
 
-  const formatCurrency = (value: number) => `Rp ${(value || 0).toLocaleString("id-ID")}`;
+  const getEmpLabel = (empId: string) => {
+    const emp = employees.find((e) => String(e.id) === empId);
+    return emp ? `${emp.employee_code} - ${emp.user?.name || "Unknown"}` : "N/A";
+  };
 
-  const payrollSummaryCards = useMemo(() => [
-    { label: "Total Payroll", subtitle: "Semua data payroll", value: String(items.length), change: "Seluruh data yang tersimpan", tone: "blue" as const, icon: Briefcase },
-    { label: "Filtered Results", subtitle: "Hasil pencarian saat ini", value: String(sortedItems.length), change: `${paginatedItems.length} data di halaman ini`, tone: "green" as const, icon: Search },
-    { label: "Unique Periods", subtitle: "Periode gaji yang tersedia", value: String(uniquePeriods.length), change: "Distribusi periode payroll", tone: "orange" as const, icon: Briefcase },
-    { label: "Status Variants", subtitle: "Variasi status payroll", value: String(uniqueStatuses.length), change: "Tracking status pembayaran", tone: "purple" as const, icon: Briefcase },
-  ], [items.length, sortedItems.length, paginatedItems.length, uniquePeriods.length, uniqueStatuses.length]);
+  const handleCreate = async () => {
+    if (!form.employee_id) { showErrorModal("Validasi", "Pilih karyawan"); return; }
+    if (!form.period) { showErrorModal("Validasi", "Masukkan periode"); return; }
+    setLoading(true);
+    try {
+      await payrollService.createPayroll({ employee_id: Number(form.employee_id), period: form.period, allowance: Number(form.allowance)||0, bonus: Number(form.bonus)||0 });
+      setMessage({ type: "success", text: "Payroll berhasil dibuat" });
+      setView("list"); await loadData();
+    } catch (err) {
+      showErrorModal("Error", err instanceof Error ? err.message : "Gagal");
+    } finally { setLoading(false); }
+  };
+
+  const handleUpdate = async () => {
+    setLoading(true);
+    try {
+      await payrollService.updatePayroll(form.id, { allowance: Number(form.allowance)||0, bonus: Number(form.bonus)||0 });
+      setMessage({ type: "success", text: "Payroll berhasil diupdate" });
+      setView("list"); await loadData();
+    } catch (err) {
+      showErrorModal("Error", err instanceof Error ? err.message : "Gagal");
+    } finally { setLoading(false); }
+  };
+
+  const handleDelete = async () => {
+    setLoading(true);
+    try {
+      await payrollService.deletePayroll(form.id);
+      setMessage({ type: "success", text: "Payroll berhasil dihapus" });
+      setView("list"); await loadData();
+    } catch (err) {
+      showErrorModal("Error", err instanceof Error ? err.message : "Gagal");
+    } finally { setLoading(false); }
+  };
+
+  const handleExport = async () => {
+    if (!exportPeriod) { showErrorModal("Validasi", "Pilih periode"); return; }
+    setExportLoading(true);
+    try {
+      const token = sessionStorage.getItem("token") || "";
+      const baseUrl = import.meta.env.VITE_API_URL || "";
+      const endpoint = exportType === "bca" ? `/payroll/export/bca-klikpay?period=${exportPeriod}` : `/payroll/export/summary?period=${exportPeriod}`;
+      const res = await fetch(`${baseUrl}${endpoint}`, { headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) throw new Error("Gagal export");
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url; a.download = `${exportType === "bca" ? "bca-klikpay" : "payroll-summary"}-${exportPeriod}.csv`;
+      document.body.appendChild(a); a.click(); a.remove(); window.URL.revokeObjectURL(url);
+      setExportModal(false);
+    } catch (err) {
+      showErrorModal("Error Export", err instanceof Error ? err.message : "Gagal");
+    } finally { setExportLoading(false); }
+  };
 
   useEffect(() => { void loadData(); }, []);
 
+  const formatCurrency = (v: number) => `Rp ${(v||0).toLocaleString("id-ID")}`;
+
+  const formContent = (
+    <Card className="crud-card" glass>
+      <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "2.5rem" }}>
+        <button onClick={() => setView("list")} className="action-btn" style={{ background: "#f1f5f9", color: "#64748b" }}><ArrowLeft size={18} /></button>
+        <h2 style={{ marginBottom: 0 }}>{mode === "create" ? "Entri Payroll Baru" : mode === "edit" ? "Perbarui Payroll" : "Konfirmasi Hapus"}</h2>
+      </div>
+      {mode !== "delete" ? (
+        <div className="crud-form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem" }}>
+          <label style={{ gridColumn: "1 / -1" }}>
+            <strong>Karyawan *</strong>
+            <select className="crud-input" value={form.employee_id} onChange={(e) => setForm({...form, employee_id: e.target.value})} disabled={mode === "edit"}>
+              <option value="">-- Pilih Karyawan --</option>
+              {employees.map((e) => (<option key={e.id} value={String(e.id)}>{e.employee_code} - {e.user?.name || "Unknown"}</option>))}
+            </select>
+          </label>
+          <label><strong>Periode *</strong><input type="month" className="crud-input" value={form.period} onChange={(e) => setForm({...form, period: e.target.value})} disabled={mode === "edit"} /></label>
+          <label><strong>Tunjangan</strong><input type="number" className="crud-input" value={form.allowance} onChange={(e) => setForm({...form, allowance: e.target.value})} placeholder="1500000" /></label>
+          <label><strong>Bonus</strong><input type="number" className="crud-input" value={form.bonus} onChange={(e) => setForm({...form, bonus: e.target.value})} placeholder="500000" /></label>
+          <div style={{ gridColumn: "1 / -1" }}>
+            <Card glass className="crud-info-card">
+              <div style={{ display: "flex", gap: 12 }}><Info size={20} /><p style={{ margin: 0, fontSize: "0.9rem" }}>Gaji pokok otomatis dari profil karyawan. Tunjangan & bonus di sini nilai tambahan manual.</p></div>
+            </Card>
+          </div>
+        </div>
+      ) : (
+        <div className="crud-warning-card">
+          <div style={{ display: "flex", gap: "1rem" }}><Trash2 size={24} color="#f43f5e" /><div><p style={{ fontWeight: 700, color: "#991b1b", marginBottom: 8 }}>Hapus payroll ini?</p><p style={{ margin: 0, color: "#b91c1c" }}>Payroll untuk <strong>{getEmpLabel(form.employee_id)}</strong> periode <strong>{form.period}</strong> akan dihapus permanen.</p></div></div>
+        </div>
+      )}
+      <div className="crud-actions" style={{ marginTop: "3rem", borderTop: "1px solid #f1f5f9", paddingTop: "2rem", display: "flex", justifyContent: "flex-end", gap: "1rem" }}>
+        <button className="btn-outline" onClick={() => setView("list")} disabled={loading}>Batal</button>
+        <button className="btn-primary" onClick={mode === "create" ? handleCreate : mode === "edit" ? handleUpdate : handleDelete} disabled={loading} style={{ background: mode === "delete" ? "#ef4444" : "#2563eb", color: "#fff", border: "none", padding: "0.75rem 2rem", borderRadius: 12, fontWeight: 700 }}>
+          {loading ? "Memproses..." : mode === "create" ? "Buat Payroll" : mode === "edit" ? "Simpan" : "Hapus Permanen"}
+        </button>
+      </div>
+    </Card>
+  );
+
   return (
     <div className="crud-page" style={{ fontFamily: "'Poppins', sans-serif" }}>
-      {/* Error Modal */}
-      <Modal
-        isOpen={errorModal.isOpen}
-        onClose={() => setErrorModal({ ...errorModal, isOpen: false })}
-        title={errorModal.title}
-        size="md"
-      >
-        <div style={{ padding: "16px 0", whiteSpace: "pre-wrap" }}>
-          <p style={{ margin: 0, lineHeight: 1.6 }}>{errorModal.message}</p>
-        </div>
+      <Modal isOpen={errorModal.isOpen} onClose={() => setErrorModal({...errorModal, isOpen: false})} title={errorModal.title} size="md">
+        <div style={{ padding: "16px 0", whiteSpace: "pre-wrap" }}><p style={{ margin: 0, lineHeight: 1.6 }}>{errorModal.message}</p></div>
       </Modal>
 
-      {/* Header - Same style as Employees Page */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
-            <div className="hero-badge">
-              <Briefcase size={16} />
-              <span>Manajemen Payroll</span>
-            </div>
+            <div className="hero-badge"><Briefcase size={16} /><span>Manajemen Payroll</span></div>
             <h1 className="hero-title">Daftar Payroll</h1>
-            <p className="hero-subtitle">
-              Lihat dan kelola seluruh data payroll karyawan dalam tampilan yang rapi dan konsisten.
-            </p>
+            <p className="hero-subtitle">Lihat, tambah, edit, dan hapus seluruh data payroll karyawan.</p>
           </div>
           <div className="hero-actions">
-            <button className="btn-outline" onClick={() => void loadData()} disabled={loading}>
-              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-              Sync Data
-            </button>
+            <button className="btn-outline" onClick={() => void loadData()} disabled={loading}><RefreshCw size={16} className={loading ? 'animate-spin' : ''} /> Sync</button>
+            {view === "list" && <><button className="btn-outline" onClick={() => setExportModal(true)} style={{ color: "#059669" }}><Download size={16} /> Export</button><button className="btn-primary" onClick={() => { setMode("create"); setForm(DEFAULT_FORM); setView("form"); }}><Plus size={16} /> Tambah Payroll</button></>}
           </div>
         </div>
       </Card>
 
-      {/* Summary Cards */}
-      <div className="payroll-summary-wrapper">
-        {payrollSummaryCards.map((card) => {
-          const Icon = card.icon;
-          return (
-            <div key={card.label} className="payroll-summary-card">
-              <div className="payroll-summary-header">
-                <div>
-                  <p className="payroll-summary-label">{card.label}</p>
-                  <p className="payroll-summary-subtitle">{card.subtitle}</p>
-                </div>
-                <div className={`payroll-summary-icon-wrapper payroll-icon-${card.tone}`}>
-                  <Icon size={28} />
-                </div>
-              </div>
-              <div className={`payroll-summary-value payroll-value-${card.tone}`}>{card.value}</div>
-              <p className="payroll-summary-trend">{card.change}</p>
-            </div>
-          );
-        })}
-      </div>
+      {message && message.type === "success" && (
+        <Card style={{ borderLeft: "4px solid #10b981", background: "rgba(16, 185, 129, 0.05)", padding: "1rem", borderRadius: 12, marginBottom: "1rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}><AlertCircle color="#10b981" size={20} /><p style={{ color: "#065f46", margin: 0, fontWeight: 600 }}>{message.text}</p></div>
+        </Card>
+      )}
 
-      {/* Data Table Card */}
-      <Card className="data-table-card">
-        <div className="data-table-header">
-          <h3 className="data-table-title">
-            Daftar Payroll
-            <span className="data-table-count">{sortedItems.length} ditemukan</span>
-          </h3>
-        </div>
-
-        <div className="control-bar">
-          <div className="search-box">
-            <Search size={18} />
-            <input
-              type="text"
-              placeholder="Cari nama karyawan, ID payroll, atau ID karyawan..."
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              className="search-input"
-            />
+      {view === "form" ? formContent : (
+        <>
+          <div className="payroll-summary-wrapper">
+            {[
+              { label: "Total Payroll", value: String(items.length), tone: "blue" as const, icon: Briefcase },
+              { label: "Filtered", value: String(sortedItems.length), tone: "green" as const, icon: Search },
+              { label: "Periode", value: String(uniquePeriods.length), tone: "orange" as const, icon: Briefcase },
+              { label: "Status", value: String(uniqueStatuses.length), tone: "purple" as const, icon: Briefcase },
+            ].map((card) => {
+              const Icon = card.icon;
+              return (
+                <div key={card.label} className="payroll-summary-card">
+                  <div className="payroll-summary-header">
+                    <div><p className="payroll-summary-label">{card.label}</p></div>
+                    <div className={`payroll-summary-icon-wrapper payroll-icon-${card.tone}`}><Icon size={28} /></div>
+                  </div>
+                  <div className={`payroll-summary-value payroll-value-${card.tone}`}>{card.value}</div>
+                </div>
+              );
+            })}
           </div>
 
-          <div className="quick-controls">
-            <div className="control-group">
-              <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} className="sort-select">
-                <option value="period">Urutkan: Periode</option>
-                <option value="employee">Urutkan: Karyawan</option>
-                <option value="total">Urutkan: Total</option>
-                <option value="id">Urutkan: ID</option>
-              </select>
-              <button className="sort-order-btn" onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}>
-                {sortOrder === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />}
-              </button>
-            </div>
-
-            <button className={`filter-btn ${showFilters ? "active" : ""}`} onClick={() => setShowFilters(!showFilters)}>
-              <Filter size={18} />
-              <span>Filter</span>
-              <ChevronDown size={14} style={{ transform: showFilters ? "rotate(180deg)" : "", transition: "transform 0.3s ease" }} />
-            </button>
-
-            {(searchText || selectedEmployeeId || selectedPeriod || selectedStatus) && (
-              <button className="btn-clear" onClick={clearFilters}>
-                Bersihkan
-              </button>
-            )}
-          </div>
-        </div>
-
-        {showFilters && (
-          <div className="filter-panel">
-            <div className="filter-row">
-              <div className="filter-group">
-                <label>Karyawan</label>
-                <select value={selectedEmployeeId} onChange={(e) => setSelectedEmployeeId(e.target.value)} className="filter-select">
-                  <option value="">Semua Karyawan ({employeesWithNames.length})</option>
-                  {employeesWithNames.map((emp: any) => (
-                    <option key={emp.id} value={String(emp.id)}>{emp.name}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="filter-group">
-                <label>Periode</label>
-                <select value={selectedPeriod} onChange={(e) => setSelectedPeriod(e.target.value)} className="filter-select">
-                  <option value="">Semua Periode</option>
-                  {uniquePeriods.map((period: string) => (
-                    <option key={period} value={period}>{period}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="filter-group">
-                <label>Status</label>
-                <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)} className="filter-select">
-                  <option value="">Semua Status</option>
-                  {uniqueStatuses.map((status: string) => (
-                    <option key={status} value={status}>
-                      {status === "draft" && "Draft"}
-                      {status === "pending" && "Menunggu"}
-                      {status === "approved" && "Disetujui"}
-                      {status === "paid" && "Sudah Dibayar"}
-                      {status === "rejected" && "Ditolak"}
-                      {!["draft", "pending", "approved", "paid", "rejected"].includes(status) &&
-                        status.charAt(0).toUpperCase() + status.slice(1)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {loading && <LoadingState message="Memuat data payroll..." />}
-        {errorMessage && (
-          <ErrorState message="Gagal memuat data payroll" error={errorMessage} onRetry={loadData} />
-        )}
-
-        {!loading && !errorMessage && sortedItems.length === 0 && (
-          <EmptyState
-            icon=""
-            title="Tidak ada data"
-            message="Tidak ada payroll yang sesuai dengan filter yang dipilih"
-            actionLabel={searchText || selectedEmployeeId || selectedPeriod || selectedStatus ? "Bersihkan Filter" : undefined}
-            onAction={searchText || selectedEmployeeId || selectedPeriod || selectedStatus ? clearFilters : undefined}
-          />
-        )}
-
-        {!loading && !errorMessage && sortedItems.length > 0 && (
-          <>
-            <div className="table-wrap">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>ID Payroll</th>
-                    <th>Nama Karyawan</th>
-                    <th>Periode</th>
-                    <th className="th-right">Gaji Pokok</th>
-                    <th className="th-right">Gaji Bersih</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedItems.map((item: any, index) => (
-                    <tr key={`${item.id}-${index}`}>
-                      <td className="crud-table-id">
-                        <div>{item.id || "N/A"}</div>
-                        <div className="crud-table-sub">EMP: {item.employee_id}</div>
-                      </td>
-                      <td className="crud-table-name">
-                        <div className="crud-table-avatar">
-                          {item.employeeName ? item.employeeName.charAt(0).toUpperCase() : String(item.employee_id || 'P').charAt(0).toUpperCase()}
-                        </div>
-                        <span>{item.employeeName || `ID: ${item.employee_id}`}</span>
-                      </td>
-                      <td><span className="crud-table-tag">{item.period || "-"}</span></td>
-                      <td className="crud-table-amount">
-                        {formatCurrency(item.basic_salary || 0)} <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 'normal' }}>Basic</span>
-                      </td>
-                      <td className="crud-table-amount crud-table-amount-green">
-                        {formatCurrency(item.take_home_pay || item.net_salary || 0)} <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 'normal' }}>Net</span>
-                      </td>
-                      <td>
-                        <PayrollStatusBadge status={item.status} size="md" />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {sortedItems.length > itemsPerPage && (
-              <div style={{ marginTop: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div className="pagination-info">
-                  Menampilkan {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, sortedItems.length)} dari {sortedItems.length}
+          <Card className="data-table-card">
+            <div className="control-bar">
+              <div className="search-box"><Search size={18} /><input type="text" placeholder="Cari nama, ID payroll, atau ID karyawan..." value={searchText} onChange={(e) => setSearchText(e.target.value)} className="search-input" /></div>
+              <div className="quick-controls">
+                <div className="control-group">
+                  <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} className="sort-select">
+                    <option value="period">Urut: Periode</option><option value="employee">Urut: Karyawan</option><option value="total">Urut: Total</option><option value="id">Urut: ID</option>
+                  </select>
+                  <button className="sort-order-btn" onClick={() => setSortOrder(s => s === "asc" ? "desc" : "asc")}>{sortOrder === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />}</button>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'flex-end', flex: 1 }}>
-                  <PaginationWithSize
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={(p) => setCurrentPage(p)}
-                    totalItems={sortedItems.length}
-                    itemsPerPage={itemsPerPage}
-                    onItemsPerPageChange={(size) => { setItemsPerPage(size); setCurrentPage(1); }}
-                  />
+                <button className={`filter-btn ${showFilters ? "active" : ""}`} onClick={() => setShowFilters(!showFilters)}><Filter size={18} /><span>Filter</span><ChevronDown size={14} style={{ transform: showFilters ? "rotate(180deg)" : "", transition: "transform 0.3s ease" }} /></button>
+                {(searchText||selectedEmployeeId||selectedPeriod||selectedStatus) && <button className="btn-clear" onClick={clearFilters}>Bersihkan</button>}
+              </div>
+            </div>
+
+            {showFilters && (
+              <div className="filter-panel">
+                <div className="filter-row">
+                  <div className="filter-group">
+                    <label>Karyawan</label><select value={selectedEmployeeId} onChange={(e) => setSelectedEmployeeId(e.target.value)} className="filter-select"><option value="">Semua</option>{employeesWithNames.map((emp: any) => (<option key={emp.id} value={String(emp.id)}>{emp.name}</option>))}</select>
+                  </div>
+                  <div className="filter-group">
+                    <label>Periode</label><select value={selectedPeriod} onChange={(e) => setSelectedPeriod(e.target.value)} className="filter-select"><option value="">Semua</option>{uniquePeriods.map((p: string) => (<option key={p} value={p}>{p}</option>))}</select>
+                  </div>
+                  <div className="filter-group">
+                    <label>Status</label><select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)} className="filter-select"><option value="">Semua</option>{uniqueStatuses.map((s: string) => (<option key={s} value={s}>{s}</option>))}</select>
+                  </div>
                 </div>
               </div>
             )}
-          </>
-        )}
-      </Card>
+
+            {loading && <LoadingState message="Memuat data payroll..." />}
+            {errorMessage && <ErrorState message="Gagal memuat" error={errorMessage} onRetry={loadData} />}
+
+            {!loading && !errorMessage && sortedItems.length === 0 && (
+              <EmptyState title="Tidak ada data" message={searchText||selectedEmployeeId||selectedPeriod||selectedStatus ? "Sesuaikan filter" : "Belum ada payroll"} actionLabel={searchText||selectedEmployeeId||selectedPeriod||selectedStatus ? "Bersihkan Filter" : "Buat Payroll"} onAction={searchText||selectedEmployeeId||selectedPeriod||selectedStatus ? clearFilters : () => { setMode("create"); setForm(DEFAULT_FORM); setView("form"); }} />
+            )}
+
+            {!loading && !errorMessage && sortedItems.length > 0 && (
+              <>
+                <div className="table-wrap">
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>Karyawan</th><th>Periode</th><th className="th-right">Gaji Pokok</th><th className="th-right">Tunjangan</th><th className="th-right">THP</th><th>Status</th><th className="th-center" style={{ width: 100 }}>Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paginatedItems.map((item: any, idx) => (
+                        <tr key={`${item.id}-${idx}`}>
+                          <td className="crud-table-name">
+                            <div className="crud-table-avatar">{item.employeeName ? item.employeeName.charAt(0).toUpperCase() : "P"}</div>
+                            <span>{item.employeeName || `ID: ${item.employee_id}`}</span>
+                          </td>
+                          <td><span className="crud-table-tag">{item.period || "-"}</span></td>
+                          <td className="crud-table-amount">{formatCurrency(item.basic_salary||0)}</td>
+                          <td className="crud-table-amount">{formatCurrency(item.allowance||0)}</td>
+                          <td className="crud-table-amount crud-table-amount-green">{formatCurrency(item.take_home_pay||item.net_salary||0)}</td>
+                          <td><PayrollStatusBadge status={item.status} size="md" /></td>
+                          <td className="td-center">
+                            <div className="action-btn-group" style={{ justifyContent: "center" }}>
+                              <button className="action-btn action-btn-edit" title="Edit" onClick={() => { setForm({ id: String(item.id), employee_id: String(item.employee_id), period: item.period, allowance: String(item.allowance||""), bonus: String(item.bonus||"") }); setMode("edit"); setView("form"); }}><Pencil size={16} /></button>
+                              <button className="action-btn action-btn-delete" title="Hapus" onClick={() => { setForm({ id: String(item.id), employee_id: String(item.employee_id), period: item.period, allowance: "", bonus: "" }); setMode("delete"); setView("form"); }}><Trash2 size={16} /></button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {sortedItems.length > itemsPerPage && (
+                  <div style={{ marginTop: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div className="pagination-info">Menampilkan {(currentPage-1)*itemsPerPage+1}-{Math.min(currentPage*itemsPerPage, sortedItems.length)} dari {sortedItems.length}</div>
+                    <PaginationWithSize currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} totalItems={sortedItems.length} itemsPerPage={itemsPerPage} onItemsPerPageChange={(s) => { setItemsPerPage(s); setCurrentPage(1); }} />
+                  </div>
+                )}
+              </>
+            )}
+          </Card>
+        </>
+      )}
+
+      {exportModal && (
+        <div className="modal-overlay" onClick={() => setExportModal(false)}>
+          <div className="modal-completion" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-completion-header">
+              <div className="modal-completion-icon" style={{ background: "linear-gradient(135deg, #dbeafe, #bfdbfe)", color: "#2563eb" }}><Download size={24} /></div>
+              <div><h3 className="modal-completion-title">Export Payroll</h3><p className="modal-completion-task">Pilih tipe dan periode</p></div>
+              <button className="modal-close-btn" onClick={() => setExportModal(false)}><X size={20} /></button>
+            </div>
+            <div className="modal-completion-body">
+              <label className="modal-completion-label">Tipe Export</label>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 8 }}>
+                {([["bca", "BCA KlikPay CSV", "Format siap import ke BCA KlikPay", Banknote], ["summary", "Summary Lengkap", "Detail gaji, tunjangan, potongan, BPJS, PPh21", FileText]] as const).map(([key, title, desc, Icon]) => (
+                  <label key={key} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderRadius: 12, border: exportType === key ? "2px solid #2563eb" : "2px solid #e2e8f0", background: exportType === key ? "#eff6ff" : "#fff", cursor: "pointer" }} onClick={() => setExportType(key)}>
+                    <input type="radio" name="exportTypeList" checked={exportType === key} onChange={() => setExportType(key)} style={{ accentColor: "#2563eb" }} />
+                    <Icon size={20} color="#2563eb" />
+                    <div><div style={{ fontWeight: 600, color: "#1e293b" }}>{title}</div><div style={{ fontSize: "0.8rem", color: "#64748b" }}>{desc}</div></div>
+                  </label>
+                ))}
+              </div>
+              <label className="modal-completion-label" style={{ marginTop: 16 }}>Periode</label>
+              <input type="month" className="crud-input" value={exportPeriod} onChange={(e) => setExportPeriod(e.target.value)} style={{ width: "100%", marginTop: 8 }} />
+            </div>
+            <div className="modal-completion-footer">
+              <button className="modal-btn-cancel" onClick={() => setExportModal(false)}>Batal</button>
+              <button className="modal-btn-confirm" onClick={handleExport} disabled={exportLoading} style={{ background: "linear-gradient(135deg, #2563eb, #1d4ed8)" }}>
+                {exportLoading ? <><RefreshCw size={16} className="animate-spin" /> Memproses...</> : <><Download size={16} /> Download CSV</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

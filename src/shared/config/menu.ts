@@ -77,10 +77,7 @@ export const menuItems: MenuItem[] = [
       RBACUtils.isHR(user) ||
       RBACUtils.isManager(user),
     subItems: [
-      { label: 'Riwayat Semua Karyawan', path: '/attendance/daily' },
-      { label: 'Timesheet', path: '/attendance/timesheet' },
       { label: 'Lembur', path: '/attendance/overtime' },
-      { label: 'Persetujuan Lembur', path: '/overtime/approval' },
       { label: 'Laporan', path: '/attendance/reports' },
     ]
   },
@@ -89,7 +86,6 @@ export const menuItems: MenuItem[] = [
     icon: CalendarDays,
     subItems: [
       { label: 'Permohonan Cuti', path: '/leave/requests' },
-      { label: 'Persetujuan', path: '/leave/approval' },
       { label: 'Kalender Cuti', path: '/leave/calendar' },
       { label: 'Saldo Cuti', path: '/leave/balance' },
     ]
@@ -101,20 +97,9 @@ export const menuItems: MenuItem[] = [
     subItems: [
       { label: 'Ringkasan', path: '/payroll' },
       { label: 'Daftar Payroll', path: '/payroll/list' },
-      { label: 'Kelola Payroll', path: '/payroll/crud' },
-      { label: 'Generate Payroll', path: '/payroll/generate' },
-      { label: 'Approve Payroll', path: '/payroll/approve' },
-      { label: 'Pembayaran Payroll', path: '/payroll/payment' },
-      {
-        label: 'Komponen Gaji',
-        icon: CreditCard,
-        subItems: [
-          { label: 'Tunjangan', path: '/payroll/component/allowance' },
-          { label: 'Potongan', path: '/payroll/component/deduction' },
-        ]
-      },
-      { label: 'Pajak & BPJS', path: '/payroll/tax' },
-      { label: 'Laporan', path: '/payroll/reports' },
+      { label: 'Proses Payroll', path: '/payroll/process' },
+      { label: 'Komponen Gaji', path: '/payroll/component' },
+      { label: 'Laporan & Pajak', path: '/payroll/reports' },
     ]
   },
   // {
@@ -130,11 +115,8 @@ export const menuItems: MenuItem[] = [
   {
     label: 'Aset & Inventaris',
     icon: Briefcase,
+    path: '/assets',
     requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
-    subItems: [
-      { label: 'Daftar Aset', path: '/assets' },
-      { label: 'Penugasan', path: '/assets/assignments' },
-    ]
   },
   {
     label: 'Task Management',
@@ -168,8 +150,7 @@ export const menuItems: MenuItem[] = [
       RBACUtils.isAdmin(user) ||
       RBACUtils.isSuperAdmin(user),
     subItems: [
-      { label: 'Program Pelatihan', path: '/training/programs' },
-      { label: 'Pendaftaran Pelatihan', path: '/training/enrollments' },
+      { label: 'Pelatihan & Pendaftaran', path: '/training/programs' },
       { label: 'Kompetensi', path: '/competencies' },
     ]
   },
@@ -263,15 +244,8 @@ export const menuItems: MenuItem[] = [
   {
     label: 'Laporan & Analitik',
     icon: FileBarChart,
+    path: '/reports/dashboard-summary',
     requiredChecker: (user) => RBACUtils.isManager(user) || RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
-    subItems: [
-      { label: 'Ringkasan Laporan', path: '/reports/dashboard-summary' },
-      { label: 'Laporan Absensi', path: '/reports/attendance' },
-      { label: 'Laporan Cuti', path: '/reports/leave' },
-      { label: 'Laporan Payroll', path: '/reports/payroll' },
-      { label: 'Laporan Aset', path: '/reports/assets' },
-      { label: 'Laporan SDM', path: '/reports/employee' },
-    ]
   },
   {
     label: 'Kepatuhan & Kebijakan',

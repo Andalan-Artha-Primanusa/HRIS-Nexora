@@ -61,6 +61,16 @@ const NotificationsPage = () => {
   const [statusMessage, setStatusMessage] = useState("");
   const [alertType, setAlertType] = useState<AlertType>("info");
   const [processingId, setProcessingId] = useState<string | number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
+
+  const paginatedItems = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return items.slice(startIndex, startIndex + pageSize);
+  }, [items, currentPage, pageSize]);
+  const totalPages = Math.ceil(items.length / pageSize);
+
+  useEffect(() => { setCurrentPage(1); }, []);
 
   const loadData = async () => {
     setLoading(true);
@@ -212,7 +222,7 @@ const NotificationsPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {items.map((item, index) => {
+                {paginatedItems.map((item, index) => {
                   const id = item.id ?? `notification-${index}`;
                   const isRead = Boolean(item.read_at);
 
@@ -250,6 +260,24 @@ const NotificationsPage = () => {
                 })}
               </tbody>
             </table>
+            {totalPages > 1 && (
+              <div className="table-pagination">
+                <div className="pagination-info">
+                  Menampilkan {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, items.length)} dari {items.length}
+                </div>
+                <div className="pagination-controls">
+                  <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)}>
+                    Sebelumnya
+                  </Button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    <button key={page} className={`pagination-page-btn ${currentPage === page ? 'active' : ''}`} onClick={() => setCurrentPage(page)}>{page}</button>
+                  ))}
+                  <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage(prev => prev + 1)}>
+                    Selanjutnya
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </Card>

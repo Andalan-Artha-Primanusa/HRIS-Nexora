@@ -1,10 +1,12 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Card } from '@/shared/ui/Card';
+import { Modal } from '@/shared/ui/Modal';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
+import { useAuthStore } from '@/app/store/auth.store';
 import { attendanceService } from '@/features/attendance/api/attendance.service';
 import overtimeService from '@/features/attendance/api/overtime.service';
-import { Clock, RefreshCw, Calendar, Timer, AlertCircle, CheckCircle, XCircle, Search, MessageSquare, Eye } from 'lucide-react';
+import { Clock, RefreshCw, Calendar, Timer, AlertCircle, CheckCircle, XCircle, Search, MessageSquare, Eye, Send, Sparkles } from 'lucide-react';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import './AttendanceShared.css';
@@ -28,6 +30,14 @@ interface OvertimeRecord {
   [key: string]: any;
 }
 
+const normalizeOvertimeStatus = (status?: string | null) => {
+  const normalized = String(status || '').trim().toLowerCase();
+  if (normalized === 'approve' || normalized === 'approved' || normalized === 'accepted') return 'approved';
+  if (normalized === 'reject' || normalized === 'rejected' || normalized === 'declined') return 'rejected';
+  if (normalized === 'submitted' || normalized === 'waiting') return 'pending';
+  return normalized;
+};
+
 const OvertimePage = () => {
   const [records, setRecords] = useState<OvertimeRecord[]>([]);
   const [loading, setLoading] = useState(false);
@@ -35,44 +45,110 @@ const OvertimePage = () => {
   const [activeTab, setActiveTab] = useState<'Semua' | 'Pending' | 'Approved' | 'Rejected'>('Semua');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
+  const [reasonModalOpen, setReasonModalOpen] = useState(false);
+  const [reasonDraft, setReasonDraft] = useState('');
+  const [selectedRecord, setSelectedRecord] = useState<OvertimeRecord | null>(null);
+  const [reasonSaving, setReasonSaving] = useState(false);
+  const user = useAuthStore((state) => state.user);
+
+  const canViewAllOvertime = useMemo(() => {
+    return Boolean(
+      user?.permissions?.some((permission: any) => permission?.name === 'attendance.view_all') ||
+      user?.roles?.some((role: any) => role?.name && ['super_admin', 'admin', 'hr', 'manager'].includes(role.name))
+    );
+  }, [user]);
 
   const loadRecords = async () => {
     setLoading(true);
     try {
-      const [summaryResult, requestResult] = await Promise.all([
-        attendanceService.getOvertimeSummary(30),
-        api.get('/my/overtime'),
-      ]);
+      if (canViewAllOvertime) {
+        // Admin/HR/Manager: Get all overtime requests
+        const allOvertimeRes = await api.get('/overtime/requests');
+        const allOvertime = Array.isArray(allOvertimeRes.data?.data) ? allOvertimeRes.data.data : [];
+        const transformed = allOvertime.map((record: any) => ({
+          id: record.id,
+          attendance_id: record.attendance_id,
+          date: record.date,
+          scheduled_checkout: record.scheduled_checkout || record.scheduled_check_out,
+          scheduled_check_out: record.scheduled_checkout || record.scheduled_check_out,
+          actual_checkout: record.actual_checkout,
+          overtime_minutes: record.overtime_minutes || 0,
+          status: normalizeOvertimeStatus(record.status),
+          request_id: record.id,
+          request_status: normalizeOvertimeStatus(record.status),
+          reason: record.reason,
+          reject_reason: record.reject_reason,
+          approved_by: record.approved_by,
+          approved_at: record.approved_at,
+          approver: record.approver,
+          evidences: record.evidences || [],
+        }));
+        setRecords(transformed);
+      } else {
+        // Employee: Get own overtime summary + requests
+        const [summaryResult, requestResult] = await Promise.all([
+          attendanceService.getOvertimeSummary(30),
+          api.get('/my/overtime'),
+        ]);
 
-      const summaryPayload = summaryResult.payload as any;
-      const overtimeRows = Array.isArray(summaryPayload?.records) ? summaryPayload.records : [];
+        const summaryPayload = summaryResult.payload as any;
+        const overtimeRows = Array.isArray(summaryPayload?.records) ? summaryPayload.records : [];
 
-      const requestPayload = requestResult.data?.data ?? requestResult.data;
-      const requests = Array.isArray(requestPayload) ? requestPayload : [];
-      const requestByAttendanceId = new Map(
-        requests.map((request: any) => [String(request.attendance_id), request])
-      );
+        const requestPayload = requestResult.data?.data ?? requestResult.data;
+        const requests = Array.isArray(requestPayload) ? requestPayload : [];
+        const requestByAttendanceId = new Map<string, any>();
+        const requestByDate = new Map<string, any>();
 
-      const mergedRecords = overtimeRows
-        .filter((record: any) => Number(record.overtime_minutes || 0) > 0)
-        .map((record: any) => {
-          const request = requestByAttendanceId.get(String(record.id));
-          return {
-            ...record,
-            attendance_id: request?.attendance_id ?? record.attendance_id ?? record.id,
-            request_id: request?.id ?? null,
-            request_status: request?.status ?? null,
-            reason: request?.reason ?? record.reason ?? null,
-            reject_reason: request?.reject_reason ?? null,
-            approved_by: request?.approved_by ?? null,
-            approved_at: request?.approved_at ?? null,
-            approver: request?.approver ?? null,
-            evidences: request?.evidences ?? [],
-            status: request?.status ?? (Number(record.overtime_minutes || 0) > 0 ? 'pending' : 'draft'),
-          };
+        requests.forEach((request: any) => {
+          const attendanceId = request?.attendance_id ?? request?.attendance?.id;
+          if (attendanceId !== undefined && attendanceId !== null) {
+            requestByAttendanceId.set(String(attendanceId), request);
+          }
+
+          if (request?.date) {
+            requestByDate.set(String(request.date).slice(0, 10), request);
+          }
         });
 
-      setRecords(mergedRecords);
+        const resolveRequestForRecord = (record: any) => {
+          const attendanceKeys = [record?.attendance_id, record?.id]
+            .filter((value) => value !== undefined && value !== null)
+            .map(String);
+
+          for (const key of attendanceKeys) {
+            const request = requestByAttendanceId.get(key);
+            if (request) return request;
+          }
+
+          const dateKey = record?.date ? String(record.date).slice(0, 10) : null;
+          if (dateKey && requestByDate.has(dateKey)) {
+            return requestByDate.get(dateKey);
+          }
+
+          return null;
+        };
+
+        const mergedRecords = overtimeRows
+          .filter((record: any) => Number(record.overtime_minutes || 0) > 0)
+          .map((record: any) => {
+            const request = resolveRequestForRecord(record);
+            return {
+              ...record,
+              attendance_id: request?.attendance_id ?? record.attendance_id ?? record.id,
+              request_id: request?.id ?? request?.attendance_id ?? null,
+              request_status: normalizeOvertimeStatus(request?.status),
+              reason: request?.reason ?? record.reason ?? null,
+              reject_reason: request?.reject_reason ?? null,
+              approved_by: request?.approved_by ?? null,
+              approved_at: request?.approved_at ?? null,
+              approver: request?.approver ?? null,
+              evidences: request?.evidences ?? [],
+              status: normalizeOvertimeStatus(request?.status ?? (Number(record.overtime_minutes || 0) > 0 ? 'pending' : 'draft')),
+            };
+          });
+
+        setRecords(mergedRecords);
+      }
     } catch (error: any) {
       console.error('Failed to load overtime:', error);
     } finally {
@@ -82,33 +158,121 @@ const OvertimePage = () => {
 
   useEffect(() => {
     void loadRecords();
-  }, []);
+  }, [canViewAllOvertime]);
 
   useEffect(() => {
     setCurrentPage(1);
   }, [searchText, activeTab]);
 
   const handleAddReason = async (record: OvertimeRecord) => {
-    const requestId = record.request_id;
+    if (!record.request_id) {
+      alert('Data lembur belum punya request untuk diisi alasan.');
+      return;
+    }
+
+    setSelectedRecord(record);
+    setReasonDraft(record.reason || '');
+    setReasonModalOpen(true);
+  };
+
+  const closeReasonModal = () => {
+    if (reasonSaving) return;
+    setReasonModalOpen(false);
+    setReasonDraft('');
+    setSelectedRecord(null);
+  };
+
+  const submitReason = async () => {
+    const requestId = selectedRecord?.request_id;
     if (!requestId) {
       alert('Data lembur belum punya request untuk diisi alasan.');
       return;
     }
 
-    const reason = window.prompt('Masukkan alasan lembur:');
-    if (!reason) return;
+    const reason = reasonDraft.trim();
+    if (!reason) {
+      alert('Alasan lembur tidak boleh kosong.');
+      return;
+    }
+
     try {
+      setReasonSaving(true);
       await api.put(`/my/overtime/${requestId}/reason`, { reason });
-      loadRecords();
+      setReasonModalOpen(false);
+      setReasonDraft('');
+      setSelectedRecord(null);
+      await loadRecords();
     } catch (error: any) {
       alert(error.response?.data?.message || 'Gagal menambahkan alasan');
+    } finally {
+      setReasonSaving(false);
+    }
+  };
+
+  const handleApproveRequest = async (record: OvertimeRecord) => {
+    const requestId = record.request_id;
+    if (!requestId) {
+      alert('Request lembur tidak ditemukan.');
+      return;
+    }
+
+    if (!window.confirm('Setujui pengajuan lembur ini?')) return;
+
+    try {
+      setLoading(true);
+      await api.put(`/overtime/requests/${requestId}/approve`);
+      await loadRecords();
+    } catch (error: any) {
+      console.error(error);
+      alert(error?.response?.data?.message || 'Gagal menyetujui lembur');
+      setLoading(false);
+    }
+  };
+
+  const handleRejectRequest = async (record: OvertimeRecord) => {
+    const requestId = record.request_id;
+    if (!requestId) {
+      alert('Request lembur tidak ditemukan.');
+      return;
+    }
+
+    const reason = window.prompt('Alasan penolakan (opsional):');
+    if (reason === null) return;
+
+    try {
+      setLoading(true);
+      await api.put(`/overtime/requests/${requestId}/reject`, { reject_reason: reason || undefined });
+      await loadRecords();
+    } catch (error: any) {
+      console.error(error);
+      alert(error?.response?.data?.message || 'Gagal menolak lembur');
+      setLoading(false);
     }
   };
 
   const handleUploadEvidence = async (record: OvertimeRecord) => {
-    const requestId = record.request_id;
+    let requestId = record.request_id;
+    
+    // If no request_id, try to create one first using attendance_id
+    if (!requestId && record.attendance_id) {
+      try {
+        const createRes = await overtimeService.createOvertimeRequest(record.attendance_id);
+        const payload = createRes?.data ?? createRes;
+        requestId = payload?.id ?? payload?.request_id;
+        
+        if (!requestId) {
+          alert('Gagal membuat request lembur. Silakan hubungi admin.');
+          return;
+        }
+      } catch (err: any) {
+        console.error('Failed to create overtime request:', err);
+        alert(err?.response?.data?.message || 'Gagal membuat request lembur');
+        return;
+      }
+    }
+    
     if (!requestId) {
-      alert('Request lembur belum tersedia untuk upload bukti.');
+      alert('Data lembur tidak valid untuk upload bukti.');
       return;
     }
 
@@ -140,14 +304,16 @@ const OvertimePage = () => {
   };
 
   const handleViewMyEvidences = async (record: OvertimeRecord) => {
-    const requestId = record.request_id;
+    const requestId = record.request_id ?? record.id;
     if (!requestId) {
-      alert('Request lembur belum tersedia untuk melihat bukti.');
+      alert('Request lembur belum tersedia, jadi bukti belum bisa dibuka.');
       return;
     }
 
     try {
-      const res = await overtimeService.getMyEvidences(requestId);
+      const res = canViewAllOvertime
+        ? await overtimeService.getEvidencesForRequest(requestId)
+        : await overtimeService.getMyEvidences(requestId);
       const payload = res?.data?.data ?? res?.data ?? res;
       const list = Array.isArray(payload) ? payload : [];
       if (list.length === 0) {
@@ -159,12 +325,13 @@ const OvertimePage = () => {
       if (!pick) return;
       const idx = parseInt(pick, 10) - 1;
       if (Number.isNaN(idx) || idx < 0 || idx >= list.length) return alert('Pilihan tidak valid');
-      const url = list[idx].url || list[idx].file_url || list[idx].path;
+      const selectedEvidence = list[idx];
+      const url = selectedEvidence?.file_url || selectedEvidence?.url || selectedEvidence?.path;
       if (!url) return alert('Tidak ada URL untuk file ini');
-      window.open(url, '_blank');
+      window.open(url, '_blank', 'noopener,noreferrer');
     } catch (err: any) {
-      console.error(err);
-      alert('Gagal mengambil bukti');
+      console.error('Failed to load evidences:', err);
+      alert(err?.response?.data?.message || err?.message || 'Gagal mengambil bukti');
     }
   };
 
@@ -173,11 +340,12 @@ const OvertimePage = () => {
       const dateMatch = (r.date || '').toLowerCase().includes(searchText.toLowerCase());
       const reasonMatch = (r.reason || '').toLowerCase().includes(searchText.toLowerCase());
       const textMatch = dateMatch || reasonMatch;
+      const currentStatus = normalizeOvertimeStatus(r.request_status ?? r.status);
 
       let statusMatch = true;
-      if (activeTab === 'Pending') statusMatch = r.status === 'pending';
-      else if (activeTab === 'Approved') statusMatch = r.status === 'approved';
-      else if (activeTab === 'Rejected') statusMatch = r.status === 'rejected';
+      if (activeTab === 'Pending') statusMatch = currentStatus === 'pending';
+      else if (activeTab === 'Approved') statusMatch = currentStatus === 'approved';
+      else if (activeTab === 'Rejected') statusMatch = currentStatus === 'rejected';
 
       return textMatch && statusMatch;
     });
@@ -190,9 +358,9 @@ const OvertimePage = () => {
 
   const totalPages = Math.ceil(filteredRecords.length / pageSize);
 
-  const pendingCount = records.filter(r => r.request_status === 'pending' || r.status === 'pending').length;
-  const approvedCount = records.filter(r => r.request_status === 'approved' || r.status === 'approved').length;
-  const rejectedCount = records.filter(r => r.request_status === 'rejected' || r.status === 'rejected').length;
+  const pendingCount = records.filter(r => normalizeOvertimeStatus(r.request_status ?? r.status) === 'pending').length;
+  const approvedCount = records.filter(r => normalizeOvertimeStatus(r.request_status ?? r.status) === 'approved').length;
+  const rejectedCount = records.filter(r => normalizeOvertimeStatus(r.request_status ?? r.status) === 'rejected').length;
   const totalMinutes = records.reduce((sum, r) => sum + (r.overtime_minutes || 0), 0);
   const totalOvertimeDays = records.length;
 
@@ -227,12 +395,13 @@ const OvertimePage = () => {
   };
 
   const getStatusBadge = (status: string) => {
+    const normalizedStatus = normalizeOvertimeStatus(status);
     const map: Record<string, { label: string; tone: string }> = {
       'pending': { label: 'Menunggu', tone: 'orange' },
       'approved': { label: 'Disetujui', tone: 'green' },
       'rejected': { label: 'Ditolak', tone: 'red' },
     };
-    const config = map[status] || { label: 'Tercatat', tone: 'blue' };
+    const config = map[normalizedStatus] || { label: 'Tercatat', tone: 'blue' };
     return <span className={`badge-soft badge-soft--${config.tone}`}>{config.label}</span>;
   };
 
@@ -274,6 +443,63 @@ const OvertimePage = () => {
             <div key={card.label} className="employee-summary-card">
               <div className="employee-summary-header">
                 <div>
+
+                <Modal
+                  isOpen={reasonModalOpen}
+                  onClose={closeReasonModal}
+                  title="Tambah Alasan Lembur"
+                  size="md"
+                  footer={(
+                    <>
+                      <button className="btn-outline" onClick={closeReasonModal} disabled={reasonSaving}>
+                        Batal
+                      </button>
+                      <button className="btn-primary" onClick={() => void submitReason()} disabled={reasonSaving}>
+                        {reasonSaving ? <RefreshCw size={16} className="animate-spin" /> : <Send size={16} />}
+                        {reasonSaving ? 'Menyimpan...' : 'Simpan Alasan'}
+                      </button>
+                    </>
+                  )}
+                >
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem', borderRadius: '16px', background: 'linear-gradient(135deg, #eff6ff, #f8fafc)', border: '1px solid #dbeafe' }}>
+                      <div style={{ width: '42px', height: '42px', borderRadius: '999px', background: '#dbeafe', display: 'grid', placeItems: 'center', color: '#2563eb' }}>
+                        <Sparkles size={20} />
+                      </div>
+                      <div>
+                        <div style={{ fontWeight: 700, color: '#0f172a' }}>
+                          {selectedRecord ? formatDate(selectedRecord.date) : 'Pilih data lembur'}
+                        </div>
+                        <div style={{ fontSize: '0.9rem', color: '#64748b' }}>
+                          Jelaskan alasan lembur secara singkat dan jelas.
+                        </div>
+                      </div>
+                    </div>
+
+                    <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontWeight: 700, color: '#1e293b' }}>
+                      Alasan Lembur
+                      <textarea
+                        value={reasonDraft}
+                        onChange={(e) => setReasonDraft(e.target.value)}
+                        rows={5}
+                        placeholder="Contoh: Menyelesaikan proses payroll dan rekap absensi yang mendesak."
+                        style={{
+                          width: '100%',
+                          resize: 'vertical',
+                          borderRadius: '16px',
+                          border: '1px solid #cbd5e1',
+                          padding: '1rem 1.1rem',
+                          fontSize: '0.95rem',
+                          lineHeight: 1.5,
+                          outline: 'none',
+                          background: '#fff',
+                        }}
+                        onFocus={(e) => { e.currentTarget.style.borderColor = '#60a5fa'; e.currentTarget.style.boxShadow = '0 0 0 4px rgba(59, 130, 246, 0.12)'; }}
+                        onBlur={(e) => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.boxShadow = 'none'; }}
+                      />
+                    </label>
+                  </div>
+                </Modal>
                   <p className="employee-summary-label">{card.label}</p>
                   <p className="employee-summary-subtitle">{card.subtitle}</p>
                 </div>
@@ -287,6 +513,56 @@ const OvertimePage = () => {
           );
         })}
       </div>
+
+      <Modal
+        isOpen={reasonModalOpen}
+        onClose={closeReasonModal}
+        title="Tambah Alasan Lembur"
+        size="md"
+        footer={(
+          <>
+            <button className="btn-outline overtime-reason-modal__footer-btn" onClick={closeReasonModal} disabled={reasonSaving}>
+              Batal
+            </button>
+            <button className="btn-primary overtime-reason-modal__footer-btn" onClick={() => void submitReason()} disabled={reasonSaving}>
+              {reasonSaving ? <RefreshCw size={16} className="animate-spin" /> : <Send size={16} />}
+              {reasonSaving ? 'Menyimpan...' : 'Simpan Alasan'}
+            </button>
+          </>
+        )}
+      >
+        <div className="overtime-reason-modal">
+          <div className="overtime-reason-modal__hero">
+            <div className="overtime-reason-modal__icon">
+              <Sparkles size={20} />
+            </div>
+            <div className="overtime-reason-modal__hero-text">
+              <div className="overtime-reason-modal__title-row">
+                <div className="overtime-reason-modal__title">{selectedRecord ? formatDate(selectedRecord.date) : 'Pilih data lembur'}</div>
+                {selectedRecord && (
+                  <div className="overtime-reason-modal__badge">
+                    {getStatusBadge(selectedRecord.request_status || selectedRecord.status)}
+                  </div>
+                )}
+              </div>
+              <div className="overtime-reason-modal__subtitle">
+                Jelaskan alasan lembur secara singkat, jelas, dan profesional.
+              </div>
+            </div>
+          </div>
+
+          <label className="overtime-reason-modal__field">
+            <span>Alasan Lembur</span>
+            <textarea
+              className="overtime-reason-modal__textarea"
+              value={reasonDraft}
+              onChange={(e) => setReasonDraft(e.target.value)}
+              rows={5}
+              placeholder="Contoh: Menyelesaikan proses payroll dan rekap absensi yang mendesak."
+            />
+          </label>
+        </div>
+      </Modal>
 
       {/* Analytics Title Card */}
       <Card className="analytics-title-card">
@@ -389,7 +665,27 @@ const OvertimePage = () => {
                         </td>
                         <td className="td-center">
                           <div className="action-btn-group">
-                            {record.request_id && (record.request_status === 'pending' || !record.reason) && (
+                            {canViewAllOvertime && normalizeOvertimeStatus(record.request_status || record.status) === 'pending' && (
+                              <>
+                                <button
+                                  className="action-btn"
+                                  style={{ color: '#10b981', background: '#ecfdf5' }}
+                                  onClick={() => void handleApproveRequest(record)}
+                                  title="Setujui"
+                                >
+                                  <CheckCircle size={16} />
+                                </button>
+                                <button
+                                  className="action-btn"
+                                  style={{ color: '#ef4444', background: '#fef2f2' }}
+                                  onClick={() => void handleRejectRequest(record)}
+                                  title="Tolak"
+                                >
+                                  <XCircle size={16} />
+                                </button>
+                              </>
+                            )}
+                            {record.request_id && (normalizeOvertimeStatus(record.request_status) === 'pending' || !record.reason) && (
                               <button
                                 className="action-btn"
                                 style={{ color: '#6366f1', background: '#eef2ff' }}
@@ -399,7 +695,7 @@ const OvertimePage = () => {
                                 <MessageSquare size={16} />
                               </button>
                             )}
-                            {record.request_id && record.request_status !== 'approved' && (
+                            {(record.request_id || record.attendance_id) && normalizeOvertimeStatus(record.request_status) !== 'approved' && (
                               <button
                                 className="action-btn"
                                 style={{ color: '#06b6d4', background: '#ecfeff' }}
@@ -418,7 +714,7 @@ const OvertimePage = () => {
                             >
                               <Eye size={16} />
                             </button>
-                            {record.request_status === 'rejected' && record.reject_reason && (
+                            {normalizeOvertimeStatus(record.request_status) === 'rejected' && record.reject_reason && (
                               <button
                                 className="action-btn"
                                 style={{ color: '#ef4444', background: '#fef2f2' }}

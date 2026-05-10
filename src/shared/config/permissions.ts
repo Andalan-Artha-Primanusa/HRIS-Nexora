@@ -111,7 +111,6 @@ export const getVisibleMenuItems = (userRole: RoleType | undefined) => {
   if (['hr', 'admin', 'super_admin'].includes(userRole as string)) {
     visiblePaths.push(
       '/attendance/admin',
-      '/leave/approval',
       '/payroll'
     );
   }

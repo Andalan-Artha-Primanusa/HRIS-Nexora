@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, RefreshCw, Clock, CheckCircle, AlertCircle, Flag, X, Sparkles } from 'lucide-react';
 import { Card, CardHeader } from '@/shared/ui';
+import { Button } from '@/shared/ui/Button';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { taskService } from '@/features/tasks/api/task.service';
 import '@/shared/styles/CrudPage.css';
@@ -13,6 +14,8 @@ const MyTasksPage: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('Semua');
   const [searchText, setSearchText] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
   const [completingTask, setCompletingTask] = useState<any>(null);
   const [completionNotes, setCompletionNotes] = useState('');
   const [submittingCompletion, setSubmittingCompletion] = useState(false);
@@ -34,6 +37,10 @@ const MyTasksPage: React.FC = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText, activeTab]);
 
   const handleStartTask = async (taskId: string | number) => {
     await taskService.updateTask(taskId, { status: 'in_progress' });
@@ -95,6 +102,12 @@ const MyTasksPage: React.FC = () => {
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
   }, [filteredTasks]);
+
+  const paginatedTasks = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return sortedTasks.slice(startIndex, startIndex + pageSize);
+  }, [sortedTasks, currentPage, pageSize]);
+  const totalPages = Math.ceil(sortedTasks.length / pageSize);
 
   const summaryCards = useMemo(
     () => [
@@ -266,6 +279,7 @@ const MyTasksPage: React.FC = () => {
           )}
 
           {!loading && !errorMessage && sortedTasks.length > 0 && (
+            <>
             <div className="table-wrap">
               <table className="data-table">
                 <thead>
@@ -279,7 +293,7 @@ const MyTasksPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {sortedTasks.map((task) => (
+                  {paginatedTasks.map((task) => (
                     <tr key={task.id} style={isOverdue(task) ? { background: '#fef2f2' } : undefined}>
                       <td>
                         <div className="cell-name">
@@ -338,6 +352,25 @@ const MyTasksPage: React.FC = () => {
                 </tbody>
               </table>
             </div>
+          {totalPages > 1 && (
+            <div className="table-pagination">
+              <div className="pagination-info">
+                Menampilkan {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, sortedTasks.length)} dari {sortedTasks.length}
+              </div>
+              <div className="pagination-controls">
+                <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)}>
+                  Sebelumnya
+                </Button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  <button key={page} className={`pagination-page-btn ${currentPage === page ? 'active' : ''}`} onClick={() => setCurrentPage(page)}>{page}</button>
+                ))}
+                <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage(prev => prev + 1)}>
+                  Selanjutnya
+                </Button>
+              </div>
+            </div>
+          )}
+          </>
           )}
         </div>
       </div>

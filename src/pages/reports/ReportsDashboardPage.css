@@ -207,6 +207,48 @@
   min-width: 200px;
 }
 
+/* ─── Drag and Drop ─── */
+.reports-chart-card--sortable {
+  position: relative;
+  transition: box-shadow 0.2s ease;
+}
+
+.reports-chart-card--sortable:hover {
+  box-shadow: 0 8px 30px rgba(37, 99, 235, 0.12);
+}
+
+.reports-charts-grid--dnd {
+  position: relative;
+}
+
+.reports-drag-handle {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(37, 99, 235, 0.06);
+  color: #94a3b8;
+  cursor: grab;
+  z-index: 10;
+  transition: background 0.2s ease, color 0.2s ease;
+  user-select: none;
+  touch-action: none;
+}
+
+.reports-drag-handle:hover {
+  background: rgba(37, 99, 235, 0.12);
+  color: #2563eb;
+}
+
+.reports-drag-handle:active {
+  cursor: grabbing;
+}
+
 /* ─── Responsive ─── */
 @media (max-width: 1280px) {
   .reports-charts-grid { grid-template-columns: 1fr; }

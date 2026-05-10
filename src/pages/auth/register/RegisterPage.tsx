@@ -120,6 +120,59 @@ const RegisterPage = () => {
     <AuthLayout
       title="Create account!"
       subtitle="Secure Register"
+      visualContent={
+        <div className="auth-fortis-panel">
+
+          <p className="auth-fortis-summary">
+            Membangun budaya kerja yang kuat, adaptif, dan berkelanjutan melalui nilai inti FORTIS.
+          </p>
+
+          <div className="auth-fortis-grid">
+            <article className="auth-fortis-item">
+              <img src="/F.png" alt="F - Focus" className="auth-fortis-icon" />
+              <div>
+                <strong>F — Focus</strong>
+                <span>Fokus pada tujuan dan kualitas.</span>
+              </div>
+            </article>
+            <article className="auth-fortis-item">
+              <img src="/O.png" alt="O - Ownership" className="auth-fortis-icon" />
+              <div>
+                <strong>O — Ownership</strong>
+                <span>Bertanggung jawab terhadap setiap hasil.</span>
+              </div>
+            </article>
+            <article className="auth-fortis-item">
+              <img src="/R.png" alt="R - Responsibility" className="auth-fortis-icon" />
+              <div>
+                <strong>R — Responsibility</strong>
+                <span>Menjaga komitmen dan kepercayaan.</span>
+              </div>
+            </article>
+            <article className="auth-fortis-item">
+              <img src="/T.png" alt="T - Teamwork" className="auth-fortis-icon" />
+              <div>
+                <strong>T — Teamwork</strong>
+                <span>Tumbuh bersama melalui kolaborasi.</span>
+              </div>
+            </article>
+            <article className="auth-fortis-item">
+              <img src="/I.png" alt="I - Innovation" className="auth-fortis-icon" />
+              <div>
+                <strong>I — Innovation</strong>
+                <span>Selalu berkembang dan mencari solusi baru.</span>
+              </div>
+            </article>
+            <article className="auth-fortis-item">
+              <img src="/S.png" alt="S - Safety" className="auth-fortis-icon" />
+              <div>
+                <strong>S — Safety</strong>
+                <span>Mengutamakan keamanan dan keberlanjutan.</span>
+              </div>
+            </article>
+          </div>
+        </div>
+      }
       footer={
         <p className="auth-footer">
           Already have an account?{" "}

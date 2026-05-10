@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { RefreshCw, Package, Laptop, Monitor, Smartphone, Briefcase, ArrowUpFromLine, X, CheckCircle, Clock, Search } from 'lucide-react';
 import { Card, CardHeader } from '@/shared/ui';
+import { Button } from '@/shared/ui/Button';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { assetService } from '@/features/assets/api/asset.service';
 import '@/shared/styles/CrudPage.css';
@@ -13,6 +14,8 @@ const MyAssetsPage: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('Semua');
   const [searchText, setSearchText] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
 
   const [returnModal, setReturnModal] = useState(false);
   const [selectedAssignment, setSelectedAssignment] = useState<any>(null);
@@ -45,6 +48,10 @@ const MyAssetsPage: React.FC = () => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText, activeTab]);
+
   const getAsset = (item: any) => {
     return item.asset || item;
   };
@@ -66,6 +73,12 @@ const MyAssetsPage: React.FC = () => {
       return matchesSearch && tabMatch;
     });
   }, [assets, searchText, activeTab]);
+
+  const paginatedAssets = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredAssets.slice(startIndex, startIndex + pageSize);
+  }, [filteredAssets, currentPage, pageSize]);
+  const totalPages = Math.ceil(filteredAssets.length / pageSize);
 
   const summaryCards = useMemo(
     () => [
@@ -242,6 +255,7 @@ const MyAssetsPage: React.FC = () => {
           )}
 
           {!loading && !errorMessage && filteredAssets.length > 0 && (
+            <>
             <div className="table-wrap">
               <table className="data-table">
                 <thead>
@@ -255,7 +269,7 @@ const MyAssetsPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredAssets.map((item) => {
+                  {paginatedAssets.map((item) => {
                     const asset = getAsset(item);
                     const IconComponent = getAssetIcon(asset);
                     return (
@@ -316,6 +330,25 @@ const MyAssetsPage: React.FC = () => {
                 </tbody>
               </table>
             </div>
+          {totalPages > 1 && (
+            <div className="table-pagination">
+              <div className="pagination-info">
+                Menampilkan {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, filteredAssets.length)} dari {filteredAssets.length}
+              </div>
+              <div className="pagination-controls">
+                <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)}>
+                  Sebelumnya
+                </Button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  <button key={page} className={`pagination-page-btn ${currentPage === page ? 'active' : ''}`} onClick={() => setCurrentPage(page)}>{page}</button>
+                ))}
+                <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage(prev => prev + 1)}>
+                  Selanjutnya
+                </Button>
+              </div>
+            </div>
+          )}
+          </>
           )}
         </div>
       </div>

@@ -67,6 +67,14 @@ const PayrollManagementPage = () => {
 
   const columns = useMemo(() => getColumns(items), [items]);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
+  const paginatedItems = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return items.slice(startIndex, startIndex + pageSize);
+  }, [items, currentPage, pageSize]);
+  const totalPages = Math.ceil(items.length / pageSize);
+
   const requireId = () => {
     const id = form.id.trim();
     if (!id) {
@@ -497,8 +505,8 @@ const PayrollManagementPage = () => {
               </tr>
             </thead>
             <tbody>
-              {items.length > 0 ? (
-                items.map((item, index) => (
+              {paginatedItems.length > 0 ? (
+                paginatedItems.map((item, index) => (
                   <tr key={String(item.id ?? index)}>
                     {columns.map((column) => (
                       <td key={`${String(item.id ?? index)}-${column}`}>
@@ -517,6 +525,25 @@ const PayrollManagementPage = () => {
             </tbody>
           </table>
         </div>
+
+        {totalPages > 1 && (
+          <div className="table-pagination">
+            <div className="pagination-info">
+              Menampilkan {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, items.length)} dari {items.length}
+            </div>
+            <div className="pagination-controls">
+              <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)}>
+                Sebelumnya
+              </Button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                <button key={page} className={`pagination-page-btn ${currentPage === page ? 'active' : ''}`} onClick={() => setCurrentPage(page)}>{page}</button>
+              ))}
+              <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage(prev => prev + 1)}>
+                Selanjutnya
+              </Button>
+            </div>
+          </div>
+        )}
       </Card>
     </div>
   );

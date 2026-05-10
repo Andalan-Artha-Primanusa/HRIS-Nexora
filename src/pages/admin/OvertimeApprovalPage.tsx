@@ -4,6 +4,7 @@ import { Card } from '@/shared/ui/Card';
 import overtimeService from '@/features/attendance/api/overtime.service';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
+import { useAuthStore } from '@/app/store/auth.store';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 
@@ -34,7 +35,21 @@ const OvertimeApprovalPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
 
+  const user = useAuthStore((state) => state.user);
+
+  const canApproveOvertime = useMemo(() => {
+    return Boolean(
+      user?.permissions?.some((permission: any) => permission?.name === 'attendance.approve_all') ||
+      user?.roles?.some((role: any) => role?.name && ['super_admin', 'admin', 'hr', 'manager'].includes(role.name))
+    );
+  }, [user]);
+
   const fetchData = async () => {
+        if (!canApproveOvertime) {
+          setRequests([]);
+          setLoading(false);
+          return;
+        }
     setLoading(true);
     try {
       const result = await api.get('/overtime/requests');
@@ -48,8 +63,8 @@ const OvertimeApprovalPage: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    void fetchData();
+  }, [canApproveOvertime]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -180,6 +195,32 @@ const OvertimeApprovalPage: React.FC = () => {
     { label: 'Disetujui', subtitle: 'Pengajuan disetujui', value: String(approvedCount), tone: 'green' as const, icon: CheckCircle },
     { label: 'Ditolak', subtitle: 'Pengajuan ditolak', value: String(rejectedCount), tone: 'red' as const, icon: XCircle },
   ];
+
+  if (!canApproveOvertime) {
+    return (
+      <div className="crud-page">
+        <Card className="hero-card">
+          <div className="hero-card-inner">
+            <div className="hero-content">
+              <div className="hero-badge">
+                <Timer size={16} />
+                <span>Persetujuan</span>
+              </div>
+              <h1 className="hero-title">Persetujuan Lembur</h1>
+              <p className="hero-subtitle">Kelola dan proses pengajuan lembur karyawan.</p>
+            </div>
+          </div>
+        </Card>
+
+        <div style={{ padding: '5rem 0' }}>
+          <EmptyState
+            title="Akses Ditolak"
+            message="Anda tidak memiliki izin untuk melihat halaman persetujuan lembur."
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="crud-page">

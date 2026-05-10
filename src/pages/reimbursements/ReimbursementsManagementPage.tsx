@@ -60,6 +60,9 @@ const ReimbursementsManagementPage = () => {
 
   const [allItemsRaw, setAllItemsRaw] = useState<ReimbursementItem[]>([]);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
+
   const summaryCards = useMemo(() => {
     // Gunakan allItemsRaw agar statistik di atas tidak ikut jadi 0 saat difilter
     const source = allItemsRaw.length > 0 ? allItemsRaw : items;
@@ -108,6 +111,12 @@ const ReimbursementsManagementPage = () => {
       },
     ];
   }, [items, allItemsRaw]);
+
+  const paginatedItems = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return items.slice(startIndex, startIndex + pageSize);
+  }, [items, currentPage, pageSize]);
+  const totalPages = Math.ceil(items.length / pageSize);
 
   const loadData = async () => {
     setLoading(true);
@@ -217,6 +226,10 @@ const ReimbursementsManagementPage = () => {
   useEffect(() => {
     void loadData();
   // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterStatus]);
+
+  useEffect(() => {
+    setCurrentPage(1);
   }, [filterStatus]);
 
   return (
@@ -355,7 +368,7 @@ const ReimbursementsManagementPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {items.map((item, index) => {
+                  {paginatedItems.map((item, index) => {
                     return (
                       <tr key={String(item.id ?? index)}>
                         <td>
@@ -456,6 +469,25 @@ const ReimbursementsManagementPage = () => {
                   })}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        {totalPages > 1 && (
+          <div className="table-pagination">
+            <div className="pagination-info">
+              Menampilkan {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, items.length)} dari {items.length}
+            </div>
+            <div className="pagination-controls">
+              <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)}>
+                Sebelumnya
+              </Button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                <button key={page} className={`pagination-page-btn ${currentPage === page ? 'active' : ''}`} onClick={() => setCurrentPage(page)}>{page}</button>
+              ))}
+              <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage(prev => prev + 1)}>
+                Selanjutnya
+              </Button>
             </div>
           </div>
         )}

@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
 import { BarChart3, PlusCircle, Settings2, X, RefreshCw, Wallet, Gift, MinusCircle } from "lucide-react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
@@ -59,20 +58,19 @@ const getColumns = (items: PayrollDetail[]) => {
 
 
 const PayrollDetailsPage = () => {
-  const location = useLocation();
-  const defaultType = location.pathname.includes("/deduction") ? "deduction" : "allowance";
+  const [componentType, setComponentType] = useState<"allowance" | "deduction">("allowance");
 
   const [items, setItems] = useState<PayrollDetail[]>([]);
   const [payrollId, setPayrollId] = useState("");
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
   const [detailId, setDetailId] = useState("");
-  const [detailType, setDetailType] = useState(defaultType);
-  const [detailDescription, setDetailDescription] = useState(defaultType === "deduction" ? "Tax" : "Housing Allowance");
-  const [detailAmount, setDetailAmount] = useState(defaultType === "deduction" ? "500000" : "2000000");
+  const [detailType, setDetailType] = useState(componentType);
+  const [detailDescription, setDetailDescription] = useState("Housing Allowance");
+  const [detailAmount, setDetailAmount] = useState("2000000");
   const [allPayrolls, setAllPayrolls] = useState<PayrollItem[]>([]);
   const [allEmployees, setAllEmployees] = useState<EmployeeItem[]>([]);
   const [bulkRows, setBulkRows] = useState<Array<{ type: string; name: string; amount: string }>>([
-    { type: defaultType, name: "", amount: "" }
+    { type: componentType, name: "", amount: "" }
   ]);
   const [activeTab, setActiveTab] = useState<"overview" | "add" | "manage">("overview");
   const [manageTab, setManageTab] = useState<"single" | "bulk">("single");
@@ -113,7 +111,7 @@ const PayrollDetailsPage = () => {
   };
 
   const addBulkRow = () => {
-    setBulkRows([...bulkRows, { type: defaultType, name: "", amount: "" }]);
+    setBulkRows([...bulkRows, { type: componentType, name: "", amount: "" }]);
   };
 
   const removeBulkRow = (index: number) => {
@@ -174,13 +172,13 @@ const PayrollDetailsPage = () => {
       {
         label: "Current Type",
         subtitle: "Mode komponen aktif",
-        value: defaultType === "deduction" ? "Deduction" : "Allowance",
+        value: componentType === "deduction" ? "Deduction" : "Allowance",
         change: statusMessage,
         tone: "purple" as const,
         icon: Settings2,
       },
     ];
-  }, [defaultType, items, statusMessage]);
+  }, [componentType, items, statusMessage]);
 
   const requirePayrollId = () => {
     const id = payrollId.trim();
@@ -253,7 +251,7 @@ const PayrollDetailsPage = () => {
         details,
       });
       setStatusMessage("Detail berhasil ditambahkan");
-      setBulkRows([{ type: defaultType, name: "", amount: "" }]);
+      setBulkRows([{ type: componentType, name: "", amount: "" }]);
       await loadPayrollDetails();
     } catch (error: unknown) {
       const errorText = error instanceof Error ? error.message : "Gagal tambah detail";
@@ -310,10 +308,11 @@ const PayrollDetailsPage = () => {
   };
 
   useEffect(() => {
-    setDetailType(defaultType);
-    setDetailDescription(defaultType === "deduction" ? "Tax" : "Housing Allowance");
-    setDetailAmount(defaultType === "deduction" ? "500000" : "2000000");
-  }, [defaultType]);
+    setDetailType(componentType);
+    setDetailDescription(componentType === "deduction" ? "Tax" : "Housing Allowance");
+    setDetailAmount(componentType === "deduction" ? "500000" : "2000000");
+    setBulkRows([{ type: componentType, name: "", amount: "" }]);
+  }, [componentType]);
 
   useEffect(() => {
     void fetchMetadata();
@@ -356,26 +355,21 @@ const PayrollDetailsPage = () => {
         </div>
       </Card>
 
-      <div className="summary-grid">
-        {componentSummaryCards.map((card) => {
-          const Icon = card.icon;
-
-          return (
-            <Card key={card.label} className="metric-card">
-              <div className="metric-header">
-                <div>
-                  <span className="metric-label">{card.label}</span>
-                  <p className="metric-subtitle">{card.subtitle}</p>
-                </div>
-                <span className={`metric-icon metric-icon--${card.tone}`}>
-                  <Icon size={22} />
-                </span>
-              </div>
-              <div className="metric-value" style={{ color: card.tone === 'orange' ? '#f59e0b' : card.tone === 'blue' ? '#2563eb' : card.tone === 'green' ? '#10b981' : '#8b5cf6' }}>{card.value}</div>
-              <div className="summary-card-change">{card.change}</div>
-            </Card>
-          );
-        })}
+      <div className="payroll-component-tabs" style={{ display: "flex", gap: 0, marginBottom: 24, background: "rgba(0,0,0,0.03)", borderRadius: 12, padding: 4, width: "fit-content" }}>
+        <button
+          className={`payroll-details-tab ${componentType === "allowance" ? "is-active" : ""}`}
+          onClick={() => setComponentType("allowance")}
+          style={{ borderRadius: 8, padding: "8px 24px", border: "none", cursor: "pointer", fontWeight: 600, fontSize: 14, background: componentType === "allowance" ? "#fff" : "transparent", boxShadow: componentType === "allowance" ? "0 2px 8px rgba(0,0,0,0.08)" : "none" }}
+        >
+          <Gift size={16} /> Tunjangan
+        </button>
+        <button
+          className={`payroll-details-tab ${componentType === "deduction" ? "is-active" : ""}`}
+          onClick={() => setComponentType("deduction")}
+          style={{ borderRadius: 8, padding: "8px 24px", border: "none", cursor: "pointer", fontWeight: 600, fontSize: 14, background: componentType === "deduction" ? "#fff" : "transparent", boxShadow: componentType === "deduction" ? "0 2px 8px rgba(0,0,0,0.08)" : "none" }}
+        >
+          <MinusCircle size={16} /> Potongan
+        </button>
       </div>
 
       <div className="payroll-details-tabs">
@@ -693,7 +687,7 @@ const PayrollDetailsPage = () => {
                       <select 
                         className="crud-input"
                         value={detailType}
-                        onChange={(event) => setDetailType(event.target.value)}
+                        onChange={(event) => setDetailType(event.target.value as "allowance" | "deduction")}
                       >
                         <option value="allowance">Allowance</option>
                         <option value="deduction">Deduction</option>

@@ -1,6 +1,12 @@
 import { api } from '@/shared/api/httpClient';
 
 const overtimeService = {
+  // Employee: create overtime request if it doesn't exist
+  createOvertimeRequest: async (attendanceId: string | number) => {
+    const response = await api.post('/my/overtime', { attendance_id: attendanceId });
+    return response.data;
+  },
+
   // Employee: upload evidence (file, max 10MB)
   uploadEvidence: async (overtimeId: string | number, file: File, additional?: Record<string, any>) => {
     const form = new FormData();

@@ -7,6 +7,7 @@ import {
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
+import { useAuthStore } from '@/app/store/auth.store';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
 import './ReportsDashboardPage.css';
@@ -36,18 +37,44 @@ const ReportsAttendancePage: React.FC = () => {
   const [employees, setEmployees] = useState<Rec[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const user = useAuthStore((state) => state.user);
+
+  const canViewAttendanceReports = useMemo(() => {
+    return Boolean(
+      user?.permissions?.some((permission: any) => permission?.name === 'attendance.view_all') ||
+      user?.roles?.some((role: any) => role?.name && ['super_admin', 'admin', 'hr', 'manager'].includes(role.name))
+    );
+  }, [user]);
 
   const load = async () => {
     setLoading(true); setError(null);
     try {
+      if (!canViewAttendanceReports) {
+        setRecords([]);
+        setEmployees([]);
+        setError('Anda tidak memiliki akses untuk melihat laporan absensi.');
+        return;
+      }
+
       const [attRes, empRes] = await Promise.allSettled([api.get('/attendance/all'), api.get('/employees')]);
-      setRecords(attRes.status === 'fulfilled' ? extractArr(attRes.value.data) : []);
-      setEmployees(empRes.status === 'fulfilled' ? extractArr(empRes.value.data) : []);
-    } catch (e) { setError(e instanceof Error ? e.message : 'Gagal memuat data'); }
+      const attendanceData = attRes.status === 'fulfilled' ? extractArr(attRes.value.data) : [];
+      const employeeData = empRes.status === 'fulfilled' ? extractArr(empRes.value.data) : [];
+
+      if (attendanceData.length === 0 && attRes.status === 'rejected') {
+        throw attRes.reason;
+      }
+
+      setRecords(attendanceData);
+      setEmployees(employeeData);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Gagal memuat data');
+      setRecords([]);
+      setEmployees([]);
+    }
     finally { setLoading(false); }
   };
 
-  useEffect(() => { void load(); }, []);
+  useEffect(() => { void load(); }, [canViewAttendanceReports]);
 
   const totalEmployees = employees.length;
 

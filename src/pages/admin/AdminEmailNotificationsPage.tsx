@@ -192,6 +192,8 @@ const AdminEmailNotificationsPage = () => {
     return sortedLogs.slice(startIndex, startIndex + pageSize);
   }, [sortedLogs, currentPage, pageSize]);
 
+  const totalPagesTemplates = Math.ceil(filteredTemplates.length / pageSize);
+  const totalPagesLogs = Math.ceil(filteredLogs.length / pageSize);
 
   const clearFilters = () => {
     setSearchText('');
@@ -453,40 +455,60 @@ const AdminEmailNotificationsPage = () => {
       <div className="table-section" style={{ marginBottom: '2rem' }}>
         <div className="wuw-table-area">
           {loading ? <LoadingState message="Memuat templates..." /> : errorMessage ? <ErrorState message="Error" error={errorMessage} onRetry={loadData} /> : paginatedTemplates.length === 0 ? <EmptyState title="Kosong" message="Tidak ada template" /> : (
-            <div className="table-wrap">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Key</th>
-                    <th>Name</th>
-                    <th>Subject</th>
-                    <th>Status</th>
-                    <th className="th-center" style={{ width: '80px' }}>Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedTemplates.map((item) => (
-                    <tr key={item.key}>
-                      <td><span className="cell-id">{item.id || "-"}</span></td>
-                      <td><span className="badge-soft badge-soft--blue">{item.key}</span></td>
-                      <td><span className="cell-name-text" style={{ fontWeight: 600 }}>{item.name}</span></td>
-                      <td>{item.subject}</td>
-                      <td><span className={`badge-soft ${item.is_active ? 'badge-soft--green' : 'badge-soft--red'}`}>{item.is_active ? 'ACTIVE' : 'INACTIVE'}</span></td>
-                      <td className="td-center">
-                        <button 
-                          className="btn-icon btn-icon--red" 
-                          onClick={() => item.id && handleDeleteTemplate(item.id)}
-                          title="Hapus Template"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </td>
+            <>
+              <div className="table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Key</th>
+                      <th>Name</th>
+                      <th>Subject</th>
+                      <th>Status</th>
+                      <th className="th-center" style={{ width: '80px' }}>Aksi</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {paginatedTemplates.map((item) => (
+                      <tr key={item.key}>
+                        <td><span className="cell-id">{item.id || "-"}</span></td>
+                        <td><span className="badge-soft badge-soft--blue">{item.key}</span></td>
+                        <td><span className="cell-name-text" style={{ fontWeight: 600 }}>{item.name}</span></td>
+                        <td>{item.subject}</td>
+                        <td><span className={`badge-soft ${item.is_active ? 'badge-soft--green' : 'badge-soft--red'}`}>{item.is_active ? 'ACTIVE' : 'INACTIVE'}</span></td>
+                        <td className="td-center">
+                          <button 
+                            className="btn-icon btn-icon--red" 
+                            onClick={() => item.id && handleDeleteTemplate(item.id)}
+                            title="Hapus Template"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {totalPagesTemplates > 1 && (
+                <div className="table-pagination">
+                  <div className="pagination-info">
+                    Menampilkan {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, filteredTemplates.length)} dari {filteredTemplates.length}
+                  </div>
+                  <div className="pagination-controls">
+                    <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)}>
+                      Sebelumnya
+                    </Button>
+                    {Array.from({ length: totalPagesTemplates }, (_, i) => i + 1).map(page => (
+                      <button key={page} className={`pagination-page-btn ${currentPage === page ? 'active' : ''}`} onClick={() => setCurrentPage(page)}>{page}</button>
+                    ))}
+                    <Button variant="outline" size="sm" disabled={currentPage === totalPagesTemplates} onClick={() => setCurrentPage(prev => prev + 1)}>
+                      Selanjutnya
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -504,30 +526,50 @@ const AdminEmailNotificationsPage = () => {
       <div className="table-section">
         <div className="wuw-table-area">
           {loading ? <LoadingState message="Memuat logs..." /> : paginatedLogs.length === 0 ? <EmptyState title="Kosong" message="Tidak ada log" /> : (
-            <div className="table-wrap">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Subject</th>
-                    <th>Recipient</th>
-                    <th>Status</th>
-                    <th>Sent At</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedLogs.map((log) => (
-                    <tr key={log.id}>
-                      <td><span className="cell-id">{log.id}</span></td>
-                      <td><span className="cell-name-text" style={{ fontWeight: 600 }}>{log.subject}</span></td>
-                      <td>{log.recipient_email}</td>
-                      <td>{getStatusBadge(log.status)}</td>
-                      <td className="cell-date">{formatDate(log.sent_at || log.created_at)}</td>
+            <>
+              <div className="table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Subject</th>
+                      <th>Recipient</th>
+                      <th>Status</th>
+                      <th>Sent At</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {paginatedLogs.map((log) => (
+                      <tr key={log.id}>
+                        <td><span className="cell-id">{log.id}</span></td>
+                        <td><span className="cell-name-text" style={{ fontWeight: 600 }}>{log.subject}</span></td>
+                        <td>{log.recipient_email}</td>
+                        <td>{getStatusBadge(log.status)}</td>
+                        <td className="cell-date">{formatDate(log.sent_at || log.created_at)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {totalPagesLogs > 1 && (
+                <div className="table-pagination">
+                  <div className="pagination-info">
+                    Menampilkan {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, filteredLogs.length)} dari {filteredLogs.length}
+                  </div>
+                  <div className="pagination-controls">
+                    <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)}>
+                      Sebelumnya
+                    </Button>
+                    {Array.from({ length: totalPagesLogs }, (_, i) => i + 1).map(page => (
+                      <button key={page} className={`pagination-page-btn ${currentPage === page ? 'active' : ''}`} onClick={() => setCurrentPage(page)}>{page}</button>
+                    ))}
+                    <Button variant="outline" size="sm" disabled={currentPage === totalPagesLogs} onClick={() => setCurrentPage(prev => prev + 1)}>
+                      Selanjutnya
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

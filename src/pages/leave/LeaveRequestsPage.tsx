@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardHeader } from '@/shared/ui';
 import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
@@ -23,8 +23,10 @@ const LeaveRequestsPage = () => {
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const [selectedDetail, setSelectedDetail] = useState<any | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const perPage = 15;
 
   const loadLeaves = async () => {
     setLoading(true);
@@ -113,6 +115,17 @@ const LeaveRequestsPage = () => {
     });
   }, [items, searchQuery, filterStatus]);
 
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / perPage));
+
+  const paginatedItems = useMemo(() => {
+    const start = (currentPage - 1) * perPage;
+    return filteredItems.slice(start, start + perPage);
+  }, [filteredItems, currentPage, perPage]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterStatus]);
+
   return (
     <div className="crud-page">
       {/* Header - Same style as Dashboard */}
@@ -193,7 +206,7 @@ const LeaveRequestsPage = () => {
             </div>
           ) : (
             <LeaveTable 
-              items={filteredItems} 
+              items={paginatedItems} 
               onView={handleOpenDetail}
               onApprove={handleApprove}
               onReject={handleReject}
@@ -201,6 +214,48 @@ const LeaveRequestsPage = () => {
               onDelete={handleDelete}
               isAdmin={isAdmin}
             />
+          )}
+          {totalPages > 1 && (
+            <div className="pagination-controls" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', padding: '1rem 0' }}>
+              <button
+                className="btn-outline"
+                disabled={currentPage <= 1}
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                style={{ padding: '0.4rem 1rem', fontSize: '0.85rem' }}
+              >
+                Sebelumnya
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(p => {
+                  if (totalPages <= 7) return true;
+                  if (p === 1 || p === totalPages) return true;
+                  if (Math.abs(p - currentPage) <= 1) return true;
+                  return false;
+                })
+                .map((p, idx, arr) => (
+                  <React.Fragment key={p}>
+                    {idx > 0 && p - arr[idx - 1] > 1 && <span style={{ color: '#94a3b8' }}>...</span>}
+                    <button
+                      className={p === currentPage ? 'btn-primary' : 'btn-outline'}
+                      onClick={() => setCurrentPage(p)}
+                      style={{ padding: '0.4rem 0.75rem', fontSize: '0.85rem', minWidth: '36px' }}
+                    >
+                      {p}
+                    </button>
+                  </React.Fragment>
+                ))}
+              <button
+                className="btn-outline"
+                disabled={currentPage >= totalPages}
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                style={{ padding: '0.4rem 1rem', fontSize: '0.85rem' }}
+              >
+                Selanjutnya
+              </button>
+              <span style={{ fontSize: '0.8rem', color: '#64748b', marginLeft: '0.5rem' }}>
+                {filteredItems.length} total
+              </span>
+            </div>
           )}
         </div>
       </div>

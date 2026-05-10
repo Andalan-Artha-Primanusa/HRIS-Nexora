@@ -1,11 +1,12 @@
 import React from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { useLocation, useOutlet } from 'react-router-dom';
 import { Sidebar } from '@/widgets/layout/Sidebar';
 import { Header } from '@/widgets/layout/Header';
 import { useAuthStore } from '@/app/store/auth.store';
 import { menuItems, type MenuItem } from '@/shared/config/menu';
 import { filterMenuItems } from '@/shared/config/menuFilter';
 import { RouteSuspenseFallback } from '@/shared/ui';
+import NotFoundPage from '@/pages/error/NotFoundPage';
 
 const routePrefetchers: Record<string, () => Promise<unknown>> = {
   '/dashboard': () => import('@/pages/dashboard/overview/OverviewPage'),
@@ -56,6 +57,7 @@ export default function DashboardLayout() {
   } | null>(null);
   const user = useAuthStore((state) => state.user);
   const location = useLocation();
+  const outlet = useOutlet();
 
   React.useEffect(() => {
     const visibleMenu = filterMenuItems(user, menuItems);
@@ -140,7 +142,7 @@ export default function DashboardLayout() {
         <Header toggleSidebar={toggleSidebar} />
         <main className="dashboard-content">
           <React.Suspense fallback={<RouteSuspenseFallback />}>
-            <Outlet />
+            {outlet || <NotFoundPage />}
           </React.Suspense>
           {import.meta.env.DEV && prefetchStats ? (
             <div className="prefetch-debug-panel" role="status" aria-live="polite">

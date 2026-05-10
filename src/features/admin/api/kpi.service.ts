@@ -83,3 +83,70 @@ export const approveKpi = async (id: string | number) => {
   const response = await api.put(`/kpis/${id}/approve`);
   return extractPayload(response.data);
 };
+
+// --- Period-based KPI API ---
+
+export const getKpiPeriods = async () => {
+  const response = await api.get("/kpi-periods");
+  return {
+    items: extractArrayPayload<any>(response.data),
+    raw: response.data,
+  };
+};
+
+export const getKpiPeriodDetail = async (id: string | number) => {
+  const response = await api.get(`/kpi-periods/${id}`);
+  return {
+    data: extractPayload(response.data),
+    raw: response.data,
+  };
+};
+
+export const createKpiPeriod = async (payload: {
+  employee_id: number;
+  period_type: string;
+  period_date: string;
+  notes?: string;
+  items: Array<{
+    indicator: string;
+    description?: string;
+    category?: string;
+    measurement_method?: string;
+    formula_type?: string;
+    weight: number;
+    target: number;
+    source?: string;
+  }>;
+}) => {
+  const response = await api.post("/kpi-periods", payload);
+  return extractPayload(response.data);
+};
+
+export const updateKpiPeriodItems = async (id: string | number, payload: {
+  notes?: string;
+  items: Array<{
+    id?: number;
+    indicator: string;
+    description?: string;
+    category?: string;
+    measurement_method?: string;
+    formula_type?: string;
+    weight: number;
+    target: number;
+    achievement?: number;
+    source?: string;
+  }>;
+}) => {
+  const response = await api.put(`/kpi-periods/${id}/items`, payload);
+  return extractPayload(response.data);
+};
+
+export const deleteKpiPeriod = async (id: string | number) => {
+  const response = await api.delete(`/kpi-periods/${id}`);
+  return response.data;
+};
+
+export const approveKpiPeriod = async (id: string | number, itemId?: number) => {
+  const response = await api.put(`/kpi-periods/${id}/approve`, itemId ? { item_id: itemId } : {});
+  return extractPayload(response.data);
+};

@@ -334,12 +334,6 @@ const sectionDefinitions: Record<string, { title: string; subtitle: string; icon
     icon: CalendarDays,
     color: '#2563EB',
   },
-  '/leave/approval': {
-    title: 'Persetujuan Cuti',
-    subtitle: 'Review dan berikan keputusan (Setuju/Tolak) untuk pengajuan cuti karyawan.',
-    icon: CalendarDays,
-    color: '#2563EB',
-  },
   '/leave/calendar': {
     title: 'Kalender Cuti',
     subtitle: 'Lihat jadwal cuti seluruh karyawan dalam format kalender.',
@@ -536,7 +530,6 @@ const supportsList = (pathname: string) => {
       '/employees',
       '/leave/requests',
       '/leave/my-leave',
-      '/leave/approval',
       '/leave/type',
       '/leave/policy',
       '/attendance',
@@ -632,8 +625,6 @@ const getDefaultFormState = (pathname: string) => {
       return { user_id: '', employee_code: '', position: '', department: '', hire_date: '', salary: '' };
     case '/leave/requests':
       return { id: '', leave_type: '', start_date: '', end_date: '', total_days: '', reason: '' };
-    case '/leave/approval':
-      return { id: '', approval_notes: '' };
     case '/leave/type':
       return { id: '', name: '', code: '', description: '', is_paid: 'true', is_active: 'true' };
     case '/leave/policy':
@@ -852,7 +843,6 @@ const routeActionMatrix: Record<string, string[]> = {
   '/leave/requests': ['createLeave', 'updateLeaveRequest', 'cancelLeaveRequest'],
   '/leave/type': ['createLeaveType', 'updateLeaveType', 'deleteLeaveType'],
   '/leave/policy': ['createLeavePolicy', 'updateLeavePolicy', 'deleteLeavePolicy'],
-  '/leave/approval': ['approveLeave', 'rejectLeave'],
   '/attendance/check-in': ['checkIn'],
   '/attendance/check-out': ['checkOut'],
   '/my/reimbursements': ['createReimbursement', 'submitMyReimbursement'],
@@ -1185,9 +1175,6 @@ const SectionPage = () => {
           break;
         case '/leave/my-leave':
           result = await api.get('/leaves/my', { params });
-          break;
-        case '/leave/approval':
-          result = await api.get('/leaves/pending', { params });
           break;
         case '/leave/type':
           result = await api.get('/leave-types', { params });
@@ -2191,20 +2178,6 @@ const SectionPage = () => {
             )}
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
               <RefreshCcw size={16} /> Segarkan
-            </Button>
-          </>
-        );
-      case '/leave/approval':
-        return (
-          <>
-            <Button variant="primary" size="md" onClick={() => void performAction('approveLeave')} disabled={loading}>
-              Approve Leave
-            </Button>
-            <Button variant="outline" size="md" onClick={() => void performAction('rejectLeave')} disabled={loading}>
-              Reject Leave
-            </Button>
-            <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Refresh Approvals
             </Button>
           </>
         );

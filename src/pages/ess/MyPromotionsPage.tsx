@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, RefreshCw, ArrowUpRight, CheckCircle, Clock, XCircle, FileText, X } from 'lucide-react';
 import { Card, CardHeader } from '@/shared/ui';
+import { Button } from '@/shared/ui/Button';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { promotionService } from '@/features/organization/api/promotion.service';
 import '@/shared/styles/CrudPage.css';
@@ -13,6 +14,8 @@ const MyPromotionsPage: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [searchText, setSearchText] = useState('');
   const [activeTab, setActiveTab] = useState('Semua');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
 
   const [reportModal, setReportModal] = useState(false);
   const [selectedPromo, setSelectedPromo] = useState<any>(null);
@@ -37,6 +40,10 @@ const MyPromotionsPage: React.FC = () => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText, activeTab]);
+
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
       const searchStr = searchText.toLowerCase();
@@ -55,6 +62,12 @@ const MyPromotionsPage: React.FC = () => {
       return matchesSearch && tabMatch;
     });
   }, [items, searchText, activeTab]);
+
+  const paginatedItems = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredItems.slice(startIndex, startIndex + pageSize);
+  }, [filteredItems, currentPage, pageSize]);
+  const totalPages = Math.ceil(filteredItems.length / pageSize);
 
   const summaryCards = useMemo(
     () => [
@@ -274,6 +287,7 @@ const MyPromotionsPage: React.FC = () => {
           )}
 
           {!loading && !errorMessage && filteredItems.length > 0 && (
+            <>
             <div className="table-wrap">
               <table className="data-table">
                 <thead>
@@ -288,7 +302,7 @@ const MyPromotionsPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredItems.map((promo) => {
+                  {paginatedItems.map((promo) => {
                     const remarks = getRemarks(promo.remarks);
                     return (
                       <tr key={promo.id}>
@@ -398,6 +412,25 @@ const MyPromotionsPage: React.FC = () => {
                 </tbody>
               </table>
             </div>
+          {totalPages > 1 && (
+            <div className="table-pagination">
+              <div className="pagination-info">
+                Menampilkan {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, filteredItems.length)} dari {filteredItems.length}
+              </div>
+              <div className="pagination-controls">
+                <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)}>
+                  Sebelumnya
+                </Button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  <button key={page} className={`pagination-page-btn ${currentPage === page ? 'active' : ''}`} onClick={() => setCurrentPage(page)}>{page}</button>
+                ))}
+                <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage(prev => prev + 1)}>
+                  Selanjutnya
+                </Button>
+              </div>
+            </div>
+          )}
+          </>
           )}
         </div>
       </div>

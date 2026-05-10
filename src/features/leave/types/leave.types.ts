@@ -1,5 +1,6 @@
 export interface LeaveCreatePayload {
-  type: string;
+  leave_type_id?: number;
+  type?: string;
   start_date: string;
   end_date: string;
   total_days: number;

@@ -399,6 +399,104 @@
   margin-bottom: 1.5rem;
 }
 
+/* Overtime Reason Modal */
+.overtime-reason-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.overtime-reason-modal__hero {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  padding: 1rem 1.1rem;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%);
+  border: 1px solid #dbeafe;
+}
+
+.overtime-reason-modal__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: #dbeafe;
+  color: #2563eb;
+  flex-shrink: 0;
+}
+
+.overtime-reason-modal__hero-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.overtime-reason-modal__title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.overtime-reason-modal__title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.overtime-reason-modal__badge {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.overtime-reason-modal__subtitle {
+  color: #64748b;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.overtime-reason-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.overtime-reason-modal__textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 140px;
+  border-radius: 18px;
+  border: 1px solid #cbd5e1;
+  padding: 1rem 1.1rem;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  outline: none;
+  background: #fff;
+  color: #0f172a;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.overtime-reason-modal__textarea::placeholder {
+  color: #94a3b8;
+}
+
+.overtime-reason-modal__textarea:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+}
+
+.overtime-reason-modal__footer-btn {
+  min-width: 130px;
+  justify-content: center;
+}
+
 /* Responsive */
 @media (max-width: 900px) {
   .control-section-inner {

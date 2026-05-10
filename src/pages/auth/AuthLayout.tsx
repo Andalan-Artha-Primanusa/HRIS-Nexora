@@ -1,4 +1,4 @@
-import { useEffect, useRef, type MouseEvent, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import "./AuthLayout.css";
 
 interface AuthLayoutProps {
@@ -6,11 +6,10 @@ interface AuthLayoutProps {
   subtitle: string;
   children: ReactNode;
   footer: ReactNode;
+  visualContent?: ReactNode;
 }
 
-const AuthLayout = ({ title, subtitle, children, footer }: AuthLayoutProps) => {
-  const pageRef = useRef<HTMLDivElement | null>(null);
-
+const AuthLayout = ({ title, subtitle, children, footer, visualContent }: AuthLayoutProps) => {
   useEffect(() => {
     const prevHtmlOverflow = document.documentElement.style.overflow;
     const prevBodyOverflow = document.body.style.overflow;
@@ -24,87 +23,15 @@ const AuthLayout = ({ title, subtitle, children, footer }: AuthLayoutProps) => {
     };
   }, []);
 
-  const handleMouseMove = (event: MouseEvent<HTMLDivElement>) => {
-    if (!pageRef.current) return;
-
-    const rect = pageRef.current.getBoundingClientRect();
-    const x = (event.clientX - rect.left) / rect.width;
-    const y = (event.clientY - rect.top) / rect.height;
-
-    const clampedX = Math.max(0, Math.min(1, x));
-    const clampedY = Math.max(0, Math.min(1, y));
-    const tiltX = `${((0.5 - clampedY) * 6).toFixed(2)}deg`;
-    const tiltY = `${((clampedX - 0.5) * 8).toFixed(2)}deg`;
-    const tiltXSoft = `${((0.5 - clampedY) * 3).toFixed(2)}deg`;
-    const tiltYSoft = `${((clampedX - 0.5) * 4).toFixed(2)}deg`;
-
-    pageRef.current.style.setProperty("--pointer-x", clampedX.toFixed(3));
-    pageRef.current.style.setProperty("--pointer-y", clampedY.toFixed(3));
-    pageRef.current.style.setProperty("--cursor-x", `${(clampedX * 100).toFixed(2)}%`);
-    pageRef.current.style.setProperty("--cursor-y", `${(clampedY * 100).toFixed(2)}%`);
-    pageRef.current.style.setProperty("--tilt-x", tiltX);
-    pageRef.current.style.setProperty("--tilt-y", tiltY);
-    pageRef.current.style.setProperty("--tilt-x-soft", tiltXSoft);
-    pageRef.current.style.setProperty("--tilt-y-soft", tiltYSoft);
-  };
-
-  const handleMouseLeave = () => {
-    if (!pageRef.current) return;
-
-    pageRef.current.style.setProperty("--pointer-x", "0.5");
-    pageRef.current.style.setProperty("--pointer-y", "0.5");
-    pageRef.current.style.setProperty("--cursor-x", "50%");
-    pageRef.current.style.setProperty("--cursor-y", "50%");
-    pageRef.current.style.setProperty("--tilt-x", "0deg");
-    pageRef.current.style.setProperty("--tilt-y", "0deg");
-    pageRef.current.style.setProperty("--tilt-x-soft", "0deg");
-    pageRef.current.style.setProperty("--tilt-y-soft", "0deg");
-  };
-
   return (
-    <div
-      ref={pageRef}
-      className="auth-page"
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-    >
+    <div className="auth-page">
       <section className="auth-visual-panel" aria-hidden="true">
-        <div className="auth-ambient auth-ambient-one" />
-        <div className="auth-ambient auth-ambient-two" />
-        <div className="auth-ambient auth-ambient-three" />
-        <div className="auth-orbit auth-orbit-one" />
-        <div className="auth-orbit auth-orbit-two" />
-
-        <div className="auth-brand-strip">
-          <img src="/logo-mahya.png" alt="Mahya HRIS" className="auth-brand-strip-logo" />
-        </div>
-
-        <div className="auth-hris-widget auth-hris-widget-top">
-          <p className="auth-widget-label">Attendance Today</p>
-          <p className="auth-widget-value">97.8%</p>
-        </div>
-        <div className="auth-hris-widget auth-hris-widget-bottom">
-          <p className="auth-widget-label">Payroll Processed</p>
-          <p className="auth-widget-value">1,248</p>
-        </div>
-        <div className="auth-hris-tags">
-          <span className="auth-hris-tag">Attendance</span>
-          <span className="auth-hris-tag">Payroll</span>
-          <span className="auth-hris-tag">Recruitment</span>
-          <span className="auth-hris-tag">People Analytics</span>
-        </div>
-
-        <span className="auth-blob auth-blob-top-left" />
-        <span className="auth-blob auth-blob-top-center" />
-        <span className="auth-blob auth-blob-middle-right" />
-        <span className="auth-blob auth-blob-bottom-left" />
-        <div className="auth-hero-wrapper">
-          <img
-            src="/hris.jpg"
-            alt="HRIS recruitment illustration"
-            className="auth-hero-image"
-          />
-        </div>
+        {visualContent ?? (
+          <div className="auth-visual-content">
+            <img src="/logo-mahya.png" alt="Mahya HRIS" className="auth-logo-image" />
+            <p className="auth-visual-tagline">KELOLA SDM ,MAKSIMALKAN POTENSI</p>
+          </div>
+        )}
       </section>
 
       <section className="auth-form-panel">
@@ -115,35 +42,12 @@ const AuthLayout = ({ title, subtitle, children, footer }: AuthLayoutProps) => {
           </header>
           {children}
           {footer}
-          
-          <div style={{ 
-            marginTop: '1.5rem',
-            paddingTop: '1.5rem',
-            borderTop: '1px solid var(--border-color)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '0.5rem',
-            opacity: 0.8
-          }}>
-            <img 
-              src="/foto-berkemah.png"
-              alt="Berkemah Team"
-              style={{ 
-                width: '160px',
-                height: '140px',
-                objectFit: 'cover',
-                borderRadius: '8px'
-              }} 
-            />
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                Powered by
-              </span>
-              <span style={{ fontSize: '0.9rem', fontWeight: 900, color: 'var(--primary-color)' }}>
-                Berkemah Team
-              </span>
+          <div className="auth-powered-by">
+            <img src="/foto-berkemah.png" alt="BERKEMAH TEAM" className="auth-powered-by-image" />
+            <div className="auth-powered-by-text">
+              <span>Powered by</span>
+              <strong>BERKEMAH TEAM</strong>
             </div>
           </div>
         </div>

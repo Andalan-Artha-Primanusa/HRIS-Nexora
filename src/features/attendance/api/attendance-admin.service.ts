@@ -31,8 +31,8 @@ const extractArrayPayload = (raw: unknown): AttendanceItem[] => {
   return [];
 };
 
-export const getAllAttendanceRecords = async () => {
-  const response = await api.get("/attendance/all");
+export const getAllAttendanceRecords = async (params?: Record<string, any>) => {
+  const response = await api.get("/attendance/all", { params });
   return {
     items: extractArrayPayload(response.data),
     raw: response.data,
