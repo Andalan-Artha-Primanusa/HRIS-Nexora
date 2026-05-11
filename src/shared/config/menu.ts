@@ -37,8 +37,8 @@ export const menuItems: MenuItem[] = [
   label: 'Manajemen Karyawan',
   icon: Users,
   path: '/employees',
-  requiredChecker: (user) =>
-    RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
+    requiredChecker: (user) =>
+    RBACUtils.isHR(user) || RBACUtils.isAdmin(user) || RBACUtils.isManager(user),
   },
   // {
   //   label: 'Manajemen Karyawan',
@@ -116,7 +116,7 @@ export const menuItems: MenuItem[] = [
     label: 'Aset & Inventaris',
     icon: Briefcase,
     path: '/assets',
-    requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
+    requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user) || RBACUtils.isManager(user),
   },
   {
     label: 'Task Management',
@@ -127,7 +127,7 @@ export const menuItems: MenuItem[] = [
   {
     label: 'Legal & Dokumen',
     icon: FileText,
-    requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
+    requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user) || RBACUtils.isManager(user),
     subItems: [
       { label: 'Surat Tugas', path: '/admin/assignment-letters' },
       { label: 'Generator Surat', path: '/legal/letters' },
@@ -158,7 +158,7 @@ export const menuItems: MenuItem[] = [
     label: 'Karir & Promosi',
     icon: ArrowUpRight,
     path: '/promotions',
-    requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
+    requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user) || RBACUtils.isManager(user),
   },
   // {
   //   label: 'Permintaan Layanan HR',
@@ -250,7 +250,7 @@ export const menuItems: MenuItem[] = [
   {
     label: 'Kepatuhan & Kebijakan',
     icon: ShieldCheck,
-    requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
+    requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user) || RBACUtils.isManager(user),
     subItems: [
       { label: 'Dashboard Kepatuhan', path: '/compliance/overview' },
       { label: 'Kalender Libur', path: '/workforce/holidays' },
@@ -261,7 +261,7 @@ export const menuItems: MenuItem[] = [
   {
     label: 'Master Data',
     icon: Database,
-    requiredChecker: (user) => RBACUtils.isAdmin(user),
+    requiredChecker: (user) => RBACUtils.isAdmin(user) || RBACUtils.isManager(user) || RBACUtils.isHR(user),
     subItems: [
       { label: 'Departemen & Posisi', path: '/organization/master-data' },
       { label: 'Jenis Cuti', path: '/leave/type' },

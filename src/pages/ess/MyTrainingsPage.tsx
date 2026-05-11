@@ -32,7 +32,7 @@ const MyTrainingsPage: React.FC = () => {
   const pageSize = 10;
 
   const isEmployee = RBACUtils.hasRole(user, 'employee');
-  const isAdmin = RBACUtils.isAdmin(user) || RBACUtils.isHR(user) || RBACUtils.isSuperAdmin(user);
+  const isAdmin = RBACUtils.isAdmin(user) || RBACUtils.isHR(user) || RBACUtils.isSuperAdmin(user) || RBACUtils.isManager(user);
 
   const fetchData = async () => {
     setLoading(true);

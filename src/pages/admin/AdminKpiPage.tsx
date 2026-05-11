@@ -95,7 +95,7 @@ const getRoleNames = (user: any) => (user?.roles ?? []).map((role: any) => role.
 
 const hasAdminAccess = (user: any) => {
   const roleNames = getRoleNames(user);
-  return roleNames.includes(ROLES.ADMIN) || roleNames.includes(ROLES.SUPER_ADMIN) || roleNames.includes(ROLES.HR);
+  return roleNames.includes(ROLES.ADMIN) || roleNames.includes(ROLES.SUPER_ADMIN) || roleNames.includes(ROLES.HR) || roleNames.includes(ROLES.MANAGER);
 };
 
 const getStatusClass = (status?: string) => {

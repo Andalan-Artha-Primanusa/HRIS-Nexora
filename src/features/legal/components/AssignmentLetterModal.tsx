@@ -12,7 +12,7 @@ export const AssignmentLetterModal: React.FC<{
 }> = ({ isOpen, onClose, onSave }) => {
   const user = useAuthStore((state) => state.user);
   const isAdminOrHR = user?.roles?.some((r: any) =>
-    ['admin', 'hr', 'super_admin'].includes(String(r.name ?? '').toLowerCase())
+    ['admin', 'hr', 'super_admin', 'manager'].includes(String(r.name ?? '').toLowerCase())
   );
 
   const [employees, setEmployees] = useState<any[]>([]);
