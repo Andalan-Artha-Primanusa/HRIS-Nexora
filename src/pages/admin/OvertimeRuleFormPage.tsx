@@ -106,7 +106,7 @@ if (fetching) return <div style={{ padding: '5rem', textAlign: 'center' }}><Refr
         </div>
       </Card>
 
-<form id="overtime-form" onSubmit={handleSubmit} className="white-unified-wrapper">
+<form id="overtime-form" onSubmit={handleSubmit} className="">
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
               <Card glass style={{ padding: '2.5rem', borderRadius: '32px' }}>

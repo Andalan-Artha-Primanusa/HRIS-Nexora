@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { RefreshCw, Package, Laptop, Monitor, Smartphone, Briefcase, ArrowUpFromLine, X, CheckCircle, Clock, Search } from 'lucide-react';
+import { RefreshCw, Package, Laptop, Monitor, Smartphone, Briefcase, ArrowUpFromLine, X, CheckCircle, Clock, Search, History } from 'lucide-react';
 import { Card, CardHeader } from '@/shared/ui';
 import { Button } from '@/shared/ui/Button';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
@@ -7,6 +7,7 @@ import { assetService } from '@/features/assets/api/asset.service';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/employee/EmployeesPage.css';
+import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 
 const MyAssetsPage: React.FC = () => {
   const [assets, setAssets] = useState<any[]>([]);
@@ -16,6 +17,7 @@ const MyAssetsPage: React.FC = () => {
   const [searchText, setSearchText] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
+  const [historyModal, setHistoryModal] = useState<{ module: string; id: number | string } | null>(null);
 
   const [returnModal, setReturnModal] = useState(false);
   const [selectedAssignment, setSelectedAssignment] = useState<any>(null);
@@ -322,6 +324,7 @@ const MyAssetsPage: React.FC = () => {
                                 <ArrowUpFromLine size={16} />
                               </button>
                             )}
+                            <button className="action-btn" style={{ color: '#8b5cf6', background: '#f5f3ff' }} onClick={() => setHistoryModal({ module: 'asset_assignment', id: item.id })} title="Riwayat Approval"><History size={16} /></button>
                           </div>
                         </td>
                       </tr>
@@ -401,6 +404,14 @@ const MyAssetsPage: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+      {historyModal && (
+        <ApprovalHistoryModal
+          isOpen={!!historyModal}
+          onClose={() => setHistoryModal(null)}
+          module={historyModal.module}
+          moduleId={historyModal.id}
+        />
       )}
     </div>
   );

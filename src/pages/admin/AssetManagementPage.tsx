@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, RefreshCw, Package, Search, Filter, Laptop, Monitor, Smartphone, Briefcase, User, Trash2, Pencil, CheckCircle2, X, ArrowDownToLine, ArrowUpFromLine, Handshake, Box, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, RefreshCw, Package, Search, Filter, Laptop, Monitor, Smartphone, Briefcase, User, Trash2, Pencil, CheckCircle2, X, ArrowDownToLine, ArrowUpFromLine, Handshake, Box, CheckCircle, XCircle, History } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { assetService } from '@/features/assets/api/asset.service';
@@ -12,6 +12,7 @@ import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/employee/EmployeesPage.css';
 import './AssetInventoryPage.css';
 import './AssetAssignmentsPage.css';
+import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 
 const formatDateTime = (input: string) => {
   if (!input) return 'N/A';
@@ -417,6 +418,7 @@ const AssignmentsTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [returnTarget, setReturnTarget] = useState<{ id: string | number; name: string } | null>(null);
   const [returning, setReturning] = useState(false);
+  const [historyModal, setHistoryModal] = useState<{ module: string; id: number | string } | null>(null);
 
   const fetchAssignments = async () => {
     try {
@@ -492,8 +494,31 @@ const AssignmentsTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading
   };
 
   const getStatusBadge = (assignment: any) => {
+    if (assignment.status === 'approved') return <span className="badge-soft badge-soft--green">Disetujui</span>;
+    if (assignment.status === 'rejected') return <span className="badge-soft badge-soft--red">Ditolak</span>;
+    if (assignment.status === 'pending' || assignment.approval_flow_id) return <span className="badge-soft badge-soft--orange">Menunggu</span>;
     if (!!assignment.returned_at) return <span className="badge-soft badge-soft--gray">Dikembalikan</span>;
     return <span className="badge-soft badge-soft--green">Aktif</span>;
+  };
+
+  const handleApproveAssignment = async (assignment: any) => {
+    if (!window.confirm('Setujui penugasan aset ini?')) return;
+    try {
+      await assetService.approveAssignment(assignment.id);
+      fetchAssignments();
+    } catch (error) {
+      console.error('Failed to approve assignment:', error);
+    }
+  };
+
+  const handleRejectAssignment = async (assignment: any) => {
+    if (!window.confirm('Tolak penugasan aset ini?')) return;
+    try {
+      await assetService.rejectAssignment(assignment.id);
+      fetchAssignments();
+    } catch (error) {
+      console.error('Failed to reject assignment:', error);
+    }
   };
 
   return (
@@ -619,10 +644,19 @@ const AssignmentsTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading
                           <td className="td-center">{getStatusBadge(assignment)}</td>
                           <td className="td-center">
                             <div className="action-btn-group">
-                              {!assignment.returned_at && (
+                              {assignment.approval_flow_id && assignment.status !== 'approved' && assignment.status !== 'rejected' && (
+                                <>
+                                  <button className="action-btn" style={{ color: '#10b981' }} onClick={() => handleApproveAssignment(assignment)} title="Setujui"><CheckCircle2 size={16} /></button>
+                                  <button className="action-btn" style={{ color: '#ef4444' }} onClick={() => handleRejectAssignment(assignment)} title="Tolak"><X size={16} /></button>
+                                </>
+                              )}
+                              {assignment.status === 'approved' && !assignment.returned_at && (
                                 <button className="action-btn action-btn-return" onClick={() => setReturnTarget({ id: assignment.id, name: assignment.asset?.name || 'Asset' })} title="Proses Pengembalian">
                                   <CheckCircle size={16} />
                                 </button>
+                              )}
+                              {assignment.approval_flow_id && (
+                                <button className="action-btn" style={{ color: '#8b5cf6', background: '#f5f3ff' }} onClick={() => setHistoryModal({ module: 'asset_assignment', id: assignment.id })} title="Riwayat Approval"><History size={16} /></button>
                               )}
                             </div>
                           </td>
@@ -659,6 +693,15 @@ const AssignmentsTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading
 
       {returnTarget && (
         <ReturnAssetModal isOpen={!!returnTarget} onClose={() => setReturnTarget(null)} onConfirm={handleReturn} assetName={returnTarget.name} loading={returning} />
+      )}
+
+      {historyModal && (
+        <ApprovalHistoryModal
+          isOpen={!!historyModal}
+          onClose={() => setHistoryModal(null)}
+          module={historyModal.module}
+          moduleId={historyModal.id}
+        />
       )}
     </>
   );

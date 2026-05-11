@@ -3,13 +3,14 @@ import { Card, CardHeader } from "@/shared/ui";
 import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { approveLeave, getLeaveRequests, rejectLeave } from "@/features/leave/api/leave.service";
 import type { LeaveItem } from "@/features/leave/types/leave.types";
-import { RefreshCw, Check, X, Clock3, CheckCircle2, XCircle, Search } from "lucide-react";
+import { RefreshCw, Check, X, Clock3, CheckCircle2, XCircle, Search, History } from "lucide-react";
 import { showToast } from "@/shared/ui/toast";
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/leave/LeaveApprovalPage.css';
 import '@/pages/admin/AdminPermissionsPage.css';
 import { useAuthStore } from "@/app/store/auth.store";
+import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 
 const formatDate = (dateString: string | undefined) => {
   if (!dateString) return "-";
@@ -60,6 +61,7 @@ const LeaveApprovalPage = () => {
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
+  const [historyModal, setHistoryModal] = useState<{ module: string; id: number } | null>(null);
 
   const loadData = async () => {
     setLoading(true);
@@ -343,6 +345,7 @@ const LeaveApprovalPage = () => {
                                   </button>
                                 </>
                               ) : null}
+                            <button className="action-btn" style={{ color: '#8b5cf6', background: '#f5f3ff' }} onClick={() => setHistoryModal({ module: 'leave', id: item.id })} title="Riwayat Approval"><History size={16} /></button>
                             </div>
                           </td>
                         )}
@@ -387,6 +390,15 @@ const LeaveApprovalPage = () => {
           )}
         </div>
       </div>
+
+      {historyModal && (
+        <ApprovalHistoryModal
+          isOpen={!!historyModal}
+          onClose={() => setHistoryModal(null)}
+          module={historyModal.module}
+          moduleId={historyModal.id}
+        />
+      )}
     </div>
   );
 };

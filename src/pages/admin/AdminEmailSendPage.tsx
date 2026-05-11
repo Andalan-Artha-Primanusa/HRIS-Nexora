@@ -163,7 +163,7 @@ const AdminEmailSendPage = () => {
         </div>
       )}
 
-      <div className="white-unified-wrapper">
+      <div className="">
         <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '2rem' }}>
           {/* Left: Form */}
           <Card glass style={{ padding: '2rem' }}>

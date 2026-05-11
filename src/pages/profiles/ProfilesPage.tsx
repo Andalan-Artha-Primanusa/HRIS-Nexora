@@ -807,7 +807,7 @@ const ProfilesPage = () => {
           </div>
         </Card>
 
-        <div className="white-unified-wrapper">
+        <div className="">
           <Card className="table-card" glass>
             <div className="table-header-bar">
               <h3>Data Profil</h3>
@@ -875,7 +875,7 @@ const ProfilesPage = () => {
           <Alert type="error" message={errorMessage} onClose={() => {}} dismissible />
         )}
 
-        <div className="white-unified-wrapper">
+        <div className="">
           <div className="form-grid">
             <Card className="table-card" glass>
               <div className="table-header-bar">
@@ -1064,7 +1064,7 @@ const ProfilesPage = () => {
           <Alert type="error" message={errorMessage} onClose={() => {}} dismissible />
         )}
 
-        <div className="white-unified-wrapper">
+        <div className="">
           <div className="form-grid">
             <Card className="table-card" glass>
               <div className="table-header-bar">
@@ -1160,7 +1160,7 @@ const ProfilesPage = () => {
         <Alert type="error" message={errorMessage} onClose={() => {}} dismissible />
       )}
 
-      <div className="white-unified-wrapper">
+      <div className="">
         <div className="wuw-header">
           <div className="wuw-header-top">
             <div className="wuw-title-area">

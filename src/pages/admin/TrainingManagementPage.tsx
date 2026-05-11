@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, RefreshCw, GraduationCap, Calendar, Users, BookOpen, Search, Filter, Clock, Award, Edit, Trash2, BookTemplate, CheckCircle, TrendingUp, UserPlus, X, Loader2, XCircle } from 'lucide-react';
+import { Plus, RefreshCw, GraduationCap, Calendar, Users, BookOpen, Search, Filter, Clock, Award, Edit, Trash2, BookTemplate, CheckCircle, TrendingUp, UserPlus, X, Loader2, XCircle, History } from 'lucide-react';
+import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 import { Card } from '@/shared/ui/Card';
 import { Modal } from '@/shared/ui/Modal';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
@@ -276,6 +277,7 @@ const EnrollmentsTab: React.FC = () => {
   const [completingEnrollmentName, setCompletingEnrollmentName] = useState('');
   const [completing, setCompleting] = useState(false);
   const [completeData, setCompleteData] = useState({ score: '', notes: '', certificate_path: '' });
+  const [historyModal, setHistoryModal] = useState<{ module: string; id: number } | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -471,6 +473,7 @@ const EnrollmentsTab: React.FC = () => {
                             {(enrollment.status === 'enrolled' || enrollment.status === 'in_progress') && (
                               <button className="action-btn" style={{ color: '#8b5cf6', background: '#f5f3ff' }} onClick={() => openCompleteModal(enrollment)} title="Tandai Selesai"><Award size={16} /></button>
                             )}
+                            <button className="action-btn" style={{ color: '#8b5cf6', background: '#f5f3ff' }} onClick={() => setHistoryModal({ module: 'training', id: enrollment.id })} title="Riwayat Approval"><History size={16} /></button>
                           </div>
                         </td>
                       </tr>
@@ -517,6 +520,15 @@ const EnrollmentsTab: React.FC = () => {
           </div>
         </div>
       </Modal>
+
+      {historyModal && (
+        <ApprovalHistoryModal
+          isOpen={!!historyModal}
+          onClose={() => setHistoryModal(null)}
+          module={historyModal.module}
+          moduleId={historyModal.id}
+        />
+      )}
     </>
   );
 };

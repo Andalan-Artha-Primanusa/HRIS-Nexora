@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, RefreshCw, FileText, Calendar, MapPin, User, CheckCircle, XCircle, Clock, BookTemplate } from 'lucide-react';
+import { Plus, RefreshCw, FileText, Calendar, MapPin, User, CheckCircle, XCircle, Clock, BookTemplate, History } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { legalService } from '@/features/legal/api/legal.service';
@@ -7,11 +7,13 @@ import { AssignmentLetterModal } from '@/features/legal/components/AssignmentLet
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
+import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 
 const AssignmentLettersPage: React.FC = () => {
   const [letters, setLetters] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [historyModal, setHistoryModal] = useState<{ module: string; id: number } | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -232,7 +234,7 @@ const AssignmentLettersPage: React.FC = () => {
                   </div>
                 )}
 
-                {letter.status?.toLowerCase() === 'approved' && (
+                  {letter.status?.toLowerCase() === 'approved' && (
                   <Button 
                     variant="outline" 
                     style={{ width: '100%', borderColor: '#2563eb', color: '#2563eb', fontWeight: 600, gap: '8px' }}
@@ -241,6 +243,13 @@ const AssignmentLettersPage: React.FC = () => {
                     <FileText size={16} /> Download PDF
                   </Button>
                 )}
+                <Button 
+                  variant="outline" 
+                  style={{ width: '100%', borderColor: '#8b5cf6', color: '#8b5cf6', fontWeight: 600, gap: '8px' }}
+                  onClick={() => setHistoryModal({ module: 'assignment_letter', id: letter.id })}
+                >
+                  <History size={16} /> Riwayat Approval
+                </Button>
               </Card>
             ))}
           </div>
@@ -252,6 +261,15 @@ const AssignmentLettersPage: React.FC = () => {
         onClose={() => setIsModalOpen(false)}
         onSave={handleSave}
       />
+
+      {historyModal && (
+        <ApprovalHistoryModal
+          isOpen={!!historyModal}
+          onClose={() => setHistoryModal(null)}
+          module={historyModal.module}
+          moduleId={historyModal.id}
+        />
+      )}
     </div>
   );
 };

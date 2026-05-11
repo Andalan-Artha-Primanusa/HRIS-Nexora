@@ -109,13 +109,6 @@
 .employee-value-red { color: #dc2626; }
 .employee-value-yellow { color: #d97706; }
 
-.white-unified-wrapper {
-  margin-top: 2.5rem;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.03);
-  border-radius: 32px;
-  border-color: rgba(0, 0, 0, 0.05) !important;
-}
-
 .btn-refresh {
   background: #f8fafc !important;
   border-color: #e2e8f0 !important;

@@ -46,7 +46,7 @@ const AdminImportPage = () => {
             </div>
           </div>
         </Card>
-        <div className="white-unified-wrapper">
+        <div className="">
           <Card glass style={{ padding: '2rem', textAlign: 'center' }}>
             <p style={{ color: '#64748b' }}>Silakan hubungi Administrator untuk mendapatkan akses.</p>
             <a

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Plus, RefreshCw, Wallet, Search, Eye, Pencil, Trash2, Send, CheckCircle2, Clock, TrendingUp } from 'lucide-react';
+import { Plus, RefreshCw, Wallet, Search, Eye, Pencil, Trash2, Send, CheckCircle2, Clock, TrendingUp, History } from 'lucide-react';
 import { Card, CardHeader } from '@/shared/ui';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { ReimbursementDetailModal } from '@/features/reimbursement/components/ReimbursementDetailModal';
@@ -16,6 +16,7 @@ import { showToast } from '@/shared/ui/toast';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/features/reimbursement/Reimbursement.css';
+import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 
 const getStatusClass = (status?: string) => {
   const normalized = String(status || "").toLowerCase();
@@ -47,6 +48,7 @@ const MyReimbursementsPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<ReimbursementItem | null>(null);
+  const [historyModal, setHistoryModal] = useState<{ module: string; id: number | string } | null>(null);
 
   // Search & Filter
   const [searchText, setSearchText] = useState("");
@@ -389,6 +391,7 @@ const MyReimbursementsPage: React.FC = () => {
                                 <Trash2 size={16} />
                               </button>
                             )}
+                            <button className="action-btn" style={{ color: '#8b5cf6', background: '#f5f3ff' }} onClick={() => setHistoryModal({ module: 'reimbursement', id: item.id })} title="Riwayat Approval"><History size={16} /></button>
                           </div>
                         </td>
                       </tr>
@@ -445,6 +448,15 @@ const MyReimbursementsPage: React.FC = () => {
         onClose={() => setIsDetailOpen(false)}
         item={selectedItem}
       />
+
+      {historyModal && (
+        <ApprovalHistoryModal
+          isOpen={!!historyModal}
+          onClose={() => setHistoryModal(null)}
+          module={historyModal.module}
+          moduleId={historyModal.id}
+        />
+      )}
     </div>
   );
 };

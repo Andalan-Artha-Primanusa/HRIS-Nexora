@@ -287,7 +287,7 @@ const CompanySettingsPage: React.FC = () => {
          </Card>
       </div>
 
-      <div className="white-unified-wrapper" style={{ marginTop: '2rem' }}>
+      <div className="" style={{ marginTop: '2rem' }}>
         <div className="wuw-header">
           <div className="wuw-header-top" style={{ marginBottom: 0 }}>
             <div className="wuw-title-area">

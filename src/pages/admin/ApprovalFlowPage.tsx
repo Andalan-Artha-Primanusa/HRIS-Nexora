@@ -63,6 +63,11 @@ const ApprovalFlowPage: React.FC = () => {
     return role?.display_name || role?.name || `Role #${roleId}`;
   };
 
+  const getUserName = (user: any) => {
+    if (!user) return null;
+    return user.name || user.email || `User #${user.id}`;
+  };
+
   const renderSteps = (steps: any[]) => {
     if (!steps || steps.length === 0) {
       return <span style={{ color: '#94a3b8', fontSize: '13px' }}>No steps</span>;
@@ -70,52 +75,60 @@ const ApprovalFlowPage: React.FC = () => {
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column' }}>
-        {steps.map((step, idx) => (
-          <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
-            {/* Dot + Line connector */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '32px', flexShrink: 0 }}>
-              <div style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '50%',
-                background: '#eff6ff',
-                border: '2px solid #bfdbfe',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 1,
-              }}>
-                <User size={14} color="#1d4ed8" />
-              </div>
-              {idx < steps.length - 1 && (
-                <div style={{
-                  width: '2px',
-                  flex: 1,
-                  minHeight: '20px',
-                  background: '#bfdbfe',
-                  margin: '2px 0',
-                }} />
-              )}
-            </div>
+        {steps.map((step, idx) => {
+          const assignedUser = step.user || step.user_id;
+          const userName = assignedUser && typeof assignedUser === 'object' ? getUserName(assignedUser) : null;
 
-            {/* Step content card */}
-            <div style={{
-              background: '#f8faff',
-              border: '0.5px solid #bfdbfe',
-              borderRadius: '10px',
-              padding: '10px 16px',
-              flex: 1,
-              marginBottom: idx < steps.length - 1 ? '12px' : 0,
-            }}>
-              <p style={{ fontSize: '11px', color: '#3b82f6', fontWeight: 600, margin: '0 0 2px 0' }}>
-                Step {idx + 1}
-              </p>
-              <p style={{ fontSize: '13px', fontWeight: 600, color: '#1e40af', margin: 0 }}>
-                {getRoleName(step.role_id)}
-              </p>
+          return (
+            <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '32px', flexShrink: 0 }}>
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  background: '#eff6ff',
+                  border: '2px solid #bfdbfe',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 1,
+                }}>
+                  <User size={14} color="#1d4ed8" />
+                </div>
+                {idx < steps.length - 1 && (
+                  <div style={{
+                    width: '2px',
+                    flex: 1,
+                    minHeight: '20px',
+                    background: '#bfdbfe',
+                    margin: '2px 0',
+                  }} />
+                )}
+              </div>
+
+              <div style={{
+                background: '#f8faff',
+                border: '0.5px solid #bfdbfe',
+                borderRadius: '10px',
+                padding: '10px 16px',
+                flex: 1,
+                marginBottom: idx < steps.length - 1 ? '12px' : 0,
+              }}>
+                <p style={{ fontSize: '11px', color: '#3b82f6', fontWeight: 600, margin: '0 0 2px 0' }}>
+                  Step {idx + 1}
+                </p>
+                <p style={{ fontSize: '13px', fontWeight: 600, color: '#1e40af', margin: 0 }}>
+                  {getRoleName(step.role_id)}
+                </p>
+                {userName && (
+                  <p style={{ fontSize: '12px', color: '#64748b', margin: '4px 0 0 0', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <User size={12} /> {userName}
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     );
   };

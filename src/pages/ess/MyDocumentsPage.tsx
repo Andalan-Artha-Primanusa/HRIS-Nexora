@@ -14,13 +14,15 @@ import {
   Eye,
   X,
   FileUp,
-  Loader2
+  Loader2,
+  History
 } from 'lucide-react';
 import { Card, CardHeader } from '@/shared/ui';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { documentService } from '@/features/employee/api/document.service';
 import type { EmployeeDocument } from '@/features/employee/types/document.types';
 import { api } from '@/shared/api/httpClient';
+import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 
@@ -362,6 +364,7 @@ const MyDocumentsPage: React.FC = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
+  const [historyModal, setHistoryModal] = useState<{ module: string; id: number | string } | null>(null);
 
   const fetchDocuments = async () => {
     setLoading(true);
@@ -678,6 +681,7 @@ const MyDocumentsPage: React.FC = () => {
                             >
                               <Eye size={16} />
                             </button>
+                            <button className="action-btn" style={{ color: '#8b5cf6', background: '#f5f3ff' }} onClick={() => setHistoryModal({ module: 'document', id: doc.id })} title="Riwayat Approval"><History size={16} /></button>
                           </div>
                         </td>
                       </tr>
@@ -729,6 +733,15 @@ const MyDocumentsPage: React.FC = () => {
         onClose={() => setShowUploadModal(false)}
         onSuccess={handleUploadSuccess}
       />
+
+      {historyModal && (
+        <ApprovalHistoryModal
+          isOpen={!!historyModal}
+          onClose={() => setHistoryModal(null)}
+          module={historyModal.module}
+          moduleId={historyModal.id}
+        />
+      )}
     </div>
   );
 };

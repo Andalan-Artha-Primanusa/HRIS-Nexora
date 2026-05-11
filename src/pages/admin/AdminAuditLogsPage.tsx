@@ -135,11 +135,9 @@ const AdminAuditLogsPage = () => {
           </div>
         </Card>
 
-        <div className="white-unified-wrapper">
-          <Card glass style={{ padding: '2rem', textAlign: 'center' }}>
-            <p>Silakan hubungi Administrator untuk mendapatkan akses.</p>
-          </Card>
-        </div>
+        <Card glass style={{ marginTop: '2rem', padding: '2rem', textAlign: 'center' }}>
+          <p>Silakan hubungi Administrator untuk mendapatkan akses.</p>
+        </Card>
       </div>
     );
   }

@@ -1,6 +1,15 @@
 import { api } from "@/shared/api/httpClient";
 
 export const assetService = {
+  // --- Approval Actions ---
+  approveAssignment: async (assignmentId: string | number, note?: string) => {
+    const response = await api.put(`/assets/assignments/${assignmentId}/approve`, { note });
+    return response.data;
+  },
+  rejectAssignment: async (assignmentId: string | number, note?: string) => {
+    const response = await api.put(`/assets/assignments/${assignmentId}/reject`, { note });
+    return response.data;
+  },
   // --- Asset Management (Admin/HR) ---
   getAssets: async (params?: { status?: string; search?: string }) => {
     const response = await api.get('/assets', { params });

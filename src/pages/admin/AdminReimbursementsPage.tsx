@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { RefreshCw, Wallet, Search, Filter, Clock, CheckCircle, XCircle, Eye, Trash2, FileText } from 'lucide-react';
+import { RefreshCw, Wallet, Search, Filter, Clock, CheckCircle, XCircle, Eye, Trash2, FileText, History } from 'lucide-react';
 import { Card, CardHeader } from '@/shared/ui';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import {
@@ -13,6 +13,7 @@ import type { ReimbursementItem } from '@/features/reimbursement/types/reimburse
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import './AdminReimbursementsPage.css';
+import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 
 const formatDateTime = (input: string) => {
   const date = new Date(input);
@@ -35,6 +36,7 @@ const AdminReimbursementsPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
   const [showFilters, setShowFilters] = useState(false);
+  const [historyModal, setHistoryModal] = useState<{ module: string; id: number | string } | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
@@ -383,6 +385,7 @@ const AdminReimbursementsPage: React.FC = () => {
                             >
                               <Eye size={16} />
                             </button>
+                            <button className="action-btn" style={{ color: '#8b5cf6', background: '#f5f3ff' }} onClick={() => setHistoryModal({ module: 'reimbursement', id: item.id })} title="Riwayat Approval"><History size={16} /></button>
                             {item.status === 'submitted' && (
                               <>
                                 <button
@@ -563,6 +566,15 @@ const AdminReimbursementsPage: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {historyModal && (
+        <ApprovalHistoryModal
+          isOpen={!!historyModal}
+          onClose={() => setHistoryModal(null)}
+          module={historyModal.module}
+          moduleId={historyModal.id}
+        />
       )}
     </div>
   );

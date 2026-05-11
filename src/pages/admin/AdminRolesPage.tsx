@@ -149,7 +149,7 @@ const AdminRolesPage = () => {
             </div>
           </div>
         </Card>
-        <div className="white-unified-wrapper">
+        <div className="">
           <Card glass style={{ padding: "2rem", textAlign: "center" }}>
             <p>Silakan hubungi Administrator untuk mendapatkan akses.</p>
           </Card>

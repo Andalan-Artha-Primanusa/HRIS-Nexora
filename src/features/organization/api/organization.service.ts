@@ -34,4 +34,10 @@ export const organizationService = {
     const response = await api.post('/approval-flows', data);
     return response.data;
   },
+
+  // Approval History
+  getApprovalHistory: async (module: string, moduleId: number | string) => {
+    const response = await api.get(`/approval-history/${module}/${moduleId}`);
+    return response.data;
+  },
 };

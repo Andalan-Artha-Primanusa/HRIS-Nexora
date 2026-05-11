@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { RefreshCw, Timer, Search, CheckCircle, XCircle, Users, AlertCircle, Eye } from 'lucide-react';
+import { RefreshCw, Timer, Search, CheckCircle, XCircle, Users, AlertCircle, Eye, History } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import overtimeService from '@/features/attendance/api/overtime.service';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
@@ -7,6 +7,7 @@ import { api } from '@/shared/api/httpClient';
 import { useAuthStore } from '@/app/store/auth.store';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
+import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 
 interface OvertimeRequest {
   id: number;
@@ -34,6 +35,7 @@ const OvertimeApprovalPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'Semua' | 'Pending' | 'Approved' | 'Rejected'>('Semua');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
+  const [historyModal, setHistoryModal] = useState<{ module: string; id: number } | null>(null);
 
   const user = useAuthStore((state) => state.user);
 
@@ -406,6 +408,7 @@ const OvertimeApprovalPage: React.FC = () => {
                             >
                               <Eye size={16} />
                             </button>
+                            <button className="action-btn" style={{ color: '#8b5cf6', background: '#f5f3ff' }} onClick={() => setHistoryModal({ module: 'overtime', id: req.id })} title="Riwayat Approval"><History size={16} /></button>
                             {req.status !== 'pending' && (
                               <button
                                 className="action-btn action-btn-edit"
@@ -463,6 +466,14 @@ const OvertimeApprovalPage: React.FC = () => {
           )}
         </div>
       </div>
+      {historyModal && (
+        <ApprovalHistoryModal
+          isOpen={!!historyModal}
+          onClose={() => setHistoryModal(null)}
+          module={historyModal.module}
+          moduleId={historyModal.id}
+        />
+      )}
     </div>
   );
 };

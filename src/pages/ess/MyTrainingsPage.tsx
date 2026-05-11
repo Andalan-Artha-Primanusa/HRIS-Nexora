@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { RefreshCw, GraduationCap, Clock, CheckCircle, BookOpen, Play, Search, Award, FileText, Star, X, Eye } from 'lucide-react';
+import { RefreshCw, GraduationCap, Clock, CheckCircle, BookOpen, Play, Search, Award, FileText, Star, X, Eye, History } from 'lucide-react';
 import { useAuthStore } from '@/app/store/auth.store';
 import { Card } from '@/shared/ui';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { trainingService } from '@/features/training/api/training.service';
 import { RBACUtils } from '@/shared/hooks/rbac';
+import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 
@@ -27,6 +28,7 @@ const MyTrainingsPage: React.FC = () => {
   const [tab, setTab] = useState<'Semua' | 'Tersedia' | 'Berlangsung' | 'Selesai'>('Semua');
   const [page, setPage] = useState(1);
   const [resultModal, setResultModal] = useState<any>(null);
+  const [historyModal, setHistoryModal] = useState<{ module: string; id: number | string } | null>(null);
   const pageSize = 10;
 
   const isEmployee = RBACUtils.hasRole(user, 'employee');
@@ -239,6 +241,9 @@ const MyTrainingsPage: React.FC = () => {
                                 {cfg.label}
                               </span>
                             )}
+                            {tab !== 'Tersedia' && (
+                              <button className="action-btn" style={{ color: '#8b5cf6', background: '#f5f3ff', marginLeft: 8, verticalAlign: 'middle' }} onClick={() => setHistoryModal({ module: 'training', id: t.id })} title="Riwayat Approval"><History size={16} /></button>
+                            )}
                           </td>
                         </tr>
                       );
@@ -310,6 +315,14 @@ const MyTrainingsPage: React.FC = () => {
             </div>
           </Card>
         </div>
+      )}
+      {historyModal && (
+        <ApprovalHistoryModal
+          isOpen={!!historyModal}
+          onClose={() => setHistoryModal(null)}
+          module={historyModal.module}
+          moduleId={historyModal.id}
+        />
       )}
     </div>
   );

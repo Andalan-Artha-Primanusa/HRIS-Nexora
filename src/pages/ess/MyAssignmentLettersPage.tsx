@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, FileText, Calendar, MapPin, Clock, CheckCircle, XCircle, RefreshCw, BookTemplate } from 'lucide-react';
+import { Plus, FileText, Calendar, MapPin, Clock, CheckCircle, XCircle, RefreshCw, BookTemplate, History } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { legalService } from '@/features/legal/api/legal.service';
@@ -7,11 +7,13 @@ import { AssignmentLetterModal } from '@/features/legal/components/AssignmentLet
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
+import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 
 const MyAssignmentLettersPage: React.FC = () => {
   const [letters, setLetters] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [historyModal, setHistoryModal] = useState<{ module: string; id: number } | null>(null);
 
   const extractArray = (res: any): any[] => {
     if (Array.isArray(res)) return res;
@@ -147,6 +149,7 @@ const MyAssignmentLettersPage: React.FC = () => {
                         Download PDF
                       </Button>
                     )}
+                    <button className="action-btn" style={{ color: '#8b5cf6', background: '#f5f3ff' }} onClick={() => setHistoryModal({ module: 'assignment_letter', id: letter.id })} title="Riwayat Approval"><History size={16} /></button>
                   </div>
                 </div>
               </Card>
@@ -160,6 +163,15 @@ const MyAssignmentLettersPage: React.FC = () => {
         onClose={() => setIsModalOpen(false)}
         onSave={handleSave}
       />
+
+      {historyModal && (
+        <ApprovalHistoryModal
+          isOpen={!!historyModal}
+          onClose={() => setHistoryModal(null)}
+          module={historyModal.module}
+          moduleId={historyModal.id}
+        />
+      )}
     </div>
   );
 };

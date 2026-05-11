@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Modal } from '@/shared/ui/Modal';
 import { Button } from '@/shared/ui/Button';
-import { Plus, Trash2, User, GitBranch, Layers } from 'lucide-react';
-import { getAllRoles } from "@/features/admin/api/admin.service";
+import { Plus, Trash2, User, GitBranch, Layers, Users } from 'lucide-react';
+import { getAllRoles, getAllUsers } from "@/features/admin/api/admin.service";
 
 interface ApprovalFlowModalProps {
   isOpen: boolean;
@@ -13,15 +13,17 @@ interface ApprovalFlowModalProps {
 export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, onClose, onSave }) => {
   const [loading, setLoading] = useState(false);
   const [roles, setRoles] = useState<any[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     module: 'assignment_letter',
-    steps: [{ role_id: '', step_order: 1 }]
+    steps: [{ role_id: '', user_id: '', step_order: 1 }]
   });
 
   useEffect(() => {
     if (isOpen) {
       fetchRoles();
+      fetchUsers();
     }
   }, [isOpen]);
 
@@ -35,10 +37,21 @@ export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, on
     }
   };
 
+  const fetchUsers = async () => {
+    try {
+      const res = await getAllUsers();
+      const data = res as any;
+      const items = Array.isArray(data) ? data : data?.items || [];
+      setUsers(items);
+    } catch (err) {
+      console.error('Failed to fetch users', err);
+    }
+  };
+
   const addStep = () => {
     setFormData({
       ...formData,
-      steps: [...formData.steps, { role_id: '', step_order: formData.steps.length + 1 }]
+      steps: [...formData.steps, { role_id: '', user_id: '', step_order: formData.steps.length + 1 }]
     });
   };
 
@@ -58,7 +71,6 @@ export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, on
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validation
     if (!formData.name) return alert('Please enter a flow name');
     if (formData.steps.some(s => !s.role_id)) return alert('Please select a role for all steps');
 
@@ -67,8 +79,9 @@ export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, on
       const cleanedData = {
         ...formData,
         steps: formData.steps.map(s => ({
-          ...s,
-          role_id: Number(s.role_id)
+          step_order: s.step_order,
+          role_id: Number(s.role_id),
+          user_id: s.user_id ? Number(s.user_id) : undefined,
         }))
       };
       await onSave(cleanedData);
@@ -134,20 +147,33 @@ export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, on
                     {index + 1}
                   </div>
                   <div style={{ 
-                    flex: 1, display: 'flex', gap: '10px', padding: '10px 16px', background: 'white', 
+                    flex: 1, display: 'flex', flexDirection: 'column', gap: '8px', padding: '12px 16px', background: 'white', 
                     borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
                   }}>
                     <select 
                       value={step.role_id} 
                       onChange={(e) => updateStep(index, 'role_id', e.target.value)}
                       required
-                      style={{ width: '100%', border: 'none', background: 'transparent', fontSize: '0.9rem', fontWeight: 600, color: '#1e293b', outline: 'none' }}
+                      style={{ width: '100%', border: 'none', background: 'transparent', fontSize: '0.9rem', fontWeight: 600, color: '#1e293b', outline: 'none', padding: '4px 0' }}
                     >
                       <option value="" disabled>Select Role...</option>
                       {roles.map(role => (
                         <option key={role.id} value={role.id}>{role.display_name || role.name}</option>
                       ))}
                     </select>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', borderTop: '1px solid #f1f5f9', paddingTop: '8px' }}>
+                      <Users size={14} color="#94a3b8" />
+                      <select 
+                        value={step.user_id} 
+                        onChange={(e) => updateStep(index, 'user_id', e.target.value)}
+                        style={{ width: '100%', border: 'none', background: 'transparent', fontSize: '0.8rem', color: '#64748b', outline: 'none', cursor: 'pointer' }}
+                      >
+                        <option value="">Any user with this role</option>
+                        {users.map((u: any) => (
+                          <option key={u.id} value={u.id}>{u.name || u.email || `User #${u.id}`}</option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                   <Button 
                     variant="ghost" 

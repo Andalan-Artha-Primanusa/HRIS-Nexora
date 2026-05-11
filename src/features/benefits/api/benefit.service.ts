@@ -25,4 +25,12 @@ export const benefitService = {
     const response = await api.put(`/benefits/${id}`, data);
     return response.data;
   },
+  approveBenefitAssignment: async (assignmentId: string | number, note?: string) => {
+    const response = await api.put(`/benefits/assignments/${assignmentId}/approve`, { note });
+    return response.data;
+  },
+  rejectBenefitAssignment: async (assignmentId: string | number, note?: string) => {
+    const response = await api.put(`/benefits/assignments/${assignmentId}/reject`, { note });
+    return response.data;
+  },
 };

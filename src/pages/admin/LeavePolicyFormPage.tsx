@@ -18,6 +18,12 @@ import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
 import './AdminLeavePages.css';
 
+const generatePolicyCode = (name: string) => {
+  const lettersOnly = name.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+  const prefix = lettersOnly.slice(0, 3);
+  return prefix ? `${prefix}1` : '';
+};
+
 const LeavePolicyFormPage: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -71,7 +77,17 @@ const LeavePolicyFormPage: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => {
+      if (name === 'name' && !isEdit) {
+        return {
+          ...prev,
+          name: value,
+          policy_code: generatePolicyCode(value),
+        };
+      }
+
+      return { ...prev, [name]: value };
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -149,7 +165,7 @@ const LeavePolicyFormPage: React.FC = () => {
         </div>
       </Card>
 
-      <form id="leave-policy-form" onSubmit={handleSubmit} className="white-unified-wrapper" style={{ maxWidth: '900px', margin: '0 auto' }}>
+      <form id="leave-policy-form" onSubmit={handleSubmit} style={{ maxWidth: '900px', margin: '0 auto' }}>
         <div>
           <Card glass style={{ padding: '2.5rem', borderRadius: '32px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '2rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem' }}>
@@ -171,6 +187,22 @@ const LeavePolicyFormPage: React.FC = () => {
                   placeholder="Contoh: Kebijakan Cuti Tahunan 2026"
                   style={{ width: '100%', height: '50px', padding: '0 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '1rem', color: '#0f172a', boxSizing: 'border-box' }}
                 />
+              </div>
+
+              <div style={{ gridColumn: 'span 2' }}>
+                <label>Kode Kebijakan</label>
+                <input
+                  type="text"
+                  name="policy_code"
+                  value={formData.policy_code}
+                  required
+                  readOnly
+                  placeholder="Otomatis dari Nama Kebijakan"
+                  style={{ width: '100%', height: '50px', padding: '0 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '1rem', color: '#0f172a', boxSizing: 'border-box' }}
+                />
+                <small style={{ color: '#64748b', display: 'block', marginTop: '0.5rem' }}>
+                  Kode otomatis dari 3 huruf awal nama kebijakan + 1.
+                </small>
               </div>
 
               <div style={{ gridColumn: 'span 2' }}>
@@ -218,8 +250,8 @@ const LeavePolicyFormPage: React.FC = () => {
                   style={{ width: '100%', height: '50px', padding: '0 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '1rem', color: '#0f172a', boxSizing: 'border-box' }}
                 >
                   <option value="fixed">Fixed</option>
-                  <option value="prorated">Prorated</option>
-                  <option value="tenure-based">Tenure Based</option>
+                  <option value="accrual">Accrual</option>
+                  <option value="unlimited">Unlimited</option>
                 </select>
               </div>
 

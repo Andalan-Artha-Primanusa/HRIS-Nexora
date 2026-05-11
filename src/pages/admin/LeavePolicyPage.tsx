@@ -7,7 +7,7 @@ import {
   Trash2,
   RefreshCw,
   CalendarDays,
-  Search
+  Search,
 } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
@@ -32,38 +32,16 @@ const LeavePolicyPage = () => {
   const [policies, setPolicies] = useState<LeavePolicy[]>([]);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  // Search & Filter State
-  const [searchText, setSearchText] = useState('');
-  const [activeTab, setActiveTab] = useState<'Semua' | 'Active' | 'Inactive'>('Semua');
-
-  // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
 
-  // Filter & Sort & Paginate
-  const filteredPolicies = useMemo(() => {
-    return policies.filter((policy) => {
-      const searchStr = searchText.toLowerCase();
-      const nameMatch = policy.name?.toLowerCase().includes(searchStr);
-      const codeMatch = policy.policy_code?.toLowerCase().includes(searchStr);
-      const textMatch = nameMatch || codeMatch;
-
-      let statusMatch = true;
-      if (activeTab === 'Active') statusMatch = policy.active === true;
-      else if (activeTab === 'Inactive') statusMatch = policy.active === false;
-
-      return textMatch && statusMatch;
-    });
-  }, [policies, searchText, activeTab]);
-
   const sortedPolicies = useMemo(() => {
-    return [...filteredPolicies].sort((a, b) => {
+    return [...policies].sort((a, b) => {
       const nameA = a.name?.toLowerCase() || '';
       const nameB = b.name?.toLowerCase() || '';
       return nameA.localeCompare(nameB);
     });
-  }, [filteredPolicies]);
+  }, [policies]);
 
   const paginatedPolicies = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize;
@@ -71,7 +49,6 @@ const LeavePolicyPage = () => {
   }, [sortedPolicies, currentPage, pageSize]);
 
   const totalPages = Math.ceil(sortedPolicies.length / pageSize);
-
   const paidCount = useMemo(() => policies.filter((p) => p.is_paid).length, [policies]);
   const activeCount = useMemo(() => policies.filter((p) => p.active).length, [policies]);
   const totalPolicies = policies.length;
@@ -87,8 +64,8 @@ const LeavePolicyPage = () => {
         icon: ShieldCheck,
       },
       {
-        label: 'Hasil Filter',
-        subtitle: 'Kebijakan sesuai pencarian',
+        label: 'Data Ditampilkan',
+        subtitle: 'Policy yang sedang tampil',
         value: String(sortedPolicies.length),
         change: `${paginatedPolicies.length} data per halaman`,
         tone: 'green' as const,
@@ -142,13 +119,7 @@ const LeavePolicyPage = () => {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchText, activeTab]);
-
-  const clearFilters = () => {
-    setSearchText('');
-    setActiveTab('Semua');
-    setCurrentPage(1);
-  };
+  }, []);
 
   const handleDelete = async (id: number) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus kebijakan ini?')) {
@@ -163,7 +134,6 @@ const LeavePolicyPage = () => {
 
   return (
     <div className="crud-page">
-      {/* Header */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -172,9 +142,7 @@ const LeavePolicyPage = () => {
               <span>Governance</span>
             </div>
             <h1 className="hero-title">Leave Policies & Rules</h1>
-            <p className="hero-subtitle">
-              Tentukan kerangka regulasi dan aturan hak cuti untuk semua kategori.
-            </p>
+            <p className="hero-subtitle">Tentukan kerangka regulasi dan aturan hak cuti untuk semua kategori.</p>
           </div>
           <div className="hero-actions">
             <button className="btn-outline" onClick={fetchPolicies} disabled={loading}>
@@ -189,7 +157,6 @@ const LeavePolicyPage = () => {
         </div>
       </Card>
 
-      {/* Summary Cards */}
       <div className="employee-summary-wrapper">
         {summaryCards.map((card) => {
           const Icon = card.icon;
@@ -211,7 +178,6 @@ const LeavePolicyPage = () => {
         })}
       </div>
 
-      {/* Analytics Title Card */}
       <Card className="analytics-title-card">
         <div className="analytics-title-inner">
           <div className="analytics-icon">
@@ -224,42 +190,16 @@ const LeavePolicyPage = () => {
         </div>
       </Card>
 
-      {/* Control Section */}
       <Card className="control-section-card">
         <div className="control-section-inner">
-          {/* Tabs */}
-          <div className="elyra-tabs">
-            {(['Semua', 'Active', 'Inactive'] as const).map((tab) => (
-              <button key={tab} className={`elyra-tab ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
-                {tab}
-              </button>
-            ))}
-          </div>
-
-          {/* Search */}
           <div className="control-actions">
-            <div className="search-box">
-              <div className="search-icon-inside">
-                <Search size={18} />
-              </div>
-              <input
-                type="text"
-                placeholder="Cari kebijakan..."
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                className="search-input-pill"
-              />
+            <div style={{ color: '#64748b', fontWeight: 600 }}>
+              Menampilkan seluruh kebijakan tanpa filter.
             </div>
-            {(searchText || activeTab !== 'Semua') && (
-              <button className="btn-clear-filter" onClick={clearFilters}>
-                Hapus Filter
-              </button>
-            )}
           </div>
         </div>
       </Card>
 
-      {/* Table Section */}
       <div className="table-section">
         <div className="wuw-table-area">
           {loading && <LoadingState message="Memuat kebijakan..." />}
@@ -267,12 +207,7 @@ const LeavePolicyPage = () => {
 
           {!loading && !errorMessage && paginatedPolicies.length === 0 && (
             <div style={{ padding: '5rem 0' }}>
-              <EmptyState
-                title="Pencarian Kosong"
-                message="Kami tidak menemukan kebijakan yang sesuai dengan kriteria Anda."
-                actionLabel="Bersihkan Filter"
-                onAction={clearFilters}
-              />
+              <EmptyState title="Belum Ada Data" message="Kami tidak menemukan kebijakan cuti yang tersimpan di sistem." actionLabel="Muat Ulang" onAction={fetchPolicies} />
             </div>
           )}
 
@@ -288,9 +223,7 @@ const LeavePolicyPage = () => {
                       <th>Jatah (Hari)</th>
                       <th>Carryover</th>
                       <th>Status</th>
-                      <th className="th-center" style={{ width: '120px' }}>
-                        Aksi
-                      </th>
+                      <th className="th-center" style={{ width: '120px' }}>Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -331,18 +264,10 @@ const LeavePolicyPage = () => {
                         </td>
                         <td className="td-center">
                           <div className="action-btn-group">
-                            <button
-                              className="action-btn action-btn-edit"
-                              onClick={() => (window.location.href = `/leave/policy/edit/${policy.id}`)}
-                              title="Edit Kebijakan"
-                            >
+                            <button className="action-btn action-btn-edit" onClick={() => (window.location.href = `/leave/policy/edit/${policy.id}`)} title="Edit Kebijakan">
                               <Pencil size={16} />
                             </button>
-                            <button
-                              className="action-btn action-btn-delete"
-                              onClick={() => handleDelete(policy.id)}
-                              title="Hapus Kebijakan"
-                            >
+                            <button className="action-btn action-btn-delete" onClick={() => handleDelete(policy.id)} title="Hapus Kebijakan">
                               <Trash2 size={16} />
                             </button>
                           </div>
@@ -353,33 +278,20 @@ const LeavePolicyPage = () => {
                 </table>
               </div>
 
-              {/* Pagination */}
               <div className="table-pagination">
                 <div className="pagination-info">
                   Menampilkan <strong>{paginatedPolicies.length}</strong> dari <strong>{sortedPolicies.length}</strong> kebijakan
                 </div>
                 <div className="pagination-controls">
-                  <button
-                    className="pagination-btn"
-                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                    disabled={currentPage === 1}
-                  >
+                  <button className="pagination-btn" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1}>
                     ‹
                   </button>
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <button
-                      key={page}
-                      className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
-                      onClick={() => setCurrentPage(page)}
-                    >
+                    <button key={page} className={`pagination-btn ${currentPage === page ? 'active' : ''}`} onClick={() => setCurrentPage(page)}>
                       {page}
                     </button>
                   ))}
-                  <button
-                    className="pagination-btn"
-                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                    disabled={currentPage === totalPages}
-                  >
+                  <button className="pagination-btn" onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages}>
                     ›
                   </button>
                 </div>

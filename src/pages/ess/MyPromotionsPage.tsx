@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, RefreshCw, ArrowUpRight, CheckCircle, Clock, XCircle, FileText, X } from 'lucide-react';
+import { Search, RefreshCw, ArrowUpRight, CheckCircle, Clock, XCircle, FileText, X, History } from 'lucide-react';
 import { Card, CardHeader } from '@/shared/ui';
 import { Button } from '@/shared/ui/Button';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
@@ -7,6 +7,7 @@ import { promotionService } from '@/features/organization/api/promotion.service'
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/employee/EmployeesPage.css';
+import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 
 const MyPromotionsPage: React.FC = () => {
   const [items, setItems] = useState<any[]>([]);
@@ -21,6 +22,7 @@ const MyPromotionsPage: React.FC = () => {
   const [selectedPromo, setSelectedPromo] = useState<any>(null);
   const [reportContent, setReportContent] = useState('');
   const [submittingReport, setSubmittingReport] = useState(false);
+  const [historyModal, setHistoryModal] = useState<{ module: string; id: number | string } | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -342,18 +344,19 @@ const MyPromotionsPage: React.FC = () => {
                         </td>
                         <td className="td-center">{getStatusBadge(promo.status)}</td>
                         <td className="td-center">{getReportBadge(promo.report_status, promo.status)}</td>
-                        <td className="td-center">
-                          <div className="action-btn-group">
-                            {promo.status === 'approved' && !promo.report_status && (
-                              <button
-                                className="action-btn"
-                                style={{ background: '#dbeafe', color: '#2563eb' }}
-                                onClick={() => openReportModal(promo)}
-                                title="Submit Laporan"
-                              >
-                                <FileText size={16} />
-                              </button>
-      )}
+        <td className="td-center">
+          <div className="action-btn-group">
+            {promo.status === 'approved' && !promo.report_status && (
+              <button
+                className="action-btn"
+                style={{ background: '#dbeafe', color: '#2563eb' }}
+                onClick={() => openReportModal(promo)}
+                title="Submit Laporan"
+              >
+                <FileText size={16} />
+              </button>
+            )}
+            <button className="action-btn" style={{ color: '#8b5cf6', background: '#f5f3ff' }} onClick={() => setHistoryModal({ module: 'promotion', id: promo.id })} title="Riwayat Approval"><History size={16} /></button>
 
       {/* Report Modal */}
       {reportModal && selectedPromo && (
@@ -434,6 +437,14 @@ const MyPromotionsPage: React.FC = () => {
           )}
         </div>
       </div>
+      {historyModal && (
+        <ApprovalHistoryModal
+          isOpen={!!historyModal}
+          onClose={() => setHistoryModal(null)}
+          module={historyModal.module}
+          moduleId={historyModal.id}
+        />
+      )}
     </div>
   );
 };

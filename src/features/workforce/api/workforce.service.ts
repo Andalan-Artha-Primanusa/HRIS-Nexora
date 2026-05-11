@@ -88,6 +88,20 @@ export const workforceService = {
       raw: response.data,
     };
   },
+  approveShiftSwapFlow: async (id: string | number, note?: string) => {
+    const response = await api.put(`/workforce/shift-swaps/${id}/approve`, { note });
+    return {
+      payload: extractPayload(response.data),
+      raw: response.data,
+    };
+  },
+  rejectShiftSwap: async (id: string | number, note?: string) => {
+    const response = await api.put(`/workforce/shift-swaps/${id}/reject`, { note });
+    return {
+      payload: extractPayload(response.data),
+      raw: response.data,
+    };
+  },
 
   // Overtime Rules
   getOvertimeRules: async () => {

@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, CheckCircle2, XCircle, RefreshCw, Calendar, Search, ArrowLeftRight } from 'lucide-react';
+import { Plus, CheckCircle2, XCircle, RefreshCw, Calendar, Search, ArrowLeftRight, History } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { workforceService } from '@/features/workforce/api/workforce.service';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
+import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 
 const ShiftSwapsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ const ShiftSwapsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"Semua" | "Pending" | "Approved" | "Rejected">("Semua");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
+  const [historyModal, setHistoryModal] = useState<{ module: string; id: number | string } | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -72,13 +74,28 @@ const ShiftSwapsPage: React.FC = () => {
     ];
   }, [swaps]);
 
-  const handleApprove = async (id: string | number) => {
+  const handleApprove = async (swap: any) => {
     if (window.confirm('Setujui penukaran shift ini?')) {
       try {
-        await workforceService.approveShiftSwap(id);
+        if (swap.approval_flow_id) {
+          await workforceService.approveShiftSwapFlow(swap.id);
+        } else {
+          await workforceService.approveShiftSwap(swap.id);
+        }
         fetchData();
       } catch (error) {
         console.error('Failed to approve shift swap:', error);
+      }
+    }
+  };
+
+  const handleReject = async (swap: any) => {
+    if (window.confirm('Tolak penukaran shift ini?')) {
+      try {
+        await workforceService.rejectShiftSwap(swap.id);
+        fetchData();
+      } catch (error) {
+        console.error('Failed to reject shift swap:', error);
       }
     }
   };
@@ -254,15 +271,12 @@ const ShiftSwapsPage: React.FC = () => {
                           <td className="td-center">
                             <div className="action-btn-group">
                               {swap.status === 'pending' && (
-                                <button
-                                  className="action-btn"
-                                  style={{ color: '#10b981' }}
-                                  onClick={() => handleApprove(swap.id)}
-                                  title="Setujui"
-                                >
-                                  <CheckCircle2 size={16} />
-                                </button>
+                                <>
+                                  <button className="action-btn" style={{ color: '#10b981' }} onClick={() => handleApprove(swap)} title="Setujui"><CheckCircle2 size={16} /></button>
+                                  <button className="action-btn" style={{ color: '#ef4444' }} onClick={() => handleReject(swap)} title="Tolak"><XCircle size={16} /></button>
+                                </>
                               )}
+                              <button className="action-btn" style={{ color: '#8b5cf6', background: '#f5f3ff' }} onClick={() => setHistoryModal({ module: 'shift_swap', id: swap.id })} title="Riwayat Approval"><History size={16} /></button>
                             </div>
                           </td>
                         </tr>
@@ -306,6 +320,14 @@ const ShiftSwapsPage: React.FC = () => {
           )}
         </div>
       </div>
+      {historyModal && (
+        <ApprovalHistoryModal
+          isOpen={!!historyModal}
+          onClose={() => setHistoryModal(null)}
+          module={historyModal.module}
+          moduleId={historyModal.id}
+        />
+      )}
     </div>
   );
 };

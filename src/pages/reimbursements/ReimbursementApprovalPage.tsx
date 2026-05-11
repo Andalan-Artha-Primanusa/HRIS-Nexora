@@ -8,9 +8,10 @@ import {
   rejectReimbursement,
 } from "@/features/reimbursement/api/reimbursement.service";
 import type { ReimbursementItem } from "@/features/reimbursement/types/reimbursement.types";
-import { BarChart3, Check, CircleCheckBig, CircleX, Clock3, RefreshCw, X, Receipt, DownloadCloud } from "lucide-react";
+import { BarChart3, Check, CircleCheckBig, CircleX, Clock3, RefreshCw, X, Receipt, DownloadCloud, History } from "lucide-react";
 import { showToast } from "@/shared/ui/toast";
 import "@/shared/styles/CrudPage.css";
+import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 
 const formatDate = (dateString: string | undefined) => {
   if (!dateString) return "-";
@@ -40,6 +41,7 @@ const ReimbursementApprovalPage = () => {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
+  const [historyModal, setHistoryModal] = useState<{ module: string; id: number | string } | null>(null);
 
   const paginatedItems = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize;
@@ -264,6 +266,7 @@ const ReimbursementApprovalPage = () => {
                             >
                               <X size={16} />
                             </button>
+                            <button className="action-btn" style={{ color: '#8b5cf6', background: '#f5f3ff' }} onClick={() => setHistoryModal({ module: 'reimbursement', id: item.id })} title="Riwayat Approval"><History size={16} /></button>
                           </div>
                         </td>
                       </tr>
@@ -294,6 +297,15 @@ const ReimbursementApprovalPage = () => {
           </div>
         )}
       </Card>
+
+      {historyModal && (
+        <ApprovalHistoryModal
+          isOpen={!!historyModal}
+          onClose={() => setHistoryModal(null)}
+          module={historyModal.module}
+          moduleId={historyModal.id}
+        />
+      )}
     </div>
   );
 };

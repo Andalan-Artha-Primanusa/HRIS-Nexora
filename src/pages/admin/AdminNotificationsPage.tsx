@@ -52,7 +52,7 @@ if (!hasAdminAccess(user)) {
           </div>
         </Card>
 
-        <div className="white-unified-wrapper">
+        <div className="">
           <Card glass style={{ padding: '2rem', textAlign: 'center' }}>
             <p>Silakan hubungi Administrator untuk mendapatkan akses.</p>
           </Card>
@@ -243,7 +243,7 @@ if (!hasAdminAccess(user)) {
         })}
       </div>
 
-      <div className="white-unified-wrapper">
+      <div className="">
         <div className="form-grid">
           <Card className="table-card" glass>
             <div className="table-header-bar">

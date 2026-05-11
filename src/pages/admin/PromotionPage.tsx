@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Filter, Plus, RefreshCw, CheckCircle, XCircle, Trash2, ArrowUpRight, FileText, X } from 'lucide-react';
+import { Search, Filter, Plus, RefreshCw, CheckCircle, XCircle, Trash2, ArrowUpRight, FileText, X, History } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
@@ -8,6 +8,7 @@ import { PromotionModal } from '@/features/organization/components/PromotionModa
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/employee/EmployeesPage.css';
+import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 
 const PromotionPage: React.FC = () => {
   const [items, setItems] = useState<any[]>([]);
@@ -25,6 +26,7 @@ const PromotionPage: React.FC = () => {
   const [viewingReport, setViewingReport] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
   const [reportActionLoading, setReportActionLoading] = useState(false);
+  const [historyModal, setHistoryModal] = useState<{ module: string; id: number } | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -505,6 +507,7 @@ const PromotionPage: React.FC = () => {
                                   </button>
                                 </>
                               )}
+                            <button className="action-btn" style={{ color: '#8b5cf6', background: '#f5f3ff' }} onClick={() => setHistoryModal({ module: 'promotion', id: promo.id })} title="Riwayat Approval"><History size={16} /></button>
                             </div>
                           </td>
                         </tr>
@@ -627,6 +630,14 @@ const PromotionPage: React.FC = () => {
             )}
           </div>
         </div>
+      )}
+      {historyModal && (
+        <ApprovalHistoryModal
+          isOpen={!!historyModal}
+          onClose={() => setHistoryModal(null)}
+          module={historyModal.module}
+          moduleId={historyModal.id}
+        />
       )}
     </div>
   );
