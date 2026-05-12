@@ -214,41 +214,74 @@
 }
 
 .payroll-details-tabs {
-  display: flex;
-  gap: 0.5rem;
-  background: rgba(255, 255, 255, 0.6);
-  padding: 0.5rem;
-  border-radius: 16px;
-  border: 1px solid var(--border);
-  margin-bottom: 0.5rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.82);
+  padding: 0.65rem;
+  border-radius: 18px;
+  border: 1px solid rgba(37, 99, 235, 0.16);
+  margin: 0 0 0.75rem;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.05);
 }
 
-.payroll-details-tab {
-  flex: 1;
+.payroll-details-tabs .payroll-details-tab {
+  position: relative;
+  min-height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.6rem;
-  padding: 0.8rem 1rem;
-  border: none;
+  padding: 0.95rem 1rem;
+  border: 1px solid transparent;
   background: transparent;
-  color: #64748b;
-  font-weight: 600;
+  color: #475569;
+  font-weight: 700;
   font-size: 0.9rem;
-  border-radius: 12px;
+  border-radius: 14px;
   cursor: pointer;
+  white-space: nowrap;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.payroll-details-tab:hover {
-  background: rgba(37, 99, 235, 0.05);
+.payroll-details-tabs .payroll-details-tab svg {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  color: #64748b;
+  transition: color 0.2s ease;
+}
+
+.payroll-details-tabs .payroll-details-tab:hover {
+  background: rgba(37, 99, 235, 0.06);
+  border-color: rgba(37, 99, 235, 0.12);
   color: var(--primary);
 }
 
-.payroll-details-tab.is-active {
-  background: white;
+.payroll-details-tabs .payroll-details-tab:hover svg {
   color: var(--primary);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+}
+
+.payroll-details-tabs .payroll-details-tab.is-active {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  border-color: rgba(37, 99, 235, 0.28);
+  box-shadow: 0 12px 26px rgba(37, 99, 235, 0.24);
+}
+
+.payroll-details-tabs .payroll-details-tab.is-active svg {
+  color: #fff;
+}
+
+.payroll-details-tabs .payroll-details-tab.is-active::after {
+  content: "";
+  position: absolute;
+  left: 1.15rem;
+  right: 1.15rem;
+  bottom: 0.45rem;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.75);
 }
 
 .payroll-details-tab-content {
@@ -393,6 +426,16 @@
 }
 
 @media (max-width: 768px) {
+  .payroll-details-tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .payroll-details-tabs .payroll-details-tab {
+    min-height: 48px;
+    justify-content: flex-start;
+    padding: 0.85rem 1rem;
+  }
+
   .payroll-details-row-item {
     grid-template-columns: 1fr;
     gap: 0.8rem;

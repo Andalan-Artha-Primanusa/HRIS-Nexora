@@ -1,37 +1,74 @@
 .payroll-tabs {
-  background: #fff;
-  border-radius: 16px;
-  border: 1px solid #e2e8f0;
-  padding: 4px;
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.82);
+  border-radius: 18px;
+  border: 1px solid rgba(37, 99, 235, 0.16);
+  padding: 0.65rem;
   margin-bottom: 1.5rem;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.05);
 }
 
 .payroll-tab {
-  flex: 1;
+  position: relative;
+  min-height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 12px 16px;
-  border-radius: 12px;
-  border: none;
+  gap: 0.6rem;
+  padding: 0.95rem 1rem;
+  border-radius: 14px;
+  border: 1px solid transparent;
   cursor: pointer;
   font-size: 0.875rem;
+  font-weight: 700;
   font-family: 'Poppins', sans-serif;
-  transition: all 0.2s;
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .payroll-tab.active {
   background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: #fff;
-  font-weight: 700;
+  border-color: rgba(37, 99, 235, 0.28);
+  box-shadow: 0 12px 26px rgba(37, 99, 235, 0.24);
+}
+
+.payroll-tab.active::after {
+  content: "";
+  position: absolute;
+  left: 1.15rem;
+  right: 1.15rem;
+  bottom: 0.45rem;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.payroll-tab svg {
+  flex: 0 0 auto;
+  color: #64748b;
+  transition: color 0.2s ease;
+}
+
+.payroll-tab.active svg {
+  color: #fff;
 }
 
 .payroll-tab:not(.active) {
   background: transparent;
-  color: #64748b;
-  font-weight: 500;
+  color: #475569;
+}
+
+.payroll-tab:not(.active):hover {
+  background: rgba(37, 99, 235, 0.06);
+  border-color: rgba(37, 99, 235, 0.12);
+  color: #2563eb;
+}
+
+.payroll-tab:not(.active):hover svg {
+  color: #2563eb;
 }
 
 .payroll-summary-grid {
@@ -120,4 +157,16 @@
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+@media (max-width: 768px) {
+  .payroll-tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .payroll-tab {
+    min-height: 48px;
+    justify-content: flex-start;
+    padding: 0.85rem 1rem;
+  }
 }
