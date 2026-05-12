@@ -135,12 +135,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
   const [allowedKeys, setAllowedKeys] = React.useState<string[] | undefined>();
 
   React.useEffect(() => {
-    fetchAllowedMenuKeys().then(setAllowedKeys);
+    fetchAllowedMenuKeys(user).then(setAllowedKeys);
   }, []);
 
   React.useEffect(() => {
     const handler = () => {
-      fetchAllowedMenuKeys().then(setAllowedKeys);
+      fetchAllowedMenuKeys(user).then(setAllowedKeys);
     };
     window.addEventListener('menu-cache-cleared', handler);
     return () => window.removeEventListener('menu-cache-cleared', handler);

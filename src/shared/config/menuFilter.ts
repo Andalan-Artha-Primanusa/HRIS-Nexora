@@ -4,8 +4,9 @@ import { api } from '@/shared/api/httpClient';
 
 let cachedAllowedKeys: string[] | null = null;
 let cachePromise: Promise<string[]> | null = null;
+let cachedAssignments: { key: string; assigned_role_ids: number[] }[] | null = null;
 
-export const fetchAllowedMenuKeys = async (): Promise<string[]> => {
+export const fetchAllowedMenuKeys = async (user?: AuthUser | null): Promise<string[]> => {
   if (cachedAllowedKeys) return cachedAllowedKeys;
   if (cachePromise) return cachePromise;
 
@@ -13,11 +14,34 @@ export const fetchAllowedMenuKeys = async (): Promise<string[]> => {
     try {
       const res = await api.get('/user/menus');
       const data = res.data?.data ?? [];
-      cachedAllowedKeys = Array.isArray(data) ? data : [];
-      return cachedAllowedKeys!;
+      if (Array.isArray(data) && data.length > 0) {
+        cachedAllowedKeys = data;
+        return cachedAllowedKeys!;
+      }
     } catch {
-      return [];
+      /* /user/menus failed, will try fallback */
     }
+
+    // Fallback: compute from /admin/menus using user's role IDs
+    if (user?.roles?.length) {
+      try {
+        const adminRes = await api.get('/admin/menus');
+        const items: { key: string; assigned_role_ids: number[] }[] = adminRes.data?.data?.items ?? [];
+        if (items.length > 0) {
+          cachedAssignments = items;
+          const userRoleIds = new Set(user.roles.map((r: any) => r.id));
+          cachedAllowedKeys = items
+            .filter(m => m.assigned_role_ids.some(rid => userRoleIds.has(rid)))
+            .map(m => m.key);
+          return cachedAllowedKeys!;
+        }
+      } catch {
+        /* both endpoints failed */
+      }
+    }
+
+    cachedAllowedKeys = [];
+    return [];
   })();
 
   return cachePromise;
