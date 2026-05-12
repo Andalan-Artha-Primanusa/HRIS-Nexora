@@ -138,6 +138,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
     fetchAllowedMenuKeys().then(setAllowedKeys);
   }, []);
 
+  React.useEffect(() => {
+    const handler = () => {
+      fetchAllowedMenuKeys().then(setAllowedKeys);
+    };
+    window.addEventListener('menu-cache-cleared', handler);
+    return () => window.removeEventListener('menu-cache-cleared', handler);
+  }, []);
+
   const filteredItems = filterMenuItems(user, menuItems, allowedKeys);
 
   // Debug logging

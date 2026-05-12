@@ -57,6 +57,7 @@ const MenuPermissionsPage = () => {
         await api.post("/admin/menus/assign-role", { menu_key: menuKey, role_id: roleId });
       }
       clearMenuCache();
+      window.dispatchEvent(new CustomEvent('menu-cache-cleared'));
       setMenuItems((prev) =>
         prev.map((m) =>
           m.key === menuKey

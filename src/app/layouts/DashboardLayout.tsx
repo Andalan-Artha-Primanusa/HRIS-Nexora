@@ -65,6 +65,14 @@ export default function DashboardLayout() {
   }, []);
 
   React.useEffect(() => {
+    const handler = () => {
+      fetchAllowedMenuKeys().then(setAllowedKeys);
+    };
+    window.addEventListener('menu-cache-cleared', handler);
+    return () => window.removeEventListener('menu-cache-cleared', handler);
+  }, []);
+
+  React.useEffect(() => {
     const visibleMenu = filterMenuItems(user, menuItems, allowedKeys);
     const availablePaths = Array.from(new Set(flattenPaths(visibleMenu)));
     const prioritizedPaths = ['/dashboard', ...availablePaths]
