@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { BarChart3, CheckCircle2, Clock3, CreditCard, ShieldCheck, RefreshCw, CheckCircle, Eye, FileCheck } from "lucide-react";
+import {
+  BarChart3, CheckCircle2, Clock3, CreditCard, ShieldCheck,
+  RefreshCw, CheckCircle, Eye, UserCheck, Shield, XCircle, AlertTriangle
+} from "lucide-react";
 import { Card } from "@/shared/ui/Card";
 import { PaginationWithSize } from "@/shared/ui/Pagination";
 import { Button } from "@/shared/ui/Button";
@@ -15,260 +18,187 @@ import "@/pages/dashboard/overview/OverviewPage.css";
 import "./PayrollListPage.css";
 import "./PayrollApprovePage.css";
 
+type ApproveAction = "manager-approve" | "hr-approve" | "reject" | null;
+
 const PayrollApprovePage = () => {
   const navigate = useNavigate();
   const [payrolls, setPayrolls] = useState<PayrollItem[]>([]);
   const [employees, setEmployees] = useState<EmployeeItem[]>([]);
+
+  // Pagination
+  const [currentPageDraft, setCurrentPageDraft] = useState(1);
+  const [itemsPerPageDraft, setItemsPerPageDraft] = useState(10);
   const [currentPagePending, setCurrentPagePending] = useState(1);
   const [itemsPerPagePending, setItemsPerPagePending] = useState(10);
   const [currentPageOther, setCurrentPageOther] = useState(1);
   const [itemsPerPageOther, setItemsPerPageOther] = useState(5);
-  const [paymentFilter, setPaymentFilter] = useState<'all' | 'paid' | 'unpaid'>('all');
-  const [selectedPayrollId, setSelectedPayrollId] = useState<string>("");
+
+  // State
   const [selectedPayroll, setSelectedPayroll] = useState<PayrollItem | null>(null);
+  const [pendingAction, setPendingAction] = useState<ApproveAction>(null);
+  const [rejectReason, setRejectReason] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [errorModal, setErrorModal] = useState<{ isOpen: boolean; title: string; message: string }>({
-    isOpen: false,
-    title: "",
-    message: "",
+    isOpen: false, title: "", message: "",
   });
 
-  const showErrorModal = (title: string, message: string) => {
-    setErrorModal({ isOpen: true, title, message });
-  };
+  const showErrorModal = (title: string, msg: string) =>
+    setErrorModal({ isOpen: true, title, message: msg });
 
-
-
-  // Load data
+  // ── Load ─────────────────────────────────────────────────
   const loadData = async () => {
     setLoading(true);
     try {
       const [payrollData, employeeData] = await Promise.all([
         payrollService.getPayrollList(),
-        getAllEmployees()
+        getAllEmployees(),
       ]);
       setPayrolls(toSafeArray(payrollData));
       setEmployees(toSafeArray(employeeData));
       setMessage(null);
     } catch (error) {
-      const errorText = error instanceof Error ? error.message : "Gagal memuat data";
-      showErrorModal("Error", errorText);
+      showErrorModal("Error", error instanceof Error ? error.message : "Gagal memuat data");
     } finally {
       setLoading(false);
     }
   };
 
-  // Select payroll
-  const handleSelectPayroll = (payroll: PayrollItem) => {
-    setSelectedPayrollId(String(payroll.id));
-    setSelectedPayroll(payroll);
-  };
+  useEffect(() => { void loadData(); }, []);
 
-  // Approve payroll - uses POST /api/payroll/{id}/approve
-  const handleApprove = async () => {
-    if (!selectedPayroll) {
-      showErrorModal("Validasi", "Pilih payroll untuk disetujui terlebih dahulu");
-      return;
-    }
-
-    if (selectedPayroll.status === "approved" || selectedPayroll.status === "paid") {
-      showErrorModal(
-        "Sudah Disetujui",
-        `Payroll ini sudah memiliki status: ${selectedPayroll.status}\n\nTidak perlu disetujui lagi.`
-      );
-      return;
-    }
-
-    if (selectedPayroll.status === "rejected") {
-      showErrorModal(
-        "Ditolak",
-        `Payroll ini memiliki status "rejected". Hubungi admin untuk reset status sebelum approve.`
-      );
-      return;
-    }
-
-    setLoading(true);
-    try {
-      console.log("Approving payroll ID:", selectedPayroll.id);
-      const payrollId = String(selectedPayroll.id);
-      // Use the service directly - POST /api/payroll/{id}/approve
-      await payrollService.approvePayroll(payrollId);
-      
-      setMessage({ type: "success", text: `Payroll ID ${selectedPayroll.id} berhasil disetujui` });
-      setSelectedPayrollId("");
-      setSelectedPayroll(null);
-      
-      await loadData();
-    } catch (error) {
-      const errorText = error instanceof Error ? error.message : "Gagal menyetujui payroll";
-      showErrorModal("Error Approve", errorText);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Reject payroll - uses POST /api/payroll/{id}/reject
-  const handleReject = async () => {
-    if (!selectedPayroll) {
-      showErrorModal("Validasi", "Pilih payroll untuk ditolak terlebih dahulu");
-      return;
-    }
-
-    if (selectedPayroll.status === "rejected") {
-      showErrorModal("Sudah Ditolak", `Payroll ini sudah memiliki status: ${selectedPayroll.status}`);
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const payrollId = String(selectedPayroll.id);
-      const reason = prompt("Masukkan alasan penolakan:", "Data tidak valid");
-      if (!reason) {
-        setLoading(false);
-        return;
-      }
-      await payrollService.rejectPayroll(payrollId, reason);
-      
-      setMessage({ type: "success", text: `Payroll ID ${selectedPayroll.id} ditolak` });
-      setSelectedPayrollId("");
-      setSelectedPayroll(null);
-      
-      await loadData();
-    } catch (error) {
-      const errorText = error instanceof Error ? error.message : "Gagal menolak payroll";
-      showErrorModal("Error Reject", errorText);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    void loadData();
-  }, []);
-
+  // ── Helpers ──────────────────────────────────────────────
   const getEmployeeName = (empId: string | number) => {
-    const emp = employees.find((e) => e.id === empId || String(e.id) === String(empId));
+    const emp = employees.find((e) => String(e.id) === String(empId));
     return emp ? `${emp.employee_code} - ${emp.user?.name || "Unknown"}` : "Unknown";
   };
 
-  const getStatusColor = (status: string) => {
-    const colors: Record<string, string> = {
-      draft: "#999",
-      pending: "#f59e0b",
-      approved: "#10b981",
-      paid: "#06b6d4",
-      rejected: "#ef4444",
-    };
-    return colors[status] || "#999";
+  const fmt = (val: string | number | undefined) =>
+    `Rp ${Number(val || 0).toLocaleString("id-ID")}`;
+
+  // ── Actions ───────────────────────────────────────────────
+  const openAction = (payroll: PayrollItem, action: ApproveAction) => {
+    setSelectedPayroll(payroll);
+    setPendingAction(action);
+    setRejectReason("");
   };
 
-  const getStatusLabel = (status: string) => {
-    const labels: Record<string, string> = {
-      draft: "Draft",
-      pending: "Menunggu",
-      approved: "Disetujui",
-      paid: "Sudah Dibayar",
-      rejected: "Ditolak",
-    };
-    return labels[status] || status;
+  const closeModal = () => {
+    setSelectedPayroll(null);
+    setPendingAction(null);
+    setRejectReason("");
   };
 
-  // Ensure payrolls is always an array before filtering
-  const safePayrolls = Array.isArray(payrolls) ? payrolls : [];
+  const handleConfirm = async () => {
+    if (!selectedPayroll || !pendingAction) return;
+    if (pendingAction === "reject" && !rejectReason.trim()) {
+      showErrorModal("Validasi", "Alasan penolakan wajib diisi");
+      return;
+    }
 
-  const filteredPayrolls = safePayrolls.filter((p) => {
-    if (paymentFilter === 'all') return true;
-    if (paymentFilter === 'paid') return String(p.status).toLowerCase() === 'paid';
-    return String(p.status).toLowerCase() !== 'paid';
-  });
+    setLoading(true);
+    try {
+      const id = String(selectedPayroll.id);
+      if (pendingAction === "manager-approve") {
+        await payrollService.managerApprovePayroll(id);
+        setMessage({ type: "success", text: `Payroll #${id} berhasil disetujui Manager → menunggu HR` });
+      } else if (pendingAction === "hr-approve") {
+        await payrollService.hrApprovePayroll(id);
+        setMessage({ type: "success", text: `Payroll #${id} disetujui HR → siap dibayar` });
+      } else if (pendingAction === "reject") {
+        await payrollService.rejectPayroll(id, rejectReason);
+        setMessage({ type: "success", text: `Payroll #${id} ditolak` });
+      }
+      closeModal();
+      await loadData();
+    } catch (error) {
+      showErrorModal("Error", error instanceof Error ? error.message : "Operasi gagal");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // Filter payrolls that are pending approval
-  const pendingPayrolls = filteredPayrolls.filter((p) => p.status === "draft" || p.status === "pending");
-  const otherPayrolls = filteredPayrolls.filter((p) => p.status === "approved" || p.status === "paid");
+  // ── Filtering & Pagination ────────────────────────────────
+  const safe = Array.isArray(payrolls) ? payrolls : [];
+  const draftPayrolls    = safe.filter((p) => p.status === "draft");
+  const pendingPayrolls  = safe.filter((p) => p.status === "pending_hr");
+  const approvedPayrolls = safe.filter((p) => p.status === "approved" || p.status === "paid");
+  const rejectedPayrolls = safe.filter((p) => p.status === "rejected");
 
-  const totalPagesPending = Math.max(1, Math.ceil(pendingPayrolls.length / itemsPerPagePending));
-  const paginatedPending = pendingPayrolls.slice((currentPagePending - 1) * itemsPerPagePending, (currentPagePending - 1) * itemsPerPagePending + itemsPerPagePending);
+  const paginate = (arr: PayrollItem[], page: number, size: number) =>
+    arr.slice((page - 1) * size, (page - 1) * size + size);
 
-  const totalPagesOther = Math.max(1, Math.ceil(otherPayrolls.length / itemsPerPageOther));
-  const paginatedOther = otherPayrolls.slice((currentPageOther - 1) * itemsPerPageOther, (currentPageOther - 1) * itemsPerPageOther + itemsPerPageOther);
+  const paginatedDraft   = paginate(draftPayrolls, currentPageDraft, itemsPerPageDraft);
+  const paginatedPending = paginate(pendingPayrolls, currentPagePending, itemsPerPagePending);
+  const paginatedOther   = paginate(approvedPayrolls, currentPageOther, itemsPerPageOther);
 
+  // ── Summary cards ─────────────────────────────────────────
   const summaryCards = [
-    {
-      label: "Pending Review",
-      subtitle: "Menunggu aksi approval",
-      value: String(pendingPayrolls.length),
-      change: "Prioritas proses hari ini",
-      tone: "orange" as const,
-      icon: Clock3,
-    },
-    {
-      label: "Ready Selected",
-      subtitle: "Payroll yang dipilih",
-      value: selectedPayroll ? "1" : "0",
-      change: selectedPayroll ? "Siap ditinjau" : "Belum ada pilihan",
-      tone: "blue" as const,
-      icon: BarChart3,
-    },
-    {
-      label: "Approved",
-      subtitle: "Payroll yang sudah disetujui",
-      value: String(otherPayrolls.filter((item) => item.status === "approved").length),
-      change: "Status final approval",
-      tone: "green" as const,
-      icon: CheckCircle2,
-    },
-    {
-      label: "Paid",
-      subtitle: "Payroll yang sudah dibayar",
-      value: String(otherPayrolls.filter((item) => item.status === "paid").length),
-      change: "Sudah masuk proses pembayaran",
-      tone: "purple" as const,
-      icon: CreditCard,
-    },
+    { label: "Menunggu Manager", subtitle: "Status: draft", value: String(draftPayrolls.length), tone: "orange" as const, icon: Clock3 },
+    { label: "Menunggu HR", subtitle: "Status: pending_hr", value: String(pendingPayrolls.length), tone: "blue" as const, icon: BarChart3 },
+    { label: "Disetujui", subtitle: "Status: approved", value: String(approvedPayrolls.filter(p => p.status === "approved").length), tone: "green" as const, icon: CheckCircle2 },
+    { label: "Dibayar", subtitle: "Status: paid", value: String(approvedPayrolls.filter(p => p.status === "paid").length), tone: "purple" as const, icon: CreditCard },
   ];
+
+  // ── Shared table row renderer ─────────────────────────────
+  const renderRow = (p: PayrollItem, actions: React.ReactNode) => (
+    <tr key={p.id}>
+      <td className="crud-table-name">
+        <div className="crud-table-avatar">{getEmployeeName(p.employee_id).charAt(0).toUpperCase()}</div>
+        <span>{getEmployeeName(p.employee_id)}</span>
+      </td>
+      <td><span className="crud-table-tag">{p.period}</span></td>
+      <td className="crud-table-amount">{fmt(p.basic_salary)}</td>
+      <td className="crud-table-amount crud-table-amount-green">{fmt(p.take_home_pay || p.net_salary)}</td>
+      <td><PayrollStatusBadge status={p.status} size="sm" /></td>
+      <td className="text-center">
+        <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>{actions}</div>
+      </td>
+    </tr>
+  );
+
+  // ── Modal content ─────────────────────────────────────────
+  const modalTitle =
+    pendingAction === "manager-approve" ? "Konfirmasi — Manager Approve" :
+    pendingAction === "hr-approve" ? "Konfirmasi — HR Final Approve" :
+    "Konfirmasi — Tolak Payroll";
+
+  const modalIcon =
+    pendingAction === "reject" ? <XCircle size={40} color="#ef4444" /> :
+    pendingAction === "hr-approve" ? <Shield size={40} color="#2563eb" /> :
+    <UserCheck size={40} color="#10b981" />;
 
   return (
     <div className="crud-page">
       {/* Error Modal */}
-      <Modal
-        isOpen={errorModal.isOpen}
-        onClose={() => setErrorModal({ ...errorModal, isOpen: false })}
-        title={errorModal.title}
-        size="md"
-      >
+      <Modal isOpen={errorModal.isOpen} onClose={() => setErrorModal({ ...errorModal, isOpen: false })} title={errorModal.title} size="md">
         <div style={{ padding: "16px 0", whiteSpace: "pre-wrap" }}>
-          <p style={{ margin: 0, lineHeight: "1.6", color: "#1e293b" }}>
-            {errorModal.message}
-          </p>
+          <p style={{ margin: 0, lineHeight: "1.6", color: "#1e293b" }}>{errorModal.message}</p>
         </div>
       </Modal>
 
+      {/* Header */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
-            <div className="hero-badge">
-              <ShieldCheck size={16} />
-              <span>Pusat Payroll</span>
-            </div>
+            <div className="hero-badge"><ShieldCheck size={16} /><span>Pusat Payroll</span></div>
             <h1 className="hero-title">Persetujuan Payroll</h1>
             <p className="hero-subtitle">
-              Setujui data payroll karyawan sebelum diproses untuk pembayaran.
+              Alur approval: <strong>Manager</strong> (draft → pending_hr) → <strong>HR</strong> (pending_hr → approved) → Finance bayar.
             </p>
           </div>
           <div className="hero-actions">
             <button className="btn-outline" onClick={() => void loadData()} disabled={loading}>
-              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-              Segarkan
+              <RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Segarkan
             </button>
-            <button className="btn-primary" onClick={() => navigate('/payroll/crud')} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.25rem', borderRadius: '10px', border: '1px solid #cbd5e1', background: '#fff', color: '#2563eb', fontSize: '0.9rem', fontWeight: '600', fontFamily: "'Poppins', sans-serif", cursor: 'pointer' }}>
-              Kelola Payroll
+            <button className="btn-outline" onClick={() => navigate("/payroll/payment")}
+              style={{ color: "#2563eb", borderColor: "#2563eb" }}>
+              Halaman Pembayaran
             </button>
           </div>
         </div>
       </Card>
 
-      {/* Summary Cards - Same style as Employees Page */}
+      {/* Summary Cards */}
       <div className="payroll-summary-wrapper">
         {summaryCards.map((card) => {
           const Icon = card.icon;
@@ -279,247 +209,284 @@ const PayrollApprovePage = () => {
                   <p className="payroll-summary-label">{card.label}</p>
                   <p className="payroll-summary-subtitle">{card.subtitle}</p>
                 </div>
-                <div className={`payroll-summary-icon-wrapper payroll-icon-${card.tone}`}>
-                  <Icon size={28} />
-                </div>
+                <div className={`payroll-summary-icon-wrapper payroll-icon-${card.tone}`}><Icon size={28} /></div>
               </div>
               <div className={`payroll-summary-value payroll-value-${card.tone}`}>{card.value}</div>
-              <p className="payroll-summary-trend">{card.change}</p>
             </div>
           );
         })}
       </div>
 
-      {/* Success Message */}
-      {message && message.type === "success" && (
+      {/* Success message */}
+      {message?.type === "success" && (
         <Card className="message-card">
-          <CheckCircle size={20} style={{ color: '#10b981', marginRight: '8px' }} />
+          <CheckCircle size={20} style={{ color: "#10b981", marginRight: 8 }} />
           <span>{message.text}</span>
         </Card>
       )}
 
-      {/* Data Table */}
+      {/* ── Step 1: Menunggu Manager (draft) ── */}
       <Card className="data-table-card">
         <div className="data-table-header">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-            <h3 className="data-table-title">
-              Menunggu Persetujuan
-              <span className="data-table-count">{pendingPayrolls.length} payroll</span>
-            </h3>
-            <div>
-              <select value={paymentFilter} onChange={(e) => { setPaymentFilter(e.target.value as any); setCurrentPagePending(1); setCurrentPageOther(1); }} className="sort-select">
-                <option value="all">Semua Status</option>
-                <option value="unpaid">Belum Dibayar</option>
-                <option value="paid">Sudah Dibayar</option>
-              </select>
-            </div>
-          </div>
+          <h3 className="data-table-title">
+            <UserCheck size={18} style={{ marginRight: 6, color: "#f59e0b" }} />
+            Step 1 — Menunggu Persetujuan Manager
+            <span className="data-table-count">{draftPayrolls.length} payroll</span>
+          </h3>
+          <p style={{ fontSize: "0.82rem", color: "#64748b", marginTop: 4 }}>
+            Manager menyetujui terlebih dahulu sebelum HR melakukan final approval.
+          </p>
         </div>
-
         <div className="table-wrap">
           <table className="crud-table">
-            <thead>
-              <tr>
-                <th>Karyawan</th>
-                <th>Periode</th>
-                <th className="text-right">Gaji Pokok</th>
-                <th className="text-right">Gaji Bersih</th>
-                <th className="text-center">Status</th>
-                <th className="text-center">Aksi</th>
-              </tr>
-            </thead>
+            <thead><tr>
+              <th>Karyawan</th><th>Periode</th>
+              <th className="text-right">Gaji Pokok</th>
+              <th className="text-right">Gaji Bersih</th>
+              <th className="text-center">Status</th>
+              <th className="text-center">Aksi</th>
+            </tr></thead>
             <tbody>
-              {paginatedPending.map((p) => (
-                <tr
-                  key={p.id}
-                  className={selectedPayrollId === String(p.id) ? "is-selected" : ""}
-                >
-                  <td className="crud-table-name">
-                      <div className="crud-table-avatar">
-                        {getEmployeeName(p.employee_id).charAt(0).toUpperCase()}
-                      </div>
-                      <span>{getEmployeeName(p.employee_id)}</span>
-                    </td>
-                    <td><span className="crud-table-tag">{p.period}</span></td>
-                    <td className="crud-table-amount">
-                      Rp {Number(p.basic_salary || 0).toLocaleString("id-ID")}
-                      <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 'normal', display: 'block' }}>Basic</span>
-                    </td>
-                    <td className="crud-table-amount crud-table-amount-green">
-                      Rp {Number(p.take_home_pay || p.net_salary || 0).toLocaleString("id-ID")}
-                      <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 'normal', display: 'block' }}>Net</span>
-                    </td>
-                    <td>
-                      <PayrollStatusBadge status={p.status || 'pending'} size="sm" />
-                    </td>
-                    <td className="text-center">
-                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                        <button
-                          type="button"
-                          onClick={() => handleSelectPayroll(p)}
-                          className={selectedPayrollId === String(p.id) ? "action-btn action-btn-edit" : "action-btn"}
-                          disabled={loading}
-                          title="Pilih untuk approve"
-                        >
-                          <Eye size={14} />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedPayroll(p);
-                            setSelectedPayrollId(String(p.id));
-                          }}
-                          className="action-btn action-btn-success"
-                          disabled={loading}
-                          title="Approve payroll"
-                        >
-                          <FileCheck size={14} />
-                        </button>
-                      </div>
-                    </td>
-                </tr>
-              ))}
+              {paginatedDraft.length > 0 ? paginatedDraft.map((p) => renderRow(p,
+                <>
+                  <button className="action-btn" title="Lihat" onClick={() => navigate(`/payroll/${p.id}`)}><Eye size={14} /></button>
+                  <button className="action-btn action-btn-success" title="Manager Approve"
+                    onClick={() => openAction(p, "manager-approve")} disabled={loading}>
+                    <UserCheck size={14} />
+                  </button>
+                  <button className="action-btn action-btn-danger" title="Tolak"
+                    onClick={() => openAction(p, "reject")} disabled={loading}>
+                    <XCircle size={14} />
+                  </button>
+                </>
+              )) : (
+                <tr><td colSpan={6} style={{ textAlign: "center", padding: "2rem", color: "#94a3b8" }}>
+                  Tidak ada payroll draft yang menunggu Manager.
+                </td></tr>
+              )}
             </tbody>
           </table>
         </div>
-        {pendingPayrolls.length > itemsPerPagePending && (
-          <div style={{ marginTop: 12, display: 'flex', justifyContent: 'flex-end' }}>
-            <PaginationWithSize
-              currentPage={currentPagePending}
-              totalPages={totalPagesPending}
-              onPageChange={(p) => setCurrentPagePending(p)}
-              totalItems={pendingPayrolls.length}
-              itemsPerPage={itemsPerPagePending}
-              onItemsPerPageChange={(s) => setItemsPerPagePending(s)}
-            />
+        {draftPayrolls.length > itemsPerPageDraft && (
+          <div style={{ marginTop: 12, display: "flex", justifyContent: "flex-end" }}>
+            <PaginationWithSize currentPage={currentPageDraft} totalPages={Math.ceil(draftPayrolls.length / itemsPerPageDraft)}
+              onPageChange={setCurrentPageDraft} totalItems={draftPayrolls.length}
+              itemsPerPage={itemsPerPageDraft} onItemsPerPageChange={setItemsPerPageDraft} />
           </div>
         )}
       </Card>
 
-      {/* Approval Modal */}
+      {/* ── Step 2: Menunggu HR (pending_hr) ── */}
+      <Card className="data-table-card">
+        <div className="data-table-header">
+          <h3 className="data-table-title">
+            <Shield size={18} style={{ marginRight: 6, color: "#2563eb" }} />
+            Step 2 — Menunggu Final Approval HR
+            <span className="data-table-count">{pendingPayrolls.length} payroll</span>
+          </h3>
+          <p style={{ fontSize: "0.82rem", color: "#64748b", marginTop: 4 }}>
+            Sudah disetujui Manager. HR melakukan verifikasi akhir.
+          </p>
+        </div>
+        <div className="table-wrap">
+          <table className="crud-table">
+            <thead><tr>
+              <th>Karyawan</th><th>Periode</th>
+              <th className="text-right">Gaji Pokok</th>
+              <th className="text-right">Gaji Bersih</th>
+              <th className="text-center">Status</th>
+              <th className="text-center">Aksi</th>
+            </tr></thead>
+            <tbody>
+              {paginatedPending.length > 0 ? paginatedPending.map((p) => renderRow(p,
+                <>
+                  <button className="action-btn" title="Lihat" onClick={() => navigate(`/payroll/${p.id}`)}><Eye size={14} /></button>
+                  <button className="action-btn action-btn-success" title="HR Final Approve"
+                    onClick={() => openAction(p, "hr-approve")} disabled={loading}>
+                    <Shield size={14} />
+                  </button>
+                  <button className="action-btn action-btn-danger" title="Tolak"
+                    onClick={() => openAction(p, "reject")} disabled={loading}>
+                    <XCircle size={14} />
+                  </button>
+                </>
+              )) : (
+                <tr><td colSpan={6} style={{ textAlign: "center", padding: "2rem", color: "#94a3b8" }}>
+                  Tidak ada payroll yang menunggu HR approval.
+                </td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        {pendingPayrolls.length > itemsPerPagePending && (
+          <div style={{ marginTop: 12, display: "flex", justifyContent: "flex-end" }}>
+            <PaginationWithSize currentPage={currentPagePending} totalPages={Math.ceil(pendingPayrolls.length / itemsPerPagePending)}
+              onPageChange={setCurrentPagePending} totalItems={pendingPayrolls.length}
+              itemsPerPage={itemsPerPagePending} onItemsPerPageChange={setItemsPerPagePending} />
+          </div>
+        )}
+      </Card>
+
+      {/* ── Rejected ── */}
+      {rejectedPayrolls.length > 0 && (
+        <Card className="data-table-card">
+          <div className="data-table-header">
+            <h3 className="data-table-title">
+              <AlertTriangle size={18} style={{ marginRight: 6, color: "#ef4444" }} />
+              Ditolak
+              <span className="data-table-count">{rejectedPayrolls.length} payroll</span>
+            </h3>
+          </div>
+          <div className="table-wrap">
+            <table className="crud-table">
+              <thead><tr>
+                <th>Karyawan</th><th>Periode</th>
+                <th className="text-right">Gaji Bersih</th>
+                <th className="text-center">Status</th>
+                <th>Alasan</th>
+              </tr></thead>
+              <tbody>
+                {rejectedPayrolls.map((p) => (
+                  <tr key={p.id}>
+                    <td className="crud-table-name">
+                      <div className="crud-table-avatar">{getEmployeeName(p.employee_id).charAt(0).toUpperCase()}</div>
+                      <span>{getEmployeeName(p.employee_id)}</span>
+                    </td>
+                    <td><span className="crud-table-tag">{p.period}</span></td>
+                    <td className="crud-table-amount">{fmt(p.take_home_pay || p.net_salary)}</td>
+                    <td><PayrollStatusBadge status={p.status} size="sm" /></td>
+                    <td style={{ fontSize: "0.82rem", color: "#64748b" }}>{p.rejected_reason || "-"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      )}
+
+      {/* ── Approved / Paid ── */}
+      {approvedPayrolls.length > 0 && (
+        <Card className="data-table-card">
+          <div className="data-table-header">
+            <h3 className="data-table-title">
+              <CheckCircle2 size={18} style={{ marginRight: 6, color: "#10b981" }} />
+              Sudah Disetujui / Dibayar
+              <span className="data-table-count">{approvedPayrolls.length} payroll</span>
+            </h3>
+          </div>
+          <div className="table-wrap">
+            <table className="crud-table">
+              <thead><tr>
+                <th>Karyawan</th><th>Periode</th>
+                <th className="text-right">Gaji Bersih</th>
+                <th className="text-center">Status</th>
+              </tr></thead>
+              <tbody>
+                {paginatedOther.map((p) => (
+                  <tr key={p.id}>
+                    <td className="crud-table-name">
+                      <div className="crud-table-avatar">{getEmployeeName(p.employee_id).charAt(0).toUpperCase()}</div>
+                      <span>{getEmployeeName(p.employee_id)}</span>
+                    </td>
+                    <td><span className="crud-table-tag">{p.period}</span></td>
+                    <td className="crud-table-amount crud-table-amount-green">{fmt(p.take_home_pay || p.net_salary)}</td>
+                    <td><PayrollStatusBadge status={p.status} size="sm" /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {approvedPayrolls.length > itemsPerPageOther && (
+            <div style={{ marginTop: 12, display: "flex", justifyContent: "flex-end" }}>
+              <PaginationWithSize currentPage={currentPageOther} totalPages={Math.ceil(approvedPayrolls.length / itemsPerPageOther)}
+                onPageChange={setCurrentPageOther} totalItems={approvedPayrolls.length}
+                itemsPerPage={itemsPerPageOther} onItemsPerPageChange={setItemsPerPageOther} />
+            </div>
+          )}
+        </Card>
+      )}
+
+      {/* ── Action Modal ── */}
       <Modal
-        isOpen={!!selectedPayroll}
-        onClose={() => {
-          setSelectedPayroll(null);
-          setSelectedPayrollId("");
-        }}
-        title={`Konfirmasi Persetujuan Payroll ID ${selectedPayroll?.id}`}
-        size="lg"
+        isOpen={!!selectedPayroll && !!pendingAction}
+        onClose={closeModal}
+        title={modalTitle}
+        size="md"
       >
         {selectedPayroll && (
-          <div className="payroll-approve-modal-container">
-            <div className="payroll-approve-detail-grid">
-              <div className="payroll-approve-detail-column">
-                <p className="payroll-approve-detail-label">ID Karyawan</p>
-                <p className="payroll-approve-detail-value payroll-approve-detail-value--accent">
-                  {selectedPayroll.employee_id}
-                </p>
+          <div style={{ padding: "8px 0" }}>
+            {/* Icon */}
+            <div style={{ textAlign: "center", marginBottom: "1.25rem" }}>{modalIcon}</div>
 
-                <p className="payroll-approve-detail-label">Nama Karyawan</p>
-                <p className="payroll-approve-detail-value">
-                  {getEmployeeName(selectedPayroll.employee_id)}
-                </p>
-
-                <p className="payroll-approve-detail-label">Periode Payroll</p>
-                <p className="payroll-approve-detail-value">{selectedPayroll.period}</p>
-
-                <p className="payroll-approve-detail-label">Status Saat Ini</p>
-                <p className="payroll-approve-detail-value">
-                  <span className="payroll-status-pill" style={{ backgroundColor: getStatusColor(selectedPayroll.status) }}>
-                    {getStatusLabel(selectedPayroll.status)}
-                  </span>
-                </p>
+            {/* Info */}
+            <div style={{ background: "#f8fafc", borderRadius: 10, padding: "1rem 1.25rem", marginBottom: "1.25rem", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+              <div>
+                <p style={{ margin: 0, fontSize: "0.75rem", color: "#64748b" }}>Karyawan</p>
+                <p style={{ margin: 0, fontWeight: 600, fontSize: "0.9rem" }}>{getEmployeeName(selectedPayroll.employee_id)}</p>
               </div>
-
-              <div className="payroll-approve-detail-column">
-                <p className="payroll-approve-detail-label">Gaji Pokok</p>
-                <p className="payroll-approve-detail-value payroll-approve-detail-value--success">
-                  Rp {Number(selectedPayroll.basic_salary || 0).toLocaleString("id-ID")}
-                </p>
-
-                <p className="payroll-approve-detail-label">Gaji Bersih (Take Home)</p>
-                <p className="payroll-approve-detail-value payroll-approve-detail-value--success payroll-approve-detail-value--large">
-                  Rp {Number(selectedPayroll.take_home_pay || selectedPayroll.net_salary || 0).toLocaleString("id-ID")}
-                </p>
+              <div>
+                <p style={{ margin: 0, fontSize: "0.75rem", color: "#64748b" }}>Periode</p>
+                <p style={{ margin: 0, fontWeight: 600, fontSize: "0.9rem" }}>{selectedPayroll.period}</p>
+              </div>
+              <div>
+                <p style={{ margin: 0, fontSize: "0.75rem", color: "#64748b" }}>Gaji Pokok</p>
+                <p style={{ margin: 0, fontWeight: 600, color: "#10b981" }}>{fmt(selectedPayroll.basic_salary)}</p>
+              </div>
+              <div>
+                <p style={{ margin: 0, fontSize: "0.75rem", color: "#64748b" }}>Take Home Pay</p>
+                <p style={{ margin: 0, fontWeight: 700, color: "#10b981", fontSize: "1rem" }}>{fmt(selectedPayroll.take_home_pay || selectedPayroll.net_salary)}</p>
               </div>
             </div>
 
-            <div className="payroll-approve-actions" style={{ marginTop: '2rem', display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-              <Button
-                variant="outline"
-                size="md"
-                onClick={() => {
-                  setSelectedPayroll(null);
-                  setSelectedPayrollId("");
-                }}
-                disabled={loading}
-              >
-                Batal
-              </Button>
-              <Button
-                variant="success"
-                size="md"
-                onClick={() => void handleApprove()}
-                disabled={loading || (selectedPayroll.status !== "draft" && selectedPayroll.status !== "pending")}
-              >
-                Setujui Payroll
-              </Button>
+            {/* Description */}
+            {pendingAction !== "reject" && (
+              <div style={{ background: pendingAction === "hr-approve" ? "#eff6ff" : "#f0fdf4", border: `1px solid ${pendingAction === "hr-approve" ? "#bfdbfe" : "#bbf7d0"}`, borderRadius: 8, padding: "0.875rem 1rem", marginBottom: "1.25rem", fontSize: "0.875rem", color: "#1e293b" }}>
+                {pendingAction === "manager-approve"
+                  ? "Anda akan menyetujui payroll ini sebagai Manager. Status akan berubah ke pending_hr dan diteruskan ke HR untuk final approval."
+                  : "Anda akan memberikan final approval sebagai HR. Status akan berubah ke approved dan siap untuk proses pembayaran."}
+              </div>
+            )}
+
+            {/* Reject reason textarea */}
+            {pendingAction === "reject" && (
+              <div style={{ marginBottom: "1.25rem" }}>
+                <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, color: "#374151", marginBottom: 6 }}>
+                  Alasan Penolakan <span style={{ color: "#ef4444" }}>*</span>
+                </label>
+                <textarea
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  placeholder="Jelaskan alasan penolakan payroll ini..."
+                  rows={4}
+                  style={{
+                    width: "100%", padding: "0.75rem", borderRadius: 8, border: "1.5px solid #e2e8f0",
+                    fontSize: "0.875rem", fontFamily: "inherit", resize: "vertical", boxSizing: "border-box",
+                    outline: "none", color: "#1e293b", background: "#fff"
+                  }}
+                />
+                <p style={{ margin: "4px 0 0", fontSize: "0.75rem", color: "#94a3b8" }}>
+                  Alasan ini akan dicatat dan dapat dilihat oleh HR dan Admin.
+                </p>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+              <Button variant="outline" size="md" onClick={closeModal} disabled={loading}>Batal</Button>
+              {pendingAction === "reject" ? (
+                <Button variant="danger" size="md" onClick={() => void handleConfirm()} disabled={loading || !rejectReason.trim()}>
+                  <XCircle size={16} style={{ marginRight: 6 }} /> Tolak Payroll
+                </Button>
+              ) : (
+                <Button variant="success" size="md" onClick={() => void handleConfirm()} disabled={loading}>
+                  <CheckCircle size={16} style={{ marginRight: 6 }} />
+                  {pendingAction === "manager-approve" ? "Manager Approve" : "HR Final Approve"}
+                </Button>
+              )}
             </div>
           </div>
         )}
       </Modal>
-
-      {/* Payroll Sudah Disetujui */}
-      {otherPayrolls.length > 0 && (
-        <>
-          <Card className="analytics-title-card">
-            <div className="analytics-title-inner">
-              <div className="analytics-icon">
-                <CheckCircle2 size={24} />
-              </div>
-              <div>
-                <h2 className="analytics-title">Telah Disetujui</h2>
-                <p className="analytics-subtitle">{otherPayrolls.length} payroll</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="crud-table-card">
-            <div className="crud-table-wrap">
-              <table className="crud-table">
-                <thead>
-                  <tr>
-                    <th>Karyawan</th>
-                    <th>Periode</th>
-                    <th className="text-right">Gaji Bersih</th>
-                    <th className="text-center">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedOther.map((p) => (
-                    <tr key={p.id}>
-<td className="crud-table-name">
-                      <div className="crud-table-avatar">
-                        {getEmployeeName(p.employee_id).charAt(0).toUpperCase()}
-                      </div>
-                      <span>{getEmployeeName(p.employee_id)}</span>
-                    </td>
-                    <td><span className="crud-table-tag">{p.period}</span></td>
-                    <td className="crud-table-amount crud-table-amount-green">
-                      Rp {Number(p.take_home_pay || p.net_salary || 0).toLocaleString("id-ID")}
-                      <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 'normal', display: 'block' }}>Net</span>
-                    </td>
-<td>
-                      <PayrollStatusBadge status={p.status || 'approved'} size="sm" />
-                    </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Card>
-        </>
-      )}
     </div>
   );
 };

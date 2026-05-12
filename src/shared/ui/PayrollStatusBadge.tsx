@@ -22,22 +22,25 @@ type StatusConfig = {
   icon: LucideIcon;
 };
 
-const getStatusConfig = (status: PayrollStatus): StatusConfig => {
+const getStatusConfig = (status: PayrollStatus | string): StatusConfig => {
   switch (String(status || "").toLowerCase()) {
     case "draft":
       return { label: "Draft", className: "status-draft", icon: CircleDashed };
+    case "pending_hr":
+      return { label: "Menunggu HR", className: "status-pending-hr", icon: Clock3 };
     case "pending":
       return { label: "Pending", className: "status-pending", icon: Clock3 };
     case "approved":
-      return { label: "Approved", className: "status-approved", icon: CheckCircle2 };
+      return { label: "Disetujui", className: "status-approved", icon: CheckCircle2 };
     case "paid":
-      return { label: "Paid", className: "status-paid", icon: Wallet };
+      return { label: "Dibayar", className: "status-paid", icon: Wallet };
     case "rejected":
-      return { label: "Rejected", className: "status-rejected", icon: XCircle };
+      return { label: "Ditolak", className: "status-rejected", icon: XCircle };
     default:
-      return { label: "Unknown", className: "status-default", icon: HelpCircle };
+      return { label: String(status || "Unknown"), className: "status-default", icon: HelpCircle };
   }
 };
+
 
 /**
  * Reusable status badge component for payroll items.

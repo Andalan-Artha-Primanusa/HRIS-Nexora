@@ -78,30 +78,49 @@ export const payrollService = {
     return response.data;
   },
 
-  // ── Admin: Workflow (draft → approved → paid) ───────────
-  // POST /api/payroll/{id}/approve (approve single payroll per API)
+  // ── Admin: Workflow (draft → pending_hr → approved → paid) ──
+  // POST /api/payroll/{id}/approve (backward-compat: auto-routes to correct step)
   approvePayroll: async (id: string | number) => {
     const response = await api.post(`/payroll/${id}/approve`);
     return response.data;
   },
 
-  // Backward compat: approve single payroll (same as above)
+  // Backward compat alias
   approvePayrollSingle: async (id: string | number) => {
     const response = await api.post(`/payroll/${id}/approve`);
     return response.data;
   },
 
-  // POST /api/payroll/{id}/pay
+  // POST /api/payroll/{id}/manager-approve  (Step 1: draft → pending_hr)
+  managerApprovePayroll: async (id: string | number) => {
+    const response = await api.post(`/payroll/${id}/manager-approve`);
+    return response.data;
+  },
+
+  // POST /api/payroll/{id}/hr-approve  (Step 2: pending_hr → approved)
+  hrApprovePayroll: async (id: string | number) => {
+    const response = await api.post(`/payroll/${id}/hr-approve`);
+    return response.data;
+  },
+
+  // POST /api/payroll/{id}/reject  (draft|pending_hr → rejected)
+  rejectPayroll: async (id: string | number, reason: string) => {
+    const response = await api.post(`/payroll/${id}/reject`, { reason });
+    return response.data;
+  },
+
+  // POST /api/payroll/{id}/pay  (approved → paid, single)
   processPayment: async (id: string | number) => {
     const response = await api.post(`/payroll/${id}/pay`);
     return response.data;
   },
 
-  // POST /api/payroll/{id}/reject
-  rejectPayroll: async (id: string | number, reason: string) => {
-    const response = await api.post(`/payroll/${id}/reject`, { reason });
+  // POST /api/payroll/bulk-pay  (bulk: all approved in period → paid)
+  bulkMarkAsPaid: async (period: string) => {
+    const response = await api.post('/payroll/bulk-pay', { period });
     return response.data;
   },
+
 
   // ── Admin: Export ───────────────────────────────────────
   // GET /api/payroll/{id}/export  (CSV)

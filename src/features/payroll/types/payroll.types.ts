@@ -9,6 +9,12 @@ export interface PayrollItem {
   basic_salary?: string | number;
   allowance?: number | string;
   bonus?: number | string;
+  overtime_pay?: number | string;
+  paid_leave_days?: number | string;
+  paid_leave_amount?: number | string;
+  late_days?: number;
+  late_deduction?: number | string;
+  reimbursement_amount?: number | string;
   deduction?: number | string;
   tax?: number | string;
   bpjs_kesehatan?: string | number;
@@ -18,12 +24,20 @@ export interface PayrollItem {
   net_salary?: string | number;
   take_home_pay?: string | number;
   status: PayrollStatus;
+  // Audit fields
+  manager_approved_by?: number | null;
+  manager_approved_at?: string | null;
+  hr_approved_by?: number | null;
+  hr_approved_at?: string | null;
+  rejected_by?: number | null;
+  rejected_reason?: string | null;
   created_at?: string;
   updated_at?: string;
   approved_at?: string;
   paid_at?: string;
   employee?: EmployeeItemExpanded;
   details?: PayrollDetail[];
+  reimbursements?: ReimbursementItem[];
 }
 
 /**
@@ -59,18 +73,33 @@ export interface PayrollSlip {
     basic_salary: number;
     allowance: number;
     bonus: number;
+    overtime_pay: number;
+    paid_leave_days: number;
+    paid_leave_amount: number;
+    reimbursement_amount: number;
     gross_pay: number;
     additional_allowances: number;
-    additional_deductions: number;
+    late_days: number;
+    late_deduction: number;
     bpjs_kesehatan: number;
     bpjs_ketenagakerjaan: number;
     pph21: number;
+    additional_deductions: number;
     total_deduction: number;
     take_home_pay: number;
   };
-  earnings: Array<{ name: string; amount: number }>;
-  deductions: Array<{ name: string; amount: number }>;
+  earnings: Array<{ id?: number; name: string; amount: number }>;
+  deductions: Array<{ id?: number; name: string; amount: number }>;
   details: PayrollDetail[];
+  reimbursements?: ReimbursementItem[];
+  approval_trail?: {
+    manager_approved_by?: number | null;
+    manager_approved_at?: string | null;
+    hr_approved_by?: number | null;
+    hr_approved_at?: string | null;
+    rejected_by?: number | null;
+    rejected_reason?: string | null;
+  };
 }
 
 /**
@@ -105,7 +134,19 @@ export interface UserItem {
   profile?: unknown;
 }
 
-export type PayrollStatus = "draft" | "pending" | "approved" | "paid" | "rejected";
+export type PayrollStatus = "draft" | "pending_hr" | "approved" | "paid" | "rejected";
+
+// Reimbursement linked to payroll
+export interface ReimbursementItem {
+  id: number;
+  employee_id: number;
+  payroll_id?: number | null;
+  title: string;
+  amount: string | number;
+  category?: string;
+  status: string;
+  expense_date?: string;
+}
 
 /**
  * Payroll with enriched employee data

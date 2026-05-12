@@ -83,6 +83,14 @@
   border: 1px solid #fca5a5;
 }
 
+/* Pending HR - Orange (menunggu approval HR setelah manager approve) */
+.payroll-status-badge.status-pending-hr {
+  background-color: #fff7ed;
+  color: #9a3412;
+  border: 1px solid #fdba74;
+}
+
+
 /* Default - Gray */
 .payroll-status-badge.status-default {
   background-color: #f3f4f6;

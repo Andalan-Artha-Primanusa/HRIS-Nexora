@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { BarChart3, CreditCard, FileText, ShieldCheck, RefreshCw, CheckCircle, DollarSign } from "lucide-react";
+import { BarChart3, CreditCard, FileText, ShieldCheck, RefreshCw, CheckCircle, DollarSign, Zap, AlertTriangle } from "lucide-react";
 import { Card } from "@/shared/ui/Card";
 import { PaginationWithSize } from "@/shared/ui/Pagination";
 import { Button } from "@/shared/ui/Button";
@@ -27,6 +27,8 @@ const PayrollPaymentPage = () => {
   const [periodFilter, setPeriodFilter] = useState<string>("all");
   const [paymentFilter, setPaymentFilter] = useState<'all' | 'paid' | 'unpaid'>('all');
   const [loading, setLoading] = useState(false);
+  const [bulkPayModal, setBulkPayModal] = useState(false);
+  const [bulkPayLoading, setBulkPayLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [errorModal, setErrorModal] = useState<{ isOpen: boolean; title: string; message: string }>({
     isOpen: false,
@@ -40,22 +42,24 @@ const PayrollPaymentPage = () => {
 
 
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [empsData, payrollsData] = await Promise.all([
-          getAllEmployees(),
-          payrollService.getPayrollList()
-        ]);
-        setEmployees(toSafeArray(empsData));
-        setAllPayrolls(toSafeArray(payrollsData));
-      } catch (error) {
-        console.error("Error loading data:", error);
-      }
-    };
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [empsData, payrollsData] = await Promise.all([
+        getAllEmployees(),
+        payrollService.getPayrollList()
+      ]);
+      setEmployees(toSafeArray(empsData));
+      setAllPayrolls(toSafeArray(payrollsData));
+      setMessage(null);
+    } catch (error) {
+      console.error("Error loading data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    void loadData();
-  }, []);
+  useEffect(() => { void loadData(); }, []);
 
   const handleViewDetail = async () => {
     if (!payrollId.trim()) {
@@ -83,29 +87,42 @@ const PayrollPaymentPage = () => {
       showErrorModal("Validasi", "Pilih payroll terlebih dahulu");
       return;
     }
-
-    if (selectedPayroll.status === "paid") {
-      showErrorModal(
-        "Sudah Dibayar",
-        `Payroll ini sudah ditandai sebagai dibayar pada ${selectedPayroll.paid_at ? new Date(selectedPayroll.paid_at).toLocaleDateString("id-ID") : "tanggal tidak tersedia"}. Tidak perlu ditandai lagi.`
-      );
+    if (selectedPayroll.status !== "approved") {
+      showErrorModal("Status Tidak Valid", `Hanya payroll berstatus 'approved' yang bisa ditandai dibayar. Status saat ini: ${selectedPayroll.status}`);
       return;
     }
-
     setLoading(true);
     try {
-      const payrollIdValue = String(selectedPayroll.id).replace(/^[A-Z]+/, "").replace(/^0+/, "") || selectedPayroll.id;
-      const updated = await payrollService.processPayment(payrollIdValue);
-      setSelectedPayroll(updated);
-      setMessage({ type: "success", text: "Payroll berhasil ditandai sebagai dibayar" });
-
-      const payrollsData = await payrollService.getPayrollList();
-      setAllPayrolls(toSafeArray(payrollsData));
+      const payrollIdValue = String(selectedPayroll.id);
+      await payrollService.processPayment(payrollIdValue);
+      setMessage({ type: "success", text: `Payroll #${payrollIdValue} berhasil ditandai sebagai dibayar` });
+      setSelectedPayroll(null);
+      await loadData();
     } catch (error) {
       const errorText = error instanceof Error ? error.message : "Gagal menandai payroll sebagai dibayar";
       showErrorModal("Error Tandai Dibayar", errorText);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleBulkPay = async () => {
+    if (periodFilter === "all") {
+      showErrorModal("Pilih Periode", "Pilih periode spesifik terlebih dahulu sebelum bulk pay");
+      setBulkPayModal(false);
+      return;
+    }
+    setBulkPayLoading(true);
+    try {
+      const result = await payrollService.bulkMarkAsPaid(periodFilter);
+      const total = result?.data?.total_paid ?? result?.total_paid ?? "?";
+      setMessage({ type: "success", text: `Bulk pay selesai — ${total} payroll periode ${periodFilter} berhasil ditandai dibayar` });
+      setBulkPayModal(false);
+      await loadData();
+    } catch (error) {
+      showErrorModal("Bulk Pay Gagal", error instanceof Error ? error.message : "Terjadi kesalahan");
+    } finally {
+      setBulkPayLoading(false);
     }
   };
 
@@ -138,9 +155,13 @@ const PayrollPaymentPage = () => {
     return labels[status] || status;
   };
 
-  // Ensure allPayrolls and employees are always arrays before filtering
   const safePayrolls = Array.isArray(allPayrolls) ? allPayrolls : [];
   const safeEmployees = Array.isArray(employees) ? employees : [];
+
+  // Count approved payrolls for selected period (for bulk pay)
+  const approvedInPeriod = safePayrolls.filter(
+    (p) => p.status === "approved" && (periodFilter === "all" || String(p.period) === periodFilter)
+  );
 
   const summaryCards = [
     {
@@ -223,12 +244,29 @@ const PayrollPaymentPage = () => {
             </p>
           </div>
           <div className="hero-actions">
-            <button className="btn-outline" onClick={() => window.location.reload()} disabled={loading}>
+            <button className="btn-outline" onClick={() => void loadData()} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan
             </button>
-            <button className="btn-primary" onClick={() => navigate('/payroll/crud')} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.25rem', borderRadius: '10px', border: '1px solid #cbd5e1', background: '#fff', color: '#2563eb', fontSize: '0.9rem', fontWeight: '600', fontFamily: "'Poppins', sans-serif", cursor: 'pointer' }}>
-              Kelola Payroll
+            {periodFilter !== "all" && approvedInPeriod.length > 0 && (
+              <button
+                onClick={() => setBulkPayModal(true)}
+                disabled={loading}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                  padding: '0.75rem 1.25rem', borderRadius: '10px',
+                  border: 'none', background: 'linear-gradient(135deg, #10b981, #059669)',
+                  color: '#fff', fontSize: '0.9rem', fontWeight: '600',
+                  fontFamily: "'Poppins', sans-serif", cursor: 'pointer', boxShadow: '0 2px 8px rgba(16,185,129,0.3)'
+                }}
+              >
+                <Zap size={16} />
+                Bayar Semua ({approvedInPeriod.length} approved)
+              </button>
+            )}
+            <button className="btn-primary" onClick={() => navigate('/payroll/approve')}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.25rem', borderRadius: '10px', border: '1px solid #cbd5e1', background: '#fff', color: '#2563eb', fontSize: '0.9rem', fontWeight: '600', fontFamily: "'Poppins', sans-serif", cursor: 'pointer' }}>
+              Halaman Approval
             </button>
           </div>
         </div>
@@ -368,91 +406,93 @@ const PayrollPaymentPage = () => {
         </div>
       </Card>
 
-      {/* Payment Confirmation Modal */}
+      {/* Single Payment Confirmation Modal */}
       <Modal
         isOpen={!!selectedPayroll}
         onClose={() => setSelectedPayroll(null)}
-        title={`Konfirmasi Pembayaran Payroll ID ${selectedPayroll?.id}`}
+        title={`Konfirmasi Pembayaran Payroll #${selectedPayroll?.id}`}
         size="lg"
       >
         {selectedPayroll && (
           <div className="payroll-payment-modal-container">
             <div className="payroll-payment-status-wrap" style={{ marginBottom: '1.5rem' }}>
-              <PayrollStatusBadge status={selectedPayroll.status || 'pending'} size="lg" />
+              <PayrollStatusBadge status={selectedPayroll.status || 'approved'} size="lg" />
             </div>
+
+            {selectedPayroll.status !== "approved" && (
+              <div style={{ background: '#fef3c7', border: '1px solid #fcd34d', borderRadius: 8, padding: '0.75rem 1rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem', color: '#92400e' }}>
+                <AlertTriangle size={16} />
+                <span>Payroll ini berstatus <strong>{selectedPayroll.status}</strong> — hanya payroll <strong>approved</strong> yang bisa ditandai dibayar.</span>
+              </div>
+            )}
 
             <div className="payroll-payment-detail-grid">
               <div className="payroll-payment-detail-column">
-                <p className="payroll-payment-detail-label"><strong>Payroll ID</strong></p>
-                <p className="payroll-payment-detail-value">{selectedPayroll.id}</p>
-
                 <p className="payroll-payment-detail-label"><strong>Karyawan</strong></p>
                 <p className="payroll-payment-detail-value">{getEmployeeName(selectedPayroll.employee_id)}</p>
-
                 <p className="payroll-payment-detail-label"><strong>Periode</strong></p>
                 <p className="payroll-payment-detail-value">{selectedPayroll.period}</p>
-
                 <p className="payroll-payment-detail-label"><strong>Gaji Pokok</strong></p>
                 <p className="payroll-payment-detail-value payroll-payment-detail-value--success">
                   Rp {Number(selectedPayroll.basic_salary || 0).toLocaleString("id-ID")}
                 </p>
               </div>
-
               <div className="payroll-payment-detail-column">
                 <p className="payroll-payment-detail-label"><strong>Tunjangan</strong></p>
-                <p className="payroll-payment-detail-value payroll-payment-detail-value--success">
-                  Rp {Number(selectedPayroll.allowance || 0).toLocaleString("id-ID")}
-                </p>
-
-                <p className="payroll-payment-detail-label"><strong>Bonus</strong></p>
-                <p className="payroll-payment-detail-value payroll-payment-detail-value--success">
-                  Rp {Number(selectedPayroll.bonus || 0).toLocaleString("id-ID")}
-                </p>
-
+                <p className="payroll-payment-detail-value payroll-payment-detail-value--success">Rp {Number(selectedPayroll.allowance || 0).toLocaleString("id-ID")}</p>
                 <p className="payroll-payment-detail-label"><strong>Total Potongan</strong></p>
-                <p className="payroll-payment-detail-value payroll-payment-detail-value--danger">
-                  Rp {Number(selectedPayroll.total_deduction || 0).toLocaleString("id-ID")}
-                </p>
+                <p className="payroll-payment-detail-value payroll-payment-detail-value--danger">Rp {Number(selectedPayroll.total_deduction || 0).toLocaleString("id-ID")}</p>
               </div>
             </div>
 
-            {(selectedPayroll.take_home_pay || selectedPayroll.net_salary) && (
-              <div className="payroll-payment-total-box" style={{ marginTop: '1.5rem', padding: '1rem', background: 'rgba(16, 185, 129, 0.05)', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.1)' }}>
-                <p className="payroll-payment-detail-label payroll-payment-detail-label--success" style={{ margin: 0 }}>
-                  <strong>Gaji Bersih (Take Home Pay)</strong>
-                </p>
-                <p className="payroll-payment-total-value" style={{ fontSize: '1.5rem', fontWeight: 700, color: '#10b981', margin: '4px 0 0 0' }}>
-                  Rp {Number(selectedPayroll.take_home_pay || selectedPayroll.net_salary || 0).toLocaleString("id-ID")}
-                </p>
-              </div>
-            )}
+            <div className="payroll-payment-total-box" style={{ marginTop: '1.5rem', padding: '1rem', background: 'rgba(16,185,129,0.05)', borderRadius: '8px', border: '1px solid rgba(16,185,129,0.15)' }}>
+              <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b' }}>Take Home Pay</p>
+              <p style={{ fontSize: '1.5rem', fontWeight: 700, color: '#10b981', margin: '4px 0 0 0' }}>
+                Rp {Number(selectedPayroll.take_home_pay || selectedPayroll.net_salary || 0).toLocaleString("id-ID")}
+              </p>
+            </div>
 
             <div className="payroll-payment-actions" style={{ marginTop: '2rem', display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-              <Button
-                variant="outline"
-                size="md"
-                onClick={() => setSelectedPayroll(null)}
-                disabled={loading}
-              >
-                Batal
-              </Button>
+              <Button variant="outline" size="md" onClick={() => setSelectedPayroll(null)} disabled={loading}>Batal</Button>
               {selectedPayroll.status === "paid" ? (
-                <div className="payroll-payment-paid-note" style={{ color: '#10b981', fontWeight: 500 }}>
-                  Payroll ini sudah dibayar
-                </div>
+                <div style={{ color: '#10b981', fontWeight: 500, alignSelf: 'center' }}>✓ Sudah dibayar</div>
               ) : (
-                <Button
-                  variant="primary"
-                  size="md"
-                  onClick={() => void handleMarkAsPaid()}
-                  disabled={loading}
-                >
+                <Button variant="primary" size="md" onClick={() => void handleMarkAsPaid()} disabled={loading || selectedPayroll.status !== "approved"}>
                   Tandai Sebagai Dibayar
                 </Button>
               )}
             </div>
           </div>
         )}
+      </Modal>
+
+      {/* Bulk Pay Confirmation Modal */}
+      <Modal isOpen={bulkPayModal} onClose={() => setBulkPayModal(false)} title="Konfirmasi Bulk Pay" size="md">
+        <div style={{ padding: '8px 0' }}>
+          <div style={{ textAlign: 'center', marginBottom: '1.25rem' }}>
+            <Zap size={48} color="#10b981" />
+          </div>
+          <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, padding: '1rem 1.25rem', marginBottom: '1.25rem' }}>
+            <p style={{ margin: 0, fontWeight: 600, fontSize: '0.95rem', color: '#166534' }}>
+              Tandai {approvedInPeriod.length} payroll sebagai DIBAYAR
+            </p>
+            <p style={{ margin: '6px 0 0', fontSize: '0.875rem', color: '#166534', opacity: 0.8 }}>
+              Periode: <strong>{periodFilter}</strong><br />
+              Total THP: <strong>Rp {approvedInPeriod.reduce((s, p) => s + Number(p.take_home_pay || p.net_salary || 0), 0).toLocaleString('id-ID')}</strong>
+            </p>
+          </div>
+          <div style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 8, padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: '0.875rem', color: '#9a3412' }}>
+            <AlertTriangle size={16} style={{ flexShrink: 0, marginTop: 1 }} />
+            <span>Tindakan ini tidak dapat dibatalkan. Semua payroll <strong>approved</strong> pada periode {periodFilter} akan berubah ke status <strong>paid</strong> secara permanen.</span>
+          </div>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+            <Button variant="outline" size="md" onClick={() => setBulkPayModal(false)} disabled={bulkPayLoading}>Batal</Button>
+            <Button variant="primary" size="md" onClick={() => void handleBulkPay()} disabled={bulkPayLoading}>
+              <Zap size={16} style={{ marginRight: 6 }} />
+              {bulkPayLoading ? 'Memproses...' : `Ya, Bayar Semua (${approvedInPeriod.length})`}
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );
