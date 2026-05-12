@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { api } from "@/shared/api/httpClient";
-import { getAllLocations } from "@/features/location/api/location.service";
+import { getAllLocations, getActiveLocations } from "@/features/location/api/location.service";
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader } from "@/shared/ui";
 import { Button } from "@/shared/ui/Button";
@@ -56,7 +56,8 @@ const EmployeesPage = () => {
 
   // Authentication & RBAC
   const user = useAuthStore((state) => state.user);
-  const canManageEmployees = RBACUtils.hasRole(user, ['super_admin', 'admin', 'hr']);
+  const canManageEmployees = RBACUtils.hasRole(user, ['super_admin', 'admin', 'hr', 'manager']);
+  const canViewAdminMetadata = RBACUtils.isAdmin(user) || RBACUtils.isSuperAdmin(user);
 
   // Lifecycle Modals State
   const [activeActionModal, setActiveActionModal] = useState<"onboarding_start" | "onboarding_complete" | "offboarding_start" | "offboarding_complete" | null>(null);
@@ -216,32 +217,58 @@ const EmployeesPage = () => {
   const loadMetadata = async () => {
     try {
       console.log("🔍 Fetching metadata...");
-      // Fetch Locations
-      const locs = await getAllLocations();
-      const locList = Array.isArray(locs.items) ? locs.items : [];
-      console.log("📍 Locations fetched:", locList);
+
+      // Fetch Locations - managers should use the active list only
+      let locList: Record<string, any>[] = [];
+      try {
+        if (canViewAdminMetadata) {
+          const locs = await getAllLocations();
+          locList = Array.isArray(locs.items) ? locs.items : [];
+          console.log("📍 Locations fetched (all):", locList);
+        } else {
+          const active = await getActiveLocations();
+          locList = Array.isArray(active.items) ? active.items : [];
+          console.log("📍 Locations fetched (active only):", locList);
+        }
+      } catch (err) {
+        console.warn("⚠️ Fetch locations failed:", err);
+      }
       setAllLocations(locList);
 
-      // Fetch Users (for Managers and direct user_id link)
-      const usersRes = await api.get('/admin/users');
-      let usersList = usersRes.data?.data?.items || usersRes.data?.data || [];
-      if (!Array.isArray(usersList)) usersList = [];
-      console.log("👤 Users fetched:", usersList);
-      // setAllUsers(usersList);
+      // Fetch Users - only admin/super admin can access the admin user listing
+      if (canViewAdminMetadata) {
+        try {
+          const usersRes = await api.get('/admin/users');
+          let usersList = usersRes.data?.data?.items || usersRes.data?.data || [];
+          if (!Array.isArray(usersList)) usersList = [];
+          console.log("👤 Users fetched:", usersList);
+          // setAllUsers(usersList);
+        } catch (err) {
+          console.warn("⚠️ Fetch users failed (likely permission):", err);
+        }
+      }
 
-      // Fetch Work Schedules
-      const schedRes = await api.get('/work-schedules');
-      let schedList = schedRes.data?.data || schedRes.data || [];
-      if (!Array.isArray(schedList)) schedList = [];
-      console.log("📅 Schedules fetched:", schedList);
-      // setAllSchedules(schedList);
+      // Fetch Work Schedules - tolerate permission issues
+      try {
+        const schedRes = await api.get('/work-schedules');
+        let schedList = schedRes.data?.data || schedRes.data || [];
+        if (!Array.isArray(schedList)) schedList = [];
+        console.log("📅 Schedules fetched:", schedList);
+        // setAllSchedules(schedList);
+      } catch (err) {
+        console.warn("⚠️ Fetch schedules failed (likely permission):", err);
+      }
 
-      // Fetch Departments
-      const deptRes = await api.get('/organization/master-data');
-      const deptList = deptRes.data?.data?.departments;
-      const finalDeptList = Array.isArray(deptList) ? deptList : [];
-      console.log("🏢 Departments fetched:", finalDeptList);
-      // setAllDepartments(finalDeptList);
+      // Fetch Departments - tolerate permission errors
+      try {
+        const deptRes = await api.get('/organization/master-data');
+        const deptList = deptRes.data?.data?.departments;
+        const finalDeptList = Array.isArray(deptList) ? deptList : [];
+        console.log("🏢 Departments fetched:", finalDeptList);
+        // setAllDepartments(finalDeptList);
+      } catch (err) {
+        console.warn("⚠️ Fetch departments failed (likely permission):", err);
+      }
     } catch (err) {
       console.error("❌ Failed to load metadata:", err);
     }

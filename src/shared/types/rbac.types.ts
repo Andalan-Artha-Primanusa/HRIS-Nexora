@@ -33,6 +33,10 @@ export type PermissionType =
   | 'profile.view_all'
   | 'profile.update'
   | 'profile.delete'
+  | 'payroll.view'
+  | 'payroll.create'
+  | 'payroll.update'
+  | 'payroll.delete'
   | 'user.view'
   | 'user.assign_role'
   | 'role.view'
@@ -59,6 +63,10 @@ export const PERMISSIONS = {
   PROFILE_VIEW_ALL: 'profile.view_all',
   PROFILE_UPDATE: 'profile.update',
   PROFILE_DELETE: 'profile.delete',
+  PAYROLL_VIEW: 'payroll.view',
+  PAYROLL_CREATE: 'payroll.create',
+  PAYROLL_UPDATE: 'payroll.update',
+  PAYROLL_DELETE: 'payroll.delete',
   USER_VIEW: 'user.view',
   USER_ASSIGN_ROLE: 'user.assign_role',
   ROLE_VIEW: 'role.view',
@@ -89,6 +97,7 @@ export const ROLE_PERMISSIONS: Record<RoleType, PermissionType[]> = {
   ],
   manager: [
     PERMISSIONS.USER_VIEW,
+    PERMISSIONS.PAYROLL_VIEW,
   ],
   employee: [],
 };

@@ -186,6 +186,7 @@ const OverviewPage: React.FC = () => {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const isAdmin = RBACUtils.isAdmin(user) || RBACUtils.isHR(user) || RBACUtils.isManager(user);
+  const canLoadDetailedDashboardData = RBACUtils.isAdmin(user) || RBACUtils.isHR(user);
 
   const [attendanceData, setAttendanceData] = useState<AttendanceTrendPoint[]>([]);
   const [departmentData, setDepartmentData] = useState<DepartmentPoint[]>([]);
@@ -243,26 +244,44 @@ const OverviewPage: React.FC = () => {
       return;
     }
 
+    if (!canLoadDetailedDashboardData) {
+      setLoading(false);
+      return;
+    }
+
     const loadDashboardData = async () => {
       setLoading(true);
       setError(null);
 
       try {
-        const [employeesRes, attendanceRes, leavesRes, reimbursementsRes, payrollRes, todayAttendanceRes] = await Promise.allSettled([
+        const canViewPayroll = RBACUtils.isAdmin(user) || RBACUtils.isHR(user) || RBACUtils.isManager(user);
+        const canViewLeaves = RBACUtils.hasPermission(user, 'leave.view');
+
+        const promises = [
           api.get('/employees'),
           api.get('/attendance/all'),
           api.get('/leaves/pending'),
           api.get('/reimbursements/pending'),
-          api.get('/payroll'),
           api.get('/attendance/today'),
-        ]);
+        ];
+
+        if (canViewPayroll) {
+          promises.push(api.get('/payroll'));
+        }
+
+        if (canViewLeaves) {
+          promises.push(api.get('/leaves'));
+        }
+
+        const [employeesRes, attendanceRes, leavesPendingRes, reimbursementsRes, todayAttendanceRes, payrollRes, allLeavesRes] = await Promise.allSettled(promises);
 
         const employees = employeesRes.status === 'fulfilled' ? extractArrayPayload(employeesRes.value.data) : [];
         const attendanceRecords = attendanceRes.status === 'fulfilled' ? extractArrayPayload(attendanceRes.value.data) : [];
-        const pendingLeaveRecords = leavesRes.status === 'fulfilled' ? extractArrayPayload(leavesRes.value.data) : [];
+        const pendingLeaveRecords = leavesPendingRes.status === 'fulfilled' ? extractArrayPayload(leavesPendingRes.value.data) : [];
         const pendingReimbursementRecords = reimbursementsRes.status === 'fulfilled' ? extractArrayPayload(reimbursementsRes.value.data) : [];
-        const payrollRecords = payrollRes.status === 'fulfilled' ? extractArrayPayload(payrollRes.value.data) : [];
+        const payrollRecords = payrollRes?.status === 'fulfilled' ? extractArrayPayload(payrollRes.value.data) : [];
         const todayAttendancePayload = todayAttendanceRes.status === 'fulfilled' ? extractPayload(todayAttendanceRes.value.data) : {};
+        const allLeaves = allLeavesRes?.status === 'fulfilled' ? extractArrayPayload(allLeavesRes.value.data) : [];
 
         setTotalEmployees(employees.length);
         setActiveEmployees(
@@ -314,8 +333,6 @@ const OverviewPage: React.FC = () => {
         setDepartmentData(Array.from(departmentMap, ([name, count]) => ({ name, count })));
 
         const leaveTypeMap = new Map<string, number>();
-        const allLeavesResponse = await api.get('/leaves');
-        const allLeaves = extractArrayPayload(allLeavesResponse.data);
         allLeaves.forEach((leave) => {
           const type = getStringValue(leave, ['type', 'leave_type', 'leaveType']) || 'Unknown';
           leaveTypeMap.set(type, (leaveTypeMap.get(type) || 0) + 1);

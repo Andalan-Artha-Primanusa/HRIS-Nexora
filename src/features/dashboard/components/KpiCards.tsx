@@ -5,11 +5,11 @@ import { api } from '@/shared/api/httpClient';
 import { useAuthStore } from '@/app/store/auth.store';
 import './KpiCards.css';
 
-const ADMIN_ROLES = ['super_admin', 'admin', 'hr', 'manager'];
+const DASHBOARD_METRIC_ROLES = ['super_admin', 'admin', 'hr', 'manager'];
 
 const hasAdminAccess = (user: ReturnType<typeof useAuthStore.getState>['user']) => {
   const roles = user?.roles ?? [];
-  return roles.some((r: any) => ADMIN_ROLES.includes(r.name));
+  return roles.some((r: any) => DASHBOARD_METRIC_ROLES.includes(r.name));
 };
 
 type KpiCardItem = {

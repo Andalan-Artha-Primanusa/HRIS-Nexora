@@ -20,12 +20,28 @@ const getStoredUser = (): AuthUser | null => {
     
     // Ensure roles is an array
     const roles = parsed.roles ?? [];
+
+    const fallbackRoleName =
+      typeof (parsed as any).role_name === "string"
+        ? (parsed as any).role_name.trim().toLowerCase()
+        : typeof (parsed as any).role === "string"
+          ? (parsed as any).role.trim().toLowerCase()
+          : typeof (parsed as any).position === "string"
+            ? (parsed as any).position.trim().toLowerCase()
+            : null;
+
+    const normalizedRoles =
+      roles.length > 0
+        ? roles
+        : fallbackRoleName
+          ? [{ id: 0, name: fallbackRoleName, display_name: fallbackRoleName } as any]
+          : [];
     
     // If permissions are missing or empty, extract from roles
     let permissions = parsed.permissions ?? [];
-    if (permissions.length === 0 && roles.length > 0) {
+    if (permissions.length === 0 && normalizedRoles.length > 0) {
       const permMap = new Map<string, any>();
-      for (const role of roles) {
+      for (const role of normalizedRoles) {
         if (Array.isArray(role.permissions)) {
           for (const perm of role.permissions) {
             if (perm.name && !permMap.has(perm.name)) {
@@ -39,7 +55,7 @@ const getStoredUser = (): AuthUser | null => {
     
     return {
       ...parsed,
-      roles,
+      roles: normalizedRoles,
       permissions,
     };
   } catch {

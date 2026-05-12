@@ -47,7 +47,7 @@ const getRoleSpecificPath = (roleName: string) => {
   }
 
   if (roleName.includes("hr") || roleName.includes("human resource")) {
-    return "/hr-summary";
+    return "/dashboard";
   }
 
   if (
@@ -56,7 +56,7 @@ const getRoleSpecificPath = (roleName: string) => {
     roleName.includes("head") ||
     roleName.includes("director")
   ) {
-    return "/analytics";
+    return "/dashboard";
   }
 
   if (

@@ -45,6 +45,3 @@ export { default as PayrollStatusBadge } from "@/shared/ui/PayrollStatusBadge";
 // Hooks
 export { useDataState, useAsync } from "./hooks/usePayrollState";
 export type { DataState, StateConfig } from "./hooks/usePayrollState";
-
-// Mock data
-export { MOCK_PAYROLL, USE_MOCK_PAYROLL_DATA } from "./api/payroll.mock";

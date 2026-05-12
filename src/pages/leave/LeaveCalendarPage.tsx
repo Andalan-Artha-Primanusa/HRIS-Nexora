@@ -3,8 +3,7 @@ import { Card, CardHeader } from "@/shared/ui";
 import { Alert } from "@/shared/ui/Alert";
 import { getLeaveCalendar } from "@/features/leave/api/leave.service";
 
-import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { BarChart3, ChevronLeft, ChevronRight, CircleCheckBig, CircleX, Clock3, Calendar, RefreshCw } from "lucide-react";
+import { ChevronLeft, ChevronRight, CircleCheckBig, CircleX, Clock3, Calendar, RefreshCw } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "./LeaveShared.css";
@@ -30,28 +29,8 @@ const LeaveCalendarPage = () => {
     const approved = events.filter(e => e.status === 'approved').length;
     const rejected = events.filter(e => e.status === 'rejected').length;
     const pending = events.filter(e => e.status === 'pending').length;
-    
-    // Leave type breakdown
-    const leaveTypes = events.reduce((acc, e) => {
-      const type = e.title.split(' - ')[0];
-      const existing = acc.find(t => t.name === type);
-      if (existing) existing.value++;
-      else acc.push({ name: type, value: 1 });
-      return acc;
-    }, [] as { name: string; value: number }[]);
 
-    // Status breakdown by type
-    const statusByType = [...new Set(events.map(e => e.title.split(' - ')[0]))].map(type => {
-      const typeEvents = events.filter(e => e.title.startsWith(type));
-      return {
-        type,
-        approved: typeEvents.filter(e => e.status === 'approved').length,
-        rejected: typeEvents.filter(e => e.status === 'rejected').length,
-        pending: typeEvents.filter(e => e.status === 'pending').length,
-      };
-    });
-
-    return { approved, rejected, pending, total: events.length, leaveTypes, statusByType };
+    return { approved, rejected, pending, total: events.length };
   }, [events]);
 
   const loadCalendar = async () => {
@@ -119,8 +98,6 @@ const LeaveCalendarPage = () => {
 
   const monthName = currentDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
 
-  const chartColors = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
-
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _leaveSummaryCards = [
     {
@@ -129,7 +106,7 @@ const LeaveCalendarPage = () => {
       value: String(stats.total),
       change: 'Ringkasan keseluruhan',
       tone: 'blue' as const,
-      icon: BarChart3,
+      icon: Calendar,
     },
     {
       label: 'Pending',
@@ -197,7 +174,7 @@ const LeaveCalendarPage = () => {
               <p className="leave-summary-subtitle">Semua data cuti</p>
             </div>
             <div className="leave-summary-icon-wrapper leave-icon-blue">
-              <BarChart3 size={28} />
+              <Calendar size={28} />
             </div>
           </div>
           <div className="leave-summary-value leave-value-blue">{stats.total}</div>
@@ -336,84 +313,6 @@ const LeaveCalendarPage = () => {
             </div>
           </div>
         </Card>
-
-        {/* Charts Section */}
-        <div className="calendar-charts-grid">
-          {/* Leave Types Pie Chart */}
-          <Card className="chart-card" glass>
-            <h3 className="chart-title">Distribusi Jenis Cuti</h3>
-            <ResponsiveContainer width="100%" height={280}>
-              <PieChart>
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#fff', 
-                    border: '1px solid #dbeafe',
-                    borderRadius: '8px'
-                  }}
-                />
-                <Legend />
-                <Pie
-                  data={stats.leaveTypes}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  fill="#2563eb"
-                  dataKey="value"
-                  label={({ name, value }) => `${name}: ${value}`}
-                >
-                  {stats.leaveTypes.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
-                  ))}
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
-          </Card>
-
-          {/* Status Overview Bar Chart */}
-          <Card className="chart-card" glass>
-            <h3 className="chart-title">Ringkasan Status</h3>
-            <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={[{ name: 'Requests', approved: stats.approved, pending: stats.pending, rejected: stats.rejected }]}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(37, 99, 235, 0.1)" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#fff', 
-                    border: '1px solid #dbeafe',
-                    borderRadius: '8px'
-                  }}
-                />
-                <Bar dataKey="approved" fill="#10b981" />
-                <Bar dataKey="pending" fill="#f59e0b" />
-                <Bar dataKey="rejected" fill="#ef4444" />
-              </BarChart>
-            </ResponsiveContainer>
-          </Card>
-
-          {/* Status by Type */}
-          <Card className="chart-card full-width" glass>
-            <h3 className="chart-title">Detail Status per Jenis Cuti</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={stats.statusByType}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(37, 99, 235, 0.1)" />
-                <XAxis dataKey="type" style={{ fontSize: '12px' }} />
-                <YAxis />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#fff', 
-                    border: '1px solid #dbeafe',
-                    borderRadius: '8px'
-                  }}
-                />
-                <Legend />
-                <Bar dataKey="approved" stackId="a" fill="#10b981" />
-                <Bar dataKey="pending" stackId="a" fill="#f59e0b" />
-                <Bar dataKey="rejected" stackId="a" fill="#ef4444" />
-              </BarChart>
-            </ResponsiveContainer>
-          </Card>
-        </div>
       </div>
 
     </div>

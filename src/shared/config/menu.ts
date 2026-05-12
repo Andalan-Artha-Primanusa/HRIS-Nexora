@@ -1,288 +1,201 @@
 import { 
-  Users, CalendarDays, CreditCard, Receipt, Target, UserCircle, 
+  Users, CalendarDays, Receipt, Target, UserCircle, 
   FileBarChart, LayoutDashboard, Briefcase, 
   FileText, Clock, Banknote, ShieldCheck, Database, CheckCircle, ArrowUpRight
 } from 'lucide-react';
 
 import type { LucideIcon } from 'lucide-react';
-import type { AuthUser } from '@/shared/types/rbac.types';
-import { RBACUtils } from '@/shared/hooks/rbac';
 
-// 🔥 TYPE FINAL (NO any, NO active)
 export type MenuItem = {
   label: string;
   icon?: LucideIcon;
   path?: string;
+  menuKey?: string;
   subItems?: MenuItem[];
-  requiredChecker?: (user: AuthUser | null) => boolean;
 };
 
-// 🔥 MENU FINAL (rapi + scalable)
 export const menuItems: MenuItem[] = [
 {
   label: 'Dashboard',
   icon: LayoutDashboard,
   path: '/dashboard',
-  requiredChecker: (user) =>
-    RBACUtils.isAdmin(user) || RBACUtils.isHR(user) || RBACUtils.isManager(user),
+  menuKey: 'dashboard',
 },
 {
   label: 'Dashboard Saya',
   icon: UserCircle,
   path: '/employee-dashboard',
-  requiredChecker: (user) =>
-    RBACUtils.hasRole(user, 'employee'),
+  menuKey: 'employee-dashboard',
 },
   {
   label: 'Manajemen Karyawan',
   icon: Users,
   path: '/employees',
-    requiredChecker: (user) =>
-    RBACUtils.isHR(user) || RBACUtils.isAdmin(user) || RBACUtils.isManager(user),
+  menuKey: 'employees',
   },
-  // {
-  //   label: 'Manajemen Karyawan',
-  //   icon: Users,
-  //   requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
-  //   subItems: [
-  //     { label: 'Daftar Karyawan', path: '/employees' },
-  //     { 
-  //       label: 'Organisasi', 
-  //       icon: Network,
-  //       subItems: [
-  //         { label: 'Direktori', path: '/organization/directory' },
-  //         { label: 'Ringkasan', path: '/organization/summary' },
-  //         { label: 'Struktur Organisasi', path: '/organization/chart' },
-  //         { label: 'Tim', path: '/organization/team' },
-  //         { label: 'Master Data', path: '/organization/master-data' },
-  //       ]
-  //     },
-
-  //     {
-  //       label: 'Dokumen',
-  //       icon: FileText,
-  //       subItems: [
-  //         { label: 'Antrian Review', path: '/documents/review' },
-  //         { label: 'Dokumen Kedaluwarsa', path: '/documents/expiring' },
-  //       ]
-  //     }
-  //   ]
-  // },
   {
     label: 'Absensi & Waktu',
     icon: Clock,
-    requiredChecker: (user) =>
-      RBACUtils.isSuperAdmin(user) ||
-      RBACUtils.isAdmin(user) ||
-      RBACUtils.isHR(user) ||
-      RBACUtils.isManager(user),
+    menuKey: 'absensi-waktu',
     subItems: [
-      { label: 'Lembur', path: '/attendance/overtime' },
-      { label: 'Laporan', path: '/attendance/reports' },
+      { label: 'Lembur', path: '/attendance/overtime', menuKey: 'absensi-waktu.overtime' },
+      { label: 'Laporan', path: '/attendance/reports', menuKey: 'absensi-waktu.reports' },
     ]
   },
   {
     label: 'Manajemen Cuti',
     icon: CalendarDays,
+    menuKey: 'manajemen-cuti',
     subItems: [
-      { label: 'Permohonan Cuti', path: '/leave/requests' },
-      { label: 'Kalender Cuti', path: '/leave/calendar' },
-      { label: 'Saldo Cuti', path: '/leave/balance' },
+      { label: 'Permohonan Cuti', path: '/leave/requests', menuKey: 'manajemen-cuti.permohonan' },
+      { label: 'Kalender Cuti', path: '/leave/calendar', menuKey: 'manajemen-cuti.kalender' },
+      { label: 'Saldo Cuti', path: '/leave/balance', menuKey: 'manajemen-cuti.saldo' },
     ]
   },
   {
     label: 'Penggajian & Slip Gaji',
     icon: Banknote,
-    requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
+    menuKey: 'penggajian',
     subItems: [
-      { label: 'Ringkasan', path: '/payroll' },
-      { label: 'Daftar Payroll', path: '/payroll/list' },
-      { label: 'Proses Payroll', path: '/payroll/process' },
-      { label: 'Komponen Gaji', path: '/payroll/component' },
-      { label: 'Laporan & Pajak', path: '/payroll/reports' },
+      { label: 'Ringkasan', path: '/payroll', menuKey: 'penggajian.ringkasan' },
+      { label: 'Daftar Payroll', path: '/payroll/list', menuKey: 'penggajian.daftar' },
+      { label: 'Proses Payroll', path: '/payroll/process', menuKey: 'penggajian.proses' },
+      { label: 'Komponen Gaji', path: '/payroll/component', menuKey: 'penggajian.komponen' },
+      { label: 'Laporan & Pajak', path: '/payroll/reports', menuKey: 'penggajian.laporan' },
     ]
   },
-  // {
-  //   label: 'Rekrutmen (ATS)',
-  //   icon: Briefcase,
-  //   requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
-  //   subItems: [
-  //     { label: 'Lowongan Pekerjaan', path: '/recruitment/openings' },
-  //     { label: 'Pipeline Kandidat', path: '/recruitment/candidates' },
-  //     { label: 'Talent Pool', path: '/recruitment/talent-pool' },
-  //   ]
-  // },
   {
     label: 'Aset & Inventaris',
     icon: Briefcase,
     path: '/assets',
-    requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user) || RBACUtils.isManager(user),
+    menuKey: 'assets',
   },
   {
     label: 'Task Management',
     icon: CheckCircle,
     path: '/tasks',
-    requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
+    menuKey: 'tasks',
   },
   {
     label: 'Legal & Dokumen',
     icon: FileText,
-    requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user) || RBACUtils.isManager(user),
+    menuKey: 'legal-dokumen',
     subItems: [
-      { label: 'Surat Tugas', path: '/admin/assignment-letters' },
-      { label: 'Generator Surat', path: '/legal/letters' },
-      { label: 'Kalkulator Pesangon', path: '/legal/severance' },
-      { label: 'PPh21 Progresif', path: '/legal/tax' },
+      { label: 'Surat Tugas', path: '/admin/assignment-letters', menuKey: 'legal-dokumen.surat-tugas' },
+      { label: 'Generator Surat', path: '/legal/letters', menuKey: 'legal-dokumen.generator' },
+      { label: 'Kalkulator Pesangon', path: '/legal/severance', menuKey: 'legal-dokumen.kalkulator' },
+      { label: 'PPh21 Progresif', path: '/legal/tax', menuKey: 'legal-dokumen.pph21' },
     ]
   },
   {
     label: 'Manajemen Reimburse',
     icon: Receipt,
     path: '/reimbursements',
-    requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user) || RBACUtils.isManager(user),
+    menuKey: 'reimbursements',
   },
   {
     label: 'Pelatihan & Kompetensi',
     icon: Target,
-    requiredChecker: (user) =>
-      RBACUtils.isManager(user) ||
-      RBACUtils.isHR(user) ||
-      RBACUtils.isAdmin(user) ||
-      RBACUtils.isSuperAdmin(user),
+    menuKey: 'pelatihan-kompetensi',
     subItems: [
-      { label: 'Pelatihan & Pendaftaran', path: '/training/programs' },
-      { label: 'Kompetensi', path: '/competencies' },
+      { label: 'Pelatihan & Pendaftaran', path: '/training/programs', menuKey: 'pelatihan-kompetensi.pelatihan' },
+      { label: 'Kompetensi', path: '/competencies', menuKey: 'pelatihan-kompetensi.kompetensi' },
     ]
   },
   {
     label: 'Karir & Promosi',
     icon: ArrowUpRight,
     path: '/promotions',
-    requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user) || RBACUtils.isManager(user),
+    menuKey: 'karir-promosi',
   },
-  // {
-  //   label: 'Permintaan Layanan HR',
-  //   icon: FileText,
-  //   subItems: [
-  //     { label: 'Antrian Permintaan', path: '/hr-requests' },
-  //     { label: 'Laporan SLA', path: '/hr-requests/sla' },
-  //   ]
-  // },
   {
   label: 'KPI & Kinerja',
   icon: Target,
   path: '/kpis',
-  requiredChecker: (user) =>
-    RBACUtils.isManager(user) ||
-    RBACUtils.isHR(user) ||
-    RBACUtils.isAdmin(user) ||
-    RBACUtils.isSuperAdmin(user),
+  menuKey: 'kpi-kinerja',
 },
-  // {
-  //   label: 'Engagement & Survei',
-  //   icon: Users,
-  //   requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
-  //   subItems: [
-  //     { label: 'Survei Kepuasan', path: '/engagement/surveys' },
-  //     { label: 'Analitik Engagement', path: '/engagement/analytics' },
-  //   ]
-  // },
   {
   label: 'Employee Self Service (ESS)',
   icon: UserCircle,
-  requiredChecker: (user) => !!user,
+  menuKey: 'ess',
     subItems: [
       {
         label: 'Kinerja',
         subItems: [
-          { label: 'KPI Saya', path: '/my/kpi' },
-          { label: 'Kompetensi Saya', path: '/my/competencies' },
+          { label: 'KPI Saya', path: '/my/kpi', menuKey: 'ess.kinerja.kpi' },
+          { label: 'Kompetensi Saya', path: '/my/competencies', menuKey: 'ess.kinerja.kompetensi' },
         ]
       },
       {
         label: 'Keuangan',
         subItems: [
-          { label: 'Payroll Saya', path: '/my/payroll' },
-          { label: 'Reimburse Saya', path: '/my/reimbursements' },
+          { label: 'Payroll Saya', path: '/my/payroll', menuKey: 'ess.keuangan.payroll' },
+          { label: 'Reimburse Saya', path: '/my/reimbursements', menuKey: 'ess.keuangan.reimburse' },
         ]
       },
       {
         label: 'Absensi',
         subItems: [
-          { label: 'Absen Masuk', path: '/attendance/check-in' },
-          { label: 'Absen Pulang', path: '/attendance/check-out' },
-          { label: 'Riwayat Absensi', path: '/attendance/history' },
+          { label: 'Absen Masuk', path: '/attendance/check-in', menuKey: 'ess.absensi.check-in' },
+          { label: 'Absen Pulang', path: '/attendance/check-out', menuKey: 'ess.absensi.check-out' },
+          { label: 'Riwayat Absensi', path: '/attendance/history', menuKey: 'ess.absensi.riwayat' },
         ]
       },
       {
         label: 'Pengembangan',
         subItems: [
-          { label: 'Pelatihan Saya', path: '/my/trainings' },
-          { label: 'Lembur Saya', path: '/attendance/overtime' },
-          { label: 'Promosi Saya', path: '/my/promotions' },
+          { label: 'Pelatihan Saya', path: '/my/trainings', menuKey: 'ess.pengembangan.pelatihan' },
+          { label: 'Lembur Saya', path: '/attendance/overtime', menuKey: 'ess.pengembangan.lembur' },
+          { label: 'Promosi Saya', path: '/my/promotions', menuKey: 'ess.pengembangan.promosi' },
         ]
       },
       {
         label: 'Dokumen & Aset',
         subItems: [
-          { label: 'Dokumen Saya', path: '/my/documents' },
-          { label: 'Aset Saya', path: '/my/assets' },
-          { label: 'Surat Tugas', path: '/my/assignment-letters' },
-          { label: 'Tugas Saya', path: '/my/tasks' },
+          { label: 'Dokumen Saya', path: '/my/documents', menuKey: 'ess.dokumen-aset.dokumen' },
+          { label: 'Aset Saya', path: '/my/assets', menuKey: 'ess.dokumen-aset.aset' },
+          { label: 'Surat Tugas', path: '/my/assignment-letters', menuKey: 'ess.dokumen-aset.surat-tugas' },
+          { label: 'Tugas Saya', path: '/my/tasks', menuKey: 'ess.dokumen-aset.tugas' },
         ]
       },
-  //   },
-  //   {
-  //     label: 'Lainnya',
-  //     subItems: [
-  //       { label: 'Permintaan Saya', path: '/my/requests' },
-  //     ]
-  //   }
-    // ]
     ]
   },
   {
     label: 'Laporan & Analitik',
     icon: FileBarChart,
     path: '/reports/dashboard-summary',
-    requiredChecker: (user) => RBACUtils.isManager(user) || RBACUtils.isHR(user) || RBACUtils.isAdmin(user),
+    menuKey: 'laporan-analitik',
   },
   {
     label: 'Kepatuhan & Kebijakan',
     icon: ShieldCheck,
-    requiredChecker: (user) => RBACUtils.isHR(user) || RBACUtils.isAdmin(user) || RBACUtils.isManager(user),
+    menuKey: 'kepatuhan-kebijakan',
     subItems: [
-      { label: 'Dashboard Kepatuhan', path: '/compliance/overview' },
-      { label: 'Kalender Libur', path: '/workforce/holidays' },
-      { label: 'Tukar Shift', path: '/workforce/shift-swaps' },
-      { label: 'Aturan Lembur', path: '/workforce/overtime-rules' },
+      { label: 'Dashboard Kepatuhan', path: '/compliance/overview', menuKey: 'kepatuhan-kebijakan.dashboard' },
+      { label: 'Kalender Libur', path: '/workforce/holidays', menuKey: 'kepatuhan-kebijakan.kalender' },
+      { label: 'Tukar Shift', path: '/workforce/shift-swaps', menuKey: 'kepatuhan-kebijakan.tukar-shift' },
+      { label: 'Aturan Lembur', path: '/workforce/overtime-rules', menuKey: 'kepatuhan-kebijakan.aturan-lembur' },
     ]
   },
   {
     label: 'Master Data',
     icon: Database,
-    requiredChecker: (user) => RBACUtils.isAdmin(user) || RBACUtils.isManager(user) || RBACUtils.isHR(user),
+    menuKey: 'master-data',
     subItems: [
-      { label: 'Departemen & Posisi', path: '/organization/master-data' },
-      { label: 'Jenis Cuti', path: '/leave/type' },
-      { label: 'Kebijakan Cuti', path: '/leave/policy' },
+      { label: 'Departemen & Posisi', path: '/organization/master-data', menuKey: 'master-data.departemen' },
+      { label: 'Jenis Cuti', path: '/leave/type', menuKey: 'master-data.jenis-cuti' },
+      { label: 'Kebijakan Cuti', path: '/leave/policy', menuKey: 'master-data.kebijakan-cuti' },
       {
         label: 'Pusat Impor (Master Data)',
         path: '/admin/import',
-        requiredChecker: (user) => RBACUtils.isAdmin(user) || RBACUtils.isSuperAdmin(user),
+        menuKey: 'master-data.pusat-impor',
       },
-
     ]
   },
  {
   label: 'Alat Admin',
   icon: ShieldCheck,
-  requiredChecker: (user) =>
-    RBACUtils.isAdmin(user) ||
-    RBACUtils.canViewUsers(user) ||
-    RBACUtils.canViewRoles(user) ||
-    RBACUtils.canViewPermissions(user),
-
+  menuKey: 'alat-admin',
   subItems: [
     {
       label: 'Master',
@@ -290,103 +203,92 @@ export const menuItems: MenuItem[] = [
         {
           label: 'Lokasi',
           path: '/locations',
-          requiredChecker: (user) =>
-            RBACUtils.isSuperAdmin(user) ||
-            RBACUtils.hasPermission(user, 'location.view' as any),
+          menuKey: 'alat-admin.master.lokasi',
         },
         {
           label: 'Jadwal Kerja',
           path: '/work-schedules',
-          requiredChecker: (user) =>
-            RBACUtils.isSuperAdmin(user) || RBACUtils.isHR(user),
+          menuKey: 'alat-admin.master.jadwal-kerja',
         },
       ],
     },
-
     {
       label: 'Manajemen Akses',
       subItems: [
         {
           label: 'Pengguna',
           path: '/admin/users',
-          requiredChecker: (user) =>
-            RBACUtils.isSuperAdmin(user) || RBACUtils.canViewUsers(user),
+          menuKey: 'alat-admin.manajemen-akses.pengguna',
         },
         {
           label: 'Peran',
           path: '/admin/roles',
-          requiredChecker: (user) =>
-            RBACUtils.isSuperAdmin(user) || RBACUtils.canViewRoles(user),
+          menuKey: 'alat-admin.manajemen-akses.peran',
         },
         {
           label: 'Izin',
           path: '/admin/permissions',
-          requiredChecker: (user) =>
-            RBACUtils.isSuperAdmin(user) || RBACUtils.canViewPermissions(user),
+          menuKey: 'alat-admin.manajemen-akses.izin',
+        },
+        {
+          label: 'Akses Menu',
+          path: '/admin/menu-permissions',
+          menuKey: 'alat-admin.manajemen-akses.menu',
         },
       ],
     },
-
     {
       label: 'Notifikasi',
       subItems: [
         {
           label: 'Notifikasi Admin',
           path: '/admin/notifications',
-          requiredChecker: (user) =>
-            RBACUtils.isAdmin(user) || RBACUtils.isSuperAdmin(user),
+          menuKey: 'alat-admin.notifikasi.admin',
         },
         {
           label: 'Kirim Notifikasi Email',
           path: '/admin/notifications/email-send',
-          requiredChecker: (user) =>
-            RBACUtils.isAdmin(user) || RBACUtils.isSuperAdmin(user),
+          menuKey: 'alat-admin.notifikasi.kirim-email',
         },
         {
           label: 'Log & Template Email',
           path: '/admin/notifications/email-logs',
-          requiredChecker: (user) =>
-            RBACUtils.isAdmin(user) || RBACUtils.isSuperAdmin(user),
+          menuKey: 'alat-admin.notifikasi.log-email',
         },
       ],
     },
-
     {
       label: 'Sistem',
       subItems: [
         {
           label: 'Log Audit',
           path: '/admin/audit-logs',
-          requiredChecker: (user) =>
-            RBACUtils.isSuperAdmin(user),
+          menuKey: 'alat-admin.sistem.log-audit',
         },
         {
           label: 'Perangkat Biometrik',
           path: '/admin/biometric-devices',
-          requiredChecker: (user) =>
-            RBACUtils.isSuperAdmin(user),
+          menuKey: 'alat-admin.sistem.biometrik',
         },
         {
           label: 'Alur Persetujuan',
           path: '/approval-flows',
-          requiredChecker: (user) =>
-            RBACUtils.isSuperAdmin(user),
+          menuKey: 'alat-admin.sistem.alur-persetujuan',
         },
       ],
     },
-
     {
       label: 'Pengaturan',
       subItems: [
         {
           label: 'Pengaturan Perusahaan',
           path: '/settings/company',
-          requiredChecker: (user) => RBACUtils.isAdmin(user),
+          menuKey: 'alat-admin.pengaturan.perusahaan',
         },
         {
           label: 'Pengaturan Notifikasi',
           path: '/settings/notifications',
-          requiredChecker: (user) => RBACUtils.isAdmin(user),
+          menuKey: 'alat-admin.pengaturan.notifikasi',
         },
       ],
     },

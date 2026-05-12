@@ -12,6 +12,23 @@ export const useRefreshUser = () => {
   const normalizeRoles = (roles: any[] | undefined) =>
     (roles || []).map((r: any) => (typeof r === "string" ? { name: r } : r));
 
+  const normalizeSingleRole = (role: any) => {
+    if (!role) return null;
+
+    if (typeof role === "string") {
+      return { name: role.trim().toLowerCase() };
+    }
+
+    if (typeof role === "object") {
+      const roleName = role.name || role.slug || role.role_name;
+      if (typeof roleName === "string" && roleName.trim().length > 0) {
+        return { ...role, name: roleName.trim().toLowerCase() };
+      }
+    }
+
+    return null;
+  };
+
   const refreshUserData = async () => {
     try {
       // Try multiple endpoints for getting user data
@@ -39,6 +56,13 @@ export const useRefreshUser = () => {
         const incomingRoles = Array.isArray((userData as any).roles)
           ? normalizeRoles((userData as any).roles)
           : [];
+        const fallbackRole =
+          normalizeSingleRole((userData as any).role) ||
+          normalizeSingleRole((userData as any).role_name) ||
+          normalizeSingleRole((userData as any).position);
+        if (incomingRoles.length === 0 && fallbackRole) {
+          incomingRoles.push(fallbackRole);
+        }
         const incomingPermissions = Array.isArray((userData as any).permissions)
           ? (userData as any).permissions
           : [];

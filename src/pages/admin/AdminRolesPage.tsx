@@ -293,7 +293,7 @@ const AdminRolesPage = () => {
                   <thead>
                     <tr>
                       <th style={{ width: "400px" }}>Nama Role</th>
-                      <th>Display Name</th>
+                      <th>Deskripsi</th>
                       <th>Permissions</th>
                       <th className="th-center" style={{ width: "120px" }}>
                         Aksi
@@ -314,7 +314,7 @@ const AdminRolesPage = () => {
                             </div>
                           </div>
                         </td>
-                        <td style={{ color: "#475569", fontWeight: 500 }}>{role.display_name || "-"}</td>
+                        <td style={{ color: "#475569", fontWeight: 500, maxWidth: 300, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{role.description || "-"}</td>
                         <td>
                           <span className={`badge-soft ${role.permissions_count ? "badge-soft--green" : "badge-soft--orange"}`}>
                             {role.permissions_count || 0} permissions

@@ -6,8 +6,8 @@ import './Sidebar.css';
 
 import { menuItems } from '@/shared/config/menu';
 import type { MenuItem } from '@/shared/config/menu';
-import { filterMenuItems } from '@/shared/config/menuFilter';
 import { useAuthStore } from '@/app/store/auth.store';
+import { filterMenuItems, fetchAllowedMenuKeys } from '@/shared/config/menuFilter';
 
 interface SidebarProps {
   collapsed: boolean;
@@ -132,7 +132,13 @@ const MenuItemComponent: React.FC<{
 
 export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
   const user = useAuthStore((state) => state.user);
-  const filteredItems = filterMenuItems(user, menuItems);
+  const [allowedKeys, setAllowedKeys] = React.useState<string[] | undefined>();
+
+  React.useEffect(() => {
+    fetchAllowedMenuKeys().then(setAllowedKeys);
+  }, []);
+
+  const filteredItems = filterMenuItems(user, menuItems, allowedKeys);
 
   // Debug logging
   if (user) {

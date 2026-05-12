@@ -41,6 +41,7 @@ const EditLocationPage = lazy(() => import("../../pages/locations/EditLocationPa
 const AdminUsersPage = lazy(() => import("../../pages/admin/AdminUsersPage"));
 const AdminRolesPage = lazy(() => import("../../pages/admin/AdminRolesPage"));
 const AdminPermissionsPage = lazy(() => import("../../pages/admin/AdminPermissionsPage"));
+const MenuPermissionsPage = lazy(() => import("../../pages/admin/MenuPermissionsPage"));
 const AdminUserAssignRolesPage = lazy(() => import("../../pages/admin/AdminUserAssignRolesPage"));
 const AdminRoleAssignPermissionsPage = lazy(() => import("../../pages/admin/AdminRoleAssignPermissionsPage"));
 const AdminNotificationsPage = lazy(() => import("../../pages/admin/AdminNotificationsPage"));
@@ -667,6 +668,7 @@ export const router = createBrowserRouter([
           { path: "roles/edit/:id", element: <AdminRoleFormPage /> },
           { path: "roles/assign-permissions", element: <AdminRoleAssignPermissionsPage /> },
           { path: "permissions", element: <AdminPermissionsPage /> },
+          { path: "menu-permissions", element: <MenuPermissionsPage /> },
           { path: "notifications", element: <AdminNotificationsPage /> },
           { path: "notifications/email-send", element: <AdminEmailSendPage /> },
           { path: "notifications/email-logs", element: <AdminEmailNotificationsPage /> },

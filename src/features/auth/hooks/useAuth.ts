@@ -26,6 +26,38 @@ const getFirstExistingValue = (source: UnknownRecord, keys: string[]) => {
   return null;
 };
 
+const normalizeRoleValue = (value: unknown) => {
+  if (typeof value === "string" && value.trim().length > 0) {
+    return { id: 0, name: value.trim().toLowerCase(), display_name: value.trim() };
+  }
+
+  if (value && typeof value === "object") {
+    const role = value as any;
+    const roleName = role.name || role.slug || role.role_name;
+
+    if (typeof roleName === "string" && roleName.trim().length > 0) {
+      return {
+        id: role.id || 0,
+        name: roleName.trim().toLowerCase(),
+        display_name: role.display_name || roleName,
+        description: role.description,
+        permissions: Array.isArray(role.permissions)
+          ? role.permissions.map((p: any) => ({
+              id: p.id,
+              name: p.name,
+              display_name: p.display_name || p.name,
+              description: p.description,
+            }))
+          : [],
+        created_at: role.created_at,
+        updated_at: role.updated_at,
+      };
+    }
+  }
+
+  return null;
+};
+
 /**
  * Normalisasi data user dan token dari response API
  */
@@ -43,32 +75,27 @@ const extractAuthFromResponse = (data: unknown) => {
   if (user && typeof user === "object") {
     const userObj = user as any;
     const normalizedRoles: any[] = [];
-    
+
     if (Array.isArray(userObj.roles)) {
       for (const role of userObj.roles) {
-        if (typeof role === "string") {
-          normalizedRoles.push({ id: 0, name: role });
-        } else if (typeof role === "object" && role) {
-          const cleanedRole = {
-            id: role.id || 0,
-            name: role.name || "",
-            display_name: role.display_name || "",
-            description: role.description,
-            permissions: Array.isArray(role.permissions)
-              ? role.permissions.map((p: any) => ({
-                  id: p.id,
-                  name: p.name,
-                  display_name: p.display_name || p.name,
-                  description: p.description,
-                }))
-              : [],
-            created_at: role.created_at,
-            updated_at: role.updated_at,
-          };
-          normalizedRoles.push(cleanedRole);
+        const normalizedRole = normalizeRoleValue(role);
+        if (normalizedRole) {
+          normalizedRoles.push(normalizedRole);
         }
       }
     }
+
+    if (normalizedRoles.length === 0) {
+      const fallbackRole =
+        normalizeRoleValue(userObj.role) ||
+        normalizeRoleValue(userObj.role_name) ||
+        normalizeRoleValue(userObj.position);
+
+      if (fallbackRole) {
+        normalizedRoles.push(fallbackRole);
+      }
+    }
+
     userObj.roles = normalizedRoles;
 
     const allPermissions = new Map<string, any>();

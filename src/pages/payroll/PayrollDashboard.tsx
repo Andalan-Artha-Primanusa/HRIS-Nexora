@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
+  LineChart,
+  Line,
   BarChart,
   Bar,
   PieChart,
@@ -14,17 +16,11 @@ import {
 } from "recharts";
 import { Card } from "@/shared/ui/Card";
 import { payrollService, toSafeArray } from "@/features/payroll/api/payroll.service";
-import { getAllEmployees } from "@/features/employee/api/employee.service";
 import type { PayrollItem } from "@/features/payroll/types/payroll.types";
-import type { EmployeeItem } from "@/features/employee/types/employee.types";
 import {
   CheckCircle2,
-  BarChart3,
   Clock3,
-  CreditCard,
   FileText,
-  LayoutDashboard,
-  PencilLine,
   ReceiptText,
   TrendingUp,
   RefreshCw,
@@ -33,10 +29,10 @@ import {
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "./PayrollListPage.css";
+import "./PayrollDashboard.css";
 
 const PayrollDashboard: React.FC = () => {
   const [payrollItems, setPayrollItems] = useState<PayrollItem[]>([]);
-  const [employees, setEmployees] = useState<EmployeeItem[]>([]);
   const [loading, _setLoading] = useState(true);
 
   // Chart Data States
@@ -56,40 +52,17 @@ const PayrollDashboard: React.FC = () => {
   const [totalPending, setTotalPending] = useState(0);
   const [averagePayroll, setAveragePayroll] = useState(0);
 
-  const chartColors = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
-
-  // Helper function to get employee name safely
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _getEmployeeName = (emp: any): string => {
-    if (emp?.user?.name && typeof emp.user.name === "string") {
-      return emp.user.name;
-    }
-    if (emp?.name && typeof emp.name === "string") {
-      return emp.name;
-    }
-    if (emp?.fullName && typeof emp.fullName === "string") {
-      return emp.fullName;
-    }
-    if (emp?.full_name && typeof emp.full_name === "string") {
-      return emp.full_name;
-    }
-    return "";
-  };
+  const statusColors = ["#2563eb", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
 
   // Load payroll data
   const loadPayrollData = async () => {
     console.log(true);
 
     try {
-      const [payrollData, employeeData] = await Promise.all([
-        payrollService.getPayrollList(),
-        getAllEmployees(),
-      ]);
+      const payrollData = await payrollService.getPayrollList();
 
       const items = toSafeArray(payrollData);
-      const emps = Array.isArray(employeeData) ? employeeData : toSafeArray(employeeData);
       setPayrollItems(items);
-      setEmployees(emps);
 
       // Calculate KPIs
       if (items.length > 0) {
@@ -142,18 +115,17 @@ const PayrollDashboard: React.FC = () => {
       totalPayroll: data.total,
       processed: data.processed,
       pending: data.pending,
-    }));
+    })).sort((a, b) => a.month.localeCompare(b.month));
 
-    console.log(monthlyArray);
+    _setMonthlyTrendData(monthlyArray.slice(-8));
 
-    // Status breakdown
-    const statuses = new Map<string, number>();
+    const statusMap = new Map<string, number>();
     items.forEach((item: any) => {
-      const status = item.status || "Draft";
-      statuses.set(status, (statuses.get(status) || 0) + 1);
+      const status = String(item.status || "draft").toLowerCase();
+      statusMap.set(status, (statusMap.get(status) || 0) + 1);
     });
 
-    const statusArray = Array.from(statuses, ([name, value]) => ({
+    const statusArray = Array.from(statusMap, ([name, value]) => ({
       name: name.charAt(0).toUpperCase() + name.slice(1),
       value,
     }));
@@ -179,7 +151,7 @@ const PayrollDashboard: React.FC = () => {
     });
 
 
-    // Department aggregation (simulated - would need actual department data from employees)
+    // Department aggregation (simulated - payroll data alone does not carry department info)
     const departmentMap = new Map<string, number>();
     items.forEach((item: any) => {
       // Placeholder: using first digit of employee ID as department proxy
@@ -314,39 +286,59 @@ const PayrollDashboard: React.FC = () => {
       <Card className="analytics-title-card">
         <div className="analytics-title-inner">
           <div className="analytics-icon">
-            <TrendingUp size={24} />
-          </div>
-          <div>
-            <h2 className="analytics-title">Tren Pemrosesan</h2>
-            <p className="analytics-subtitle">Status payroll per periode</p>
-          </div>
-        </div>
-      </Card>
-
-<Card className="analytics-title-card">
-        <div className="analytics-title-inner">
-          <div className="analytics-icon">
             <ReceiptText size={24} />
           </div>
           <div>
-            <h2 className="analytics-title">Status Saat Ini</h2>
-            <p className="analytics-subtitle">Distribusi status payroll</p>
+            <h2 className="analytics-title">Analitik Payroll</h2>
+            <p className="analytics-subtitle">Ringkasan tren, status, dan distribusi biaya untuk evaluasi cepat</p>
           </div>
         </div>
       </Card>
 
       {/* Charts Grid */}
       <div className="payroll-charts-grid">
-        <Card className="crud-table-card">
+        <Card className="crud-table-card payroll-chart-card">
+          <h3 className="payroll-section-title">Tren Payroll Bulanan</h3>
+          <p className="chart-subtitle">Volume payroll yang diproses per periode (8 periode terakhir)</p>
+          {_monthlyTrendData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={_monthlyTrendData} margin={{ top: 8, right: 16, left: 4, bottom: 8 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
+                <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
+                <Tooltip {...tooltipStyle} />
+                <Legend />
+                <Line type="monotone" dataKey="totalPayroll" name="Total" stroke="#2563eb" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="processed" name="Selesai" stroke="#10b981" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="pending" name="Menunggu" stroke="#f59e0b" strokeWidth={2} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="chart-empty">Belum ada data tren bulanan</div>
+          )}
+        </Card>
+
+        <Card className="crud-table-card payroll-chart-card">
+          <h3 className="payroll-section-title">Komposisi Status</h3>
+          <p className="chart-subtitle">Distribusi status payroll saat ini</p>
           {payrollStatusData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
-                <Pie data={payrollStatusData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={5} dataKey="value" nameKey="name">
+                <Pie
+                  data={payrollStatusData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={62}
+                  outerRadius={102}
+                  paddingAngle={4}
+                  dataKey="value"
+                  nameKey="name"
+                >
                   {payrollStatusData.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
+                    <Cell key={`status-cell-${index}`} fill={statusColors[index % statusColors.length]} />
                   ))}
                 </Pie>
-                <Tooltip {...tooltipStyle} />
+                <Tooltip {...tooltipStyle} formatter={(value: any) => `${value} record`} />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
@@ -355,7 +347,7 @@ const PayrollDashboard: React.FC = () => {
           )}
         </Card>
 
-        <Card className="crud-table-card">
+        <Card className="crud-table-card payroll-chart-card payroll-full-width-chart">
           <h3 className="payroll-section-title">Distribusi Gaji per Departemen</h3>
           <p className="chart-subtitle">Total kompensasi (Tunjangan + Bonus) per departemen</p>
           {departmentPayrollData.length > 0 ? (

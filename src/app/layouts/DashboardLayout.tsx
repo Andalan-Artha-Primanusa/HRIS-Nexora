@@ -4,7 +4,7 @@ import { Sidebar } from '@/widgets/layout/Sidebar';
 import { Header } from '@/widgets/layout/Header';
 import { useAuthStore } from '@/app/store/auth.store';
 import { menuItems, type MenuItem } from '@/shared/config/menu';
-import { filterMenuItems } from '@/shared/config/menuFilter';
+import { filterMenuItems, fetchAllowedMenuKeys } from '@/shared/config/menuFilter';
 import { RouteSuspenseFallback } from '@/shared/ui';
 import NotFoundPage from '@/pages/error/NotFoundPage';
 
@@ -55,12 +55,17 @@ export default function DashboardLayout() {
     durationMs: number;
     capturedAt: string;
   } | null>(null);
+  const [allowedKeys, setAllowedKeys] = React.useState<string[] | undefined>();
   const user = useAuthStore((state) => state.user);
   const location = useLocation();
   const outlet = useOutlet();
 
   React.useEffect(() => {
-    const visibleMenu = filterMenuItems(user, menuItems);
+    fetchAllowedMenuKeys().then(setAllowedKeys);
+  }, []);
+
+  React.useEffect(() => {
+    const visibleMenu = filterMenuItems(user, menuItems, allowedKeys);
     const availablePaths = Array.from(new Set(flattenPaths(visibleMenu)));
     const prioritizedPaths = ['/dashboard', ...availablePaths]
       .filter((path, index, arr) => arr.indexOf(path) === index)
