@@ -11,18 +11,8 @@ export const fetchAllowedMenuKeys = async (user?: AuthUser | null): Promise<stri
   if (cachePromise) return cachePromise;
 
   cachePromise = (async () => {
-    try {
-      const res = await api.get('/user/menus');
-      const data = res.data?.data ?? [];
-      if (Array.isArray(data) && data.length > 0) {
-        cachedAllowedKeys = data;
-        return cachedAllowedKeys!;
-      }
-    } catch {
-      /* /user/menus failed, will try fallback */
-    }
-
-    // Fallback: compute from /admin/menus using user's role IDs
+    // Primary: compute from /admin/menus using user's role IDs
+    // (more reliable than /user/menus which may return all keys for some roles)
     if (user?.roles?.length) {
       try {
         const adminRes = await api.get('/admin/menus');
@@ -36,8 +26,18 @@ export const fetchAllowedMenuKeys = async (user?: AuthUser | null): Promise<stri
           return cachedAllowedKeys!;
         }
       } catch {
-        /* both endpoints failed */
+        /* /admin/menus failed, will try fallback */
       }
+    }
+
+    // Fallback: try /user/menus
+    try {
+      const res = await api.get('/user/menus');
+      const data = res.data?.data ?? [];
+      cachedAllowedKeys = Array.isArray(data) ? data : [];
+      return cachedAllowedKeys!;
+    } catch {
+      /* both endpoints failed */
     }
 
     cachedAllowedKeys = [];

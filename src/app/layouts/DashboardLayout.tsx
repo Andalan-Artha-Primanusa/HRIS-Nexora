@@ -60,6 +60,24 @@ export default function DashboardLayout() {
   const location = useLocation();
   const outlet = useOutlet();
 
+  const allMenuPaths = React.useMemo(
+    () => Array.from(new Set(flattenPaths(menuItems))),
+    []
+  );
+  const visibleMenu = React.useMemo(
+    () => filterMenuItems(user, menuItems, allowedKeys),
+    [user, allowedKeys]
+  );
+  const availablePaths = React.useMemo(
+    () => Array.from(new Set(flattenPaths(visibleMenu))),
+    [visibleMenu]
+  );
+  const isRouteBlocked = React.useMemo(() => {
+    if (allowedKeys === undefined) return false;
+    if (!user) return false;
+    return allMenuPaths.includes(location.pathname) && !availablePaths.includes(location.pathname);
+  }, [allowedKeys, user, allMenuPaths, availablePaths, location.pathname]);
+
   React.useEffect(() => {
     fetchAllowedMenuKeys(user).then(setAllowedKeys);
   }, []);
@@ -73,8 +91,6 @@ export default function DashboardLayout() {
   }, []);
 
   React.useEffect(() => {
-    const visibleMenu = filterMenuItems(user, menuItems, allowedKeys);
-    const availablePaths = Array.from(new Set(flattenPaths(visibleMenu)));
     const prioritizedPaths = ['/dashboard', ...availablePaths]
       .filter((path, index, arr) => arr.indexOf(path) === index)
       .filter((path) => path !== location.pathname)
@@ -142,7 +158,7 @@ export default function DashboardLayout() {
         window.clearTimeout(timeoutId);
       }
     };
-  }, [user, location.pathname]);
+  }, [availablePaths, location.pathname]);
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
@@ -155,7 +171,7 @@ export default function DashboardLayout() {
         <Header toggleSidebar={toggleSidebar} />
         <main className="dashboard-content">
           <React.Suspense fallback={<RouteSuspenseFallback />}>
-            {outlet || <NotFoundPage />}
+            {isRouteBlocked ? <NotFoundPage /> : (outlet || <NotFoundPage />)}
           </React.Suspense>
           {import.meta.env.DEV && prefetchStats ? (
             <div className="prefetch-debug-panel" role="status" aria-live="polite">
