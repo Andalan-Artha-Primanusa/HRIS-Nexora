@@ -7,7 +7,8 @@ import type { LeaveItem } from '@/features/leave/types/leave.types';
 import { LeaveSummary } from '@/features/leave/components/LeaveSummary';
 import { LeaveTable } from '@/features/leave/components/LeaveTable';
 import { LeaveDetailModal } from '@/features/leave/components/LeaveDetailModal';
-import { Plus, RefreshCw, Search, Calendar } from 'lucide-react';
+import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
+import { Plus, RefreshCw, Search, Calendar, History } from 'lucide-react';
 import { showToast } from '@/shared/ui/toast';
 import { useAuthStore } from '@/app/store/auth.store';
 import '@/shared/styles/CrudPage.css';
@@ -26,6 +27,7 @@ const LeaveRequestsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedDetail, setSelectedDetail] = useState<any | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [historyModal, setHistoryModal] = useState<{ module: string; id: number | string } | null>(null);
   const perPage = 10;
 
   const loadLeaves = async () => {
@@ -212,6 +214,7 @@ const LeaveRequestsPage = () => {
               onReject={handleReject}
               onEdit={(id) => navigate(`/leave/requests/edit/${id}`)}
               onDelete={handleDelete}
+              onHistory={(id) => setHistoryModal({ module: 'leave', id })}
               isAdmin={isAdmin}
             />
           )}
@@ -240,6 +243,15 @@ const LeaveRequestsPage = () => {
         onReject={handleReject}
         isAdmin={isAdmin}
       />
+
+      {historyModal && (
+        <ApprovalHistoryModal
+          isOpen={!!historyModal}
+          onClose={() => setHistoryModal(null)}
+          module={historyModal.module}
+          moduleId={historyModal.id}
+        />
+      )}
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Eye, Check, X, Pencil, Trash2 } from 'lucide-react';
+import { Eye, Check, X, Pencil, Trash2, History } from 'lucide-react';
 
 interface LeaveTableProps {
   items: any[];
@@ -8,6 +8,7 @@ interface LeaveTableProps {
   onReject?: (id: string) => void;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
+  onHistory?: (id: string) => void;
   isAdmin?: boolean;
 }
 
@@ -28,7 +29,7 @@ const formatDate = (date: any) => {
   return new Date(date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
 };
 
-export const LeaveTable: React.FC<LeaveTableProps> = ({ items, onView, onApprove, onReject, onEdit, onDelete, isAdmin }) => {
+export const LeaveTable: React.FC<LeaveTableProps> = ({ items, onView, onApprove, onReject, onEdit, onDelete, onHistory, isAdmin }) => {
   return (
     <div className="table-wrap">
       <table className="data-table">
@@ -94,6 +95,11 @@ export const LeaveTable: React.FC<LeaveTableProps> = ({ items, onView, onApprove
                        </button>
                     )}
 
+                    {onHistory && (
+                      <button className="action-btn" style={{ background: '#f5f3ff', color: '#8b5cf6' }} onClick={() => onHistory(String(item.id))} title="Riwayat Approval">
+                        <History size={16} />
+                      </button>
+                    )}
                     {onDelete && (
                        <button className="action-btn action-btn-delete" onClick={() => onDelete(String(item.id))} title="Hapus">
                          <Trash2 size={16} />
