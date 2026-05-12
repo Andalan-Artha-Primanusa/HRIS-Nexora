@@ -29,6 +29,7 @@ const PayrollPaymentPage = () => {
   const [loading, setLoading] = useState(false);
   const [bulkPayModal, setBulkPayModal] = useState(false);
   const [bulkPayLoading, setBulkPayLoading] = useState(false);
+  const [bulkPeriod, setBulkPeriod] = useState<string>(""); // dedicated state for bulk pay panel
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [errorModal, setErrorModal] = useState<{ isOpen: boolean; title: string; message: string }>({
     isOpen: false,
@@ -107,16 +108,16 @@ const PayrollPaymentPage = () => {
   };
 
   const handleBulkPay = async () => {
-    if (periodFilter === "all") {
-      showErrorModal("Pilih Periode", "Pilih periode spesifik terlebih dahulu sebelum bulk pay");
+    if (!bulkPeriod) {
+      showErrorModal("Pilih Periode", "Pilih periode terlebih dahulu sebelum bulk pay");
       setBulkPayModal(false);
       return;
     }
     setBulkPayLoading(true);
     try {
-      const result = await payrollService.bulkMarkAsPaid(periodFilter);
-      const total = result?.data?.total_paid ?? result?.total_paid ?? "?";
-      setMessage({ type: "success", text: `Bulk pay selesai — ${total} payroll periode ${periodFilter} berhasil ditandai dibayar` });
+      const result = await payrollService.bulkMarkAsPaid(bulkPeriod);
+      const total = result?.data?.total_paid ?? result?.total_paid ?? approvedForBulk.length;
+      setMessage({ type: "success", text: `✅ Bulk pay selesai — ${total} payroll periode ${bulkPeriod} berhasil ditandai dibayar` });
       setBulkPayModal(false);
       await loadData();
     } catch (error) {
@@ -158,7 +159,16 @@ const PayrollPaymentPage = () => {
   const safePayrolls = Array.isArray(allPayrolls) ? allPayrolls : [];
   const safeEmployees = Array.isArray(employees) ? employees : [];
 
-  // Count approved payrolls for selected period (for bulk pay)
+  // Approved payrolls for bulk pay panel (uses its own period state)
+  const approvedForBulk = safePayrolls.filter(
+    (p) => p.status === "approved" && (bulkPeriod === "" || String(p.period) === bulkPeriod)
+  );
+  const totalBulkTHP = approvedForBulk.reduce((s, p) => s + Number(p.take_home_pay || p.net_salary || 0), 0);
+
+  // Unique periods from all payrolls for dropdowns
+  const allPeriods = Array.from(new Set(safePayrolls.map(p => p.period).filter(Boolean))).sort().reverse() as string[];
+
+  // Count approved for table filter (existing logic)
   const approvedInPeriod = safePayrolls.filter(
     (p) => p.status === "approved" && (periodFilter === "all" || String(p.period) === periodFilter)
   );
@@ -248,22 +258,6 @@ const PayrollPaymentPage = () => {
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan
             </button>
-            {periodFilter !== "all" && approvedInPeriod.length > 0 && (
-              <button
-                onClick={() => setBulkPayModal(true)}
-                disabled={loading}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                  padding: '0.75rem 1.25rem', borderRadius: '10px',
-                  border: 'none', background: 'linear-gradient(135deg, #10b981, #059669)',
-                  color: '#fff', fontSize: '0.9rem', fontWeight: '600',
-                  fontFamily: "'Poppins', sans-serif", cursor: 'pointer', boxShadow: '0 2px 8px rgba(16,185,129,0.3)'
-                }}
-              >
-                <Zap size={16} />
-                Bayar Semua ({approvedInPeriod.length} approved)
-              </button>
-            )}
             <button className="btn-primary" onClick={() => navigate('/payroll/approve')}
               style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.25rem', borderRadius: '10px', border: '1px solid #cbd5e1', background: '#fff', color: '#2563eb', fontSize: '0.9rem', fontWeight: '600', fontFamily: "'Poppins', sans-serif", cursor: 'pointer' }}>
               Halaman Approval
@@ -300,6 +294,79 @@ const PayrollPaymentPage = () => {
           <span>{message.text}</span>
         </Card>
       )}
+
+      {/* ── BULK PAY PANEL — Selalu Terlihat ── */}
+      <Card style={{ padding: '1.5rem', marginBottom: '0.5rem', background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)', border: '1.5px solid #86efac', borderRadius: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: '1.25rem' }}>
+          <div style={{ width: 40, height: 40, borderRadius: 10, background: 'linear-gradient(135deg, #10b981, #059669)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Zap size={20} color="#fff" />
+          </div>
+          <div>
+            <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#065f46' }}>Pembayaran Massal</h3>
+            <p style={{ margin: 0, fontSize: '0.8rem', color: '#6ee7b7' }}>Tandai semua payroll yang sudah disetujui sebagai dibayar sekaligus</p>
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '1rem', alignItems: 'flex-end' }}>
+          {/* Period Selector */}
+          <div>
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
+              Pilih Periode
+            </label>
+            <select
+              value={bulkPeriod}
+              onChange={(e) => setBulkPeriod(e.target.value)}
+              style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1.5px solid #6ee7b7', background: '#fff', fontSize: '0.9rem', fontFamily: "'Poppins', sans-serif", color: '#065f46', outline: 'none' }}
+            >
+              <option value="">-- Pilih Periode --</option>
+              {allPeriods.map(p => (
+                <option key={p} value={p}>{p}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Info Box */}
+          <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #a7f3d0', padding: '10px 14px' }}>
+            {bulkPeriod ? (
+              approvedForBulk.length > 0 ? (
+                <>
+                  <p style={{ margin: 0, fontSize: '0.75rem', color: '#059669', fontWeight: 600 }}>
+                    ✅ {approvedForBulk.length} payroll siap dibayar
+                  </p>
+                  <p style={{ margin: '2px 0 0', fontSize: '0.875rem', fontWeight: 700, color: '#065f46' }}>
+                    Total: Rp {totalBulkTHP.toLocaleString('id-ID')}
+                  </p>
+                </>
+              ) : (
+                <p style={{ margin: 0, fontSize: '0.8rem', color: '#6b7280' }}>Tidak ada payroll <strong>approved</strong> di periode ini</p>
+              )
+            ) : (
+              <p style={{ margin: 0, fontSize: '0.8rem', color: '#9ca3af' }}>Pilih periode untuk melihat detail</p>
+            )}
+          </div>
+
+          {/* Action Button */}
+          <button
+            onClick={() => { if (!bulkPeriod) { showErrorModal("Pilih Periode", "Pilih periode terlebih dahulu"); return; } setBulkPayModal(true); }}
+            disabled={loading || !bulkPeriod || approvedForBulk.length === 0}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              padding: '10px 20px', borderRadius: 10, border: 'none',
+              background: (!bulkPeriod || approvedForBulk.length === 0)
+                ? '#d1fae5'
+                : 'linear-gradient(135deg, #10b981, #059669)',
+              color: (!bulkPeriod || approvedForBulk.length === 0) ? '#6b7280' : '#fff',
+              fontSize: '0.9rem', fontWeight: 700, fontFamily: "'Poppins', sans-serif",
+              cursor: (!bulkPeriod || approvedForBulk.length === 0) ? 'not-allowed' : 'pointer',
+              boxShadow: (!bulkPeriod || approvedForBulk.length === 0) ? 'none' : '0 4px 12px rgba(16,185,129,0.35)',
+              whiteSpace: 'nowrap', transition: 'all 0.2s'
+            }}
+          >
+            <Zap size={16} />
+            {approvedForBulk.length > 0 ? `Bayar ${approvedForBulk.length} Payroll` : 'Bayar Semua'}
+          </button>
+        </div>
+      </Card>
 
       <Card className="analytics-title-card">
         <div className="analytics-title-inner">
@@ -467,33 +534,34 @@ const PayrollPaymentPage = () => {
       </Modal>
 
       {/* Bulk Pay Confirmation Modal */}
-      <Modal isOpen={bulkPayModal} onClose={() => setBulkPayModal(false)} title="Konfirmasi Bulk Pay" size="md">
+      <Modal isOpen={bulkPayModal} onClose={() => setBulkPayModal(false)} title="Konfirmasi Pembayaran Massal" size="md">
         <div style={{ padding: '8px 0' }}>
           <div style={{ textAlign: 'center', marginBottom: '1.25rem' }}>
             <Zap size={48} color="#10b981" />
           </div>
           <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, padding: '1rem 1.25rem', marginBottom: '1.25rem' }}>
-            <p style={{ margin: 0, fontWeight: 600, fontSize: '0.95rem', color: '#166534' }}>
-              Tandai {approvedInPeriod.length} payroll sebagai DIBAYAR
+            <p style={{ margin: 0, fontWeight: 700, fontSize: '1rem', color: '#166534' }}>
+              Tandai {approvedForBulk.length} payroll sebagai DIBAYAR
             </p>
-            <p style={{ margin: '6px 0 0', fontSize: '0.875rem', color: '#166534', opacity: 0.8 }}>
-              Periode: <strong>{periodFilter}</strong><br />
-              Total THP: <strong>Rp {approvedInPeriod.reduce((s, p) => s + Number(p.take_home_pay || p.net_salary || 0), 0).toLocaleString('id-ID')}</strong>
+            <p style={{ margin: '8px 0 0', fontSize: '0.875rem', color: '#166534' }}>
+              Periode: <strong>{bulkPeriod}</strong><br />
+              Total Take Home Pay: <strong>Rp {totalBulkTHP.toLocaleString('id-ID')}</strong>
             </p>
           </div>
           <div style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 8, padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: '0.875rem', color: '#9a3412' }}>
             <AlertTriangle size={16} style={{ flexShrink: 0, marginTop: 1 }} />
-            <span>Tindakan ini tidak dapat dibatalkan. Semua payroll <strong>approved</strong> pada periode {periodFilter} akan berubah ke status <strong>paid</strong> secara permanen.</span>
+            <span>Tindakan ini <strong>tidak dapat dibatalkan</strong>. Semua payroll <strong>approved</strong> pada periode <strong>{bulkPeriod}</strong> akan berubah ke status <strong>paid</strong> secara permanen.</span>
           </div>
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
             <Button variant="outline" size="md" onClick={() => setBulkPayModal(false)} disabled={bulkPayLoading}>Batal</Button>
             <Button variant="primary" size="md" onClick={() => void handleBulkPay()} disabled={bulkPayLoading}>
               <Zap size={16} style={{ marginRight: 6 }} />
-              {bulkPayLoading ? 'Memproses...' : `Ya, Bayar Semua (${approvedInPeriod.length})`}
+              {bulkPayLoading ? 'Memproses...' : `Ya, Bayar ${approvedForBulk.length} Payroll`}
             </Button>
           </div>
         </div>
       </Modal>
+
     </div>
   );
 };

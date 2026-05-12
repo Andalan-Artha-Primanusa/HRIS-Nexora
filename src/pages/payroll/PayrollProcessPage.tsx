@@ -299,6 +299,8 @@ const ApproveTab = () => {
   const pageSizePending = 10;
   const [paymentFilter, setPaymentFilter] = useState<'all' | 'paid' | 'unpaid'>('all');
   const [selectedPayroll, setSelectedPayroll] = useState<PayrollItem | null>(null);
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [errorModal, setErrorModal] = useState<{ isOpen: boolean; title: string; message: string }>({ isOpen: false, title: "", message: "" });
@@ -326,25 +328,40 @@ const ApproveTab = () => {
     if (selectedPayroll.status === "approved" || selectedPayroll.status === "paid") {
       showErrorModal("Sudah Disetujui", `Status: ${selectedPayroll.status}`); return;
     }
-    if (selectedPayroll.status === "rejected") { showErrorModal("Ditolak", "Hubungi admin untuk reset"); return; }
+    if (selectedPayroll.status === "rejected") { showErrorModal("Ditolak", "Payroll ini sudah ditolak."); return; }
     setLoading(true);
     try {
-      await payrollService.approvePayroll(String(selectedPayroll.id));
-      setMessage({ type: "success", text: `Payroll ID ${selectedPayroll.id} berhasil disetujui` });
+      // Route ke endpoint yang benar berdasarkan status
+      if (selectedPayroll.status === "draft") {
+        await payrollService.managerApprovePayroll(String(selectedPayroll.id));
+        setMessage({ type: "success", text: `Payroll #${selectedPayroll.id} disetujui Manager — menunggu HR` });
+      } else if (selectedPayroll.status === "pending_hr") {
+        await payrollService.hrApprovePayroll(String(selectedPayroll.id));
+        setMessage({ type: "success", text: `Payroll #${selectedPayroll.id} disetujui HR — siap dibayar` });
+      } else {
+        await payrollService.approvePayroll(String(selectedPayroll.id));
+        setMessage({ type: "success", text: `Payroll #${selectedPayroll.id} berhasil disetujui` });
+      }
       setSelectedPayroll(null);
       await loadData();
     } catch (err) { showErrorModal("Error", err instanceof Error ? err.message : "Gagal approve"); }
     finally { setLoading(false); }
   };
 
-  const handleReject = async () => {
+  const handleReject = () => {
     if (!selectedPayroll) { showErrorModal("Validasi", "Pilih payroll"); return; }
+    setRejectReason("");
+    setRejectModalOpen(true);
+  };
+
+  const confirmReject = async () => {
+    if (!selectedPayroll) return;
+    if (!rejectReason.trim()) { showErrorModal("Validasi", "Alasan penolakan wajib diisi"); return; }
     setLoading(true);
     try {
-      const reason = prompt("Alasan penolakan:", "Data tidak valid");
-      if (!reason) { setLoading(false); return; }
-      await payrollService.rejectPayroll(String(selectedPayroll.id), reason);
-      setMessage({ type: "success", text: `Payroll ID ${selectedPayroll.id} ditolak` });
+      await payrollService.rejectPayroll(String(selectedPayroll.id), rejectReason);
+      setMessage({ type: "success", text: `Payroll #${selectedPayroll.id} ditolak` });
+      setRejectModalOpen(false);
       setSelectedPayroll(null);
       await loadData();
     } catch (err) { showErrorModal("Error", err instanceof Error ? err.message : "Gagal"); }
@@ -357,14 +374,18 @@ const ApproveTab = () => {
     if (paymentFilter === 'paid') return String(p.status).toLowerCase() === 'paid';
     return String(p.status).toLowerCase() !== 'paid';
   });
-  const pendingPayrolls = filteredPayrolls.filter(p => p.status === "draft" || p.status === "pending");
+  const pendingPayrolls = filteredPayrolls.filter(p =>
+    String(p.status) === "draft" || String(p.status) === "pending_hr" || String(p.status) === "pending"
+  );
   const otherPayrolls = filteredPayrolls.filter(p => p.status === "approved" || p.status === "paid");
+  const rejectedPayrolls = filteredPayrolls.filter(p => p.status === "rejected");
   const paginatedPending = pendingPayrolls.slice((currentPagePending - 1) * pageSizePending, currentPagePending * pageSizePending);
   const totalPagesPending = Math.max(1, Math.ceil(pendingPayrolls.length / pageSizePending));
 
   const summaryCards = [
-    { label: "Pending Review", subtitle: "Menunggu approval", value: String(pendingPayrolls.length), change: "Prioritas hari ini", tone: "orange" as const, icon: Clock },
-    { label: "Approved", subtitle: "Sudah disetujui", value: String(otherPayrolls.filter(p => p.status === "approved").length), change: "Final approval", tone: "green" as const, icon: CheckCircle2 },
+    { label: "Draft (Manager)", subtitle: "Menunggu approve manager", value: String(filteredPayrolls.filter(p => p.status === "draft").length), change: "Step 1", tone: "orange" as const, icon: Clock },
+    { label: "Pending HR", subtitle: "Menunggu final approval HR", value: String(filteredPayrolls.filter(p => p.status === "pending_hr").length), change: "Step 2", tone: "blue" as const, icon: ShieldCheck },
+    { label: "Approved", subtitle: "Sudah disetujui", value: String(otherPayrolls.filter(p => p.status === "approved").length), change: "Siap dibayar", tone: "green" as const, icon: CheckCircle2 },
     { label: "Paid", subtitle: "Sudah dibayar", value: String(otherPayrolls.filter(p => p.status === "paid").length), change: "Selesai", tone: "purple" as const, icon: CreditCard },
   ];
 
@@ -486,7 +507,34 @@ const ApproveTab = () => {
         </>
       )}
 
-      <Modal isOpen={!!selectedPayroll} onClose={() => setSelectedPayroll(null)} title={`Konfirmasi Payroll ID ${selectedPayroll?.id}`} size="lg">
+      {/* Reject Modal — dengan textarea profesional */}
+      <Modal isOpen={rejectModalOpen} onClose={() => setRejectModalOpen(false)} title="Tolak Payroll" size="md">
+        {selectedPayroll && (
+          <div style={{ padding: "8px 0" }}>
+            <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, padding: "0.75rem 1rem", marginBottom: "1rem", fontSize: "0.875rem", color: "#991b1b" }}>
+              Payroll <strong>#{selectedPayroll.id}</strong> — {String(selectedPayroll.period)}
+            </div>
+            <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, color: "#374151", marginBottom: 6 }}>
+              Alasan Penolakan <span style={{ color: "#ef4444" }}>*</span>
+            </label>
+            <textarea
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              placeholder="Jelaskan alasan penolakan..."
+              rows={4}
+              style={{ width: "100%", padding: "0.75rem", borderRadius: 8, border: "1.5px solid #e2e8f0", fontSize: "0.875rem", fontFamily: "inherit", resize: "vertical", boxSizing: "border-box", outline: "none" }}
+            />
+            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: "1.25rem" }}>
+              <Button variant="outline" size="md" onClick={() => setRejectModalOpen(false)} disabled={loading}>Batal</Button>
+              <Button variant="danger" size="md" onClick={() => void confirmReject()} disabled={loading || !rejectReason.trim()}>
+                Tolak Payroll
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      <Modal isOpen={!!selectedPayroll && !rejectModalOpen} onClose={() => setSelectedPayroll(null)} title={`Konfirmasi Payroll #${selectedPayroll?.id}`} size="lg">
         {selectedPayroll && (
           <div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
@@ -507,8 +555,10 @@ const ApproveTab = () => {
             </div>
             <div style={{ marginTop: "2rem", display: "flex", gap: 12, justifyContent: "flex-end" }}>
               <Button variant="outline" size="md" onClick={() => setSelectedPayroll(null)} disabled={loading}>Batal</Button>
-              <Button variant="danger" size="md" onClick={() => void handleReject()} disabled={loading}>Tolak</Button>
-              <Button variant="success" size="md" onClick={() => void handleApprove()} disabled={loading || (selectedPayroll.status !== "draft" && selectedPayroll.status !== "pending")}>Setujui Payroll</Button>
+              <Button variant="danger" size="md" onClick={() => handleReject()} disabled={loading}>Tolak</Button>
+              <Button variant="success" size="md" onClick={() => void handleApprove()} disabled={loading || (String(selectedPayroll.status) !== "draft" && String(selectedPayroll.status) !== "pending_hr" && String(selectedPayroll.status) !== "pending")}>
+                {String(selectedPayroll.status) === "draft" ? "Manager Approve" : String(selectedPayroll.status) === "pending_hr" ? "HR Final Approve" : "Setujui Payroll"}
+              </Button>
             </div>
           </div>
         )}
@@ -529,6 +579,9 @@ const PaymentTab = () => {
   const [periodFilter, setPeriodFilter] = useState<string>("all");
   const [paymentFilter, setPaymentFilter] = useState<'all' | 'paid' | 'unpaid'>('all');
   const [loading, setLoading] = useState(false);
+  const [bulkPeriod, setBulkPeriod] = useState("");
+  const [bulkPayModal, setBulkPayModal] = useState(false);
+  const [bulkPayLoading, setBulkPayLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [errorModal, setErrorModal] = useState<{ isOpen: boolean; title: string; message: string }>({ isOpen: false, title: "", message: "" });
 
@@ -548,14 +601,32 @@ const PaymentTab = () => {
   const handleMarkAsPaid = async () => {
     if (!selectedPayroll) { showErrorModal("Validasi", "Pilih payroll"); return; }
     if (selectedPayroll.status === "paid") { showErrorModal("Sudah Dibayar", "Payroll ini sudah dibayar."); return; }
+    if (selectedPayroll.status !== "approved") {
+      showErrorModal("Status Tidak Valid", `Hanya payroll berstatus 'approved' yang bisa ditandai dibayar. Status saat ini: ${selectedPayroll.status}`);
+      return;
+    }
     setLoading(true);
     try {
-      const updated = await payrollService.processPayment(String(selectedPayroll.id));
-      setSelectedPayroll(updated);
-      setMessage({ type: "success", text: "Payroll berhasil ditandai sebagai dibayar" });
+      await payrollService.processPayment(String(selectedPayroll.id));
+      setMessage({ type: "success", text: `Payroll #${selectedPayroll.id} berhasil ditandai dibayar` });
+      setSelectedPayroll(null);
       setAllPayrolls(toSafeArray(await payrollService.getPayrollList()));
     } catch (err) { showErrorModal("Error", err instanceof Error ? err.message : "Gagal"); }
     finally { setLoading(false); }
+  };
+
+  const handleBulkPay = async () => {
+    if (!bulkPeriod) { showErrorModal("Pilih Periode", "Pilih periode terlebih dahulu"); return; }
+    setBulkPayLoading(true);
+    try {
+      const result = await payrollService.bulkMarkAsPaid(bulkPeriod);
+      const total = result?.data?.total_paid ?? result?.total_paid ?? approvedForBulk.length;
+      setMessage({ type: "success", text: `✅ ${total} payroll periode ${bulkPeriod} berhasil ditandai dibayar` });
+      setBulkPayModal(false);
+      const pays = await payrollService.getPayrollList();
+      setAllPayrolls(toSafeArray(pays));
+    } catch (err) { showErrorModal("Bulk Pay Gagal", err instanceof Error ? err.message : "Gagal"); }
+    finally { setBulkPayLoading(false); }
   };
 
   const safePayrolls = Array.isArray(allPayrolls) ? allPayrolls : [];
@@ -565,6 +636,12 @@ const PaymentTab = () => {
     return e ? `${e.employee_code} - ${e.user?.name || "Unknown"}` : "Unknown";
   };
 
+  // Bulk pay kalkulasi
+  const allPeriods = Array.from(new Set(safePayrolls.map(p => p.period).filter(Boolean))).sort().reverse() as string[];
+  const approvedForBulk = safePayrolls.filter(p => p.status === "approved" && (bulkPeriod === "" || String(p.period) === bulkPeriod));
+  const totalBulkTHP = approvedForBulk.reduce((s, p) => s + Number(p.take_home_pay || p.net_salary || 0), 0);
+
+  // Filter tabel
   const filteredPayrolls = safePayrolls.filter(p => {
     if (paymentFilter === 'paid' && String(p.status).toLowerCase() !== 'paid') return false;
     if (paymentFilter === 'unpaid' && String(p.status).toLowerCase() === 'paid') return false;
@@ -577,13 +654,12 @@ const PaymentTab = () => {
     }
     return true;
   });
-
   const totalPagesRecent = Math.max(1, Math.ceil(filteredPayrolls.length / pageSizeRecent));
   const recentPayrolls = filteredPayrolls.slice((currentPageRecent - 1) * pageSizeRecent, currentPageRecent * pageSizeRecent);
 
   const summaryCards = [
     { label: "All Payroll", subtitle: "Total", value: String(safePayrolls.length), tone: "blue" as const, icon: FileText },
-    { label: "Ready to Pay", subtitle: "Belum paid", value: String(safePayrolls.filter(i => i.status !== "paid").length), tone: "orange" as const, icon: ShieldCheck },
+    { label: "Approved", subtitle: "Siap dibayar", value: String(safePayrolls.filter(i => i.status === "approved").length), tone: "orange" as const, icon: ShieldCheck },
     { label: "Paid", subtitle: "Sudah dibayar", value: String(safePayrolls.filter(i => i.status === "paid").length), tone: "purple" as const, icon: CreditCard },
   ];
 
@@ -599,6 +675,88 @@ const PaymentTab = () => {
           <button onClick={() => setMessage(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "#86efac" }}><X size={16} /></button>
         </div>
       )}
+
+      {/* ── PANEL BAYAR MASSAL ── */}
+      <Card style={{ padding: '1.5rem', background: 'linear-gradient(135deg, #f0fdf4, #ecfdf5)', border: '1.5px solid #86efac', borderRadius: 16, marginBottom: '0.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: '1.25rem' }}>
+          <div style={{ width: 40, height: 40, borderRadius: 10, background: 'linear-gradient(135deg,#10b981,#059669)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Zap size={20} color="#fff" />
+          </div>
+          <div>
+            <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#065f46' }}>Pembayaran Massal</h3>
+            <p style={{ margin: 0, fontSize: '0.8rem', color: '#34d399' }}>Bayar semua payroll yang sudah approved sekaligus per periode</p>
+          </div>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '1rem', alignItems: 'flex-end' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Pilih Periode</label>
+            <select
+              value={bulkPeriod}
+              onChange={(e) => setBulkPeriod(e.target.value)}
+              style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1.5px solid #6ee7b7', background: '#fff', fontSize: '0.9rem', fontFamily: "'Poppins',sans-serif", color: '#065f46', outline: 'none' }}
+            >
+              <option value="">-- Pilih Periode --</option>
+              {allPeriods.map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
+          </div>
+          <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #a7f3d0', padding: '10px 14px', minHeight: 48, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            {bulkPeriod ? (
+              approvedForBulk.length > 0 ? (
+                <>
+                  <p style={{ margin: 0, fontSize: '0.78rem', color: '#059669', fontWeight: 600 }}>✅ {approvedForBulk.length} payroll siap dibayar</p>
+                  <p style={{ margin: '2px 0 0', fontSize: '0.9rem', fontWeight: 700, color: '#065f46' }}>Total: Rp {totalBulkTHP.toLocaleString('id-ID')}</p>
+                </>
+              ) : (
+                <p style={{ margin: 0, fontSize: '0.82rem', color: '#6b7280' }}>Tidak ada payroll <strong>approved</strong> di periode ini</p>
+              )
+            ) : (
+              <p style={{ margin: 0, fontSize: '0.82rem', color: '#9ca3af' }}>Pilih periode untuk melihat detail</p>
+            )}
+          </div>
+          <button
+            onClick={() => { if (!bulkPeriod) { showErrorModal("Pilih Periode", "Pilih periode dulu"); return; } setBulkPayModal(true); }}
+            disabled={loading || !bulkPeriod || approvedForBulk.length === 0}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 20px',
+              borderRadius: 10, border: 'none',
+              background: approvedForBulk.length > 0 && bulkPeriod ? 'linear-gradient(135deg,#10b981,#059669)' : '#d1fae5',
+              color: approvedForBulk.length > 0 && bulkPeriod ? '#fff' : '#6b7280',
+              fontSize: '0.9rem', fontWeight: 700, fontFamily: "'Poppins',sans-serif",
+              cursor: approvedForBulk.length > 0 && bulkPeriod ? 'pointer' : 'not-allowed',
+              boxShadow: approvedForBulk.length > 0 && bulkPeriod ? '0 4px 12px rgba(16,185,129,0.35)' : 'none',
+              whiteSpace: 'nowrap', transition: 'all 0.2s'
+            }}
+          >
+            <Zap size={16} />
+            {approvedForBulk.length > 0 ? `Bayar ${approvedForBulk.length} Payroll` : 'Bayar Semua'}
+          </button>
+        </div>
+      </Card>
+
+      {/* Modal Konfirmasi Bulk Pay */}
+      <Modal isOpen={bulkPayModal} onClose={() => setBulkPayModal(false)} title="Konfirmasi Pembayaran Massal" size="md">
+        <div style={{ padding: '8px 0' }}>
+          <div style={{ textAlign: 'center', marginBottom: '1.25rem' }}><Zap size={48} color="#10b981" /></div>
+          <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, padding: '1rem 1.25rem', marginBottom: '1.25rem' }}>
+            <p style={{ margin: 0, fontWeight: 700, fontSize: '1rem', color: '#166534' }}>Tandai {approvedForBulk.length} payroll sebagai DIBAYAR</p>
+            <p style={{ margin: '8px 0 0', fontSize: '0.875rem', color: '#166534' }}>
+              Periode: <strong>{bulkPeriod}</strong><br />
+              Total THP: <strong>Rp {totalBulkTHP.toLocaleString('id-ID')}</strong>
+            </p>
+          </div>
+          <div style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 8, padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', gap: 8, fontSize: '0.875rem', color: '#9a3412' }}>
+            <AlertCircle size={16} style={{ flexShrink: 0, marginTop: 1 }} />
+            <span>Tindakan ini <strong>tidak dapat dibatalkan</strong>. Semua payroll approved di periode <strong>{bulkPeriod}</strong> akan jadi <strong>paid</strong> permanen.</span>
+          </div>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+            <Button variant="outline" size="md" onClick={() => setBulkPayModal(false)} disabled={bulkPayLoading}>Batal</Button>
+            <Button variant="primary" size="md" onClick={() => void handleBulkPay()} disabled={bulkPayLoading}>
+              <Zap size={16} style={{ marginRight: 6 }} />
+              {bulkPayLoading ? 'Memproses...' : `Ya, Bayar ${approvedForBulk.length} Payroll`}
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
       <div className="payroll-summary-wrapper">
         {summaryCards.map((c) => {
