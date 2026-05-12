@@ -35,12 +35,21 @@ const MenuPermissionsPage = () => {
     loadData();
   }, []);
 
+  const cacheToLocalStorage = (items: MenuDef[], rls: Role[]) => {
+    try {
+      localStorage.setItem('menuAssignments', JSON.stringify({ items, roles: rls }));
+    } catch { /* quota exceeded, silent */ }
+  };
+
   const loadData = async () => {
     setLoading(true);
     try {
       const res = await api.get("/admin/menus");
-      setMenuItems(res.data?.data?.items ?? []);
-      setRoles(res.data?.data?.roles ?? []);
+      const items = res.data?.data?.items ?? [];
+      const rls = res.data?.data?.roles ?? [];
+      setMenuItems(items);
+      setRoles(rls);
+      cacheToLocalStorage(items, rls);
     } catch {
       showToast("Gagal memuat data menu", "error");
     } finally {
@@ -58,8 +67,8 @@ const MenuPermissionsPage = () => {
       }
       clearMenuCache();
       window.dispatchEvent(new CustomEvent('menu-cache-cleared'));
-      setMenuItems((prev) =>
-        prev.map((m) =>
+      setMenuItems((prev) => {
+        const updated = prev.map((m) =>
           m.key === menuKey
             ? {
                 ...m,
@@ -68,8 +77,10 @@ const MenuPermissionsPage = () => {
                   : [...m.assigned_role_ids, roleId],
               }
             : m
-        )
-      );
+        );
+        cacheToLocalStorage(updated, roles);
+        return updated;
+      });
     } catch {
       showToast("Gagal memperbarui akses menu", "error");
     } finally {

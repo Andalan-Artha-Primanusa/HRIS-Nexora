@@ -7,6 +7,7 @@ import { AssignmentLetterModal } from '@/features/legal/components/AssignmentLet
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
+import './AssignmentLettersPage.css';
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 
 const AssignmentLettersPage: React.FC = () => {
@@ -130,126 +131,77 @@ const AssignmentLettersPage: React.FC = () => {
             <p style={{ color: '#94a3b8' }}>All official duty requests will appear here once submitted.</p>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem' }}>
+          <div className="assignment-grid">
             {letters.map((letter) => (
-              <Card key={letter.id} glass style={{ 
-                padding: '0', 
-                borderRadius: '20px', 
-                overflow: 'hidden',
-                border: '1px solid var(--cr-border)',
-                display: 'flex',
-                flexDirection: 'column'
-              }}>
-                {/* Header Section */}
-                <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.5)', borderBottom: '1px solid rgba(37,99,235,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div style={{ display: 'flex', gap: '14px' }}>
-                    <div style={{ 
-                      width: '46px', 
-                      height: '46px', 
-                      background: 'linear-gradient(135deg, #eff6ff, #dbeafe)', 
-                      borderRadius: '14px', 
-                      color: '#2563eb',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxShadow: 'inset 0 0 0 1px rgba(37,99,235,0.1)'
-                    }}>
-                      <FileText size={22} />
+              <Card key={letter.id} glass className="assignment-card">
+                <div className="assignment-card-header">
+                  <div className="assignment-card-title-row">
+                    <div className="assignment-icon-box">
+                      <FileText size={20} />
                     </div>
                     <div>
-                      <h3 style={{ margin: '0 0 4px', fontSize: '1.1rem', fontWeight: 700, color: '#1e293b' }}>{letter.title}</h3>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px' }}>
-                          #{letter.id}
-                        </span>
-                        <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>•</span>
-                        <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Official Duty Letter</span>
+                      <h3 className="assignment-title">{letter.title}</h3>
+                      <div className="assignment-meta">
+                        <span className="assignment-id">#{letter.id}</span>
+                        <span className="assignment-dot">•</span>
+                        <span>Official Duty Letter</span>
                       </div>
                     </div>
                   </div>
                   {getStatusBadge(letter.status)}
                 </div>
 
-                {/* Body Content */}
-                <div style={{ padding: '1.5rem', flex: 1 }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.5rem' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 700 }}>
-                        <User size={12} /> Requester
-                      </div>
-                      <div style={{ fontWeight: 600, color: '#334155', fontSize: '0.95rem' }}>
+                <div className="assignment-card-body">
+                  <div className="assignment-info-grid">
+                    <div className="assignment-info-item">
+                      <div className="assignment-info-label"><User size={12} /> Requester</div>
+                      <div className="assignment-info-value">
                         {letter.user?.name || letter.employee?.user?.name || letter.employee?.full_name || 'N/A'}
                       </div>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 700 }}>
-                        <MapPin size={12} /> Destination
-                      </div>
-                      <div style={{ fontWeight: 600, color: '#334155', fontSize: '0.95rem' }}>
-                        {letter.location || 'Not Specified'}
-                      </div>
+                    <div className="assignment-info-item">
+                      <div className="assignment-info-label"><MapPin size={12} /> Destination</div>
+                      <div className="assignment-info-value">{letter.location || 'Not Specified'}</div>
                     </div>
                   </div>
 
-                  <div style={{ padding: '12px 16px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #f1f5f9', marginBottom: '1.5rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <Calendar size={16} color="#2563eb" />
-                      <div style={{ fontSize: '0.9rem', color: '#475569' }}>
-                        <span style={{ fontWeight: 600, color: '#1e293b' }}>{new Date(letter.start_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
-                        <span style={{ margin: '0 8px', color: '#cbd5e1' }}>→</span>
-                        <span style={{ fontWeight: 600, color: '#1e293b' }}>{new Date(letter.end_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
-                      </div>
-                    </div>
+                  <div className="assignment-date-box">
+                    <Calendar size={16} />
+                    <span>
+                      <strong>{new Date(letter.start_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</strong>
+                      <span className="assignment-date-arrow">→</span>
+                      <strong>{new Date(letter.end_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</strong>
+                    </span>
                   </div>
 
                   {letter.description && (
-                    <div style={{ marginBottom: '1.5rem' }}>
-                      <div style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 700, marginBottom: '6px' }}>Purpose / Notes</div>
-                      <p style={{ margin: 0, fontSize: '0.9rem', color: '#64748b', lineHeight: 1.6, background: '#fff', padding: '10px', borderRadius: '8px', border: '1px dashed #e2e8f0' }}>
-                        {letter.description}
-                      </p>
+                    <div className="assignment-notes">
+                      <div className="assignment-info-label">Purpose / Notes</div>
+                      <p className="assignment-notes-text">{letter.description}</p>
                     </div>
                   )}
                 </div>
 
-                {/* Footer Actions */}
-                {letter.status === 'pending' && (
-                  <div style={{ padding: '1rem 1.5rem', background: '#f8fafc', borderTop: '1px solid #f1f5f9', display: 'flex', gap: '0.75rem' }}>
-                    <Button 
-                      variant="primary" 
-                      style={{ flex: 1, height: '40px', borderRadius: '10px', fontWeight: 600 }}
-                      onClick={() => handleApprove(letter.id)}
-                    >
-                      <CheckCircle size={16} style={{ marginRight: '8px' }} />
-                      Approve
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      style={{ flex: 1, height: '40px', borderRadius: '10px', color: '#dc2626', borderColor: '#fee2e2', fontWeight: 600 }}
-                      onClick={() => handleReject(letter.id)}
-                    >
-                      <XCircle size={16} style={{ marginRight: '8px' }} />
-                      Reject
-                    </Button>
-                  </div>
-                )}
-
+                <div className="assignment-card-footer">
+                  {letter.status === 'pending' && (
+                    <div className="assignment-actions-row">
+                      <Button variant="primary" className="assignment-btn-approve" onClick={() => handleApprove(letter.id)}>
+                        <CheckCircle size={16} /> Approve
+                      </Button>
+                      <Button variant="outline" className="assignment-btn-reject" onClick={() => handleReject(letter.id)}>
+                        <XCircle size={16} /> Reject
+                      </Button>
+                    </div>
+                  )}
                   {letter.status?.toLowerCase() === 'approved' && (
-                  <Button 
-                    variant="outline" 
-                    style={{ width: '100%', borderColor: '#2563eb', color: '#2563eb', fontWeight: 600, gap: '8px' }}
-                    onClick={() => handleDownloadPdf(letter.id)}
-                  >
-                    <FileText size={16} /> Download PDF
-                  </Button>
-                )}
-                <Button 
-                  variant="outline" 
-                  style={{ width: '100%', borderColor: '#8b5cf6', color: '#8b5cf6', fontWeight: 600, gap: '8px' }}
-                  onClick={() => setHistoryModal({ module: 'assignment_letter', id: letter.id })}
-                >
-                  <History size={16} /> Riwayat Approval
-                </Button>
+                    <Button variant="outline" className="assignment-btn-pdf" onClick={() => handleDownloadPdf(letter.id)}>
+                      <FileText size={16} /> Download PDF
+                    </Button>
+                  )}
+                  <button className="assignment-history-btn" onClick={() => setHistoryModal({ module: 'assignment_letter', id: letter.id })}>
+                    <History size={16} /> Riwayat Approval
+                  </button>
+                </div>
               </Card>
             ))}
           </div>

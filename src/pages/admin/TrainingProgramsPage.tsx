@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, RefreshCw, GraduationCap, Calendar, Users, BookOpen, Search, Filter, Clock, Award, Edit, Trash2, BookTemplate, CheckCircle, TrendingUp, UserPlus, X, Loader2 } from 'lucide-react';
+import { Plus, RefreshCw, GraduationCap, Calendar, Users, BookOpen, Search, Filter, Clock, Award, Edit, Trash2, BookTemplate, CheckCircle, TrendingUp, UserPlus, X, Loader2, History } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { Modal } from '@/shared/ui/Modal';
@@ -11,6 +11,7 @@ import type { TrainingProgram } from '@/features/training/types/training.types';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import './TrainingProgramsPage.css';
+import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 
 const formatDateTime = (input: string) => {
   const date = new Date(input);
@@ -29,6 +30,9 @@ const TrainingProgramsPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
   const [showFilters, setShowFilters] = useState(false);
+
+  // History Modal State
+  const [historyModal, setHistoryModal] = useState<{ module: string; id: number } | null>(null);
 
   // Enroll Modal State
   const [enrollModalOpen, setEnrollModalOpen] = useState(false);
@@ -397,6 +401,14 @@ const TrainingProgramsPage: React.FC = () => {
                             >
                               <Trash2 size={16} />
                             </button>
+                            <button
+                              className="action-btn"
+                              style={{ color: '#8b5cf6', background: '#f5f3ff' }}
+                              onClick={() => setHistoryModal({ module: 'training', id: typeof program.id === 'string' ? parseInt(program.id, 10) : program.id })}
+                              title="Riwayat Approval"
+                            >
+                              <History size={16} />
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -535,6 +547,15 @@ const TrainingProgramsPage: React.FC = () => {
           </div>
         </div>
       </Modal>
+
+      {historyModal && (
+        <ApprovalHistoryModal
+          isOpen={!!historyModal}
+          onClose={() => setHistoryModal(null)}
+          module={historyModal.module}
+          moduleId={historyModal.id}
+        />
+      )}
     </div>
   );
 };

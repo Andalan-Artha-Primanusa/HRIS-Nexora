@@ -14,6 +14,7 @@ import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "./PayrollListPage.css";
 import "./PayrollApprovePage.css";
+import "./PayrollProcessPage.css";
 
 const formatCurrency = (v: unknown) => {
   const num = typeof v === "string" ? parseFloat(v) : Number(v);
@@ -56,19 +57,13 @@ const PayrollProcessPage = () => {
         </div>
       </Card>
 
-      <div className="elyra-tabs" style={{ background: "#fff", borderRadius: 16, border: "1px solid #e2e8f0", padding: 4, display: "flex", marginBottom: "1.5rem" }}>
+      <div className="payroll-tabs">
         {TABS.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.key;
           return (
             <button key={tab.key} onClick={() => setActiveTab(tab.key as TabKey)}
-              style={{
-                flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                padding: "12px 16px", borderRadius: 12, border: "none", cursor: "pointer",
-                background: isActive ? "linear-gradient(135deg, #2563eb, #1d4ed8)" : "transparent",
-                color: isActive ? "#fff" : "#64748b", fontWeight: isActive ? 700 : 500, fontSize: "0.875rem",
-                fontFamily: "'Poppins', sans-serif", transition: "all 0.2s",
-              }}
+              className={`payroll-tab ${isActive ? 'active' : ''}`}
             >
               <Icon size={18} />
               {tab.label}
@@ -164,29 +159,29 @@ const GenerateTab = () => {
         </div>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.5rem", marginBottom: "2rem" }}>
+      <div className="payroll-summary-grid">
         {summaryCards.map((c) => {
           const Icon = c.icon;
           const colors: Record<string, string> = { blue: "#3b82f6", orange: "#f97316", green: "#22c55e", purple: "#8b5cf6" };
           return (
-            <div key={c.label} style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 16, padding: "1.5rem", borderTop: `3px solid ${colors[c.tone]}` }}>
-              <p style={{ fontSize: "0.875rem", color: "#64748b", fontWeight: 500, marginBottom: "0.25rem" }}>{c.label}</p>
-              <p style={{ fontSize: "0.8rem", color: "#94a3b8", margin: 0 }}>{c.subtitle}</p>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "0.5rem" }}>
-                <div style={{ fontSize: "1.75rem", fontWeight: 700, color: colors[c.tone], lineHeight: 1.2 }}>{c.value}</div>
-                <div style={{ width: 64, height: 64, borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", background: `rgba(${c.tone === "blue" ? "59,130,246" : c.tone === "orange" ? "249,115,22" : c.tone === "green" ? "34,197,94" : "139,92,246"},0.08)`, color: colors[c.tone], flexShrink: 0 }}>
+            <div key={c.label} className="payroll-summary-card" style={{ borderTopColor: colors[c.tone] }}>
+              <p className="label">{c.label}</p>
+              <p className="subtitle">{c.subtitle}</p>
+              <div className="value-row">
+                <div className="value" style={{ color: colors[c.tone] }}>{c.value}</div>
+                <div className="icon-box" style={{ background: `rgba(${c.tone === "blue" ? "59,130,246" : c.tone === "orange" ? "249,115,22" : c.tone === "green" ? "34,197,94" : "139,92,246"},0.08)`, color: colors[c.tone] }}>
                   <Icon size={22} />
                 </div>
               </div>
-              <p style={{ fontSize: "0.75rem", color: "#64748b", margin: 0, paddingTop: "1rem", borderTop: "1px solid #e2e8f0" }}>{c.change}</p>
+              <p className="change-text">{c.change}</p>
             </div>
           );
         })}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "340px 1fr", gap: "1.25rem", alignItems: "start" }}>
-        <Card className="crud-table-card">
-          <p style={{ fontSize: "1.25rem", fontWeight: 700, color: "#1e293b", margin: "0 0 1.25rem", display: "flex", alignItems: "center", gap: 8 }}>
+      <div className="payroll-config-grid">
+        <Card className="payroll-table-card">
+          <p className="payroll-section-title">
             <Zap size={15} color="#6366f1" /> Konfigurasi Batch
           </p>
           <label style={{ display: "block", marginBottom: "1rem" }}>

@@ -12,7 +12,7 @@ import { AttendanceSummary } from '@/features/attendance/components/AttendanceSu
 import { AttendanceTable } from '@/features/attendance/components/AttendanceTable';
 import { AttendanceDetailModal } from '@/features/attendance/components/AttendanceDetailModal';
 import {
-  RefreshCw, FileText, Search, Filter, Download,
+  RefreshCw, FileText, Search, Download,
 } from 'lucide-react';
 import { showToast } from '@/shared/ui/toast';
 import '@/shared/styles/CrudPage.css';
@@ -187,10 +187,17 @@ const AttendanceReportsPage = () => {
                 className="search-input-pill"
               />
             </div>
-            <div className="filter-btn-rounded">
-              <Filter size={18} />
-              <span>Filter</span>
-            </div>
+            <select
+              className="filter-select-premium"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              style={{ height: '44px', minWidth: '160px' }}
+            >
+              <option value="">Semua Status</option>
+              <option value="on_time">Hadir</option>
+              <option value="late">Terlambat</option>
+              <option value="absent">Absen</option>
+            </select>
             <input
               type="date"
               value={filterDate}
@@ -199,17 +206,6 @@ const AttendanceReportsPage = () => {
               style={{ height: '44px', minWidth: '160px' }}
             />
           </div>
-          <select
-            className="filter-select-premium"
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            style={{ height: '44px', minWidth: '180px' }}
-          >
-            <option value="">Semua Status</option>
-            <option value="on_time">Hadir</option>
-            <option value="late">Terlambat</option>
-            <option value="absent">Absen</option>
-          </select>
         </div>
       </Card>
 

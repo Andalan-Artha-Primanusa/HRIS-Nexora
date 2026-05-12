@@ -171,7 +171,7 @@ export default function DashboardLayout() {
         <Header toggleSidebar={toggleSidebar} />
         <main className="dashboard-content">
           <React.Suspense fallback={<RouteSuspenseFallback />}>
-            {isRouteBlocked ? <NotFoundPage /> : (outlet || <NotFoundPage />)}
+            {allowedKeys === undefined ? <RouteSuspenseFallback /> : (isRouteBlocked ? <NotFoundPage /> : (outlet || <NotFoundPage />))}
           </React.Suspense>
           {import.meta.env.DEV && prefetchStats ? (
             <div className="prefetch-debug-panel" role="status" aria-live="polite">

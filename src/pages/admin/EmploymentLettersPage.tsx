@@ -7,6 +7,7 @@ import { getAllEmployees } from '@/features/employee/api/employee.service';
 import { legalService } from '@/features/legal/api/legal.service';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
+import './EmploymentLettersPage.css';
 
 const EmploymentLettersPage: React.FC = () => {
   const [employees, setEmployees] = useState<any[]>([]);
