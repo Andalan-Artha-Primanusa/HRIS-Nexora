@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { BarChart3, CalendarDays, CheckCircle2, RefreshCw, Zap, Clock, Wallet, LayoutDashboard, ChevronLeft, ChevronRight, AlertCircle, X, ShieldCheck, CreditCard, Eye, FileCheck, DollarSign, FileText, Search } from "lucide-react";
 import { Card } from "@/shared/ui/Card";
 import { Modal } from "@/shared/ui/Modal";
-import { PaginationWithSize } from "@/shared/ui/Pagination";
+
 import { Button } from "@/shared/ui/Button";
 import { PayrollStatusBadge } from "@/shared/ui/PayrollStatusBadge";
 import { payrollService, toSafeArray } from "@/features/payroll/api/payroll.service";
@@ -96,7 +96,7 @@ const GenerateTab = () => {
   const [paymentFilter, setPaymentFilter] = useState<"all" | "paid" | "unpaid">("all");
   const [yearFilter, setYearFilter] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const pageSize = 10;
   const period = `${selectedYear}-${selectedMonth}`;
 
   const showErrorModal = (title: string, msg: string) => setErrorModal({ isOpen: true, title, message: msg });
@@ -136,9 +136,9 @@ const GenerateTab = () => {
       (yearFilter === "all" || String(it.period ?? "").startsWith(yearFilter));
   }), [items, paymentFilter, yearFilter]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / itemsPerPage));
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const safePage = Math.min(currentPage, totalPages);
-  const paginated = filtered.slice((safePage - 1) * itemsPerPage, safePage * itemsPerPage);
+  const paginated = filtered.slice((safePage - 1) * pageSize, safePage * pageSize);
 
   const columns = [
     { key: "id", label: "ID" }, { key: "employee_id", label: "Karyawan" }, { key: "period", label: "Periode" },
@@ -221,9 +221,6 @@ const GenerateTab = () => {
               <BarChart3 size={15} color="#6366f1" /> Daftar Payroll <span style={{ fontSize: 11, color: "#94a3b8", fontWeight: 400, marginLeft: 4 }}>({filtered.length} records)</span>
             </p>
             <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <select style={{ padding: "5px 10px", borderRadius: 8, border: "1.5px solid #e2e8f0", fontSize: 12, color: "#64748b", fontFamily: "'Poppins', sans-serif" }} value={itemsPerPage} onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}>
-                {[5, 10, 25, 50].map(n => <option key={n} value={n}>{n} / hal</option>)}
-              </select>
               <select style={{ padding: "5px 10px", borderRadius: 8, border: "1.5px solid #e2e8f0", fontSize: 12, color: "#64748b", fontFamily: "'Poppins', sans-serif" }} value={yearFilter} onChange={(e) => { setYearFilter(e.target.value); setCurrentPage(1); }}>
                 <option value="all">Semua Tahun</option>
                 {YEARS.map(y => <option key={y} value={String(y)}>{y}</option>)}
@@ -280,8 +277,17 @@ const GenerateTab = () => {
           )}
 
           {filtered.length > 0 && (
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "1rem", flexWrap: "wrap", gap: 8 }}>
-              <span style={{ fontSize: 12, color: "#94a3b8" }}>Menampilkan <strong style={{ color: "#475569" }}>{(safePage - 1) * itemsPerPage + 1}–{Math.min(safePage * itemsPerPage, filtered.length)}</strong> dari <strong style={{ color: "#475569" }}>{filtered.length}</strong> data</span>
+            <div className="table-pagination">
+              <div className="pagination-info">
+                Menampilkan <strong>{paginated.length}</strong> dari <strong>{filtered.length}</strong> data
+              </div>
+              <div className="pagination-controls">
+                <button className="pagination-btn" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1}>‹</button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button key={page} className={`pagination-btn ${currentPage === page ? 'active' : ''}`} onClick={() => setCurrentPage(page)}>{page}</button>
+                ))}
+                <button className="pagination-btn" onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages}>›</button>
+              </div>
             </div>
           )}
         </Card>
@@ -295,7 +301,7 @@ const ApproveTab = () => {
   const [payrolls, setPayrolls] = useState<PayrollItem[]>([]);
   const [employees, setEmployees] = useState<EmployeeItem[]>([]);
   const [currentPagePending, setCurrentPagePending] = useState(1);
-  const [itemsPerPagePending, setItemsPerPagePending] = useState(10);
+  const pageSizePending = 10;
   const [paymentFilter, setPaymentFilter] = useState<'all' | 'paid' | 'unpaid'>('all');
   const [selectedPayroll, setSelectedPayroll] = useState<PayrollItem | null>(null);
   const [loading, setLoading] = useState(false);
@@ -358,8 +364,8 @@ const ApproveTab = () => {
   });
   const pendingPayrolls = filteredPayrolls.filter(p => p.status === "draft" || p.status === "pending");
   const otherPayrolls = filteredPayrolls.filter(p => p.status === "approved" || p.status === "paid");
-  const paginatedPending = pendingPayrolls.slice((currentPagePending - 1) * itemsPerPagePending, currentPagePending * itemsPerPagePending);
-  const totalPagesPending = Math.max(1, Math.ceil(pendingPayrolls.length / itemsPerPagePending));
+  const paginatedPending = pendingPayrolls.slice((currentPagePending - 1) * pageSizePending, currentPagePending * pageSizePending);
+  const totalPagesPending = Math.max(1, Math.ceil(pendingPayrolls.length / pageSizePending));
 
   const summaryCards = [
     { label: "Pending Review", subtitle: "Menunggu approval", value: String(pendingPayrolls.length), change: "Prioritas hari ini", tone: "orange" as const, icon: Clock },
@@ -437,9 +443,18 @@ const ApproveTab = () => {
             </tbody>
           </table>
         </div>
-        {pendingPayrolls.length > itemsPerPagePending && (
-          <div style={{ marginTop: 12, display: "flex", justifyContent: "flex-end" }}>
-            <PaginationWithSize currentPage={currentPagePending} totalPages={totalPagesPending} onPageChange={(p) => setCurrentPagePending(p)} totalItems={pendingPayrolls.length} itemsPerPage={itemsPerPagePending} onItemsPerPageChange={(s) => setItemsPerPagePending(s)} />
+        {pendingPayrolls.length > pageSizePending && (
+          <div className="table-pagination">
+            <div className="pagination-info">
+              Menampilkan <strong>{paginatedPending.length}</strong> dari <strong>{pendingPayrolls.length}</strong> data
+            </div>
+            <div className="pagination-controls">
+              <button className="pagination-btn" onClick={() => setCurrentPagePending(Math.max(1, currentPagePending - 1))} disabled={currentPagePending === 1}>‹</button>
+              {Array.from({ length: totalPagesPending }, (_, i) => i + 1).map((page) => (
+                <button key={page} className={`pagination-btn ${currentPagePending === page ? 'active' : ''}`} onClick={() => setCurrentPagePending(page)}>{page}</button>
+              ))}
+              <button className="pagination-btn" onClick={() => setCurrentPagePending(Math.min(totalPagesPending, currentPagePending + 1))} disabled={currentPagePending === totalPagesPending}>›</button>
+            </div>
           </div>
         )}
       </Card>
@@ -514,7 +529,7 @@ const PaymentTab = () => {
   const [employees, setEmployees] = useState<EmployeeItem[]>([]);
   const [allPayrolls, setAllPayrolls] = useState<PayrollItem[]>([]);
   const [currentPageRecent, setCurrentPageRecent] = useState(1);
-  const [itemsPerPageRecent, setItemsPerPageRecent] = useState(5);
+  const pageSizeRecent = 10;
   const [searchTerm, setSearchTerm] = useState("");
   const [periodFilter, setPeriodFilter] = useState<string>("all");
   const [paymentFilter, setPaymentFilter] = useState<'all' | 'paid' | 'unpaid'>('all');
@@ -568,8 +583,8 @@ const PaymentTab = () => {
     return true;
   });
 
-  const totalPagesRecent = Math.max(1, Math.ceil(filteredPayrolls.length / itemsPerPageRecent));
-  const recentPayrolls = filteredPayrolls.slice((currentPageRecent - 1) * itemsPerPageRecent, currentPageRecent * itemsPerPageRecent);
+  const totalPagesRecent = Math.max(1, Math.ceil(filteredPayrolls.length / pageSizeRecent));
+  const recentPayrolls = filteredPayrolls.slice((currentPageRecent - 1) * pageSizeRecent, currentPageRecent * pageSizeRecent);
 
   const summaryCards = [
     { label: "All Payroll", subtitle: "Total", value: String(safePayrolls.length), tone: "blue" as const, icon: FileText },
@@ -655,9 +670,18 @@ const PaymentTab = () => {
           </table>
         </div>
 
-        {filteredPayrolls.length > itemsPerPageRecent && (
-          <div style={{ marginTop: 8, display: "flex", justifyContent: "flex-end" }}>
-            <PaginationWithSize currentPage={currentPageRecent} totalPages={totalPagesRecent} onPageChange={(p) => setCurrentPageRecent(p)} totalItems={filteredPayrolls.length} itemsPerPage={itemsPerPageRecent} onItemsPerPageChange={(s) => setItemsPerPageRecent(s)} />
+        {filteredPayrolls.length > pageSizeRecent && (
+          <div className="table-pagination">
+            <div className="pagination-info">
+              Menampilkan <strong>{recentPayrolls.length}</strong> dari <strong>{filteredPayrolls.length}</strong> data
+            </div>
+            <div className="pagination-controls">
+              <button className="pagination-btn" onClick={() => setCurrentPageRecent(Math.max(1, currentPageRecent - 1))} disabled={currentPageRecent === 1}>‹</button>
+              {Array.from({ length: totalPagesRecent }, (_, i) => i + 1).map((page) => (
+                <button key={page} className={`pagination-btn ${currentPageRecent === page ? 'active' : ''}`} onClick={() => setCurrentPageRecent(page)}>{page}</button>
+              ))}
+              <button className="pagination-btn" onClick={() => setCurrentPageRecent(Math.min(totalPagesRecent, currentPageRecent + 1))} disabled={currentPageRecent === totalPagesRecent}>›</button>
+            </div>
           </div>
         )}
       </Card>

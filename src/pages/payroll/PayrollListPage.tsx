@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Card } from "@/shared/ui/Card";
 import { Modal } from "@/shared/ui/Modal";
 import { ArrowDown, ArrowUp, Briefcase, Filter, RefreshCw, Search, ChevronDown, Plus, Pencil, Trash2, ArrowLeft, AlertCircle, Download, Banknote, FileText, X, Info } from "lucide-react";
-import { PaginationWithSize } from '@/shared/ui/Pagination';
+
 import { payrollService, toSafeArray } from "@/features/payroll/api/payroll.service";
 import { getAllEmployees } from "@/features/employee/api/employee.service";
 import { PayrollStatusBadge } from "@/shared/ui/PayrollStatusBadge";
@@ -46,7 +46,7 @@ const PayrollListPage = () => {
   const [sortBy, setSortBy] = useState<"id" | "employee" | "period" | "total">("period");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const pageSize = 10;
 
   const [view, setView] = useState<"list" | "form">("list");
   const [form, setForm] = useState<PayrollFormState>(DEFAULT_FORM);
@@ -126,8 +126,8 @@ const PayrollListPage = () => {
     });
   }, [filteredItems, sortBy, sortOrder]);
 
-  const paginatedItems = sortedItems.slice((currentPage - 1) * itemsPerPage, (currentPage - 1) * itemsPerPage + itemsPerPage);
-  const totalPages = Math.max(1, Math.ceil(sortedItems.length / itemsPerPage));
+  const paginatedItems = sortedItems.slice((currentPage - 1) * pageSize, (currentPage - 1) * pageSize + pageSize);
+  const totalPages = Math.max(1, Math.ceil(sortedItems.length / pageSize));
 
   useEffect(() => { setCurrentPage(1); }, [searchText, selectedEmployeeId, selectedPeriod, selectedStatus, sortBy, sortOrder]);
 
@@ -375,10 +375,18 @@ const PayrollListPage = () => {
                   </table>
                 </div>
 
-                {sortedItems.length > itemsPerPage && (
-                  <div style={{ marginTop: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div className="pagination-info">Menampilkan {(currentPage-1)*itemsPerPage+1}-{Math.min(currentPage*itemsPerPage, sortedItems.length)} dari {sortedItems.length}</div>
-                    <PaginationWithSize currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} totalItems={sortedItems.length} itemsPerPage={itemsPerPage} onItemsPerPageChange={(s) => { setItemsPerPage(s); setCurrentPage(1); }} />
+                {sortedItems.length > pageSize && (
+                  <div className="table-pagination">
+                    <div className="pagination-info">
+                      Menampilkan <strong>{paginatedItems.length}</strong> dari <strong>{sortedItems.length}</strong> data
+                    </div>
+                    <div className="pagination-controls">
+                      <button className="pagination-btn" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1}>‹</button>
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                        <button key={page} className={`pagination-btn ${currentPage === page ? 'active' : ''}`} onClick={() => setCurrentPage(page)}>{page}</button>
+                      ))}
+                      <button className="pagination-btn" onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages}>›</button>
+                    </div>
                   </div>
                 )}
               </>

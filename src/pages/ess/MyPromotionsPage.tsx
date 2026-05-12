@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, RefreshCw, ArrowUpRight, CheckCircle, Clock, XCircle, FileText, X, History } from 'lucide-react';
 import { Card, CardHeader } from '@/shared/ui';
-import { Button } from '@/shared/ui/Button';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { promotionService } from '@/features/organization/api/promotion.service';
 import '@/shared/styles/CrudPage.css';
@@ -418,18 +417,14 @@ const MyPromotionsPage: React.FC = () => {
           {totalPages > 1 && (
             <div className="table-pagination">
               <div className="pagination-info">
-                Menampilkan {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, filteredItems.length)} dari {filteredItems.length}
+                Menampilkan <strong>{paginatedItems.length}</strong> dari <strong>{filteredItems.length}</strong> data
               </div>
               <div className="pagination-controls">
-                <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)}>
-                  Sebelumnya
-                </Button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                  <button key={page} className={`pagination-page-btn ${currentPage === page ? 'active' : ''}`} onClick={() => setCurrentPage(page)}>{page}</button>
+                <button className="pagination-btn" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1}>‹</button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button key={page} className={`pagination-btn ${currentPage === page ? 'active' : ''}`} onClick={() => setCurrentPage(page)}>{page}</button>
                 ))}
-                <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage(prev => prev + 1)}>
-                  Selanjutnya
-                </Button>
+                <button className="pagination-btn" onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages}>›</button>
               </div>
             </div>
           )}

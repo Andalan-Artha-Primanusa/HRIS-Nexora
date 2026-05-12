@@ -26,7 +26,7 @@ const LeaveRequestsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedDetail, setSelectedDetail] = useState<any | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const perPage = 15;
+  const perPage = 10;
 
   const loadLeaves = async () => {
     setLoading(true);
@@ -216,45 +216,17 @@ const LeaveRequestsPage = () => {
             />
           )}
           {totalPages > 1 && (
-            <div className="pagination-controls" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', padding: '1rem 0' }}>
-              <button
-                className="btn-outline"
-                disabled={currentPage <= 1}
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                style={{ padding: '0.4rem 1rem', fontSize: '0.85rem' }}
-              >
-                Sebelumnya
-              </button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1)
-                .filter(p => {
-                  if (totalPages <= 7) return true;
-                  if (p === 1 || p === totalPages) return true;
-                  if (Math.abs(p - currentPage) <= 1) return true;
-                  return false;
-                })
-                .map((p, idx, arr) => (
-                  <React.Fragment key={p}>
-                    {idx > 0 && p - arr[idx - 1] > 1 && <span style={{ color: '#94a3b8' }}>...</span>}
-                    <button
-                      className={p === currentPage ? 'btn-primary' : 'btn-outline'}
-                      onClick={() => setCurrentPage(p)}
-                      style={{ padding: '0.4rem 0.75rem', fontSize: '0.85rem', minWidth: '36px' }}
-                    >
-                      {p}
-                    </button>
-                  </React.Fragment>
+            <div className="table-pagination">
+              <div className="pagination-info">
+                Menampilkan <strong>{paginatedItems.length}</strong> dari <strong>{filteredItems.length}</strong> data
+              </div>
+              <div className="pagination-controls">
+                <button className="pagination-btn" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1}>‹</button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button key={page} className={`pagination-btn ${currentPage === page ? 'active' : ''}`} onClick={() => setCurrentPage(page)}>{page}</button>
                 ))}
-              <button
-                className="btn-outline"
-                disabled={currentPage >= totalPages}
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                style={{ padding: '0.4rem 1rem', fontSize: '0.85rem' }}
-              >
-                Selanjutnya
-              </button>
-              <span style={{ fontSize: '0.8rem', color: '#64748b', marginLeft: '0.5rem' }}>
-                {filteredItems.length} total
-              </span>
+                <button className="pagination-btn" onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages}>›</button>
+              </div>
             </div>
           )}
         </div>

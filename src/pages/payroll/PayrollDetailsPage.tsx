@@ -78,7 +78,7 @@ const PayrollDetailsPage = () => {
   const [overviewSearch, setOverviewSearch] = useState("");
   const [overviewTypeFilter, setOverviewTypeFilter] = useState<"all" | "allowance" | "deduction">("all");
   const [currentPageOverview, setCurrentPageOverview] = useState(1);
-  const [itemsPerPageOverview, setItemsPerPageOverview] = useState(10);
+  const pageSizeOverview = 10;
   const [statusMessage, setStatusMessage] = useState("Ready to call payroll details API");
   const [loading, setLoading] = useState(false);
   const [errorModal, setErrorModal] = useState<{ isOpen: boolean; title: string; message: string }>({
@@ -138,8 +138,8 @@ const PayrollDetailsPage = () => {
     }
     return list;
   }, [items, overviewTypeFilter, overviewSearch]);
-  const totalPagesOverview = Math.max(1, Math.ceil(filteredOverviewItems.length / itemsPerPageOverview));
-  const paginatedOverview = filteredOverviewItems.slice((currentPageOverview - 1) * itemsPerPageOverview, (currentPageOverview - 1) * itemsPerPageOverview + itemsPerPageOverview);
+  const totalPagesOverview = Math.max(1, Math.ceil(filteredOverviewItems.length / pageSizeOverview));
+  const paginatedOverview = filteredOverviewItems.slice((currentPageOverview - 1) * pageSizeOverview, (currentPageOverview - 1) * pageSizeOverview + pageSizeOverview);
   const componentSummaryCards = useMemo(() => {
     const allowanceCount = items.filter((item) => String(item.type).toLowerCase() === "allowance").length;
     const deductionCount = items.filter((item) => String(item.type).toLowerCase() === "deduction").length;
@@ -484,19 +484,17 @@ const PayrollDetailsPage = () => {
               </table>
             </div>
 
-            {filteredOverviewItems.length > itemsPerPageOverview && (
-              <div style={{ marginTop: 8, display: 'flex', justifyContent: 'flex-end' }}>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <select className="crud-input crud-input--sm" value={itemsPerPageOverview} onChange={(e) => { setItemsPerPageOverview(Number(e.target.value)); setCurrentPageOverview(1); }}>
-                    <option value={5}>5 / halaman</option>
-                    <option value={10}>10 / halaman</option>
-                    <option value={25}>25 / halaman</option>
-                  </select>
-                  <div>
-                    <button className="btn-outline" onClick={() => setCurrentPageOverview(Math.max(1, currentPageOverview - 1))}>&lt;</button>
-                    <span style={{ margin: '0 8px' }}>{currentPageOverview} / {totalPagesOverview}</span>
-                    <button className="btn-outline" onClick={() => setCurrentPageOverview(Math.min(totalPagesOverview, currentPageOverview + 1))}>&gt;</button>
-                  </div>
+            {filteredOverviewItems.length > pageSizeOverview && (
+              <div className="table-pagination">
+                <div className="pagination-info">
+                  Menampilkan <strong>{paginatedOverview.length}</strong> dari <strong>{filteredOverviewItems.length}</strong> data
+                </div>
+                <div className="pagination-controls">
+                  <button className="pagination-btn" onClick={() => setCurrentPageOverview(Math.max(1, currentPageOverview - 1))} disabled={currentPageOverview === 1}>‹</button>
+                  {Array.from({ length: totalPagesOverview }, (_, i) => i + 1).map((page) => (
+                    <button key={page} className={`pagination-btn ${currentPageOverview === page ? 'active' : ''}`} onClick={() => setCurrentPageOverview(page)}>{page}</button>
+                  ))}
+                  <button className="pagination-btn" onClick={() => setCurrentPageOverview(Math.min(totalPagesOverview, currentPageOverview + 1))} disabled={currentPageOverview === totalPagesOverview}>›</button>
                 </div>
               </div>
             )}
