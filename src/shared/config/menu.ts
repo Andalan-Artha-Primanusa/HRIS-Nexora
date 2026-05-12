@@ -145,7 +145,7 @@ export const menuItems: MenuItem[] = [
         label: 'Pengembangan',
         subItems: [
           { label: 'Pelatihan Saya', path: '/my/trainings', menuKey: 'ess.pengembangan.pelatihan' },
-          { label: 'Lembur Saya', path: '/attendance/overtime', menuKey: 'ess.pengembangan.lembur' },
+          { label: 'Lembur Saya', path: '/my/overtime', menuKey: 'ess.pengembangan.lembur' },
           { label: 'Promosi Saya', path: '/my/promotions', menuKey: 'ess.pengembangan.promosi' },
         ]
       },

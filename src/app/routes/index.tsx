@@ -394,6 +394,11 @@ export const router = createBrowserRouter([
         children: [{ index: true, element: <MyPromotionsPage /> }],
       },
       {
+        path: "/my/overtime",
+        element: <DashboardLayout />,
+        children: [{ index: true, element: <OvertimePage /> }],
+      },
+      {
         path: "/my/documents",
         element: <DashboardLayout />,
         children: [{ index: true, element: <MyDocumentsPage /> }],

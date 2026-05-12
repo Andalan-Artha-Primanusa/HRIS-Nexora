@@ -35,7 +35,7 @@ const loadFromLocalStorage = (user: AuthUser): string[] | null => {
   }
 };
 
-export const fetchAllowedMenuKeys = async (user?: AuthUser | null): Promise<string[]> => {
+export const fetchAllowedMenuKeys = async (user: AuthUser | null = null): Promise<string[]> => {
   if (cachedAllowedKeys) return cachedAllowedKeys;
   if (cachePromise) return cachePromise;
 
