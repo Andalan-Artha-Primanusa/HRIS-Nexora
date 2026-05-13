@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
+import { ConfirmDialog } from "@/shared/ui/ConfirmDialog";
 import { Alert } from "@/shared/ui/Alert";
 import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { getErrorMessage } from "@/shared/api/errorHandler";
@@ -137,6 +138,8 @@ const AdminKpiPage = () => {
 
   const [showDetail, setShowDetail] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState<KpiPeriod | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<KpiPeriod | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
 
   useEffect(() => {
@@ -209,16 +212,21 @@ const AdminKpiPage = () => {
   };
   const handleEdit = (p: KpiPeriod) => navigate(`/kpis/edit/${p.id}`);
 
-  const handleDelete = async (id: number) => {
-    if (!window.confirm("Hapus periode KPI ini?")) return;
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+
+    setDeleting(true);
     try {
-      await deleteKpiPeriod(id);
+      await deleteKpiPeriod(deleteTarget.id);
       setStatusMessage("Periode KPI berhasil dihapus");
       setAlertType("success");
+      setDeleteTarget(null);
       loadData();
     } catch (error) {
       setStatusMessage(getErrorMessage(error as never));
       setAlertType("error");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -455,7 +463,7 @@ const AdminKpiPage = () => {
                               </button>
                               <button
                                 className="action-btn action-btn-delete"
-                                onClick={() => handleDelete(period.id)}
+                                onClick={() => setDeleteTarget(period)}
                                 title="Hapus"
                               >
                                 <Trash2 size={16} />
@@ -872,6 +880,17 @@ const AdminKpiPage = () => {
           </Card>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        title="Hapus Periode KPI"
+        message={`Periode KPI "${deleteTarget?.period_label || "ini"}" akan dihapus. Tindakan ini tidak dapat dibatalkan.`}
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        loading={deleting}
+        onConfirm={() => void handleDelete()}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardHeader } from '@/shared/ui';
+import { Card, ConfirmDialog } from '@/shared/ui';
 import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { getAllLeaves, deleteLeaveRequest, approveLeave, rejectLeave } from '@/features/leave/api/leave.service';
 import type { LeaveItem } from '@/features/leave/types/leave.types';
@@ -28,6 +28,8 @@ const LeaveRequestsPage = () => {
   const [selectedDetail, setSelectedDetail] = useState<any | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [historyModal, setHistoryModal] = useState<{ module: string; id: number | string } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<LeaveItem | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const perPage = 10;
 
   const loadLeaves = async () => {
@@ -72,17 +74,19 @@ const LeaveRequestsPage = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm("Apakah Anda yakin ingin menghapus pengajuan ini?")) return;
-    setLoading(true);
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+
+    setDeleting(true);
     try {
-      await deleteLeaveRequest(id);
+      await deleteLeaveRequest(String((deleteTarget as any).id));
       showToast('Pengajuan berhasil dihapus', 'success');
       await loadLeaves();
+      setDeleteTarget(null);
     } catch (err: any) {
       showToast(err.message || 'Gagal menghapus', 'error');
     } finally {
-      setLoading(false);
+      setDeleting(false);
     }
   };
 
@@ -213,7 +217,10 @@ const LeaveRequestsPage = () => {
               onApprove={handleApprove}
               onReject={handleReject}
               onEdit={(id) => navigate(`/leave/requests/edit/${id}`)}
-              onDelete={handleDelete}
+              onDelete={(id) => {
+                const item = items.find((entry: any) => String(entry.id) === String(id)) || null;
+                setDeleteTarget(item);
+              }}
               onHistory={(id) => setHistoryModal({ module: 'leave', id })}
               isAdmin={isAdmin}
             />
@@ -252,6 +259,17 @@ const LeaveRequestsPage = () => {
           moduleId={historyModal.id}
         />
       )}
+
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        title="Hapus Pengajuan Cuti"
+        message="Pengajuan cuti ini akan dihapus dari sistem. Tindakan ini tidak dapat dibatalkan."
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        loading={deleting}
+        onConfirm={() => void confirmDelete()}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 };

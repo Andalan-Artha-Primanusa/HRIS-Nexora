@@ -2,8 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
+import { ConfirmDialog } from "@/shared/ui/ConfirmDialog";
 import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { getErrorMessage } from "@/shared/api/errorHandler";
+import { showToast } from "@/shared/ui/toast";
 import { ROLES } from "@/shared/types/rbac.types";
 import { BellRing, RefreshCw, Search, Send, Shield, Layout, History, Trash2 } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
@@ -66,6 +68,8 @@ const AdminEmailNotificationsPage = () => {
   const [logs, setLogs] = useState<EmailLogItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<EmailTemplateItem | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Template Form State
   const [showModal, setShowModal] = useState(false);
@@ -126,19 +130,25 @@ const AdminEmailNotificationsPage = () => {
     } catch (error: any) {
       console.error("Save Template Error:", error.response?.data || error);
       const serverMessage = error.response?.data?.message || error.response?.data?.error;
-      alert(serverMessage ? `Server Error: ${serverMessage}` : getErrorMessage(error));
+      showToast(serverMessage ? `Server Error: ${serverMessage}` : getErrorMessage(error), "error");
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDeleteTemplate = async (id: number | string) => {
-    if (!window.confirm("Apakah Anda yakin ingin menghapus template ini?")) return;
+  const handleDeleteTemplate = async () => {
+    if (!deleteTarget?.id) return;
+
+    setDeleting(true);
     try {
-      await deleteEmailTemplate(id);
+      await deleteEmailTemplate(deleteTarget.id);
+      showToast("Template email berhasil dihapus", "success");
+      setDeleteTarget(null);
       void loadData();
     } catch (error: any) {
-      alert(getErrorMessage(error));
+      showToast(getErrorMessage(error), "error");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -479,7 +489,7 @@ const AdminEmailNotificationsPage = () => {
                         <td className="td-center">
                           <button 
                             className="btn-icon btn-icon--red" 
-                            onClick={() => item.id && handleDeleteTemplate(item.id)}
+                            onClick={() => item.id && setDeleteTarget(item)}
                             title="Hapus Template"
                           >
                             <Trash2 size={16} />
@@ -573,6 +583,17 @@ const AdminEmailNotificationsPage = () => {
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        title="Hapus Template Email"
+        message={`Template "${deleteTarget?.name || deleteTarget?.key || "ini"}" akan dihapus. Tindakan ini tidak dapat dibatalkan.`}
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        loading={deleting}
+        onConfirm={() => void handleDeleteTemplate()}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 };

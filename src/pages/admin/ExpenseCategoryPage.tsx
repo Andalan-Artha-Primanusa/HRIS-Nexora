@@ -2,8 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { Plus, RefreshCw, Pencil, Trash2, Search, Tag, CheckCircle, FileText, Receipt } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
+import { showToast } from '@/shared/ui/toast';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import './ExpenseCategoryPage.css';
@@ -35,6 +37,8 @@ const ExpenseCategoryPage = () => {
   // Modal State
   const [showModal, setShowModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState<ExpenseCategory | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ExpenseCategory | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     code: '',
@@ -195,14 +199,20 @@ const ExpenseCategoryPage = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus kategori ini?')) {
-      try {
-        await api.delete(`/expense-categories/${id}`);
-        fetchData();
-      } catch (err) {
-        console.error(err);
-      }
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+
+    setDeleting(true);
+    try {
+      await api.delete(`/expense-categories/${deleteTarget.id}`);
+      showToast('Kategori expense berhasil dihapus', 'success');
+      setDeleteTarget(null);
+      fetchData();
+    } catch (err: any) {
+      console.error(err);
+      showToast(err?.response?.data?.message || err?.message || 'Gagal menghapus kategori', 'error');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -404,7 +414,7 @@ const ExpenseCategoryPage = () => {
                             </button>
                             <button
                               className="action-btn action-btn-delete"
-                              onClick={() => handleDelete(category.id)}
+                              onClick={() => setDeleteTarget(category)}
                               title="Hapus"
                             >
                               <Trash2 size={16} />
@@ -547,6 +557,17 @@ const ExpenseCategoryPage = () => {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        title="Hapus Kategori Expense"
+        message={`Kategori "${deleteTarget?.name || 'ini'}" akan dihapus. Tindakan ini tidak dapat dibatalkan.`}
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        loading={deleting}
+        onConfirm={() => void handleDelete()}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 };

@@ -3,6 +3,7 @@ import { Plus, RefreshCw, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { recruitmentService } from '@/features/recruitment/api/recruitment.service';
 import type { JobOpening } from '@/features/recruitment/types/recruitment.types';
 import { JobOpeningTable } from '@/features/recruitment/components/JobOpeningTable';
@@ -13,6 +14,8 @@ const JobOpeningsPage: React.FC = () => {
   const [items, setItems] = useState<JobOpening[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<JobOpening | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -41,14 +44,18 @@ const JobOpeningsPage: React.FC = () => {
     navigate(`/recruitment/openings/edit/${job.id}`);
   };
 
-  const handleDelete = async (id: string | number) => {
-    if (window.confirm('Are you sure you want to delete this job?')) {
-      try {
-        await recruitmentService.deleteJobOpening(id);
-        fetchData();
-      } catch (error) {
-        console.error('Error deleting job:', error);
-      }
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+
+    setDeleting(true);
+    try {
+      await recruitmentService.deleteJobOpening(deleteTarget.id);
+      setDeleteTarget(null);
+      fetchData();
+    } catch (error) {
+      console.error('Error deleting job:', error);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -90,9 +97,20 @@ const JobOpeningsPage: React.FC = () => {
           items={filteredItems}
           onView={() => {}}
           onEdit={handleEdit}
-          onDelete={handleDelete}
+          onDelete={(id) => setDeleteTarget(items.find((item) => String(item.id) === String(id)) || null)}
         />
       </Card>
+
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        title="Hapus Lowongan"
+        message={`Lowongan "${deleteTarget?.title || 'ini'}" akan dihapus. Tindakan ini tidak dapat dibatalkan.`}
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        loading={deleting}
+        onConfirm={() => void handleDelete()}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 };
