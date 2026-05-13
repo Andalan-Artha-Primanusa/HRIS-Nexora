@@ -7,6 +7,7 @@ import type { LeaveItem } from '@/features/leave/types/leave.types';
 import { LeaveSummary } from '@/features/leave/components/LeaveSummary';
 import { LeaveTable } from '@/features/leave/components/LeaveTable';
 import { LeaveDetailModal } from '@/features/leave/components/LeaveDetailModal';
+import { RejectLeaveModal } from '@/features/leave/components/RejectLeaveModal';
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 import { Plus, RefreshCw, Search, Calendar, History } from 'lucide-react';
 import { showToast } from '@/shared/ui/toast';
@@ -29,6 +30,7 @@ const LeaveRequestsPage = () => {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [historyModal, setHistoryModal] = useState<{ module: string; id: number | string } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<LeaveItem | null>(null);
+  const [rejectTarget, setRejectTarget] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const perPage = 10;
 
@@ -58,15 +60,19 @@ const LeaveRequestsPage = () => {
     }
   };
 
-  const handleReject = async (id: string) => {
-    const reason = window.prompt("Berikan alasan penolakan:");
-    if (reason === null) return;
+  const handleReject = (id: string) => {
+    setRejectTarget(id);
+  };
+
+  const handleConfirmReject = async (reason: string) => {
+    if (!rejectTarget) return;
     setLoading(true);
     try {
-      await rejectLeave(id, { note: reason || 'Ditolak melalui manajemen' });
+      await rejectLeave(rejectTarget, { note: reason || 'Ditolak melalui manajemen' });
       showToast('Pengajuan cuti ditolak', 'success');
       await loadLeaves();
       setIsDetailModalOpen(false);
+      setRejectTarget(null);
     } catch (err: any) {
       showToast(err.message || 'Gagal menolak', 'error');
     } finally {
@@ -269,6 +275,13 @@ const LeaveRequestsPage = () => {
         loading={deleting}
         onConfirm={() => void confirmDelete()}
         onCancel={() => setDeleteTarget(null)}
+      />
+
+      <RejectLeaveModal
+        isOpen={!!rejectTarget}
+        onClose={() => setRejectTarget(null)}
+        onConfirm={handleConfirmReject}
+        loading={loading}
       />
     </div>
   );

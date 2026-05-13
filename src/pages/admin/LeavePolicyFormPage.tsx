@@ -42,9 +42,46 @@ const LeavePolicyFormPage: React.FC = () => {
     active: 'true'
   });
 
+  const [leaveTypes, setLeaveTypes] = useState<any[]>([]);
+  const [selectedTypeId, setSelectedTypeId] = useState('');
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(isEdit);
   const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    const fetchTypes = async () => {
+      try {
+        const res = await api.get('/leave-types');
+        let list: any[] = [];
+        const d = res.data;
+        if (d?.data && Array.isArray(d.data)) list = d.data;
+        else if (d?.items && Array.isArray(d.items)) list = d.items;
+        else if (Array.isArray(d)) list = d;
+        setLeaveTypes(list);
+      } catch (err) {
+        console.error('Failed to fetch leave types', err);
+      }
+    };
+    void fetchTypes();
+  }, []);
+
+  const handleTypeSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const typeIdVal = e.target.value;
+    setSelectedTypeId(typeIdVal);
+    if (!typeIdVal) return;
+
+    const found = leaveTypes.find(t => String(t.id) === String(typeIdVal));
+    if (found) {
+      const yearStr = formData.year || new Date().getFullYear().toString();
+      const generatedName = `Kebijakan ${String(found.name)} ${yearStr}`;
+      setFormData(prev => ({
+        ...prev,
+        name: generatedName,
+        policy_code: generatePolicyCode(generatedName),
+        is_paid: String(found.is_paid ?? true)
+      }));
+    }
+  };
 
   useEffect(() => {
     if (isEdit) {
@@ -176,6 +213,27 @@ const LeavePolicyFormPage: React.FC = () => {
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '1.5rem' }}>
+              <div style={{ gridColumn: 'span 6', background: '#faf5ff', padding: '16px', borderRadius: '16px', border: '1px solid #e9d5ff' }}>
+                <label style={{ color: '#6b21a8', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                  <ShieldCheck size={16} /> Relasikan dengan Jenis Cuti (Smart Auto-Fill)
+                </label>
+                <select 
+                  value={selectedTypeId} 
+                  onChange={handleTypeSelect}
+                  style={{ width: '100%', height: '50px', padding: '0 16px', borderRadius: '12px', border: '1px solid #d8b4fe', fontSize: '1rem', color: '#581c87', background: '#fff', cursor: 'pointer', fontWeight: 600, boxSizing: 'border-box' }}
+                >
+                  <option value="">-- Pilih Jenis Cuti untuk Mengisi Form Otomatis --</option>
+                  {leaveTypes.map(t => (
+                    <option key={t.id} value={t.id}>
+                      {t.name} ({t.code}) — {t.is_paid ? 'Paid' : 'Unpaid'}
+                    </option>
+                  ))}
+                </select>
+                <small style={{ color: '#7e22ce', display: 'block', marginTop: '6px' }}>
+                  Memilih jenis cuti akan otomatis merumuskan Nama Kebijakan, Kode, dan Status Pembayaran yang selaras.
+                </small>
+              </div>
+
               <div style={{ gridColumn: 'span 4' }}>
                 <label>Nama Kebijakan</label>
                 <input 

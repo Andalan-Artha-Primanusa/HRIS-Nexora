@@ -48,6 +48,7 @@ export const menuItems: MenuItem[] = [
     menuKey: 'manajemen-cuti',
     subItems: [
       { label: 'Permohonan Cuti', path: '/leave/requests', menuKey: 'manajemen-cuti.permohonan' },
+      { label: 'Persetujuan Cuti', path: '/leave/approval', menuKey: 'manajemen-cuti.persetujuan' },
       { label: 'Kalender Cuti', path: '/leave/calendar', menuKey: 'manajemen-cuti.kalender' },
       { label: 'Saldo Cuti', path: '/leave/balance', menuKey: 'manajemen-cuti.saldo' },
     ]

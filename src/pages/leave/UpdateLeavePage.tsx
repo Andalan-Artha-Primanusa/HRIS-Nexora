@@ -68,6 +68,20 @@ const UpdateLeavePage = () => {
     void loadDetail();
   }, [id]);
 
+  useEffect(() => {
+    if (formData.start_date && formData.end_date && !loading) {
+      const start = new Date(formData.start_date);
+      const end = new Date(formData.end_date);
+      if (end >= start) {
+        const diffTime = end.getTime() - start.getTime();
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        setFormData(prev => ({ ...prev, total_days: diffDays }));
+      } else {
+        setFormData(prev => ({ ...prev, total_days: 1 }));
+      }
+    }
+  }, [formData.start_date, formData.end_date, loading]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -253,8 +267,7 @@ const UpdateLeavePage = () => {
           {/* Total Days */}
           <div className="leave-form-group">
             <label htmlFor="total_days">
-              Total Hari
-              <span className="leave-required">*</span>
+              Total Hari (Otomatis)
             </label>
             <input
               id="total_days"
@@ -262,9 +275,9 @@ const UpdateLeavePage = () => {
               name="total_days"
               className="leave-input"
               value={formData.total_days}
-              onChange={handleInputChange}
-              min="1"
-              disabled={isViewMode || loading}
+              readOnly
+              disabled
+              style={{ background: '#f1f5f9', cursor: 'not-allowed' }}
             />
           </div>
 
