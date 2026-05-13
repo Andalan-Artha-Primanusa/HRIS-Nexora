@@ -85,9 +85,9 @@ const AssignmentLettersPage: React.FC = () => {
       if (response.success && response.data.file_url) {
         window.open(response.data.file_url, '_blank');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to download PDF', err);
-      alert('Failed to generate PDF. Please ensure the request is approved.');
+      showToast(err?.response?.data?.message || err?.message || 'Gagal mengunduh PDF. Pastikan pengajuan telah disetujui.', 'error');
     }
   };
 

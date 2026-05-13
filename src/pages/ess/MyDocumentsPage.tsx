@@ -463,9 +463,9 @@ const MyDocumentsPage: React.FC = () => {
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("Gagal download file. Pastikan dokumen fisik tersedia di server.");
+      showToast(err?.response?.data?.message || err?.message || 'Gagal mengunduh file. Pastikan dokumen fisik tersedia di server.', 'error');
     }
   };
 

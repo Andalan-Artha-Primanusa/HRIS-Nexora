@@ -186,25 +186,13 @@ const AdminReimbursementsPage: React.FC = () => {
     }
   };
 
-<<<<<<< HEAD
-  const handleDelete = async (item: ReimbursementItem) => {
-    if (window.confirm('Hapus klaim ini?')) {
-      try {
-        await deleteReimbursement(String(item.id));
-        fetchData();
-        showToast('Klaim berhasil dihapus', 'success');
-      } catch (error: any) {
-        console.error('Failed to delete:', error);
-        showToast(error?.response?.data?.message || error?.message || 'Gagal menghapus klaim', 'error');
-      }
-=======
   const handleDelete = async () => {
     if (!deleteTarget) return;
 
     setDeleting(true);
     try {
       await deleteReimbursement(String(deleteTarget.id));
-      showToast('Klaim reimbursement berhasil dihapus', 'success');
+      showToast('Klaim berhasil dihapus', 'success');
       setDeleteTarget(null);
       fetchData();
     } catch (error: any) {
@@ -212,7 +200,6 @@ const AdminReimbursementsPage: React.FC = () => {
       showToast(error?.response?.data?.message || error?.message || 'Gagal menghapus klaim', 'error');
     } finally {
       setDeleting(false);
->>>>>>> 493697e777409b707d0ec7ed200cf2b926b57361
     }
   };
 

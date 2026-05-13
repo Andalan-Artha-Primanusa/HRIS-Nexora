@@ -61,8 +61,15 @@ const PromotionPage: React.FC = () => {
   }, []);
 
   const handleSave = async (formData: any) => {
-    await promotionService.createPromotion(formData);
-    fetchData();
+    try {
+      await promotionService.createPromotion(formData);
+      fetchData();
+      showToast('Promosi berhasil dibuat', 'success');
+    } catch (error: any) {
+      console.error(error);
+      showToast(error?.response?.data?.message || error?.message || 'Gagal membuat promosi', 'error');
+      throw error;
+    }
   };
 
   const handleApprove = async (id: string | number) => {

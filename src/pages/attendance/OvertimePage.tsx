@@ -167,7 +167,7 @@ const OvertimePage = () => {
 
   const handleAddReason = async (record: OvertimeRecord) => {
     if (!record.request_id) {
-      alert('Data lembur belum punya request untuk diisi alasan.');
+      showToast('Data lembur belum punya request untuk diisi alasan.', 'info');
       return;
     }
 
@@ -186,13 +186,13 @@ const OvertimePage = () => {
   const submitReason = async () => {
     const requestId = selectedRecord?.request_id;
     if (!requestId) {
-      alert('Data lembur belum punya request untuk diisi alasan.');
+      showToast('Data lembur belum punya request untuk diisi alasan.', 'info');
       return;
     }
 
     const reason = reasonDraft.trim();
     if (!reason) {
-      alert('Alasan lembur tidak boleh kosong.');
+      showToast('Alasan lembur tidak boleh kosong.', 'warning');
       return;
     }
 
@@ -203,8 +203,9 @@ const OvertimePage = () => {
       setReasonDraft('');
       setSelectedRecord(null);
       await loadRecords();
+      showToast('Alasan lembur berhasil disimpan', 'success');
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Gagal menambahkan alasan');
+      showToast(error.response?.data?.message || 'Gagal menambahkan alasan', 'error');
     } finally {
       setReasonSaving(false);
     }
@@ -213,7 +214,7 @@ const OvertimePage = () => {
   const handleApproveRequest = async (record: OvertimeRecord) => {
     const requestId = record.request_id;
     if (!requestId) {
-      alert('Request lembur tidak ditemukan.');
+      showToast('Request lembur tidak ditemukan.', 'error');
       return;
     }
 
@@ -234,7 +235,7 @@ const OvertimePage = () => {
   const handleRejectRequest = async (record: OvertimeRecord) => {
     const requestId = record.request_id;
     if (!requestId) {
-      alert('Request lembur tidak ditemukan.');
+      showToast('Request lembur tidak ditemukan.', 'error');
       return;
     }
 
@@ -256,7 +257,6 @@ const OvertimePage = () => {
   const handleUploadEvidence = async (record: OvertimeRecord) => {
     let requestId = record.request_id;
     
-    // If no request_id, try to create one first using attendance_id
     if (!requestId && record.attendance_id) {
       try {
         const createRes = await overtimeService.createOvertimeRequest(record.attendance_id);
@@ -264,18 +264,18 @@ const OvertimePage = () => {
         requestId = payload?.id ?? payload?.request_id;
         
         if (!requestId) {
-          alert('Gagal membuat request lembur. Silakan hubungi admin.');
+          showToast('Gagal membuat request lembur. Silakan hubungi admin.', 'error');
           return;
         }
       } catch (err: any) {
         console.error('Failed to create overtime request:', err);
-        alert(err?.response?.data?.message || 'Gagal membuat request lembur');
+        showToast(err?.response?.data?.message || 'Gagal membuat request lembur', 'error');
         return;
       }
     }
     
     if (!requestId) {
-      alert('Data lembur tidak valid untuk upload bukti.');
+      showToast('Data lembur tidak valid untuk upload bukti.', 'error');
       return;
     }
 
@@ -287,29 +287,29 @@ const OvertimePage = () => {
         const file = input.files?.[0];
         if (!file) return;
         if (file.size > 10 * 1024 * 1024) {
-          alert('Ukuran file maksimal 10MB');
+          showToast('Ukuran file maksimal 10MB', 'warning');
           return;
         }
         try {
           await overtimeService.uploadEvidence(requestId, file);
-          alert('Bukti berhasil diunggah');
+          showToast('Bukti berhasil diunggah', 'success');
           void loadRecords();
         } catch (err: any) {
           console.error(err);
-          alert(err?.response?.data?.message || 'Gagal mengunggah bukti');
+          showToast(err?.response?.data?.message || 'Gagal mengunggah bukti', 'error');
         }
       };
       input.click();
     } catch (err) {
       console.error(err);
-      alert('Gagal membuka dialog file');
+      showToast('Gagal membuka dialog file', 'error');
     }
   };
 
   const handleViewMyEvidences = async (record: OvertimeRecord) => {
     const requestId = record.request_id ?? record.id;
     if (!requestId) {
-      alert('Request lembur belum tersedia, jadi bukti belum bisa dibuka.');
+      showToast('Request lembur belum tersedia, jadi bukti belum bisa dibuka.', 'info');
       return;
     }
 
@@ -320,21 +320,21 @@ const OvertimePage = () => {
       const payload = res?.data?.data ?? res?.data ?? res;
       const list = Array.isArray(payload) ? payload : [];
       if (list.length === 0) {
-        alert('Belum ada bukti untuk lembur ini');
+        showToast('Belum ada bukti untuk lembur ini', 'info');
         return;
       }
       const names = list.map((e: any, i: number) => `${i + 1}. ${e.filename || e.name || e.file_name || 'file'}`);
       const pick = window.prompt('Bukti:\n' + names.join('\n') + '\n\nMasukkan nomor untuk membuka (kosong = batalkan)');
       if (!pick) return;
       const idx = parseInt(pick, 10) - 1;
-      if (Number.isNaN(idx) || idx < 0 || idx >= list.length) return alert('Pilihan tidak valid');
+      if (Number.isNaN(idx) || idx < 0 || idx >= list.length) { showToast('Pilihan tidak valid', 'error'); return; }
       const selectedEvidence = list[idx];
       const url = selectedEvidence?.file_url || selectedEvidence?.url || selectedEvidence?.path;
-      if (!url) return alert('Tidak ada URL untuk file ini');
+      if (!url) { showToast('Tidak ada URL untuk file ini', 'error'); return; }
       window.open(url, '_blank', 'noopener,noreferrer');
     } catch (err: any) {
       console.error('Failed to load evidences:', err);
-      alert(err?.response?.data?.message || err?.message || 'Gagal mengambil bukti');
+      showToast(err?.response?.data?.message || err?.message || 'Gagal mengambil bukti', 'error');
     }
   };
 
@@ -721,7 +721,7 @@ const OvertimePage = () => {
                               <button
                                 className="action-btn"
                                 style={{ color: '#ef4444', background: '#fef2f2' }}
-                                onClick={() => alert('Alasan ditolak: ' + record.reject_reason)}
+                                onClick={() => showToast('Alasan ditolak: ' + record.reject_reason, 'info')}
                                 title="Lihat Alasan Penolakan"
                               >
                                 <XCircle size={16} />

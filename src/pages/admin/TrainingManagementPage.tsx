@@ -85,25 +85,21 @@ const ProgramsTab: React.FC = () => {
 
   const clearFilters = () => { setSearchQuery(''); setActiveTab('Semua'); setCurrentPage(1); };
 
-<<<<<<< HEAD
-  const handleDelete = async (id: number) => {
-    if (!window.confirm('Apakah Anda yakin ingin menghapus program ini?')) return;
-    try { await trainingService.deleteProgram(id); fetchData(); showToast('Program berhasil dihapus', 'success'); } catch (err: any) { console.error(err); showToast(err?.response?.data?.message || err?.message || 'Gagal menghapus program', 'error'); }
-=======
   const handleDelete = async () => {
     if (!deleteTarget) return;
 
     setDeleting(true);
     try {
       await trainingService.deleteProgram(Number(deleteTarget.id));
+      showToast('Program berhasil dihapus', 'success');
       setDeleteTarget(null);
       fetchData();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      showToast(err?.response?.data?.message || err?.message || 'Gagal menghapus program', 'error');
     } finally {
       setDeleting(false);
     }
->>>>>>> 493697e777409b707d0ec7ed200cf2b926b57361
   };
 
   const openEnrollModal = (programId: number, programName: string) => {
@@ -119,8 +115,9 @@ const ProgramsTab: React.FC = () => {
     try {
       await trainingService.enrollEmployees(selectedProgramId, [selectedEmployeeId]);
       closeEnrollModal(); fetchData();
+      showToast('Karyawan berhasil didaftarkan', 'success');
     } catch (err: any) {
-      console.error(err); alert(err.response?.data?.message || 'Gagal mendaftarkan karyawan');
+      console.error(err); showToast(err.response?.data?.message || err?.message || 'Gagal mendaftarkan karyawan', 'error');
     } finally { setEnrolling(false); }
   };
 
@@ -349,8 +346,9 @@ const EnrollmentsTab: React.FC = () => {
       if (completeData.certificate_path) payload.certificate_path = completeData.certificate_path;
       await trainingService.completeTraining(completingEnrollmentId, payload);
       closeCompleteModal(); fetchData();
+      showToast('Pelatihan berhasil ditandai selesai', 'success');
     } catch (err: any) {
-      console.error(err); alert(err.response?.data?.message || 'Gagal menandai pelatihan selesai');
+      console.error(err); showToast(err.response?.data?.message || err?.message || 'Gagal menandai pelatihan selesai', 'error');
     } finally { setCompleting(false); }
   };
 

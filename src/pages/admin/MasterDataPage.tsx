@@ -177,15 +177,12 @@ const MasterDataPage: React.FC = () => {
    */
   const handleSave = async () => {
     if (!formData.name.trim()) {
-      alert('Nama tidak boleh kosong.');
+      showToast('Nama tidak boleh kosong.', 'warning');
       return;
     }
 
     try {
       if (editingItem) {
-        // ── UPDATE ──
-        // Try the dedicated endpoint first; fall back to updating in local state only
-        // if the backend doesn't expose per-resource routes yet.
         const endpointMap: Record<ActiveTab, string> = {
           department: `/departments/${editingItem.id}`,
           position:   `/positions/${editingItem.id}`,
@@ -193,18 +190,15 @@ const MasterDataPage: React.FC = () => {
         try {
           await api.put(endpointMap[activeTab], formData);
         } catch {
-          // Backend may not have separate resource routes — do optimistic update only
           console.warn('PUT endpoint not available, applying local update only.');
         }
 
-        // Optimistic update in local state
         const updater = (prev: any[]): any[] =>
           prev.map((i) => i.id === editingItem.id ? { ...i, ...formData } : i);
         if (activeTab === 'department') setDepartments(updater);
         if (activeTab === 'position')   setPositions(updater);
 
       } else {
-        // ── CREATE ──
         const endpointMap: Record<ActiveTab, string> = {
           department: '/departments',
           position:   '/positions',
@@ -218,7 +212,6 @@ const MasterDataPage: React.FC = () => {
           console.warn('POST endpoint not available, applying local insert only.');
         }
 
-        // Optimistic insert — use server-returned item if available, otherwise build locally
         const localItem = newItem ?? {
           id: Date.now(),
           ...formData,
@@ -230,12 +223,12 @@ const MasterDataPage: React.FC = () => {
       }
 
       setShowModal(false);
-      // Re-fetch to stay in sync with server
       fetchData();
+      showToast('Data berhasil disimpan', 'success');
 
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert('Gagal menyimpan data.');
+      showToast(err?.response?.data?.message || err?.message || 'Gagal menyimpan data.', 'error');
     }
   };
 
@@ -250,8 +243,9 @@ const MasterDataPage: React.FC = () => {
     try {
       await api.delete(endpointMap[tab]);
       showToast(`${tab === 'department' ? 'Departemen' : 'Posisi'} berhasil dihapus`, 'success');
-    } catch {
+    } catch (err: any) {
       console.warn('DELETE endpoint not available, applying local removal only.');
+      showToast(err?.response?.data?.message || err?.message || `Gagal menghapus ${tab}`, 'error');
     }
     // Optimistic removal
     const remover = (prev: any[]): any[] => prev.filter((i) => i.id !== item.id);

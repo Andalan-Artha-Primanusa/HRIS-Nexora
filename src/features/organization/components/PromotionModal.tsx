@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Modal } from '@/shared/ui/Modal';
 import { Button } from '@/shared/ui/Button';
 import { getAllEmployees } from '@/features/employee/api/employee.service';
+import { showToast } from '@/shared/ui/toast';
 import { User, ArrowUpRight, Calendar, DollarSign, Building2, AlignLeft } from 'lucide-react';
 
 interface PromotionModalProps {
@@ -69,8 +70,9 @@ export const PromotionModal: React.FC<PromotionModalProps> = ({ isOpen, onClose,
         new_salary: formData.new_salary ? Number(formData.new_salary) : undefined,
       });
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      showToast(error?.response?.data?.message || error?.message || 'Gagal menyimpan promosi', 'error');
     } finally {
       setLoading(false);
     }

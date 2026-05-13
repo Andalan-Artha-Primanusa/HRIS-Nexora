@@ -108,37 +108,37 @@ const OvertimeApprovalPage: React.FC = () => {
       const payload = res?.data?.data ?? res?.data ?? res;
       const list = Array.isArray(payload) ? payload : [];
       if (list.length === 0) {
-        alert('Tidak ada bukti untuk pengajuan ini');
+        showToast('Tidak ada bukti untuk pengajuan ini', 'info');
         return;
       }
       const names = list.map((e: any, i: number) => `${i + 1}. ${e.filename || e.name || e.file_name || 'file'} [${e.status || '-'}]`);
       const pick = window.prompt('Bukti:\n' + names.join('\n') + '\n\nMasukkan nomor untuk membuka/kelola (kosong = batalkan)');
       if (!pick) return;
       const idx = parseInt(pick, 10) - 1;
-      if (Number.isNaN(idx) || idx < 0 || idx >= list.length) return alert('Pilihan tidak valid');
+      if (Number.isNaN(idx) || idx < 0 || idx >= list.length) { showToast('Pilihan tidak valid', 'error'); return; }
       const ev = list[idx];
       const url = ev.url || ev.file_url || ev.path;
       if (url) window.open(url, '_blank');
 
-      if (ev.status === 'approved') return alert('Bukti sudah disetujui');
+      if (ev.status === 'approved') { showToast('Bukti sudah disetujui', 'info'); return; }
 
       const action = window.prompt('Ketik "approve" untuk setujui, "reject" untuk tolak (kosong = batal)');
       if (!action) return;
       if (action.toLowerCase() === 'approve') {
         await overtimeService.approveEvidence(ev.id);
-        alert('Bukti disetujui');
+        showToast('Bukti berhasil disetujui', 'success');
         fetchData();
       } else if (action.toLowerCase() === 'reject') {
         const reason = window.prompt('Alasan penolakan (opsional):');
         await overtimeService.rejectEvidence(ev.id, reason || undefined);
-        alert('Bukti ditolak');
+        showToast('Bukti berhasil ditolak', 'success');
         fetchData();
       } else {
-        alert('Perintah tidak dikenal');
+        showToast('Perintah tidak dikenal', 'error');
       }
     } catch (err: any) {
       console.error(err);
-      alert('Gagal mengambil bukti');
+      showToast(err?.response?.data?.message || err?.message || 'Gagal mengambil bukti', 'error');
     }
   };
 
@@ -417,9 +417,9 @@ const OvertimeApprovalPage: React.FC = () => {
                                 className="action-btn action-btn-edit"
                                 onClick={() => {
                                   const info = req.status === 'approved'
-                                    ? `Disetujui oleh: ${req.approver?.name || '-'}\nPada: ${req.approved_at || '-'}`
-                                    : `Ditolak oleh: ${req.approver?.name || '-'}\nAlasan: ${req.reject_reason || '-'}`;
-                                  alert(info);
+                                    ? `Disetujui oleh: ${req.approver?.name || '-'} - ${req.approved_at || '-'}`
+                                    : `Ditolak oleh: ${req.approver?.name || '-'} - ${req.reject_reason || '-'}`;
+                                  showToast(info, 'info');
                                 }}
                                 title="Lihat Detail"
                               >

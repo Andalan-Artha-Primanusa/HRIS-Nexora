@@ -183,14 +183,9 @@ const InventoryTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading, 
 
     setDeleting(true);
     try {
-<<<<<<< HEAD
-      await assetService.deleteAsset(id);
-      showToast('Aset berhasil dihapus', 'success');
-=======
       await assetService.deleteAsset(deleteTarget.id);
       showToast('Aset berhasil dihapus', 'success');
       setDeleteTarget(null);
->>>>>>> 493697e777409b707d0ec7ed200cf2b926b57361
     } catch (error: any) {
       console.error('Failed to delete asset:', error);
       showToast(error?.response?.data?.message || error?.message || 'Gagal menghapus aset', 'error');

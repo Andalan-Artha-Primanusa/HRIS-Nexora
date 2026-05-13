@@ -184,9 +184,10 @@ const TrainingProgramsPage: React.FC = () => {
       await trainingService.enrollEmployees(selectedProgramId, [selectedEmployeeId]);
       closeEnrollModal();
       fetchData();
+      showToast('Karyawan berhasil didaftarkan', 'success');
     } catch (err: any) {
       console.error(err);
-      alert(err.response?.data?.message || 'Gagal mendaftarkan karyawan');
+      showToast(err.response?.data?.message || err?.message || 'Gagal mendaftarkan karyawan', 'error');
     } finally {
       setEnrolling(false);
     }

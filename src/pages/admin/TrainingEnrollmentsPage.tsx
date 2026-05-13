@@ -101,9 +101,10 @@ const TrainingEnrollmentsPage: React.FC = () => {
       await trainingService.completeTraining(completingEnrollmentId, payload);
       closeCompleteModal();
       fetchData();
+      showToast('Pelatihan berhasil ditandai selesai', 'success');
     } catch (err: any) {
       console.error(err);
-      alert(err.response?.data?.message || 'Gagal menandai pelatihan selesai');
+      showToast(err.response?.data?.message || err?.message || 'Gagal menandai pelatihan selesai', 'error');
     } finally {
       setCompleting(false);
     }
