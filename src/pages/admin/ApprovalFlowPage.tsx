@@ -265,9 +265,10 @@ const ApprovalFlowPage: React.FC = () => {
 
       <ApprovalFlowModal
         isOpen={isModalOpen}
-        onClose={closeModal}
+        onClose={() => { setIsModalOpen(false); setEditFlow(null); }}
         onSave={editFlow ? handleUpdate : handleSave}
         editData={editFlow}
+        existingFlows={flows}
       />
 
       <ConfirmDialog

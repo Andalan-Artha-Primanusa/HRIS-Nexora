@@ -9,9 +9,25 @@ interface ApprovalFlowModalProps {
   onClose: () => void;
   onSave: (data: any) => void;
   editData?: any | null;
+  existingFlows?: any[];
 }
 
-export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, onClose, onSave, editData }) => {
+const MODULES = [
+  { value: 'assignment_letter', label: 'Assignment Letter (Surat Tugas)' },
+  { value: 'leave', label: 'Leave Request' },
+  { value: 'reimbursement', label: 'Reimbursement' },
+  { value: 'overtime', label: 'Overtime' },
+  { value: 'promotion', label: 'Promotion Request' },
+  { value: 'training', label: 'Training Request' },
+  { value: 'document', label: 'Document (Dokumen Karyawan)' },
+  { value: 'asset_assignment', label: 'Asset Assignment' },
+  { value: 'shift_swap', label: 'Shift Swap (Tukar Shift)' },
+  { value: 'payroll', label: 'Payroll' },
+  { value: 'kpi', label: 'KPI (Key Performance Indicator)' },
+  { value: 'benefit_assignment', label: 'Benefit Assignment' },
+];
+
+export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, onClose, onSave, editData, existingFlows = [] }) => {
   const [loading, setLoading] = useState(false);
   const [roles, setRoles] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
@@ -145,18 +161,16 @@ export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, on
               onChange={(e) => setFormData({ ...formData, module: e.target.value })}
               style={{ height: '52px', borderRadius: '12px', border: '1px solid #e2e8f0', width: '100%', padding: '0 16px', fontSize: '0.95rem', cursor: 'pointer' }}
             >
-              <option value="assignment_letter">Assignment Letter (Surat Tugas)</option>
-              <option value="leave">Leave Request</option>
-              <option value="reimbursement">Reimbursement</option>
-              <option value="overtime">Overtime</option>
-              <option value="promotion">Promotion Request</option>
-              <option value="training">Training Request</option>
-              <option value="document">Document (Dokumen Karyawan)</option>
-              <option value="asset_assignment">Asset Assignment</option>
-              <option value="shift_swap">Shift Swap (Tukar Shift)</option>
-              <option value="payroll">Payroll</option>
-              <option value="kpi">KPI (Key Performance Indicator)</option>
-              <option value="benefit_assignment">Benefit Assignment</option>
+              {MODULES.map((mod) => {
+                const hasActiveFlow = !editData && existingFlows.some(
+                  (f) => f.module === mod.value && f.is_active !== false
+                );
+                return (
+                  <option key={mod.value} value={mod.value} disabled={hasActiveFlow}>
+                    {mod.label} {hasActiveFlow ? '(Sudah ada)' : ''}
+                  </option>
+                );
+              })}
             </select>
           </div>
 
