@@ -6,6 +6,7 @@ import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDispl
 import { workforceService } from '@/features/workforce/api/workforce.service';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
+import { showToast } from '@/shared/ui/toast';
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 
 const ShiftSwapsPage: React.FC = () => {
@@ -25,8 +26,9 @@ const ShiftSwapsPage: React.FC = () => {
       const data = await workforceService.getShiftSwaps();
       const swapsArray = Array.isArray(data?.items) ? data.items : [];
       setSwaps(swapsArray);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      showToast(err?.response?.data?.message || err?.message || 'Gagal memuat data penukaran shift', 'error');
       setSwaps([]);
     } finally {
       setLoading(false);
@@ -83,12 +85,13 @@ const ShiftSwapsPage: React.FC = () => {
           await workforceService.approveShiftSwap(swap.id);
         }
         fetchData();
+        showToast('Penukaran shift berhasil disetujui', 'success');
       } catch (error: any) {
         const msg = error?.response?.data?.message || error?.message || 'Gagal menyetujui';
         if (msg.includes('Approval flow') || msg.includes('No approval flow')) {
-          alert('Tidak bisa menyetujui karena belum ada alur persetujuan (approval flow) untuk Shift Swap. Silakan buat di menu Alur Persetujuan terlebih dahulu.');
+          showToast('Tidak bisa menyetujui karena belum ada alur persetujuan (approval flow) untuk Shift Swap. Silakan buat di menu Alur Persetujuan terlebih dahulu.', 'error');
         } else {
-          alert(msg);
+          showToast(msg, 'error');
         }
         console.error('Failed to approve shift swap:', error);
       }
@@ -100,9 +103,10 @@ const ShiftSwapsPage: React.FC = () => {
       try {
         await workforceService.rejectShiftSwap(swap.id);
         fetchData();
+        showToast('Penukaran shift berhasil ditolak', 'success');
       } catch (error: any) {
         const msg = error?.response?.data?.message || error?.message || 'Gagal menolak';
-        alert(msg);
+        showToast(msg, 'error');
         console.error('Failed to reject shift swap:', error);
       }
     }

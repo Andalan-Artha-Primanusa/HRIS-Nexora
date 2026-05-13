@@ -91,6 +91,7 @@ const InventoryTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading, 
         assignment_note: assignmentNote,
       });
       closeAssignModal();
+      showToast('Aset berhasil ditugaskan', 'success');
     } catch (error: any) {
       console.error('Failed to assign asset:', error);
       showToast(error?.response?.data?.message || error?.message || 'Gagal menugaskan aset', 'error');
@@ -121,6 +122,7 @@ const InventoryTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading, 
         condition: 'good',
       });
       closeReturnModal();
+      showToast('Aset berhasil dikembalikan', 'success');
     } catch (error: any) {
       console.error('Failed to return asset:', error);
       showToast(error?.response?.data?.message || error?.message || 'Gagal mengembalikan aset', 'error');
@@ -181,9 +183,14 @@ const InventoryTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading, 
 
     setDeleting(true);
     try {
+<<<<<<< HEAD
+      await assetService.deleteAsset(id);
+      showToast('Aset berhasil dihapus', 'success');
+=======
       await assetService.deleteAsset(deleteTarget.id);
       showToast('Aset berhasil dihapus', 'success');
       setDeleteTarget(null);
+>>>>>>> 493697e777409b707d0ec7ed200cf2b926b57361
     } catch (error: any) {
       console.error('Failed to delete asset:', error);
       showToast(error?.response?.data?.message || error?.message || 'Gagal menghapus aset', 'error');
@@ -510,6 +517,7 @@ const AssignmentsTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading
       await assetService.returnAsset(returnTarget.id, data);
       setReturnTarget(null);
       fetchAssignments();
+      showToast('Aset berhasil dikembalikan', 'success');
     } catch (error: any) {
       console.error('Failed to return asset:', error);
       showToast(error?.response?.data?.message || error?.message || 'Gagal mengembalikan aset', 'error');
@@ -531,6 +539,7 @@ const AssignmentsTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading
     try {
       await assetService.approveAssignment(assignment.id);
       fetchAssignments();
+      showToast('Penugasan berhasil disetujui', 'success');
     } catch (error: any) {
       console.error('Failed to approve assignment:', error);
       showToast(error?.response?.data?.message || error?.message || 'Gagal menyetujui penugasan', 'error');
@@ -542,6 +551,7 @@ const AssignmentsTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading
     try {
       await assetService.rejectAssignment(assignment.id);
       fetchAssignments();
+      showToast('Penugasan berhasil ditolak', 'success');
     } catch (error: any) {
       console.error('Failed to reject assignment:', error);
       showToast(error?.response?.data?.message || error?.message || 'Gagal menolak penugasan', 'error');

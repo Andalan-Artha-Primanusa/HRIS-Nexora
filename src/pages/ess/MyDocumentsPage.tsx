@@ -21,6 +21,7 @@ import { Card, CardHeader } from '@/shared/ui';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { documentService } from '@/features/employee/api/document.service';
 import type { EmployeeDocument } from '@/features/employee/types/document.types';
+import { showToast } from '@/shared/ui/toast';
 import { api } from '@/shared/api/httpClient';
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 import '@/shared/styles/CrudPage.css';
@@ -154,10 +155,12 @@ const UploadDocumentModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSu
       formData.append('file', file!);
 
       await documentService.uploadDocument(formData);
+      showToast('Dokumen berhasil diunggah', 'success');
       onSuccess();
       onClose();
     } catch (err: any) {
       console.error('Upload failed', err);
+      showToast(err?.response?.data?.message || err?.message || 'Gagal mengunggah dokumen', 'error');
       // Handle validation errors from API
       if (err?.errors) {
         const apiErrors: Record<string, string> = {};

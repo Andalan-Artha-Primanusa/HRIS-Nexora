@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Save, Gift, Shield, DollarSign } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { showToast } from '@/shared/ui/toast';
 import { benefitService } from '@/features/benefits/api/benefit.service';
 import '@/shared/styles/CrudPage.css';
 
@@ -45,12 +46,15 @@ const BenefitFormPage: React.FC = () => {
     try {
       if (isEdit) {
         await benefitService.updateBenefit(id, formData);
+        showToast('Benefit berhasil diperbarui', 'success');
       } else {
         await benefitService.createBenefit(formData);
+        showToast('Benefit berhasil dibuat', 'success');
       }
       navigate('/compensation/benefits');
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      showToast(err?.response?.data?.message || err?.message || 'Gagal menyimpan benefit', 'error');
     } finally {
       setLoading(false);
     }

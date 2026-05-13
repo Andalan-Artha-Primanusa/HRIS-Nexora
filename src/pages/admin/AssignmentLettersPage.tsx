@@ -49,6 +49,7 @@ const AssignmentLettersPage: React.FC = () => {
     try {
       await legalService.createAssignmentLetter(formData);
       fetchData();
+      showToast('Surat tugas berhasil dibuat', 'success');
     } catch (err: any) {
       console.error('Failed to create assignment letter', err);
       showToast(err?.response?.data?.message || err?.message || 'Gagal membuat surat tugas', 'error');
@@ -60,6 +61,7 @@ const AssignmentLettersPage: React.FC = () => {
     try {
       await legalService.approveAssignmentLetter(id);
       fetchData();
+      showToast('Surat tugas berhasil disetujui', 'success');
     } catch (err: any) {
       console.error('Failed to approve', err);
       showToast(err?.response?.data?.message || err?.message || 'Gagal menyetujui surat tugas', 'error');
@@ -70,6 +72,7 @@ const AssignmentLettersPage: React.FC = () => {
     try {
       await legalService.rejectAssignmentLetter(id);
       fetchData();
+      showToast('Surat tugas berhasil ditolak', 'success');
     } catch (err: any) {
       console.error('Failed to reject', err);
       showToast(err?.response?.data?.message || err?.message || 'Gagal menolak surat tugas', 'error');

@@ -7,6 +7,7 @@ import { api } from '@/shared/api/httpClient';
 import { useAuthStore } from '@/app/store/auth.store';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
+import { showToast } from '@/shared/ui/toast';
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 
 interface OvertimeRequest {
@@ -78,9 +79,10 @@ const OvertimeApprovalPage: React.FC = () => {
       setLoading(true);
       await api.put(`/overtime/requests/${id}/approve`);
       fetchData();
-    } catch (error) {
+      showToast('Lembur berhasil disetujui', 'success');
+    } catch (error: any) {
       console.error(error);
-      alert('Gagal menyetujui lembur');
+      showToast(error?.response?.data?.message || 'Gagal menyetujui lembur', 'error');
       setLoading(false);
     }
   };
@@ -92,9 +94,10 @@ const OvertimeApprovalPage: React.FC = () => {
       setLoading(true);
       await api.put(`/overtime/requests/${id}/reject`, { reject_reason: reason || undefined });
       fetchData();
-    } catch (error) {
+      showToast('Lembur berhasil ditolak', 'success');
+    } catch (error: any) {
       console.error(error);
-      alert('Gagal menolak lembur');
+      showToast(error?.response?.data?.message || 'Gagal menolak lembur', 'error');
       setLoading(false);
     }
   };

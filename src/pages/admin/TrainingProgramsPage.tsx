@@ -11,6 +11,7 @@ import type { TrainingProgram } from '@/features/training/types/training.types';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import './TrainingProgramsPage.css';
+import { showToast } from '@/shared/ui/toast';
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 
 const formatDateTime = (input: string) => {
@@ -143,8 +144,10 @@ const TrainingProgramsPage: React.FC = () => {
       try {
         await trainingService.deleteProgram(id);
         fetchData();
-      } catch (err) {
+        showToast('Program berhasil dihapus', 'success');
+      } catch (err: any) {
         console.error(err);
+        showToast(err?.response?.data?.message || err?.message || 'Gagal menghapus program', 'error');
       }
     }
   };
