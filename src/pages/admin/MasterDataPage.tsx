@@ -2,8 +2,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Plus, RefreshCw, Edit, Trash2, Search, Building2, Briefcase, Database, CheckCircle } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
+import { showToast } from '@/shared/ui/toast';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
@@ -73,6 +75,8 @@ const MasterDataPage: React.FC = () => {
   // Modal state
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState<DepartmentItem | PositionItem | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ item: DepartmentItem | PositionItem; tab: ActiveTab } | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     code: '',
@@ -235,21 +239,26 @@ const MasterDataPage: React.FC = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!window.confirm(`Yakin ingin menghapus ${activeTab} ini?`)) return;
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    const { item, tab } = deleteTarget;
     const endpointMap: Record<ActiveTab, string> = {
-      department: `/departments/${id}`,
-      position:   `/positions/${id}`,
+      department: `/departments/${item.id}`,
+      position:   `/positions/${item.id}`,
     };
+    setDeleting(true);
     try {
-      await api.delete(endpointMap[activeTab]);
+      await api.delete(endpointMap[tab]);
+      showToast(`${tab === 'department' ? 'Departemen' : 'Posisi'} berhasil dihapus`, 'success');
     } catch {
       console.warn('DELETE endpoint not available, applying local removal only.');
     }
     // Optimistic removal
-    const remover = (prev: any[]): any[] => prev.filter((i) => i.id !== id);
-    if (activeTab === 'department') setDepartments(remover);
-    if (activeTab === 'position')   setPositions(remover);
+    const remover = (prev: any[]): any[] => prev.filter((i) => i.id !== item.id);
+    if (tab === 'department') setDepartments(remover);
+    if (tab === 'position')   setPositions(remover);
+    setDeleteTarget(null);
+    setDeleting(false);
     fetchData();
   };
 
@@ -456,7 +465,7 @@ const MasterDataPage: React.FC = () => {
                             </button>
                             <button
                               className="action-btn action-btn-delete"
-                              onClick={() => handleDelete(item.id)}
+                              onClick={() => setDeleteTarget({ item, tab: activeTab })}
                               title="Hapus"
                             >
                               <Trash2 size={16} />
@@ -597,6 +606,17 @@ const MasterDataPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        title={`Hapus ${deleteTarget?.tab === 'position' ? 'Posisi' : 'Departemen'}`}
+        message={`${deleteTarget?.tab === 'position' ? 'Posisi' : 'Departemen'} "${deleteTarget?.item.name || 'ini'}" akan dihapus. Tindakan ini tidak dapat dibatalkan.`}
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        loading={deleting}
+        onConfirm={() => void handleDelete()}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 };

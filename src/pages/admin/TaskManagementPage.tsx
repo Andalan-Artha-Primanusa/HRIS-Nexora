@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Filter, Plus, RefreshCw, Pencil, Trash2, CheckCircle, Clock, AlertCircle, X, Sparkles } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
+import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { taskService } from '@/features/tasks/api/task.service';
 import { TaskModal } from '@/features/tasks/components/TaskModal';
+import { showToast } from '@/shared/ui/toast';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/employee/EmployeesPage.css';
@@ -23,6 +25,8 @@ const TaskManagementPage: React.FC = () => {
   const [completingTask, setCompletingTask] = useState<any>(null);
   const [completionNotes, setCompletionNotes] = useState('');
   const [submittingCompletion, setSubmittingCompletion] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<any>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -69,13 +73,20 @@ const TaskManagementPage: React.FC = () => {
     fetchData();
   };
 
-  const handleDelete = async (id: string | number) => {
-    if (!window.confirm('Hapus tugas ini?')) return;
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+
+    setDeleting(true);
     try {
-      await taskService.deleteTask(id);
+      await taskService.deleteTask(deleteTarget.id);
+      showToast('Tugas berhasil dihapus', 'success');
+      setDeleteTarget(null);
       fetchData();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      showToast(error?.response?.data?.message || error?.message || 'Gagal menghapus tugas', 'error');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -475,7 +486,7 @@ const TaskManagementPage: React.FC = () => {
                             </button>
                             <button
                               className="action-btn action-btn-delete"
-                              onClick={() => handleDelete(task.id)}
+                              onClick={() => setDeleteTarget(task)}
                               title="Hapus"
                             >
                               <Trash2 size={16} />
@@ -566,6 +577,17 @@ const TaskManagementPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        title="Hapus Tugas"
+        message={`Tugas "${String(deleteTarget?.title || "ini")}" akan dihapus. Tindakan ini tidak dapat dibatalkan.`}
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        loading={deleting}
+        onConfirm={() => void handleDelete()}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 };

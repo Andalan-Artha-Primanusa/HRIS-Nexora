@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { BarChart3, PlusCircle, Settings2, X, RefreshCw, Wallet, Gift, MinusCircle, Search } from "lucide-react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
+import { ConfirmDialog } from "@/shared/ui/ConfirmDialog";
 import { payrollService, toSafeArray, getAllPayroll } from "@/features/payroll/api/payroll.service";
 import { getAllEmployees } from "@/features/employee/api/employee.service";
 import { showToast } from "@/shared/ui/toast";
@@ -44,6 +45,7 @@ const PayrollDetailsPage = () => {
   const [currentPageOverview, setCurrentPageOverview] = useState(1);
   const pageSizeOverview = 10;
   const [loading, setLoading] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const fetchMetadata = async () => {
     try {
@@ -221,18 +223,27 @@ const PayrollDetailsPage = () => {
     }
   };
 
+  const requestDeleteSingle = () => {
+    const id = detailId.trim();
+    if (!id) {
+      showToast("Pilih komponen terlebih dahulu", "error");
+      return;
+    }
+    setDeleteDialogOpen(true);
+  };
+
   const deleteSingle = async () => {
     const id = detailId.trim();
     if (!id) {
       showToast("Pilih komponen terlebih dahulu", "error");
       return;
     }
-    if (!window.confirm("Hapus komponen ini?")) return;
     setLoading(true);
     try {
       await payrollService.deletePayrollDetail(id);
       showToast("Komponen berhasil dihapus", "success");
       setDetailId("");
+      setDeleteDialogOpen(false);
       await loadPayrollDetails();
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : "Gagal hapus detail";
@@ -550,7 +561,7 @@ const PayrollDetailsPage = () => {
                 <Button variant="primary" size="md" onClick={() => void updateSingle()} disabled={loading || !detailId}>
                   {loading ? 'Menyimpan...' : 'Simpan Perubahan'}
                 </Button>
-                <Button variant="ghost" size="md" onClick={() => void deleteSingle()} disabled={loading || !detailId} style={{ color: '#ef4444' }}>
+                <Button variant="ghost" size="md" onClick={requestDeleteSingle} disabled={loading || !detailId} style={{ color: '#ef4444' }}>
                   Hapus Komponen
                 </Button>
               </div>
@@ -642,6 +653,17 @@ const PayrollDetailsPage = () => {
           )}
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={deleteDialogOpen}
+        title="Hapus Komponen Payroll"
+        message={`Komponen "${detailName || "ini"}" akan dihapus dari payroll. Tindakan ini tidak dapat dibatalkan.`}
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        loading={loading}
+        onConfirm={() => void deleteSingle()}
+        onCancel={() => setDeleteDialogOpen(false)}
+      />
     </div>
   );
 };

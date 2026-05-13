@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Plus, RefreshCw, Wallet, Search, Eye, Pencil, Trash2, Send, CheckCircle2, Clock, TrendingUp, History } from 'lucide-react';
-import { Card, CardHeader } from '@/shared/ui';
+import { Card, ConfirmDialog } from '@/shared/ui';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { ReimbursementDetailModal } from '@/features/reimbursement/components/ReimbursementDetailModal';
 import { ReimbursementModal } from '@/features/reimbursement/components/ReimbursementModal';
@@ -49,6 +49,8 @@ const MyReimbursementsPage: React.FC = () => {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<ReimbursementItem | null>(null);
   const [historyModal, setHistoryModal] = useState<{ module: string; id: number | string } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ReimbursementItem | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Search & Filter
   const [searchText, setSearchText] = useState("");
@@ -159,16 +161,20 @@ const MyReimbursementsPage: React.FC = () => {
     }
   };
 
-  const handleDelete = async (item: ReimbursementItem) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus klaim ini?')) {
-      try {
-        await deleteMyReimbursement(String(item.id));
-        await fetchData();
-        showToast("Klaim reimbursement berhasil dihapus.", "success");
-      } catch (error: any) {
-        console.error('Failed to delete reimbursement:', error);
-        showToast(getActionErrorMessage(error, "Gagal menghapus klaim reimbursement."), "error");
-      }
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+
+    setDeleting(true);
+    try {
+      await deleteMyReimbursement(String(deleteTarget.id));
+      await fetchData();
+      showToast("Klaim reimbursement berhasil dihapus.", "success");
+      setDeleteTarget(null);
+    } catch (error: any) {
+      console.error('Failed to delete reimbursement:', error);
+      showToast(getActionErrorMessage(error, "Gagal menghapus klaim reimbursement."), "error");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -385,7 +391,7 @@ const MyReimbursementsPage: React.FC = () => {
                             {item.status === 'draft' && (
                               <button
                                 className="action-btn action-btn-delete"
-                                onClick={() => handleDelete(item)}
+                                onClick={() => setDeleteTarget(item)}
                                 title="Hapus"
                               >
                                 <Trash2 size={16} />
@@ -457,6 +463,17 @@ const MyReimbursementsPage: React.FC = () => {
           moduleId={historyModal.id}
         />
       )}
+
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        title="Hapus Klaim Reimbursement"
+        message={`Klaim "${String(deleteTarget?.title || "ini")}" akan dihapus dari daftar draft Anda. Tindakan ini tidak dapat dibatalkan.`}
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        loading={deleting}
+        onConfirm={() => void handleDelete()}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 };

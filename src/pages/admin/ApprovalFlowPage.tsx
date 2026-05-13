@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { GitBranch, Plus, RefreshCw, Workflow, Edit, Trash2, User, ToggleLeft, ToggleRight } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
+import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { organizationService } from '@/features/organization/api/organization.service';
 import { ApprovalFlowModal } from '@/features/organization/components/ApprovalFlowModal';
 import { getAllRoles } from '@/features/admin/api/admin.service';
@@ -18,6 +19,8 @@ const ApprovalFlowPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [moduleFilter, setModuleFilter] = useState('all');
   const [roles, setRoles] = useState<any[]>([]);
+  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -68,14 +71,19 @@ const ApprovalFlowPage: React.FC = () => {
     }
   };
 
-  const handleDelete = async (flow: any) => {
-    if (!window.confirm(`Hapus approval flow "${flow.name}"?`)) return;
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+
+    setDeleting(true);
     try {
-      await organizationService.deleteApprovalFlow(flow.id);
+      await organizationService.deleteApprovalFlow(deleteTarget.id);
       showToast('Approval flow berhasil dihapus', 'success');
+      setDeleteTarget(null);
       fetchData();
     } catch (err: any) {
       showToast(err.message || 'Gagal menghapus approval flow', 'error');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -242,7 +250,7 @@ const ApprovalFlowPage: React.FC = () => {
                 <button className="btn-outline" onClick={() => openEdit(flow)}>
                   <Edit size={14} /> Edit
                 </button>
-                <button className="btn-outline" style={{ color: '#ef4444', borderColor: '#fecaca' }} onClick={() => handleDelete(flow)}>
+                <button className="btn-outline" style={{ color: '#ef4444', borderColor: '#fecaca' }} onClick={() => setDeleteTarget(flow)}>
                   <Trash2 size={14} /> Delete
                 </button>
                 <button className="btn-outline" onClick={() => toggleActive(flow)}>
@@ -260,6 +268,17 @@ const ApprovalFlowPage: React.FC = () => {
         onClose={closeModal}
         onSave={editFlow ? handleUpdate : handleSave}
         editData={editFlow}
+      />
+
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        title="Hapus Approval Flow"
+        message={`Approval flow "${String(deleteTarget?.name || "ini")}" akan dihapus. Tindakan ini tidak dapat dibatalkan.`}
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        loading={deleting}
+        onConfirm={() => void handleDelete()}
+        onCancel={() => setDeleteTarget(null)}
       />
     </div>
   );

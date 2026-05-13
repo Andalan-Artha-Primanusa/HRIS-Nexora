@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardHeader } from '@/shared/ui';
+import { Card, CardHeader, ConfirmDialog } from '@/shared/ui';
 import { Button } from '@/shared/ui/Button';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { getAllLocations, deleteLocation } from '@/features/location/api/location.service';
@@ -14,6 +14,8 @@ const LocationsPage = () => {
   const navigate = useNavigate();
   const [locations, setLocations] = useState<LocationItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<LocationItem | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Search & Filter State
@@ -109,19 +111,20 @@ const LocationsPage = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Apakah Anda yakin ingin menghapus lokasi ini?')) return;
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
 
-    setLoading(true);
+    setDeleting(true);
     try {
-      await deleteLocation(id);
+      await deleteLocation(String((deleteTarget as any).id));
       await loadLocations();
       setErrorMessage(null);
+      setDeleteTarget(null);
     } catch (err: any) {
       const message = err.response?.data?.message || err.message || 'Gagal menghapus location';
       setErrorMessage(message);
     } finally {
-      setLoading(false);
+      setDeleting(false);
     }
   };
 
@@ -314,7 +317,7 @@ const LocationsPage = () => {
                               <button className="action-btn action-btn-edit" onClick={() => navigate(`/locations/edit/${loc.id}`)} title="Edit">
                                 <Pencil size={16} />
                               </button>
-                              <button className="action-btn action-btn-delete" onClick={() => void handleDelete(String(loc.id))} title="Hapus">
+                              <button className="action-btn action-btn-delete" onClick={() => setDeleteTarget(location)} title="Hapus">
                                 <Trash2 size={16} />
                               </button>
                             </div>
@@ -361,6 +364,17 @@ const LocationsPage = () => {
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        title="Hapus Lokasi"
+        message={`Lokasi "${String((deleteTarget as any)?.name || "ini")}" akan dihapus. Tindakan ini tidak dapat dibatalkan.`}
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        loading={deleting}
+        onConfirm={() => void handleDelete()}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 };

@@ -2,8 +2,10 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Calendar, RefreshCw, Edit, Trash2, CalendarDays, Search } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
+import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { workforceService } from '@/features/workforce/api/workforce.service';
+import { showToast } from '@/shared/ui/toast';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 
@@ -12,6 +14,8 @@ const HolidayCalendarPage: React.FC = () => {
   const [holidays, setHolidays] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Search & Filter
   const [searchText, setSearchText] = useState("");
@@ -86,14 +90,20 @@ const HolidayCalendarPage: React.FC = () => {
     setCurrentPage(1);
   }, [searchText, activeTab]);
 
-  const handleDelete = async (id: string | number) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus hari libur ini?')) {
-      try {
-        await workforceService.deleteHoliday(id);
-        fetchData();
-      } catch (error) {
-        console.error('Failed to delete holiday:', error);
-      }
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+
+    setDeleting(true);
+    try {
+      await workforceService.deleteHoliday(deleteTarget.id);
+      showToast('Hari libur berhasil dihapus', 'success');
+      setDeleteTarget(null);
+      fetchData();
+    } catch (error: any) {
+      console.error('Failed to delete holiday:', error);
+      showToast(error?.response?.data?.message || error?.message || 'Gagal menghapus hari libur', 'error');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -270,7 +280,7 @@ const HolidayCalendarPage: React.FC = () => {
                             </button>
                             <button
                               className="action-btn action-btn-delete"
-                              onClick={() => handleDelete(h.id)}
+                              onClick={() => setDeleteTarget(h)}
                               title="Hapus"
                             >
                               <Trash2 size={16} />
@@ -318,6 +328,17 @@ const HolidayCalendarPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        title="Hapus Hari Libur"
+        message={`Hari libur "${String(deleteTarget?.name || "ini")}" akan dihapus. Tindakan ini tidak dapat dibatalkan.`}
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        loading={deleting}
+        onConfirm={() => void handleDelete()}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 };

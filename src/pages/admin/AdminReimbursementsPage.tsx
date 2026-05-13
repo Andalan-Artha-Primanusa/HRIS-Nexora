@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { RefreshCw, Wallet, Search, Filter, Clock, CheckCircle, XCircle, Eye, Trash2, FileText, History } from 'lucide-react';
-import { Card, CardHeader } from '@/shared/ui';
+import { Card, CardHeader, ConfirmDialog } from '@/shared/ui';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import {
   getAllReimbursements,
@@ -43,6 +43,8 @@ const AdminReimbursementsPage: React.FC = () => {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<ReimbursementItem | null>(null);
   const [actionNote, setActionNote] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<ReimbursementItem | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -184,6 +186,7 @@ const AdminReimbursementsPage: React.FC = () => {
     }
   };
 
+<<<<<<< HEAD
   const handleDelete = async (item: ReimbursementItem) => {
     if (window.confirm('Hapus klaim ini?')) {
       try {
@@ -194,6 +197,22 @@ const AdminReimbursementsPage: React.FC = () => {
         console.error('Failed to delete:', error);
         showToast(error?.response?.data?.message || error?.message || 'Gagal menghapus klaim', 'error');
       }
+=======
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+
+    setDeleting(true);
+    try {
+      await deleteReimbursement(String(deleteTarget.id));
+      showToast('Klaim reimbursement berhasil dihapus', 'success');
+      setDeleteTarget(null);
+      fetchData();
+    } catch (error: any) {
+      console.error('Failed to delete:', error);
+      showToast(error?.response?.data?.message || error?.message || 'Gagal menghapus klaim', 'error');
+    } finally {
+      setDeleting(false);
+>>>>>>> 493697e777409b707d0ec7ed200cf2b926b57361
     }
   };
 
@@ -413,7 +432,7 @@ const AdminReimbursementsPage: React.FC = () => {
                             )}
                             <button
                               className="action-btn action-btn-delete"
-                              onClick={() => handleDelete(item)}
+                              onClick={() => setDeleteTarget(item)}
                               title="Hapus"
                             >
                               <Trash2 size={16} />
@@ -583,6 +602,17 @@ const AdminReimbursementsPage: React.FC = () => {
           moduleId={historyModal.id}
         />
       )}
+
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        title="Hapus Klaim Reimbursement"
+        message={`Klaim "${String(deleteTarget?.title || "ini")}" akan dihapus. Tindakan ini tidak dapat dibatalkan.`}
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        loading={deleting}
+        onConfirm={() => void handleDelete()}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 };

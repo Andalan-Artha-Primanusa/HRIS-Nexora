@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
+import { ConfirmDialog } from "@/shared/ui/ConfirmDialog";
 import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import {
   approveReimbursement,
@@ -57,6 +58,7 @@ const ReimbursementsManagementPage = () => {
   
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [form, setForm] = useState(DEFAULT_FORM);
+  const [deleteTarget, setDeleteTarget] = useState<ReimbursementItem | null>(null);
 
   const [allItemsRaw, setAllItemsRaw] = useState<ReimbursementItem[]>([]);
 
@@ -195,13 +197,15 @@ const ReimbursementsManagementPage = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if(!window.confirm('Hapus permanen ledger ini?')) return;
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    const id = String(deleteTarget.id);
     setActionLoading(id + '_del');
     try {
       await deleteReimbursement(id);
       await loadData();
       showToast("Data dihapus", "success");
+      setDeleteTarget(null);
     } catch (error: any) {
       showToast(error.message || "Gagal menghapus", "error");
     } finally {
@@ -456,7 +460,7 @@ const ReimbursementsManagementPage = () => {
                              </button>
                              <button
                                   className="action-btn action-btn-delete"
-                                  onClick={() => void handleDelete(String(item.id))}
+                                  onClick={() => setDeleteTarget(item)}
                                   disabled={actionLoading === String(item.id)+'_del'}
                                   title="Hapus Permanen"
                               >
@@ -492,6 +496,17 @@ const ReimbursementsManagementPage = () => {
           </div>
         )}
       </Card>
+
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        title="Hapus Ledger Reimbursement"
+        message={`Ledger "${String(deleteTarget?.title || "ini")}" akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.`}
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        loading={!!deleteTarget && actionLoading === String(deleteTarget.id) + '_del'}
+        onConfirm={() => void handleDelete()}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 };

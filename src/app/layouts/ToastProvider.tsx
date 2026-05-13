@@ -15,21 +15,25 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
         toastOptions={{
           duration: 4000,
           style: {
-            background: "#363636",
-            color: "#fff",
+            background: "#ffffff",
+            color: "#0f172a",
             fontSize: "14px",
-            borderRadius: "8px",
+            borderRadius: "10px",
+            border: "1px solid #e2e8f0",
+            boxShadow: "0 18px 40px rgba(15, 23, 42, 0.14)",
+            padding: "12px 14px",
+            fontWeight: 500,
           },
           success: {
             duration: 3000,
             style: {
-              background: "#10b981",
+              borderColor: "#bbf7d0",
             },
           },
           error: {
             duration: 5000,
             style: {
-              background: "#ef4444",
+              borderColor: "#fecaca",
             },
           },
         }}

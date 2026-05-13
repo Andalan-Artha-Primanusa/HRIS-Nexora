@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Card } from '@/shared/ui/Card';
+import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
 import {
@@ -31,6 +32,8 @@ const AttendanceReportsPage = () => {
   const [filterDate, setFilterDate] = useState(todayStr);
   const [selectedDetail, setSelectedDetail] = useState<any | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<AttendanceItem | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const loadAdminRecords = async () => {
     setAdminLoading(true);
@@ -60,17 +63,19 @@ const AttendanceReportsPage = () => {
     }
   };
 
-  const handleDeleteRecord = async (id: string) => {
-    if (!window.confirm("Apakah Anda yakin ingin menghapus catatan kehadiran ini?")) return;
-    setAdminLoading(true);
+  const confirmDeleteRecord = async () => {
+    if (!deleteTarget) return;
+
+    setDeleting(true);
     try {
-      await deleteAttendanceRecord(id);
+      await deleteAttendanceRecord(String((deleteTarget as any).id));
       showToast("Catatan kehadiran berhasil dihapus", "success");
       await loadAdminRecords();
+      setDeleteTarget(null);
     } catch (error: any) {
       showToast(error.message || "Gagal menghapus catatan", "error");
     } finally {
-      setAdminLoading(false);
+      setDeleting(false);
     }
   };
 
@@ -221,7 +226,10 @@ const AttendanceReportsPage = () => {
             <AttendanceTable
               items={filteredItems}
               onView={handleViewDetail}
-              onDelete={handleDeleteRecord}
+              onDelete={(id) => {
+                const item = adminItems.find((entry: any) => String(entry.id) === String(id)) || null;
+                setDeleteTarget(item);
+              }}
               loading={adminLoading}
             />
           )}
@@ -232,6 +240,17 @@ const AttendanceReportsPage = () => {
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
         item={selectedDetail}
+      />
+
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        title="Hapus Catatan Kehadiran"
+        message="Catatan kehadiran ini akan dihapus dari laporan. Tindakan ini tidak dapat dibatalkan."
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        loading={deleting}
+        onConfirm={() => void confirmDeleteRecord()}
+        onCancel={() => setDeleteTarget(null)}
       />
     </div>
   );

@@ -5,6 +5,7 @@ import { showToast } from '@/shared/ui/toast';
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 import { Card } from '@/shared/ui/Card';
 import { Modal } from '@/shared/ui/Modal';
+import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { trainingService } from '@/features/training/api/training.service';
 import { employeeService } from '@/features/employee/api/employee.service';
@@ -39,6 +40,8 @@ const ProgramsTab: React.FC = () => {
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | null>(null);
   const [enrolling, setEnrolling] = useState(false);
   const [employeeSearch, setEmployeeSearch] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<TrainingProgram | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -82,9 +85,25 @@ const ProgramsTab: React.FC = () => {
 
   const clearFilters = () => { setSearchQuery(''); setActiveTab('Semua'); setCurrentPage(1); };
 
+<<<<<<< HEAD
   const handleDelete = async (id: number) => {
     if (!window.confirm('Apakah Anda yakin ingin menghapus program ini?')) return;
     try { await trainingService.deleteProgram(id); fetchData(); showToast('Program berhasil dihapus', 'success'); } catch (err: any) { console.error(err); showToast(err?.response?.data?.message || err?.message || 'Gagal menghapus program', 'error'); }
+=======
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+
+    setDeleting(true);
+    try {
+      await trainingService.deleteProgram(Number(deleteTarget.id));
+      setDeleteTarget(null);
+      fetchData();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setDeleting(false);
+    }
+>>>>>>> 493697e777409b707d0ec7ed200cf2b926b57361
   };
 
   const openEnrollModal = (programId: number, programName: string) => {
@@ -203,7 +222,7 @@ const ProgramsTab: React.FC = () => {
                               <UserPlus size={16} />
                             </button>
                             <button className="action-btn action-btn-edit" onClick={() => navigate(`/training/programs/edit/${program.id}`)} title="Edit"><Edit size={16} /></button>
-                            <button className="action-btn action-btn-delete" onClick={() => handleDelete(typeof program.id === 'string' ? parseInt(program.id, 10) : program.id)} title="Hapus"><Trash2 size={16} /></button>
+                            <button className="action-btn action-btn-delete" onClick={() => setDeleteTarget(program)} title="Hapus"><Trash2 size={16} /></button>
                           </div>
                         </td>
                       </tr>
@@ -261,6 +280,16 @@ const ProgramsTab: React.FC = () => {
           </div>
         </div>
       </Modal>
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        title="Hapus Program Pelatihan"
+        message={`Program "${String((deleteTarget as any)?.title || (deleteTarget as any)?.nama || 'ini')}" akan dihapus. Tindakan ini tidak dapat dibatalkan.`}
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        loading={deleting}
+        onConfirm={() => void handleDelete()}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </>
   );
 };

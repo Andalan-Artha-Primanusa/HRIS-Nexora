@@ -2,9 +2,11 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, RefreshCw, Package, Search, Filter, Laptop, Monitor, Smartphone, Briefcase, User, Trash2, Pencil, CheckCircle2, X, ArrowDownToLine, ArrowUpFromLine } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
+import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { assetService } from '@/features/assets/api/asset.service';
 import { api } from '@/shared/api/httpClient';
+import { showToast } from '@/shared/ui/toast';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/employee/EmployeesPage.css';
@@ -47,6 +49,8 @@ const AssetInventoryPage: React.FC = () => {
   const [selectedAssignment, setSelectedAssignment] = useState<any>(null);
   const [returnNote, setReturnNote] = useState('');
   const [returningLoading, setReturningLoading] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -221,13 +225,20 @@ const AssetInventoryPage: React.FC = () => {
     setCurrentPage(1);
   };
 
-  const handleDelete = async (id: string | number, name: string) => {
-    if (!window.confirm(`Hapus aset "${name}"? Tindakan ini tidak dapat dibatalkan.`)) return;
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+
+    setDeleting(true);
     try {
-      await assetService.deleteAsset(id);
+      await assetService.deleteAsset(deleteTarget.id);
+      showToast('Aset berhasil dihapus', 'success');
+      setDeleteTarget(null);
       fetchData();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to delete asset:', error);
+      showToast(error?.response?.data?.message || error?.message || 'Gagal menghapus aset', 'error');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -450,7 +461,7 @@ const AssetInventoryPage: React.FC = () => {
                               </button>
                               <button
                                 className="action-btn action-btn-delete"
-                                onClick={() => handleDelete(asset.id, asset.name)}
+                                onClick={() => setDeleteTarget(asset)}
                                 title="Hapus"
                               >
                                 <Trash2 size={16} />
@@ -608,6 +619,17 @@ const AssetInventoryPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        title="Hapus Aset"
+        message={`Aset "${String(deleteTarget?.name || "ini")}" akan dihapus. Tindakan ini tidak dapat dibatalkan.`}
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        loading={deleting}
+        onConfirm={() => void handleDelete()}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 };

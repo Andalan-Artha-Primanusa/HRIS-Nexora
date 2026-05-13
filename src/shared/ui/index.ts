@@ -131,6 +131,7 @@ export {
 
 // Modal Components
 export { Modal } from './Modal';
+export { ConfirmDialog } from './ConfirmDialog';
 
 // Tabs Component
 export { Tabs } from './Tabs';

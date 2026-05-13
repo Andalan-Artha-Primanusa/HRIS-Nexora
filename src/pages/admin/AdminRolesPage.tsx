@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
+import { ConfirmDialog } from "@/shared/ui/ConfirmDialog";
 import { Alert } from "@/shared/ui/Alert";
 import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { KeyRound, RefreshCw, Shield, Plus, Search, Filter, Edit, Trash2 } from "lucide-react";
@@ -32,6 +33,8 @@ const AdminRolesPage = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState("");
   const [alertType, setAlertType] = useState<"success" | "error" | "info">("info");
+  const [deleteTarget, setDeleteTarget] = useState<Role | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
 
@@ -105,23 +108,31 @@ const AdminRolesPage = () => {
     setCurrentPage(1);
   };
 
-  const handleDelete = async (id: number, name: string) => {
-    if (id === 1 || name === "admin" || name === "super_admin") {
+  const requestDelete = (role: Role) => {
+    if (role.id === 1 || role.name === "admin" || role.name === "super_admin") {
       setStatusMessage("Role sistem utama tidak dapat dihapus.");
       setAlertType("error");
       return;
     }
 
-    if (!window.confirm(`Apakah Anda yakin ingin menghapus role "${name}"?`)) return;
+    setDeleteTarget(role);
+  };
 
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+
+    setDeleting(true);
     try {
-      await deleteRole(id);
-      setStatusMessage(`Role "${name}" berhasil dihapus.`);
+      await deleteRole(deleteTarget.id);
+      setStatusMessage(`Role "${deleteTarget.name}" berhasil dihapus.`);
       setAlertType("success");
+      setDeleteTarget(null);
       void loadRoles();
     } catch (error: unknown) {
       setStatusMessage(getErrorMessage(error as never));
       setAlertType("error");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -331,7 +342,7 @@ const AdminRolesPage = () => {
                             </button>
                             <button
                               className="action-btn action-btn-delete"
-                              onClick={() => void handleDelete(role.id, role.name)}
+                              onClick={() => requestDelete(role)}
                               title="Hapus Role"
                               disabled={role.id === 1 || role.name === "admin" || role.name === "super_admin"}
                             >
@@ -380,6 +391,17 @@ const AdminRolesPage = () => {
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        title="Hapus Role"
+        message={`Role "${deleteTarget?.name || ""}" akan dihapus. Pastikan role ini tidak sedang dipakai oleh user aktif.`}
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        loading={deleting}
+        onConfirm={() => void handleDelete()}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 };
