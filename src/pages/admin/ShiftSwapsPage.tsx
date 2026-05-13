@@ -83,7 +83,13 @@ const ShiftSwapsPage: React.FC = () => {
           await workforceService.approveShiftSwap(swap.id);
         }
         fetchData();
-      } catch (error) {
+      } catch (error: any) {
+        const msg = error?.response?.data?.message || error?.message || 'Gagal menyetujui';
+        if (msg.includes('Approval flow') || msg.includes('No approval flow')) {
+          alert('Tidak bisa menyetujui karena belum ada alur persetujuan (approval flow) untuk Shift Swap. Silakan buat di menu Alur Persetujuan terlebih dahulu.');
+        } else {
+          alert(msg);
+        }
         console.error('Failed to approve shift swap:', error);
       }
     }
@@ -94,7 +100,9 @@ const ShiftSwapsPage: React.FC = () => {
       try {
         await workforceService.rejectShiftSwap(swap.id);
         fetchData();
-      } catch (error) {
+      } catch (error: any) {
+        const msg = error?.response?.data?.message || error?.message || 'Gagal menolak';
+        alert(msg);
         console.error('Failed to reject shift swap:', error);
       }
     }

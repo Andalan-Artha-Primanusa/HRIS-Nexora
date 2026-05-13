@@ -1,7 +1,7 @@
 import { 
   Users, CalendarDays, Receipt, Target, UserCircle, 
   FileBarChart, LayoutDashboard, Briefcase, 
-  FileText, Clock, Banknote, ShieldCheck, Database, CheckCircle, ArrowUpRight
+  FileText, Clock, Banknote, ShieldCheck, Database, CheckCircle, ArrowUpRight, GitBranch
 } from 'lucide-react';
 
 import type { LucideIcon } from 'lucide-react';
@@ -192,7 +192,13 @@ export const menuItems: MenuItem[] = [
       },
     ]
   },
- {
+  {
+    label: 'Alur Persetujuan',
+    icon: GitBranch,
+    path: '/approval-flows',
+    menuKey: 'alur-persetujuan',
+  },
+  {
   label: 'Alat Admin',
   icon: ShieldCheck,
   menuKey: 'alat-admin',

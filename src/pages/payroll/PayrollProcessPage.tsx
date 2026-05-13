@@ -46,7 +46,7 @@ const PayrollProcessPage = () => {
   const [activeTab, setActiveTab] = useState<TabKey>("generate");
 
   return (
-    <div className="crud-page" style={{ fontFamily: "'Poppins', sans-serif" }}>
+    <div className="crud-page payroll-process-page">
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -162,14 +162,13 @@ const GenerateTab = () => {
       <div className="payroll-summary-grid">
         {summaryCards.map((c) => {
           const Icon = c.icon;
-          const colors: Record<string, string> = { blue: "#3b82f6", orange: "#f97316", green: "#22c55e", purple: "#8b5cf6" };
           return (
-            <div key={c.label} className="payroll-summary-card" style={{ borderTopColor: colors[c.tone] }}>
+            <div key={c.label} className="payroll-summary-card" style={{ borderTopColor: "#3b82f6" }}>
               <p className="label">{c.label}</p>
               <p className="subtitle">{c.subtitle}</p>
               <div className="value-row">
-                <div className="value" style={{ color: colors[c.tone] }}>{c.value}</div>
-                <div className="icon-box" style={{ background: `rgba(${c.tone === "blue" ? "59,130,246" : c.tone === "orange" ? "249,115,22" : c.tone === "green" ? "34,197,94" : "139,92,246"},0.08)`, color: colors[c.tone] }}>
+                <div className="value" style={{ color: "#2563eb" }}>{c.value}</div>
+                <div className="icon-box">
                   <Icon size={22} />
                 </div>
               </div>

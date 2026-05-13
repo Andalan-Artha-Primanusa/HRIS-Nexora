@@ -8,6 +8,7 @@ import { PromotionModal } from '@/features/organization/components/PromotionModa
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/employee/EmployeesPage.css';
+import { showToast } from '@/shared/ui/toast';
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 
 const PromotionPage: React.FC = () => {
@@ -69,8 +70,9 @@ const PromotionPage: React.FC = () => {
     try {
       await promotionService.approvePromotion(id);
       fetchData();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      showToast(error?.response?.data?.message || error?.message || 'Gagal menyetujui promosi', 'error');
     }
   };
 
@@ -80,8 +82,9 @@ const PromotionPage: React.FC = () => {
     try {
       await promotionService.rejectPromotion(id, remarks);
       fetchData();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      showToast(error?.response?.data?.message || error?.message || 'Gagal menolak promosi', 'error');
     }
   };
 
@@ -90,8 +93,9 @@ const PromotionPage: React.FC = () => {
     try {
       await promotionService.deletePromotion(id);
       fetchData();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      showToast(error?.response?.data?.message || error?.message || 'Gagal menghapus promosi', 'error');
     }
   };
 
@@ -107,8 +111,9 @@ const PromotionPage: React.FC = () => {
     try {
       await promotionService.approveReport(id);
       fetchData();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      showToast(error?.response?.data?.message || error?.message || 'Gagal menyetujui laporan', 'error');
     } finally {
       setReportActionLoading(false);
     }
@@ -130,8 +135,9 @@ const PromotionPage: React.FC = () => {
       });
       closeReportModal();
       fetchData();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      showToast(error?.response?.data?.message || error?.message || 'Gagal menolak laporan', 'error');
     } finally {
       setReportActionLoading(false);
     }

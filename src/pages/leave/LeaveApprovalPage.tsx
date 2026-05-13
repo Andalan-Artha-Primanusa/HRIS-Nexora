@@ -120,8 +120,9 @@ const LeaveApprovalPage = () => {
       await approveLeave(String(leaveId), { note: "Disetujui" });
       await loadData();
       showToast("Pengajuan disetujui", "success");
-    } catch (error: unknown) {
+    } catch (error: any) {
       console.error("Failed to approve:", error);
+      showToast(error?.response?.data?.message || error?.message || 'Gagal menyetujui cuti', 'error');
     } finally {
       setActionLoading(null);
     }
@@ -136,8 +137,9 @@ const LeaveApprovalPage = () => {
       await rejectLeave(String(leaveId), { note: reason || "Ditolak tanpa alasan" });
       await loadData();
       showToast("Pengajuan ditolak", "success");
-    } catch (error: unknown) {
+    } catch (error: any) {
       console.error("Failed to reject:", error);
+      showToast(error?.response?.data?.message || error?.message || 'Gagal menolak cuti', 'error');
     } finally {
       setActionLoading(null);
     }

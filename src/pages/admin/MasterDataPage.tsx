@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Plus, RefreshCw, Edit, Trash2, Search, Building2, Briefcase, MapPin, Database, CheckCircle } from 'lucide-react';
+import { Plus, RefreshCw, Edit, Trash2, Search, Building2, Briefcase, Database, CheckCircle } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
@@ -29,20 +29,7 @@ interface PositionItem {
   department_id?: number;
 }
 
-interface LocationItem {
-  id: number;
-  name: string;
-  code?: string;
-  description?: string;
-  is_active?: boolean;
-  address?: string;
-  timezone?: string;
-  latitude?: string;
-  longitude?: string;
-  radius?: number | string;
-}
-
-type ActiveTab = 'department' | 'position' | 'location';
+type ActiveTab = 'department' | 'position';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -68,22 +55,11 @@ function normalizePositions(raw: unknown[]): PositionItem[] {
   });
 }
 
-function normalizeLocations(raw: unknown[]): LocationItem[] {
-  return (raw as LocationItem[]).map((item) => ({
-    ...item,
-    is_active: item.is_active ?? true,
-    code: item.code ?? '',
-    description: item.description ?? '',
-    timezone: item.timezone ?? 'Asia/Jakarta',
-  }));
-}
-
 // ─── Component ────────────────────────────────────────────────────────────────
 
 const MasterDataPage: React.FC = () => {
   const [departments, setDepartments] = useState<DepartmentItem[]>([]);
   const [positions, setPositions] = useState<PositionItem[]>([]);
-  const [locations, setLocations] = useState<LocationItem[]>([]);
 
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -96,7 +72,7 @@ const MasterDataPage: React.FC = () => {
 
   // Modal state
   const [showModal, setShowModal] = useState(false);
-  const [editingItem, setEditingItem] = useState<DepartmentItem | PositionItem | LocationItem | null>(null);
+  const [editingItem, setEditingItem] = useState<DepartmentItem | PositionItem | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     code: '',
@@ -105,12 +81,6 @@ const MasterDataPage: React.FC = () => {
     // Position
     level: 'Mid',
     department_id: '',
-    // Location
-    address: '',
-    timezone: 'Asia/Jakarta',
-    latitude: '',
-    longitude: '',
-    radius: '',
   });
 
   // ── Fetch ──────────────────────────────────────────────────────────────────
@@ -125,11 +95,9 @@ const MasterDataPage: React.FC = () => {
 
       const rawDepts = Array.isArray(payload.departments) ? payload.departments : [];
       const rawPos   = Array.isArray(payload.positions)   ? payload.positions   : [];
-      const rawLocs  = Array.isArray(payload.locations)   ? payload.locations   : [];
 
       setDepartments(normalizeDepartments(rawDepts));
       setPositions(normalizePositions(rawPos));
-      setLocations(normalizeLocations(rawLocs));
     } catch (err) {
       console.error(err);
       setErrorMessage('Gagal memuat master data');
@@ -144,13 +112,10 @@ const MasterDataPage: React.FC = () => {
 
   // ── Derived data ───────────────────────────────────────────────────────────
 
-  const currentData: (DepartmentItem | PositionItem | LocationItem)[] = useMemo(() => {
-    switch (activeTab) {
-      case 'department': return departments;
-      case 'position':   return positions;
-      case 'location':   return locations;
-    }
-  }, [activeTab, departments, positions, locations]);
+  const currentData: (DepartmentItem | PositionItem)[] = useMemo(() => {
+    if (activeTab === 'department') return departments;
+    return positions;
+  }, [activeTab, departments, positions]);
 
   const filteredData = useMemo(() => {
     const q = searchText.toLowerCase();
@@ -179,10 +144,9 @@ const MasterDataPage: React.FC = () => {
 
   const clearFilters = () => { setSearchText(''); setCurrentPage(1); };
 
-  const handleOpenModal = (item?: DepartmentItem | PositionItem | LocationItem) => {
+  const handleOpenModal = (item?: DepartmentItem | PositionItem) => {
     if (item) {
       setEditingItem(item);
-      const loc = item as LocationItem;
       const pos = item as PositionItem;
       setFormData({
         name:          item.name ?? '',
@@ -191,19 +155,12 @@ const MasterDataPage: React.FC = () => {
         is_active:     item.is_active ?? true,
         level:         pos.level ?? 'Mid',
         department_id: pos.department_id?.toString() ?? '',
-        address:       loc.address ?? '',
-        timezone:      loc.timezone ?? 'Asia/Jakarta',
-        latitude:      loc.latitude ?? '',
-        longitude:     loc.longitude ?? '',
-        radius:        loc.radius?.toString() ?? '',
       });
     } else {
       setEditingItem(null);
       setFormData({
         name: '', code: '', description: '', is_active: true,
         level: 'Mid', department_id: '',
-        address: '', timezone: 'Asia/Jakarta',
-        latitude: '', longitude: '', radius: '',
       });
     }
     setShowModal(true);
@@ -228,7 +185,6 @@ const MasterDataPage: React.FC = () => {
         const endpointMap: Record<ActiveTab, string> = {
           department: `/departments/${editingItem.id}`,
           position:   `/positions/${editingItem.id}`,
-          location:   `/locations/${editingItem.id}`,
         };
         try {
           await api.put(endpointMap[activeTab], formData);
@@ -242,14 +198,12 @@ const MasterDataPage: React.FC = () => {
           prev.map((i) => i.id === editingItem.id ? { ...i, ...formData } : i);
         if (activeTab === 'department') setDepartments(updater);
         if (activeTab === 'position')   setPositions(updater);
-        if (activeTab === 'location')   setLocations(updater);
 
       } else {
         // ── CREATE ──
         const endpointMap: Record<ActiveTab, string> = {
           department: '/departments',
           position:   '/positions',
-          location:   '/locations',
         };
 
         let newItem: any = null;
@@ -265,12 +219,10 @@ const MasterDataPage: React.FC = () => {
           id: Date.now(),
           ...formData,
           department_id: formData.department_id ? Number(formData.department_id) : undefined,
-          radius: formData.radius ? Number(formData.radius) : undefined,
         };
 
         if (activeTab === 'department') setDepartments((p) => [...p, localItem]);
         if (activeTab === 'position')   setPositions((p)   => [...p, localItem]);
-        if (activeTab === 'location')   setLocations((p)   => [...p, localItem]);
       }
 
       setShowModal(false);
@@ -288,7 +240,6 @@ const MasterDataPage: React.FC = () => {
     const endpointMap: Record<ActiveTab, string> = {
       department: `/departments/${id}`,
       position:   `/positions/${id}`,
-      location:   `/locations/${id}`,
     };
     try {
       await api.delete(endpointMap[activeTab]);
@@ -299,7 +250,6 @@ const MasterDataPage: React.FC = () => {
     const remover = (prev: any[]): any[] => prev.filter((i) => i.id !== id);
     if (activeTab === 'department') setDepartments(remover);
     if (activeTab === 'position')   setPositions(remover);
-    if (activeTab === 'location')   setLocations(remover);
     fetchData();
   };
 
@@ -308,14 +258,13 @@ const MasterDataPage: React.FC = () => {
   const tabs = [
     { key: 'department' as ActiveTab, label: 'Departments', icon: Building2, data: departments },
     { key: 'position'   as ActiveTab, label: 'Positions',   icon: Briefcase,  data: positions  },
-    { key: 'location'   as ActiveTab, label: 'Locations',   icon: MapPin,     data: locations  },
   ];
 
   const activeTabMeta = tabs.find((t) => t.key === activeTab)!;
 
   // ── Summary cards ──────────────────────────────────────────────────────────
 
-  const totalCount  = departments.length + positions.length + locations.length;
+  const totalCount  = departments.length + positions.length;
   const activeCount = currentData.filter((i) => i.is_active !== false).length;
 
   const summaryCards = useMemo(() => [
@@ -330,10 +279,10 @@ const MasterDataPage: React.FC = () => {
       tone: 'green' as const, icon: Search,
     },
     {
-      label: activeTab === 'department' ? 'Departemen' : activeTab === 'position' ? 'Posisi' : 'Lokasi',
+      label: activeTab === 'department' ? 'Departemen' : 'Posisi',
       subtitle: `Total ${activeTab}`,
       value: String(currentData.length), change: 'Semua data',
-      tone: (activeTab === 'department' ? 'orange' : activeTab === 'position' ? 'purple' : 'red') as any,
+      tone: (activeTab === 'department' ? 'orange' : 'purple') as any,
       icon: activeTabMeta.icon,
     },
     {
@@ -346,7 +295,7 @@ const MasterDataPage: React.FC = () => {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   const tabLabel = (tab: ActiveTab) =>
-    tab === 'department' ? 'Departemen' : tab === 'position' ? 'Posisi' : 'Lokasi';
+    tab === 'department' ? 'Departemen' : 'Posisi';
 
   return (
     <div className="crud-page">
@@ -360,7 +309,7 @@ const MasterDataPage: React.FC = () => {
               <span>Organization</span>
             </div>
             <h1 className="hero-title">Master Data</h1>
-            <p className="hero-subtitle">Kelola data inti organisasi: departemen, posisi, dan lokasi.</p>
+            <p className="hero-subtitle">Kelola data inti organisasi: departemen dan posisi.</p>
           </div>
           <div className="hero-actions">
             <button className="btn-outline" onClick={fetchData} disabled={loading}>
@@ -480,7 +429,6 @@ const MasterDataPage: React.FC = () => {
                             <div className="cell-avatar">
                               {activeTab === 'department' && <Building2 size={18} />}
                               {activeTab === 'position'   && <Briefcase  size={18} />}
-                              {activeTab === 'location'   && <MapPin     size={18} />}
                             </div>
                             <div className="cell-stacked">
                               <span className="cell-name-text">{item.name}</span>
@@ -627,62 +575,7 @@ const MasterDataPage: React.FC = () => {
                 </>
               )}
 
-              {/* Location-specific fields */}
-              {activeTab === 'location' && (
-                <>
-                  <div className="form-group">
-                    <label>Alamat</label>
-                    <textarea
-                      value={formData.address}
-                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                      placeholder="Masukkan alamat lengkap"
-                      rows={3}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Timezone</label>
-                    <select
-                      value={formData.timezone}
-                      onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
-                    >
-                      <option value="Asia/Jakarta">Asia/Jakarta (WIB)</option>
-                      <option value="Asia/Makassar">Asia/Makassar (WITA)</option>
-                      <option value="Asia/Jayapura">Asia/Jayapura (WIT)</option>
-                      <option value="Asia/Singapore">Asia/Singapore</option>
-                      <option value="UTC">UTC</option>
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label>Latitude <span className="required">*</span></label>
-                    <input
-                      type="number"
-                      step="any"
-                      value={formData.latitude}
-                      onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
-                      placeholder="-6.200000"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Longitude <span className="required">*</span></label>
-                    <input
-                      type="number"
-                      step="any"
-                      value={formData.longitude}
-                      onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
-                      placeholder="106.816666"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Radius (meter) <span className="required">*</span></label>
-                    <input
-                      type="number"
-                      value={formData.radius}
-                      onChange={(e) => setFormData({ ...formData, radius: e.target.value })}
-                      placeholder="100"
-                    />
-                  </div>
-                </>
-              )}
+
 
               {/* Active toggle */}
               <label className="checkbox-label">

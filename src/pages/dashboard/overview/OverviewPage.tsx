@@ -372,7 +372,7 @@ const OverviewPage: React.FC = () => {
     };
 
     void loadDashboardData();
-  }, []);
+  }, [isAdmin, canLoadDetailedDashboardData, user]);
 
   return (
     <div className="crud-page">

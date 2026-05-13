@@ -33,10 +33,9 @@ import "./PayrollDashboard.css";
 
 const PayrollDashboard: React.FC = () => {
   const [payrollItems, setPayrollItems] = useState<PayrollItem[]>([]);
-  const [loading, _setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
-  // Chart Data States
-  const [_monthlyTrendData, _setMonthlyTrendData] = useState<
+  const [monthlyTrendData, setMonthlyTrendData] = useState<
     { month: string; totalPayroll: number; processed: number; pending: number }[]
   >([]);
   const [payrollStatusData, setPayrollStatusData] = useState<
@@ -46,7 +45,6 @@ const PayrollDashboard: React.FC = () => {
     { name: string; amount: number }[]
   >([]);
 
-  // KPI States
   const [totalPayroll, setTotalPayroll] = useState(0);
   const [totalProcessed, setTotalProcessed] = useState(0);
   const [totalPending, setTotalPending] = useState(0);
@@ -54,17 +52,13 @@ const PayrollDashboard: React.FC = () => {
 
   const statusColors = ["#2563eb", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
 
-  // Load payroll data
   const loadPayrollData = async () => {
-    console.log(true);
-
+    setLoading(true);
     try {
       const payrollData = await payrollService.getPayrollList();
-
       const items = toSafeArray(payrollData);
       setPayrollItems(items);
 
-      // Calculate KPIs
       if (items.length > 0) {
         const total = items.length;
         const processed = items.filter((item: any) => item.status === "paid" || item.status === "approved").length;
@@ -73,40 +67,32 @@ const PayrollDashboard: React.FC = () => {
         setTotalPayroll(total);
         setTotalProcessed(processed);
         setTotalPending(pending);
-        setAveragePayroll(Math.round(total > 0 ? (total / 12) : 0)); // Rough estimate
 
-        // Process data for charts
+        const thpSum = items.reduce((sum, item: any) => sum + (Number(item.take_home_pay) || 0), 0);
+        const periods = new Set(items.map((item: any) => item.period));
+        const monthCount = Math.max(periods.size, 1);
+        setAveragePayroll(Math.round(thpSum / monthCount));
+
         processChartData(items);
       }
     } catch (err) {
       console.error("Error loading payroll:", err);
     } finally {
-      console.log(false);
+      setLoading(false);
     }
   };
 
   const processChartData = (items: PayrollItem[]) => {
-    // Group by month (assuming period field exists)
-    const monthlyMap = new Map<
-      string,
-      { total: number; processed: number; pending: number }
-    >();
-
+    const monthlyMap = new Map<string, { total: number; processed: number; pending: number }>();
     items.forEach((item: any) => {
       const month = item.period || "Unknown";
-      const current = monthlyMap.get(month) || {
-        total: 0,
-        processed: 0,
-        pending: 0,
-      };
-
+      const current = monthlyMap.get(month) || { total: 0, processed: 0, pending: 0 };
       current.total += 1;
       if (item.status === "paid" || item.status === "approved") {
         current.processed += 1;
       } else {
         current.pending += 1;
       }
-
       monthlyMap.set(month, current);
     });
 
@@ -117,55 +103,29 @@ const PayrollDashboard: React.FC = () => {
       pending: data.pending,
     })).sort((a, b) => a.month.localeCompare(b.month));
 
-    _setMonthlyTrendData(monthlyArray.slice(-8));
+    setMonthlyTrendData(monthlyArray.slice(-8));
 
     const statusMap = new Map<string, number>();
     items.forEach((item: any) => {
       const status = String(item.status || "draft").toLowerCase();
       statusMap.set(status, (statusMap.get(status) || 0) + 1);
     });
+    setPayrollStatusData(
+      Array.from(statusMap, ([name, value]) => ({
+        name: name.charAt(0).toUpperCase() + name.slice(1),
+        value,
+      }))
+    );
 
-    const statusArray = Array.from(statusMap, ([name, value]) => ({
-      name: name.charAt(0).toUpperCase() + name.slice(1),
-      value,
-    }));
-
-    setPayrollStatusData(statusArray);
-
-    // Top employees by total compensation
-    const employeeMap = new Map<
-      string,
-      { allowance: number; bonus: number }
-    >();
-    items.forEach((item: any) => {
-      const empId = item.employee_id || "Unknown";
-      const current = employeeMap.get(String(empId)) || {
-        allowance: 0,
-        bonus: 0,
-      };
-
-      current.allowance += item.allowance || 0;
-      current.bonus += item.bonus || 0;
-
-      employeeMap.set(String(empId), current);
-    });
-
-
-    // Department aggregation (simulated - payroll data alone does not carry department info)
     const departmentMap = new Map<string, number>();
     items.forEach((item: any) => {
-      // Placeholder: using first digit of employee ID as department proxy
-      const dept = `Dept-${String(item.employee_id || "?")[0]}`;
-      const amount = (item.allowance || 0) + (item.bonus || 0);
+      const dept = item.employee?.department || "Unknown";
+      const amount = Number(item.take_home_pay || item.net_salary || 0);
       departmentMap.set(dept, (departmentMap.get(dept) || 0) + amount);
     });
-
-    const deptArray = Array.from(departmentMap, ([name, amount]) => ({
-      name,
-      amount,
-    }));
-
-    setDepartmentPayrollData(deptArray);
+    setDepartmentPayrollData(
+      Array.from(departmentMap, ([name, amount]) => ({ name, amount }))
+    );
   };
 
   const handleGenerateMonthly = async () => {
@@ -300,9 +260,9 @@ const PayrollDashboard: React.FC = () => {
         <Card className="crud-table-card payroll-chart-card">
           <h3 className="payroll-section-title">Tren Payroll Bulanan</h3>
           <p className="chart-subtitle">Volume payroll yang diproses per periode (8 periode terakhir)</p>
-          {_monthlyTrendData.length > 0 ? (
+          {monthlyTrendData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={_monthlyTrendData} margin={{ top: 8, right: 16, left: 4, bottom: 8 }}>
+              <LineChart data={monthlyTrendData} margin={{ top: 8, right: 16, left: 4, bottom: 8 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
                 <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
                 <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />

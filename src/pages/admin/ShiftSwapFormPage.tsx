@@ -70,7 +70,7 @@ const ShiftSwapFormPage: React.FC = () => {
 
   const getEmployeeName = (id: string | number) => {
     const emp = employees.find(e => String(e.id) === String(id));
-    return emp ? emp.full_name : 'Belum dipilih';
+    return emp ? (emp.user?.name || emp.employee_code || `ID ${emp.id}`) : 'Belum dipilih';
   };
 
   return (
@@ -130,7 +130,7 @@ const ShiftSwapFormPage: React.FC = () => {
                     >
                       <option value="">Pilih Karyawan</option>
                       {employees.map(emp => (
-                        <option key={emp.id} value={emp.id}>{emp.full_name} ({emp.position || 'No Position'})</option>
+                        <option key={emp.id} value={emp.id}>{emp.user?.name || emp.employee_code || `ID ${emp.id}`} ({emp.position || 'No Position'})</option>
                       ))}
                     </select>
                   </div>
@@ -149,7 +149,7 @@ const ShiftSwapFormPage: React.FC = () => {
                     >
                       <option value="">Pilih Karyawan</option>
                       {employees.map(emp => (
-                        <option key={emp.id} value={emp.id}>{emp.full_name} ({emp.position || 'No Position'})</option>
+                        <option key={emp.id} value={emp.id}>{emp.user?.name || emp.employee_code || `ID ${emp.id}`} ({emp.position || 'No Position'})</option>
                       ))}
                     </select>
                   </div>

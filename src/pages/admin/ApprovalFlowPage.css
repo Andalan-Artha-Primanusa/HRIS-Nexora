@@ -1,0 +1,270 @@
+.approval-filter-bar {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1rem 1.5rem;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  font-family: 'Poppins', sans-serif;
+}
+
+.approval-filter-group {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.approval-flow-card {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 1rem;
+  overflow: hidden;
+  transition: all 0.25s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  position: relative;
+  font-family: 'Poppins', sans-serif;
+}
+
+.approval-flow-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #2563eb, #60a5fa);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.approval-flow-card:hover::before {
+  opacity: 1;
+}
+
+.approval-flow-card:hover {
+  box-shadow: 0 8px 30px rgba(37, 99, 235, 0.1);
+  border-color: #93c5fd;
+}
+
+.approval-flow-header {
+  padding: 1.25rem 1.5rem 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.approval-flow-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.approval-flow-id {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  font-family: 'Poppins', sans-serif;
+}
+
+.approval-flow-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.3;
+  font-family: 'Poppins', sans-serif;
+}
+
+.approval-flow-module {
+  display: inline-block;
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  color: #1d4ed8;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 12px;
+  border-radius: 6px;
+  width: fit-content;
+  text-transform: capitalize;
+  letter-spacing: 0.02em;
+  border: 1px solid #93c5fd;
+  font-family: 'Poppins', sans-serif;
+}
+
+.approval-flow-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 4px 14px;
+  border-radius: 999px;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+  font-family: 'Poppins', sans-serif;
+}
+
+.approval-flow-badge.active {
+  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+  color: #065f46;
+  border: 1px solid #6ee7b7;
+}
+
+.approval-flow-badge.inactive {
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+.approval-flow-body {
+  padding: 0 1.5rem 0.75rem;
+}
+
+.approval-steps-title {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 0.75rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+.approval-step-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.approval-step-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 28px;
+  flex-shrink: 0;
+}
+
+.approval-step-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2563eb, #60a5fa);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+  border: 2px solid #fff;
+  font-family: 'Poppins', sans-serif;
+}
+
+.approval-step-line {
+  width: 2px;
+  flex: 1;
+  min-height: 20px;
+  background: #bfdbfe;
+  margin: 2px 0;
+}
+
+.approval-step-content {
+  flex: 1;
+  background: linear-gradient(135deg, #f8faff, #eff6ff);
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  transition: all 0.2s;
+}
+
+.approval-step-content:hover {
+  border-color: #93c5fd;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.06);
+}
+
+.approval-step-role {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 2px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.approval-step-user {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.approval-flow-actions {
+  padding: 0.75rem 1.5rem;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  gap: 0.5rem;
+  background: #fafbfc;
+}
+
+.approval-flow-actions .btn-outline {
+  border-radius: 8px;
+  font-size: 0.8rem;
+  padding: 6px 14px;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #1e293b;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.approval-flow-actions .btn-outline:hover {
+  background: #f8fafc;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.approval-flow-actions .btn-outline:last-child {
+  margin-left: auto;
+}
+
+.approval-empty-state {
+  background: #fff;
+  border-radius: 16px;
+  padding: 4rem 2rem;
+  border: 1px solid #e2e8f0;
+  text-align: center;
+  color: #94a3b8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+.approval-count {
+  display: inline-block;
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  color: #1d4ed8;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 3px 12px;
+  border-radius: 999px;
+  margin-bottom: 0.75rem;
+  font-family: 'Poppins', sans-serif;
+}

@@ -8,6 +8,7 @@ import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
 import './AssignmentLettersPage.css';
+import { showToast } from '@/shared/ui/toast';
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 
 const AssignmentLettersPage: React.FC = () => {
@@ -48,8 +49,9 @@ const AssignmentLettersPage: React.FC = () => {
     try {
       await legalService.createAssignmentLetter(formData);
       fetchData();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to create assignment letter', err);
+      showToast(err?.response?.data?.message || err?.message || 'Gagal membuat surat tugas', 'error');
       throw err;
     }
   };
@@ -58,8 +60,9 @@ const AssignmentLettersPage: React.FC = () => {
     try {
       await legalService.approveAssignmentLetter(id);
       fetchData();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to approve', err);
+      showToast(err?.response?.data?.message || err?.message || 'Gagal menyetujui surat tugas', 'error');
     }
   };
 
@@ -67,8 +70,9 @@ const AssignmentLettersPage: React.FC = () => {
     try {
       await legalService.rejectAssignmentLetter(id);
       fetchData();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to reject', err);
+      showToast(err?.response?.data?.message || err?.message || 'Gagal menolak surat tugas', 'error');
     }
   };
 

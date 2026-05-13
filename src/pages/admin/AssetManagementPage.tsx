@@ -12,6 +12,7 @@ import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/employee/EmployeesPage.css';
 import './AssetInventoryPage.css';
 import './AssetAssignmentsPage.css';
+import { showToast } from '@/shared/ui/toast';
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 
 const formatDateTime = (input: string) => {
@@ -87,8 +88,9 @@ const InventoryTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading, 
         assignment_note: assignmentNote,
       });
       closeAssignModal();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to assign asset:', error);
+      showToast(error?.response?.data?.message || error?.message || 'Gagal menugaskan aset', 'error');
     } finally {
       setAssigningLoading(false);
     }
@@ -116,8 +118,9 @@ const InventoryTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading, 
         condition: 'good',
       });
       closeReturnModal();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to return asset:', error);
+      showToast(error?.response?.data?.message || error?.message || 'Gagal mengembalikan aset', 'error');
     } finally {
       setReturningLoading(false);
     }
@@ -174,8 +177,9 @@ const InventoryTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading, 
     if (!window.confirm(`Hapus aset "${name}"? Tindakan ini tidak dapat dibatalkan.`)) return;
     try {
       await assetService.deleteAsset(id);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to delete asset:', error);
+      showToast(error?.response?.data?.message || error?.message || 'Gagal menghapus aset', 'error');
     }
   };
 
@@ -428,8 +432,9 @@ const AssignmentsTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading
       else if (res?.data && Array.isArray(res.data)) arr = res.data;
       else if (Array.isArray(res)) arr = res;
       setAssignments(arr);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch assignments:', error);
+      showToast(error?.response?.data?.message || error?.message || 'Gagal memuat penugasan', 'error');
       setAssignments([]);
     }
   };
@@ -486,8 +491,9 @@ const AssignmentsTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading
       await assetService.returnAsset(returnTarget.id, data);
       setReturnTarget(null);
       fetchAssignments();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to return asset:', error);
+      showToast(error?.response?.data?.message || error?.message || 'Gagal mengembalikan aset', 'error');
     } finally {
       setReturning(false);
     }
@@ -506,8 +512,9 @@ const AssignmentsTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading
     try {
       await assetService.approveAssignment(assignment.id);
       fetchAssignments();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to approve assignment:', error);
+      showToast(error?.response?.data?.message || error?.message || 'Gagal menyetujui penugasan', 'error');
     }
   };
 
@@ -516,8 +523,9 @@ const AssignmentsTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading
     try {
       await assetService.rejectAssignment(assignment.id);
       fetchAssignments();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to reject assignment:', error);
+      showToast(error?.response?.data?.message || error?.message || 'Gagal menolak penugasan', 'error');
     }
   };
 
@@ -721,8 +729,9 @@ const AssetManagementPage: React.FC = () => {
       else if (response?.data && Array.isArray(response.data)) assetsArray = response.data;
       else if (Array.isArray(response)) assetsArray = response;
       setAssets(assetsArray);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch assets:', error);
+      showToast(error?.response?.data?.message || error?.message || 'Gagal memuat aset', 'error');
       setAssets([]);
     } finally {
       setLoading(false);

@@ -82,7 +82,7 @@ export const workforceService = {
     };
   },
   approveShiftSwap: async (id: string | number) => {
-    const response = await api.put(`/workforce/shift-swaps/${id}`);
+    const response = await api.put(`/workforce/shift-swaps/${id}`, { status: 'approved' });
     return {
       payload: extractPayload(response.data),
       raw: response.data,

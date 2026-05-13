@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { GitBranch, Plus, RefreshCw, Workflow, User } from 'lucide-react';
+import { GitBranch, Plus, RefreshCw, Workflow, Edit, Trash2, User, ToggleLeft, ToggleRight } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { organizationService } from '@/features/organization/api/organization.service';
 import { ApprovalFlowModal } from '@/features/organization/components/ApprovalFlowModal';
 import { getAllRoles } from '@/features/admin/api/admin.service';
+import { showToast } from '@/shared/ui/toast';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
+import './ApprovalFlowPage.css';
 
 const ApprovalFlowPage: React.FC = () => {
   const [flows, setFlows] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editFlow, setEditFlow] = useState<any | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [moduleFilter, setModuleFilter] = useState('all');
   const [roles, setRoles] = useState<any[]>([]);
@@ -22,8 +25,8 @@ const ApprovalFlowPage: React.FC = () => {
       const data = await organizationService.getApprovalFlows();
       const rawFlows = Array.isArray(data) ? data : data.data || [];
       setFlows(rawFlows);
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      showToast(err.message || 'Gagal memuat data', 'error');
     } finally {
       setLoading(false);
     }
@@ -46,14 +49,64 @@ const ApprovalFlowPage: React.FC = () => {
   const handleSave = async (data: any) => {
     try {
       await organizationService.createApprovalFlow(data);
+      showToast('Approval flow berhasil dibuat', 'success');
       fetchData();
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      showToast(err.message || 'Gagal membuat approval flow', 'error');
     }
   };
 
+  const handleUpdate = async (data: any) => {
+    if (!editFlow) return;
+    try {
+      await organizationService.updateApprovalFlow(editFlow.id, data);
+      setEditFlow(null);
+      showToast('Approval flow berhasil diperbarui', 'success');
+      fetchData();
+    } catch (err: any) {
+      showToast(err.message || 'Gagal memperbarui approval flow', 'error');
+    }
+  };
+
+  const handleDelete = async (flow: any) => {
+    if (!window.confirm(`Hapus approval flow "${flow.name}"?`)) return;
+    try {
+      await organizationService.deleteApprovalFlow(flow.id);
+      showToast('Approval flow berhasil dihapus', 'success');
+      fetchData();
+    } catch (err: any) {
+      showToast(err.message || 'Gagal menghapus approval flow', 'error');
+    }
+  };
+
+  const toggleActive = async (flow: any) => {
+    try {
+      await organizationService.updateApprovalFlow(flow.id, { ...flow, is_active: !flow.is_active });
+      showToast(`Flow ${flow.is_active ? 'dinonaktifkan' : 'diaktifkan'}`, 'success');
+      fetchData();
+    } catch (err: any) {
+      showToast(err.message || 'Gagal mengubah status', 'error');
+    }
+  };
+
+  const openCreate = () => {
+    setEditFlow(null);
+    setIsModalOpen(true);
+  };
+
+  const openEdit = (flow: any) => {
+    setEditFlow(flow);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditFlow(null);
+  };
+
   const filteredFlows = flows.filter(flow => {
-    const matchesSearch = flow.name?.toLowerCase().includes(searchQuery.toLowerCase());
+    const q = searchQuery.toLowerCase();
+    const matchesSearch = !q || flow.name?.toLowerCase().includes(q) || flow.module?.toLowerCase().includes(q);
     const matchesModule = moduleFilter === 'all' || flow.module === moduleFilter;
     return matchesSearch && matchesModule;
   });
@@ -68,74 +121,24 @@ const ApprovalFlowPage: React.FC = () => {
     return user.name || user.email || `User #${user.id}`;
   };
 
-  const renderSteps = (steps: any[]) => {
-    if (!steps || steps.length === 0) {
-      return <span style={{ color: '#94a3b8', fontSize: '13px' }}>No steps</span>;
-    }
-
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
-        {steps.map((step, idx) => {
-          const assignedUser = step.user || step.user_id;
-          const userName = assignedUser && typeof assignedUser === 'object' ? getUserName(assignedUser) : null;
-
-          return (
-            <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '32px', flexShrink: 0 }}>
-                <div style={{
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '50%',
-                  background: '#eff6ff',
-                  border: '2px solid #bfdbfe',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  zIndex: 1,
-                }}>
-                  <User size={14} color="#1d4ed8" />
-                </div>
-                {idx < steps.length - 1 && (
-                  <div style={{
-                    width: '2px',
-                    flex: 1,
-                    minHeight: '20px',
-                    background: '#bfdbfe',
-                    margin: '2px 0',
-                  }} />
-                )}
-              </div>
-
-              <div style={{
-                background: '#f8faff',
-                border: '0.5px solid #bfdbfe',
-                borderRadius: '10px',
-                padding: '10px 16px',
-                flex: 1,
-                marginBottom: idx < steps.length - 1 ? '12px' : 0,
-              }}>
-                <p style={{ fontSize: '11px', color: '#3b82f6', fontWeight: 600, margin: '0 0 2px 0' }}>
-                  Step {idx + 1}
-                </p>
-                <p style={{ fontSize: '13px', fontWeight: 600, color: '#1e40af', margin: 0 }}>
-                  {getRoleName(step.role_id)}
-                </p>
-                {userName && (
-                  <p style={{ fontSize: '12px', color: '#64748b', margin: '4px 0 0 0', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <User size={12} /> {userName}
-                  </p>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
+  const moduleOptions = [
+    { value: 'all', label: 'All Modules' },
+    { value: 'assignment_letter', label: 'Assignment Letters' },
+    { value: 'leave', label: 'Leave Requests' },
+    { value: 'reimbursement', label: 'Reimbursements' },
+    { value: 'overtime', label: 'Overtime' },
+    { value: 'promotion', label: 'Promotion Requests' },
+    { value: 'training', label: 'Training Requests' },
+    { value: 'document', label: 'Documents' },
+    { value: 'asset_assignment', label: 'Asset Assignments' },
+    { value: 'shift_swap', label: 'Shift Swaps' },
+    { value: 'payroll', label: 'Payroll' },
+    { value: 'kpi', label: 'KPI' },
+    { value: 'benefit_assignment', label: 'Benefit Assignments' },
+  ];
 
   return (
     <div className="crud-page">
-      {/* ===== HERO CARD (tidak diubah) ===== */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -152,7 +155,7 @@ const ApprovalFlowPage: React.FC = () => {
             <button className="btn-outline" onClick={fetchData}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
             </button>
-            <button className="btn-primary" onClick={() => setIsModalOpen(true)}>
+            <button className="btn-primary" onClick={openCreate}>
               <Plus size={16} />
               New Flow
             </button>
@@ -160,147 +163,93 @@ const ApprovalFlowPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* ===== FILTER BAR ===== */}
-      <div style={{
-        background: 'white',
-        borderRadius: '16px',
-        padding: '16px 20px',
-        border: '0.5px solid #e2e8f0',
-        marginBottom: '20px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-      }}>
-        <h3 style={{ fontSize: '13px', fontWeight: 500, color: '#1e293b', margin: 0 }}>Filters</h3>
-        <div style={{ display: 'flex', gap: '10px' }}>
+      <div className="approval-filter-bar">
+        <div className="approval-filter-group">
           <input
             type="text"
-            placeholder="Search flows..."
+            placeholder="Search by name or module..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="search-input"
+            style={{ width: '260px' }}
           />
           <select
             value={moduleFilter}
             onChange={(e) => setModuleFilter(e.target.value)}
             className="form-input"
+            style={{ width: '180px' }}
           >
-            <option value="all">All Modules</option>
-            <option value="assignment_letter">Assignment Letters</option>
-            <option value="leave">Leave Requests</option>
-            <option value="reimbursement">Reimbursements</option>
-            <option value="overtime">Overtime</option>
+            {moduleOptions.map(o => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
           </select>
         </div>
       </div>
 
-      {/* ===== CONTENT AREA ===== */}
       {loading ? (
-        <div style={{
-          background: 'white',
-          borderRadius: '16px',
-          padding: '40px',
-          border: '0.5px solid #e2e8f0',
-          textAlign: 'center',
-          color: '#94a3b8',
-        }}>
+        <div className="approval-empty-state">
           <p>Loading...</p>
         </div>
       ) : filteredFlows.length === 0 ? (
-        <div style={{
-          background: 'white',
-          borderRadius: '16px',
-          padding: '40px',
-          border: '0.5px solid #e2e8f0',
-          textAlign: 'center',
-          color: '#94a3b8',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '12px',
-        }}>
+        <div className="approval-empty-state">
           <GitBranch size={48} style={{ opacity: 0.3 }} />
           <p>No approval flows found</p>
         </div>
       ) : (
         <div>
-          {/* Count badge */}
-          <div style={{ marginBottom: '12px', paddingLeft: '4px' }}>
-            <span style={{
-              display: 'inline-block',
-              background: '#eff6ff',
-              color: '#1d4ed8',
-              fontSize: '12px',
-              fontWeight: 500,
-              padding: '3px 10px',
-              borderRadius: '20px',
-            }}>
-              {filteredFlows.length} flows
-            </span>
-          </div>
+          <span className="approval-count">{filteredFlows.length} flows</span>
 
-          {/* Flow cards */}
           {filteredFlows.map((flow) => (
-            <div
-              key={flow.id}
-              style={{
-                background: 'white',
-                borderRadius: '16px',
-                padding: '20px 24px',
-                border: '0.5px solid #e2e8f0',
-                marginBottom: '14px',
-              }}
-            >
-              {/* Card header */}
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                marginBottom: '20px',
-              }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <span style={{ fontSize: '11px', color: '#64748b' }}>#{flow.id}</span>
-                  <h4 style={{ fontSize: '15px', fontWeight: 500, color: '#1e293b', margin: 0 }}>
-                    {flow.name}
-                  </h4>
-                  <span style={{
-                    display: 'inline-block',
-                    background: '#eff6ff',
-                    color: '#1d4ed8',
-                    fontSize: '11px',
-                    fontWeight: 500,
-                    padding: '2px 8px',
-                    borderRadius: '6px',
-                    width: 'fit-content',
-                  }}>
-                    {flow.module}
-                  </span>
+            <div key={flow.id} className="approval-flow-card">
+              <div className="approval-flow-header">
+                <div className="approval-flow-info">
+                  <span className="approval-flow-id">#{flow.id}</span>
+                  <h4 className="approval-flow-name">{flow.name}</h4>
+                  <span className="approval-flow-module">{flow.module?.replace(/_/g, ' ')}</span>
                 </div>
-                <span style={{
-                  fontSize: '12px',
-                  fontWeight: 500,
-                  padding: '4px 12px',
-                  borderRadius: '20px',
-                  background: flow.is_active ? '#dcfce7' : '#f1f5f9',
-                  color: flow.is_active ? '#166534' : '#64748b',
-                }}>
+                <span className={`approval-flow-badge ${flow.is_active ? 'active' : 'inactive'}`}>
                   {flow.is_active ? 'Active' : 'Inactive'}
                 </span>
               </div>
 
-              {/* Steps section */}
-              <p style={{
-                fontSize: '11px',
-                fontWeight: 500,
-                color: '#94a3b8',
-                letterSpacing: '0.04em',
-                textTransform: 'uppercase',
-                marginBottom: '14px',
-                margin: '0 0 14px 0',
-              }}>
-                Approval Steps
-              </p>
-              {renderSteps(flow.steps)}
+              <div className="approval-flow-body">
+                {flow.steps && flow.steps.length > 0 && (
+                  <>
+                    <p className="approval-steps-title">Approval Steps</p>
+                    {flow.steps.map((step: any, idx: number) => {
+                      const assignedUser = step.user || step.user_id;
+                      const userName = assignedUser && typeof assignedUser === 'object' ? getUserName(assignedUser) : null;
+                      return (
+                        <div key={idx} className="approval-step-row">
+                          <div className="approval-step-indicator">
+                            <div className="approval-step-dot">{idx + 1}</div>
+                            {idx < flow.steps.length - 1 && <div className="approval-step-line" />}
+                          </div>
+                          <div className="approval-step-content">
+                            <p className="approval-step-role">{getRoleName(step.role_id)}</p>
+                            {userName && (
+                              <p className="approval-step-user"><User size={12} /> {userName}</p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </>
+                )}
+              </div>
+
+              <div className="approval-flow-actions">
+                <button className="btn-outline" onClick={() => openEdit(flow)}>
+                  <Edit size={14} /> Edit
+                </button>
+                <button className="btn-outline" style={{ color: '#ef4444', borderColor: '#fecaca' }} onClick={() => handleDelete(flow)}>
+                  <Trash2 size={14} /> Delete
+                </button>
+                <button className="btn-outline" onClick={() => toggleActive(flow)}>
+                  {flow.is_active ? <ToggleLeft size={14} /> : <ToggleRight size={14} />}
+                  {flow.is_active ? 'Deactivate' : 'Activate'}
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -308,8 +257,9 @@ const ApprovalFlowPage: React.FC = () => {
 
       <ApprovalFlowModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSave={handleSave}
+        onClose={closeModal}
+        onSave={editFlow ? handleUpdate : handleSave}
+        editData={editFlow}
       />
     </div>
   );

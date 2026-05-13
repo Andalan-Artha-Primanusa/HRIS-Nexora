@@ -8,9 +8,10 @@ interface ApprovalFlowModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (data: any) => void;
+  editData?: any | null;
 }
 
-export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, onClose, onSave }) => {
+export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, onClose, onSave, editData }) => {
   const [loading, setLoading] = useState(false);
   const [roles, setRoles] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
@@ -20,12 +21,33 @@ export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, on
     steps: [{ role_id: '', user_id: '', step_order: 1 }]
   });
 
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      module: 'assignment_letter',
+      steps: [{ role_id: '', user_id: '', step_order: 1 }]
+    });
+  };
+
   useEffect(() => {
     if (isOpen) {
       fetchRoles();
       fetchUsers();
+      if (editData) {
+        setFormData({
+          name: editData.name || '',
+          module: editData.module || 'assignment_letter',
+          steps: (editData.steps || []).map((s: any, i: number) => ({
+            role_id: String(s.role_id || ''),
+            user_id: String(s.user_id || s.user?.id || ''),
+            step_order: i + 1,
+          })),
+        });
+      } else {
+        resetForm();
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, editData]);
 
   const fetchRoles = async () => {
     try {
@@ -94,7 +116,7 @@ export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, on
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Configure Approval Flow">
+    <Modal isOpen={isOpen} onClose={onClose} title={editData ? 'Edit Approval Flow' : 'Configure Approval Flow'}>
       <form onSubmit={handleSubmit} style={{ padding: '0.5rem' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
           
@@ -129,6 +151,12 @@ export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, on
               <option value="overtime">Overtime</option>
               <option value="promotion">Promotion Request</option>
               <option value="training">Training Request</option>
+              <option value="document">Document (Dokumen Karyawan)</option>
+              <option value="asset_assignment">Asset Assignment</option>
+              <option value="shift_swap">Shift Swap (Tukar Shift)</option>
+              <option value="payroll">Payroll</option>
+              <option value="kpi">KPI (Key Performance Indicator)</option>
+              <option value="benefit_assignment">Benefit Assignment</option>
             </select>
           </div>
 
@@ -206,7 +234,7 @@ export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, on
         <div style={{ marginTop: '3rem', display: 'flex', gap: '1rem' }}>
           <Button variant="ghost" onClick={onClose} type="button" style={{ flex: 1, height: '52px', borderRadius: '12px' }}>Cancel</Button>
           <Button variant="primary" type="submit" disabled={loading} style={{ flex: 1.5, height: '52px', borderRadius: '12px', fontWeight: 700, boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)' }}>
-            {loading ? 'Creating flow...' : 'Activate Approval Flow'}
+            {loading ? 'Saving...' : (editData ? 'Update Flow' : 'Activate Approval Flow')}
           </Button>
         </div>
       </form>

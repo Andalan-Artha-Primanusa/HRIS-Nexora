@@ -13,6 +13,7 @@ import type { ReimbursementItem } from '@/features/reimbursement/types/reimburse
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import './AdminReimbursementsPage.css';
+import { showToast } from '@/shared/ui/toast';
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 
 const formatDateTime = (input: string) => {
@@ -163,8 +164,9 @@ const AdminReimbursementsPage: React.FC = () => {
       await approveReimbursement(String(selectedItem.id), { note: actionNote });
       setShowApproveModal(false);
       fetchData();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to approve:', error);
+      showToast(error?.response?.data?.message || error?.message || 'Gagal menyetujui klaim', 'error');
     }
   };
 
@@ -174,8 +176,9 @@ const AdminReimbursementsPage: React.FC = () => {
       await rejectReimbursement(String(selectedItem.id), { note: actionNote });
       setShowRejectModal(false);
       fetchData();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to reject:', error);
+      showToast(error?.response?.data?.message || error?.message || 'Gagal menolak klaim', 'error');
     }
   };
 
@@ -184,8 +187,9 @@ const AdminReimbursementsPage: React.FC = () => {
       try {
         await deleteReimbursement(String(item.id));
         fetchData();
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to delete:', error);
+        showToast(error?.response?.data?.message || error?.message || 'Gagal menghapus klaim', 'error');
       }
     }
   };
