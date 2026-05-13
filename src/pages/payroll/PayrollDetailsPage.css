@@ -302,6 +302,134 @@
   color: #0f172a;
 }
 
+.payroll-component-list-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.payroll-list-subtitle {
+  margin: 0.25rem 0 0;
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+.payroll-component-toolbar {
+  display: grid;
+  grid-template-columns: minmax(180px, 220px) minmax(260px, 1fr) minmax(220px, 320px) auto;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.payroll-component-toolbar .crud-input--sm {
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+}
+
+.payroll-select-wide {
+  min-width: 0;
+}
+
+.payroll-search-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 40px;
+  padding: 0 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #94a3b8;
+}
+
+.payroll-search-control:focus-within {
+  border-color: #2563eb;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.payroll-search-control input {
+  width: 100%;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #0f172a;
+  font-size: 0.85rem;
+}
+
+.payroll-search-control input::placeholder {
+  color: #94a3b8;
+}
+
+.payroll-component-id {
+  font-weight: 700;
+  color: #2563eb;
+}
+
+.payroll-component-name {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 180px;
+}
+
+.payroll-component-name span {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.payroll-component-name small {
+  color: #94a3b8;
+  font-size: 0.74rem;
+}
+
+.payroll-component-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.payroll-component-form label {
+  display: grid;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.payroll-component-detail {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.payroll-component-detail div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.payroll-component-detail div:last-child {
+  border-bottom: none;
+}
+
+.payroll-component-detail span {
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+.payroll-component-detail strong {
+  color: #0f172a;
+  font-size: 0.88rem;
+  text-align: right;
+}
+
 .payroll-manage-form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -603,6 +731,30 @@
 @media (max-width: 768px) {
   .payroll-details-tabs {
     grid-template-columns: 1fr;
+  }
+
+  .payroll-component-tabs {
+    width: 100%;
+  }
+
+  .payroll-component-tab {
+    flex: 1;
+    justify-content: center;
+    padding-inline: 0.75rem;
+  }
+
+  .payroll-component-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .payroll-details-overview-header {
+    align-items: stretch;
+  }
+
+  .payroll-details-overview-header > div,
+  .payroll-details-overview-header .ui-button,
+  .payroll-details-overview-header button {
+    width: 100%;
   }
 
   .payroll-details-row-item {
