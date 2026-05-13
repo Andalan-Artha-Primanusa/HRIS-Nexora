@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { showToast } from '@/shared/ui/toast';
 import { ArrowLeft, CheckCircle } from 'lucide-react';
 import { getKpiDetail, approveKpi } from '@/features/dashboard/api/kpi.service';
 import './KpiPage.css';
@@ -68,15 +69,16 @@ const KpiApprovePage = () => {
     try {
       const result = await approveKpi(id!);
       setStatusMessage('KPI berhasil di-approve.');
-      console.log('Approved KPI:', result);
+      showToast('KPI berhasil disetujui', 'success');
       
       setTimeout(() => {
         navigate('/kpis');
       }, 1000);
     } catch (error: any) {
-      const message = error?.response?.data?.message || 'Failed to approve KPI.';
+      const message = error?.response?.data?.message || 'Gagal approve KPI.';
       setErrorMessage(message);
       setStatusMessage('Gagal approve KPI.');
+      showToast(message, 'error');
       console.error(error);
     } finally {
       setApproving(false);

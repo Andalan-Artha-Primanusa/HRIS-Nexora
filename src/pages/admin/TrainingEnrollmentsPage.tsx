@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { showToast } from '@/shared/ui/toast';
 import { RefreshCw, GraduationCap, Users, Search, Filter, CheckCircle, Clock, XCircle, BookOpen, Award, X, Loader2 } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Modal } from '@/shared/ui/Modal';
@@ -48,27 +49,29 @@ const TrainingEnrollmentsPage: React.FC = () => {
   }, []);
 
   const handleApprove = async (id: number) => {
-    if (!window.confirm('Approve this training enrollment?')) return;
+    if (!window.confirm('Setujui pendaftaran pelatihan ini?')) return;
     try {
       setLoading(true);
       await trainingService.approveEnrollment(id);
       fetchData();
-    } catch (error) {
+      showToast('Pendaftaran berhasil disetujui', 'success');
+    } catch (error: any) {
       console.error(error);
-      alert('Failed to approve enrollment');
+      showToast(error?.response?.data?.message || error?.message || 'Gagal menyetujui pendaftaran', 'error');
       setLoading(false);
     }
   };
 
   const handleReject = async (id: number) => {
-    if (!window.confirm('Reject this training enrollment?')) return;
+    if (!window.confirm('Tolak pendaftaran pelatihan ini?')) return;
     try {
       setLoading(true);
       await trainingService.rejectEnrollment(id);
       fetchData();
-    } catch (error) {
+      showToast('Pendaftaran berhasil ditolak', 'success');
+    } catch (error: any) {
       console.error(error);
-      alert('Failed to reject enrollment');
+      showToast(error?.response?.data?.message || error?.message || 'Gagal menolak pendaftaran', 'error');
       setLoading(false);
     }
   };

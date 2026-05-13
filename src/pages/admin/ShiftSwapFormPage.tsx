@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
+import { showToast } from '@/shared/ui/toast';
 import { Alert } from '@/shared/ui/Alert';
 import { employeeService } from '@/features/employee/api/employee.service';
 import { workforceService } from '@/features/workforce/api/workforce.service';
@@ -60,10 +61,13 @@ const ShiftSwapFormPage: React.FC = () => {
       await workforceService.createShiftSwap(payload);
       setStatusMessage("Permintaan tukar shift berhasil dibuat");
       setStatusType("success");
+      showToast('Permintaan tukar shift berhasil dibuat', 'success');
       setTimeout(() => navigate('/workforce/shift-swaps'), 1500);
     } catch (err: any) {
-      setStatusMessage(err.message || "Gagal membuat permintaan tukar shift");
+      const msg = err?.response?.data?.message || err.message || "Gagal membuat permintaan tukar shift";
+      setStatusMessage(msg);
       setStatusType("error");
+      showToast(msg, 'error');
       setSaving(false);
     }
   };

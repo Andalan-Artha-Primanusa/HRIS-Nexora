@@ -6,6 +6,7 @@ import { api } from '@/shared/api/httpClient';
 import { useAuthStore } from '@/app/store/auth.store';
 import { attendanceService } from '@/features/attendance/api/attendance.service';
 import overtimeService from '@/features/attendance/api/overtime.service';
+import { showToast } from '@/shared/ui/toast';
 import { Clock, RefreshCw, Calendar, Timer, AlertCircle, CheckCircle, XCircle, Search, MessageSquare, Eye, Send, Sparkles } from 'lucide-react';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
@@ -222,9 +223,10 @@ const OvertimePage = () => {
       setLoading(true);
       await api.put(`/overtime/requests/${requestId}/approve`);
       await loadRecords();
+      showToast('Lembur berhasil disetujui', 'success');
     } catch (error: any) {
       console.error(error);
-      alert(error?.response?.data?.message || 'Gagal menyetujui lembur');
+      showToast(error?.response?.data?.message || 'Gagal menyetujui lembur', 'error');
       setLoading(false);
     }
   };
@@ -243,9 +245,10 @@ const OvertimePage = () => {
       setLoading(true);
       await api.put(`/overtime/requests/${requestId}/reject`, { reject_reason: reason || undefined });
       await loadRecords();
+      showToast('Lembur berhasil ditolak', 'success');
     } catch (error: any) {
       console.error(error);
-      alert(error?.response?.data?.message || 'Gagal menolak lembur');
+      showToast(error?.response?.data?.message || 'Gagal menolak lembur', 'error');
       setLoading(false);
     }
   };

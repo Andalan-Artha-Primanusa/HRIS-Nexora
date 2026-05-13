@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, RefreshCw, GraduationCap, Calendar, Users, BookOpen, Search, Filter, Clock, Award, Edit, Trash2, BookTemplate, CheckCircle, TrendingUp, UserPlus, X, Loader2, XCircle, History } from 'lucide-react';
+import { showToast } from '@/shared/ui/toast';
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 import { Card } from '@/shared/ui/Card';
 import { Modal } from '@/shared/ui/Modal';
@@ -83,7 +84,7 @@ const ProgramsTab: React.FC = () => {
 
   const handleDelete = async (id: number) => {
     if (!window.confirm('Apakah Anda yakin ingin menghapus program ini?')) return;
-    try { await trainingService.deleteProgram(id); fetchData(); } catch (err) { console.error(err); }
+    try { await trainingService.deleteProgram(id); fetchData(); showToast('Program berhasil dihapus', 'success'); } catch (err: any) { console.error(err); showToast(err?.response?.data?.message || err?.message || 'Gagal menghapus program', 'error'); }
   };
 
   const openEnrollModal = (programId: number, programName: string) => {
@@ -294,13 +295,13 @@ const EnrollmentsTab: React.FC = () => {
   useEffect(() => { fetchData(); }, []);
 
   const handleApprove = async (id: number) => {
-    if (!window.confirm('Approve this training enrollment?')) return;
-    try { setLoading(true); await trainingService.approveEnrollment(id); fetchData(); } catch (error) { console.error(error); alert('Failed to approve enrollment'); setLoading(false); }
+    if (!window.confirm('Setujui pendaftaran pelatihan ini?')) return;
+    try { setLoading(true); await trainingService.approveEnrollment(id); fetchData(); showToast('Pendaftaran berhasil disetujui', 'success'); } catch (error: any) { console.error(error); showToast(error?.response?.data?.message || error?.message || 'Gagal menyetujui pendaftaran', 'error'); setLoading(false); }
   };
 
   const handleReject = async (id: number) => {
-    if (!window.confirm('Reject this training enrollment?')) return;
-    try { setLoading(true); await trainingService.rejectEnrollment(id); fetchData(); } catch (error) { console.error(error); alert('Failed to reject enrollment'); setLoading(false); }
+    if (!window.confirm('Tolak pendaftaran pelatihan ini?')) return;
+    try { setLoading(true); await trainingService.rejectEnrollment(id); fetchData(); showToast('Pendaftaran berhasil ditolak', 'success'); } catch (error: any) { console.error(error); showToast(error?.response?.data?.message || error?.message || 'Gagal menolak pendaftaran', 'error'); setLoading(false); }
   };
 
   const openCompleteModal = (enrollment: any) => {

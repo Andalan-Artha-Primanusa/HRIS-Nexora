@@ -164,6 +164,7 @@ const AdminReimbursementsPage: React.FC = () => {
       await approveReimbursement(String(selectedItem.id), { note: actionNote });
       setShowApproveModal(false);
       fetchData();
+      showToast('Klaim berhasil disetujui', 'success');
     } catch (error: any) {
       console.error('Failed to approve:', error);
       showToast(error?.response?.data?.message || error?.message || 'Gagal menyetujui klaim', 'error');
@@ -176,6 +177,7 @@ const AdminReimbursementsPage: React.FC = () => {
       await rejectReimbursement(String(selectedItem.id), { note: actionNote });
       setShowRejectModal(false);
       fetchData();
+      showToast('Klaim berhasil ditolak', 'success');
     } catch (error: any) {
       console.error('Failed to reject:', error);
       showToast(error?.response?.data?.message || error?.message || 'Gagal menolak klaim', 'error');
@@ -183,10 +185,11 @@ const AdminReimbursementsPage: React.FC = () => {
   };
 
   const handleDelete = async (item: ReimbursementItem) => {
-    if (window.confirm('Are you sure you want to delete this reimbursement?')) {
+    if (window.confirm('Hapus klaim ini?')) {
       try {
         await deleteReimbursement(String(item.id));
         fetchData();
+        showToast('Klaim berhasil dihapus', 'success');
       } catch (error: any) {
         console.error('Failed to delete:', error);
         showToast(error?.response?.data?.message || error?.message || 'Gagal menghapus klaim', 'error');

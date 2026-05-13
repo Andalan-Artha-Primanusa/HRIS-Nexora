@@ -70,6 +70,7 @@ const PromotionPage: React.FC = () => {
     try {
       await promotionService.approvePromotion(id);
       fetchData();
+      showToast('Promosi berhasil disetujui', 'success');
     } catch (error: any) {
       console.error(error);
       showToast(error?.response?.data?.message || error?.message || 'Gagal menyetujui promosi', 'error');
@@ -82,6 +83,7 @@ const PromotionPage: React.FC = () => {
     try {
       await promotionService.rejectPromotion(id, remarks);
       fetchData();
+      showToast('Promosi berhasil ditolak', 'success');
     } catch (error: any) {
       console.error(error);
       showToast(error?.response?.data?.message || error?.message || 'Gagal menolak promosi', 'error');
@@ -93,6 +95,7 @@ const PromotionPage: React.FC = () => {
     try {
       await promotionService.deletePromotion(id);
       fetchData();
+      showToast('Promosi berhasil dihapus', 'success');
     } catch (error: any) {
       console.error(error);
       showToast(error?.response?.data?.message || error?.message || 'Gagal menghapus promosi', 'error');
@@ -111,6 +114,7 @@ const PromotionPage: React.FC = () => {
     try {
       await promotionService.approveReport(id);
       fetchData();
+      showToast('Laporan berhasil disetujui', 'success');
     } catch (error: any) {
       console.error(error);
       showToast(error?.response?.data?.message || error?.message || 'Gagal menyetujui laporan', 'error');
@@ -135,6 +139,7 @@ const PromotionPage: React.FC = () => {
       });
       closeReportModal();
       fetchData();
+      showToast('Laporan berhasil ditolak', 'success');
     } catch (error: any) {
       console.error(error);
       showToast(error?.response?.data?.message || error?.message || 'Gagal menolak laporan', 'error');
