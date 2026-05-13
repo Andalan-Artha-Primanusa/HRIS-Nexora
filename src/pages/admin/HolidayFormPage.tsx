@@ -118,8 +118,8 @@ const HolidayFormPage: React.FC = () => {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                        <label style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b' }}>Tipe Libur</label>
                        <select name="type" value={formData.type} onChange={handleChange} style={{ width: '100%', padding: '0 16px', height: '50px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '1rem', color: '#0f172a', transition: 'all 0.2s', boxSizing: 'border-box' }}>
-                          <option>National Holiday</option>
-                          <option>Company Holiday</option>
+                          <option value="National Holiday">Libur Nasional</option>
+                          <option value="Company Holiday">Libur Perusahaan</option>
                        </select>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', gridColumn: '1 / -1' }}>
@@ -166,7 +166,7 @@ const HolidayFormPage: React.FC = () => {
                        <label>Status Kebijakan</label>
                        <div style={{ padding: '1rem', background: '#ecfdf5', color: '#059669', borderRadius: '16px', fontSize: '0.9rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '10px' }}>
                           <CheckCircle2 size={20} />
-                          Active Policy
+                          Kebijakan Aktif
                        </div>
                     </div>
                  </div>

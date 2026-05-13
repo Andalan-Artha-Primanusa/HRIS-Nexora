@@ -102,7 +102,7 @@ const AttendanceReportsPage = () => {
       item.date ? new Date(item.date).toLocaleDateString('id-ID') : '-',
       fmtTime(item.check_in),
       fmtTime(item.check_out),
-      item.status || '-',
+      formatAttendanceStatus(item.status),
     ]);
     const csv = [headers.map(csvVal), ...rows.map(r => r.map(csvVal))].map(r => r.join(',')).join('\n');
     const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -167,7 +167,7 @@ const AttendanceReportsPage = () => {
           <div className="hero-actions">
             <button className="btn-outline" onClick={exportCSV}>
               <Download size={16} />
-              Export Data Karyawan
+              Ekspor Data Karyawan
             </button>
             <button className="btn-outline" onClick={() => void loadAdminRecords()}>
               <RefreshCw size={16} className={adminLoading ? 'animate-spin' : ''} />
@@ -254,6 +254,14 @@ const AttendanceReportsPage = () => {
       />
     </div>
   );
+};
+
+const formatAttendanceStatus = (status: any) => {
+  const s = String(status || '').toLowerCase();
+  if (s.includes('late') || s.includes('terlambat')) return 'Terlambat';
+  if (s.includes('present') || s.includes('hadir') || s === 'active' || s === 'on_time') return 'Hadir';
+  if (s.includes('absent') || s.includes('tidak hadir')) return 'Absen';
+  return status ? String(status) : '-';
 };
 
 export default AttendanceReportsPage;

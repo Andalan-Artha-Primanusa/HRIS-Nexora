@@ -46,6 +46,21 @@ const LeaveBalancePage = () => {
     };
   }, [data]);
 
+  const formatEntitlementType = (value: any) => {
+    const normalized = String(value || '').toLowerCase();
+    if (normalized === 'fixed') return 'Tetap';
+    if (normalized === 'accrual' || normalized === 'accural') return 'Bertahap';
+    if (normalized === 'unlimited') return 'Tidak Terbatas';
+    return value || '-';
+  };
+
+  const formatPolicyName = (value: any) => {
+    const normalized = String(value || '').toLowerCase();
+    if (normalized === 'paid leave') return 'Cuti Berbayar';
+    if (normalized === 'unpaid leave') return 'Cuti Tidak Berbayar';
+    return value || '-';
+  };
+
   return (
     <div className="crud-page">
       {/* Header - Same style as Leave Requests */}
@@ -88,7 +103,7 @@ const LeaveBalancePage = () => {
           <div className="leave-summary-header">
             <div>
               <p className="leave-summary-label">Sisa Tahun Lalu</p>
-              <p className="leave-summary-subtitle">Carry over</p>
+              <p className="leave-summary-subtitle">Sisa tahun lalu</p>
             </div>
             <div className="leave-summary-icon-wrapper leave-icon-purple">
               <TrendingUp size={28} />
@@ -123,7 +138,7 @@ const LeaveBalancePage = () => {
             </div>
           </div>
           <div className="leave-summary-value leave-value-orange">{stats.pending}</div>
-          <p className="leave-summary-trend">Hari pending</p>
+              <p className="leave-summary-trend">Hari menunggu</p>
         </div>
 
         <div className="leave-summary-card">
@@ -167,8 +182,8 @@ const LeaveBalancePage = () => {
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>Field</th>
-                  <th>Value</th>
+                  <th>Kolom</th>
+                  <th>Nilai</th>
                 </tr>
               </thead>
               <tbody>
@@ -178,22 +193,22 @@ const LeaveBalancePage = () => {
                 </tr>
                 <tr>
                   <td><strong>Nama Kebijakan</strong></td>
-                  <td>{data.policy.name || '-'}</td>
+                  <td>{formatPolicyName(data.policy.name)}</td>
                 </tr>
                 <tr>
                   <td><strong>Kode Kebijakan</strong></td>
                   <td>{data.policy.policy_code || '-'}</td>
                 </tr>
                 <tr>
-                  <td><strong>Tipe Entitlement</strong></td>
-                  <td>{data.policy.entitlement_type}</td>
+                  <td><strong>Tipe Hak Cuti</strong></td>
+                  <td>{formatEntitlementType(data.policy.entitlement_type)}</td>
                 </tr>
                 <tr>
-                  <td><strong>Nilai Entitlement</strong></td>
+                  <td><strong>Nilai Hak Cuti</strong></td>
                   <td>{data.policy.entitlement_value ?? '-'}</td>
                 </tr>
                 <tr>
-                  <td><strong>Maks. Carry Over</strong></td>
+                  <td><strong>Maks. Sisa Tahun Lalu</strong></td>
                   <td>{data.policy.max_carryover_days ?? '-'}</td>
                 </tr>
                 <tr>
@@ -209,19 +224,19 @@ const LeaveBalancePage = () => {
                   <td>{data.policy.annual_allowance} hari</td>
                 </tr>
                 <tr>
-                  <td><strong>Kuota Carry Over</strong></td>
+                  <td><strong>Kuota Sisa Tahun Lalu</strong></td>
                   <td>{data.policy.carry_over_allowance} hari</td>
                 </tr>
                 <tr>
-                  <td><strong>Carry Over Aktif</strong></td>
+                  <td><strong>Sisa Tahun Lalu Aktif</strong></td>
                   <td>{data.policy.carry_over_enabled ? 'Ya' : 'Tidak'}</td>
                 </tr>
                 <tr>
-                  <td><strong>Encashment Aktif</strong></td>
+                  <td><strong>Pencairan Cuti Aktif</strong></td>
                   <td>{data.policy.encashment_enabled ? 'Ya' : 'Tidak'}</td>
                 </tr>
                 <tr>
-                  <td><strong>Maks. Pending Days</strong></td>
+                  <td><strong>Maks. Hari Menunggu</strong></td>
                   <td>{data.policy.max_pending_days} hari</td>
                 </tr>
                 <tr>
@@ -233,11 +248,11 @@ const LeaveBalancePage = () => {
                   </td>
                 </tr>
                 <tr>
-                  <td><strong>Blackout Ranges</strong></td>
+                  <td><strong>Periode Diblokir</strong></td>
                   <td>{data.policy.blackout_ranges || '-'}</td>
                 </tr>
                 <tr>
-                  <td><strong>Holiday Calendar ID</strong></td>
+                  <td><strong>ID Kalender Libur</strong></td>
                   <td>{data.policy.holiday_calendar_id ?? '-'}</td>
                 </tr>
                 <tr>

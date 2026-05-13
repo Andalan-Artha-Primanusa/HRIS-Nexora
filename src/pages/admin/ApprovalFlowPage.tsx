@@ -61,10 +61,10 @@ const ApprovalFlowPage: React.FC = () => {
   const handleSave = async (data: any) => {
     try {
       await organizationService.createApprovalFlow(data);
-      showToast('Approval flow berhasil dibuat', 'success');
+      showToast('Alur persetujuan berhasil dibuat', 'success');
       fetchData();
     } catch (err: any) {
-      const message = getApiErrorMessage(err, 'Gagal membuat approval flow');
+      const message = getApiErrorMessage(err, 'Gagal membuat alur persetujuan');
       showToast(message, 'error');
       throw new Error(message);
     }
@@ -75,10 +75,10 @@ const ApprovalFlowPage: React.FC = () => {
     try {
       await organizationService.updateApprovalFlow(editFlow.id, data);
       setEditFlow(null);
-      showToast('Approval flow berhasil diperbarui', 'success');
+      showToast('Alur persetujuan berhasil diperbarui', 'success');
       fetchData();
     } catch (err: any) {
-      const message = getApiErrorMessage(err, 'Gagal memperbarui approval flow');
+      const message = getApiErrorMessage(err, 'Gagal memperbarui alur persetujuan');
       showToast(message, 'error');
       throw new Error(message);
     }
@@ -90,11 +90,11 @@ const ApprovalFlowPage: React.FC = () => {
     setDeleting(true);
     try {
       await organizationService.deleteApprovalFlow(deleteTarget.id);
-      showToast('Approval flow berhasil dihapus', 'success');
+      showToast('Alur persetujuan berhasil dihapus', 'success');
       setDeleteTarget(null);
       fetchData();
     } catch (err: any) {
-      showToast(err.message || 'Gagal menghapus approval flow', 'error');
+      showToast(err.message || 'Gagal menghapus alur persetujuan', 'error');
     } finally {
       setDeleting(false);
     }
@@ -103,7 +103,7 @@ const ApprovalFlowPage: React.FC = () => {
   const toggleActive = async (flow: any) => {
     try {
       await organizationService.updateApprovalFlow(flow.id, { ...flow, is_active: !flow.is_active });
-      showToast(`Flow ${flow.is_active ? 'dinonaktifkan' : 'diaktifkan'}`, 'success');
+      showToast(`Alur ${flow.is_active ? 'dinonaktifkan' : 'diaktifkan'}`, 'success');
       fetchData();
     } catch (err: any) {
       showToast(err.message || 'Gagal mengubah status', 'error');
@@ -134,29 +134,33 @@ const ApprovalFlowPage: React.FC = () => {
 
   const getRoleName = (roleId: number) => {
     const role = roles.find(r => r.id === roleId);
-    return role?.display_name || role?.name || `Role #${roleId}`;
+    return role?.display_name || role?.name || `Peran #${roleId}`;
   };
 
   const getUserName = (user: any) => {
     if (!user) return null;
-    return user.name || user.email || `User #${user.id}`;
+    return user.name || user.email || `Pengguna #${user.id}`;
   };
 
   const moduleOptions = [
-    { value: 'all', label: 'All Modules' },
-    { value: 'assignment_letter', label: 'Assignment Letters' },
-    { value: 'leave', label: 'Leave Requests' },
-    { value: 'reimbursement', label: 'Reimbursements' },
-    { value: 'overtime', label: 'Overtime' },
-    { value: 'promotion', label: 'Promotion Requests' },
-    { value: 'training', label: 'Training Requests' },
-    { value: 'document', label: 'Documents' },
-    { value: 'asset_assignment', label: 'Asset Assignments' },
-    { value: 'shift_swap', label: 'Shift Swaps' },
-    { value: 'payroll', label: 'Payroll' },
+    { value: 'all', label: 'Semua Modul' },
+    { value: 'assignment_letter', label: 'Surat Tugas' },
+    { value: 'leave', label: 'Pengajuan Cuti' },
+    { value: 'reimbursement', label: 'Penggantian Biaya' },
+    { value: 'overtime', label: 'Lembur' },
+    { value: 'promotion', label: 'Pengajuan Promosi' },
+    { value: 'training', label: 'Pengajuan Pelatihan' },
+    { value: 'document', label: 'Dokumen' },
+    { value: 'asset_assignment', label: 'Penugasan Aset' },
+    { value: 'shift_swap', label: 'Tukar Giliran Kerja' },
+    { value: 'payroll', label: 'Penggajian' },
     { value: 'kpi', label: 'KPI' },
-    { value: 'benefit_assignment', label: 'Benefit Assignments' },
+    { value: 'benefit_assignment', label: 'Penugasan Tunjangan' },
   ];
+
+  const getModuleLabel = (value: string) => {
+    return moduleOptions.find((option) => option.value === value)?.label || value?.replace(/_/g, ' ') || '-';
+  };
 
   return (
     <div className="crud-page">
@@ -165,11 +169,11 @@ const ApprovalFlowPage: React.FC = () => {
           <div className="hero-content">
             <div className="hero-badge">
               <Workflow size={16} />
-              <span>System Configuration</span>
+              <span>Konfigurasi Sistem</span>
             </div>
-            <h1 className="hero-title">Approval Flows</h1>
+            <h1 className="hero-title">Alur Persetujuan</h1>
             <p className="hero-subtitle">
-              Define multi-level approval workflows for organizational modules.
+              Atur alur persetujuan bertingkat untuk modul organisasi.
             </p>
           </div>
           <div className="hero-actions">
@@ -178,7 +182,7 @@ const ApprovalFlowPage: React.FC = () => {
             </button>
             <button className="btn-primary" onClick={openCreate}>
               <Plus size={16} />
-              New Flow
+              Alur Baru
             </button>
           </div>
         </div>
@@ -188,7 +192,7 @@ const ApprovalFlowPage: React.FC = () => {
         <div className="approval-filter-group">
           <input
             type="text"
-            placeholder="Search by name or module..."
+            placeholder="Cari berdasarkan nama atau modul..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="search-input"
@@ -209,16 +213,16 @@ const ApprovalFlowPage: React.FC = () => {
 
       {loading ? (
         <div className="approval-empty-state">
-          <p>Loading...</p>
+          <p>Memuat...</p>
         </div>
       ) : filteredFlows.length === 0 ? (
         <div className="approval-empty-state">
           <GitBranch size={48} style={{ opacity: 0.3 }} />
-          <p>No approval flows found</p>
+          <p>Alur persetujuan tidak ditemukan</p>
         </div>
       ) : (
         <div>
-          <span className="approval-count">{filteredFlows.length} flows</span>
+          <span className="approval-count">{filteredFlows.length} alur</span>
 
           {filteredFlows.map((flow) => (
             <div key={flow.id} className="approval-flow-card">
@@ -226,17 +230,17 @@ const ApprovalFlowPage: React.FC = () => {
                 <div className="approval-flow-info">
                   <span className="approval-flow-id">#{flow.id}</span>
                   <h4 className="approval-flow-name">{flow.name}</h4>
-                  <span className="approval-flow-module">{flow.module?.replace(/_/g, ' ')}</span>
+                  <span className="approval-flow-module">{getModuleLabel(flow.module)}</span>
                 </div>
                 <span className={`approval-flow-badge ${flow.is_active ? 'active' : 'inactive'}`}>
-                  {flow.is_active ? 'Active' : 'Inactive'}
+                  {flow.is_active ? 'Aktif' : 'Tidak Aktif'}
                 </span>
               </div>
 
               <div className="approval-flow-body">
                 {flow.steps && flow.steps.length > 0 && (
                   <>
-                    <p className="approval-steps-title">Approval Steps</p>
+                    <p className="approval-steps-title">Tahapan Persetujuan</p>
                     {flow.steps.map((step: any, idx: number) => {
                       const assignedUser = step.user || step.user_id;
                       const userName = assignedUser && typeof assignedUser === 'object' ? getUserName(assignedUser) : null;
@@ -261,14 +265,14 @@ const ApprovalFlowPage: React.FC = () => {
 
               <div className="approval-flow-actions">
                 <button className="btn-outline" onClick={() => openEdit(flow)}>
-                  <Edit size={14} /> Edit
+                  <Edit size={14} /> Ubah
                 </button>
                 <button className="btn-outline" style={{ color: '#ef4444', borderColor: '#fecaca' }} onClick={() => setDeleteTarget(flow)}>
-                  <Trash2 size={14} /> Delete
+                  <Trash2 size={14} /> Hapus
                 </button>
                 <button className="btn-outline" onClick={() => toggleActive(flow)}>
                   {flow.is_active ? <ToggleLeft size={14} /> : <ToggleRight size={14} />}
-                  {flow.is_active ? 'Deactivate' : 'Activate'}
+                  {flow.is_active ? 'Nonaktifkan' : 'Aktifkan'}
                 </button>
               </div>
             </div>
@@ -286,8 +290,8 @@ const ApprovalFlowPage: React.FC = () => {
 
       <ConfirmDialog
         isOpen={!!deleteTarget}
-        title="Hapus Approval Flow"
-        message={`Approval flow "${String(deleteTarget?.name || "ini")}" akan dihapus. Tindakan ini tidak dapat dibatalkan.`}
+        title="Hapus Alur Persetujuan"
+        message={`Alur persetujuan "${String(deleteTarget?.name || "ini")}" akan dihapus. Tindakan ini tidak dapat dibatalkan.`}
         confirmLabel="Hapus"
         cancelLabel="Batal"
         loading={deleting}

@@ -53,7 +53,7 @@ const AdminRoleAssignPermissionsPage = () => {
     try {
       const result = await getAllRoles();
       const formattedRoles = result.items.map((item: any) => {
-        const displayName = item.display_name || item.name || `Role ${item.id}`;
+        const displayName = item.display_name || item.name || `Peran ${item.id}`;
         const name = item.name || '';
         const permCount = item.permissions_count || (Array.isArray(item.permissions) ? item.permissions.length : 0);
         
@@ -174,7 +174,7 @@ const AdminRoleAssignPermissionsPage = () => {
           <p>Tentukan hak akses spesifik untuk setiap tingkatan peran dalam sistem.</p>
         </div>
         <Button variant="outline" size="md" onClick={() => navigate("/admin/roles")}>
-          ← Kembali ke Roles
+          ← Kembali ke Peran
         </Button>
       </div>
 
@@ -202,7 +202,7 @@ const AdminRoleAssignPermissionsPage = () => {
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan={2} style={{ textAlign: 'center', padding: '2rem' }}>Memuat roles...</td></tr>
+                  <tr><td colSpan={2} style={{ textAlign: 'center', padding: '2rem' }}>Memuat peran...</td></tr>
                 ) : roles.map((r) => (
                   <tr 
                     key={r.id} 

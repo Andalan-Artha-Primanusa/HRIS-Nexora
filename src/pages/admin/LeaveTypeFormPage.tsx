@@ -178,7 +178,7 @@ const LeaveTypeFormPage: React.FC = () => {
                     style={{ width: '100%', height: '50px', padding: '0 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '1rem', color: '#0f172a', boxSizing: 'border-box' }}
                   >
                     <option value="true">Berbayar (Paid)</option>
-                    <option value="false">Tidak Berbayar (Unpaid)</option>
+                    <option value="false">Tidak Berbayar</option>
                   </select>
                 </div>
 

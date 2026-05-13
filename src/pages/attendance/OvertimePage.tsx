@@ -192,7 +192,7 @@ const OvertimePage = () => {
 
     const reason = reasonDraft.trim();
     if (!reason) {
-      showToast('Alasan lembur tidak boleh kosong.', 'warning');
+      showToast('Alasan lembur tidak boleh kosong.', 'info');
       return;
     }
 
@@ -287,7 +287,7 @@ const OvertimePage = () => {
         const file = input.files?.[0];
         if (!file) return;
         if (file.size > 10 * 1024 * 1024) {
-          showToast('Ukuran file maksimal 10MB', 'warning');
+          showToast('Ukuran file maksimal 10MB', 'info');
           return;
         }
         try {

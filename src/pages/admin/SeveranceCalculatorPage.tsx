@@ -73,7 +73,7 @@ const SeveranceCalculatorPage: React.FC = () => {
       });
       const responseData = data.data || data;
       setCalculation({
-        service_period_formatted: responseData.masa_kerja_bulan ? `${Math.floor(responseData.masa_kerja_bulan)} bulan` : 'N/A',
+        service_period_formatted: responseData.masa_kerja_bulan ? `${Math.floor(responseData.masa_kerja_bulan)} bulan` : '-',
         base_salary: responseData.employee?.salary || 0,
         severance_pay: responseData.pesangon?.pesangon || 0,
         service_reward: responseData.pesangon?.uang_penghargaan || 0,
@@ -114,7 +114,7 @@ const SeveranceCalculatorPage: React.FC = () => {
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(20);
       doc.setFont('helvetica', 'bold');
-      doc.text(company.name || 'Company', pageWidth / 2, 18, { align: 'center' });
+      doc.text(company.name || 'Perusahaan', pageWidth / 2, 18, { align: 'center' });
       doc.setFont('helvetica', 'normal');
       
       doc.setFontSize(9);
@@ -132,12 +132,12 @@ const SeveranceCalculatorPage: React.FC = () => {
     doc.setTextColor(20, 30, 48);
     doc.setFontSize(16);
     doc.setFont('helvetica', 'bold');
-    doc.text('CALCULATION OF SEVERANCE PAY', pageWidth / 2, 62, { align: 'center' });
+    doc.text('PERHITUNGAN PESANGON', pageWidth / 2, 62, { align: 'center' });
     doc.setFont('helvetica', 'normal');
     
     doc.setFontSize(9);
     doc.setTextColor(100, 100, 100);
-    doc.text('Based on PP No. 35 of 2021 - Progressive Calculation', pageWidth / 2, 68, { align: 'center' });
+    doc.text('Berdasarkan PP No. 35 Tahun 2021 - Perhitungan Progresif', pageWidth / 2, 68, { align: 'center' });
 
     // Divider
     doc.setDrawColor(37, 99, 235);
@@ -154,35 +154,35 @@ const SeveranceCalculatorPage: React.FC = () => {
     doc.setTextColor(20, 30, 48);
     doc.setFontSize(11);
     doc.setFont('helvetica', 'bold');
-    doc.text('EMPLOYEE INFORMATION', margin + 8, infoStartY + 10);
+    doc.text('INFORMASI KARYAWAN', margin + 8, infoStartY + 10);
     doc.setFont('helvetica', 'normal');
     
     doc.setFontSize(9);
     doc.setTextColor(60, 60, 60);
     
-    const empName = emp?.full_name || emp?.user?.name || 'N/A';
-    const empCode = emp?.employee_code || emp?.employee_id || 'N/A';
-    const empPos = emp?.position || 'N/A';
-    const empDept = emp?.department || 'N/A';
+    const empName = emp?.full_name || emp?.user?.name || '-';
+    const empCode = emp?.employee_code || emp?.employee_id || '-';
+    const empPos = emp?.position || '-';
+    const empDept = emp?.department || '-';
 
-    doc.text(`Name: ${empName}`, margin + 8, infoStartY + 17);
-    doc.text(`Employee ID: ${empCode}`, margin + 8, infoStartY + 23);
-    doc.text(`Position: ${empPos}`, margin + 8, infoStartY + 29);
-    doc.text(`Department: ${empDept}`, margin + 75, infoStartY + 17);
-    doc.text(`Join Date: ${joinDate}`, margin + 75, infoStartY + 23);
-    doc.text(`Termination: ${terminationDate}`, margin + 75, infoStartY + 29);
+    doc.text(`Nama: ${empName}`, margin + 8, infoStartY + 17);
+    doc.text(`ID Karyawan: ${empCode}`, margin + 8, infoStartY + 23);
+    doc.text(`Posisi: ${empPos}`, margin + 8, infoStartY + 29);
+    doc.text(`Departemen: ${empDept}`, margin + 75, infoStartY + 17);
+    doc.text(`Tanggal Masuk: ${joinDate}`, margin + 75, infoStartY + 23);
+    doc.text(`Tanggal Keluar: ${terminationDate}`, margin + 75, infoStartY + 29);
 
     // Calculation Results Table
     const tableStartY = infoStartY + 48;
     autoTable(doc, {
       startY: tableStartY,
-      head: [['Component', 'Amount (IDR)']],
+      head: [['Komponen', 'Jumlah (IDR)']],
       body: [
-        ['Service Period', calculation.service_period_formatted || 'N/A'],
-        ['Base Salary', formatCurrency(calculation.base_salary)],
-        ['Severance Pay (Pesangon)', formatCurrency(calculation.severance_pay)],
-        ['Service Reward (UPMK)', formatCurrency(calculation.service_reward)],
-        ['Compensation (UPH)', formatCurrency(calculation.compensation)],
+        ['Masa Kerja', calculation.service_period_formatted || '-'],
+        ['Gaji Pokok', formatCurrency(calculation.base_salary)],
+        ['Uang Pesangon', formatCurrency(calculation.severance_pay)],
+        ['Uang Penghargaan Masa Kerja (UPMK)', formatCurrency(calculation.service_reward)],
+        ['Uang Penggantian Hak (UPH)', formatCurrency(calculation.compensation)],
       ],
       styles: { fontSize: 10, cellPadding: 7, lineColor: [230, 230, 230] },
       headStyles: { 
@@ -205,7 +205,7 @@ const SeveranceCalculatorPage: React.FC = () => {
     
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(13);
-    doc.text('TOTAL SEVERANCE PAY', margin + 10, finalY + 11);
+    doc.text('TOTAL PESANGON', margin + 10, finalY + 11);
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
     doc.text(formatCurrency(calculation.total_severance), pageWidth - margin - 10, finalY + 11, { align: 'right' });
@@ -215,12 +215,12 @@ const SeveranceCalculatorPage: React.FC = () => {
     doc.setTextColor(150, 150, 150);
     doc.setFontSize(8);
     const footerY = 285;
-    doc.text(`Generated: ${new Date().toLocaleString('id-ID')}`, margin, footerY);
-    doc.text(`Powered by ${company?.name || 'HRIS System'}`, pageWidth / 2, footerY, { align: 'center' });
-    doc.text('Page 1 of 1', pageWidth - margin, footerY, { align: 'right' });
+    doc.text(`Dibuat: ${new Date().toLocaleString('id-ID')}`, margin, footerY);
+    doc.text(`Didukung oleh ${company?.name || 'Sistem HRIS'}`, pageWidth / 2, footerY, { align: 'center' });
+    doc.text('Halaman 1 dari 1', pageWidth - margin, footerY, { align: 'right' });
 
     // Save
-    doc.save(`SeverancePay_${empCode}_${new Date().getTime()}.pdf`);
+    doc.save(`Pesangon_${empCode}_${new Date().getTime()}.pdf`);
   };
 
   return (
@@ -252,12 +252,12 @@ const SeveranceCalculatorPage: React.FC = () => {
             <div style={{ padding: '10px', background: '#eff6ff', borderRadius: '12px', color: '#2563eb' }}>
               <Calculator size={24} />
             </div>
-            <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: '#1e293b' }}>Select Employee</h3>
+            <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: '#1e293b' }}>Pilih Karyawan</h3>
           </div>
           
           <div className="form-group" style={{ marginBottom: '2rem' }}>
             <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Employee Name
+              Nama Karyawan
             </label>
             <select 
               className="form-control" 
@@ -274,10 +274,10 @@ const SeveranceCalculatorPage: React.FC = () => {
                 boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
               }}
             >
-              <option value="">-- Choose Employee --</option>
+              <option value="">-- Pilih Karyawan --</option>
               {employees.map(emp => (
                 <option key={emp.id} value={emp.id}>
-                  {emp.full_name || emp.user?.name || emp.name || 'Unknown'} ({emp.employee_id || emp.employee_code || '#'+emp.id})
+                  {emp.full_name || emp.user?.name || emp.name || 'Tidak diketahui'} ({emp.employee_id || emp.employee_code || '#'+emp.id})
                 </option>
               ))}
             </select>
@@ -286,7 +286,7 @@ const SeveranceCalculatorPage: React.FC = () => {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
             <div className="form-group">
               <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>
-                Join Date
+                Tanggal Bergabung
               </label>
               <input 
                 type="date" 
@@ -298,7 +298,7 @@ const SeveranceCalculatorPage: React.FC = () => {
             </div>
             <div className="form-group">
               <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>
-                Termination Date
+                Tanggal Keluar
               </label>
               <input 
                 type="date" 
@@ -323,12 +323,12 @@ const SeveranceCalculatorPage: React.FC = () => {
             disabled={!selectedEmployee || !joinDate || !terminationDate || loading}
           >
             <Calculator size={20} style={{ marginRight: '10px' }} />
-            {loading ? 'Calculating...' : 'Calculate Severance'}
+            {loading ? 'Menghitung...' : 'Hitung Pesangon'}
           </Button>
 
           <div style={{ marginTop: '2rem', padding: '1.25rem', background: '#f0f9ff', borderRadius: '16px', border: '1px dashed #bae6fd' }}>
             <p style={{ margin: 0, fontSize: '0.85rem', color: '#0369a1', lineHeight: 1.5 }}>
-              <strong>Note:</strong> Calculation includes Severance Pay (Pesangon), Service Reward (UPMK), and Compensation (UPH) as per government regulations.
+              <strong>Catatan:</strong> Perhitungan mencakup uang pesangon, uang penghargaan masa kerja (UPMK), dan uang penggantian hak (UPH) sesuai peraturan pemerintah.
             </p>
           </div>
         </Card>
@@ -337,36 +337,36 @@ const SeveranceCalculatorPage: React.FC = () => {
           {calculation ? (
             <div className="calculation-result">
               <div style={{ padding: '2rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.4)' }}>
-                <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: '#1e293b' }}>Calculation Summary</h3>
+                <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: '#1e293b' }}>Ringkasan Perhitungan</h3>
                 <Button variant="outline" style={{ borderRadius: '10px' }} onClick={exportPDF}>
                   <Download size={18} style={{ marginRight: '8px' }} />
-                  Export PDF
+                  Ekspor PDF
                 </Button>
               </div>
 
               <div style={{ padding: '2rem' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2.5rem' }}>
                   <div style={{ padding: '1.25rem', background: '#f8fafc', borderRadius: '16px', border: '1px solid #f1f5f9' }}>
-                    <div style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '8px' }}>Service Period</div>
-                    <div style={{ fontWeight: 700, fontSize: '1.1rem', color: '#1e293b' }}>{calculation.service_period_formatted || 'N/A'}</div>
+                    <div style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '8px' }}>Masa Kerja</div>
+                    <div style={{ fontWeight: 700, fontSize: '1.1rem', color: '#1e293b' }}>{calculation.service_period_formatted || '-'}</div>
                   </div>
                   <div style={{ padding: '1.25rem', background: '#f8fafc', borderRadius: '16px', border: '1px solid #f1f5f9' }}>
-                    <div style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '8px' }}>Basic Salary (Base)</div>
+                    <div style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '8px' }}>Gaji Pokok</div>
                     <div style={{ fontWeight: 700, fontSize: '1.1rem', color: '#1e293b' }}>{formatCurrency(calculation.base_salary || 0)}</div>
                   </div>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ color: '#64748b', fontWeight: 500 }}>Severance Pay (Uang Pesangon)</span>
+                    <span style={{ color: '#64748b', fontWeight: 500 }}>Uang Pesangon</span>
                     <span style={{ fontWeight: 700, color: '#1e293b' }}>{formatCurrency(calculation.severance_pay || 0)}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ color: '#64748b', fontWeight: 500 }}>Service Reward (UPMK)</span>
+                    <span style={{ color: '#64748b', fontWeight: 500 }}>Uang Penghargaan Masa Kerja (UPMK)</span>
                     <span style={{ fontWeight: 700, color: '#1e293b' }}>{formatCurrency(calculation.service_reward || 0)}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ color: '#64748b', fontWeight: 500 }}>Compensation (UPH)</span>
+                    <span style={{ color: '#64748b', fontWeight: 500 }}>Uang Penggantian Hak (UPH)</span>
                     <span style={{ fontWeight: 700, color: '#1e293b' }}>{formatCurrency(calculation.compensation || 0)}</span>
                   </div>
                   
@@ -382,7 +382,7 @@ const SeveranceCalculatorPage: React.FC = () => {
                     boxShadow: '0 10px 25px rgba(37, 99, 235, 0.3)'
                   }}>
                     <div>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 600, opacity: 0.9, marginBottom: '4px' }}>Total Payout Amount</div>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 600, opacity: 0.9, marginBottom: '4px' }}>Total Pembayaran</div>
                       <div style={{ fontSize: '1.75rem', fontWeight: 800 }}>{formatCurrency(calculation.total_severance || 0)}</div>
                     </div>
                     <div style={{ background: 'rgba(255,255,255,0.2)', padding: '12px', borderRadius: '14px' }}>
@@ -397,8 +397,8 @@ const SeveranceCalculatorPage: React.FC = () => {
               <div style={{ width: '80px', height: '80px', background: '#f8fafc', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', color: '#cbd5e1' }}>
                 <Calculator size={40} />
               </div>
-              <h3 style={{ margin: '0 0 0.5rem', fontSize: '1.1rem', color: '#475569', fontWeight: 700 }}>Ready to Calculate</h3>
-              <p style={{ margin: 0, fontSize: '0.9rem', color: '#94a3b8', maxWidth: '300px' }}>Select an employee from the list to compute their severance package according to PP 35/2021.</p>
+              <h3 style={{ margin: '0 0 0.5rem', fontSize: '1.1rem', color: '#475569', fontWeight: 700 }}>Siap Menghitung</h3>
+              <p style={{ margin: 0, fontSize: '0.9rem', color: '#94a3b8', maxWidth: '300px' }}>Pilih karyawan dari daftar untuk menghitung paket pesangon sesuai PP 35/2021.</p>
             </div>
           )}
         </Card>

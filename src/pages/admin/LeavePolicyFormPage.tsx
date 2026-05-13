@@ -249,9 +249,9 @@ const LeavePolicyFormPage: React.FC = () => {
                   onChange={handleChange} 
                   style={{ width: '100%', height: '50px', padding: '0 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '1rem', color: '#0f172a', boxSizing: 'border-box' }}
                 >
-                  <option value="fixed">Fixed</option>
-                  <option value="accrual">Accrual</option>
-                  <option value="unlimited">Unlimited</option>
+                  <option value="fixed">Tetap</option>
+                  <option value="accrual">Bertahap</option>
+                  <option value="unlimited">Tidak Terbatas</option>
                 </select>
               </div>
 
@@ -264,7 +264,7 @@ const LeavePolicyFormPage: React.FC = () => {
                   style={{ width: '100%', height: '50px', padding: '0 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '1rem', color: '#0f172a', boxSizing: 'border-box' }}
                 >
                   <option value="true">Paid</option>
-                  <option value="false">Unpaid</option>
+                  <option value="false">Tidak Berbayar</option>
                 </select>
               </div>
 

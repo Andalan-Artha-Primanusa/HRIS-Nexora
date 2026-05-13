@@ -57,6 +57,23 @@ export const ApprovalHistoryModal = ({ isOpen, onClose, module, moduleId }: Appr
   const currentStep = completedSteps + 1;
   const effectiveTotal = Math.max(totalSteps, currentStep);
 
+  const moduleLabels: Record<string, string> = {
+    assignment_letter: "surat tugas",
+    leave: "cuti",
+    reimbursement: "penggantian biaya",
+    overtime: "lembur",
+    promotion: "promosi",
+    training: "pelatihan",
+    document: "dokumen",
+    asset_assignment: "penugasan aset",
+    shift_swap: "tukar giliran kerja",
+    payroll: "penggajian",
+    kpi: "KPI",
+    benefit_assignment: "penugasan tunjangan",
+  };
+
+  const moduleLabel = moduleLabels[module] || module.replace(/_/g, " ");
+
   if (!isOpen) return null;
 
   return (
@@ -89,10 +106,10 @@ export const ApprovalHistoryModal = ({ isOpen, onClose, module, moduleId }: Appr
             </div>
             <div>
               <h3 style={{ margin: 0, fontSize: "1.1rem", color: "#1e293b", fontWeight: 700 }}>
-                Approval History
+                Riwayat Persetujuan
               </h3>
               <p style={{ margin: 0, fontSize: "0.8rem", color: "#64748b" }}>
-                {module.replace(/_/g, " ")} #{moduleId}
+                {moduleLabel} #{moduleId}
               </p>
             </div>
           </div>
@@ -109,7 +126,7 @@ export const ApprovalHistoryModal = ({ isOpen, onClose, module, moduleId }: Appr
             <div style={{ marginBottom: "1rem" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
                 <span style={{ fontSize: "0.8rem", fontWeight: 600, color: "#475569" }}>
-                  Progress: Step {currentStep} of {effectiveTotal}
+                  Progres: Tahap {currentStep} dari {effectiveTotal}
                 </span>
                 <span style={{ fontSize: "0.75rem", color: "#94a3b8" }}>
                   {Math.round((completedSteps / effectiveTotal) * 100)}%
@@ -126,11 +143,11 @@ export const ApprovalHistoryModal = ({ isOpen, onClose, module, moduleId }: Appr
           {loading ? (
             <div style={{ textAlign: "center", padding: "2rem" }}>
               <Loader2 size={24} className="animate-spin" />
-              <p style={{ color: "#94a3b8", marginTop: 8 }}>Loading history...</p>
+              <p style={{ color: "#94a3b8", marginTop: 8 }}>Memuat riwayat...</p>
             </div>
           ) : history.length === 0 ? (
             <div style={{ textAlign: "center", padding: "2rem", color: "#94a3b8" }}>
-              <p>No approval history found.</p>
+              <p>Riwayat persetujuan tidak ditemukan.</p>
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
@@ -207,10 +224,10 @@ export const ApprovalHistoryModal = ({ isOpen, onClose, module, moduleId }: Appr
                                 : "#d97706",
                             }}
                           >
-                            {isPending ? "Waiting Approval" : isApproved ? "Approved" : "Rejected"}
+                            {isPending ? "Menunggu Persetujuan" : isApproved ? "Disetujui" : "Ditolak"}
                           </span>
                           <span style={{ fontSize: "11px", color: "#94a3b8" }}>
-                            Step {item.step_order}
+                            Tahap {item.step_order}
                           </span>
                         </div>
 
@@ -221,7 +238,7 @@ export const ApprovalHistoryModal = ({ isOpen, onClose, module, moduleId }: Appr
                           }}
                         >
                           <Shield size={13} />
-                          {item.role?.display_name || item.role?.name || `Role #${item.role_id}`}
+                          {item.role?.display_name || item.role?.name || `Peran #${item.role_id}`}
                         </div>
 
                         {item.user && (
@@ -232,7 +249,7 @@ export const ApprovalHistoryModal = ({ isOpen, onClose, module, moduleId }: Appr
                             }}
                           >
                             <User size={13} />
-                            {item.user.name || item.user.email || `User #${item.user_id}`}
+                            {item.user.name || item.user.email || `Pengguna #${item.user_id}`}
                           </div>
                         )}
 

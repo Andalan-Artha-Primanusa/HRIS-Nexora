@@ -76,7 +76,7 @@ const AdminRolesPage = () => {
   const rolesSummaryCards = useMemo(
     () => [
       {
-        label: "Total Roles",
+        label: "Total Peran",
         subtitle: "Semua role tersedia",
         value: String(roles.length),
         change: "Data role sistem",
@@ -92,7 +92,7 @@ const AdminRolesPage = () => {
         icon: Search,
       },
       {
-        label: "Total Permissions",
+        label: "Total Izin",
         subtitle: "Jumlah permission aktif",
         value: String(roles.reduce((sum, r) => sum + (r.permissions_count || 0), 0)),
         change: "Hak akses sistem",
@@ -110,7 +110,7 @@ const AdminRolesPage = () => {
 
   const requestDelete = (role: Role) => {
     if (role.id === 1 || role.name === "admin" || role.name === "super_admin") {
-      setStatusMessage("Role sistem utama tidak dapat dihapus.");
+      setStatusMessage("Peran sistem utama tidak dapat dihapus.");
       setAlertType("error");
       return;
     }
@@ -124,7 +124,7 @@ const AdminRolesPage = () => {
     setDeleting(true);
     try {
       await deleteRole(deleteTarget.id);
-      setStatusMessage(`Role "${deleteTarget.name}" berhasil dihapus.`);
+      setStatusMessage(`Peran "${deleteTarget.name}" berhasil dihapus.`);
       setAlertType("success");
       setDeleteTarget(null);
       void loadRoles();
@@ -179,7 +179,7 @@ const AdminRolesPage = () => {
               <Shield size={16} />
               <span>Admin Center</span>
             </div>
-            <h1 className="hero-title">Kelola Role</h1>
+            <h1 className="hero-title">Kelola Peran</h1>
             <p className="hero-subtitle">Manajemen role dan permission pengguna sistem.</p>
           </div>
           <div className="hero-actions">
@@ -189,7 +189,7 @@ const AdminRolesPage = () => {
             </button>
             <button type="button" className="btn-primary" onClick={() => navigate("/admin/roles/create")}>
               <Plus size={16} />
-              Tambah Role
+              Tambah Peran
             </button>
           </div>
         </div>
@@ -226,7 +226,7 @@ const AdminRolesPage = () => {
             <Shield size={24} />
           </div>
           <div>
-            <h2 className="analytics-title">Daftar Role</h2>
+            <h2 className="analytics-title">Daftar Peran</h2>
             <p className="analytics-subtitle">Kelola dan lihat semua role</p>
           </div>
         </div>
@@ -289,9 +289,9 @@ const AdminRolesPage = () => {
           {!loading && !errorMessage && paginatedRoles.length === 0 && (
             <div style={{ padding: "5rem 0" }}>
               <EmptyState
-                title="Role Kosong"
+                title="Peran Kosong"
                 message={searchText ? "Tidak ada role yang sesuai dengan kriteria Anda." : "Belum ada data role. Tambah role baru untuk memulai."}
-                actionLabel="Tambah Role"
+                actionLabel="Tambah Peran"
                 onAction={() => navigate("/admin/roles/create")}
               />
             </div>
@@ -303,9 +303,9 @@ const AdminRolesPage = () => {
                 <table className="data-table">
                   <thead>
                     <tr>
-                      <th style={{ width: "400px" }}>Nama Role</th>
+                      <th style={{ width: "400px" }}>Nama Peran</th>
                       <th>Deskripsi</th>
-                      <th>Permissions</th>
+                      <th>Izin</th>
                       <th className="th-center" style={{ width: "120px" }}>
                         Aksi
                       </th>
@@ -336,14 +336,14 @@ const AdminRolesPage = () => {
                             <button
                               className="action-btn action-btn-edit"
                               onClick={() => navigate(`/admin/roles/edit/${role.id}`)}
-                              title="Edit Role"
+                              title="Ubah Peran"
                             >
                               <Edit size={16} />
                             </button>
                             <button
                               className="action-btn action-btn-delete"
                               onClick={() => requestDelete(role)}
-                              title="Hapus Role"
+                              title="Hapus Peran"
                               disabled={role.id === 1 || role.name === "admin" || role.name === "super_admin"}
                             >
                               <Trash2 size={16} />
@@ -359,7 +359,7 @@ const AdminRolesPage = () => {
               {/* Pagination */}
               <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan <strong>{paginatedRoles.length}</strong> dari <strong>{filteredRoles.length}</strong> roles
+                  Menampilkan <strong>{paginatedRoles.length}</strong> dari <strong>{filteredRoles.length}</strong> peran
                 </div>
                 <div className="pagination-controls">
                   <button
@@ -394,8 +394,8 @@ const AdminRolesPage = () => {
 
       <ConfirmDialog
         isOpen={!!deleteTarget}
-        title="Hapus Role"
-        message={`Role "${deleteTarget?.name || ""}" akan dihapus. Pastikan role ini tidak sedang dipakai oleh user aktif.`}
+        title="Hapus Peran"
+        message={`Peran "${deleteTarget?.name || ""}" akan dihapus. Pastikan peran ini tidak sedang dipakai oleh pengguna aktif.`}
         confirmLabel="Hapus"
         cancelLabel="Batal"
         loading={deleting}

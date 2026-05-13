@@ -87,10 +87,10 @@ export const AssignmentLetterModal: React.FC<{
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Request Official Assignment Letter">
+    <Modal isOpen={isOpen} onClose={onClose} title="Ajukan Surat Tugas Resmi">
       <div style={{ padding: '0.5rem' }}>
         <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '2rem', marginTop: '-0.5rem' }}>
-          Issue a new official duty letter (Surat Tugas) for an employee.
+          Buat surat tugas resmi baru untuk karyawan.
         </p>
         
         <form onSubmit={handleSubmit} className="crud-form">
@@ -98,7 +98,7 @@ export const AssignmentLetterModal: React.FC<{
             
             <div className="form-group">
               <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '8px', display: 'block' }}>
-                {isAdminOrHR ? 'Assignee' : 'Employee'}
+                {isAdminOrHR ? 'Penerima Tugas' : 'Karyawan'}
               </label>
               <div style={{ position: 'relative' }}>
                 <User size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', zIndex: 1 }} />
@@ -110,16 +110,16 @@ export const AssignmentLetterModal: React.FC<{
                     required
                     style={{ paddingLeft: '44px', height: '52px', borderRadius: '12px', border: '1px solid #e2e8f0', width: '100%' }}
                   >
-                    <option value="">Select Employee...</option>
+                    <option value="">Pilih karyawan...</option>
                     {employees.map((emp) => (
                       <option key={emp.id} value={emp.id}>
-                        {emp.user?.name || emp.full_name || emp.name || `Employee #${emp.id}`} {emp.employee_code ? `[${emp.employee_code}]` : ''}
+                        {emp.user?.name || emp.full_name || emp.name || `Karyawan #${emp.id}`} {emp.employee_code ? `[${emp.employee_code}]` : ''}
                       </option>
                     ))}
                   </select>
                 ) : (
                   <div style={{ paddingLeft: '44px', height: '52px', borderRadius: '12px', border: '1px solid #e2e8f0', width: '100%', display: 'flex', alignItems: 'center', background: '#f8fafc', color: '#64748b', fontSize: '0.95rem', fontWeight: 500 }}>
-                    {user?.name || user?.email || 'Current User'}
+                    {user?.name || user?.email || 'Pengguna Saat Ini'}
                     <Lock size={14} style={{ marginLeft: '8px', color: '#94a3b8' }} />
                   </div>
                 )}
@@ -127,7 +127,7 @@ export const AssignmentLetterModal: React.FC<{
             </div>
 
             <div className="form-group">
-              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '8px', display: 'block' }}>Letter Title / Purpose</label>
+              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '8px', display: 'block' }}>Judul Surat / Tujuan</label>
               <div style={{ position: 'relative' }}>
                 <FileText size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', zIndex: 1 }} />
                 <input 
@@ -144,7 +144,7 @@ export const AssignmentLetterModal: React.FC<{
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
               <div className="form-group">
-                <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '8px', display: 'block' }}>Start Date</label>
+                <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '8px', display: 'block' }}>Tanggal Mulai</label>
                 <div style={{ position: 'relative' }}>
                   <Calendar size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', zIndex: 1 }} />
                   <input 
@@ -158,7 +158,7 @@ export const AssignmentLetterModal: React.FC<{
                 </div>
               </div>
               <div className="form-group">
-                <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '8px', display: 'block' }}>End Date</label>
+                <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '8px', display: 'block' }}>Tanggal Selesai</label>
                 <div style={{ position: 'relative' }}>
                   <Calendar size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', zIndex: 1 }} />
                   <input 
@@ -174,7 +174,7 @@ export const AssignmentLetterModal: React.FC<{
             </div>
 
             <div className="form-group">
-              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '8px', display: 'block' }}>Destination Location</label>
+              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '8px', display: 'block' }}>Lokasi Tujuan</label>
               <div style={{ position: 'relative' }}>
                 <MapPin size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', zIndex: 1 }} />
                 <input 
@@ -190,7 +190,7 @@ export const AssignmentLetterModal: React.FC<{
             </div>
 
             <div className="form-group">
-              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '8px', display: 'block' }}>Detailed Description</label>
+              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '8px', display: 'block' }}>Deskripsi Rinci</label>
               <div style={{ position: 'relative' }}>
                 <AlignLeft size={18} style={{ position: 'absolute', left: '14px', top: '16px', color: '#94a3b8' }} />
                 <textarea 
@@ -198,7 +198,7 @@ export const AssignmentLetterModal: React.FC<{
                   style={{ paddingLeft: '44px', minHeight: '100px', borderRadius: '12px', border: '1px solid #e2e8f0', width: '100%', paddingTop: '14px' }}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Describe the scope and objectives of this assignment..."
+                  placeholder="Jelaskan ruang lingkup dan tujuan penugasan ini..."
                 />
               </div>
             </div>
@@ -207,10 +207,10 @@ export const AssignmentLetterModal: React.FC<{
 
           <div style={{ marginTop: '2.5rem', display: 'flex', gap: '1rem' }}>
             <Button variant="ghost" onClick={onClose} type="button" disabled={loading} style={{ flex: 1, height: '52px', borderRadius: '12px' }}>
-              Cancel
+              Batal
             </Button>
             <Button variant="primary" type="submit" disabled={loading} style={{ flex: 1.5, height: '52px', borderRadius: '12px', fontWeight: 600 }}>
-              {loading ? 'Submitting Request...' : 'Issue Letter'}
+              {loading ? 'Mengajukan...' : 'Terbitkan Surat'}
             </Button>
           </div>
         </form>

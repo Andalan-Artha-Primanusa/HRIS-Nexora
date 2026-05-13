@@ -58,8 +58,8 @@ export const menuItems: MenuItem[] = [
     menuKey: 'penggajian',
     subItems: [
       { label: 'Ringkasan', path: '/payroll', menuKey: 'penggajian.ringkasan' },
-      { label: 'Daftar Payroll', path: '/payroll/list', menuKey: 'penggajian.daftar' },
-      { label: 'Proses Payroll', path: '/payroll/process', menuKey: 'penggajian.proses' },
+      { label: 'Daftar Penggajian', path: '/payroll/list', menuKey: 'penggajian.daftar' },
+      { label: 'Proses Penggajian', path: '/payroll/process', menuKey: 'penggajian.proses' },
       { label: 'Komponen Gaji', path: '/payroll/component', menuKey: 'penggajian.komponen' },
       { label: 'Laporan & Pajak', path: '/payroll/reports', menuKey: 'penggajian.laporan' },
     ]
@@ -71,24 +71,24 @@ export const menuItems: MenuItem[] = [
     menuKey: 'assets',
   },
   {
-    label: 'Task Management',
+    label: 'Manajemen Tugas',
     icon: CheckCircle,
     path: '/tasks',
     menuKey: 'tasks',
   },
   {
-    label: 'Legal & Dokumen',
+    label: 'Hukum & Dokumen',
     icon: FileText,
     menuKey: 'legal-dokumen',
     subItems: [
       { label: 'Surat Tugas', path: '/admin/assignment-letters', menuKey: 'legal-dokumen.surat-tugas' },
-      { label: 'Generator Surat', path: '/legal/letters', menuKey: 'legal-dokumen.generator' },
+      { label: 'Pembuat Surat', path: '/legal/letters', menuKey: 'legal-dokumen.generator' },
       { label: 'Kalkulator Pesangon', path: '/legal/severance', menuKey: 'legal-dokumen.kalkulator' },
       { label: 'PPh21 Progresif', path: '/legal/tax', menuKey: 'legal-dokumen.pph21' },
     ]
   },
   {
-    label: 'Manajemen Reimburse',
+    label: 'Manajemen Penggantian Biaya',
     icon: Receipt,
     path: '/reimbursements',
     menuKey: 'reimbursements',
@@ -103,7 +103,7 @@ export const menuItems: MenuItem[] = [
     ]
   },
   {
-    label: 'Karir & Promosi',
+    label: 'Karier & Promosi',
     icon: ArrowUpRight,
     path: '/promotions',
     menuKey: 'karir-promosi',
@@ -115,7 +115,7 @@ export const menuItems: MenuItem[] = [
   menuKey: 'kpi-kinerja',
 },
   {
-  label: 'Employee Self Service (ESS)',
+  label: 'Layanan Mandiri Karyawan',
   icon: UserCircle,
   menuKey: 'ess',
     subItems: [
@@ -129,8 +129,8 @@ export const menuItems: MenuItem[] = [
       {
         label: 'Keuangan',
         subItems: [
-          { label: 'Payroll Saya', path: '/my/payroll', menuKey: 'ess.keuangan.payroll' },
-          { label: 'Reimburse Saya', path: '/my/reimbursements', menuKey: 'ess.keuangan.reimburse' },
+          { label: 'Penggajian Saya', path: '/my/payroll', menuKey: 'ess.keuangan.payroll' },
+          { label: 'Penggantian Biaya Saya', path: '/my/reimbursements', menuKey: 'ess.keuangan.reimburse' },
         ]
       },
       {
@@ -173,12 +173,12 @@ export const menuItems: MenuItem[] = [
     subItems: [
       { label: 'Dashboard Kepatuhan', path: '/compliance/overview', menuKey: 'kepatuhan-kebijakan.dashboard' },
       { label: 'Kalender Libur', path: '/workforce/holidays', menuKey: 'kepatuhan-kebijakan.kalender' },
-      { label: 'Tukar Shift', path: '/workforce/shift-swaps', menuKey: 'kepatuhan-kebijakan.tukar-shift' },
+      { label: 'Tukar Giliran Kerja', path: '/workforce/shift-swaps', menuKey: 'kepatuhan-kebijakan.tukar-shift' },
       { label: 'Aturan Lembur', path: '/workforce/overtime-rules', menuKey: 'kepatuhan-kebijakan.aturan-lembur' },
     ]
   },
   {
-    label: 'Master Data',
+    label: 'Data Induk',
     icon: Database,
     menuKey: 'master-data',
     subItems: [
@@ -186,7 +186,7 @@ export const menuItems: MenuItem[] = [
       { label: 'Jenis Cuti', path: '/leave/type', menuKey: 'master-data.jenis-cuti' },
       { label: 'Kebijakan Cuti', path: '/leave/policy', menuKey: 'master-data.kebijakan-cuti' },
       {
-        label: 'Pusat Impor (Master Data)',
+        label: 'Pusat Impor Data Induk',
         path: '/admin/import',
         menuKey: 'master-data.pusat-impor',
       },
@@ -199,12 +199,12 @@ export const menuItems: MenuItem[] = [
     menuKey: 'alur-persetujuan',
   },
   {
-  label: 'Alat Admin',
+  label: 'Alat Administrator',
   icon: ShieldCheck,
   menuKey: 'alat-admin',
   subItems: [
     {
-      label: 'Master',
+      label: 'Data Utama',
       subItems: [
         {
           label: 'Lokasi',
@@ -247,17 +247,17 @@ export const menuItems: MenuItem[] = [
       label: 'Notifikasi',
       subItems: [
         {
-          label: 'Notifikasi Admin',
+          label: 'Notifikasi Administrator',
           path: '/admin/notifications',
           menuKey: 'alat-admin.notifikasi.admin',
         },
         {
-          label: 'Kirim Notifikasi Email',
+          label: 'Kirim Notifikasi Surel',
           path: '/admin/notifications/email-send',
           menuKey: 'alat-admin.notifikasi.kirim-email',
         },
         {
-          label: 'Log & Template Email',
+          label: 'Catatan & Templat Surel',
           path: '/admin/notifications/email-logs',
           menuKey: 'alat-admin.notifikasi.log-email',
         },
@@ -267,7 +267,7 @@ export const menuItems: MenuItem[] = [
       label: 'Sistem',
       subItems: [
         {
-          label: 'Log Audit',
+          label: 'Catatan Audit',
           path: '/admin/audit-logs',
           menuKey: 'alat-admin.sistem.log-audit',
         },

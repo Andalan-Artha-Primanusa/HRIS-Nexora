@@ -30,8 +30,8 @@ export const AttendanceSummary: React.FC<AttendanceSummaryProps> = ({ stats }) =
   return (
     <div className="attendance-summary-wrapper">
       <StatCard label="Total Karyawan" value={stats.total} sub="Terdaftar di sistem" tone="blue" icon={Users} />
-      <StatCard label="Hadir" value={stats.present} sub="Sudah check-in" tone="green" icon={CheckCircle} />
-      <StatCard label="Terlambat" value={stats.late} sub="Melewati grace period" tone="orange" icon={Clock} />
+      <StatCard label="Hadir" value={stats.present} sub="Sudah absen masuk" tone="green" icon={CheckCircle} />
+      <StatCard label="Terlambat" value={stats.late} sub="Melewati masa toleransi" tone="orange" icon={Clock} />
       <StatCard label="Absen" value={stats.absent} sub="Belum ada catatan" tone="red" icon={AlertTriangle} />
     </div>
   );

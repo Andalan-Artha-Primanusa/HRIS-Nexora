@@ -60,7 +60,7 @@ const AdminPermissionsPage = () => {
   const permissionSummaryCards = useMemo(
     () => [
       {
-        label: "Total Permissions",
+        label: "Total Izin",
         subtitle: "Semua permission tersedia",
         value: String(permissions.length),
         change: "Data permission sistem",
@@ -69,15 +69,15 @@ const AdminPermissionsPage = () => {
       },
       {
         label: "Hasil Filter",
-        subtitle: "Permission sesuai pencarian",
+        subtitle: "Izin sesuai pencarian",
         value: String(filteredPermissions.length),
         change: `${paginatedPermissions.length} data per halaman`,
         tone: "green" as const,
         icon: Search,
       },
       {
-        label: "Guard Types",
-        subtitle: "Jenis guard yang digunakan",
+        label: "Jenis Guard",
+        subtitle: "Jenis penjaga akses yang digunakan",
         value: String(uniqueGuards.length),
         change: "Hak akses sistem",
         tone: "orange" as const,
@@ -152,7 +152,7 @@ const AdminPermissionsPage = () => {
               <Shield size={16} />
               <span>Admin Center</span>
             </div>
-            <h1 className="hero-title">Permission Management</h1>
+            <h1 className="hero-title">Manajemen Izin</h1>
             <p className="hero-subtitle">
               Kelola dan tampilkan daftar permission yang tersedia untuk pengaturan akses sistem.
             </p>
@@ -195,7 +195,7 @@ const AdminPermissionsPage = () => {
             <KeyRound size={24} />
           </div>
           <div>
-            <h2 className="analytics-title">Daftar Permissions</h2>
+            <h2 className="analytics-title">Daftar Izin</h2>
             <p className="analytics-subtitle">Kelola dan lihat semua permission</p>
           </div>
         </div>
@@ -232,13 +232,13 @@ const AdminPermissionsPage = () => {
           <div className="filter-dropdown">
             <div className="filter-row">
               <div className="filter-group">
-                <label>Guard</label>
+                <label>Penjaga Akses</label>
                 <select
                   value={selectedGuard}
                   onChange={(e) => setSelectedGuard(e.target.value)}
                   className="filter-select-premium"
                 >
-                  <option value="">Semua Guard</option>
+                  <option value="">Semua Penjaga Akses</option>
                   {uniqueGuards.map((guard) => (
                     <option key={guard} value={guard}>
                       {guard}
@@ -276,8 +276,8 @@ const AdminPermissionsPage = () => {
           {!loading && !errorMessage && paginatedPermissions.length === 0 && (
             <div style={{ padding: '5rem 0' }}>
               <EmptyState
-                title="Permission Kosong"
-                message={searchText || selectedGuard ? 'Tidak ada permission yang sesuai dengan kriteria Anda.' : 'Belum ada data permission.'}
+                title="Izin Kosong"
+                message={searchText || selectedGuard ? 'Tidak ada izin yang sesuai dengan kriteria Anda.' : 'Belum ada data izin.'}
                 actionLabel="Segarkan"
                 onAction={() => void loadPermissions()}
               />
@@ -290,8 +290,8 @@ const AdminPermissionsPage = () => {
                 <table className="data-table">
                   <thead>
                     <tr>
-                      <th style={{ width: '400px' }}>Permission</th>
-                      <th>Guard</th>
+                      <th style={{ width: '400px' }}>Izin</th>
+                      <th>Penjaga Akses</th>
                       <th className="th-center" style={{ width: '120px' }}>Aksi</th>
                     </tr>
                   </thead>
@@ -331,7 +331,7 @@ const AdminPermissionsPage = () => {
               {/* Pagination */}
               <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan <strong>{paginatedPermissions.length}</strong> dari <strong>{filteredPermissions.length}</strong> permissions
+                  Menampilkan <strong>{paginatedPermissions.length}</strong> dari <strong>{filteredPermissions.length}</strong> izin
                 </div>
                 <div className="pagination-controls">
                   <button

@@ -21,6 +21,7 @@ export const LeaveDetailModal: React.FC<LeaveDetailModalProps> = ({ isOpen, onCl
   };
 
   const status = String(item.status || 'pending').toLowerCase();
+  const statusLabel = status === 'approved' ? 'DISETUJUI' : status === 'rejected' ? 'DITOLAK' : status === 'submitted' ? 'DIAJUKAN' : 'MENUNGGU';
 
   return (
     <div className="modal-overlay">
@@ -47,8 +48,8 @@ export const LeaveDetailModal: React.FC<LeaveDetailModalProps> = ({ isOpen, onCl
                   {String(item.employee?.full_name || item.user?.name || 'E').charAt(0)}
                 </div>
                 <div>
-                  <div style={{ fontWeight: 600, color: '#1e293b' }}>{item.employee?.full_name || item.employee_name || item.user?.name || 'Unknown'}</div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{item.employee?.position || item.employee?.position_name || item.department_name || 'Employee'}</div>
+                  <div style={{ fontWeight: 600, color: '#1e293b' }}>{item.employee?.full_name || item.employee_name || item.user?.name || 'Tidak diketahui'}</div>
+                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{item.employee?.position || item.employee?.position_name || item.department_name || 'Karyawan'}</div>
                 </div>
               </div>
             </div>
@@ -56,7 +57,7 @@ export const LeaveDetailModal: React.FC<LeaveDetailModalProps> = ({ isOpen, onCl
             <div className="detail-group">
               <label style={{ display: 'block', fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Status</label>
               <span className={`badge-soft badge-soft--${status === 'approved' ? 'green' : status === 'rejected' ? 'red' : 'orange'}`} style={{ borderRadius: '999px', padding: '0.25rem 0.75rem' }}>
-                {status.toUpperCase()}
+                {statusLabel}
               </span>
             </div>
           </div>

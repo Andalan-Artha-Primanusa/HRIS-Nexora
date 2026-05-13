@@ -89,9 +89,9 @@ const EmploymentLettersPage: React.FC = () => {
       } else {
         await legalService.generateEmploymentLetter(id);
       }
-      alert('Letter generated successfully!');
+      alert('Surat berhasil dibuat!');
     } catch (err) {
-      alert('Failed to generate letter');
+      alert('Gagal membuat surat');
     }
   };
 
@@ -185,7 +185,7 @@ const EmploymentLettersPage: React.FC = () => {
                 className={`tab-button ${activeTab === tab ? 'active' : ''}`}
                 onClick={() => setActiveTab(tab)}
               >
-                {tab}
+                {tab === "Has Letter" ? "Memiliki Surat" : tab === "No Letter" ? "Belum Ada Surat" : tab}
                 {tab !== "Semua" && (
                   <span className="tab-count">
                     {tab === "Has Letter"
@@ -223,10 +223,10 @@ const EmploymentLettersPage: React.FC = () => {
                 <thead>
                   <tr>
                     <th>Karyawan</th>
-                    <th>Department</th>
-                    <th>Position</th>
-                    <th>Join Date</th>
-                    <th style={{ textAlign: 'right' }}>Actions</th>
+                    <th>Departemen</th>
+                    <th>Posisi</th>
+                    <th>Tanggal Bergabung</th>
+                    <th style={{ textAlign: 'right' }}>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -251,7 +251,7 @@ const EmploymentLettersPage: React.FC = () => {
                           </div>
                           <div>
                             <div style={{ fontWeight: 600, color: '#1e293b', fontSize: '0.95rem' }}>
-                              {emp.full_name || emp.user?.name || emp.name || 'Unknown Employee'}
+                              {emp.full_name || emp.user?.name || emp.name || 'Karyawan Tidak Diketahui'}
                             </div>
                             <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{emp.employee_id || emp.employee_code || '#' + emp.id}</div>
                           </div>
@@ -266,11 +266,11 @@ const EmploymentLettersPage: React.FC = () => {
                           color: '#475569',
                           fontWeight: 500
                         }}>
-                          {emp.department || 'N/A'}
+                          {emp.department || '-'}
                         </span>
                       </td>
                       <td>
-                        <div style={{ fontSize: '0.9rem', color: '#334155' }}>{emp.designation || emp.position || 'N/A'}</div>
+                        <div style={{ fontSize: '0.9rem', color: '#334155' }}>{emp.designation || emp.position || '-'}</div>
                       </td>
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem', color: '#64748b' }}>
@@ -287,7 +287,7 @@ const EmploymentLettersPage: React.FC = () => {
                           <button
                             className="btn-action-generate"
                             onClick={() => handleGenerate(emp.id, 'employment')}
-                            title="Generate Surat Keterangan Kerja"
+                            title="Buat Surat Keterangan Kerja"
                             style={{
                               padding: '8px 12px',
                               borderRadius: '8px',
@@ -309,7 +309,7 @@ const EmploymentLettersPage: React.FC = () => {
                           <button
                             className="btn-action-generate"
                             onClick={() => handleGenerate(emp.id, 'experience')}
-                            title="Generate Surat Pengalaman Kerja (Paklaring)"
+                            title="Buat Surat Pengalaman Kerja (Paklaring)"
                             style={{
                               padding: '8px 12px',
                               borderRadius: '8px',

@@ -13,18 +13,18 @@ interface ApprovalFlowModalProps {
 }
 
 const MODULES = [
-  { value: 'assignment_letter', label: 'Assignment Letter (Surat Tugas)' },
-  { value: 'leave', label: 'Leave Request' },
-  { value: 'reimbursement', label: 'Reimbursement' },
-  { value: 'overtime', label: 'Overtime' },
-  { value: 'promotion', label: 'Promotion Request' },
-  { value: 'training', label: 'Training Request' },
-  { value: 'document', label: 'Document (Dokumen Karyawan)' },
-  { value: 'asset_assignment', label: 'Asset Assignment' },
-  { value: 'shift_swap', label: 'Shift Swap (Tukar Shift)' },
-  { value: 'payroll', label: 'Payroll' },
-  { value: 'kpi', label: 'KPI (Key Performance Indicator)' },
-  { value: 'benefit_assignment', label: 'Benefit Assignment' },
+  { value: 'assignment_letter', label: 'Surat Tugas' },
+  { value: 'leave', label: 'Pengajuan Cuti' },
+  { value: 'reimbursement', label: 'Penggantian Biaya' },
+  { value: 'overtime', label: 'Lembur' },
+  { value: 'promotion', label: 'Pengajuan Promosi' },
+  { value: 'training', label: 'Pengajuan Pelatihan' },
+  { value: 'document', label: 'Dokumen Karyawan' },
+  { value: 'asset_assignment', label: 'Penugasan Aset' },
+  { value: 'shift_swap', label: 'Tukar Giliran Kerja' },
+  { value: 'payroll', label: 'Penggajian' },
+  { value: 'kpi', label: 'KPI (Indikator Kinerja Utama)' },
+  { value: 'benefit_assignment', label: 'Penugasan Tunjangan' },
 ];
 
 export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, onClose, onSave, editData, existingFlows = [] }) => {
@@ -124,15 +124,15 @@ export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, on
     setFormError("");
 
     if (!formData.name.trim()) {
-      setFormError('Nama approval flow wajib diisi.');
+      setFormError('Nama alur persetujuan wajib diisi.');
       return;
     }
     if (isModuleTaken(formData.module)) {
-      setFormError('Module ini sudah memiliki approval flow aktif. Pilih module lain atau edit flow yang sudah ada.');
+      setFormError('Modul ini sudah memiliki alur persetujuan aktif. Pilih modul lain atau ubah alur yang sudah ada.');
       return;
     }
     if (formData.steps.some(s => !s.role_id)) {
-      setFormError('Pilih role untuk semua step approval.');
+      setFormError('Pilih peran untuk semua tahap persetujuan.');
       return;
     }
 
@@ -149,7 +149,7 @@ export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, on
       await onSave(cleanedData);
       onClose();
     } catch (err: any) {
-      setFormError(err?.message || 'Gagal menyimpan approval flow.');
+      setFormError(err?.message || 'Gagal menyimpan alur persetujuan.');
       console.error(err);
     } finally {
       setLoading(false);
@@ -157,18 +157,18 @@ export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, on
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={editData ? 'Edit Approval Flow' : 'Configure Approval Flow'}>
+    <Modal isOpen={isOpen} onClose={onClose} title={editData ? 'Ubah Alur Persetujuan' : 'Konfigurasi Alur Persetujuan'}>
       <form onSubmit={handleSubmit} style={{ padding: '0.5rem' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
           
           <div className="form-group">
             <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#334155', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <GitBranch size={14} color="#6366f1" /> Flow Name
+              <GitBranch size={14} color="#6366f1" /> Nama Alur
             </label>
             <input 
               type="text" 
               className="crud-input"
-              placeholder="e.g. Standard Assignment Approval"
+              placeholder="Contoh: Persetujuan standar surat tugas"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
@@ -178,7 +178,7 @@ export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, on
 
           <div className="form-group">
             <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#334155', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Layers size={14} color="#6366f1" /> Targeted Module
+              <Layers size={14} color="#6366f1" /> Modul Tujuan
             </label>
             <select 
               className="crud-input"
@@ -199,14 +199,14 @@ export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, on
             </select>
             {isModuleTaken(formData.module) && (
               <p style={{ margin: '8px 0 0', fontSize: '0.8rem', color: '#dc2626', fontWeight: 600 }}>
-                Module ini sudah memiliki approval flow aktif.
+                Modul ini sudah memiliki alur persetujuan aktif.
               </p>
             )}
           </div>
 
           <div>
             <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#334155', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <User size={14} color="#6366f1" /> Sequence of Approvers
+              <User size={14} color="#6366f1" /> Urutan Penyetuju
             </label>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', position: 'relative' }}>
               {formData.steps.map((step, index) => (
@@ -228,7 +228,7 @@ export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, on
                       required
                       style={{ width: '100%', border: 'none', background: 'transparent', fontSize: '0.9rem', fontWeight: 600, color: '#1e293b', outline: 'none', padding: '4px 0' }}
                     >
-                      <option value="" disabled>Select Role...</option>
+                      <option value="" disabled>Pilih peran...</option>
                       {roles.map(role => (
                         <option key={role.id} value={role.id}>{role.display_name || role.name}</option>
                       ))}
@@ -240,9 +240,9 @@ export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, on
                         onChange={(e) => updateStep(index, 'user_id', e.target.value)}
                         style={{ width: '100%', border: 'none', background: 'transparent', fontSize: '0.8rem', color: '#64748b', outline: 'none', cursor: 'pointer' }}
                       >
-                        <option value="">Any user with this role</option>
+                        <option value="">Pengguna mana pun dengan peran ini</option>
                         {users.map((u: any) => (
-                          <option key={u.id} value={u.id}>{u.name || u.email || `User #${u.id}`}</option>
+                          <option key={u.id} value={u.id}>{u.name || u.email || `Pengguna #${u.id}`}</option>
                         ))}
                       </select>
                     </div>
@@ -269,7 +269,7 @@ export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, on
                   marginTop: '0.5rem', width: '100%'
                 }}
               >
-                <Plus size={16} style={{ marginRight: '8px' }} /> Add Approval Level
+                <Plus size={16} style={{ marginRight: '8px' }} /> Tambah Tingkat Persetujuan
               </Button>
             </div>
           </div>
@@ -282,9 +282,9 @@ export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, on
         )}
 
         <div style={{ marginTop: '3rem', display: 'flex', gap: '1rem' }}>
-          <Button variant="ghost" onClick={onClose} type="button" style={{ flex: 1, height: '52px', borderRadius: '12px' }}>Cancel</Button>
+          <Button variant="ghost" onClick={onClose} type="button" style={{ flex: 1, height: '52px', borderRadius: '12px' }}>Batal</Button>
           <Button variant="primary" type="submit" disabled={loading} style={{ flex: 1.5, height: '52px', borderRadius: '12px', fontWeight: 700, boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)' }}>
-            {loading ? 'Saving...' : (editData ? 'Update Flow' : 'Activate Approval Flow')}
+            {loading ? 'Menyimpan...' : (editData ? 'Perbarui Alur' : 'Aktifkan Alur Persetujuan')}
           </Button>
         </div>
       </form>

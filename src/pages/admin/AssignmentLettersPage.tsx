@@ -76,10 +76,10 @@ const AssignmentLettersPage: React.FC = () => {
     setDecisionLoading(true);
     try {
       if (action === 'approve') {
-        await legalService.approveAssignmentLetter(letter.id, 'Approved from assignment letter admin');
+        await legalService.approveAssignmentLetter(letter.id, 'Disetujui dari admin surat tugas');
         showToast('Surat tugas berhasil disetujui', 'success');
       } else {
-        await legalService.rejectAssignmentLetter(letter.id, 'Rejected from assignment letter admin');
+        await legalService.rejectAssignmentLetter(letter.id, 'Ditolak dari admin surat tugas');
         showToast('Surat tugas berhasil ditolak', 'success');
       }
       setPendingDecision(null);
@@ -108,9 +108,9 @@ const AssignmentLettersPage: React.FC = () => {
 
   const getStatusBadge = (status: string) => {
     const s = status?.toLowerCase();
-    if (s === 'approved') return <span className="status-pill status-approved"><CheckCircle size={14} /> Approved</span>;
-    if (s === 'rejected') return <span className="status-pill status-rejected"><XCircle size={14} /> Rejected</span>;
-    return <span className="status-pill status-pending"><Clock size={14} /> Pending</span>;
+    if (s === 'approved') return <span className="status-pill status-approved"><CheckCircle size={14} /> Disetujui</span>;
+    if (s === 'rejected') return <span className="status-pill status-rejected"><XCircle size={14} /> Ditolak</span>;
+    return <span className="status-pill status-pending"><Clock size={14} /> Menunggu</span>;
   };
 
   return (
@@ -144,13 +144,13 @@ const AssignmentLettersPage: React.FC = () => {
         {loading ? (
           <div style={{ textAlign: 'center', padding: '5rem', background: 'rgba(255,255,255,0.4)', borderRadius: '24px' }}>
             <RefreshCw size={32} className="animate-spin" color="#2563eb" style={{ marginBottom: '1rem' }} />
-            <p style={{ color: '#64748b', fontWeight: 500 }}>Loading assignment letters...</p>
+            <p style={{ color: '#64748b', fontWeight: 500 }}>Memuat surat tugas...</p>
           </div>
         ) : letters.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '5rem', background: 'rgba(255,255,255,0.4)', borderRadius: '24px' }}>
             <FileText size={48} color="#cbd5e1" style={{ marginBottom: '1.5rem' }} />
-            <h3 style={{ color: '#475569', marginBottom: '0.5rem' }}>No assignment letters found</h3>
-            <p style={{ color: '#94a3b8' }}>All official duty requests will appear here once submitted.</p>
+            <h3 style={{ color: '#475569', marginBottom: '0.5rem' }}>Belum ada surat tugas</h3>
+            <p style={{ color: '#94a3b8' }}>Semua permintaan surat tugas akan muncul di sini setelah diajukan.</p>
           </div>
         ) : (
           <div className="assignment-grid">
@@ -166,7 +166,7 @@ const AssignmentLettersPage: React.FC = () => {
                       <div className="assignment-meta">
                         <span className="assignment-id">#{letter.id}</span>
                         <span className="assignment-dot">•</span>
-                        <span>Official Duty Letter</span>
+                        <span>Surat Tugas Resmi</span>
                       </div>
                     </div>
                   </div>
@@ -176,14 +176,14 @@ const AssignmentLettersPage: React.FC = () => {
                 <div className="assignment-card-body">
                   <div className="assignment-info-grid">
                     <div className="assignment-info-item">
-                      <div className="assignment-info-label"><User size={12} /> Requester</div>
+                      <div className="assignment-info-label"><User size={12} /> Pemohon</div>
                       <div className="assignment-info-value">
-                        {letter.user?.name || letter.employee?.user?.name || letter.employee?.full_name || 'N/A'}
+                        {letter.user?.name || letter.employee?.user?.name || letter.employee?.full_name || '-'}
                       </div>
                     </div>
                     <div className="assignment-info-item">
-                      <div className="assignment-info-label"><MapPin size={12} /> Destination</div>
-                      <div className="assignment-info-value">{letter.location || 'Not Specified'}</div>
+                      <div className="assignment-info-label"><MapPin size={12} /> Tujuan</div>
+                      <div className="assignment-info-value">{letter.location || 'Belum ditentukan'}</div>
                     </div>
                   </div>
 
@@ -198,7 +198,7 @@ const AssignmentLettersPage: React.FC = () => {
 
                   {letter.description && (
                     <div className="assignment-notes">
-                      <div className="assignment-info-label">Purpose / Notes</div>
+                      <div className="assignment-info-label">Tujuan / Catatan</div>
                       <p className="assignment-notes-text">{letter.description}</p>
                     </div>
                   )}
@@ -208,20 +208,20 @@ const AssignmentLettersPage: React.FC = () => {
                   {letter.status?.toLowerCase() === 'pending' && (
                     <div className="assignment-actions-row">
                       <Button variant="primary" className="assignment-btn-approve" onClick={() => openDecisionDialog('approve', letter)} disabled={decisionLoading}>
-                        <CheckCircle size={16} /> Approve
+                        <CheckCircle size={16} /> Setujui
                       </Button>
                       <Button variant="outline" className="assignment-btn-reject" onClick={() => openDecisionDialog('reject', letter)} disabled={decisionLoading}>
-                        <XCircle size={16} /> Reject
+                        <XCircle size={16} /> Tolak
                       </Button>
                     </div>
                   )}
                   {letter.status?.toLowerCase() === 'approved' && (
                     <Button variant="outline" className="assignment-btn-pdf" onClick={() => handleDownloadPdf(letter.id)}>
-                      <FileText size={16} /> Download PDF
+                      <FileText size={16} /> Unduh PDF
                     </Button>
                   )}
                   <button className="assignment-history-btn" onClick={() => setHistoryModal({ module: 'assignment_letter', id: letter.id })}>
-                    <History size={16} /> Riwayat Approval
+                    <History size={16} /> Riwayat Persetujuan
                   </button>
                 </div>
               </Card>
@@ -253,7 +253,7 @@ const AssignmentLettersPage: React.FC = () => {
             ? `Surat tugas "${pendingDecision?.letter?.title || 'ini'}" akan disetujui. Lanjutkan?`
             : `Surat tugas "${pendingDecision?.letter?.title || 'ini'}" akan ditolak. Lanjutkan?`
         }
-        confirmLabel={isApproveDecision ? 'Approve' : 'Reject'}
+        confirmLabel={isApproveDecision ? 'Setujui' : 'Tolak'}
         cancelLabel="Batal"
         variant={isApproveDecision ? 'warning' : 'danger'}
         loading={decisionLoading}

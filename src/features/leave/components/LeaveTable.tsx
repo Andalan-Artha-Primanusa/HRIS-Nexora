@@ -29,6 +29,14 @@ const formatDate = (date: any) => {
   return new Date(date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
 };
 
+const formatStatusLabel = (status: string) => {
+  if (status === 'approved') return 'Disetujui';
+  if (status === 'rejected') return 'Ditolak';
+  if (status === 'submitted') return 'Diajukan';
+  if (status === 'active') return 'Aktif';
+  return 'Menunggu';
+};
+
 export const LeaveTable: React.FC<LeaveTableProps> = ({ items, onView, onApprove, onReject, onEdit, onDelete, onHistory, isAdmin }) => {
   return (
     <div className="table-wrap">
@@ -69,7 +77,7 @@ export const LeaveTable: React.FC<LeaveTableProps> = ({ items, onView, onApprove
                 <td><strong>{item.total_days || 1}</strong> Hari</td>
                 <td className="td-center">
                   <span className={`badge-soft badge-soft--${status === 'approved' ? 'green' : status === 'rejected' ? 'red' : 'orange'}`}>
-                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                    {formatStatusLabel(status)}
                   </span>
                 </td>
                 <td className="td-center">
@@ -96,7 +104,7 @@ export const LeaveTable: React.FC<LeaveTableProps> = ({ items, onView, onApprove
                     )}
 
                     {onHistory && (
-                      <button className="action-btn" style={{ background: '#f5f3ff', color: '#8b5cf6' }} onClick={() => onHistory(String(item.id))} title="Riwayat Approval">
+                      <button className="action-btn" style={{ background: '#f5f3ff', color: '#8b5cf6' }} onClick={() => onHistory(String(item.id))} title="Riwayat Persetujuan">
                         <History size={16} />
                       </button>
                     )}

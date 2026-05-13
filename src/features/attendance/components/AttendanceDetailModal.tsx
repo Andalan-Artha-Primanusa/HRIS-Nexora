@@ -22,6 +22,15 @@ export const AttendanceDetailModal: React.FC<AttendanceDetailModalProps> = ({ is
     return new Date(time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   };
 
+  const formatStatus = (status: any) => {
+    const s = String(status || '').toLowerCase();
+    if (s.includes('late') || s.includes('terlambat')) return 'Terlambat';
+    if (s.includes('present') || s.includes('hadir') || s === 'active' || s === 'on_time') return 'Hadir';
+    if (s.includes('absent') || s.includes('tidak hadir')) return 'Absen';
+    if (s.includes('success')) return 'Berhasil';
+    return status ? String(status) : 'Berhasil';
+  };
+
   return (
     <div className="modal-overlay">
       <Card className="modal-content" glass style={{ width: '100%', maxWidth: '600px', padding: 0, overflow: 'hidden' }}>
@@ -62,7 +71,7 @@ export const AttendanceDetailModal: React.FC<AttendanceDetailModalProps> = ({ is
             </div>
 
             <div className="detail-group" style={{ background: '#f0fdf4', padding: '1rem', borderRadius: '12px' }}>
-              <label style={{ display: 'block', fontSize: '0.75rem', color: '#166534', fontWeight: 700, marginBottom: '0.5rem' }}>Check In</label>
+              <label style={{ display: 'block', fontSize: '0.75rem', color: '#166534', fontWeight: 700, marginBottom: '0.5rem' }}>Absen Masuk</label>
               <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#166534' }}>{formatTime(item.check_in || item.clock_in)}</div>
               {item.lat_in && (
                 <div style={{ fontSize: '0.75rem', color: '#15803d', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -72,7 +81,7 @@ export const AttendanceDetailModal: React.FC<AttendanceDetailModalProps> = ({ is
             </div>
 
             <div className="detail-group" style={{ background: '#fef2f2', padding: '1rem', borderRadius: '12px' }}>
-              <label style={{ display: 'block', fontSize: '0.75rem', color: '#991b1b', fontWeight: 700, marginBottom: '0.5rem' }}>Check Out</label>
+              <label style={{ display: 'block', fontSize: '0.75rem', color: '#991b1b', fontWeight: 700, marginBottom: '0.5rem' }}>Absen Pulang</label>
               <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#991b1b' }}>{formatTime(item.check_out || item.clock_out)}</div>
               {item.lat_out && (
                 <div style={{ fontSize: '0.75rem', color: '#b91c1c', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -85,9 +94,9 @@ export const AttendanceDetailModal: React.FC<AttendanceDetailModalProps> = ({ is
           <div style={{ marginTop: '1.5rem', padding: '1rem', background: '#f8fafc', borderRadius: '12px', border: '1px dashed #cbd5e1' }}>
              <label style={{ display: 'block', fontSize: '0.75rem', color: '#64748b', fontWeight: 700, marginBottom: '0.5rem' }}>Metadata & Status</label>
              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-                <div style={{ fontSize: '0.85rem', color: '#334155' }}><strong>Status:</strong> {item.status || 'Success'}</div>
-                <div style={{ fontSize: '0.85rem', color: '#334155' }}><strong>Device:</strong> {item.device_id || 'Mobile App'}</div>
-                <div style={{ fontSize: '0.85rem', color: '#334155' }}><strong>Source:</strong> GPS/Biometric</div>
+                <div style={{ fontSize: '0.85rem', color: '#334155' }}><strong>Status:</strong> {formatStatus(item.status)}</div>
+                <div style={{ fontSize: '0.85rem', color: '#334155' }}><strong>Perangkat:</strong> {item.device_id || 'Aplikasi Seluler'}</div>
+                <div style={{ fontSize: '0.85rem', color: '#334155' }}><strong>Sumber:</strong> GPS/Biometrik</div>
              </div>
           </div>
         </div>

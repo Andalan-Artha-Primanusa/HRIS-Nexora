@@ -76,7 +76,7 @@ const CompanySettingsPage: React.FC = () => {
 
   const handleSave = async () => {
     if (!company.name) {
-      alert('Company name is required');
+      alert('Nama perusahaan wajib diisi');
       return;
     }
     setSaving(true);
@@ -95,10 +95,10 @@ const CompanySettingsPage: React.FC = () => {
           setCompanyId(newData.id);
         }
       }
-      alert('Company settings saved successfully!');
+      alert('Pengaturan perusahaan berhasil disimpan!');
     } catch (err: any) {
       console.error('Save error:', err.response?.data || err);
-      const errorMessage = err.response?.data?.message || err.response?.data?.error || 'Failed to save settings';
+      const errorMessage = err.response?.data?.message || err.response?.data?.error || 'Gagal menyimpan pengaturan';
       alert(`Error: ${errorMessage}`);
     } finally {
       setSaving(false);
@@ -110,7 +110,7 @@ const CompanySettingsPage: React.FC = () => {
     if (!file) return;
     
     if (!companyId) {
-      alert('Please save company data first before uploading logo');
+      alert('Simpan data perusahaan terlebih dahulu sebelum mengunggah logo');
       return;
     }
 
@@ -127,10 +127,10 @@ const CompanySettingsPage: React.FC = () => {
         setCompany(prev => ({ ...prev, logo: updatedData.logo }));
         setLogoPreview(null);
       }
-      alert('Logo uploaded successfully!');
+      alert('Logo berhasil diunggah!');
     } catch (err: any) {
       console.error('Logo upload error:', err.response?.data || err);
-      alert('Failed to upload logo');
+      alert('Gagal mengunggah logo');
     } finally {
       setUploadingLogo(false);
     }
@@ -138,16 +138,16 @@ const CompanySettingsPage: React.FC = () => {
 
   const handleDeleteLogo = async () => {
     if (!companyId) return;
-    if (!confirm('Are you sure you want to delete the logo?')) return;
+    if (!confirm('Yakin ingin menghapus logo?')) return;
 
     try {
       await api.delete(`/company/${companyId}/logo`);
       setCompany(prev => ({ ...prev, logo: '' }));
       setLogoPreview(null);
-      alert('Logo deleted successfully!');
+      alert('Logo berhasil dihapus!');
     } catch (err: any) {
       console.error('Logo delete error:', err.response?.data || err);
-      alert('Failed to delete logo');
+      alert('Gagal menghapus logo');
     }
   };
 
@@ -165,9 +165,9 @@ const CompanySettingsPage: React.FC = () => {
   };
 
   const tabs = [
-    { key: 'general', label: 'General Info', icon: Building2 },
-    { key: 'contact', label: 'Contact Details', icon: Mail },
-    { key: 'business', label: 'Business & Legal', icon: Landmark },
+    { key: 'general', label: 'Info Umum', icon: Building2 },
+    { key: 'contact', label: 'Detail Kontak', icon: Mail },
+    { key: 'business', label: 'Bisnis & Legal', icon: Landmark },
   ];
 
   return (
@@ -177,17 +177,17 @@ const CompanySettingsPage: React.FC = () => {
           <div className="hero-content">
             <div className="hero-badge">
               <Settings size={16} />
-              <span>System Administration</span>
+              <span>Administrasi Sistem</span>
             </div>
-            <h1 className="hero-title">Company Settings</h1>
+            <h1 className="hero-title">Pengaturan Perusahaan</h1>
             <p className="hero-subtitle">
-              Manage your organization's core identity, contact information, and business parameters.
+              Kelola identitas inti organisasi, informasi kontak, dan parameter bisnis.
             </p>
           </div>
           <div className="hero-actions">
             <button className="btn-outline" onClick={fetchData} disabled={loading} style={{ background: 'white' }}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-              {loading ? 'Memuat...' : 'Refresh'}
+              {loading ? 'Memuat...' : 'Segarkan'}
             </button>
             <button className="btn-primary" onClick={handleSave} disabled={saving} style={{ boxShadow: '0 10px 20px rgba(37, 99, 235, 0.2)' }}>
               <Save size={16} />
@@ -203,11 +203,11 @@ const CompanySettingsPage: React.FC = () => {
           <div className="hero-content">
             <div className="hero-badge">
               <Upload size={16} />
-              <span>Company Logo</span>
+              <span>Logo Perusahaan</span>
             </div>
-            <h1 className="hero-title">Update Logo</h1>
+            <h1 className="hero-title">Perbarui Logo</h1>
             <p className="hero-subtitle">
-              Upload your company logo for documents and reports.
+              Unggah logo perusahaan untuk dokumen dan laporan.
             </p>
           </div>
           <div className="hero-actions" style={{ flexDirection: 'column', gap: '1rem' }}>
@@ -215,7 +215,7 @@ const CompanySettingsPage: React.FC = () => {
               <div style={{ textAlign: 'center' }}>
                 <img 
                   src={logoPreview || `${api.defaults.baseURL?.replace('/api', '')}/${company.logo}`} 
-                  alt="Company Logo" 
+                  alt="Logo Perusahaan"
                   style={{ maxHeight: '100px', maxWidth: '200px', objectFit: 'contain' }}
                 />
               </div>
@@ -223,7 +223,7 @@ const CompanySettingsPage: React.FC = () => {
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <label className="btn-outline" style={{ cursor: 'pointer', background: 'white' }}>
                 <Upload size={16} />
-                {uploadingLogo ? 'Uploading...' : 'Upload Logo'}
+                {uploadingLogo ? 'Mengunggah...' : 'Unggah Logo'}
                 <input 
                   type="file" 
                   accept="image/*" 
@@ -235,7 +235,7 @@ const CompanySettingsPage: React.FC = () => {
               {(company.logo || logoPreview) && (
                 <button className="btn-outline" onClick={handleDeleteLogo} style={{ background: 'white' }}>
                   <Trash2 size={16} />
-                  Delete Logo
+                  Hapus Logo
                 </button>
               )}
             </div>
@@ -247,43 +247,43 @@ const CompanySettingsPage: React.FC = () => {
         <Card className="summary-card">
           <div className="summary-card__header">
             <div>
-              <span className="summary-card__label">Company Identity</span>
-              <p className="summary-card__subtitle">Primary registration name</p>
+              <span className="summary-card__label">Identitas Perusahaan</span>
+              <p className="summary-card__subtitle">Nama registrasi utama</p>
             </div>
             <span className="summary-card__icon summary-card__icon--blue">
               <Building2 size={20} />
             </span>
           </div>
-          <div className="summary-card__value summary-card__value--blue">{company.name || 'Not set'}</div>
-          <div className="summary-card__change">{company.code || 'NO-CODE'} • {company.founded_year || 'Year not set'}</div>
+          <div className="summary-card__value summary-card__value--blue">{company.name || 'Belum diisi'}</div>
+          <div className="summary-card__change">{company.code || 'TANPA-KODE'} - {company.founded_year || 'Tahun belum diisi'}</div>
         </Card>
 
         <Card className="summary-card">
           <div className="summary-card__header">
             <div>
-              <span className="summary-card__label">Industry Sector</span>
-              <p className="summary-card__subtitle">Business classification</p>
+              <span className="summary-card__label">Sektor Industri</span>
+              <p className="summary-card__subtitle">Klasifikasi bisnis</p>
             </div>
             <span className="summary-card__icon summary-card__icon--green">
               <Briefcase size={20} />
             </span>
           </div>
-          <div className="summary-card__value summary-card__value--green">{company.industry || 'Not set'}</div>
-          <div className="summary-card__change">Standard Business Type</div>
+          <div className="summary-card__value summary-card__value--green">{company.industry || 'Belum diisi'}</div>
+          <div className="summary-card__change">Jenis bisnis standar</div>
         </Card>
 
          <Card className="summary-card">
            <div className="summary-card__header">
              <div>
-               <span className="summary-card__label">Workforce Size</span>
-               <p className="summary-card__subtitle">Total active personnel</p>
+               <span className="summary-card__label">Jumlah Tenaga Kerja</span>
+               <p className="summary-card__subtitle">Total personel aktif</p>
              </div>
              <span className="summary-card__icon summary-card__icon--orange">
                <User size={20} />
              </span>
            </div>
            <div className="summary-card__value summary-card__value--orange">-</div>
-           <div className="summary-card__change">Data from employees</div>
+           <div className="summary-card__change">Data dari karyawan</div>
          </Card>
       </div>
 
@@ -291,7 +291,7 @@ const CompanySettingsPage: React.FC = () => {
         <div className="wuw-header">
           <div className="wuw-header-top" style={{ marginBottom: 0 }}>
             <div className="wuw-title-area">
-              <h3>Detailed Configuration</h3>
+              <h3>Konfigurasi Rinci</h3>
             </div>
             <div className="settings-tabs-container">
               {tabs.map(tab => (
@@ -312,40 +312,40 @@ const CompanySettingsPage: React.FC = () => {
           {loading ? (
             <div className="settings-loading-state">
               <RefreshCw size={48} className="animate-spin" color="#2563eb" />
-              <p>Synchronizing company data...</p>
+              <p>Menyinkronkan data perusahaan...</p>
             </div>
           ) : (
             <div className="settings-form-wrapper">
               {activeTab === 'general' && (
                 <div className="form-grid-layout">
                   <div className="form-group-item">
-                    <label>Company Name <span className="text-danger">*</span></label>
+                    <label>Nama Perusahaan <span className="text-danger">*</span></label>
                     <div className="input-icon-wrapper">
                       <Building2 size={18} className="field-icon" />
                       <input
                         type="text"
                         value={company.name}
                         onChange={(e) => handleChange('name', e.target.value)}
-                        placeholder="Enter official company name"
+                        placeholder="Masukkan nama resmi perusahaan"
                         className="premium-input"
                       />
                     </div>
                   </div>
                   <div className="form-group-item">
-                    <label>Legal Name</label>
+                    <label>Nama Legal</label>
                     <div className="input-icon-wrapper">
                       <Landmark size={18} className="field-icon" />
                       <input
                         type="text"
                         value={company.legal_name}
                         onChange={(e) => handleChange('legal_name', e.target.value)}
-                        placeholder="PT Your Company Name"
+                        placeholder="PT Nama Perusahaan Anda"
                         className="premium-input"
                       />
                     </div>
                   </div>
                   <div className="form-group-item">
-                    <label>Tax Number (NPWP)</label>
+                    <label>Nomor Pajak (NPWP)</label>
                     <div className="input-icon-wrapper">
                       <ShieldCheck size={18} className="field-icon" />
                       <input
@@ -358,7 +358,7 @@ const CompanySettingsPage: React.FC = () => {
                     </div>
                   </div>
                   <div className="form-group-item">
-                    <label>Website URL</label>
+                    <label>URL Situs Web</label>
                     <div className="input-icon-wrapper">
                       <Globe size={18} className="field-icon" />
                       <input
@@ -376,7 +376,7 @@ const CompanySettingsPage: React.FC = () => {
               {activeTab === 'contact' && (
                 <div className="form-grid-layout">
                   <div className="form-group-item">
-                    <label>Email Address</label>
+                    <label>Alamat Surel</label>
                     <div className="input-icon-wrapper">
                       <Mail size={18} className="field-icon" />
                       <input
@@ -389,7 +389,7 @@ const CompanySettingsPage: React.FC = () => {
                     </div>
                   </div>
                   <div className="form-group-item">
-                    <label>Phone Number</label>
+                    <label>Nomor Telepon</label>
                     <div className="input-icon-wrapper">
                       <Phone size={18} className="field-icon" />
                       <input
@@ -402,46 +402,46 @@ const CompanySettingsPage: React.FC = () => {
                     </div>
                   </div>
                   <div className="form-group-item full-width">
-                    <label>Full Address</label>
+                    <label>Alamat Lengkap</label>
                     <div className="input-icon-wrapper">
                       <MapPin size={18} className="field-icon" />
                       <input
                         type="text"
                         value={company.address}
                         onChange={(e) => handleChange('address', e.target.value)}
-                        placeholder="Street name, building, floor..."
+                        placeholder="Nama jalan, gedung, lantai..."
                         className="premium-input"
                       />
                     </div>
                   </div>
                   <div className="form-group-item">
-                    <label>City</label>
+                    <label>Kota</label>
                     <div className="input-icon-wrapper">
                       <MapPin size={18} className="field-icon" />
                       <input
                         type="text"
                         value={company.city}
                         onChange={(e) => handleChange('city', e.target.value)}
-                        placeholder="e.g. Jakarta"
+                        placeholder="Contoh: Jakarta"
                         className="premium-input"
                       />
                     </div>
                   </div>
                   <div className="form-group-item">
-                    <label>State/Province</label>
+                    <label>Provinsi</label>
                     <div className="input-icon-wrapper">
                       <MapPin size={18} className="field-icon" />
                       <input
                         type="text"
                         value={company.state}
                         onChange={(e) => handleChange('state', e.target.value)}
-                        placeholder="e.g. DKI Jakarta"
+                        placeholder="Contoh: DKI Jakarta"
                         className="premium-input"
                       />
                     </div>
                   </div>
                   <div className="form-group-item">
-                    <label>Postal Code</label>
+                    <label>Kode Pos</label>
                     <div className="input-icon-wrapper">
                       <MapPin size={18} className="field-icon" />
                       <input
@@ -454,20 +454,20 @@ const CompanySettingsPage: React.FC = () => {
                     </div>
                   </div>
                   <div className="form-group-item">
-                    <label>Country</label>
+                    <label>Negara</label>
                     <div className="input-icon-wrapper">
                       <Globe size={18} className="field-icon" />
                       <input
                         type="text"
                         value={company.country}
                         onChange={(e) => handleChange('country', e.target.value)}
-                        placeholder="e.g. Indonesia"
+                        placeholder="Contoh: Indonesia"
                         className="premium-input"
                       />
                     </div>
                   </div>
                   <div className="form-group-item">
-                    <label>Website URL</label>
+                    <label>URL Situs Web</label>
                     <div className="input-icon-wrapper">
                       <Globe size={18} className="field-icon" />
                       <input
@@ -489,12 +489,12 @@ const CompanySettingsPage: React.FC = () => {
                       <Info size={24} />
                     </div>
                     <div className="banner-text">
-                      <h4>Verification & Legal Identity</h4>
-                      <p>Detailed legal information helps in generating accurate payroll reports and compliance documents.</p>
+                      <h4>Verifikasi & Identitas Legal</h4>
+                      <p>Informasi legal yang rinci membantu menghasilkan laporan penggajian dan dokumen kepatuhan yang akurat.</p>
                     </div>
                   </div>
                   <div className="form-group-item">
-                    <label>Business Legal Entity</label>
+                    <label>Badan Hukum Bisnis</label>
                     <div className="input-icon-wrapper">
                       <Landmark size={18} className="field-icon" />
                       <select 
@@ -502,23 +502,23 @@ const CompanySettingsPage: React.FC = () => {
                         onChange={(e) => handleChange('industry', e.target.value)}
                         className="premium-input"
                       >
-                        <option value="">Select type</option>
+                        <option value="">Pilih jenis</option>
                         <option value="pt">PT (Perseroan Terbatas)</option>
                         <option value="cv">CV (Commanditaire Vennootschap)</option>
-                        <option value="individual">Sole Proprietorship</option>
-                        <option value="foundation">Foundation / NGO</option>
+                        <option value="individual">Usaha Perorangan</option>
+                        <option value="foundation">Yayasan / LSM</option>
                       </select>
                     </div>
                   </div>
                   <div className="form-group-item">
-                    <label>Fiscal Year Cycle Start</label>
+                    <label>Awal Siklus Tahun Fiskal</label>
                     <div className="input-icon-wrapper">
                       <Clock size={18} className="field-icon" />
                       <select className="premium-input">
-                        <option value="1">January</option>
+                        <option value="1">Januari</option>
                         <option value="4">April</option>
-                        <option value="7">July</option>
-                        <option value="10">October</option>
+                        <option value="7">Juli</option>
+                        <option value="10">Oktober</option>
                       </select>
                     </div>
                   </div>

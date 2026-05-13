@@ -49,10 +49,10 @@ const LeaveCalendarPage = () => {
       }));
       
       setEvents(parsedEvents);
-      setAlertMessage("Leave calendar berhasil dimuat");
+      setAlertMessage("Kalender cuti berhasil dimuat");
       setAlertType('info');
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal memuat leave calendar";
+      const message = error instanceof Error ? error.message : "Gagal memuat kalender cuti";
       setAlertMessage(message);
       setAlertType('error');
     } finally {
@@ -101,7 +101,7 @@ const LeaveCalendarPage = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _leaveSummaryCards = [
     {
-      label: 'Total Requests',
+      label: 'Total Pengajuan',
       subtitle: 'Semua data pengajuan cuti',
       value: String(stats.total),
       change: 'Ringkasan keseluruhan',
@@ -109,15 +109,15 @@ const LeaveCalendarPage = () => {
       icon: Calendar,
     },
     {
-      label: 'Pending',
+      label: 'Menunggu',
       subtitle: 'Menunggu persetujuan',
       value: String(stats.pending),
-      change: 'Perlu tindakan approval',
+      change: 'Perlu tindakan persetujuan',
       tone: 'orange' as const,
       icon: Clock3,
     },
     {
-      label: 'Approved',
+      label: 'Disetujui',
       subtitle: 'Pengajuan disetujui',
       value: String(stats.approved),
       change: 'Status final berhasil',
@@ -125,7 +125,7 @@ const LeaveCalendarPage = () => {
       icon: CircleCheckBig,
     },
     {
-      label: 'Rejected',
+      label: 'Ditolak',
       subtitle: 'Pengajuan ditolak',
       value: String(stats.rejected),
       change: 'Perlu revisi atau tindak lanjut',
@@ -192,7 +192,7 @@ const LeaveCalendarPage = () => {
             </div>
           </div>
           <div className="leave-summary-value leave-value-orange">{stats.pending}</div>
-          <p className="leave-summary-trend">Perlu tindakan approval</p>
+          <p className="leave-summary-trend">Perlu tindakan persetujuan</p>
         </div>
 
         <div className="leave-summary-card">
@@ -258,7 +258,7 @@ const LeaveCalendarPage = () => {
 
           {/* Day headers */}
           <div className="calendar-grid">
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+            {['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'].map(day => (
               <div key={day} className="calendar-day-header">{day}</div>
             ))}
 

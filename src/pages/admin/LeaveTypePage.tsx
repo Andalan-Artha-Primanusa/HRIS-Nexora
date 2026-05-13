@@ -132,7 +132,7 @@ const LeaveTypePage: React.FC = () => {
         icon: Search,
       },
       {
-        label: 'Paid Leave',
+        label: 'Cuti Berbayar',
         subtitle: 'Cuti berbayar',
         value: String(paidCount),
         change: 'Berbayar',
@@ -140,7 +140,7 @@ const LeaveTypePage: React.FC = () => {
         icon: ShieldCheck,
       },
       {
-        label: 'Active Types',
+        label: 'Jenis Aktif',
         subtitle: 'Jenis aktif',
         value: String(activeCount),
         change: 'Siap digunakan',
@@ -221,7 +221,7 @@ const LeaveTypePage: React.FC = () => {
           <div className="elyra-tabs">
             {(['Semua', 'Active', 'Inactive'] as const).map((tab) => (
               <button key={tab} className={`elyra-tab ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
-                {tab}
+                {tab === 'Active' ? 'Aktif' : tab === 'Inactive' ? 'Tidak Aktif' : tab}
               </button>
             ))}
           </div>
@@ -298,12 +298,12 @@ const LeaveTypePage: React.FC = () => {
                         </td>
                         <td>
                           <span className={`badge-soft ${type.is_paid ? 'badge-soft--green' : 'badge-soft--red'}`}>
-                            {type.is_paid ? 'PAID' : 'UNPAID'}
+                            {type.is_paid ? 'BERBAYAR' : 'TIDAK BERBAYAR'}
                           </span>
                         </td>
                         <td className="td-center">
                           <span className={`badge-soft badge-soft--${type.is_active ? 'green' : 'red'}`}>
-                            {type.is_active ? 'ACTIVE' : 'INACTIVE'}
+                            {type.is_active ? 'AKTIF' : 'TIDAK AKTIF'}
                           </span>
                         </td>
                         <td className="td-center">

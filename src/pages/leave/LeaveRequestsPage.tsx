@@ -47,7 +47,7 @@ const LeaveRequestsPage = () => {
   const handleApprove = async (id: string) => {
     setLoading(true);
     try {
-      await approveLeave(id, { note: 'Approved via Management' });
+      await approveLeave(id, { note: 'Disetujui melalui manajemen' });
       showToast('Pengajuan cuti disetujui', 'success');
       await loadLeaves();
       setIsDetailModalOpen(false);
@@ -63,7 +63,7 @@ const LeaveRequestsPage = () => {
     if (reason === null) return;
     setLoading(true);
     try {
-      await rejectLeave(id, { note: reason || 'Rejected via Management' });
+      await rejectLeave(id, { note: reason || 'Ditolak melalui manajemen' });
       showToast('Pengajuan cuti ditolak', 'success');
       await loadLeaves();
       setIsDetailModalOpen(false);
@@ -143,7 +143,7 @@ const LeaveRequestsPage = () => {
               <span>Pusat Cuti</span>
             </div>
             <h1 className="hero-title">Manajemen Pengajuan Cuti</h1>
-            <p className="hero-subtitle">Kelola permohonan izin dan cuti karyawan dalam satu dashboard terpadu.</p>
+            <p className="hero-subtitle">Kelola permohonan izin dan cuti karyawan dalam satu dasbor terpadu.</p>
           </div>
           <div className="hero-actions">
             <button className="btn-outline" onClick={() => void loadLeaves()}>
@@ -152,7 +152,7 @@ const LeaveRequestsPage = () => {
             </button>
             <button className="btn-primary" onClick={() => navigate('/leave/requests/create')}>
               <Plus size={16} />
-              Buat Request
+              Buat Pengajuan
             </button>
           </div>
         </div>
@@ -194,9 +194,9 @@ const LeaveRequestsPage = () => {
             onChange={(e) => setFilterStatus(e.target.value)}
           >
             <option value="">Semua Status</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
+            <option value="pending">Menunggu</option>
+            <option value="approved">Disetujui</option>
+            <option value="rejected">Ditolak</option>
           </select>
         </div>
       </Card>

@@ -100,7 +100,7 @@ const AdminUserAssignRolesPage = () => {
 
     try {
       await assignRolesToUser(selectedUser.id.toString(), { role_ids: selectedRoleIds });
-      setStatusMessage(`Role untuk ${selectedUser.name} berhasil diperbarui!`);
+      setStatusMessage(`Peran untuk ${selectedUser.name} berhasil diperbarui!`);
       setAlertType('success');
       setSelectedUser(null);
       setSelectedRoleIds([]);

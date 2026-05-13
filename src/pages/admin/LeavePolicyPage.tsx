@@ -72,7 +72,7 @@ const LeavePolicyPage = () => {
         icon: Search,
       },
       {
-        label: 'Paid Leave',
+        label: 'Cuti Berbayar',
         subtitle: 'Cuti berbayar',
         value: String(paidCount),
         change: 'Berbayar',
@@ -80,7 +80,7 @@ const LeavePolicyPage = () => {
         icon: Clock,
       },
       {
-        label: 'Active Policies',
+        label: 'Kebijakan Aktif',
         subtitle: 'Policies aktif',
         value: String(activeCount),
         change: 'Siap digunakan',
@@ -221,7 +221,7 @@ const LeavePolicyPage = () => {
                       <th>Kode</th>
                       <th>Tipe</th>
                       <th>Jatah (Hari)</th>
-                      <th>Carryover</th>
+                      <th>Sisa Tahun Lalu</th>
                       <th>Status</th>
                       <th className="th-center" style={{ width: '120px' }}>Aksi</th>
                     </tr>
@@ -236,7 +236,9 @@ const LeavePolicyPage = () => {
                             </div>
                             <div className="cell-stacked">
                               <span className="cell-name-text">{policy.name}</span>
-                              <span className="cell-stacked__sub">{policy.entitlement_type?.toUpperCase() || 'FIXED'}</span>
+                              <span className="cell-stacked__sub">
+                                {policy.entitlement_type === 'accrual' ? 'BERTAHAP' : policy.entitlement_type === 'unlimited' ? 'TIDAK TERBATAS' : 'TETAP'}
+                              </span>
                             </div>
                           </div>
                         </td>
@@ -245,7 +247,7 @@ const LeavePolicyPage = () => {
                         </td>
                         <td>
                           <span className={`policy-badge ${policy.is_paid ? 'policy-badge-paid' : 'policy-badge-unpaid'}`}>
-                            {policy.is_paid ? 'PAID' : 'UNPAID'}
+                            {policy.is_paid ? 'BERBAYAR' : 'TIDAK BERBAYAR'}
                           </span>
                         </td>
                         <td>
@@ -259,7 +261,7 @@ const LeavePolicyPage = () => {
                         </td>
                         <td className="td-center">
                           <span className={`badge-soft badge-soft--${policy.active ? 'green' : 'red'}`}>
-                            {policy.active ? 'Active' : 'Inactive'}
+                            {policy.active ? 'Aktif' : 'Tidak Aktif'}
                           </span>
                         </td>
                         <td className="td-center">

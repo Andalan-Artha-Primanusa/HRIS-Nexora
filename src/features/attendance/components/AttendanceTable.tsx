@@ -94,7 +94,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({ items, onView,
                     <button className="action-btn action-btn-view" onClick={() => onView(String(item.id))} title="Lihat Detail">
                       <Eye size={16} />
                     </button>
-                    <button className="action-btn action-btn-delete" onClick={() => onDelete(String(item.id))} title="Hapus Record">
+                    <button className="action-btn action-btn-delete" onClick={() => onDelete(String(item.id))} title="Hapus Catatan">
                       <Trash2 size={16} />
                     </button>
                   </div>

@@ -177,7 +177,7 @@ const MasterDataPage: React.FC = () => {
    */
   const handleSave = async () => {
     if (!formData.name.trim()) {
-      showToast('Nama tidak boleh kosong.', 'warning');
+      showToast('Nama tidak boleh kosong.', 'info');
       return;
     }
 
@@ -259,8 +259,8 @@ const MasterDataPage: React.FC = () => {
   // ── Tabs config ────────────────────────────────────────────────────────────
 
   const tabs = [
-    { key: 'department' as ActiveTab, label: 'Departments', icon: Building2, data: departments },
-    { key: 'position'   as ActiveTab, label: 'Positions',   icon: Briefcase,  data: positions  },
+    { key: 'department' as ActiveTab, label: 'Departemen', icon: Building2, data: departments },
+    { key: 'position'   as ActiveTab, label: 'Posisi',   icon: Briefcase,  data: positions  },
   ];
 
   const activeTabMeta = tabs.find((t) => t.key === activeTab)!;
@@ -445,7 +445,7 @@ const MasterDataPage: React.FC = () => {
                         <td className="cell-description">{item.description || '-'}</td>
                         <td>
                           <span className={`badge-soft badge-soft--${item.is_active !== false ? 'green' : 'red'}`}>
-                            {item.is_active !== false ? 'Active' : 'Inactive'}
+                            {item.is_active !== false ? 'Aktif' : 'Tidak Aktif'}
                           </span>
                         </td>
                         <td className="td-center">

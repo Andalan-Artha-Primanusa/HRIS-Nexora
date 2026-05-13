@@ -53,10 +53,10 @@ const AdminRoleFormPage: React.FC = () => {
     try {
       if (isEdit) {
         await updateRole(id, formData);
-        setStatusMessage("Role berhasil diperbarui!");
+        setStatusMessage("Peran berhasil diperbarui!");
       } else {
         await createRole(formData);
-        setStatusMessage("Role baru berhasil dibuat!");
+        setStatusMessage("Peran baru berhasil dibuat!");
       }
       setAlertType("success");
       setTimeout(() => navigate('/admin/roles'), 1500);
@@ -88,7 +88,7 @@ const AdminRoleFormPage: React.FC = () => {
               <Shield size={16} />
               <span>Admin Center</span>
             </div>
-            <h1 className="hero-title">{isEdit ? 'Edit Role' : 'Tambah Role Baru'}</h1>
+            <h1 className="hero-title">{isEdit ? 'Ubah Peran' : 'Tambah Peran Baru'}</h1>
             <p className="hero-subtitle">
               Konfigurasi nama dan deskripsi untuk peran pengguna dalam sistem.
             </p>
@@ -118,11 +118,11 @@ const AdminRoleFormPage: React.FC = () => {
            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
               <Card glass style={{ padding: '2.5rem', borderRadius: '32px' }}>
                  <h3 style={{ margin: '0 0 2rem', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '1.25rem', fontWeight: 800, color: '#1e3a8a' }}>
-                    <Tag size={24} color="#2563eb" /> Informasi Role
+                    <Tag size={24} color="#2563eb" /> Informasi Peran
                  </h3>
                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                       <label style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b' }}>Nama Role <span style={{ color: '#ef4444' }}>*</span></label>
+                       <label style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b' }}>Nama Peran <span style={{ color: '#ef4444' }}>*</span></label>
                        <input 
                          name="name" 
                          value={formData.name} 
@@ -136,7 +136,7 @@ const AdminRoleFormPage: React.FC = () => {
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                       <label style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b' }}>Deskripsi Role</label>
+                       <label style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b' }}>Deskripsi Peran</label>
                        <div style={{ position: 'relative' }}>
                           <FileText size={18} style={{ position: 'absolute', left: '14px', top: '16px', color: '#94a3b8' }} />
                           <textarea 
@@ -157,12 +157,12 @@ const AdminRoleFormPage: React.FC = () => {
                  <h3 style={{ margin: '0 0 1.5rem', fontSize: '1.1rem', fontWeight: 800, color: '#1e3a8a' }}>Panduan</h3>
                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                     <div style={{ fontSize: '0.85rem', color: '#64748b', lineHeight: 1.6 }}>
-                       <strong>Role</strong> mendefinisikan kelompok izin yang diberikan kepada pengguna. Setelah membuat role, Anda dapat:
+                       <strong>Peran</strong> mendefinisikan kelompok izin yang diberikan kepada pengguna. Setelah membuat peran, Anda dapat:
                     </div>
                     <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.85rem', color: '#64748b', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                       <li>Menghubungkan Permissions ke Role ini.</li>
-                       <li>Menetapkan Role ini ke satu atau lebih karyawan.</li>
-                       <li>Membatasi akses ke modul tertentu berdasarkan Role.</li>
+                       <li>Menghubungkan izin ke peran ini.</li>
+                       <li>Menetapkan peran ini ke satu atau lebih karyawan.</li>
+                       <li>Membatasi akses ke modul tertentu berdasarkan peran.</li>
                     </ul>
                  </div>
               </Card>
@@ -170,7 +170,7 @@ const AdminRoleFormPage: React.FC = () => {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                  <Button type="submit" variant="primary" size="lg" disabled={loading} style={{ width: '100%', height: '60px', borderRadius: '20px', fontWeight: 800, fontSize: '1.1rem', boxShadow: '0 10px 20px rgba(37, 99, 235, 0.2)' }}>
                     <Save size={20} style={{ marginRight: '10px' }} />
-                    {loading ? 'Menyimpan...' : (isEdit ? 'Simpan Perubahan' : 'Buat Role Baru')}
+                    {loading ? 'Menyimpan...' : (isEdit ? 'Simpan Perubahan' : 'Buat Peran Baru')}
                  </Button>
                  <Button type="button" onClick={() => navigate('/admin/roles')} style={{ width: '100%', height: '54px', borderRadius: '20px', fontWeight: 700, background: '#f1f5f9', color: '#475569', border: '1px solid #cbd5e1' }}>
                     Batalkan

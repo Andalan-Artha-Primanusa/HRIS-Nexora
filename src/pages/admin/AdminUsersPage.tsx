@@ -139,7 +139,7 @@ const AdminUsersPage = () => {
         icon: Search,
       },
       {
-        label: 'Total Roles',
+        label: 'Total Peran',
         subtitle: 'Jenis role tersedia',
         value: String(uniqueRoles.length),
         change: 'Hak akses sistem',
@@ -195,7 +195,7 @@ const AdminUsersPage = () => {
               onClick={() => navigate("/admin/users/assign-roles")}
             >
               <UserPlus size={16} />
-              Assign Role
+              Tetapkan Peran
             </button>
           </div>
         </div>
@@ -264,9 +264,9 @@ const AdminUsersPage = () => {
           <div className="filter-dropdown">
             <div className="filter-row">
               <div className="filter-group">
-                <label>Role</label>
+                <label>Peran</label>
                 <select value={selectedRole} onChange={(e) => setSelectedRole(e.target.value)} className="filter-select-premium">
-                  <option value="">Semua Role</option>
+                  <option value="">Semua Peran</option>
                   {uniqueRoles.map((role) => (
                     <option key={role} value={role}>
                       {role}
@@ -320,7 +320,7 @@ const AdminUsersPage = () => {
                     <tr>
                       <th style={{ width: '400px' }}>Nama Pengguna</th>
                       <th>Email</th>
-                      <th>Roles</th>
+                      <th>Peran</th>
                       <th className="th-center" style={{ width: '120px' }}>Aksi</th>
                     </tr>
                   </thead>
@@ -360,7 +360,7 @@ const AdminUsersPage = () => {
                             <button
                               className="action-btn action-btn-edit"
                               onClick={() => navigate("/admin/users/assign-roles")}
-                              title="Assign Role"
+                              title="Tetapkan Peran"
                             >
                               <Shield size={16} />
                             </button>
