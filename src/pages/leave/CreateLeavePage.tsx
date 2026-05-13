@@ -41,6 +41,21 @@ const CreateLeavePage = () => {
     };
     void fetchLeaveTypes();
   }, []);
+
+  useEffect(() => {
+    if (formData.start_date && formData.end_date) {
+      const start = new Date(formData.start_date);
+      const end = new Date(formData.end_date);
+      if (end >= start) {
+        const diffTime = end.getTime() - start.getTime();
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        setFormData(prev => ({ ...prev, total_days: diffDays }));
+      } else {
+        setFormData(prev => ({ ...prev, total_days: 1 }));
+      }
+    }
+  }, [formData.start_date, formData.end_date]);
+
   const [loading, setLoading] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('error');
@@ -212,8 +227,7 @@ const CreateLeavePage = () => {
           {/* Total Days */}
           <div className="leave-form-group">
             <label htmlFor="total_days">
-              Total Hari
-              <span className="leave-required">*</span>
+              Total Hari (Otomatis)
             </label>
             <input
               id="total_days"
@@ -221,9 +235,9 @@ const CreateLeavePage = () => {
               name="total_days"
               className="leave-input"
               value={formData.total_days}
-              onChange={handleInputChange}
-              min="1"
-              disabled={loading}
+              readOnly
+              disabled
+              style={{ background: '#f1f5f9', cursor: 'not-allowed' }}
             />
           </div>
 

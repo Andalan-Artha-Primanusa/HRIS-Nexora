@@ -127,5 +127,11 @@ export const filterMenuItems = (
     ? new Set(allowedKeys)
     : collectKeys(items);
 
+  // Pastikan menu Persetujuan Cuti selalu diizinkan bagi pengguna dengan peran Approver agar tidak tersaring oleh cache lama
+  const isApprover = user.roles?.some((r: any) => ['super_admin', 'admin', 'hr', 'manager'].includes(r.name?.toLowerCase()));
+  if (isApprover) {
+    keys.add('manajemen-cuti.persetujuan');
+  }
+
   return filterByKeys(items, keys);
 };

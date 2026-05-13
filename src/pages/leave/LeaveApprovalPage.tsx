@@ -1,7 +1,8 @@
 import { useEffect, useState, useMemo } from "react";
 import { Card, CardHeader } from "@/shared/ui";
 import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
-import { approveLeave, getLeaveRequests, rejectLeave } from "@/features/leave/api/leave.service";
+import { approveLeave, getPendingLeaves, rejectLeave } from "@/features/leave/api/leave.service";
+import { RejectLeaveModal } from "@/features/leave/components/RejectLeaveModal";
 import type { LeaveItem } from "@/features/leave/types/leave.types";
 import { RefreshCw, Check, X, Clock3, CheckCircle2, XCircle, Search, History } from "lucide-react";
 import { showToast } from "@/shared/ui/toast";
@@ -62,11 +63,12 @@ const LeaveApprovalPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
   const [historyModal, setHistoryModal] = useState<{ module: string; id: number } | null>(null);
+  const [rejectModal, setRejectModal] = useState<{ id: string | number; name: string } | null>(null);
 
   const loadData = async () => {
     setLoading(true);
     try {
-      const result = await getLeaveRequests({});
+      const result = await getPendingLeaves();
       const raw = result.items || [];
       setItems(raw);
     } catch (error: unknown) {
@@ -128,15 +130,15 @@ const LeaveApprovalPage = () => {
     }
   };
 
-  const handleReject = async (leaveId: string | number) => {
-    const reason = window.prompt("Berikan alasan penolakan untuk karyawan:");
-    if (reason === null) return;
-
+  const handleConfirmReject = async (reason: string) => {
+    if (!rejectModal) return;
+    const leaveId = rejectModal.id;
     setActionLoading(String(leaveId));
     try {
-      await rejectLeave(String(leaveId), { note: reason || "Ditolak tanpa alasan" });
+      await rejectLeave(String(leaveId), { note: reason });
       await loadData();
       showToast("Pengajuan ditolak", "success");
+      setRejectModal(null);
     } catch (error: any) {
       console.error("Failed to reject:", error);
       showToast(error?.response?.data?.message || error?.message || 'Gagal menolak cuti', 'error');
@@ -339,7 +341,7 @@ const LeaveApprovalPage = () => {
                                   </button>
                                   <button
                                     className="action-btn action-btn-delete"
-                                    onClick={() => handleReject(item.id)}
+                                    onClick={() => setRejectModal({ id: item.id, name: getEmployeeName(item) })}
                                     disabled={actionLoading === String(item.id)}
                                     title="Tolak"
                                   >
@@ -401,6 +403,14 @@ const LeaveApprovalPage = () => {
           moduleId={historyModal.id}
         />
       )}
+
+      <RejectLeaveModal
+        isOpen={!!rejectModal}
+        onClose={() => setRejectModal(null)}
+        onConfirm={handleConfirmReject}
+        employeeName={rejectModal?.name}
+        loading={!!actionLoading}
+      />
     </div>
   );
 };

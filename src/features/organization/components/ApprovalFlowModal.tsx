@@ -3,6 +3,7 @@ import { Modal } from '@/shared/ui/Modal';
 import { Button } from '@/shared/ui/Button';
 import { Plus, Trash2, User, GitBranch, Layers, Users } from 'lucide-react';
 import { getAllRoles, getAllUsers } from "@/features/admin/api/admin.service";
+import { api } from "@/shared/api/httpClient";
 
 interface ApprovalFlowModalProps {
   isOpen: boolean;
@@ -31,6 +32,7 @@ export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, on
   const [loading, setLoading] = useState(false);
   const [roles, setRoles] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
+  const [usersByRole, setUsersByRole] = useState<Record<string, any[]>>({});
   const [formData, setFormData] = useState({
     name: '',
     module: 'assignment_letter',
@@ -50,20 +52,57 @@ export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, on
       fetchRoles();
       fetchUsers();
       if (editData) {
+        const mappedSteps = (editData.steps || []).map((s: any, i: number) => ({
+          role_id: String(s.role_id || ''),
+          user_id: String(s.user_id || s.user?.id || ''),
+          step_order: i + 1,
+        }));
         setFormData({
           name: editData.name || '',
           module: editData.module || 'assignment_letter',
-          steps: (editData.steps || []).map((s: any, i: number) => ({
-            role_id: String(s.role_id || ''),
-            user_id: String(s.user_id || s.user?.id || ''),
-            step_order: i + 1,
-          })),
+          steps: mappedSteps,
+        });
+        mappedSteps.forEach((st: any) => {
+          if (st.role_id) void fetchUsersForRole(st.role_id);
         });
       } else {
         resetForm();
       }
     }
   }, [isOpen, editData]);
+
+  const fetchUsersForRole = async (roleIdParams: string) => {
+    if (!roleIdParams || usersByRole[roleIdParams]) return;
+    try {
+      const res = await api.get("/admin/users", {
+        params: { role: roleIdParams, per_page: 100 }
+      });
+      let items: any[] = [];
+      const root = res.data;
+      const inner = root?.data ?? root;
+      
+      if (Array.isArray(inner)) {
+        items = inner;
+      } else if (inner && typeof inner === 'object') {
+        const candidates = [
+          (inner as any).data,
+          (inner as any).items,
+          (inner as any).rows,
+          root?.items,
+          root?.data?.data
+        ];
+        for (const c of candidates) {
+          if (Array.isArray(c)) {
+            items = c;
+            break;
+          }
+        }
+      }
+      setUsersByRole(prev => ({ ...prev, [roleIdParams]: items }));
+    } catch (err) {
+      console.error(`Failed to fetch users for role ${roleIdParams}`, err);
+    }
+  };
 
   const fetchRoles = async () => {
     try {
@@ -77,13 +116,29 @@ export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, on
 
   const fetchUsers = async () => {
     try {
-      const res = await getAllUsers();
+      const res = await getAllUsers(1, 200);
       const data = res as any;
       const items = Array.isArray(data) ? data : data?.items || [];
       setUsers(items);
     } catch (err) {
       console.error('Failed to fetch users', err);
     }
+  };
+
+  const getFilteredUsersForStep = (roleIdStr: string) => {
+    if (usersByRole[roleIdStr] && usersByRole[roleIdStr].length > 0) {
+      return usersByRole[roleIdStr];
+    }
+    if (roleIdStr && users.length > 0) {
+      const filtered = users.filter(u => {
+        if (u.roles && Array.isArray(u.roles)) {
+          return u.roles.some((r: any) => String(r.id) === String(roleIdStr));
+        }
+        return false;
+      });
+      if (filtered.length > 0) return filtered;
+    }
+    return users;
   };
 
   const addStep = () => {
@@ -103,6 +158,10 @@ export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, on
   const updateStep = (index: number, field: string, value: any) => {
     const newSteps = [...formData.steps];
     (newSteps[index] as any)[field] = value;
+    if (field === 'role_id' && value) {
+      (newSteps[index] as any).user_id = '';
+      void fetchUsersForRole(value);
+    }
     setFormData({ ...formData, steps: newSteps });
   };
 
@@ -211,7 +270,7 @@ export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, on
                         style={{ width: '100%', border: 'none', background: 'transparent', fontSize: '0.8rem', color: '#64748b', outline: 'none', cursor: 'pointer' }}
                       >
                         <option value="">Any user with this role</option>
-                        {users.map((u: any) => (
+                        {getFilteredUsersForStep(step.role_id).map((u: any) => (
                           <option key={u.id} value={u.id}>{u.name || u.email || `User #${u.id}`}</option>
                         ))}
                       </select>

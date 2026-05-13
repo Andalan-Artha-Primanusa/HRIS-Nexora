@@ -504,6 +504,16 @@ export const router = createBrowserRouter([
         ],
       },
       {
+        path: "/leave/approval",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <LeaveApprovalPage />,
+          },
+        ],
+      },
+      {
         path: "/leave/calendar",
         element: <DashboardLayout />,
         children: [
