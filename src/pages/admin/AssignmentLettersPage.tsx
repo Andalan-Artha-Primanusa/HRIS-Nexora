@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, RefreshCw, FileText, Calendar, MapPin, User, CheckCircle, XCircle, Clock, BookTemplate, History } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { legalService } from '@/features/legal/api/legal.service';
 import { AssignmentLetterModal } from '@/features/legal/components/AssignmentLetterModal';
 import '@/shared/styles/CrudPage.css';
@@ -16,6 +17,8 @@ const AssignmentLettersPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [historyModal, setHistoryModal] = useState<{ module: string; id: number } | null>(null);
+  const [pendingDecision, setPendingDecision] = useState<{ action: 'approve' | 'reject'; letter: any } | null>(null);
+  const [decisionLoading, setDecisionLoading] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -57,27 +60,39 @@ const AssignmentLettersPage: React.FC = () => {
     }
   };
 
-  const handleApprove = async (id: string | number) => {
+  const openDecisionDialog = (action: 'approve' | 'reject', letter: any) => {
+    setPendingDecision({ action, letter });
+  };
+
+  const closeDecisionDialog = () => {
+    if (decisionLoading) return;
+    setPendingDecision(null);
+  };
+
+  const executeDecision = async () => {
+    if (!pendingDecision?.letter?.id) return;
+
+    const { action, letter } = pendingDecision;
+    setDecisionLoading(true);
     try {
-      await legalService.approveAssignmentLetter(id);
-      fetchData();
-      showToast('Surat tugas berhasil disetujui', 'success');
+      if (action === 'approve') {
+        await legalService.approveAssignmentLetter(letter.id, 'Approved from assignment letter admin');
+        showToast('Surat tugas berhasil disetujui', 'success');
+      } else {
+        await legalService.rejectAssignmentLetter(letter.id, 'Rejected from assignment letter admin');
+        showToast('Surat tugas berhasil ditolak', 'success');
+      }
+      setPendingDecision(null);
+      await fetchData();
     } catch (err: any) {
-      console.error('Failed to approve', err);
-      showToast(err?.response?.data?.message || err?.message || 'Gagal menyetujui surat tugas', 'error');
+      console.error(`Failed to ${action} assignment letter`, err);
+      showToast(err?.message || (action === 'approve' ? 'Gagal menyetujui surat tugas' : 'Gagal menolak surat tugas'), 'error');
+    } finally {
+      setDecisionLoading(false);
     }
   };
 
-  const handleReject = async (id: string | number) => {
-    try {
-      await legalService.rejectAssignmentLetter(id);
-      fetchData();
-      showToast('Surat tugas berhasil ditolak', 'success');
-    } catch (err: any) {
-      console.error('Failed to reject', err);
-      showToast(err?.response?.data?.message || err?.message || 'Gagal menolak surat tugas', 'error');
-    }
-  };
+  const isApproveDecision = pendingDecision?.action === 'approve';
 
   const handleDownloadPdf = async (id: string | number) => {
     try {
@@ -190,12 +205,12 @@ const AssignmentLettersPage: React.FC = () => {
                 </div>
 
                 <div className="assignment-card-footer">
-                  {letter.status === 'pending' && (
+                  {letter.status?.toLowerCase() === 'pending' && (
                     <div className="assignment-actions-row">
-                      <Button variant="primary" className="assignment-btn-approve" onClick={() => handleApprove(letter.id)}>
+                      <Button variant="primary" className="assignment-btn-approve" onClick={() => openDecisionDialog('approve', letter)} disabled={decisionLoading}>
                         <CheckCircle size={16} /> Approve
                       </Button>
-                      <Button variant="outline" className="assignment-btn-reject" onClick={() => handleReject(letter.id)}>
+                      <Button variant="outline" className="assignment-btn-reject" onClick={() => openDecisionDialog('reject', letter)} disabled={decisionLoading}>
                         <XCircle size={16} /> Reject
                       </Button>
                     </div>
@@ -229,6 +244,22 @@ const AssignmentLettersPage: React.FC = () => {
           moduleId={historyModal.id}
         />
       )}
+
+      <ConfirmDialog
+        isOpen={!!pendingDecision}
+        title={isApproveDecision ? 'Setujui Surat Tugas' : 'Tolak Surat Tugas'}
+        message={
+          isApproveDecision
+            ? `Surat tugas "${pendingDecision?.letter?.title || 'ini'}" akan disetujui. Lanjutkan?`
+            : `Surat tugas "${pendingDecision?.letter?.title || 'ini'}" akan ditolak. Lanjutkan?`
+        }
+        confirmLabel={isApproveDecision ? 'Approve' : 'Reject'}
+        cancelLabel="Batal"
+        variant={isApproveDecision ? 'warning' : 'danger'}
+        loading={decisionLoading}
+        onConfirm={() => void executeDecision()}
+        onCancel={closeDecisionDialog}
+      />
     </div>
   );
 };

@@ -22,6 +22,15 @@ const ApprovalFlowPage: React.FC = () => {
   const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  const getApiErrorMessage = (err: any, fallback: string) => {
+    const errors = err?.errors;
+    if (errors && typeof errors === 'object') {
+      const firstError = Object.values(errors).flat().find(Boolean);
+      if (firstError) return String(firstError);
+    }
+    return err?.message || fallback;
+  };
+
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -55,7 +64,9 @@ const ApprovalFlowPage: React.FC = () => {
       showToast('Approval flow berhasil dibuat', 'success');
       fetchData();
     } catch (err: any) {
-      showToast(err.message || 'Gagal membuat approval flow', 'error');
+      const message = getApiErrorMessage(err, 'Gagal membuat approval flow');
+      showToast(message, 'error');
+      throw new Error(message);
     }
   };
 
@@ -67,7 +78,9 @@ const ApprovalFlowPage: React.FC = () => {
       showToast('Approval flow berhasil diperbarui', 'success');
       fetchData();
     } catch (err: any) {
-      showToast(err.message || 'Gagal memperbarui approval flow', 'error');
+      const message = getApiErrorMessage(err, 'Gagal memperbarui approval flow');
+      showToast(message, 'error');
+      throw new Error(message);
     }
   };
 
