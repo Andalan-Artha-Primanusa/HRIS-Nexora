@@ -51,8 +51,9 @@ api.interceptors.response.use(
     // Tampilkan toast sukses otomatis untuk mutasi (POST, PUT, DELETE)
     const isMutation = ["POST", "PUT", "DELETE", "PATCH"].includes(method || "");
     const isSilentUrl = url.includes("/me") || url.includes("/logout"); // Biarkan /me dan /logout tetap senyap di sini
+    const skipToast = Boolean((response.config as any).skipToast);
 
-    if (isMutation && !isSilentUrl) {
+    if (isMutation && !isSilentUrl && !skipToast && response.status >= 200 && response.status < 300) {
       const message = response.data?.message || (url.includes("/login") ? "Login Berhasil" : "Aksi berhasil dilakukan");
       showToast(message, "success");
     }

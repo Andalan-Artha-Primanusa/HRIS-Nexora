@@ -31,18 +31,29 @@ export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, on
   const [loading, setLoading] = useState(false);
   const [roles, setRoles] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
+  const [formError, setFormError] = useState("");
   const [formData, setFormData] = useState({
     name: '',
     module: 'assignment_letter',
     steps: [{ role_id: '', user_id: '', step_order: 1 }]
   });
 
+  const isModuleTaken = (module: string) => !editData && existingFlows.some(
+    (flow) => flow.module === module && flow.is_active !== false
+  );
+
+  const getDefaultModule = () => {
+    if (editData?.module) return editData.module;
+    return MODULES.find((module) => !isModuleTaken(module.value))?.value || 'assignment_letter';
+  };
+
   const resetForm = () => {
     setFormData({
       name: '',
-      module: 'assignment_letter',
+      module: getDefaultModule(),
       steps: [{ role_id: '', user_id: '', step_order: 1 }]
     });
+    setFormError("");
   };
 
   useEffect(() => {
@@ -59,11 +70,12 @@ export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, on
             step_order: i + 1,
           })),
         });
+        setFormError("");
       } else {
         resetForm();
       }
     }
-  }, [isOpen, editData]);
+  }, [isOpen, editData, existingFlows]);
 
   const fetchRoles = async () => {
     try {
@@ -109,8 +121,20 @@ export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, on
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name) return alert('Please enter a flow name');
-    if (formData.steps.some(s => !s.role_id)) return alert('Please select a role for all steps');
+    setFormError("");
+
+    if (!formData.name.trim()) {
+      setFormError('Nama approval flow wajib diisi.');
+      return;
+    }
+    if (isModuleTaken(formData.module)) {
+      setFormError('Module ini sudah memiliki approval flow aktif. Pilih module lain atau edit flow yang sudah ada.');
+      return;
+    }
+    if (formData.steps.some(s => !s.role_id)) {
+      setFormError('Pilih role untuk semua step approval.');
+      return;
+    }
 
     setLoading(true);
     try {
@@ -124,7 +148,8 @@ export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, on
       };
       await onSave(cleanedData);
       onClose();
-    } catch (err) {
+    } catch (err: any) {
+      setFormError(err?.message || 'Gagal menyimpan approval flow.');
       console.error(err);
     } finally {
       setLoading(false);
@@ -172,6 +197,11 @@ export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, on
                 );
               })}
             </select>
+            {isModuleTaken(formData.module) && (
+              <p style={{ margin: '8px 0 0', fontSize: '0.8rem', color: '#dc2626', fontWeight: 600 }}>
+                Module ini sudah memiliki approval flow aktif.
+              </p>
+            )}
           </div>
 
           <div>
@@ -244,6 +274,12 @@ export const ApprovalFlowModal: React.FC<ApprovalFlowModalProps> = ({ isOpen, on
             </div>
           </div>
         </div>
+
+        {formError && (
+          <div style={{ marginTop: '1.5rem', padding: '12px 14px', borderRadius: '12px', background: '#fef2f2', color: '#b91c1c', fontSize: '0.85rem', fontWeight: 600, border: '1px solid #fecaca' }}>
+            {formError}
+          </div>
+        )}
 
         <div style={{ marginTop: '3rem', display: 'flex', gap: '1rem' }}>
           <Button variant="ghost" onClick={onClose} type="button" style={{ flex: 1, height: '52px', borderRadius: '12px' }}>Cancel</Button>
