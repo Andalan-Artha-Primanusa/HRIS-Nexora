@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Card } from "@/shared/ui/Card";
 import { Modal } from "@/shared/ui/Modal";
+import { showToast } from "@/shared/ui/toast";
 import { PayrollStatusBadge } from "@/shared/ui/PayrollStatusBadge";
 import {
   generateMonthlyPayroll,
@@ -424,9 +425,6 @@ const PayrollGeneratePage = () => {
 
   const [items, setItems] = useState<PayrollItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
-  const [errorModal, setErrorModal] = useState({ isOpen: false, title: "", message: "" });
-
   /* period selectors */
   const [selectedYear, setSelectedYear] = useState(String(now.getFullYear()));
   const [selectedMonth, setSelectedMonth] = useState(
@@ -443,19 +441,13 @@ const PayrollGeneratePage = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
   /* ── API ── */
-  const showErrorModal = (title: string, msg: string) =>
-    setErrorModal({ isOpen: true, title, message: msg });
-
   const loadPayroll = async () => {
     setLoading(true);
     try {
       const result = await getAllPayroll();
       setItems(toSafeArray(result));
     } catch (err) {
-      showErrorModal(
-        "Error Muat Data",
-        err instanceof Error ? err.message : "Gagal memuat payroll"
-      );
+      showToast(err instanceof Error ? err.message : "Gagal memuat payroll", "error");
     } finally {
       setLoading(false);
     }
@@ -463,22 +455,16 @@ const PayrollGeneratePage = () => {
 
   const generateMonthly = async () => {
     if (!period.trim()) {
-      showErrorModal("Validasi", "Pilih periode terlebih dahulu");
+      showToast("Pilih periode terlebih dahulu", "error");
       return;
     }
     setLoading(true);
     try {
       await generateMonthlyPayroll({ period });
-      setMessage({
-        type: "success",
-        text: `Payroll berhasil di-generate untuk periode ${period}`,
-      });
+      showToast(`Payroll berhasil di-generate untuk periode ${period}`, "success");
       await loadPayroll();
     } catch (err) {
-      showErrorModal(
-        "Error Generate",
-        err instanceof Error ? err.message : "Gagal generate payroll"
-      );
+      showToast(err instanceof Error ? err.message : "Gagal generate payroll", "error");
     } finally {
       setLoading(false);
     }
@@ -639,23 +625,6 @@ const PayrollGeneratePage = () => {
   /* ─────────────────── JSX ─────────────────── */
   return (
     <div className="crud-page payroll-page" style={S.page}>
-      {/* Error modal */}
-      <Modal
-        isOpen={errorModal.isOpen}
-        onClose={() => setErrorModal({ ...errorModal, isOpen: false })}
-        title={errorModal.title}
-        size="md"
-      >
-        <div
-          style={{ display: "flex", gap: "12px", alignItems: "flex-start", padding: "4px 0" }}
-        >
-          <AlertCircle size={20} color="#f43f5e" style={{ flexShrink: 0, marginTop: 2 }} />
-          <p style={{ fontSize: "14px", color: "#475569", lineHeight: 1.6 }}>
-            {errorModal.message}
-          </p>
-        </div>
-      </Modal>
-
       {/* ── Hero ── */}
       <Card className="hero-card">
         <div className="hero-card-inner">
@@ -682,22 +651,6 @@ const PayrollGeneratePage = () => {
           </div>
         </div>
       </Card>
-
-      {/* ── Success message ── */}
-      {message?.type === "success" && (
-        <div style={S.successBar}>
-          <CheckCircle2 size={18} color="#22c55e" style={{ flexShrink: 0 }} />
-          <span style={{ fontSize: "13px", color: "#15803d", fontWeight: 500, flex: 1 }}>
-            {message.text}
-          </span>
-          <button
-            onClick={() => setMessage(null)}
-            style={{ background: "none", border: "none", cursor: "pointer", color: "#86efac" }}
-          >
-            <X size={16} />
-          </button>
-        </div>
-      )}
 
       {/* ── Summary cards ── */}
       <div style={S.summaryGrid}>

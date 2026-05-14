@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Card } from "@/shared/ui/Card";
 import { Modal } from "@/shared/ui/Modal";
+import { showToast } from "@/shared/ui/toast";
 import { ArrowDown, ArrowUp, Briefcase, Filter, RefreshCw, Search, ChevronDown, Plus, Pencil, Trash2, ArrowLeft, AlertCircle, Download, Banknote, FileText, X, Info } from "lucide-react";
 
 import { payrollService, toSafeArray } from "@/features/payroll/api/payroll.service";
@@ -35,8 +36,6 @@ const PayrollListPage = () => {
   const [employees, setEmployees] = useState<EmployeeItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [errorModal, setErrorModal] = useState<{ isOpen: boolean; title: string; message: string }>({ isOpen: false, title: "", message: "" });
-
   const [searchText, setSearchText] = useState("");
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
   const [selectedPeriod, setSelectedPeriod] = useState<string>("");
@@ -51,14 +50,11 @@ const PayrollListPage = () => {
   const [view, setView] = useState<"list" | "form">("list");
   const [form, setForm] = useState<PayrollFormState>(DEFAULT_FORM);
   const [mode, setMode] = useState<"create" | "edit" | "delete">("create");
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const [exportModal, setExportModal] = useState(false);
   const [exportPeriod, setExportPeriod] = useState(new Date().toISOString().slice(0, 7));
   const [exportType, setExportType] = useState<"bca" | "summary">("bca");
   const [exportLoading, setExportLoading] = useState(false);
-
-  const showErrorModal = (title: string, msg: string) => setErrorModal({ isOpen: true, title, message: msg });
 
   const normalizePayroll = (payroll: any): any => ({
     ...payroll,
@@ -161,15 +157,15 @@ const PayrollListPage = () => {
   };
 
   const handleCreate = async () => {
-    if (!form.employee_id) { showErrorModal("Validasi", "Pilih karyawan"); return; }
-    if (!form.period) { showErrorModal("Validasi", "Masukkan periode"); return; }
+    if (!form.employee_id) { showToast("Pilih karyawan", "error"); return; }
+    if (!form.period) { showToast("Masukkan periode", "error"); return; }
     setLoading(true);
     try {
       await payrollService.createPayroll({ employee_id: Number(form.employee_id), period: form.period, allowance: Number(form.allowance)||0, bonus: Number(form.bonus)||0 });
-      setMessage({ type: "success", text: "Payroll berhasil dibuat" });
+      showToast("Payroll berhasil dibuat", "success");
       setView("list"); await loadData();
     } catch (err) {
-      showErrorModal("Error", err instanceof Error ? err.message : "Gagal");
+      showToast(err instanceof Error ? err.message : "Gagal", "error");
     } finally { setLoading(false); }
   };
 
@@ -177,10 +173,10 @@ const PayrollListPage = () => {
     setLoading(true);
     try {
       await payrollService.updatePayroll(form.id, { allowance: Number(form.allowance)||0, bonus: Number(form.bonus)||0 });
-      setMessage({ type: "success", text: "Payroll berhasil diupdate" });
+      showToast("Payroll berhasil diupdate", "success");
       setView("list"); await loadData();
     } catch (err) {
-      showErrorModal("Error", err instanceof Error ? err.message : "Gagal");
+      showToast(err instanceof Error ? err.message : "Gagal", "error");
     } finally { setLoading(false); }
   };
 
@@ -188,15 +184,15 @@ const PayrollListPage = () => {
     setLoading(true);
     try {
       await payrollService.deletePayroll(form.id);
-      setMessage({ type: "success", text: "Payroll berhasil dihapus" });
+      showToast("Payroll berhasil dihapus", "success");
       setView("list"); await loadData();
     } catch (err) {
-      showErrorModal("Error", err instanceof Error ? err.message : "Gagal");
+      showToast(err instanceof Error ? err.message : "Gagal", "error");
     } finally { setLoading(false); }
   };
 
   const handleExport = async () => {
-    if (!exportPeriod) { showErrorModal("Validasi", "Pilih periode"); return; }
+    if (!exportPeriod) { showToast("Pilih periode", "error"); return; }
     setExportLoading(true);
     try {
       const token = sessionStorage.getItem("token") || "";
@@ -209,8 +205,9 @@ const PayrollListPage = () => {
       const a = document.createElement("a"); a.href = url; a.download = `${exportType === "bca" ? "bca-klikpay" : "payroll-summary"}-${exportPeriod}.csv`;
       document.body.appendChild(a); a.click(); a.remove(); window.URL.revokeObjectURL(url);
       setExportModal(false);
+      showToast("Export berhasil", "success");
     } catch (err) {
-      showErrorModal("Error Export", err instanceof Error ? err.message : "Gagal");
+      showToast(err instanceof Error ? err.message : "Gagal", "error");
     } finally { setExportLoading(false); }
   };
 
@@ -258,10 +255,6 @@ const PayrollListPage = () => {
 
   return (
     <div className="crud-page" style={{ fontFamily: "'Poppins', sans-serif" }}>
-      <Modal isOpen={errorModal.isOpen} onClose={() => setErrorModal({...errorModal, isOpen: false})} title={errorModal.title} size="md">
-        <div style={{ padding: "16px 0", whiteSpace: "pre-wrap" }}><p style={{ margin: 0, lineHeight: 1.6 }}>{errorModal.message}</p></div>
-      </Modal>
-
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -275,12 +268,6 @@ const PayrollListPage = () => {
           </div>
         </div>
       </Card>
-
-      {message && message.type === "success" && (
-        <Card style={{ borderLeft: "4px solid #10b981", background: "rgba(16, 185, 129, 0.05)", padding: "1rem", borderRadius: 12, marginBottom: "1rem" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}><AlertCircle color="#10b981" size={20} /><p style={{ color: "#065f46", margin: 0, fontWeight: 600 }}>{message.text}</p></div>
-        </Card>
-      )}
 
       {view === "form" ? formContent : (
         <>

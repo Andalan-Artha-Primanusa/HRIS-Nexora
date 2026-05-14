@@ -3,6 +3,7 @@ import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
 import { CheckCircle2, CreditCard, Eye, FileText, Pencil, Plus, RefreshCw, Settings2, Trash2 } from "lucide-react";
+import { showToast } from "@/shared/ui/toast";
 import {
   approvePayroll,
   createPayroll,
@@ -55,16 +56,6 @@ const PayrollManagementPage = () => {
   const [selectedDetail, setSelectedDetail] = useState<Record<string, unknown> | null>(null);
   const [form, setForm] = useState<PayrollFormState>(DEFAULT_FORM);
   const [loading, setLoading] = useState(false);
-  const [errorModal, setErrorModal] = useState<{ isOpen: boolean; title: string; message: string }>({
-    isOpen: false,
-    title: "",
-    message: "",
-  });
-
-  const showErrorModal = (title: string, message: string) => {
-    setErrorModal({ isOpen: true, title, message });
-  };
-
   const columns = useMemo(() => getColumns(items), [items]);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -90,8 +81,7 @@ const PayrollManagementPage = () => {
       const result = await getAllPayroll();
       setItems(toSafeArray(result));
     } catch (error: unknown) {
-      const errorText = error instanceof Error ? error.message : "Gagal muat payroll";
-      showErrorModal("Error Load Data", errorText);
+      showToast(error instanceof Error ? error.message : "Gagal muat payroll", "error");
     } finally {
       setLoading(false);
     }
@@ -108,10 +98,10 @@ const PayrollManagementPage = () => {
         bonus: Number(form.bonus) || 0,
       };
       await createPayroll(payload);
+      showToast("Payroll berhasil dibuat", "success");
       await loadPayroll();
     } catch (error: unknown) {
-      const errorText = error instanceof Error ? error.message : "Gagal buat payroll";
-      showErrorModal("Error Buat Payroll", errorText);
+      showToast(error instanceof Error ? error.message : "Gagal buat payroll", "error");
     } finally {
       setLoading(false);
     }
@@ -122,10 +112,10 @@ const PayrollManagementPage = () => {
 
     try {
       await generateMonthlyPayroll({ period: form.period });
+      showToast("Payroll bulanan berhasil di-generate", "success");
       await loadPayroll();
     } catch (error: unknown) {
-      const errorText = error instanceof Error ? error.message : "Gagal generate payroll";
-      showErrorModal("Error Generate", errorText);
+      showToast(error instanceof Error ? error.message : "Gagal generate payroll", "error");
     } finally {
       setLoading(false);
     }
@@ -134,20 +124,18 @@ const PayrollManagementPage = () => {
   const getDetail = async () => {
     const id = requireId();
     if (!id) {
-      showErrorModal("Validasi", "Masukkan Payroll ID terlebih dahulu");
+      showToast("Masukkan Payroll ID terlebih dahulu", "error");
       return;
     }
 
     setLoading(true);
 
     try {
-      // Extract numeric ID if prefixed (e.g., "P003" -> "3")
       const payrollId = String(id).replace(/^[A-Z]+/, "").replace(/^0+/, "") || id;
       const result = await getPayrollDetail(payrollId);
       setSelectedDetail(result as unknown as Record<string, unknown>);
     } catch (error: unknown) {
-      const errorText = error instanceof Error ? error.message : "Gagal muat detail";
-      showErrorModal("Error Muat Detail", errorText);
+      showToast(error instanceof Error ? error.message : "Gagal muat detail", "error");
     } finally {
       setLoading(false);
     }
@@ -156,7 +144,7 @@ const PayrollManagementPage = () => {
   const updateItem = async () => {
     const id = requireId();
     if (!id) {
-      showErrorModal("Validasi", "Masukkan Payroll ID terlebih dahulu");
+      showToast("Masukkan Payroll ID terlebih dahulu", "error");
       return;
     }
 
@@ -168,13 +156,12 @@ const PayrollManagementPage = () => {
         bonus: Number(form.bonus) || 0,
       };
 
-      // Extract numeric ID if prefixed (e.g., "P003" -> "3")
       const payrollId = String(id).replace(/^[A-Z]+/, "").replace(/^0+/, "") || id;
       await updatePayroll(payrollId, payload);
+      showToast("Payroll berhasil diperbarui", "success");
       await loadPayroll();
     } catch (error: unknown) {
-      const errorText = error instanceof Error ? error.message : "Gagal update payroll";
-      showErrorModal("Error Update", errorText);
+      showToast(error instanceof Error ? error.message : "Gagal update payroll", "error");
     } finally {
       setLoading(false);
     }
@@ -183,20 +170,19 @@ const PayrollManagementPage = () => {
   const deleteItem = async () => {
     const id = requireId();
     if (!id) {
-      showErrorModal("Validasi", "Masukkan Payroll ID terlebih dahulu");
+      showToast("Masukkan Payroll ID terlebih dahulu", "error");
       return;
     }
 
     setLoading(true);
 
     try {
-      // Extract numeric ID if prefixed (e.g., "P003" -> "3")
       const payrollId = String(id).replace(/^[A-Z]+/, "").replace(/^0+/, "") || id;
       await deletePayroll(payrollId);
+      showToast("Payroll berhasil dihapus", "success");
       await loadPayroll();
     } catch (error: unknown) {
-      const errorText = error instanceof Error ? error.message : "Gagal hapus payroll";
-      showErrorModal("Error Hapus", errorText);
+      showToast(error instanceof Error ? error.message : "Gagal hapus payroll", "error");
     } finally {
       setLoading(false);
     }
@@ -205,20 +191,19 @@ const PayrollManagementPage = () => {
   const approveItem = async () => {
     const id = requireId();
     if (!id) {
-      showErrorModal("Validasi", "Masukkan Payroll ID terlebih dahulu");
+      showToast("Masukkan Payroll ID terlebih dahulu", "error");
       return;
     }
 
     setLoading(true);
 
     try {
-      // Extract numeric ID if prefixed (e.g., "P003" -> "3")
       const payrollId = String(id).replace(/^[A-Z]+/, "").replace(/^0+/, "") || id;
       await approvePayroll(payrollId);
+      showToast("Payroll berhasil disetujui", "success");
       await loadPayroll();
     } catch (error: unknown) {
-      const errorText = error instanceof Error ? error.message : "Gagal approve payroll";
-      showErrorModal("Error Approve", errorText);
+      showToast(error instanceof Error ? error.message : "Gagal approve payroll", "error");
     } finally {
       setLoading(false);
     }
@@ -227,20 +212,19 @@ const PayrollManagementPage = () => {
   const markPaid = async () => {
     const id = requireId();
     if (!id) {
-      showErrorModal("Validasi", "Masukkan Payroll ID terlebih dahulu");
+      showToast("Masukkan Payroll ID terlebih dahulu", "error");
       return;
     }
 
     setLoading(true);
 
     try {
-      // Extract numeric ID if prefixed (e.g., "P003" -> "3")
       const payrollId = String(id).replace(/^[A-Z]+/, "").replace(/^0+/, "") || id;
       await markPayrollAsPaid(payrollId);
+      showToast("Payroll berhasil ditandai dibayar", "success");
       await loadPayroll();
     } catch (error: unknown) {
-      const errorText = error instanceof Error ? error.message : "Gagal mark as paid";
-      showErrorModal("Error Mark Paid", errorText);
+      showToast(error instanceof Error ? error.message : "Gagal mark as paid", "error");
     } finally {
       setLoading(false);
     }
@@ -253,20 +237,6 @@ const PayrollManagementPage = () => {
 
   return (
     <div className="crud-page">
-      {/* Error Modal */}
-      <Modal
-        isOpen={errorModal.isOpen}
-        onClose={() => setErrorModal({ ...errorModal, isOpen: false })}
-        title={errorModal.title}
-        size="md"
-      >
-        <div style={{ padding: "16px 0", whiteSpace: "pre-wrap" }}>
-          <p style={{ margin: 0, lineHeight: "1.6", color: "var(--color-text-primary)" }}>
-            {errorModal.message}
-          </p>
-        </div>
-      </Modal>
-
       <div className="crud-header" style={{ borderBottom: "2px solid #2563eb", paddingBottom: "20px" }}>
         <div>
           <h1 style={{ color: "#2563eb", marginBottom: "4px", display: "inline-flex", alignItems: "center", gap: "8px" }}>

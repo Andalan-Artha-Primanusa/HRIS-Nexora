@@ -8,6 +8,7 @@ import { Card } from "@/shared/ui/Card";
 import { PaginationWithSize } from "@/shared/ui/Pagination";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
+import { showToast } from "@/shared/ui/toast";
 import { PayrollStatusBadge } from "@/shared/ui/PayrollStatusBadge";
 import { payrollService, toSafeArray } from "@/features/payroll/api/payroll.service";
 import { getAllEmployees } from "@/features/employee/api/employee.service";
@@ -38,14 +39,6 @@ const PayrollApprovePage = () => {
   const [pendingAction, setPendingAction] = useState<ApproveAction>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
-  const [errorModal, setErrorModal] = useState<{ isOpen: boolean; title: string; message: string }>({
-    isOpen: false, title: "", message: "",
-  });
-
-  const showErrorModal = (title: string, msg: string) =>
-    setErrorModal({ isOpen: true, title, message: msg });
-
   // ── Load ─────────────────────────────────────────────────
   const loadData = async () => {
     setLoading(true);
@@ -56,9 +49,8 @@ const PayrollApprovePage = () => {
       ]);
       setPayrolls(toSafeArray(payrollData));
       setEmployees(toSafeArray(employeeData));
-      setMessage(null);
     } catch (error) {
-      showErrorModal("Error", error instanceof Error ? error.message : "Gagal memuat data");
+      showToast(error instanceof Error ? error.message : "Gagal memuat data", "error");
     } finally {
       setLoading(false);
     }
@@ -91,7 +83,7 @@ const PayrollApprovePage = () => {
   const handleConfirm = async () => {
     if (!selectedPayroll || !pendingAction) return;
     if (pendingAction === "reject" && !rejectReason.trim()) {
-      showErrorModal("Validasi", "Alasan penolakan wajib diisi");
+      showToast("Alasan penolakan wajib diisi", "error");
       return;
     }
 
@@ -100,18 +92,18 @@ const PayrollApprovePage = () => {
       const id = String(selectedPayroll.id);
       if (pendingAction === "manager-approve") {
         await payrollService.managerApprovePayroll(id);
-        setMessage({ type: "success", text: `Payroll #${id} berhasil disetujui Manager → menunggu HR` });
+        showToast(`Payroll #${id} berhasil disetujui Manager → menunggu HR`, "success");
       } else if (pendingAction === "hr-approve") {
         await payrollService.hrApprovePayroll(id);
-        setMessage({ type: "success", text: `Payroll #${id} disetujui HR → siap dibayar` });
+        showToast(`Payroll #${id} disetujui HR → siap dibayar`, "success");
       } else if (pendingAction === "reject") {
         await payrollService.rejectPayroll(id, rejectReason);
-        setMessage({ type: "success", text: `Payroll #${id} ditolak` });
+        showToast(`Payroll #${id} ditolak`, "success");
       }
       closeModal();
       await loadData();
     } catch (error) {
-      showErrorModal("Error", error instanceof Error ? error.message : "Operasi gagal");
+      showToast(error instanceof Error ? error.message : "Operasi gagal", "error");
     } finally {
       setLoading(false);
     }
@@ -169,14 +161,6 @@ const PayrollApprovePage = () => {
 
   return (
     <div className="crud-page">
-      {/* Error Modal */}
-      <Modal isOpen={errorModal.isOpen} onClose={() => setErrorModal({ ...errorModal, isOpen: false })} title={errorModal.title} size="md">
-        <div style={{ padding: "16px 0", whiteSpace: "pre-wrap" }}>
-          <p style={{ margin: 0, lineHeight: "1.6", color: "#1e293b" }}>{errorModal.message}</p>
-        </div>
-      </Modal>
-
-      {/* Header */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -216,14 +200,6 @@ const PayrollApprovePage = () => {
           );
         })}
       </div>
-
-      {/* Success message */}
-      {message?.type === "success" && (
-        <Card className="message-card">
-          <CheckCircle size={20} style={{ color: "#10b981", marginRight: 8 }} />
-          <span>{message.text}</span>
-        </Card>
-      )}
 
       {/* ── Step 1: Menunggu Manager (draft) ── */}
       <Card className="data-table-card">

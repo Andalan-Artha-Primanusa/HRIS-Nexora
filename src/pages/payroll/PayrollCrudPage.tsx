@@ -3,6 +3,7 @@ import { Plus, Pencil, Trash2, ArrowLeft, RefreshCw, AlertCircle, Info, UserCirc
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
+import { showToast } from "@/shared/ui/toast";
 import { payrollService, toSafeArray } from "@/features/payroll/api/payroll.service";
 import { PayrollStatusBadge } from '@/shared/ui/PayrollStatusBadge';
 import { getAllEmployees } from "@/features/employee/api/employee.service";
@@ -40,13 +41,6 @@ const PayrollCrudPage = () => {
   const [selectedPayrollId, setSelectedPayrollId] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState<"create" | "edit" | "delete">("create");
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
-  const [errorModal, setErrorModal] = useState<{ isOpen: boolean; title: string; message: string }>({
-    isOpen: false,
-    title: "",
-    message: "",
-  });
-
   const [exportModal, setExportModal] = useState(false);
   const [exportPeriod, setExportPeriod] = useState(new Date().toISOString().slice(0, 7));
   const [exportType, setExportType] = useState<"bca" | "summary">("bca");
@@ -61,10 +55,8 @@ const PayrollCrudPage = () => {
       ]);
       setEmployees(toSafeArray(employeesData));
       setPayrolls(toSafeArray(payrollsData));
-      setMessage(null);
     } catch (error) {
-      const errorText = error instanceof Error ? error.message : "Gagal memuat data";
-      setMessage({ type: "error", text: errorText });
+      showToast(error instanceof Error ? error.message : "Gagal memuat data", "error");
     } finally {
       setLoading(false);
     }
@@ -74,7 +66,6 @@ const PayrollCrudPage = () => {
     setForm(DEFAULT_FORM);
     setMode("create");
     setView("form");
-    setMessage(null);
   };
 
   const selectPayroll = (payroll: PayrollItem, action: "edit" | "delete") => {
@@ -90,10 +81,6 @@ const PayrollCrudPage = () => {
     setView("form");
   };
 
-  const showErrorModal = (title: string, messageText: string) => {
-    setErrorModal({ isOpen: true, title, message: messageText });
-  };
-
   const handleSave = async () => {
     if (mode === "create") await handleCreate();
     else if (mode === "edit") await handleUpdate();
@@ -102,12 +89,12 @@ const PayrollCrudPage = () => {
 
   const handleCreate = async () => {
     if (!form.employee_id) {
-      showErrorModal("Validasi", "Pilih karyawan terlebih dahulu");
+      showToast("Pilih karyawan terlebih dahulu", "error");
       return;
     }
 
     if (!form.period) {
-      showErrorModal("Validasi", "Masukkan periode (YYYY-MM)");
+      showToast("Masukkan periode (YYYY-MM)", "error");
       return;
     }
 
@@ -121,12 +108,11 @@ const PayrollCrudPage = () => {
       };
 
       await payrollService.createPayroll(payload);
-      setMessage({ type: "success", text: "Payroll berhasil dibuat" });
+      showToast("Payroll berhasil dibuat", "success");
       setView("list");
       await loadData();
     } catch (error) {
-      const errorText = error instanceof Error ? error.message : "Gagal membuat payroll";
-      showErrorModal("Error Membuat Payroll", errorText);
+      showToast(error instanceof Error ? error.message : "Gagal membuat payroll", "error");
     } finally {
       setLoading(false);
     }
@@ -141,12 +127,11 @@ const PayrollCrudPage = () => {
       };
       const payrollId = String(form.id).replace(/^[A-Z]+/, "").replace(/^0+/, "") || form.id;
       await payrollService.updatePayroll(payrollId, payload);
-      setMessage({ type: "success", text: "Payroll berhasil diupdate" });
+      showToast("Payroll berhasil diupdate", "success");
       setView("list");
       await loadData();
     } catch (error) {
-      const errorText = error instanceof Error ? error.message : "Gagal update payroll";
-      showErrorModal("Error Update Payroll", errorText);
+      showToast(error instanceof Error ? error.message : "Gagal update payroll", "error");
     } finally {
       setLoading(false);
     }
@@ -157,12 +142,11 @@ const PayrollCrudPage = () => {
     try {
       const payrollId = String(form.id).replace(/^[A-Z]+/, "").replace(/^0+/, "") || form.id;
       await payrollService.deletePayroll(payrollId);
-      setMessage({ type: "success", text: "Payroll berhasil dihapus" });
+      showToast("Payroll berhasil dihapus", "success");
       setView("list");
       await loadData();
     } catch (error) {
-      const errorText = error instanceof Error ? error.message : "Gagal hapus payroll";
-      showErrorModal("Error Hapus Payroll", errorText);
+      showToast(error instanceof Error ? error.message : "Gagal hapus payroll", "error");
     } finally {
       setLoading(false);
     }
@@ -172,12 +156,11 @@ const PayrollCrudPage = () => {
     setView("list");
     setForm(DEFAULT_FORM);
     setSelectedPayrollId("");
-    setMessage(null);
   };
 
   const handleExport = async () => {
     if (!exportPeriod) {
-      showErrorModal("Validasi", "Pilih periode terlebih dahulu");
+      showToast("Pilih periode terlebih dahulu", "error");
       return;
     }
     setExportLoading(true);
@@ -214,9 +197,9 @@ const PayrollCrudPage = () => {
       window.URL.revokeObjectURL(downloadUrl);
 
       setExportModal(false);
+      showToast("Export berhasil", "success");
     } catch (error) {
-      const errorText = error instanceof Error ? error.message : "Gagal export";
-      showErrorModal("Error Export", errorText);
+      showToast(error instanceof Error ? error.message : "Gagal export", "error");
     } finally {
       setExportLoading(false);
     }
@@ -246,20 +229,6 @@ const PayrollCrudPage = () => {
 
   return (
     <div className="crud-page">
-      <Modal
-        isOpen={errorModal.isOpen}
-        onClose={() => setErrorModal({ ...errorModal, isOpen: false })}
-        title={errorModal.title}
-        size="md"
-      >
-        <div style={{ padding: "16px 0", whiteSpace: "pre-wrap" }}>
-          <p style={{ margin: 0, lineHeight: "1.6", color: "#1e293b" }}>
-            {errorModal.message}
-          </p>
-        </div>
-      </Modal>
-
-      {/* Header - Same style as Dashboard */}
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -296,15 +265,6 @@ const PayrollCrudPage = () => {
           </div>
         </div>
       </Card>
-
-      {message && message.type === "success" && (
-        <Card style={{ borderLeft: '4px solid #10b981', background: 'rgba(16, 185, 129, 0.05)', padding: '1rem', borderRadius: '12px', marginBottom: '1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <AlertCircle color="#10b981" size={20} />
-            <p style={{ color: "#065f46", margin: 0, fontWeight: "600" }}>{message.text}</p>
-          </div>
-        </Card>
-      )}
 
       {view === "list" && (
         <>

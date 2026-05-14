@@ -32,9 +32,6 @@ const KpiApprovePage = () => {
   const [kpi, setKpi] = useState<KpiRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [approving, setApproving] = useState(false);
-  const [statusMessage, setStatusMessage] = useState('Memuat detail KPI...');
-  const [errorMessage, setErrorMessage] = useState('');
-
   useEffect(() => {
     if (id) {
       void loadKpiDetail();
@@ -43,14 +40,12 @@ const KpiApprovePage = () => {
 
   const loadKpiDetail = async () => {
     setLoading(true);
-    setStatusMessage('Memuat detail KPI...');
 
     try {
       const result = await getKpiDetail(id!);
       setKpi((result.payload ?? result) as KpiRecord);
-      setStatusMessage('Detail KPI berhasil dimuat.');
     } catch (error: any) {
-      setStatusMessage('Gagal memuat detail KPI.');
+      showToast(error?.response?.data?.message || 'Gagal memuat detail KPI.', 'error');
       console.error(error);
     } finally {
       setLoading(false);
@@ -63,22 +58,16 @@ const KpiApprovePage = () => {
     }
 
     setApproving(true);
-    setErrorMessage('');
-    setStatusMessage('Approve KPI...');
 
     try {
       const result = await approveKpi(id!);
-      setStatusMessage('KPI berhasil di-approve.');
       showToast('KPI berhasil disetujui', 'success');
       
       setTimeout(() => {
         navigate('/kpis');
       }, 1000);
     } catch (error: any) {
-      const message = error?.response?.data?.message || 'Gagal approve KPI.';
-      setErrorMessage(message);
-      setStatusMessage('Gagal approve KPI.');
-      showToast(message, 'error');
+      showToast(error?.response?.data?.message || 'Gagal approve KPI.', 'error');
       console.error(error);
     } finally {
       setApproving(false);
@@ -222,18 +211,6 @@ const KpiApprovePage = () => {
               )}
             </div>
 
-            {errorMessage && (
-              <div style={{ 
-                color: '#d32f2f', 
-                padding: '12px', 
-                background: '#ffebee', 
-                borderRadius: '4px',
-                marginTop: '12px'
-              }}>
-                {errorMessage}
-              </div>
-            )}
-
             <div className="kpi-action-buttons" style={{ marginTop: '20px' }}>
               <Button 
                 variant="primary" 
@@ -263,9 +240,6 @@ const KpiApprovePage = () => {
         </Card>
       )}
 
-      <div style={{ marginTop: '16px', padding: '12px', background: '#f0f0f0', borderRadius: '4px', fontSize: '14px' }}>
-        <strong>Status:</strong> {statusMessage}
-      </div>
     </div>
   );
 };

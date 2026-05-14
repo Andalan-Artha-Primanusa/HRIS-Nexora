@@ -5,6 +5,7 @@ import { Card } from "@/shared/ui/Card";
 import { PaginationWithSize } from "@/shared/ui/Pagination";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
+import { showToast } from "@/shared/ui/toast";
 import { PayrollStatusBadge } from "@/shared/ui/PayrollStatusBadge";
 import { payrollService, toSafeArray } from "@/features/payroll/api/payroll.service";
 import { getAllEmployees } from "@/features/employee/api/employee.service";
@@ -30,19 +31,6 @@ const PayrollPaymentPage = () => {
   const [bulkPayModal, setBulkPayModal] = useState(false);
   const [bulkPayLoading, setBulkPayLoading] = useState(false);
   const [bulkPeriod, setBulkPeriod] = useState<string>(""); // dedicated state for bulk pay panel
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
-  const [errorModal, setErrorModal] = useState<{ isOpen: boolean; title: string; message: string }>({
-    isOpen: false,
-    title: "",
-    message: "",
-  });
-
-  const showErrorModal = (title: string, message: string) => {
-    setErrorModal({ isOpen: true, title, message });
-  };
-
-
-
   const loadData = async () => {
     setLoading(true);
     try {
@@ -52,7 +40,6 @@ const PayrollPaymentPage = () => {
       ]);
       setEmployees(toSafeArray(empsData));
       setAllPayrolls(toSafeArray(payrollsData));
-      setMessage(null);
     } catch (error) {
       console.error("Error loading data:", error);
     } finally {
@@ -64,7 +51,7 @@ const PayrollPaymentPage = () => {
 
   const handleViewDetail = async () => {
     if (!payrollId.trim()) {
-      showErrorModal("Validasi", "Masukkan Payroll ID terlebih dahulu");
+      showToast("Masukkan Payroll ID terlebih dahulu", "error");
       return;
     }
 
@@ -73,10 +60,8 @@ const PayrollPaymentPage = () => {
       const cleanId = String(payrollId).replace(/^[A-Z]+/, "").replace(/^0+/, "") || payrollId;
       const payroll = await payrollService.getPayrollDetail(cleanId);
       setSelectedPayroll(payroll);
-      setMessage(null);
     } catch (error) {
-      const errorText = error instanceof Error ? error.message : "Gagal memuat detail payroll";
-      showErrorModal("Error Muat Detail", errorText);
+      showToast(error instanceof Error ? error.message : "Gagal memuat detail payroll", "error");
       setSelectedPayroll(null);
     } finally {
       setLoading(false);
@@ -85,23 +70,22 @@ const PayrollPaymentPage = () => {
 
   const handleMarkAsPaid = async () => {
     if (!selectedPayroll) {
-      showErrorModal("Validasi", "Pilih payroll terlebih dahulu");
+      showToast("Pilih payroll terlebih dahulu", "error");
       return;
     }
     if (selectedPayroll.status !== "approved") {
-      showErrorModal("Status Tidak Valid", `Hanya payroll berstatus 'approved' yang bisa ditandai dibayar. Status saat ini: ${selectedPayroll.status}`);
+      showToast(`Hanya payroll berstatus 'approved' yang bisa ditandai dibayar. Status saat ini: ${selectedPayroll.status}`, "error");
       return;
     }
     setLoading(true);
     try {
       const payrollIdValue = String(selectedPayroll.id);
       await payrollService.processPayment(payrollIdValue);
-      setMessage({ type: "success", text: `Payroll #${payrollIdValue} berhasil ditandai sebagai dibayar` });
+      showToast(`Payroll #${payrollIdValue} berhasil ditandai sebagai dibayar`, "success");
       setSelectedPayroll(null);
       await loadData();
     } catch (error) {
-      const errorText = error instanceof Error ? error.message : "Gagal menandai payroll sebagai dibayar";
-      showErrorModal("Error Tandai Dibayar", errorText);
+      showToast(error instanceof Error ? error.message : "Gagal menandai payroll sebagai dibayar", "error");
     } finally {
       setLoading(false);
     }
@@ -109,7 +93,7 @@ const PayrollPaymentPage = () => {
 
   const handleBulkPay = async () => {
     if (!bulkPeriod) {
-      showErrorModal("Pilih Periode", "Pilih periode terlebih dahulu sebelum bulk pay");
+      showToast("Pilih periode terlebih dahulu sebelum bulk pay", "error");
       setBulkPayModal(false);
       return;
     }
@@ -117,11 +101,11 @@ const PayrollPaymentPage = () => {
     try {
       const result = await payrollService.bulkMarkAsPaid(bulkPeriod);
       const total = result?.data?.total_paid ?? result?.total_paid ?? approvedForBulk.length;
-      setMessage({ type: "success", text: `✅ Bulk pay selesai — ${total} payroll periode ${bulkPeriod} berhasil ditandai dibayar` });
+      showToast(`✅ Bulk pay selesai — ${total} payroll periode ${bulkPeriod} berhasil ditandai dibayar`, "success");
       setBulkPayModal(false);
       await loadData();
     } catch (error) {
-      showErrorModal("Bulk Pay Gagal", error instanceof Error ? error.message : "Terjadi kesalahan");
+      showToast(error instanceof Error ? error.message : "Terjadi kesalahan", "error");
     } finally {
       setBulkPayLoading(false);
     }
@@ -228,19 +212,6 @@ const PayrollPaymentPage = () => {
 
   return (
     <div className="crud-page">
-      <Modal
-        isOpen={errorModal.isOpen}
-        onClose={() => setErrorModal({ ...errorModal, isOpen: false })}
-        title={errorModal.title}
-        size="md"
-      >
-        <div style={{ padding: "16px 0", whiteSpace: "pre-wrap" }}>
-          <p style={{ margin: 0, lineHeight: "1.6", color: "var(--color-text-primary)" }}>
-            {errorModal.message}
-          </p>
-        </div>
-      </Modal>
-
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -287,13 +258,6 @@ const PayrollPaymentPage = () => {
           );
         })}
       </div>
-
-      {message && message.type === "success" && (
-        <Card className="message-card">
-          <CheckCircle size={20} style={{ color: '#10b981', marginRight: '8px' }} />
-          <span>{message.text}</span>
-        </Card>
-      )}
 
       {/* ── BULK PAY PANEL — Selalu Terlihat ── */}
       <Card style={{ padding: '1.5rem', marginBottom: '0.5rem', background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)', border: '1.5px solid #86efac', borderRadius: 16 }}>
@@ -347,7 +311,7 @@ const PayrollPaymentPage = () => {
 
           {/* Action Button */}
           <button
-            onClick={() => { if (!bulkPeriod) { showErrorModal("Pilih Periode", "Pilih periode terlebih dahulu"); return; } setBulkPayModal(true); }}
+            onClick={() => { if (!bulkPeriod) { showToast("Pilih periode terlebih dahulu", "error"); return; } setBulkPayModal(true); }}
             disabled={loading || !bulkPeriod || approvedForBulk.length === 0}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,

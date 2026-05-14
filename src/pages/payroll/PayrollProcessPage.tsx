@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { BarChart3, CalendarDays, CheckCircle2, RefreshCw, Zap, Clock, Wallet, LayoutDashboard, ChevronLeft, ChevronRight, AlertCircle, X, ShieldCheck, CreditCard, Eye, FileCheck, DollarSign, FileText, Search } from "lucide-react";
+import { BarChart3, CalendarDays, CheckCircle2, RefreshCw, Zap, Clock, Wallet, LayoutDashboard, ChevronLeft, ChevronRight, AlertCircle, ShieldCheck, CreditCard, Eye, FileCheck, DollarSign, FileText, Search } from "lucide-react";
 import { Card } from "@/shared/ui/Card";
 import { Modal } from "@/shared/ui/Modal";
+import { showToast } from "@/shared/ui/toast";
 
 import { Button } from "@/shared/ui/Button";
 import { PayrollStatusBadge } from "@/shared/ui/PayrollStatusBadge";
@@ -84,8 +85,6 @@ const GenerateTab = () => {
   const now = new Date();
   const [items, setItems] = useState<PayrollItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
-  const [errorModal, setErrorModal] = useState({ isOpen: false, title: "", message: "" });
   const [selectedYear, setSelectedYear] = useState(String(now.getFullYear()));
   const [selectedMonth, setSelectedMonth] = useState(String(now.getMonth() + 1).padStart(2, "0"));
   const [paymentFilter, setPaymentFilter] = useState<"all" | "paid" | "unpaid">("all");
@@ -94,21 +93,20 @@ const GenerateTab = () => {
   const pageSize = 10;
   const period = `${selectedYear}-${selectedMonth}`;
 
-  const showErrorModal = (title: string, msg: string) => setErrorModal({ isOpen: true, title, message: msg });
   const loadPayroll = async () => {
     setLoading(true);
     try { setItems(toSafeArray(await payrollService.getPayrollList())); }
-    catch (err) { showErrorModal("Error", err instanceof Error ? err.message : "Gagal memuat"); }
+    catch (err) { showToast(err instanceof Error ? err.message : "Gagal memuat", "error"); }
     finally { setLoading(false); }
   };
   const generateMonthly = async () => {
-    if (!period.trim()) { showErrorModal("Validasi", "Pilih periode"); return; }
+    if (!period.trim()) { showToast("Pilih periode", "error"); return; }
     setLoading(true);
     try {
       await payrollService.generatePayroll({ period });
-      setMessage({ type: "success", text: `Payroll berhasil di-generate untuk ${period}` });
+      showToast(`Payroll berhasil di-generate untuk ${period}`, "success");
       await loadPayroll();
-    } catch (err) { showErrorModal("Error Generate", err instanceof Error ? err.message : "Gagal"); }
+    } catch (err) { showToast(err instanceof Error ? err.message : "Gagal", "error"); }
     finally { setLoading(false); }
   };
   useEffect(() => { void loadPayroll(); }, []);
@@ -144,21 +142,6 @@ const GenerateTab = () => {
 
   return (
     <>
-      <Modal isOpen={errorModal.isOpen} onClose={() => setErrorModal({ ...errorModal, isOpen: false })} title={errorModal.title} size="md">
-        <div style={{ display: "flex", gap: 12, alignItems: "flex-start", padding: "4px 0" }}>
-          <AlertCircle size={20} color="#f43f5e" style={{ flexShrink: 0, marginTop: 2 }} />
-          <p style={{ fontSize: "14px", color: "#475569", lineHeight: 1.6 }}>{errorModal.message}</p>
-        </div>
-      </Modal>
-
-      {message?.type === "success" && (
-        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 12, marginBottom: "1rem" }}>
-          <CheckCircle2 size={18} color="#22c55e" />
-          <span style={{ fontSize: "13px", color: "#15803d", fontWeight: 500, flex: 1 }}>{message.text}</span>
-          <button onClick={() => setMessage(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "#86efac" }}><X size={16} /></button>
-        </div>
-      )}
-
       <div className="payroll-summary-grid">
         {summaryCards.map((c) => {
           const Icon = c.icon;
@@ -301,10 +284,6 @@ const ApproveTab = () => {
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
-  const [errorModal, setErrorModal] = useState<{ isOpen: boolean; title: string; message: string }>({ isOpen: false, title: "", message: "" });
-
-  const showErrorModal = (title: string, msg: string) => setErrorModal({ isOpen: true, title, message: msg });
   const loadData = async () => {
     setLoading(true);
     try {
@@ -312,7 +291,7 @@ const ApproveTab = () => {
       setPayrolls(toSafeArray(payrollData));
       setEmployees(toSafeArray(employeeData));
     } catch (err) {
-      showErrorModal("Error", err instanceof Error ? err.message : "Gagal memuat");
+      showToast(err instanceof Error ? err.message : "Gagal memuat", "error");
     } finally { setLoading(false); }
   };
   useEffect(() => { void loadData(); }, []);
@@ -323,47 +302,46 @@ const ApproveTab = () => {
   };
 
   const handleApprove = async () => {
-    if (!selectedPayroll) { showErrorModal("Validasi", "Pilih payroll terlebih dahulu"); return; }
+    if (!selectedPayroll) { showToast("Pilih payroll terlebih dahulu", "error"); return; }
     if (selectedPayroll.status === "approved" || selectedPayroll.status === "paid") {
-      showErrorModal("Sudah Disetujui", `Status: ${selectedPayroll.status}`); return;
+      showToast(`Status: ${selectedPayroll.status}`, "error"); return;
     }
-    if (selectedPayroll.status === "rejected") { showErrorModal("Ditolak", "Payroll ini sudah ditolak."); return; }
+    if (selectedPayroll.status === "rejected") { showToast("Payroll ini sudah ditolak.", "error"); return; }
     setLoading(true);
     try {
-      // Route ke endpoint yang benar berdasarkan status
       if (selectedPayroll.status === "draft") {
         await payrollService.managerApprovePayroll(String(selectedPayroll.id));
-        setMessage({ type: "success", text: `Payroll #${selectedPayroll.id} disetujui Manager — menunggu HR` });
+        showToast(`Payroll #${selectedPayroll.id} disetujui Manager — menunggu HR`, "success");
       } else if (selectedPayroll.status === "pending_hr") {
         await payrollService.hrApprovePayroll(String(selectedPayroll.id));
-        setMessage({ type: "success", text: `Payroll #${selectedPayroll.id} disetujui HR — siap dibayar` });
+        showToast(`Payroll #${selectedPayroll.id} disetujui HR — siap dibayar`, "success");
       } else {
         await payrollService.approvePayroll(String(selectedPayroll.id));
-        setMessage({ type: "success", text: `Payroll #${selectedPayroll.id} berhasil disetujui` });
+        showToast(`Payroll #${selectedPayroll.id} berhasil disetujui`, "success");
       }
       setSelectedPayroll(null);
       await loadData();
-    } catch (err) { showErrorModal("Error", err instanceof Error ? err.message : "Gagal approve"); }
+    } catch (err) { showToast(err instanceof Error ? err.message : "Gagal approve", "error"); }
     finally { setLoading(false); }
   };
 
   const handleReject = () => {
-    if (!selectedPayroll) { showErrorModal("Validasi", "Pilih payroll"); return; }
+    if (!selectedPayroll) { showToast("Pilih payroll", "error"); return; }
     setRejectReason("");
     setRejectModalOpen(true);
   };
 
   const confirmReject = async () => {
     if (!selectedPayroll) return;
-    if (!rejectReason.trim()) { showErrorModal("Validasi", "Alasan penolakan wajib diisi"); return; }
+    if (!rejectReason.trim()) { showToast("Alasan penolakan wajib diisi", "error"); return; }
     setLoading(true);
     try {
       await payrollService.rejectPayroll(String(selectedPayroll.id), rejectReason);
-      setMessage({ type: "success", text: `Payroll #${selectedPayroll.id} ditolak` });
+      showToast(`Payroll #${selectedPayroll.id} ditolak`, "success");
       setRejectModalOpen(false);
       setSelectedPayroll(null);
       await loadData();
-    } catch (err) { showErrorModal("Error", err instanceof Error ? err.message : "Gagal"); }
+    } catch (err) { showToast(err instanceof Error ? err.message : "Gagal", "error"); }
     finally { setLoading(false); }
   };
 
@@ -390,18 +368,6 @@ const ApproveTab = () => {
 
   return (
     <>
-      <Modal isOpen={errorModal.isOpen} onClose={() => setErrorModal({ ...errorModal, isOpen: false })} title={errorModal.title} size="md">
-        <div style={{ padding: "16px 0", whiteSpace: "pre-wrap" }}><p style={{ margin: 0, lineHeight: 1.6, color: "#1e293b" }}>{errorModal.message}</p></div>
-      </Modal>
-
-      {message && message.type === "success" && (
-        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 12, marginBottom: "1rem" }}>
-          <CheckCircle2 size={18} color="#22c55e" />
-          <span style={{ fontSize: "13px", color: "#15803d", fontWeight: 500, flex: 1 }}>{message.text}</span>
-          <button onClick={() => setMessage(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "#86efac" }}><X size={16} /></button>
-        </div>
-      )}
-
       <div className="payroll-summary-wrapper">
         {summaryCards.map((c) => {
           const Icon = c.icon;
@@ -581,11 +547,6 @@ const PaymentTab = () => {
   const [bulkPeriod, setBulkPeriod] = useState("");
   const [bulkPayModal, setBulkPayModal] = useState(false);
   const [bulkPayLoading, setBulkPayLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
-  const [errorModal, setErrorModal] = useState<{ isOpen: boolean; title: string; message: string }>({ isOpen: false, title: "", message: "" });
-
-  const showErrorModal = (title: string, msg: string) => setErrorModal({ isOpen: true, title, message: msg });
-
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -598,33 +559,33 @@ const PaymentTab = () => {
   }, []);
 
   const handleMarkAsPaid = async () => {
-    if (!selectedPayroll) { showErrorModal("Validasi", "Pilih payroll"); return; }
-    if (selectedPayroll.status === "paid") { showErrorModal("Sudah Dibayar", "Payroll ini sudah dibayar."); return; }
+    if (!selectedPayroll) { showToast("Pilih payroll", "error"); return; }
+    if (selectedPayroll.status === "paid") { showToast("Payroll ini sudah dibayar.", "error"); return; }
     if (selectedPayroll.status !== "approved") {
-      showErrorModal("Status Tidak Valid", `Hanya payroll berstatus 'approved' yang bisa ditandai dibayar. Status saat ini: ${selectedPayroll.status}`);
+      showToast(`Hanya payroll berstatus 'approved' yang bisa ditandai dibayar. Status saat ini: ${selectedPayroll.status}`, "error");
       return;
     }
     setLoading(true);
     try {
       await payrollService.processPayment(String(selectedPayroll.id));
-      setMessage({ type: "success", text: `Payroll #${selectedPayroll.id} berhasil ditandai dibayar` });
+      showToast(`Payroll #${selectedPayroll.id} berhasil ditandai dibayar`, "success");
       setSelectedPayroll(null);
       setAllPayrolls(toSafeArray(await payrollService.getPayrollList()));
-    } catch (err) { showErrorModal("Error", err instanceof Error ? err.message : "Gagal"); }
+    } catch (err) { showToast(err instanceof Error ? err.message : "Gagal", "error"); }
     finally { setLoading(false); }
   };
 
   const handleBulkPay = async () => {
-    if (!bulkPeriod) { showErrorModal("Pilih Periode", "Pilih periode terlebih dahulu"); return; }
+    if (!bulkPeriod) { showToast("Pilih periode terlebih dahulu", "error"); return; }
     setBulkPayLoading(true);
     try {
       const result = await payrollService.bulkMarkAsPaid(bulkPeriod);
       const total = result?.data?.total_paid ?? result?.total_paid ?? approvedForBulk.length;
-      setMessage({ type: "success", text: `✅ ${total} payroll periode ${bulkPeriod} berhasil ditandai dibayar` });
+      showToast(`✅ ${total} payroll periode ${bulkPeriod} berhasil ditandai dibayar`, "success");
       setBulkPayModal(false);
       const pays = await payrollService.getPayrollList();
       setAllPayrolls(toSafeArray(pays));
-    } catch (err) { showErrorModal("Bulk Pay Gagal", err instanceof Error ? err.message : "Gagal"); }
+    } catch (err) { showToast(err instanceof Error ? err.message : "Gagal", "error"); }
     finally { setBulkPayLoading(false); }
   };
 
@@ -664,17 +625,6 @@ const PaymentTab = () => {
 
   return (
     <>
-      <Modal isOpen={errorModal.isOpen} onClose={() => setErrorModal({ ...errorModal, isOpen: false })} title={errorModal.title} size="md">
-        <div style={{ padding: "16px 0", whiteSpace: "pre-wrap" }}><p style={{ color: "#475569", lineHeight: 1.6 }}>{errorModal.message}</p></div>
-      </Modal>
-
-      {message && message.type === "success" && (
-        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 12, marginBottom: "1rem" }}>
-          <CheckCircle2 size={18} color="#22c55e" /><span style={{ fontSize: 13, color: "#15803d", fontWeight: 500, flex: 1 }}>{message.text}</span>
-          <button onClick={() => setMessage(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "#86efac" }}><X size={16} /></button>
-        </div>
-      )}
-
       {/* ── PANEL BAYAR MASSAL ── */}
       <Card style={{ padding: '1.5rem', background: 'linear-gradient(135deg, #f0fdf4, #ecfdf5)', border: '1.5px solid #86efac', borderRadius: 16, marginBottom: '0.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: '1.25rem' }}>
@@ -713,7 +663,7 @@ const PaymentTab = () => {
             )}
           </div>
           <button
-            onClick={() => { if (!bulkPeriod) { showErrorModal("Pilih Periode", "Pilih periode dulu"); return; } setBulkPayModal(true); }}
+            onClick={() => { if (!bulkPeriod) { showToast("Pilih periode dulu", "error"); return; } setBulkPayModal(true); }}
             disabled={loading || !bulkPeriod || approvedForBulk.length === 0}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 20px',
