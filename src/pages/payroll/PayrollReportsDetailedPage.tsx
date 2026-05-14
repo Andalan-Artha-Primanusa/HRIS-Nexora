@@ -45,8 +45,9 @@ const PayrollReportsDetailedPage: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await payrollService.getPayrollList();
+      const response = await payrollService.getPayrollList({ page: currentPage, per_page: pageSize });
       setData(toSafeArray(response));
+      setTotalPages(response?.data?.last_page ?? response?.last_page ?? 1);
     } catch (err: any) {
       setError(err?.response?.data?.message || err.message || 'Gagal memuat data payroll');
     } finally {
@@ -113,7 +114,7 @@ const PayrollReportsDetailedPage: React.FC = () => {
 
   useEffect(() => {
     void loadData();
-  }, []);
+  }, [currentPage, pageSize]);
 
   const filteredData = useMemo(() => {
     return data.filter(item => {

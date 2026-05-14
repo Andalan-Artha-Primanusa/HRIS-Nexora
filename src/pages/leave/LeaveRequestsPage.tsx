@@ -39,6 +39,7 @@ const LeaveRequestsPage = () => {
     try {
       const result = await getAllLeaves(currentPage, perPage);
       setItems(result.items);
+      setTotalPages(result.totalPages ?? 1);
     } catch (err: any) {
       showToast(err.message || 'Gagal memuat pengajuan cuti', 'error');
     } finally {
@@ -103,7 +104,7 @@ const LeaveRequestsPage = () => {
 
   useEffect(() => {
     void loadLeaves();
-  }, []);
+  }, [currentPage, perPage]);
 
   const stats = useMemo(() => {
     const total = items.length;

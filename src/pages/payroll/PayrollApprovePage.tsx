@@ -117,7 +117,7 @@ const PayrollApprovePage = () => {
   const rejectedPayrolls = safe.filter((p) => p.status === "rejected");
 
   const paginate = (arr: PayrollItem[], page: number, size: number) =>
-    arr;
+    arr.slice((page - 1) * size, page * size);
 
   const paginatedDraft   = paginate(draftPayrolls, currentPageDraft, itemsPerPageDraft);
   const paginatedPending = paginate(pendingPayrolls, currentPagePending, itemsPerPagePending);

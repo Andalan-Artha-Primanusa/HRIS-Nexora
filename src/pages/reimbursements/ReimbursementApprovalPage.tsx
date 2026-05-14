@@ -90,6 +90,7 @@ const ReimbursementApprovalPage = () => {
       // lalu kita filter secara presisi di frontend agar tidak luput.
       const result = await getAllReimbursements({ page: currentPage, per_page: pageSize });
       const allItems = result.items || [];
+      setTotalPages(result.totalPages ?? 1);
       
       const pendingItems = allItems.filter(i => {
         const s = String(i.status).toLowerCase();
@@ -137,7 +138,7 @@ const ReimbursementApprovalPage = () => {
 
   useEffect(() => {
     void loadPending();
-  }, []);
+  }, [currentPage, pageSize]);
 
   return (
     <div className="crud-page">

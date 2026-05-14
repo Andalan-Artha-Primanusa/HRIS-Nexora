@@ -54,6 +54,7 @@ const AdminReimbursementsPage: React.FC = () => {
         getReimbursementStatistics()
       ]);
       setItems(reimbData.items || []);
+      setTotalPages(reimbData.totalPages ?? 1);
       setStats(statsData.payload);
     } catch (error) {
       console.error('Failed to fetch reimbursements:', error);
@@ -62,7 +63,7 @@ const AdminReimbursementsPage: React.FC = () => {
     }
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { fetchData(); }, [currentPage]);
 
   // Filter Logic
   const filteredItems = useMemo(() => {

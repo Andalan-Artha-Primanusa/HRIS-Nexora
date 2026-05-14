@@ -30,8 +30,8 @@ const AdminUserAssignRolesPage = () => {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      const result = await getAllUsers();
-      const formattedUsers = result.items.map((item: any) => ({
+      const result = await getAllUsers(1, 100);
+      const formattedUsers = (result.items || []).map((item: any) => ({
         id: item.id,
         name: item.name,
         email: item.email,
@@ -48,8 +48,8 @@ const AdminUserAssignRolesPage = () => {
 
   const loadRoles = async () => {
     try {
-      const result = await getAllRoles();
-      setRoles(result.items as Role[]);
+      const result = await getAllRoles(1, 100);
+      setRoles((result.items || []) as Role[]);
     } catch (error) {
       console.error("Failed to load roles:", error);
     }

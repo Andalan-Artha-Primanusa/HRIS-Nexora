@@ -124,6 +124,7 @@ const ReimbursementsManagementPage = () => {
     try {
       const result = await getAllReimbursements({ page: currentPage, per_page: pageSize });
       const raw = result.items || [];
+      setTotalPages(result.totalPages ?? 1);
       setAllItemsRaw(raw);
       
       if (!filterStatus) {
@@ -229,7 +230,7 @@ const ReimbursementsManagementPage = () => {
   useEffect(() => {
     void loadData();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterStatus]);
+  }, [filterStatus, currentPage, pageSize]);
 
   useEffect(() => {
     setCurrentPage(1);

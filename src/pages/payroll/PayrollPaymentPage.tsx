@@ -208,7 +208,13 @@ const PayrollPaymentPage = () => {
   });
 
   const [totalPagesRecent, setTotalPagesRecent] = useState(1);
-  const recentPayrolls = filteredPayrolls;
+  const recentPayrolls = filteredPayrolls.slice((currentPageRecent - 1) * itemsPerPageRecent, currentPageRecent * itemsPerPageRecent);
+
+  useEffect(() => {
+    const nextTotalPages = Math.max(1, Math.ceil(filteredPayrolls.length / itemsPerPageRecent));
+    setTotalPagesRecent(nextTotalPages);
+    setCurrentPageRecent((page) => Math.min(page, nextTotalPages));
+  }, [filteredPayrolls, itemsPerPageRecent]);
 
   return (
     <div className="crud-page">

@@ -69,8 +69,8 @@ const AdminUsersPage = () => {
     setErrorMessage(null);
 
     try {
-      const result = await getAllUsers();
-      const formattedUsers = result.items.map((item: any) => ({
+      const result = await getAllUsers(currentPage, pageSize);
+      const formattedUsers = (result.items || []).map((item: any) => ({
         id: item.id,
         name: item.name,
         email: item.email,
@@ -79,6 +79,7 @@ const AdminUsersPage = () => {
           : [],
       }));
       setUsers(formattedUsers);
+      setTotalPages(result.totalPages ?? 1);
     } catch (error: unknown) {
       setErrorMessage(getErrorMessage(error as any));
     } finally {
@@ -156,7 +157,7 @@ const AdminUsersPage = () => {
   useEffect(() => {
     void loadUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [currentPage]);
 
   // Reset page on filter changes
   useEffect(() => {

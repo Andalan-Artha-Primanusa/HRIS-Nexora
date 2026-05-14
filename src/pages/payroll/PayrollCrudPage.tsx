@@ -220,7 +220,13 @@ const PayrollCrudPage = () => {
   });
 
   const [totalPages, setTotalPages] = useState(1);
-  const paginatedPayrolls = filteredPayrolls;
+  const paginatedPayrolls = filteredPayrolls.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  useEffect(() => {
+    const nextTotalPages = Math.max(1, Math.ceil(filteredPayrolls.length / itemsPerPage));
+    setTotalPages(nextTotalPages);
+    setCurrentPage((page) => Math.min(page, nextTotalPages));
+  }, [filteredPayrolls, itemsPerPage]);
 
   const getEmployeeName = (empId: string) => {
     const employee = employees.find((entry) => String(entry.id) === empId);

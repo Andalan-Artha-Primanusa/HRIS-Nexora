@@ -41,9 +41,10 @@ const AdminRolesPage = () => {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const data = await getAllRoles();
+      const data = await getAllRoles(currentPage, pageSize);
       const rolesArray = Array.isArray(data) ? data : (data as any).items || (data as any).data || [];
       setRoles(rolesArray);
+      setTotalPages((data as any)?.totalPages ?? 1);
     } catch (error: unknown) {
       setErrorMessage(getErrorMessage(error as never));
     } finally {
@@ -136,7 +137,7 @@ const AdminRolesPage = () => {
 
   useEffect(() => {
     void loadRoles();
-  }, []);
+  }, [currentPage]);
 
   if (!canViewRoles) {
     return (

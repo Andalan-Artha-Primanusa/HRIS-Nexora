@@ -91,14 +91,20 @@ const GenerateTab = () => {
   const [yearFilter, setYearFilter] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
+  const [generateTotalPages, setGenerateTotalPages] = useState(1);
   const period = `${selectedYear}-${selectedMonth}`;
 
   const loadPayroll = async () => {
     setLoading(true);
-    try { setItems(toSafeArray(await payrollService.getPayrollList()));
-      const payrollResp = await payrollService.getPayrollList({ page: currentPage, per_page: pageSize }); }
-    catch (err) { showToast(err instanceof Error ? err.message : "Gagal memuat", "error"); }
-    finally { setLoading(false); }
+    try {
+      const payrollResp = await payrollService.getPayrollList({ page: currentPage, per_page: pageSize });
+      setItems(toSafeArray(payrollResp));
+      setGenerateTotalPages(payrollResp?.data?.last_page ?? 1);
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Gagal memuat", "error");
+    } finally {
+      setLoading(false);
+    }
   };
   const generateMonthly = async () => {
     if (!period.trim()) { showToast("Pilih periode", "error"); return; }
@@ -110,7 +116,7 @@ const GenerateTab = () => {
     } catch (err) { showToast(err instanceof Error ? err.message : "Gagal", "error"); }
     finally { setLoading(false); }
   };
-  useEffect(() => { void loadPayroll(); }, []);
+  useEffect(() => { void loadPayroll(); }, [currentPage]);
 
   const summaryCards = useMemo(() => {
     const paid = items.filter(i => String(i.status).toLowerCase() === "paid").length;
@@ -130,8 +136,6 @@ const GenerateTab = () => {
       (yearFilter === "all" || String(it.period ?? "").startsWith(yearFilter));
   }), [items, paymentFilter, yearFilter]);
 
-  const [totalPages, setTotalPages] = useState(1);
-  const safePage = Math.min(currentPage, totalPages);
   const paginated = filtered;
 
   const columns = [
@@ -261,10 +265,10 @@ const GenerateTab = () => {
               </div>
               <div className="pagination-controls">
                 <button className="pagination-btn" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1}>‹</button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                {Array.from({ length: generateTotalPages }, (_, i) => i + 1).map((page) => (
                   <button key={page} className={`pagination-btn ${currentPage === page ? 'active' : ''}`} onClick={() => setCurrentPage(page)}>{page}</button>
                 ))}
-                <button className="pagination-btn" onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages}>›</button>
+                <button className="pagination-btn" onClick={() => setCurrentPage(Math.min(generateTotalPages, currentPage + 1))} disabled={currentPage === generateTotalPages}>›</button>
               </div>
             </div>
           )}
