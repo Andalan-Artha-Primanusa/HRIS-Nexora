@@ -212,8 +212,7 @@ const AdminKpiPage = () => {
     setDeleting(true);
     try {
       await deleteKpiPeriod(deleteTarget.id);
-      setStatusMessage("Periode KPI berhasil dihapus");
-      setAlertType("success");
+      showToast("Periode KPI berhasil dihapus", "success");
       setDeleteTarget(null);
       loadData();
     } catch (error) {
@@ -226,8 +225,7 @@ const AdminKpiPage = () => {
   const handleApprove = async (id: number, itemId?: number) => {
     try {
       await approveKpiPeriod(id, itemId);
-      setStatusMessage("Periode KPI berhasil disetujui");
-      setAlertType("success");
+      showToast("Periode KPI berhasil disetujui", "success");
       await loadData();
     } catch (error) {
       showToast(getErrorMessage(error as never), "error");

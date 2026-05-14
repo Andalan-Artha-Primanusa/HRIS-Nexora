@@ -23,6 +23,7 @@ export interface ReimbursementItem {
     name: string;
   };
   employee_name?: string;
+  can_act?: boolean;
 }
 
 // ─── Filters untuk GET /reimbursements ──────────────────────────────────────
@@ -30,6 +31,8 @@ export interface ReimbursementFilters {
   status?: string;
   category?: string;
   employee_id?: number;
+  page?: number;
+  per_page?: number;
 }
 
 // ─── Payload CREATE (admin: POST /reimbursements) ───────────────────────────

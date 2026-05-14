@@ -544,6 +544,8 @@ const PayrollGeneratePage = () => {
   const [totalPages, setTotalPages] = useState(1);
   const paginatedItems = filteredItems;
 
+  const safePage = Math.max(1, Math.min(currentPage, Math.max(1, totalPages)));
+
   const handleFilterChange = (f: "all" | "paid" | "unpaid") => {
     setPaymentFilter(f);
     setCurrentPage(1);

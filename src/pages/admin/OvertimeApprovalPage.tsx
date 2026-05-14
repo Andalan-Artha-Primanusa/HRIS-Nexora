@@ -28,6 +28,7 @@ interface OvertimeRequest {
     user?: { id: number; name: string; email: string };
   };
   approver?: { id: number; name: string } | null;
+  can_act?: boolean;
 }
 
 const OvertimeApprovalPage: React.FC = () => {

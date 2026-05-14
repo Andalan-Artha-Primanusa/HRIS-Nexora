@@ -106,7 +106,7 @@ const AdminBiometricDevicesPage = () => {
   const handleSync = async (device: BiometricDeviceItem) => {
     const deviceId = (device as any).id;
     setSyncingId(deviceId);
-    setAlertMessage("");
+    // clear previous alerts handled via toast; no local alert state here
 
     try {
       await syncBiometricAttendance({
