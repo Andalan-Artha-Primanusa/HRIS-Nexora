@@ -216,26 +216,35 @@ const PayrollListPage = () => {
   const formatCurrency = (v: number) => `Rp ${(v||0).toLocaleString("id-ID")}`;
 
   const formContent = (
-    <Card className="crud-card" glass>
-      <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "2.5rem" }}>
-        <button onClick={() => setView("list")} className="action-btn" style={{ background: "#f1f5f9", color: "#64748b" }}><ArrowLeft size={18} /></button>
-        <h2 style={{ marginBottom: 0 }}>{mode === "create" ? "Entri Payroll Baru" : mode === "edit" ? "Perbarui Payroll" : "Konfirmasi Hapus"}</h2>
+    <Card className="crud-card payroll-form-card" glass>
+      <div className="payroll-form-header">
+        <button onClick={() => setView("list")} className="action-btn payroll-back-btn"><ArrowLeft size={18} /></button>
+        <h2>{mode === "create" ? "Entri Payroll Baru" : mode === "edit" ? "Perbarui Payroll" : "Konfirmasi Hapus"}</h2>
       </div>
       {mode !== "delete" ? (
-        <div className="crud-form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem" }}>
-          <label style={{ gridColumn: "1 / -1" }}>
+        <div className="payroll-form-grid">
+          <label className="payroll-field payroll-field-full">
             <strong>Karyawan *</strong>
-            <select className="crud-input" value={form.employee_id} onChange={(e) => setForm({...form, employee_id: e.target.value})} disabled={mode === "edit"}>
+            <select className="crud-input payroll-control" value={form.employee_id} onChange={(e) => setForm({...form, employee_id: e.target.value})} disabled={mode === "edit"}>
               <option value="">-- Pilih Karyawan --</option>
               {employees.map((e) => (<option key={e.id} value={String(e.id)}>{e.employee_code} - {e.user?.name || "Unknown"}</option>))}
             </select>
           </label>
-          <label><strong>Periode *</strong><input type="month" className="crud-input" value={form.period} onChange={(e) => setForm({...form, period: e.target.value})} disabled={mode === "edit"} /></label>
-          <label><strong>Tunjangan</strong><input type="number" className="crud-input" value={form.allowance} onChange={(e) => setForm({...form, allowance: e.target.value})} placeholder="1500000" /></label>
-          <label><strong>Bonus</strong><input type="number" className="crud-input" value={form.bonus} onChange={(e) => setForm({...form, bonus: e.target.value})} placeholder="500000" /></label>
-          <div style={{ gridColumn: "1 / -1" }}>
-            <Card glass className="crud-info-card">
-              <div style={{ display: "flex", gap: 12 }}><Info size={20} /><p style={{ margin: 0, fontSize: "0.9rem" }}>Gaji pokok otomatis dari profil karyawan. Tunjangan & bonus di sini nilai tambahan manual.</p></div>
+          <label className="payroll-field">
+            <strong>Periode *</strong>
+            <input type="month" className="crud-input payroll-control payroll-month-input" value={form.period} onChange={(e) => setForm({...form, period: e.target.value})} disabled={mode === "edit"} />
+          </label>
+          <label className="payroll-field">
+            <strong>Tunjangan</strong>
+            <input type="number" className="crud-input payroll-control" value={form.allowance} onChange={(e) => setForm({...form, allowance: e.target.value})} placeholder="1500000" />
+          </label>
+          <label className="payroll-field">
+            <strong>Bonus</strong>
+            <input type="number" className="crud-input payroll-control" value={form.bonus} onChange={(e) => setForm({...form, bonus: e.target.value})} placeholder="500000" />
+          </label>
+          <div className="payroll-field-full">
+            <Card glass className="crud-info-card payroll-info-card">
+              <div><Info size={20} /><p>Gaji pokok otomatis dari profil karyawan. Tunjangan & bonus di sini nilai tambahan manual.</p></div>
             </Card>
           </div>
         </div>
@@ -244,7 +253,7 @@ const PayrollListPage = () => {
           <div style={{ display: "flex", gap: "1rem" }}><Trash2 size={24} color="#f43f5e" /><div><p style={{ fontWeight: 700, color: "#991b1b", marginBottom: 8 }}>Hapus payroll ini?</p><p style={{ margin: 0, color: "#b91c1c" }}>Payroll untuk <strong>{getEmpLabel(form.employee_id)}</strong> periode <strong>{form.period}</strong> akan dihapus permanen.</p></div></div>
         </div>
       )}
-      <div className="crud-actions" style={{ marginTop: "3rem", borderTop: "1px solid #f1f5f9", paddingTop: "2rem", display: "flex", justifyContent: "flex-end", gap: "1rem" }}>
+      <div className="crud-actions payroll-form-actions">
         <button className="btn-outline" onClick={() => setView("list")} disabled={loading}>Batal</button>
         <button className="btn-primary" onClick={mode === "create" ? handleCreate : mode === "edit" ? handleUpdate : handleDelete} disabled={loading} style={{ background: mode === "delete" ? "#ef4444" : "#2563eb", color: "#fff", border: "none", padding: "0.75rem 2rem", borderRadius: 12, fontWeight: 700 }}>
           {loading ? "Memproses..." : mode === "create" ? "Buat Payroll" : mode === "edit" ? "Simpan" : "Hapus Permanen"}
@@ -402,7 +411,7 @@ const PayrollListPage = () => {
                 ))}
               </div>
               <label className="modal-completion-label" style={{ marginTop: 16 }}>Periode</label>
-              <input type="month" className="crud-input" value={exportPeriod} onChange={(e) => setExportPeriod(e.target.value)} style={{ width: "100%", marginTop: 8 }} />
+              <input type="month" className="crud-input payroll-control payroll-month-input payroll-export-period-input" value={exportPeriod} onChange={(e) => setExportPeriod(e.target.value)} />
             </div>
             <div className="modal-completion-footer">
               <button className="modal-btn-cancel" onClick={() => setExportModal(false)}>Batal</button>
