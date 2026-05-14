@@ -3,7 +3,7 @@ import { api } from "@/shared/api/httpClient";
 import { getAllLocations, getActiveLocations } from "@/features/location/api/location.service";
 import type { LocationItem } from "@/features/location/types/location.types";
 import { useNavigate } from "react-router-dom";
-import { Card, CardHeader } from "@/shared/ui";
+import { Card, CardHeader, ConfirmDialog } from "@/shared/ui";
 import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import {
   deleteEmployee,
@@ -52,6 +52,7 @@ const EmployeesPage = () => {
   const [, setStatusMessage] = useState("Ready to call employee API");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<EmployeeItem | null>(null);
   // const [hasLoaded, setHasLoaded] = useState(false);
 
   // Authentication & RBAC
@@ -298,8 +299,10 @@ const EmployeesPage = () => {
 
 
 
-  const deleteExistingEmployee = async (idValue: string) => {
-    const id = requireId(idValue);
+  const confirmDeleteEmployee = async () => {
+    if (!deleteTarget) return;
+
+    const id = requireId(String(deleteTarget.id));
     if (!id) return;
 
     setLoading(true);
@@ -308,6 +311,7 @@ const EmployeesPage = () => {
     try {
       await deleteEmployee(id);
       setStatusMessage("Employee berhasil dihapus.");
+      setDeleteTarget(null);
       await loadEmployees();
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Gagal menghapus employee.";
@@ -579,7 +583,7 @@ const EmployeesPage = () => {
                             </button>
                             <button
                               className="action-btn action-btn-delete"
-                              onClick={() => void deleteExistingEmployee(String(item.id))}
+                              onClick={() => setDeleteTarget(item)}
                               title="Hapus"
                             >
                               <Trash2 size={16} />
@@ -640,6 +644,17 @@ const EmployeesPage = () => {
         setOffboardingReason={setOffboardingReason}
         handleLifecycleAction={handleLifecycleAction}
         loading={loading}
+      />
+
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        title="Hapus Karyawan"
+        message={`Karyawan "${deleteTarget?.user?.name || deleteTarget?.employee_code || "ini"}" akan dihapus. Tindakan ini tidak dapat dibatalkan.`}
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        loading={loading && !!deleteTarget}
+        onConfirm={() => void confirmDeleteEmployee()}
+        onCancel={() => setDeleteTarget(null)}
       />
     </div>
   );
