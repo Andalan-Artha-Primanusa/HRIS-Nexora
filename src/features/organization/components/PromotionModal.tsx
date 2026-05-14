@@ -3,7 +3,7 @@ import { Modal } from '@/shared/ui/Modal';
 import { Button } from '@/shared/ui/Button';
 import { getAllEmployees } from '@/features/employee/api/employee.service';
 import { showToast } from '@/shared/ui/toast';
-import { User, ArrowUpRight, Calendar, DollarSign, Building2, AlignLeft } from 'lucide-react';
+import { User, ArrowUpRight, Calendar, Building2, AlignLeft } from 'lucide-react';
 
 interface PromotionModalProps {
   isOpen: boolean;
@@ -163,7 +163,7 @@ export const PromotionModal: React.FC<PromotionModalProps> = ({ isOpen, onClose,
             <div className="form-group">
               <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '8px', display: 'block' }}>Gaji Baru (opsional)</label>
               <div style={{ position: 'relative' }}>
-                <DollarSign size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', zIndex: 1 }} />
+                <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#64748b', zIndex: 1, fontWeight: 700, fontSize: '0.9rem' }}>Rp</span>
                 <input
                   type="text"
                   className="crud-input"
