@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Filter, Award, Target, Plus, RefreshCw, Pencil, Trash2, Users, CheckCircle, UserPlus, Eye } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
-import { Button } from '@/shared/ui/Button';
+import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { trainingService } from '@/features/training/api/training.service';
 import { CompetencyModal } from '@/features/training/components/CompetencyModal';
@@ -26,6 +26,7 @@ const CompetencyMatrixPage: React.FC = () => {
   const [editingCompetency, setEditingCompetency] = useState<any>(null);
   const [assigningCompetency, setAssigningCompetency] = useState<any>(null);
   const [viewingAssigned, setViewingAssigned] = useState<any>(null);
+  const [deleteTarget, setDeleteTarget] = useState<any>(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -141,9 +142,12 @@ const CompetencyMatrixPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+
     try {
-      await trainingService.deleteCompetency(id);
+      await trainingService.deleteCompetency(deleteTarget.id);
+      setDeleteTarget(null);
       fetchData();
       showToast('Kompetensi berhasil dihapus', 'success');
     } catch (err: any) {
@@ -376,7 +380,7 @@ const CompetencyMatrixPage: React.FC = () => {
                             </button>
                             <button
                               className="action-btn action-btn-delete"
-                              onClick={() => handleDelete(item.id)}
+                              onClick={() => setDeleteTarget(item)}
                               title="Hapus"
                             >
                               <Trash2 size={16} />
@@ -447,6 +451,17 @@ const CompetencyMatrixPage: React.FC = () => {
         onClose={() => setViewingAssigned(null)}
         competencyId={viewingAssigned?.id}
         competencyName={viewingAssigned?.name}
+      />
+
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        title="Hapus Kompetensi"
+        message={`Kompetensi "${deleteTarget?.name || "ini"}" akan dihapus. Tindakan ini tidak dapat dibatalkan.`}
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        loading={loading && !!deleteTarget}
+        onConfirm={() => void handleDelete()}
+        onCancel={() => setDeleteTarget(null)}
       />
     </div>
   );
