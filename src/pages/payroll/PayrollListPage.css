@@ -360,6 +360,194 @@
   overflow: hidden;
 }
 
+/* Payroll create/edit form */
+.payroll-form-card {
+  padding: 1.4rem 1.4rem 1.2rem;
+  border: 1px solid #dbe5f2;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.06);
+}
+
+.payroll-form-header {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-bottom: 1.8rem;
+}
+
+.payroll-form-header h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.payroll-back-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: #f1f5f9 !important;
+  color: #475569 !important;
+  border: 1px solid transparent;
+}
+
+.payroll-back-btn:hover {
+  background: #e0e7ff !important;
+  color: #1d4ed8 !important;
+  border-color: #c7d2fe;
+}
+
+.payroll-form-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1.35rem 1.75rem;
+  align-items: start;
+}
+
+.payroll-field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.payroll-field-full {
+  grid-column: 1 / -1;
+}
+
+.payroll-field strong,
+.modal-completion-label {
+  color: #0f172a;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.payroll-control {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 0.95rem;
+  border: 1px solid #d8e0eb;
+  border-radius: 12px;
+  background-color: #ffffff;
+  color: #0f172a;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.4;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.payroll-control::placeholder {
+  color: #94a3b8;
+  opacity: 1;
+}
+
+.payroll-control:hover:not(:disabled) {
+  border-color: #b8c6d9;
+}
+
+.payroll-control:focus,
+.payroll-control:focus-visible {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+  outline: none;
+}
+
+.payroll-control:disabled {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #64748b;
+  opacity: 1;
+  -webkit-text-fill-color: #64748b;
+  cursor: not-allowed;
+}
+
+.payroll-month-input {
+  max-width: 230px;
+  color-scheme: light;
+}
+
+.payroll-month-input::-webkit-calendar-picker-indicator {
+  width: 18px;
+  height: 18px;
+  padding: 6px;
+  margin-right: -4px;
+  border-radius: 8px;
+  cursor: pointer;
+  opacity: 0.72;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.payroll-month-input::-webkit-calendar-picker-indicator:hover {
+  background-color: #eff6ff;
+  opacity: 1;
+}
+
+.payroll-info-card {
+  padding: 1rem 1.2rem !important;
+  border: 1px solid #d7e4f5 !important;
+  border-radius: 14px !important;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%) !important;
+  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.04) !important;
+}
+
+.payroll-info-card > div {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  color: #334155;
+}
+
+.payroll-info-card svg {
+  margin-top: 0.05rem;
+  color: #334155;
+  flex-shrink: 0;
+}
+
+.payroll-info-card p {
+  margin: 0;
+  color: #1e293b;
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+.payroll-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.85rem;
+  margin-top: 2.1rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid #edf2f7;
+}
+
+.payroll-form-actions .btn-outline {
+  background: #ffffff;
+  border: 1px solid #d8e0eb;
+  color: #475569;
+}
+
+.payroll-form-actions .btn-outline:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #1e293b;
+}
+
+/* Export modal field polish */
+.modal-completion .payroll-export-period-input {
+  width: 100%;
+  max-width: none;
+  margin-top: 0.5rem;
+  background-color: #f8fafc;
+}
+
+.modal-completion .payroll-export-period-input:focus {
+  background-color: #ffffff;
+}
+
 .data-table-header {
   padding: 1.5rem;
   background: #ffffff;
@@ -544,6 +732,29 @@
 
 /* Responsive */
 @media (max-width: 900px) {
+  .payroll-form-card {
+    padding: 1.1rem;
+  }
+
+  .payroll-form-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .payroll-month-input {
+    max-width: none;
+  }
+
+  .payroll-form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .payroll-form-actions .btn-outline,
+  .payroll-form-actions .btn-primary {
+    width: 100%;
+    justify-content: center;
+  }
+
   .control-bar {
     flex-direction: column;
     align-items: stretch;
