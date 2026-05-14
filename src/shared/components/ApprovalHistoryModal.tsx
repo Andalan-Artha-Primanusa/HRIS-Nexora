@@ -43,7 +43,7 @@ export const ApprovalHistoryModal = ({ isOpen, onClose, module, moduleId }: Appr
         setTotalSteps(res.meta.total_steps);
       } else {
         const maxStep = raw.reduce((max: number, h: HistoryItem) => Math.max(max, h.step_order || 0), 0);
-        setTotalSteps(maxStep + (raw.length > 0 && raw.some((h: HistoryItem) => h.action === "pending") ? 0 : 0));
+        setTotalSteps(maxStep);
       }
     } catch {
       setHistory([]);
@@ -53,9 +53,8 @@ export const ApprovalHistoryModal = ({ isOpen, onClose, module, moduleId }: Appr
   };
 
   const completedSteps = history.filter(h => h.action !== "pending").length;
-  const pendingStep = history.find(h => h.action === "pending");
-  const currentStep = completedSteps + 1;
-  const effectiveTotal = Math.max(totalSteps, currentStep);
+  const currentStep = Math.min(completedSteps + 1, totalSteps);
+  const effectiveTotal = totalSteps;
 
   const moduleLabels: Record<string, string> = {
     assignment_letter: "surat tugas",

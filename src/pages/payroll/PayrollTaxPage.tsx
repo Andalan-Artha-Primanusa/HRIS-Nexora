@@ -130,12 +130,9 @@ const PayrollTaxPage: React.FC = () => {
     });
   }, [data, searchText, activeTab]);
 
-  const paginatedData = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return filteredData.slice(startIndex, startIndex + pageSize);
-  }, [filteredData, currentPage, pageSize]);
+  const paginatedData = filteredData;
 
-  const totalPages = Math.ceil(filteredData.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   const summaryStats = useMemo(() => {
     const totals = data.reduce((acc, curr) => ({

@@ -60,11 +60,8 @@ const PayrollDetailsPage = () => {
     return list;
   }, [componentType, items, overviewSearch]);
 
-  const totalPagesOverview = Math.max(1, Math.ceil(filteredOverviewItems.length / pageSizeOverview));
-  const paginatedOverview = filteredOverviewItems.slice(
-    (currentPageOverview - 1) * pageSizeOverview,
-    currentPageOverview * pageSizeOverview
-  );
+  const [totalPagesOverview, setTotalPagesOverview] = useState(1);
+  const paginatedOverview = filteredOverviewItems;
 
   const componentSummaryCards = useMemo(() => {
     const allowanceCount = items.filter((item) => String(item.type).toLowerCase() === "allowance").length;

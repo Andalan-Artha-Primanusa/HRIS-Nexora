@@ -158,12 +158,9 @@ const InventoryTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading, 
     });
   }, [filteredAssets]);
 
-  const paginatedAssets = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return sortedAssets.slice(startIndex, startIndex + pageSize);
-  }, [sortedAssets, currentPage, pageSize]);
+  const paginatedAssets = sortedAssets;
 
-  const totalPages = Math.ceil(sortedAssets.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   const summaryCards = useMemo(() => [
     { label: 'Total Aset', subtitle: 'Seluruh aset perusahaan', value: String(assets.length), change: 'Data aset tersimpan', tone: 'blue' as const, icon: Package },
@@ -485,12 +482,9 @@ const AssignmentsTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading
     });
   }, [filteredAssignments]);
 
-  const paginatedAssignments = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return sortedAssignments.slice(startIndex, startIndex + pageSize);
-  }, [sortedAssignments, currentPage, pageSize]);
+  const paginatedAssignments = sortedAssignments;
 
-  const totalPages = Math.ceil(sortedAssignments.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   const summaryCards = useMemo(() => [
     { label: 'Total Penugasan', subtitle: 'Seluruh penugasan aset', value: String(assignments.length), change: 'Data penugasan', tone: 'blue' as const, icon: Handshake },
@@ -530,25 +524,23 @@ const AssignmentsTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading
   };
 
   const handleApproveAssignment = async (assignment: any) => {
-    if (!window.confirm('Setujui penugasan aset ini?')) return;
     try {
       await assetService.approveAssignment(assignment.id);
       fetchAssignments();
       showToast('Penugasan berhasil disetujui', 'success');
     } catch (error: any) {
-      console.error('Failed to approve assignment:', error);
+      console.error(error);
       showToast(error?.response?.data?.message || error?.message || 'Gagal menyetujui penugasan', 'error');
     }
   };
 
   const handleRejectAssignment = async (assignment: any) => {
-    if (!window.confirm('Tolak penugasan aset ini?')) return;
     try {
       await assetService.rejectAssignment(assignment.id);
       fetchAssignments();
       showToast('Penugasan berhasil ditolak', 'success');
     } catch (error: any) {
-      console.error('Failed to reject assignment:', error);
+      console.error(error);
       showToast(error?.response?.data?.message || error?.message || 'Gagal menolak penugasan', 'error');
     }
   };
@@ -676,7 +668,7 @@ const AssignmentsTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading
                           <td className="td-center">{getStatusBadge(assignment)}</td>
                           <td className="td-center">
                             <div className="action-btn-group">
-                              {assignment.approval_flow_id && assignment.status !== 'approved' && assignment.status !== 'rejected' && (
+                              {assignment.approval_flow_id && assignment.status !== 'approved' && assignment.status !== 'rejected' && assignment.can_act !== false && (
                                 <>
                                   <button className="action-btn" style={{ color: '#10b981' }} onClick={() => handleApproveAssignment(assignment)} title="Setujui"><CheckCircle2 size={16} /></button>
                                   <button className="action-btn" style={{ color: '#ef4444' }} onClick={() => handleRejectAssignment(assignment)} title="Tolak"><X size={16} /></button>

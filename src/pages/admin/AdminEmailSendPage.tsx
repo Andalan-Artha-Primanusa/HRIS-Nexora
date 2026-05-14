@@ -4,6 +4,7 @@ import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { getErrorMessage } from "@/shared/api/errorHandler";
+import { showToast } from '@/shared/ui/toast';
 import { ROLES } from "@/shared/types/rbac.types";
 import { Mail, Send, Shield, Users, FileText } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
@@ -46,8 +47,7 @@ const AdminEmailSendPage = () => {
   const [employees, setEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
-  const [statusMessage, setStatusMessage] = useState("");
-  const [alertType, setAlertType] = useState<"success" | "error">("success");
+
 
   // Form State
   const [selectedTemplate, setSelectedTemplate] = useState("");
@@ -96,14 +96,12 @@ const AdminEmailSendPage = () => {
     if (!selectedRecipient || !selectedTemplate) return;
 
     setSending(true);
-    setStatusMessage("");
 
     const employee = employees.find(emp => String(emp.id) === String(selectedRecipient) || String(emp.user_id) === String(selectedRecipient));
     const recipientEmail = employee?.user?.email || employee?.email;
 
     if (!recipientEmail) {
-      setAlertType("error");
-      setStatusMessage("Karyawan tidak memiliki email yang valid.");
+      showToast("Karyawan tidak memiliki email yang valid.", "error");
       setSending(false);
       return;
     }
@@ -117,15 +115,13 @@ const AdminEmailSendPage = () => {
         message: htmlPreview || undefined, // Send the body as message
       });
 
-      setAlertType("success");
-      setStatusMessage("Email berhasil dikirim ke " + recipientEmail);
+      showToast("Email berhasil dikirim ke " + recipientEmail, "success");
       setSelectedRecipient("");
       setSelectedTemplate("");
       setSubject("");
       setHtmlPreview("");
     } catch (error) {
-      setAlertType("error");
-      setStatusMessage(getErrorMessage(error as any));
+      showToast(getErrorMessage(error as any), "error");
     } finally {
       setSending(false);
     }
@@ -147,21 +143,6 @@ const AdminEmailSendPage = () => {
           </div>
         </div>
       </Card>
-
-      {statusMessage && (
-        <div style={{ marginBottom: '1.5rem' }}>
-          <Card style={{ 
-            padding: '1.25rem', 
-            background: alertType === 'success' ? '#ecfdf5' : '#fef2f2',
-            borderLeft: `4px solid ${alertType === 'success' ? '#10b981' : '#ef4444'}`,
-            borderRadius: '12px'
-          }}>
-            <p style={{ color: alertType === 'success' ? '#065f46' : '#991b1b', margin: 0, fontWeight: 700 }}>
-              {statusMessage}
-            </p>
-          </Card>
-        </div>
-      )}
 
       <div className="">
         <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '2rem' }}>

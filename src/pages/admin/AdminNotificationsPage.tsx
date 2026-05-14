@@ -4,7 +4,7 @@ import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { ROLES } from "@/shared/types/rbac.types";
-import { Alert } from "@/shared/ui/Alert";
+import { showToast } from '@/shared/ui/toast';
 import { Bell, Megaphone, RefreshCw, Send, Shield, Users } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
@@ -62,8 +62,7 @@ if (!hasAdminAccess(user)) {
   }
 
   const [summary, setSummary] = useState<SummaryData>({});
-  const [statusMessage, setStatusMessage] = useState("");
-  const [alertType, setAlertType] = useState<"success" | "error" | "info">("info");
+
   const [loading, setLoading] = useState(false);
   const [_errorMessage, setErrorMessage] = useState<string | null>(null);
   const [sendingDirect, setSendingDirect] = useState(false);
@@ -161,12 +160,10 @@ if (!hasAdminAccess(user)) {
       setTitle("");
       setMessage("");
       setRecipientId("");
-      setStatusMessage("Notifikasi individual berhasil dibuat.");
-      setAlertType("success");
+      showToast("Notifikasi individual berhasil dibuat.", "success");
       await loadSummary();
     } catch (error: unknown) {
-      setStatusMessage(getErrorMessage(error as never));
-      setAlertType("error");
+      showToast(getErrorMessage(error as never), "error");
     } finally {
       setSendingDirect(false);
     }
@@ -186,12 +183,10 @@ if (!hasAdminAccess(user)) {
       setBroadcastTitle("");
       setBroadcastMessage("");
       setBroadcastAudience("all");
-      setStatusMessage("Broadcast notifikasi berhasil dikirim.");
-      setAlertType("success");
+      showToast("Broadcast notifikasi berhasil dikirim.", "success");
       await loadSummary();
     } catch (error: unknown) {
-      setStatusMessage(getErrorMessage(error as never));
-      setAlertType("error");
+      showToast(getErrorMessage(error as never), "error");
     } finally {
       setSendingBroadcast(false);
     }
@@ -219,8 +214,6 @@ if (!hasAdminAccess(user)) {
           </div>
         </div>
       </Card>
-
-      {statusMessage && <Alert type={alertType} message={statusMessage} onClose={() => setStatusMessage("")} dismissible />}
 
       <div className="employee-summary-wrapper">
         {summaryCards.map((card) => {

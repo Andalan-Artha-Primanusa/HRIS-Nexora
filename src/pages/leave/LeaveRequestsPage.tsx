@@ -37,7 +37,7 @@ const LeaveRequestsPage = () => {
   const loadLeaves = async () => {
     setLoading(true);
     try {
-      const result = await getAllLeaves();
+      const result = await getAllLeaves(currentPage, perPage);
       setItems(result.items);
     } catch (err: any) {
       showToast(err.message || 'Gagal memuat pengajuan cuti', 'error');
@@ -127,12 +127,9 @@ const LeaveRequestsPage = () => {
     });
   }, [items, searchQuery, filterStatus]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredItems.length / perPage));
+  const [totalPages, setTotalPages] = useState(1);
 
-  const paginatedItems = useMemo(() => {
-    const start = (currentPage - 1) * perPage;
-    return filteredItems.slice(start, start + perPage);
-  }, [filteredItems, currentPage, perPage]);
+  const paginatedItems = filteredItems;
 
   useEffect(() => {
     setCurrentPage(1);

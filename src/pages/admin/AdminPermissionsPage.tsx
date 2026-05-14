@@ -50,12 +50,9 @@ const AdminPermissionsPage = () => {
     });
   }, [permissions, searchText, selectedGuard]);
 
-  const paginatedPermissions = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return filteredPermissions.slice(start, start + pageSize);
-  }, [filteredPermissions, currentPage, pageSize]);
+  const paginatedPermissions = filteredPermissions;
 
-  const totalPages = Math.ceil(filteredPermissions.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   const permissionSummaryCards = useMemo(
     () => [

@@ -1,11 +1,11 @@
 import { api } from '@/shared/api/httpClient';
 
 export const promotionService = {
-  getPromotions: (params?: Record<string, string>) => {
+  getPromotions: (params?: Record<string, string | number>) => {
     return api.get('/promotions', { params });
   },
 
-  getMyPromotions: (params?: Record<string, string>) => {
+  getMyPromotions: (params?: Record<string, string | number>) => {
     return api.get('/my/promotions', { params });
   },
 

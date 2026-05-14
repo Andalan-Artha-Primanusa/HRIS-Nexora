@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '@/shared/api/httpClient';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
-import { Alert } from '@/shared/ui/Alert';
+import { showToast } from '@/shared/ui/toast';
 import { createLocation } from '@/features/location/api/location.service';
 import { MapPin, ArrowLeft, Save, MapPinned } from 'lucide-react';
 import '@/shared/styles/CrudPage.css';
@@ -22,8 +22,7 @@ const CreateLocationPage = () => {
   });
   const [departments, setDepartments] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const [alertMessage, setAlertMessage] = useState('');
-  const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('info');
+
   const [locationDetected, setLocationDetected] = useState(false);
 
   useEffect(() => {
@@ -37,17 +36,14 @@ const CreateLocationPage = () => {
             longitude: position.coords.longitude.toFixed(6),
           }));
           setLocationDetected(true);
-          setAlertMessage('');
         },
         (err) => {
-          setAlertMessage(`Gagal mendeteksi lokasi: ${err.message}`);
-          setAlertType('error');
+          showToast(`Gagal mendeteksi lokasi: ${err.message}`, 'error');
           setLocationDetected(false);
         }
       );
     } else {
-      setAlertMessage('Geolocation tidak didukung oleh browser ini');
-      setAlertType('error');
+      showToast('Geolocation tidak didukung oleh browser ini', 'error');
       setLocationDetected(false);
     }
 
@@ -79,28 +75,23 @@ const CreateLocationPage = () => {
 
   const validateForm = (): boolean => {
     if (!formData.name.trim()) {
-      setAlertMessage('Nama lokasi wajib diisi');
-      setAlertType('error');
+      showToast('Nama lokasi wajib diisi', 'error');
       return false;
     }
     if (!formData.department) {
-      setAlertMessage('Departemen wajib dipilih');
-      setAlertType('error');
+      showToast('Departemen wajib dipilih', 'error');
       return false;
     }
     if (!formData.latitude) {
-      setAlertMessage('Latitude wajib diisi');
-      setAlertType('error');
+      showToast('Latitude wajib diisi', 'error');
       return false;
     }
     if (!formData.longitude) {
-      setAlertMessage('Longitude wajib diisi');
-      setAlertType('error');
+      showToast('Longitude wajib diisi', 'error');
       return false;
     }
     if (!formData.radius || parseFloat(formData.radius) <= 0) {
-      setAlertMessage('Radius harus lebih dari 0');
-      setAlertType('error');
+      showToast('Radius harus lebih dari 0', 'error');
       return false;
     }
     return true;
@@ -110,7 +101,6 @@ const CreateLocationPage = () => {
     if (!validateForm()) return;
 
     setLoading(true);
-    setAlertMessage('');
 
     try {
       await createLocation({
@@ -121,15 +111,13 @@ const CreateLocationPage = () => {
         department: formData.department,
       });
 
-      setAlertMessage('Lokasi berhasil dibuat!');
-      setAlertType('success');
+      showToast('Lokasi berhasil dibuat!', 'success');
       setTimeout(() => {
         navigate('/locations');
       }, 1500);
     } catch (err: any) {
       const message = err.response?.data?.message || err.message || 'Gagal membuat lokasi';
-      setAlertMessage(message);
-      setAlertType('error');
+      showToast(message, 'error');
     } finally {
       setLoading(false);
     }
@@ -172,17 +160,6 @@ const CreateLocationPage = () => {
                  <MapPin size={24} color="#2563eb" /> Detail Lokasi
               </h3>
               
-              {alertMessage && (
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <Alert 
-                    type={alertType} 
-                    message={alertMessage}
-                    onClose={() => setAlertMessage('')}
-                    dismissible
-                  />
-                </div>
-              )}
-
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
                 {/* Nama Lokasi */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', gridColumn: '1 / -1' }}>

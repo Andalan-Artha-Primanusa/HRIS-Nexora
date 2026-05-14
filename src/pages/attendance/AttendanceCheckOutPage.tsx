@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
-import { Alert } from '@/shared/ui/Alert';
+import { showToast } from '@/shared/ui/toast';
 import { api } from '@/shared/api/httpClient';
 import { CheckCircle2, MapPin, Clock, LogOut } from 'lucide-react';
 import '@/pages/dashboard/overview/OverviewPage.css';
@@ -13,20 +13,16 @@ const AttendanceCheckOutPage = () => {
   const [longitude, setLongitude] = useState<number | null>(null);
   const [status, setStatus] = useState('Mendeteksi lokasi GPS...');
   const [loading, setLoading] = useState(false);
-  const [alertMessage, setAlertMessage] = useState('');
-  const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('info');
+
 
   const detectGPS = () => {
     setStatus('Mendeteksi lokasi GPS...');
-    setAlertMessage('');
-    
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           setLatitude(position.coords.latitude);
           setLongitude(position.coords.longitude);
           setStatus('Lokasi GPS terdeteksi. Siap untuk check out.');
-          setAlertMessage('');
         },
         (error) => {
           let msg = 'Gagal mendeteksi lokasi GPS';
@@ -34,15 +30,13 @@ const AttendanceCheckOutPage = () => {
           if (error.code === 2) msg = 'Lokasi tidak tersedia.';
           if (error.code === 3) msg = 'Waktu deteksi lokasi habis.';
           
-          setAlertMessage(msg);
-          setAlertType('error');
+          showToast(msg, 'error');
           setStatus('Gagal mendeteksi lokasi GPS');
         },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     } else {
-      setAlertMessage('Geolocation tidak didukung oleh browser ini');
-      setAlertType('error');
+      showToast('Geolocation tidak didukung oleh browser ini', 'error');
       setStatus('Browser tidak mendukung GPS');
     }
   };
@@ -59,8 +53,6 @@ const AttendanceCheckOutPage = () => {
 
     setLoading(true);
     setStatus('Mengirim check-out...');
-    setAlertMessage('');
-
     try {
       const now = new Date();
       const response = await api.post('/attendance/check-out', {
@@ -78,12 +70,10 @@ const AttendanceCheckOutPage = () => {
         msg += ` | ⏰ Lembur terdeteksi: ${h}j ${m}m — Menunggu Persetujuan`;
       }
 
-      setAlertMessage(msg);
-      setAlertType('success');
+      showToast(msg, 'success');
     } catch (error: any) {
       setStatus('Check-out gagal');
-      setAlertMessage(`✗ ${error.response?.data?.message || error.message || 'Terjadi kesalahan'}`);
-      setAlertType('error');
+      showToast(`✗ ${error.response?.data?.message || error.message || 'Terjadi kesalahan'}`, 'error');
     } finally {
       setLoading(false);
     }
@@ -120,15 +110,6 @@ return (
             <strong>{status}</strong>
           </div>
         </div>
-        {alertMessage && (
-          <Alert 
-            type={alertType} 
-            message={alertMessage}
-            onClose={() => setAlertMessage('')}
-            dismissible
-          />
-        )}
-
         <div className="attendance-form-grid">
           <label>
             <MapPin size={18} style={{ display: 'inline', marginRight: '0.5rem' }} />

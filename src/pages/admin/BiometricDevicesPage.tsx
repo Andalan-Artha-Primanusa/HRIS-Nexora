@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Cpu, Plus, Radio, Activity } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { showToast } from '@/shared/ui/toast';
 import { biometricService } from '@/features/biometric/api/biometric.service';
 
 const BiometricDevicesPage: React.FC = () => {
@@ -25,7 +26,7 @@ const BiometricDevicesPage: React.FC = () => {
     setSyncing(true);
     try {
       await biometricService.syncAttendance();
-      alert('Attendance synchronization completed successfully.');
+      showToast('Sinkronisasi absensi berhasil!', 'success');
     } catch (err) {
       console.error(err);
     } finally {

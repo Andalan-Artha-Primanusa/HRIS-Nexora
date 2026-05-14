@@ -89,12 +89,9 @@ const TrainingProgramsPage: React.FC = () => {
   }, [filteredPrograms]);
 
   // Paginate
-  const paginatedPrograms = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return sortedPrograms.slice(startIndex, startIndex + pageSize);
-  }, [sortedPrograms, currentPage, pageSize]);
+  const paginatedPrograms = sortedPrograms;
 
-  const totalPages = Math.ceil(sortedPrograms.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   // Summary Cards
   const summaryCards = useMemo(() => [
@@ -140,15 +137,13 @@ const TrainingProgramsPage: React.FC = () => {
 
   const handleDelete = async (id: number, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (window.confirm('Apakah Anda yakin ingin menghapus program ini?')) {
-      try {
-        await trainingService.deleteProgram(id);
-        fetchData();
-        showToast('Program berhasil dihapus', 'success');
-      } catch (err: any) {
-        console.error(err);
-        showToast(err?.response?.data?.message || err?.message || 'Gagal menghapus program', 'error');
-      }
+    try {
+      await trainingService.deleteProgram(id);
+      fetchData();
+      showToast('Program berhasil dihapus', 'success');
+    } catch (err: any) {
+      console.error(err);
+      showToast(err?.response?.data?.message || err?.message || 'Gagal menghapus program', 'error');
     }
   };
 

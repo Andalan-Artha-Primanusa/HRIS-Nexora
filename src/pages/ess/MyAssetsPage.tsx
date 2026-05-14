@@ -76,11 +76,8 @@ const MyAssetsPage: React.FC = () => {
     });
   }, [assets, searchText, activeTab]);
 
-  const paginatedAssets = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return filteredAssets.slice(startIndex, startIndex + pageSize);
-  }, [filteredAssets, currentPage, pageSize]);
-  const totalPages = Math.ceil(filteredAssets.length / pageSize);
+  const paginatedAssets = filteredAssets;
+  const [totalPages, setTotalPages] = useState(1);
 
   const summaryCards = useMemo(
     () => [

@@ -134,12 +134,9 @@ const MasterDataPage: React.FC = () => {
       (a.name ?? '').toLowerCase().localeCompare((b.name ?? '').toLowerCase())
     ), [filteredData]);
 
-  const paginatedData = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return sortedData.slice(start, start + pageSize);
-  }, [sortedData, currentPage]);
+  const paginatedData = sortedData;
 
-  const totalPages = Math.ceil(sortedData.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   // Reset page on search / tab change
   useEffect(() => { setCurrentPage(1); }, [searchText, activeTab]);

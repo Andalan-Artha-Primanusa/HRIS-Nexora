@@ -5,6 +5,7 @@ import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { ConfirmDialog } from "@/shared/ui/ConfirmDialog";
 import { Alert } from "@/shared/ui/Alert";
+import { showToast } from '@/shared/ui/toast';
 import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { ROLES } from "@/shared/types/rbac.types";
@@ -126,8 +127,6 @@ const AdminKpiPage = () => {
 
   const [periods, setPeriods] = useState<KpiPeriod[]>([]);
   const [loading, setLoading] = useState(true);
-  const [statusMessage, setStatusMessage] = useState("");
-  const [alertType, setAlertType] = useState<"success" | "error" | "info">("info");
 
   const [searchText, setSearchText] = useState("");
   const [activeTab, setActiveTab] = useState<"Semua" | "Draft" | "Submitted" | "Approved">("Semua");
@@ -144,8 +143,7 @@ const AdminKpiPage = () => {
 
   useEffect(() => {
     if (location.state?.message) {
-      setStatusMessage(location.state.message);
-      setAlertType("success");
+      showToast(location.state.message, "success");
       navigate(location.pathname, { replace: true, state: {} });
     }
   }, [location, navigate]);
@@ -156,8 +154,7 @@ const AdminKpiPage = () => {
       const res = await getKpiPeriods();
       setPeriods(res.items);
     } catch (error) {
-      setStatusMessage(getErrorMessage(error as never));
-      setAlertType("error");
+      showToast(getErrorMessage(error as never), "error");
     } finally {
       setLoading(false);
     }
@@ -185,12 +182,9 @@ const AdminKpiPage = () => {
     });
   }, [periods, searchText, activeTab, typeFilter]);
 
-  const paginatedPeriods = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return filteredPeriods.slice(startIndex, startIndex + pageSize);
-  }, [filteredPeriods, currentPage, pageSize]);
+  const paginatedPeriods = filteredPeriods;
 
-  const totalPages = Math.ceil(filteredPeriods.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -223,8 +217,7 @@ const AdminKpiPage = () => {
       setDeleteTarget(null);
       loadData();
     } catch (error) {
-      setStatusMessage(getErrorMessage(error as never));
-      setAlertType("error");
+      showToast(getErrorMessage(error as never), "error");
     } finally {
       setDeleting(false);
     }
@@ -237,8 +230,7 @@ const AdminKpiPage = () => {
       setAlertType("success");
       await loadData();
     } catch (error) {
-      setStatusMessage(getErrorMessage(error as never));
-      setAlertType("error");
+      showToast(getErrorMessage(error as never), "error");
     }
   };
 
@@ -323,13 +315,6 @@ const AdminKpiPage = () => {
           </div>
         </div>
       </Card>
-
-      {statusMessage && (
-        <div className={`alert alert-${alertType}`} style={{ marginBottom: 24 }}>
-          <span>{statusMessage}</span>
-          <button onClick={() => setStatusMessage("")} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", fontSize: 18 }}>×</button>
-        </div>
-      )}
 
       <div className="table-section">
         <div className="wuw-table-area">

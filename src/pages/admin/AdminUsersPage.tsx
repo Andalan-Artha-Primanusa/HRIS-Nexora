@@ -113,12 +113,9 @@ const AdminUsersPage = () => {
     });
   }, [users, searchText, selectedRole]);
 
-  const paginatedUsers = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return filteredUsers.slice(start, start + pageSize);
-  }, [filteredUsers, currentPage, pageSize]);
+  const paginatedUsers = filteredUsers;
 
-  const totalPages = Math.ceil(filteredUsers.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   const userSummaryCards = useMemo(
     () => [

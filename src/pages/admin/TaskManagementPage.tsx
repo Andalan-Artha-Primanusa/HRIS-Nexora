@@ -157,12 +157,9 @@ const TaskManagementPage: React.FC = () => {
     });
   }, [filteredItems]);
 
-  const paginatedItems = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return sortedItems.slice(startIndex, startIndex + pageSize);
-  }, [sortedItems, currentPage, pageSize]);
+  const paginatedItems = sortedItems;
 
-  const totalPages = Math.ceil(sortedItems.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   const summaryCards = useMemo(
     () => [

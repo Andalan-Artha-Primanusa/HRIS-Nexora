@@ -6,6 +6,7 @@ import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDispl
 import { trainingService } from '@/features/training/api/training.service';
 import { RBACUtils } from '@/shared/hooks/rbac';
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
+import { showToast } from "@/shared/ui/toast";
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 
@@ -68,14 +69,13 @@ const MyTrainingsPage: React.FC = () => {
   useEffect(() => { fetchData(); }, []);
 
   const handleEnroll = async (id: number) => {
-    if (!window.confirm('Daftar pelatihan ini?')) return;
     try {
       setLoading(true);
       await trainingService.selfEnroll(id);
-      alert('Pendaftaran berhasil diajukan');
+      showToast('Pendaftaran berhasil diajukan', 'success');
       fetchData();
     } catch (e: any) {
-      alert(e.response?.data?.message || 'Gagal mendaftar');
+      showToast(e.response?.data?.message || 'Gagal mendaftar', 'error');
       setLoading(false);
     }
   };
@@ -96,7 +96,7 @@ const MyTrainingsPage: React.FC = () => {
   }, [list, search, tab]);
 
   const sorted = useMemo(() => [...filtered].sort((a: any, b: any) => (a.program?.title || a.title || '').localeCompare(b.program?.title || b.title || '')), [filtered]);
-  const paginated = useMemo(() => sorted.slice((page - 1) * pageSize, page * pageSize), [sorted, page, pageSize]);
+  const paginated = sorted;
 
   useEffect(() => { setPage(1); }, [search, tab]);
 

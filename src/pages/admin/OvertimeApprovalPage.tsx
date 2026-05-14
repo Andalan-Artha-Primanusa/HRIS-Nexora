@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { RefreshCw, Timer, Search, CheckCircle, XCircle, Users, AlertCircle, Eye, History } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
+import { Modal } from '@/shared/ui/Modal';
 import overtimeService from '@/features/attendance/api/overtime.service';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
@@ -9,6 +10,7 @@ import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import { showToast } from '@/shared/ui/toast';
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
+import { RejectReasonModal } from "@/shared/components/RejectReasonModal";
 
 interface OvertimeRequest {
   id: number;
@@ -37,6 +39,9 @@ const OvertimeApprovalPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
   const [historyModal, setHistoryModal] = useState<{ module: string; id: number } | null>(null);
+  const [rejectTarget, setRejectTarget] = useState<number | null>(null);
+  const [rejectEvidenceTarget, setRejectEvidenceTarget] = useState<any | null>(null);
+  const [evidenceReview, setEvidenceReview] = useState<any[] | null>(null);
 
   const user = useAuthStore((state) => state.user);
 
@@ -74,7 +79,6 @@ const OvertimeApprovalPage: React.FC = () => {
   }, [searchText, activeTab]);
 
   const handleApprove = async (id: number) => {
-    if (!window.confirm('Setujui pengajuan lembur ini?')) return;
     try {
       setLoading(true);
       await api.put(`/overtime/requests/${id}/approve`);
@@ -88,11 +92,14 @@ const OvertimeApprovalPage: React.FC = () => {
   };
 
   const handleReject = async (id: number) => {
-    const reason = window.prompt('Alasan penolakan (opsional):');
-    if (reason === null) return; // cancelled
+    setRejectTarget(id);
+  };
+
+  const confirmReject = async (reason: string) => {
+    if (rejectTarget === null) return;
     try {
       setLoading(true);
-      await api.put(`/overtime/requests/${id}/reject`, { reject_reason: reason || undefined });
+      await api.put(`/overtime/requests/${rejectTarget}/reject`, { reject_reason: reason || undefined });
       fetchData();
       showToast('Lembur berhasil ditolak', 'success');
     } catch (error: any) {
@@ -111,34 +118,26 @@ const OvertimeApprovalPage: React.FC = () => {
         showToast('Tidak ada bukti untuk pengajuan ini', 'info');
         return;
       }
-      const names = list.map((e: any, i: number) => `${i + 1}. ${e.filename || e.name || e.file_name || 'file'} [${e.status || '-'}]`);
-      const pick = window.prompt('Bukti:\n' + names.join('\n') + '\n\nMasukkan nomor untuk membuka/kelola (kosong = batalkan)');
-      if (!pick) return;
-      const idx = parseInt(pick, 10) - 1;
-      if (Number.isNaN(idx) || idx < 0 || idx >= list.length) { showToast('Pilihan tidak valid', 'error'); return; }
-      const ev = list[idx];
-      const url = ev.url || ev.file_url || ev.path;
-      if (url) window.open(url, '_blank');
-
-      if (ev.status === 'approved') { showToast('Bukti sudah disetujui', 'info'); return; }
-
-      const action = window.prompt('Ketik "approve" untuk setujui, "reject" untuk tolak (kosong = batal)');
-      if (!action) return;
-      if (action.toLowerCase() === 'approve') {
-        await overtimeService.approveEvidence(ev.id);
-        showToast('Bukti berhasil disetujui', 'success');
-        fetchData();
-      } else if (action.toLowerCase() === 'reject') {
-        const reason = window.prompt('Alasan penolakan (opsional):');
-        await overtimeService.rejectEvidence(ev.id, reason || undefined);
-        showToast('Bukti berhasil ditolak', 'success');
-        fetchData();
-      } else {
-        showToast('Perintah tidak dikenal', 'error');
-      }
+      setEvidenceReview(list);
     } catch (err: any) {
       console.error(err);
       showToast(err?.response?.data?.message || err?.message || 'Gagal mengambil bukti', 'error');
+    }
+  };
+
+  const handleEvidenceAction = async (ev: any, action: 'approve' | 'reject', reason?: string) => {
+    try {
+      if (action === 'approve') {
+        await overtimeService.approveEvidence(ev.id);
+        showToast('Bukti berhasil disetujui', 'success');
+      } else {
+        await overtimeService.rejectEvidence(ev.id, reason || undefined);
+        showToast('Bukti berhasil ditolak', 'success');
+      }
+      fetchData();
+    } catch (err: any) {
+      console.error(err);
+      showToast(err?.response?.data?.message || err?.message || 'Gagal memproses bukti', 'error');
     }
   };
 
@@ -158,12 +157,9 @@ const OvertimeApprovalPage: React.FC = () => {
     });
   }, [requests, searchText, activeTab]);
 
-  const paginatedRequests = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return filteredRequests.slice(start, start + pageSize);
-  }, [filteredRequests, currentPage, pageSize]);
+  const paginatedRequests = filteredRequests;
 
-  const totalPages = Math.ceil(filteredRequests.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   const pendingCount = requests.filter(r => r.status === 'pending').length;
   const approvedCount = requests.filter(r => r.status === 'approved').length;
@@ -383,7 +379,7 @@ const OvertimeApprovalPage: React.FC = () => {
                         </td>
                         <td className="td-center">
                           <div className="action-btn-group">
-                            {req.status === 'pending' && (
+                            {req.status === 'pending' && req.can_act !== false && (
                               <>
                                 <button
                                   className="action-btn"
@@ -476,6 +472,89 @@ const OvertimeApprovalPage: React.FC = () => {
           module={historyModal.module}
           moduleId={historyModal.id}
         />
+      )}
+
+      <RejectReasonModal
+        isOpen={rejectTarget !== null}
+        onClose={() => setRejectTarget(null)}
+        onConfirm={confirmReject}
+      />
+
+      <RejectReasonModal
+        isOpen={rejectEvidenceTarget !== null}
+        onClose={() => setRejectEvidenceTarget(null)}
+        onConfirm={async (reason: string) => {
+          const ev = rejectEvidenceTarget;
+          setRejectEvidenceTarget(null);
+          await handleEvidenceAction(ev, 'reject', reason);
+        }}
+        title="Alasan Penolakan Bukti"
+      />
+
+      {evidenceReview && (
+        <Modal
+          isOpen={!!evidenceReview}
+          onClose={() => setEvidenceReview(null)}
+          title="Bukti Lembur"
+          size="md"
+        >
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+            {evidenceReview.map((ev: any, i: number) => (
+              <div
+                key={ev.id || i}
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  padding: "0.75rem 1rem", borderRadius: "8px",
+                  background: "#f8fafc", border: "1px solid #f1f5f9",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                  <span style={{ fontWeight: 600, color: "#475569", minWidth: "1.5rem" }}>{i + 1}.</span>
+                  <span style={{ color: "#0f172a", fontWeight: 500 }}>{ev.filename || ev.name || ev.file_name || 'file'}</span>
+                  <span className={`badge-soft badge-soft--${ev.status === 'approved' ? 'green' : ev.status === 'rejected' ? 'red' : 'orange'}`}>
+                    {ev.status || '-'}
+                  </span>
+                </div>
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <button
+                    className="action-btn"
+                    style={{ color: "#0f172a", background: "#f1f5f9" }}
+                    onClick={() => {
+                      const url = ev.url || ev.file_url || ev.path;
+                      if (url) window.open(url, '_blank');
+                    }}
+                    title="Lihat File"
+                  >
+                    <Eye size={16} />
+                  </button>
+                  {ev.status !== 'approved' && (
+                    <>
+                      <button
+                        className="action-btn"
+                        style={{ color: "#10b981", background: "#ecfdf5" }}
+                        onClick={() => handleEvidenceAction(ev, 'approve')}
+                        title="Setujui"
+                      >
+                        <CheckCircle size={16} />
+                      </button>
+                      <button
+                        className="action-btn"
+                        style={{ color: "#ef4444", background: "#fef2f2" }}
+                        onClick={() => {
+                          setEvidenceReview(null);
+                          setRejectEvidenceTarget(ev);
+                        }}
+                        title="Tolak"
+                      >
+                        <XCircle size={16} />
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </Modal>
       )}
     </div>
   );

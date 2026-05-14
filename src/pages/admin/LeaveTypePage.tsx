@@ -12,6 +12,7 @@ import {
 import { Card } from '@/shared/ui/Card';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
+import { showToast } from '@/shared/ui/toast';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
@@ -92,12 +93,9 @@ const LeaveTypePage: React.FC = () => {
     });
   }, [filteredTypes]);
 
-  const paginatedTypes = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return sortedTypes.slice(startIndex, startIndex + pageSize);
-  }, [sortedTypes, currentPage, pageSize]);
+  const paginatedTypes = sortedTypes;
 
-  const totalPages = Math.ceil(sortedTypes.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   const clearFilters = () => {
     setSearchText('');
@@ -317,9 +315,13 @@ const LeaveTypePage: React.FC = () => {
                             </button>
                             <button
                               className="action-btn action-btn-delete"
-                              onClick={() => {
-                                if (window.confirm('Hapus jenis cuti ini?')) {
-                                  void api.delete(`/leave-types/${type.id}`).then(() => void fetchTypes());
+                              onClick={async () => {
+                                try {
+                                  await api.delete(`/leave-types/${type.id}`);
+                                  void fetchTypes();
+                                  showToast('Jenis cuti berhasil dihapus', 'success');
+                                } catch (err: any) {
+                                  showToast(err?.response?.data?.message || 'Gagal menghapus jenis cuti', 'error');
                                 }
                               }}
                               title="Hapus"

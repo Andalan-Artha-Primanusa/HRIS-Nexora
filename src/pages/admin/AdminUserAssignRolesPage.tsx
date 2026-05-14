@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
-import { Alert } from "@/shared/ui/Alert";
+import { showToast } from '@/shared/ui/toast';
 import { assignRolesToUser, getAllUsers, getAllRoles } from "@/features/admin/api/admin.service";
 import type { Role } from "@/shared/types/rbac.types";
 import { Search, Users, ShieldCheck, CheckSquare, ChevronLeft, Shield } from "lucide-react";
@@ -22,8 +22,7 @@ const AdminUserAssignRolesPage = () => {
   const [roles, setRoles] = useState<Role[]>([]);
   const [selectedUser, setSelectedUser] = useState<UserListItem | null>(null);
   const [selectedRoleIds, setSelectedRoleIds] = useState<number[]>([]);
-  const [statusMessage, setStatusMessage] = useState("");
-  const [alertType, setAlertType] = useState<'success' | 'error' | 'info' | 'warning'>('info');
+
   const [loading, setLoading] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -41,8 +40,7 @@ const AdminUserAssignRolesPage = () => {
       setUsers(formattedUsers);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Gagal memuat users.";
-      setStatusMessage(message);
-      setAlertType('error');
+      showToast(message, 'error');
     } finally {
       setLoading(false);
     }
@@ -89,26 +87,22 @@ const AdminUserAssignRolesPage = () => {
     if (!selectedUser) return;
 
     if (selectedRoleIds.length === 0) {
-      setStatusMessage("Pilih minimal satu role.");
-      setAlertType('warning');
+      showToast("Pilih minimal satu role.", 'info');
       return;
     }
 
     setIsAssigning(true);
-    setStatusMessage("Sedang assign role...");
-    setAlertType('info');
+    showToast("Sedang assign role...", 'info');
 
     try {
       await assignRolesToUser(selectedUser.id.toString(), { role_ids: selectedRoleIds });
-      setStatusMessage(`Peran untuk ${selectedUser.name} berhasil diperbarui!`);
-      setAlertType('success');
+      showToast(`Peran untuk ${selectedUser.name} berhasil diperbarui!`, 'success');
       setSelectedUser(null);
       setSelectedRoleIds([]);
       await loadUsers();
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Gagal assign role.";
-      setStatusMessage(message);
-      setAlertType('error');
+      showToast(message, 'error');
     } finally {
       setIsAssigning(false);
     }
@@ -141,15 +135,6 @@ const AdminUserAssignRolesPage = () => {
           </div>
         </div>
       </Card>
-
-      {statusMessage && (
-        <Alert 
-          type={alertType} 
-          message={statusMessage} 
-          onClose={() => setStatusMessage('')}
-          dismissible
-        />
-      )}
 
       <div className="crud-content-grid" style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '2rem', alignItems: 'start' }}>
         

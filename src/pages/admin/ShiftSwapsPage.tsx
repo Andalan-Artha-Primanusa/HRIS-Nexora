@@ -55,12 +55,9 @@ const ShiftSwapsPage: React.FC = () => {
     });
   }, [swaps, searchText, activeTab]);
 
-  const paginatedSwaps = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return filteredSwaps.slice(startIndex, startIndex + pageSize);
-  }, [filteredSwaps, currentPage, pageSize]);
+  const paginatedSwaps = filteredSwaps;
 
-  const totalPages = Math.ceil(filteredSwaps.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   const summaryStats = useMemo(() => {
     const total = swaps.length;
@@ -77,38 +74,34 @@ const ShiftSwapsPage: React.FC = () => {
   }, [swaps]);
 
   const handleApprove = async (swap: any) => {
-    if (window.confirm('Setujui penukaran shift ini?')) {
-      try {
-        if (swap.approval_flow_id) {
-          await workforceService.approveShiftSwapFlow(swap.id);
-        } else {
-          await workforceService.approveShiftSwap(swap.id);
-        }
-        fetchData();
-        showToast('Penukaran shift berhasil disetujui', 'success');
-      } catch (error: any) {
-        const msg = error?.response?.data?.message || error?.message || 'Gagal menyetujui';
-        if (msg.includes('Approval flow') || msg.includes('No approval flow')) {
-          showToast('Tidak bisa menyetujui karena belum ada alur persetujuan (approval flow) untuk Shift Swap. Silakan buat di menu Alur Persetujuan terlebih dahulu.', 'error');
-        } else {
-          showToast(msg, 'error');
-        }
-        console.error('Failed to approve shift swap:', error);
+    try {
+      if (swap.approval_flow_id) {
+        await workforceService.approveShiftSwapFlow(swap.id);
+      } else {
+        await workforceService.approveShiftSwap(swap.id);
       }
+      fetchData();
+      showToast('Penukaran shift berhasil disetujui', 'success');
+    } catch (error: any) {
+      const msg = error?.response?.data?.message || error?.message || 'Gagal menyetujui';
+      if (msg.includes('Approval flow') || msg.includes('No approval flow')) {
+        showToast('Tidak bisa menyetujui karena belum ada alur persetujuan (approval flow) untuk Shift Swap. Silakan buat di menu Alur Persetujuan terlebih dahulu.', 'error');
+      } else {
+        showToast(msg, 'error');
+      }
+      console.error(error);
     }
   };
 
   const handleReject = async (swap: any) => {
-    if (window.confirm('Tolak penukaran shift ini?')) {
-      try {
-        await workforceService.rejectShiftSwap(swap.id);
-        fetchData();
-        showToast('Penukaran shift berhasil ditolak', 'success');
-      } catch (error: any) {
-        const msg = error?.response?.data?.message || error?.message || 'Gagal menolak';
-        showToast(msg, 'error');
-        console.error('Failed to reject shift swap:', error);
-      }
+    try {
+      await workforceService.rejectShiftSwap(swap.id);
+      fetchData();
+      showToast('Penukaran shift berhasil ditolak', 'success');
+    } catch (error: any) {
+      const msg = error?.response?.data?.message || error?.message || 'Gagal menolak';
+      showToast(msg, 'error');
+      console.error(error);
     }
   };
 
@@ -282,7 +275,7 @@ const ShiftSwapsPage: React.FC = () => {
                           </td>
                           <td className="td-center">
                             <div className="action-btn-group">
-                              {swap.status === 'pending' && (
+                              {swap.status === 'pending' && swap.can_act !== false && (
                                 <>
                                   <button className="action-btn" style={{ color: '#10b981' }} onClick={() => handleApprove(swap)} title="Setujui"><CheckCircle2 size={16} /></button>
                                   <button className="action-btn" style={{ color: '#ef4444' }} onClick={() => handleReject(swap)} title="Tolak"><XCircle size={16} /></button>

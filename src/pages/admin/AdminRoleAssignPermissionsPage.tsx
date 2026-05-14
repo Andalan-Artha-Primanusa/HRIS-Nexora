@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
-import { Alert } from "@/shared/ui/Alert";
+import { showToast } from '@/shared/ui/toast';
 import { assignPermissionsToRole, getAllRoles, getAllPermissions } from "@/features/admin/api/admin.service";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { RBACUtils } from "@/shared/hooks/rbac";
@@ -42,8 +42,7 @@ const AdminRoleAssignPermissionsPage = () => {
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [selectedRole, setSelectedRole] = useState<RoleData | null>(null);
   const [selectedPermissionIds, setSelectedPermissionIds] = useState<number[]>([]);
-  const [statusMessage, setStatusMessage] = useState("");
-  const [alertType, setAlertType] = useState<'success' | 'error' | 'info' | 'warning'>('info');
+
   const [loading, setLoading] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
   const [permSearch, setPermSearch] = useState("");
@@ -68,8 +67,7 @@ const AdminRoleAssignPermissionsPage = () => {
       setRoles(formattedRoles);
     } catch (error: unknown) {
       const message = getErrorMessage(error as any);
-      setStatusMessage(message);
-      setAlertType('error');
+      showToast(message, 'error');
     } finally {
       setLoading(false);
     }
@@ -130,32 +128,27 @@ const AdminRoleAssignPermissionsPage = () => {
     if (!selectedRole) return;
 
     if (selectedPermissionIds.length === 0) {
-      setStatusMessage("Pilih minimal satu permission.");
-      setAlertType('warning');
+      showToast("Pilih minimal satu permission.", 'info');
       return;
     }
 
     if (selectedRole.id === 1) {
-      setStatusMessage("Hanya Super Admin yang dapat memodifikasi role Super Admin.");
-      setAlertType('error');
+      showToast("Hanya Super Admin yang dapat memodifikasi role Super Admin.", 'error');
       return;
     }
 
     setIsAssigning(true);
-    setStatusMessage("Sedang assign permission...");
-    setAlertType('info');
+    showToast("Sedang assign permission...", 'info');
 
     try {
       await assignPermissionsToRole(selectedRole.id.toString(), { permission_ids: selectedPermissionIds });
-      setStatusMessage(`Izin untuk peran ${selectedRole.display_name} berhasil diperbarui!`);
-      setAlertType('success');
+      showToast(`Izin untuk peran ${selectedRole.display_name} berhasil diperbarui!`, 'success');
       setSelectedRole(null);
       setSelectedPermissionIds([]);
       await loadRoles();
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Gagal assign permission ke role.";
-      setStatusMessage(message);
-      setAlertType('error');
+      showToast(message, 'error');
     } finally {
       setIsAssigning(false);
     }
@@ -177,15 +170,6 @@ const AdminRoleAssignPermissionsPage = () => {
           ← Kembali ke Peran
         </Button>
       </div>
-
-      {statusMessage && (
-        <Alert 
-          type={alertType} 
-          message={statusMessage} 
-          onClose={() => setStatusMessage('')}
-          dismissible
-        />
-      )}
 
       <div className="crud-content-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.8fr)', gap: '1.5rem', alignItems: 'start' }}>
         

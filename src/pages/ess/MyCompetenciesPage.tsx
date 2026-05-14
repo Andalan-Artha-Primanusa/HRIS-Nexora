@@ -89,12 +89,9 @@ const MyCompetenciesPage: React.FC = () => {
     });
   }, [filteredCompetencies]);
 
-  const paginatedCompetencies = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return sortedCompetencies.slice(startIndex, startIndex + pageSize);
-  }, [sortedCompetencies, currentPage, pageSize]);
+  const paginatedCompetencies = sortedCompetencies;
 
-  const totalPages = Math.ceil(sortedCompetencies.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   const assessedCount = useMemo(() => competencies.filter((c) => c.assessed_at).length, [competencies]);
   const unassessedCount = useMemo(() => competencies.filter((c) => !c.assessed_at).length, [competencies]);

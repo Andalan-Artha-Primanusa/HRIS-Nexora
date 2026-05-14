@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Card, CardHeader } from "@/shared/ui";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
+import { showToast } from "@/shared/ui/toast";
 import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { BarChart3, CheckCircle2, Receipt, Wallet, Download, Printer, RefreshCw, Search, Eye } from "lucide-react";
 import { getMyPayroll, getMyPayrollSlip, exportMyPayrollCsv, exportMyPayrollPdf } from "@/features/ess/api/ess.service";
@@ -31,8 +32,9 @@ const MyPayrollPage = () => {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const result = await getMyPayroll();
+      const result = await getMyPayroll(currentPage, pageSize);
       setItems(result.items);
+      setTotalPages(result.totalPages);
     } catch (error) {
       console.error("Failed to load payroll:", error);
       setErrorMessage('Gagal memuat slip gaji');
@@ -75,12 +77,9 @@ const MyPayrollPage = () => {
     });
   }, [items, searchText, activeTab]);
 
-  const paginatedItems = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return filteredItems.slice(startIndex, startIndex + pageSize);
-  }, [filteredItems, currentPage, pageSize]);
+  const paginatedItems = filteredItems;
 
-  const totalPages = Math.ceil(filteredItems.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   const clearFilters = () => {
     setSearchText("");
@@ -119,7 +118,7 @@ const MyPayrollPage = () => {
       link.parentNode?.removeChild(link);
     } catch (error) {
       console.error("Failed to download PDF:", error);
-      alert('Gagal mengunduh PDF. Silakan coba lagi.');
+      showToast('Gagal mengunduh PDF. Silakan coba lagi.', 'error');
     }
   };
 
@@ -136,7 +135,7 @@ const MyPayrollPage = () => {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Failed to download CSV:", error);
-      alert('Gagal mengunduh CSV. Silakan coba lagi.');
+      showToast('Gagal mengunduh CSV. Silakan coba lagi.', 'error');
     }
   };
 

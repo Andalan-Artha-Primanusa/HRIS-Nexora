@@ -35,12 +35,6 @@ const MenuPermissionsPage = () => {
     loadData();
   }, []);
 
-  const cacheToLocalStorage = (items: MenuDef[], rls: Role[]) => {
-    try {
-      localStorage.setItem('menuAssignments', JSON.stringify({ items, roles: rls }));
-    } catch { /* quota exceeded, silent */ }
-  };
-
   const loadData = async () => {
     setLoading(true);
     try {
@@ -49,7 +43,6 @@ const MenuPermissionsPage = () => {
       const rls = res.data?.data?.roles ?? [];
       setMenuItems(items);
       setRoles(rls);
-      cacheToLocalStorage(items, rls);
     } catch {
       showToast("Gagal memuat data menu", "error");
     } finally {
@@ -65,10 +58,8 @@ const MenuPermissionsPage = () => {
       } else {
         await api.post("/admin/menus/assign-role", { menu_key: menuKey, role_id: roleId });
       }
-      clearMenuCache();
-      window.dispatchEvent(new CustomEvent('menu-cache-cleared'));
-      setMenuItems((prev) => {
-        const updated = prev.map((m) =>
+      setMenuItems((prev) =>
+        prev.map((m) =>
           m.key === menuKey
             ? {
                 ...m,
@@ -77,10 +68,10 @@ const MenuPermissionsPage = () => {
                   : [...m.assigned_role_ids, roleId],
               }
             : m
-        );
-        cacheToLocalStorage(updated, roles);
-        return updated;
-      });
+        )
+      );
+      clearMenuCache();
+      window.dispatchEvent(new CustomEvent('menu-cache-cleared'));
     } catch {
       showToast("Gagal memperbarui akses menu", "error");
     } finally {
@@ -105,12 +96,9 @@ const MenuPermissionsPage = () => {
     );
   }, [menuItems, searchText]);
 
-  const paginatedItems = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return filteredItems.slice(startIndex, startIndex + pageSize);
-  }, [filteredItems, currentPage, pageSize]);
+  const paginatedItems = filteredItems;
 
-  const totalPages = Math.ceil(filteredItems.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     setCurrentPage(1);

@@ -4,6 +4,7 @@ import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { FileText, ArrowLeft, Trash2 } from 'lucide-react';
 import { getKpiDetail, deleteKpi } from '@/features/dashboard/api/kpi.service';
+import { showToast } from '@/shared/ui/toast';
 import './KpiPage.css';
 
 type KpiStatus = 'draft' | 'submitted' | 'approved';
@@ -30,7 +31,6 @@ const KpiDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const [kpi, setKpi] = useState<KpiRecord | null>(null);
   const [loading, setLoading] = useState(true);
-  const [statusMessage, setStatusMessage] = useState('Memuat detail KPI...');
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
@@ -41,15 +41,12 @@ const KpiDetailPage = () => {
 
   const loadKpiDetail = async () => {
     setLoading(true);
-    setStatusMessage('Memuat detail KPI...');
 
     try {
       const result = await getKpiDetail(id!);
       const payload = (result.payload ?? result) as KpiRecord;
       setKpi(payload);
-      setStatusMessage('Detail KPI berhasil dimuat.');
     } catch (error: any) {
-      setStatusMessage('Gagal memuat detail KPI.');
       console.error(error);
     } finally {
       setLoading(false);
@@ -57,22 +54,17 @@ const KpiDetailPage = () => {
   };
 
   const handleDelete = async () => {
-    if (!window.confirm('Apakah Anda yakin ingin menghapus KPI ini?')) {
-      return;
-    }
-
     setDeleting(true);
-    setStatusMessage('Menghapus KPI...');
 
     try {
       await deleteKpi(id!);
-      setStatusMessage('KPI berhasil dihapus.');
+      showToast('KPI berhasil dihapus.', 'success');
       setTimeout(() => {
         navigate('/kpis');
       }, 1000);
     } catch (error: any) {
-      const message = error?.response?.data?.message || 'Failed to delete KPI.';
-      setStatusMessage(message);
+      const message = error?.response?.data?.message || 'Gagal menghapus KPI.';
+      showToast(message, 'error');
       console.error(error);
     } finally {
       setDeleting(false);
@@ -250,9 +242,7 @@ const KpiDetailPage = () => {
         </Card>
       )}
 
-      <div style={{ marginTop: '16px', padding: '12px', background: '#f0f0f0', borderRadius: '4px', fontSize: '14px' }}>
-        <strong>Status:</strong> {statusMessage}
-      </div>
+
     </div>
   );
 };

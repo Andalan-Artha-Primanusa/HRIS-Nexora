@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
-import { Alert } from "@/shared/ui/Alert";
+import { showToast } from '@/shared/ui/toast';
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { ROLES } from "@/shared/types/rbac.types";
 import { Download, FileSpreadsheet, RefreshCw, ShieldAlert, Upload, UploadCloud, CheckCircle2, FileText, Users } from "lucide-react";
@@ -15,7 +15,7 @@ import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "./AdminCrudPages.css";
 
-type AlertType = "success" | "error" | "info";
+
 
 const hasAdminAccess = (user: any) => {
   const roles = Array.isArray(user?.roles) ? user.roles : [];
@@ -69,8 +69,7 @@ const AdminImportPage = () => {
   const [submittingEmployees, setSubmittingEmployees] = useState(false);
   const [userImportResult, setUserImportResult] = useState<string | null>(null);
   const [employeeImportResult, setEmployeeImportResult] = useState<string | null>(null);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertType, setAlertType] = useState<AlertType>("info");
+
 
   const summaryStats = useMemo(() => {
     const uploadedCount = [userFile, employeeFile].filter(Boolean).length;
@@ -103,25 +102,21 @@ const AdminImportPage = () => {
     event.preventDefault();
 
     if (!userFile) {
-      setAlertMessage("Silakan pilih file users terlebih dahulu.");
-      setAlertType("error");
+      showToast("Silakan pilih file users terlebih dahulu.", "error");
       return;
     }
 
     setSubmittingUsers(true);
-    setAlertMessage("");
     setUserImportResult(null);
 
     try {
       const result = await importUsers(userFile, userRole);
       setUserImportResult(JSON.stringify(result, null, 2));
-      setAlertMessage("Import users berhasil diproses.");
-      setAlertType("success");
+      showToast("Import users berhasil diproses.", "success");
       setUserFile(null);
       setUserRole("employee");
     } catch (error: unknown) {
-      setAlertMessage(getErrorMessage(error as any));
-      setAlertType("error");
+      showToast(getErrorMessage(error as any), "error");
     } finally {
       setSubmittingUsers(false);
     }
@@ -131,13 +126,11 @@ const AdminImportPage = () => {
     event.preventDefault();
 
     if (!employeeFile) {
-      setAlertMessage("Silakan pilih file employees terlebih dahulu.");
-      setAlertType("error");
+      showToast("Silakan pilih file employees terlebih dahulu.", "error");
       return;
     }
 
     setSubmittingEmployees(true);
-    setAlertMessage("");
     setEmployeeImportResult(null);
 
     try {
@@ -146,19 +139,13 @@ const AdminImportPage = () => {
 
       const result = await importEmployees(formData);
       setEmployeeImportResult(JSON.stringify(result, null, 2));
-      setAlertMessage("Import employees berhasil diproses.");
-      setAlertType("success");
+      showToast("Import employees berhasil diproses.", "success");
       setEmployeeFile(null);
     } catch (error: unknown) {
-      setAlertMessage(getErrorMessage(error as any));
-      setAlertType("error");
+      showToast(getErrorMessage(error as any), "error");
     } finally {
       setSubmittingEmployees(false);
     }
-  };
-
-  const clearAlert = () => {
-    setAlertMessage("");
   };
 
   return (
@@ -182,7 +169,6 @@ const AdminImportPage = () => {
               setEmployeeFile(null);
               setUserImportResult(null);
               setEmployeeImportResult(null);
-              setAlertMessage("");
             }}>
               <RefreshCw size={16} />
               Reset
@@ -213,15 +199,6 @@ const AdminImportPage = () => {
           );
         })}
       </div>
-
-      {/* Alert Message */}
-      {alertMessage && (
-        <Alert
-          type={alertType}
-          message={alertMessage}
-          onClose={clearAlert}
-        />
-      )}
 
       {/* Import Section */}
       <div className="import-grid">

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
-import { Alert } from "@/shared/ui/Alert";
+import { showToast } from '@/shared/ui/toast';
 import { Briefcase, Users, ChevronLeft } from "lucide-react";
 import { api } from "@/shared/api/httpClient";
 import { createEmployee } from "@/features/employee/api/employee.service";
@@ -18,7 +18,6 @@ const EmployeeCreatePage = () => {
   const navigate = useNavigate();
 
   const [createForm, setCreateForm] = useState<EmployeeFormState>(DEFAULT_FORM);
-  const [statusMessage, setStatusMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
   // Metadata State
@@ -54,12 +53,12 @@ const EmployeeCreatePage = () => {
   const handleCreate = async () => {
     // Client-side validation
     if (!createForm.user_id) {
-      setStatusMessage("Gagal: Silakan pilih User System terlebih dahulu.");
+      showToast("Gagal: Silakan pilih User System terlebih dahulu.", 'error');
       return;
     }
 
     setLoading(true);
-    setStatusMessage("Menyimpan employee...");
+    showToast("Menyimpan employee...", 'info');
 
     try {
       const payload: EmployeeCreatePayload = {
@@ -83,9 +82,9 @@ const EmployeeCreatePage = () => {
       if (error.type === "validation" && error.errors) {
         const validationErrors = error.errors;
         const messages = Object.values(validationErrors).flat().join(", ");
-        setStatusMessage(`Gagal: ${messages}`);
+        showToast(`Gagal: ${messages}`, 'error');
       } else {
-        setStatusMessage(error.message || "Gagal membuat employee");
+        showToast(error.message || "Gagal membuat employee", 'error');
       }
     } finally {
       setLoading(false);
@@ -112,15 +111,6 @@ const EmployeeCreatePage = () => {
           </div>
         </div>
       </Card>
-
-      {statusMessage && (
-        <Alert
-          type={statusMessage.startsWith("Gagal") ? "error" : "info"}
-          message={statusMessage}
-          onClose={() => setStatusMessage('')}
-          dismissible
-        />
-      )}
 
       <Card className="control-card" glass>
         <div style={{ marginBottom: '1rem' }}>

@@ -73,8 +73,8 @@ const ProgramsTab: React.FC = () => {
   }), [programs, searchQuery, activeTab]);
 
   const sorted = useMemo(() => [...filtered].sort((a, b) => ((a as any).title || '').localeCompare((b as any).title || '')), [filtered]);
-  const paginated = useMemo(() => sorted.slice((currentPage - 1) * pageSize, currentPage * pageSize), [sorted, currentPage, pageSize]);
-  const totalPages = Math.ceil(sorted.length / pageSize);
+  const paginated = sorted;
+  const [totalPages, setTotalPages] = useState(1);
 
   const summaryCards = useMemo(() => [
     { label: 'Total Program', subtitle: 'Seluruh program pelatihan', value: String(programs.length), change: 'Program Pelatihan', tone: 'blue' as const, icon: GraduationCap },
@@ -321,12 +321,10 @@ const EnrollmentsTab: React.FC = () => {
   useEffect(() => { fetchData(); }, []);
 
   const handleApprove = async (id: number) => {
-    if (!window.confirm('Setujui pendaftaran pelatihan ini?')) return;
     try { setLoading(true); await trainingService.approveEnrollment(id); fetchData(); showToast('Pendaftaran berhasil disetujui', 'success'); } catch (error: any) { console.error(error); showToast(error?.response?.data?.message || error?.message || 'Gagal menyetujui pendaftaran', 'error'); setLoading(false); }
   };
 
   const handleReject = async (id: number) => {
-    if (!window.confirm('Tolak pendaftaran pelatihan ini?')) return;
     try { setLoading(true); await trainingService.rejectEnrollment(id); fetchData(); showToast('Pendaftaran berhasil ditolak', 'success'); } catch (error: any) { console.error(error); showToast(error?.response?.data?.message || error?.message || 'Gagal menolak pendaftaran', 'error'); setLoading(false); }
   };
 
@@ -363,8 +361,8 @@ const EnrollmentsTab: React.FC = () => {
     return matchSearch && statusMatch;
   }), [enrollments, searchText, activeTab]);
 
-  const paginated = useMemo(() => filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize), [filtered, currentPage, pageSize]);
-  const totalPages = Math.ceil(filtered.length / pageSize);
+  const paginated = filtered;
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => { setCurrentPage(1); }, [searchText, activeTab]);
 
@@ -492,7 +490,7 @@ const EnrollmentsTab: React.FC = () => {
                         </td>
                         <td className="td-center">
                           <div className="action-btn-group">
-                            {enrollment.status === 'pending' && (
+                            {enrollment.status === 'pending' && enrollment.can_act !== false && (
                               <>
                                 <button className="action-btn" style={{ color: '#10b981', background: '#ecfdf5' }} onClick={() => handleApprove(enrollment.id)} title="Approve"><CheckCircle size={16} /></button>
                                 <button className="action-btn" style={{ color: '#ef4444', background: '#fef2f2' }} onClick={() => handleReject(enrollment.id)} title="Reject"><XCircle size={16} /></button>

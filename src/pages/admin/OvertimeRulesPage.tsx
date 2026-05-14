@@ -53,12 +53,9 @@ const OvertimeRulesPage: React.FC = () => {
     });
   }, [rules, searchText, activeTab]);
 
-  const paginatedRules = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return filteredRules.slice(startIndex, startIndex + pageSize);
-  }, [filteredRules, currentPage, pageSize]);
+  const paginatedRules = filteredRules;
 
-  const totalPages = Math.ceil(filteredRules.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   const summaryStats = useMemo(() => {
     const total = rules.length;

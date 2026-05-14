@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
-import { Alert } from "@/shared/ui/Alert";
+import { showToast } from '@/shared/ui/toast';
 import { Briefcase, Users, ChevronLeft } from "lucide-react";
 import { api } from "@/shared/api/httpClient";
 import { getEmployeeDetail, updateEmployee } from "@/features/employee/api/employee.service";
@@ -19,7 +19,6 @@ const EmployeeEditPage = () => {
   const { id: routeEmployeeId } = useParams<{ id: string }>();
 
   const [updateForm, setUpdateForm] = useState<EmployeeFormState>(DEFAULT_FORM);
-  const [statusMessage, setStatusMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
   // Metadata State
@@ -57,7 +56,7 @@ const EmployeeEditPage = () => {
 
     const loadUpdateDetail = async () => {
       setLoading(true);
-      setStatusMessage("Memuat detail employee untuk update...");
+      showToast("Memuat detail employee untuk update...", 'info');
 
       try {
         const result = await getEmployeeDetail(routeEmployeeId);
@@ -83,10 +82,10 @@ const EmployeeEditPage = () => {
           work_schedule_id: formatId(result?.work_schedule_id),
         });
 
-        setStatusMessage("Detail employee berhasil dimuat.");
+        showToast("Detail employee berhasil dimuat.", 'info');
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : "Gagal memuat detail employee.";
-        setStatusMessage(`Gagal: ${message}`);
+        showToast(`Gagal: ${message}`, 'error');
       } finally {
         setLoading(false);
       }
@@ -98,12 +97,12 @@ const EmployeeEditPage = () => {
   const handleUpdate = async () => {
     const targetId = updateForm.id;
     if (!targetId) {
-      setStatusMessage("Gagal: ID tidak ditemukan untuk update.");
+      showToast("Gagal: ID tidak ditemukan untuk update.", 'error');
       return;
     }
 
     setLoading(true);
-    setStatusMessage("Mengupdate employee...");
+    showToast("Mengupdate employee...", 'info');
 
     try {
       const payload: EmployeeUpdatePayload = {
@@ -131,9 +130,9 @@ const EmployeeEditPage = () => {
       if (error.type === "validation" && error.errors) {
         const validationErrors = error.errors;
         const messages = Object.values(validationErrors).flat().join(", ");
-        setStatusMessage(`Gagal: ${messages}`);
+        showToast(`Gagal: ${messages}`, 'error');
       } else {
-        setStatusMessage(error.message || "Gagal mengupdate employee");
+        showToast(error.message || "Gagal mengupdate employee", 'error');
       }
     } finally {
       setLoading(false);
@@ -160,15 +159,6 @@ const EmployeeEditPage = () => {
           </div>
         </div>
       </Card>
-
-      {statusMessage && (
-        <Alert
-          type={statusMessage.startsWith("Gagal") ? "error" : "info"}
-          message={statusMessage}
-          onClose={() => setStatusMessage('')}
-          dismissible
-        />
-      )}
 
       <Card className="control-card" glass>
         <div style={{ marginBottom: '1rem' }}>

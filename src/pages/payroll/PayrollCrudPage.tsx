@@ -219,8 +219,8 @@ const PayrollCrudPage = () => {
     return String(p.status).toLowerCase() !== 'paid';
   });
 
-  const totalPages = Math.max(1, Math.ceil(filteredPayrolls.length / itemsPerPage));
-  const paginatedPayrolls = filteredPayrolls.slice((currentPage - 1) * itemsPerPage, (currentPage - 1) * itemsPerPage + itemsPerPage);
+  const [totalPages, setTotalPages] = useState(1);
+  const paginatedPayrolls = filteredPayrolls;
 
   const getEmployeeName = (empId: string) => {
     const employee = employees.find((entry) => String(entry.id) === empId);

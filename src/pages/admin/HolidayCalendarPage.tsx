@@ -73,12 +73,9 @@ const HolidayCalendarPage: React.FC = () => {
     });
   }, [holidays, searchText, activeTab]);
 
-  const paginatedHolidays = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return filteredHolidays.slice(startIndex, startIndex + pageSize);
-  }, [filteredHolidays, currentPage, pageSize]);
+  const paginatedHolidays = filteredHolidays;
 
-  const totalPages = Math.ceil(filteredHolidays.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   const clearFilters = () => {
     setSearchText("");

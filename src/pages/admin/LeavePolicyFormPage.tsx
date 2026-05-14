@@ -3,14 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
+import { showToast } from '@/shared/ui/toast';
 import { 
   Save, 
   ArrowLeft, 
   ShieldCheck, 
   RefreshCw,
   Info,
-  CheckCircle,
-  XCircle,
   Settings
 } from 'lucide-react';
 import '@/shared/styles/CrudPage.css';
@@ -46,7 +45,6 @@ const LeavePolicyFormPage: React.FC = () => {
   const [selectedTypeId, setSelectedTypeId] = useState('');
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(isEdit);
-  const [message, setMessage] = useState('');
 
   useEffect(() => {
     const fetchTypes = async () => {
@@ -103,7 +101,7 @@ const LeavePolicyFormPage: React.FC = () => {
           });
         } catch (err) {
           console.error('Error fetching detail:', err);
-          setMessage('Gagal memuat data detail.');
+          showToast('Gagal memuat data detail.', 'error');
         } finally {
           setFetching(false);
         }
@@ -130,7 +128,6 @@ const LeavePolicyFormPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setMessage('');
 
     const payload = {
       ...formData,
@@ -146,10 +143,11 @@ const LeavePolicyFormPage: React.FC = () => {
     try {
       if (isEdit) {
         await api.put(`/leave-policies/${id}`, payload);
-        setMessage('Kebijakan cuti berhasil diperbarui!');
+        showToast('Kebijakan cuti berhasil diperbarui!', 'success');
+        setTimeout(() => navigate('/leave/policy'), 2000);
       } else {
         await api.post('/leave-policies', payload);
-        setMessage('Kebijakan baru berhasil ditambahkan!');
+        showToast('Kebijakan baru berhasil ditambahkan!', 'success');
         setTimeout(() => navigate('/leave/policy'), 2000);
       }
     } catch (err: any) {
@@ -157,9 +155,9 @@ const LeavePolicyFormPage: React.FC = () => {
       const errorData = err.response?.data;
       if (errorData?.errors) {
         const firstError = Object.values(errorData.errors)[0];
-        setMessage(`Validation Error: ${Array.isArray(firstError) ? firstError[0] : firstError}`);
+        showToast(`${Array.isArray(firstError) ? firstError[0] : firstError}`, 'error');
       } else {
-        setMessage(errorData?.message || 'Terjadi kesalahan saat menyimpan data.');
+        showToast(errorData?.message || 'Terjadi kesalahan saat menyimpan data.', 'error');
       }
     } finally {
       setLoading(false);
@@ -339,25 +337,6 @@ const LeavePolicyFormPage: React.FC = () => {
                 </select>
               </div>
             </div>
-
-            {message && (
-              <div style={{ 
-                marginTop: '1.5rem', 
-                padding: '1rem', 
-                borderRadius: '12px', 
-                background: message.includes('berhasil') ? '#f5f3ff' : '#fef2f2',
-                color: message.includes('berhasil') ? '#7c3aed' : '#dc2626',
-                fontSize: '0.9rem',
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                border: message.includes('berhasil') ? '1px solid #ddd6fe' : '1px solid #fecaca'
-              }}>
-                {message.includes('berhasil') ? <CheckCircle size={18} /> : <XCircle size={18} />}
-                {message}
-              </div>
-            )}
 
             <div style={{ marginTop: '2.5rem', display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
                <Button variant="ghost" type="button" onClick={() => navigate('/leave/policy')} style={{ background: '#f1f5f9', color: '#475569', border: '1px solid #cbd5e1', borderRadius: '12px', height: '48px', padding: '0 24px', fontWeight: 600 }}>

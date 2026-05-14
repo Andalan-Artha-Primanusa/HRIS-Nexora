@@ -103,11 +103,8 @@ const MyTasksPage: React.FC = () => {
     });
   }, [filteredTasks]);
 
-  const paginatedTasks = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return sortedTasks.slice(startIndex, startIndex + pageSize);
-  }, [sortedTasks, currentPage, pageSize]);
-  const totalPages = Math.ceil(sortedTasks.length / pageSize);
+  const paginatedTasks = sortedTasks;
+  const [totalPages, setTotalPages] = useState(1);
 
   const summaryCards = useMemo(
     () => [

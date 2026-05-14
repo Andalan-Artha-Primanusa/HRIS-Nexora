@@ -444,8 +444,9 @@ const PayrollGeneratePage = () => {
   const loadPayroll = async () => {
     setLoading(true);
     try {
-      const result = await getAllPayroll();
+      const result = await getAllPayroll({ page: currentPage, per_page: itemsPerPage });
       setItems(toSafeArray(result));
+      setTotalPages(result?.data?.last_page ?? 1);
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Gagal memuat payroll", "error");
     } finally {
@@ -540,12 +541,8 @@ const PayrollGeneratePage = () => {
     [items, paymentFilter, yearFilter]
   );
 
-  const totalPages = Math.max(1, Math.ceil(filteredItems.length / itemsPerPage));
-  const safePage = Math.min(currentPage, totalPages);
-  const paginatedItems = filteredItems.slice(
-    (safePage - 1) * itemsPerPage,
-    safePage * itemsPerPage
-  );
+  const [totalPages, setTotalPages] = useState(1);
+  const paginatedItems = filteredItems;
 
   const handleFilterChange = (f: "all" | "paid" | "unpaid") => {
     setPaymentFilter(f);

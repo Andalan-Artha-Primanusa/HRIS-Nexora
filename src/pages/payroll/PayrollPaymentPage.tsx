@@ -207,8 +207,8 @@ const PayrollPaymentPage = () => {
     return true;
   });
 
-  const totalPagesRecent = Math.max(1, Math.ceil(filteredPayrolls.length / itemsPerPageRecent));
-  const recentPayrolls = filteredPayrolls.slice((currentPageRecent - 1) * itemsPerPageRecent, (currentPageRecent - 1) * itemsPerPageRecent + itemsPerPageRecent);
+  const [totalPagesRecent, setTotalPagesRecent] = useState(1);
+  const recentPayrolls = filteredPayrolls;
 
   return (
     <div className="crud-page">

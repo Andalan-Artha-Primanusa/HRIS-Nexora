@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
-import { Alert } from '@/shared/ui/Alert';
+import { showToast } from '@/shared/ui/toast';
 import { createLeaveRequest } from '@/features/leave/api/leave.service';
 import { api } from '@/shared/api/httpClient';
 import type { LeaveCreatePayload } from '@/features/leave/types/leave.types';
@@ -57,8 +57,6 @@ const CreateLeavePage = () => {
   }, [formData.start_date, formData.end_date]);
 
   const [loading, setLoading] = useState(false);
-  const [alertMessage, setAlertMessage] = useState('');
-  const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('error');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -70,28 +68,23 @@ const CreateLeavePage = () => {
 
   const validateForm = (): boolean => {
     if (!formData.leave_type_id) {
-      setAlertMessage('Tipe cuti wajib dipilih');
-      setAlertType('error');
+      showToast('Tipe cuti wajib dipilih', 'error');
       return false;
     }
     if (!formData.start_date) {
-      setAlertMessage('Tanggal mulai wajib diisi');
-      setAlertType('error');
+      showToast('Tanggal mulai wajib diisi', 'error');
       return false;
     }
     if (!formData.end_date) {
-      setAlertMessage('Tanggal selesai wajib diisi');
-      setAlertType('error');
+      showToast('Tanggal selesai wajib diisi', 'error');
       return false;
     }
     if (new Date(formData.start_date) > new Date(formData.end_date)) {
-      setAlertMessage('Tanggal mulai harus sebelum tanggal selesai');
-      setAlertType('error');
+      showToast('Tanggal mulai harus sebelum tanggal selesai', 'error');
       return false;
     }
     if (!formData.reason.trim()) {
-      setAlertMessage('Alasan wajib diisi');
-      setAlertType('error');
+      showToast('Alasan wajib diisi', 'error');
       return false;
     }
     return true;
@@ -101,7 +94,6 @@ const CreateLeavePage = () => {
     if (!validateForm()) return;
 
     setLoading(true);
-    setAlertMessage('');
 
     try {
       const payload: LeaveCreatePayload = {
@@ -113,15 +105,13 @@ const CreateLeavePage = () => {
       };
 
       await createLeaveRequest(payload);
-      setAlertMessage('Pengajuan cuti berhasil dibuat!');
-      setAlertType('success');
+      showToast('Pengajuan cuti berhasil dibuat!', 'success');
       setTimeout(() => {
         navigate(returnPath);
       }, 1500);
     } catch (err: any) {
       const message = err.response?.data?.message || err.message || 'Gagal membuat pengajuan cuti';
-      setAlertMessage(message);
-      setAlertType('error');
+      showToast(message, 'error');
     } finally {
       setLoading(false);
     }
@@ -155,15 +145,6 @@ const CreateLeavePage = () => {
 
       {/* Form Card */}
       <Card className="leave-card" glass>
-        {alertMessage && (
-          <Alert 
-            type={alertType} 
-            message={alertMessage}
-            onClose={() => setAlertMessage('')}
-            dismissible
-          />
-        )}
-
         <form className="leave-form" onSubmit={(e) => { e.preventDefault(); void handleCreateLeave(); }}>
           {/* Tipe Cuti */}
           <div className="leave-form-group">

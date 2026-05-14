@@ -49,7 +49,6 @@ const TrainingEnrollmentsPage: React.FC = () => {
   }, []);
 
   const handleApprove = async (id: number) => {
-    if (!window.confirm('Setujui pendaftaran pelatihan ini?')) return;
     try {
       setLoading(true);
       await trainingService.approveEnrollment(id);
@@ -63,7 +62,6 @@ const TrainingEnrollmentsPage: React.FC = () => {
   };
 
   const handleReject = async (id: number) => {
-    if (!window.confirm('Tolak pendaftaran pelatihan ini?')) return;
     try {
       setLoading(true);
       await trainingService.rejectEnrollment(id);
@@ -128,10 +126,7 @@ const TrainingEnrollmentsPage: React.FC = () => {
     });
   }, [enrollments, searchText, activeTab]);
 
-  const paginatedEnrollments = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return filteredEnrollments.slice(startIndex, startIndex + pageSize);
-  }, [filteredEnrollments, currentPage, pageSize]);
+  const paginatedEnrollments = filteredEnrollments;
 
   const summaryStats = useMemo(() => {
     const total = enrollments.length;
@@ -146,7 +141,7 @@ const TrainingEnrollmentsPage: React.FC = () => {
     ];
   }, [enrollments, filteredEnrollments.length, paginatedEnrollments.length]);
 
-  const totalPages = Math.ceil(filteredEnrollments.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   const clearFilters = () => {
     setSearchText("");
@@ -365,7 +360,7 @@ const TrainingEnrollmentsPage: React.FC = () => {
                         </td>
                         <td className="td-center">
                           <div className="action-btn-group">
-                            {enrollment.status === 'pending' && (
+                            {enrollment.status === 'pending' && enrollment.can_act !== false && (
                               <>
                                 <button
                                   className="action-btn"

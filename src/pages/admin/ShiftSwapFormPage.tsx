@@ -8,7 +8,6 @@ import {
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
 import { showToast } from '@/shared/ui/toast';
-import { Alert } from '@/shared/ui/Alert';
 import { employeeService } from '@/features/employee/api/employee.service';
 import { workforceService } from '@/features/workforce/api/workforce.service';
 import './AdminWorkforcePages.css';
@@ -29,8 +28,7 @@ const ShiftSwapFormPage: React.FC = () => {
   const [employees, setEmployees] = useState<any[]>([]);
   const [_loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [statusMessage, setStatusMessage] = useState("");
-  const [statusType, setStatusType] = useState<"success" | "error" | "info">("error");
+
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -50,7 +48,6 @@ const ShiftSwapFormPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setStatusMessage("");
     try {
       const payload = {
         requester_employee_id: Number(formData.requester_employee_id),
@@ -59,14 +56,10 @@ const ShiftSwapFormPage: React.FC = () => {
         reason: formData.reason,
       };
       await workforceService.createShiftSwap(payload);
-      setStatusMessage("Permintaan tukar shift berhasil dibuat");
-      setStatusType("success");
       showToast('Permintaan tukar shift berhasil dibuat', 'success');
       setTimeout(() => navigate('/workforce/shift-swaps'), 1500);
     } catch (err: any) {
       const msg = err?.response?.data?.message || err.message || "Gagal membuat permintaan tukar shift";
-      setStatusMessage(msg);
-      setStatusType("error");
       showToast(msg, 'error');
       setSaving(false);
     }
@@ -99,15 +92,6 @@ const ShiftSwapFormPage: React.FC = () => {
           </div>
         </div>
       </Card>
-
-      {statusMessage && (
-        <Alert
-          type={statusType}
-          message={statusMessage}
-          onClose={() => setStatusMessage("")}
-          dismissible
-        />
-      )}
 
       <form onSubmit={handleSubmit}>
         <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '2rem' }}>

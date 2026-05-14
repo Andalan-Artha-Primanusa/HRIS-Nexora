@@ -5,7 +5,7 @@ import { getLocationDetail, updateLocation } from '@/features/location/api/locat
 import type { LocationUpdatePayload } from '@/features/location/types/location.types';
 import { MapPin, ArrowLeft, Save, MapPinned } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
-import { Alert } from '@/shared/ui/Alert';
+import { showToast } from '@/shared/ui/toast';
 import { Button } from '@/shared/ui/Button';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
@@ -25,14 +25,12 @@ const EditLocationPage = () => {
   });
   const [departments, setDepartments] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [alertMessage, setAlertMessage] = useState('');
-  const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('info');
+
 
   useEffect(() => {
     const loadDetail = async () => {
       if (!id) {
-        setAlertMessage('Location ID tidak ditemukan');
-        setAlertType('error');
+        showToast('Location ID tidak ditemukan', 'error');
         setLoading(false);
         return;
       }
@@ -48,11 +46,9 @@ const EditLocationPage = () => {
           radius: String(payload.radius || '100'),
           department: payload.department || '',
         });
-        setAlertMessage('');
       } catch (err: any) {
         const message = err.response?.data?.message || err.message || 'Gagal memuat data lokasi';
-        setAlertMessage(message);
-        setAlertType('error');
+        showToast(message, 'error');
       } finally {
         setLoading(false);
       }
@@ -83,18 +79,15 @@ const EditLocationPage = () => {
 
   const validateForm = (): boolean => {
     if (!formData.name.trim()) {
-      setAlertMessage('Nama lokasi wajib diisi');
-      setAlertType('error');
+      showToast('Nama lokasi wajib diisi', 'error');
       return false;
     }
     if (!formData.department) {
-      setAlertMessage('Departemen wajib dipilih');
-      setAlertType('error');
+      showToast('Departemen wajib dipilih', 'error');
       return false;
     }
     if (!formData.radius || parseFloat(formData.radius) <= 0) {
-      setAlertMessage('Radius harus lebih dari 0');
-      setAlertType('error');
+      showToast('Radius harus lebih dari 0', 'error');
       return false;
     }
     return true;
@@ -104,7 +97,6 @@ const EditLocationPage = () => {
     if (!validateForm() || !id) return;
 
     setLoading(true);
-    setAlertMessage('');
 
     try {
       const payload: LocationUpdatePayload = {
@@ -114,15 +106,13 @@ const EditLocationPage = () => {
       };
 
       await updateLocation(id, payload);
-      setAlertMessage('Lokasi berhasil diupdate!');
-      setAlertType('success');
+      showToast('Lokasi berhasil diupdate!', 'success');
       setTimeout(() => {
         navigate('/locations');
       }, 1500);
     } catch (err: any) {
       const message = err.response?.data?.message || err.message || 'Gagal mengupdate lokasi';
-      setAlertMessage(message);
-      setAlertType('error');
+      showToast(message, 'error');
     } finally {
       setLoading(false);
     }
@@ -167,16 +157,6 @@ const EditLocationPage = () => {
           </div>
         </div>
       </Card>
-
-      {/* Alert Messages */}
-      {alertMessage && (
-        <Alert 
-          type={alertType} 
-          message={alertMessage}
-          onClose={() => setAlertMessage('')}
-          dismissible
-        />
-      )}
 
       {/* Form Card */}
       <Card className="control-card" glass style={{ marginBottom: '2rem' }}>

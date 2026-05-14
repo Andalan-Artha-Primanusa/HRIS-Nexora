@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
-import { Alert } from "@/shared/ui/Alert";
+import { showToast } from '@/shared/ui/toast';
 import {
   Save,
   User,
@@ -88,8 +88,7 @@ const KpiFormPage = () => {
   const [loading, setLoading] = useState(isEdit);
   const [submitting, setSubmitting] = useState(false);
   const [employees, setEmployees] = useState<any[]>([]);
-  const [statusMessage, setStatusMessage] = useState("");
-  const [alertType, setAlertType] = useState<"success" | "error">("error");
+
 
   const [formData, setFormData] = useState({
     employee_id: "",
@@ -137,8 +136,7 @@ const KpiFormPage = () => {
           }
         }
       } catch (error) {
-        setStatusMessage(getErrorMessage(error as never));
-        setAlertType("error");
+        showToast(getErrorMessage(error as never), "error");
       } finally {
         setLoading(false);
       }
@@ -162,8 +160,7 @@ const KpiFormPage = () => {
     e.preventDefault();
 
     if (!weightOk) {
-      setStatusMessage("Total bobot harus 100%");
-      setAlertType("error");
+      showToast("Total bobot harus 100%", "error");
       return;
     }
 
@@ -209,8 +206,7 @@ const KpiFormPage = () => {
         },
       });
     } catch (error) {
-      setStatusMessage(getErrorMessage(error as never));
-      setAlertType("error");
+      showToast(getErrorMessage(error as never), "error");
       setSubmitting(false);
     }
   };
@@ -262,15 +258,6 @@ const KpiFormPage = () => {
           </div>
         </div>
       </Card>
-
-      {statusMessage && (
-        <Alert
-          type={alertType}
-          message={statusMessage}
-          onClose={() => setStatusMessage("")}
-          dismissible
-        />
-      )}
 
       <Card
         glass

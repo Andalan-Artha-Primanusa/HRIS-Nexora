@@ -5,6 +5,7 @@ import { Button } from '@/shared/ui/Button';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { getAllEmployees } from '@/features/employee/api/employee.service';
 import { legalService } from '@/features/legal/api/legal.service';
+import { showToast } from '@/shared/ui/toast';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import './EmploymentLettersPage.css';
@@ -65,12 +66,9 @@ const EmploymentLettersPage: React.FC = () => {
     });
   }, [employees, searchText, activeTab]);
 
-  const paginatedEmployees = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return filteredEmployees.slice(startIndex, startIndex + pageSize);
-  }, [filteredEmployees, currentPage, pageSize]);
+  const paginatedEmployees = filteredEmployees;
 
-  const totalPages = Math.ceil(filteredEmployees.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   const clearFilters = () => {
     setSearchText("");
@@ -89,9 +87,9 @@ const EmploymentLettersPage: React.FC = () => {
       } else {
         await legalService.generateEmploymentLetter(id);
       }
-      alert('Surat berhasil dibuat!');
+      showToast('Surat berhasil dibuat!', 'success');
     } catch (err) {
-      alert('Gagal membuat surat');
+      showToast('Gagal membuat surat', 'error');
     }
   };
 

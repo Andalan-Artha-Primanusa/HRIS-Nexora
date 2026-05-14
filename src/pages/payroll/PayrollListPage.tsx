@@ -122,8 +122,8 @@ const PayrollListPage = () => {
     });
   }, [filteredItems, sortBy, sortOrder]);
 
-  const paginatedItems = sortedItems.slice((currentPage - 1) * pageSize, (currentPage - 1) * pageSize + pageSize);
-  const totalPages = Math.max(1, Math.ceil(sortedItems.length / pageSize));
+  const paginatedItems = sortedItems;
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => { setCurrentPage(1); }, [searchText, selectedEmployeeId, selectedPeriod, selectedStatus, sortBy, sortOrder]);
 

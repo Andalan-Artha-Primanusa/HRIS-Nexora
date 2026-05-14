@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Alert } from "@/shared/ui/Alert";
+import { showToast } from '@/shared/ui/toast';
 import { ChevronLeft, Tag } from "lucide-react";
 import { createWorkSchedule } from "@/features/work-schedule/api/work-schedule.service";
 import WorkScheduleForm, { type WorkScheduleFormState } from "./components/WorkScheduleForm";
@@ -11,8 +11,7 @@ import { Card } from "@/shared/ui/Card";
 const WorkScheduleCreatePage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [statusMessage, setStatusMessage] = useState("");
-  const [statusType, setStatusType] = useState<"success" | "error" | "info">("error");
+
 
   const [formData, setFormData] = useState<WorkScheduleFormState>({
     name: "",
@@ -23,18 +22,15 @@ const WorkScheduleCreatePage = () => {
 
   const handleCreate = async () => {
     setLoading(true);
-    setStatusMessage("");
     try {
       await createWorkSchedule({
         ...formData,
         grace_period: Number(formData.grace_period),
       });
-      setStatusMessage("Jadwal kerja berhasil dibuat");
-      setStatusType("success");
+      showToast("Jadwal kerja berhasil dibuat", "success");
       setTimeout(() => navigate("/work-schedules"), 1500);
     } catch (err: any) {
-      setStatusMessage(err.message || "Gagal membuat jadwal kerja");
-      setStatusType("error");
+      showToast(err.message || "Gagal membuat jadwal kerja", "error");
       setLoading(false);
     }
   };
@@ -61,15 +57,6 @@ const WorkScheduleCreatePage = () => {
           </div>
         </div>
       </Card>
-
-      {statusMessage && (
-        <Alert
-          type={statusType}
-          message={statusMessage}
-          onClose={() => setStatusMessage("")}
-          dismissible
-        />
-      )}
 
       <WorkScheduleForm
         formData={formData}

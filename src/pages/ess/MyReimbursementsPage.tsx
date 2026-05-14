@@ -63,8 +63,9 @@ const MyReimbursementsPage: React.FC = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const reimbData = await getMyReimbursements();
+      const reimbData = await getMyReimbursements('', currentPage, pageSize);
       setItems(reimbData.items);
+        setTotalPages(reimbData.totalPages);
     } catch (error) {
       console.error('Failed to fetch reimbursements:', error);
     } finally {
@@ -94,12 +95,9 @@ const MyReimbursementsPage: React.FC = () => {
     });
   }, [items, searchText, activeTab]);
 
-  const paginatedItems = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return filteredItems.slice(startIndex, startIndex + pageSize);
-  }, [filteredItems, currentPage, pageSize]);
+  const paginatedItems = filteredItems;
 
-  const totalPages = Math.ceil(filteredItems.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   const summaryStats = useMemo(() => {
     const total = items.length;
@@ -179,15 +177,13 @@ const MyReimbursementsPage: React.FC = () => {
   };
 
   const handleSubmit = async (item: ReimbursementItem) => {
-    if (window.confirm('Ajukan klaim ini untuk persetujuan?')) {
-      try {
-        await submitMyReimbursement(String(item.id));
-        await fetchData();
-        showToast("Klaim reimbursement berhasil diajukan.", "success");
-      } catch (error: any) {
-        console.error('Failed to submit reimbursement:', error);
-        showToast(getActionErrorMessage(error, "Gagal mengajukan klaim reimbursement."), "error");
-      }
+    try {
+      await submitMyReimbursement(String(item.id));
+      await fetchData();
+      showToast("Klaim reimbursement berhasil diajukan.", "success");
+    } catch (error: any) {
+      console.error('Failed to submit reimbursement:', error);
+      showToast(getActionErrorMessage(error, "Gagal mengajukan klaim reimbursement."), "error");
     }
   };
 

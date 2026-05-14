@@ -10,6 +10,7 @@ import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/employee/EmployeesPage.css';
 import { showToast } from '@/shared/ui/toast';
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
+import { RejectReasonModal } from "@/shared/components/RejectReasonModal";
 
 const PromotionPage: React.FC = () => {
   const [items, setItems] = useState<any[]>([]);
@@ -28,6 +29,7 @@ const PromotionPage: React.FC = () => {
   const [rejectionReason, setRejectionReason] = useState('');
   const [reportActionLoading, setReportActionLoading] = useState(false);
   const [historyModal, setHistoryModal] = useState<{ module: string; id: number } | null>(null);
+  const [rejectModalId, setRejectModalId] = useState<string | number | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -73,7 +75,6 @@ const PromotionPage: React.FC = () => {
   };
 
   const handleApprove = async (id: string | number) => {
-    if (!window.confirm('Setujui promosi ini? Jabatan karyawan akan otomatis diperbarui.')) return;
     try {
       await promotionService.approvePromotion(id);
       fetchData();
@@ -85,20 +86,24 @@ const PromotionPage: React.FC = () => {
   };
 
   const handleReject = async (id: string | number) => {
-    const remarks = prompt('Alasan penolakan (opsional):');
-    if (remarks === null) return;
+    setRejectModalId(id);
+  };
+
+  const confirmReject = async (remarks: string) => {
+    if (rejectModalId === null) return;
     try {
-      await promotionService.rejectPromotion(id, remarks);
+      await promotionService.rejectPromotion(rejectModalId, remarks);
       fetchData();
       showToast('Promosi berhasil ditolak', 'success');
     } catch (error: any) {
       console.error(error);
       showToast(error?.response?.data?.message || error?.message || 'Gagal menolak promosi', 'error');
+    } finally {
+      setRejectModalId(null);
     }
   };
 
   const handleDelete = async (id: string | number) => {
-    if (!window.confirm('Hapus pengajuan promosi ini?')) return;
     try {
       await promotionService.deletePromotion(id);
       fetchData();
@@ -116,7 +121,6 @@ const PromotionPage: React.FC = () => {
   };
 
   const handleApproveReport = async (id: string | number) => {
-    if (!window.confirm('Setujui laporan kegiatan ini? Promosi akan dinyatakan selesai.')) return;
     setReportActionLoading(true);
     try {
       await promotionService.approveReport(id);
@@ -188,12 +192,9 @@ const PromotionPage: React.FC = () => {
     });
   }, [filteredItems]);
 
-  const paginatedItems = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return sortedItems.slice(startIndex, startIndex + pageSize);
-  }, [sortedItems, currentPage, pageSize]);
+  const paginatedItems = sortedItems;
 
-  const totalPages = Math.ceil(sortedItems.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   const summaryCards = useMemo(
     () => [
@@ -470,7 +471,7 @@ const PromotionPage: React.FC = () => {
                           <td className="td-center">{getReportBadge(promo.report_status, promo.status)}</td>
                           <td className="td-center">
                             <div className="action-btn-group">
-                              {promo.status === 'pending' && (
+                              {promo.status === 'pending' && promo.can_act !== false && (
                                 <>
                                   <button
                                     className="action-btn"
@@ -497,7 +498,7 @@ const PromotionPage: React.FC = () => {
                                   </button>
                                 </>
                               )}
-                              {promo.report_status === 'submitted' && (
+                              {promo.report_status === 'submitted' && promo.can_act !== false && (
                                 <>
                                   <button
                                     className="action-btn"
@@ -657,6 +658,12 @@ const PromotionPage: React.FC = () => {
           moduleId={historyModal.id}
         />
       )}
+      <RejectReasonModal
+        isOpen={rejectModalId !== null}
+        onClose={() => setRejectModalId(null)}
+        onConfirm={confirmReject}
+        confirmLabel="Tolak Promosi"
+      />
     </div>
   );
 };

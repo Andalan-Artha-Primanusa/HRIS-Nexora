@@ -10,6 +10,7 @@ import {
 import type { ReimbursementItem } from "@/features/reimbursement/types/reimbursement.types";
 import { BarChart3, Check, CircleCheckBig, CircleX, Clock3, RefreshCw, X, Receipt, DownloadCloud, History } from "lucide-react";
 import { showToast } from "@/shared/ui/toast";
+import { RejectReasonModal } from "@/shared/components/RejectReasonModal";
 import "@/shared/styles/CrudPage.css";
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 
@@ -42,12 +43,10 @@ const ReimbursementApprovalPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
   const [historyModal, setHistoryModal] = useState<{ module: string; id: number | string } | null>(null);
+  const [rejectTarget, setRejectTarget] = useState<string | number | null>(null);
 
-  const paginatedItems = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return items.slice(startIndex, startIndex + pageSize);
-  }, [items, currentPage, pageSize]);
-  const totalPages = Math.ceil(items.length / pageSize);
+  const paginatedItems = items;
+  const [totalPages, setTotalPages] = useState(1);
 
   const summaryCards = [
     {
@@ -89,7 +88,7 @@ const ReimbursementApprovalPage = () => {
     try {
       // Ambil data tanpa filter status di URL dulu untuk memastikan kita dapat data mentah, 
       // lalu kita filter secara presisi di frontend agar tidak luput.
-      const result = await getAllReimbursements();
+      const result = await getAllReimbursements({ page: currentPage, per_page: pageSize });
       const allItems = result.items || [];
       
       const pendingItems = allItems.filter(i => {
@@ -119,12 +118,14 @@ const ReimbursementApprovalPage = () => {
   };
 
   const handleReject = async (id: string | number) => {
-    const reason = window.prompt("Berikan alasan penolakan untuk karyawan:");
-    if (reason === null) return; // cancelled
-    
-    setActionLoading(String(id));
+    setRejectTarget(id);
+  };
+
+  const confirmReject = async (reason: string) => {
+    if (rejectTarget === null) return;
+    setActionLoading(String(rejectTarget));
     try {
-      await rejectReimbursement(String(id), { note: reason || "Ditolak tanpa alasan" });
+      await rejectReimbursement(String(rejectTarget), { note: reason || "Ditolak tanpa alasan" });
       await loadPending();
       showToast("Pengajuan ditolak", "success");
     } catch (error: any) {
@@ -250,22 +251,26 @@ const ReimbursementApprovalPage = () => {
                         </td>
                         <td>
                           <div className="action-btn-group">
-                            <button
-                              className="action-btn action-btn-success"
-                              onClick={() => void handleApprove(item.id)}
-                              disabled={actionLoading === String(item.id)}
-                              title="Approve Reimburse"
-                            >
-                              <Check size={16} />
-                            </button>
-                            <button
-                              className="action-btn action-btn-delete"
-                              onClick={() => void handleReject(item.id)}
-                              disabled={actionLoading === String(item.id)}
-                              title="Reject Reimburse"
-                            >
-                              <X size={16} />
-                            </button>
+                            {item.can_act !== false && (
+                              <>
+                                <button
+                                  className="action-btn action-btn-success"
+                                  onClick={() => void handleApprove(item.id)}
+                                  disabled={actionLoading === String(item.id)}
+                                  title="Approve Reimburse"
+                                >
+                                  <Check size={16} />
+                                </button>
+                                <button
+                                  className="action-btn action-btn-delete"
+                                  onClick={() => void handleReject(item.id)}
+                                  disabled={actionLoading === String(item.id)}
+                                  title="Reject Reimburse"
+                                >
+                                  <X size={16} />
+                                </button>
+                              </>
+                            )}
                             <button className="action-btn" style={{ color: '#8b5cf6', background: '#f5f3ff' }} onClick={() => setHistoryModal({ module: 'reimbursement', id: item.id })} title="Riwayat Approval"><History size={16} /></button>
                           </div>
                         </td>
@@ -306,6 +311,14 @@ const ReimbursementApprovalPage = () => {
           moduleId={historyModal.id}
         />
       )}
+
+      <RejectReasonModal
+        isOpen={rejectTarget !== null}
+        onClose={() => setRejectTarget(null)}
+        onConfirm={confirmReject}
+        title="Alasan Penolakan"
+        confirmLabel="Tolak"
+      />
     </div>
   );
 };

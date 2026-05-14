@@ -60,11 +60,8 @@ const PayrollManagementPage = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
-  const paginatedItems = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return items.slice(startIndex, startIndex + pageSize);
-  }, [items, currentPage, pageSize]);
-  const totalPages = Math.ceil(items.length / pageSize);
+  const paginatedItems = items;
+  const [totalPages, setTotalPages] = useState(1);
 
   const requireId = () => {
     const id = form.id.trim();
@@ -78,8 +75,9 @@ const PayrollManagementPage = () => {
     setLoading(true);
 
     try {
-      const result = await getAllPayroll();
+      const result = await getAllPayroll({ page: currentPage, per_page: pageSize });
       setItems(toSafeArray(result));
+      setTotalPages(result?.data?.last_page ?? 1);
     } catch (error: unknown) {
       showToast(error instanceof Error ? error.message : "Gagal muat payroll", "error");
     } finally {

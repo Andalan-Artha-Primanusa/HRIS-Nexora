@@ -105,12 +105,9 @@ const PayrollReportsPage: React.FC = () => {
     });
   }, [data, searchText, activeFilterTab]);
 
-  const paginatedData = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return filteredData.slice(start, start + pageSize);
-  }, [filteredData, currentPage, pageSize]);
+  const paginatedData = filteredData;
 
-  const totalPages = Math.ceil(filteredData.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   const taxSummary = useMemo(() => {
     const totals = data.reduce((acc, curr) => ({

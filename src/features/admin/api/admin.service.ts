@@ -37,10 +37,12 @@ export const getAllUsers = async (page = 1, perPage = 50) => {
   const response = await api.get("/admin/users", {
     params: { page, per_page: perPage }
   });
+  const raw = response.data;
   return {
-    items: extractArrayPayload(response.data) as unknown as AdminUser[],
-    raw: response.data,
-    total: toRecord(response.data).total,
+    items: extractArrayPayload(raw) as unknown as AdminUser[],
+    totalPages: raw?.data?.last_page ?? 1,
+    raw,
+    total: toRecord(raw).total,
     page,
     perPage,
   };
@@ -80,10 +82,12 @@ export const getAllRoles = async (page = 1, perPage = 50) => {
   const response = await api.get("/admin/roles", {
     params: { page, per_page: perPage }
   });
+  const raw = response.data;
   return {
-    items: extractArrayPayload(response.data) as unknown as AdminRole[],
-    raw: response.data,
-    total: toRecord(response.data).total,
+    items: extractArrayPayload(raw) as unknown as AdminRole[],
+    totalPages: raw?.data?.last_page ?? 1,
+    raw,
+    total: toRecord(raw).total,
     page,
     perPage,
   };
@@ -153,10 +157,12 @@ export const getAllPermissions = async (page = 1, perPage = 50) => {
   const response = await api.get("/admin/permissions", {
     params: { page, per_page: perPage }
   });
+  const raw = response.data;
   return {
-    items: extractArrayPayload(response.data) as unknown as AdminPermission[],
-    raw: response.data,
-    total: toRecord(response.data).total,
+    items: extractArrayPayload(raw) as unknown as AdminPermission[],
+    totalPages: raw?.data?.last_page ?? 1,
+    raw,
+    total: toRecord(raw).total,
     page,
     perPage,
   };

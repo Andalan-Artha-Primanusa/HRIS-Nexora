@@ -137,12 +137,9 @@ const MyLeavesPage = () => {
     });
   }, [leaves, searchText, selectedStatus]);
 
-  const paginatedLeaves = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return filteredLeaves.slice(startIndex, startIndex + pageSize);
-  }, [filteredLeaves, currentPage, pageSize]);
+  const paginatedLeaves = filteredLeaves;
 
-  const totalPages = Math.ceil(filteredLeaves.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   const summaryCards = useMemo(() => {
     if (isBalanceRoute) {

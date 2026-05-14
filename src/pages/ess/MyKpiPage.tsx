@@ -21,6 +21,7 @@ import {
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import { getMyKpiPeriods, submitMyKpiPeriod, updateMyKpiPeriodItems } from "@/features/ess/api/ess.service";
+import { showToast } from "@/shared/ui/toast";
 
 type KpiPeriodItem = {
   id: number;
@@ -114,8 +115,7 @@ const MyKpiPage = () => {
   const [searchText, setSearchText] = useState("");
   const [activeTab, setActiveTab] = useState<(typeof TAB_OPTIONS)[number]>("Semua");
   const [loading, setLoading] = useState(true);
-  const [statusMessage, setStatusMessage] = useState("");
-  const [alertType, setAlertType] = useState<"success" | "error" | "info">("info");
+
   const [currentPage, setCurrentPage] = useState(1);
   const [itemDrafts, setItemDrafts] = useState<KpiPeriodDraftMap>({});
   const [savingItemId, setSavingItemId] = useState<number | null>(null);
@@ -125,7 +125,7 @@ const MyKpiPage = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const response = await getMyKpiPeriods();
+      const response = await getMyKpiPeriods(currentPage, pageSize);
       const items = Array.isArray(response.items) ? response.items : [];
       const mappedPeriods = items.map((item) => {
         const record = item as KpiPeriodRecord;
@@ -140,8 +140,7 @@ const MyKpiPage = () => {
       return mappedPeriods;
     } catch (error) {
       console.error("KPI Period Fetch Error:", error);
-      setStatusMessage(getErrorMessage(error as never) || "Gagal memuat KPI periode");
-      setAlertType("error");
+      showToast(getErrorMessage(error as never) || "Gagal memuat KPI periode", "error");
       return [] as KpiPeriodRecord[];
     } finally {
       setLoading(false);
@@ -192,10 +191,10 @@ const MyKpiPage = () => {
   }, [periods, searchText, activeTab]);
 
   const paginatedPeriods = useMemo(
-    () => filteredPeriods.slice((currentPage - 1) * pageSize, currentPage * pageSize),
+    () => filteredPeriods,
     [filteredPeriods, currentPage, pageSize]
   );
-  const totalPages = Math.max(1, Math.ceil(filteredPeriods.length / pageSize));
+  const [totalPages, setTotalPages] = useState(1);
 
   const stats = useMemo(() => ({
     total: periods.length,
@@ -226,11 +225,9 @@ const MyKpiPage = () => {
         });
       }
 
-      setStatusMessage(`Capaian ${item.indicator} berhasil disimpan.`);
-      setAlertType("success");
+      showToast(`Capaian ${item.indicator} berhasil disimpan.`, "success");
     } catch (error) {
-      setStatusMessage(getErrorMessage(error as never) || "Gagal menyimpan capaian KPI item");
-      setAlertType("error");
+      showToast(getErrorMessage(error as never) || "Gagal menyimpan capaian KPI item", "error");
     } finally {
       setSavingItemId(null);
     }
@@ -238,8 +235,6 @@ const MyKpiPage = () => {
 
   const handleSubmitItem = async (item: KpiPeriodItem) => {
     if (!selectedPeriod) return;
-
-    if (!window.confirm(`Ajukan item KPI \"${item.indicator}\"?`)) return;
 
     setSubmittingItemId(item.id);
     try {
@@ -258,11 +253,9 @@ const MyKpiPage = () => {
         });
       }
 
-      setStatusMessage(`Item KPI ${item.indicator} berhasil diajukan.`);
-      setAlertType("success");
+      showToast(`Item KPI ${item.indicator} berhasil diajukan.`, "success");
     } catch (error) {
-      setStatusMessage(getErrorMessage(error as never) || "Gagal mengajukan item KPI");
-      setAlertType("error");
+      showToast(getErrorMessage(error as never) || "Gagal mengajukan item KPI", "error");
     } finally {
       setSubmittingItemId(null);
     }
@@ -389,12 +382,7 @@ const MyKpiPage = () => {
         </div>
       </Card>
 
-      {statusMessage && (
-        <div className={`alert alert-${alertType}`} style={{ marginBottom: 24, display: "flex", alignItems: "center", gap: 8 }}>
-          <span>{statusMessage}</span>
-          <button onClick={() => setStatusMessage("")} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", fontSize: "1.2rem" }}>×</button>
-        </div>
-      )}
+
 
       <Card className="kpi-card" glass>
         <div className="kpi-card-title">

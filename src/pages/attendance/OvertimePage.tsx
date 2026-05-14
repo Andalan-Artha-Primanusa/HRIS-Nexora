@@ -7,6 +7,7 @@ import { useAuthStore } from '@/app/store/auth.store';
 import { attendanceService } from '@/features/attendance/api/attendance.service';
 import overtimeService from '@/features/attendance/api/overtime.service';
 import { showToast } from '@/shared/ui/toast';
+import { RejectReasonModal } from "@/shared/components/RejectReasonModal";
 import { Clock, RefreshCw, Calendar, Timer, AlertCircle, CheckCircle, XCircle, Search, MessageSquare, Eye, Send, Sparkles } from 'lucide-react';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
@@ -50,6 +51,8 @@ const OvertimePage = () => {
   const [reasonDraft, setReasonDraft] = useState('');
   const [selectedRecord, setSelectedRecord] = useState<OvertimeRecord | null>(null);
   const [reasonSaving, setReasonSaving] = useState(false);
+  const [rejectTargetId, setRejectTargetId] = useState<number | null>(null);
+  const [evidenceList, setEvidenceList] = useState<any[] | null>(null);
   const user = useAuthStore((state) => state.user);
 
   const canViewAllOvertime = useMemo(() => {
@@ -218,8 +221,6 @@ const OvertimePage = () => {
       return;
     }
 
-    if (!window.confirm('Setujui pengajuan lembur ini?')) return;
-
     try {
       setLoading(true);
       await api.put(`/overtime/requests/${requestId}/approve`);
@@ -238,13 +239,14 @@ const OvertimePage = () => {
       showToast('Request lembur tidak ditemukan.', 'error');
       return;
     }
+    setRejectTargetId(requestId);
+  };
 
-    const reason = window.prompt('Alasan penolakan (opsional):');
-    if (reason === null) return;
-
+  const confirmRejectRequest = async (reason: string) => {
+    if (rejectTargetId === null) return;
     try {
       setLoading(true);
-      await api.put(`/overtime/requests/${requestId}/reject`, { reject_reason: reason || undefined });
+      await api.put(`/overtime/requests/${rejectTargetId}/reject`, { reject_reason: reason || undefined });
       await loadRecords();
       showToast('Lembur berhasil ditolak', 'success');
     } catch (error: any) {
@@ -323,15 +325,7 @@ const OvertimePage = () => {
         showToast('Belum ada bukti untuk lembur ini', 'info');
         return;
       }
-      const names = list.map((e: any, i: number) => `${i + 1}. ${e.filename || e.name || e.file_name || 'file'}`);
-      const pick = window.prompt('Bukti:\n' + names.join('\n') + '\n\nMasukkan nomor untuk membuka (kosong = batalkan)');
-      if (!pick) return;
-      const idx = parseInt(pick, 10) - 1;
-      if (Number.isNaN(idx) || idx < 0 || idx >= list.length) { showToast('Pilihan tidak valid', 'error'); return; }
-      const selectedEvidence = list[idx];
-      const url = selectedEvidence?.file_url || selectedEvidence?.url || selectedEvidence?.path;
-      if (!url) { showToast('Tidak ada URL untuk file ini', 'error'); return; }
-      window.open(url, '_blank', 'noopener,noreferrer');
+      setEvidenceList(list);
     } catch (err: any) {
       console.error('Failed to load evidences:', err);
       showToast(err?.response?.data?.message || err?.message || 'Gagal mengambil bukti', 'error');
@@ -354,12 +348,9 @@ const OvertimePage = () => {
     });
   }, [records, searchText, activeTab]);
 
-  const paginatedRecords = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return filteredRecords.slice(start, start + pageSize);
-  }, [filteredRecords, currentPage, pageSize]);
+  const paginatedRecords = filteredRecords;
 
-  const totalPages = Math.ceil(filteredRecords.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   const pendingCount = records.filter(r => normalizeOvertimeStatus(r.request_status ?? r.status) === 'pending').length;
   const approvedCount = records.filter(r => normalizeOvertimeStatus(r.request_status ?? r.status) === 'approved').length;
@@ -668,7 +659,7 @@ const OvertimePage = () => {
                         </td>
                         <td className="td-center">
                           <div className="action-btn-group">
-                            {canViewAllOvertime && normalizeOvertimeStatus(record.request_status || record.status) === 'pending' && (
+                            {canViewAllOvertime && normalizeOvertimeStatus(record.request_status || record.status) === 'pending' && record.can_act !== false && (
                               <>
                                 <button
                                   className="action-btn"
@@ -770,6 +761,47 @@ const OvertimePage = () => {
           )}
         </div>
       </div>
+
+      <RejectReasonModal
+        isOpen={rejectTargetId !== null}
+        onClose={() => setRejectTargetId(null)}
+        onConfirm={confirmRejectRequest}
+      />
+
+      {evidenceList && (
+        <Modal
+          isOpen={!!evidenceList}
+          onClose={() => setEvidenceList(null)}
+          title="Bukti Lembur"
+          size="sm"
+        >
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+            {evidenceList.map((ev: any, i: number) => (
+              <div
+                key={ev.id || i}
+                style={{
+                  display: "flex", alignItems: "center", gap: "0.75rem",
+                  padding: "0.75rem 1rem", borderRadius: "8px",
+                  background: "#f8fafc", border: "1px solid #f1f5f9",
+                  cursor: "pointer",
+                }}
+                onClick={() => {
+                  const url = ev.file_url || ev.url || ev.path;
+                  if (url) window.open(url, '_blank', 'noopener,noreferrer');
+                }}
+              >
+                <span style={{ fontWeight: 600, color: "#475569", minWidth: "1.5rem" }}>{i + 1}.</span>
+                <span style={{ color: "#0f172a", fontWeight: 500 }}>
+                  {ev.filename || ev.name || ev.file_name || 'file'}
+                </span>
+                <span style={{ marginLeft: "auto", color: "#64748b", fontSize: "0.85rem" }}>
+                  Klik untuk buka
+                </span>
+              </div>
+            ))}
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };

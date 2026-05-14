@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader } from "@/shared/ui";
 import { Button } from "@/shared/ui/Button";
-import { Alert } from "@/shared/ui/Alert";
+import { showToast } from '@/shared/ui/toast';
 import { getAllWorkSchedules, deleteWorkSchedule } from "@/features/work-schedule/api/work-schedule.service";
 import type { WorkScheduleItem } from "@/features/work-schedule/types/work-schedule.types";
 import { 
@@ -85,30 +85,22 @@ const WorkSchedulesPage = () => {
   const navigate = useNavigate();
   const [schedules, setSchedules] = useState<WorkScheduleItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [statusMessage, setStatusMessage] = useState("");
-  const [statusType, setStatusType] = useState<"success" | "error" | "info">("info");
+
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
 
-  const paginatedSchedules = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return schedules.slice(startIndex, startIndex + pageSize);
-  }, [schedules, currentPage, pageSize]);
-  const totalPages = Math.ceil(schedules.length / pageSize);
+  const paginatedSchedules = schedules;
+  const [totalPages, setTotalPages] = useState(1);
 
   const loadSchedules = async (options: { clearMessage?: boolean } = {}) => {
     const { clearMessage = true } = options;
     setLoading(true);
-    if (clearMessage) {
-      setStatusMessage("");
-    }
     try {
       const result = await getAllWorkSchedules();
       setSchedules(result.items);
     } catch (error) {
-      setStatusMessage(getErrorMessage(error, "Gagal memuat jadwal kerja"));
-      setStatusType("error");
+      showToast(getErrorMessage(error, "Gagal memuat jadwal kerja"), "error");
     } finally {
       setLoading(false);
     }
@@ -118,13 +110,11 @@ const WorkSchedulesPage = () => {
     setLoading(true);
     try {
       await deleteWorkSchedule(id);
-      setStatusMessage("Jadwal kerja berhasil dihapus");
-      setStatusType("success");
+      showToast("Jadwal kerja berhasil dihapus", "success");
       setDeleteConfirmId(null);
       await loadSchedules({ clearMessage: false });
     } catch (error) {
-      setStatusMessage(getErrorMessage(error, "Gagal menghapus jadwal kerja"));
-      setStatusType("error");
+      showToast(getErrorMessage(error, "Gagal menghapus jadwal kerja"), "error");
     } finally {
       setLoading(false);
     }
@@ -235,15 +225,6 @@ const WorkSchedulesPage = () => {
           );
         })}
       </div>
-
-      {statusMessage && (
-        <Alert
-          type={statusType}
-          message={statusMessage}
-          onClose={() => setStatusMessage("")}
-          dismissible
-        />
-      )}
 
       <Card className="analytics-title-card">
         <CardHeader

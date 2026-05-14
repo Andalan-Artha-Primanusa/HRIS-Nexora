@@ -50,7 +50,7 @@ const AdminReimbursementsPage: React.FC = () => {
     setLoading(true);
     try {
       const [reimbData, statsData] = await Promise.all([
-        getAllReimbursements({}),
+        getAllReimbursements({ page: currentPage, per_page: pageSize }),
         getReimbursementStatistics()
       ]);
       setItems(reimbData.items || []);
@@ -94,12 +94,9 @@ const AdminReimbursementsPage: React.FC = () => {
   }, [filteredItems]);
 
   // Paginate
-  const paginatedItems = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return sortedItems.slice(startIndex, startIndex + pageSize);
-  }, [sortedItems, currentPage, pageSize]);
+  const paginatedItems = sortedItems;
 
-  const totalPages = Math.ceil(sortedItems.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   // Summary Cards
   const summaryCards = useMemo(() => [

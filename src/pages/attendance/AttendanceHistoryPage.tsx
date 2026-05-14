@@ -74,12 +74,9 @@ const AttendanceHistoryPage = () => {
     });
   }, [filteredHistory]);
 
-  const paginatedHistory = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return sortedHistory.slice(startIndex, startIndex + pageSize);
-  }, [sortedHistory, currentPage, pageSize]);
+  const paginatedHistory = sortedHistory;
 
-  const totalPages = Math.ceil(sortedHistory.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   const clearFilters = () => {
     setSearchText('');

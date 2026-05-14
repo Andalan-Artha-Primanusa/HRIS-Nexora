@@ -172,10 +172,7 @@ const AdminEmailNotificationsPage = () => {
     return [...filteredTemplates].sort((a, b) => String(a.name ?? '').localeCompare(String(b.name ?? '')));
   }, [filteredTemplates]);
 
-  const paginatedTemplates = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return sortedTemplates.slice(startIndex, startIndex + pageSize);
-  }, [sortedTemplates, currentPage, pageSize]);
+  const paginatedTemplates = sortedTemplates;
 
   const filteredLogs = useMemo(() => {
     if (!searchText) return logs;
@@ -197,13 +194,10 @@ const AdminEmailNotificationsPage = () => {
     });
   }, [filteredLogs]);
 
-  const paginatedLogs = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return sortedLogs.slice(startIndex, startIndex + pageSize);
-  }, [sortedLogs, currentPage, pageSize]);
+  const paginatedLogs = sortedLogs;
 
-  const totalPagesTemplates = Math.ceil(filteredTemplates.length / pageSize);
-  const totalPagesLogs = Math.ceil(filteredLogs.length / pageSize);
+  const [totalPagesTemplates, setTotalPagesTemplates] = useState(1);
+  const [totalPagesLogs, setTotalPagesLogs] = useState(1);
 
   const clearFilters = () => {
     setSearchText('');

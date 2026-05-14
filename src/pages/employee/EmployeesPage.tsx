@@ -152,12 +152,9 @@ const EmployeesPage = () => {
     });
   }, [filteredEmployees, sortBy, sortOrder]);
 
-  const paginatedEmployees = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return sortedEmployees.slice(startIndex, startIndex + pageSize);
-  }, [sortedEmployees, currentPage, pageSize]);
+  const paginatedEmployees = sortedEmployees;
 
-  const totalPages = Math.ceil(sortedEmployees.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   const employeeSummaryCards = useMemo(
     () => [

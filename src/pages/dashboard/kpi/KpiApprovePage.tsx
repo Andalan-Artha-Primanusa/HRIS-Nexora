@@ -53,10 +53,6 @@ const KpiApprovePage = () => {
   };
 
   const handleApprove = async () => {
-    if (!window.confirm('Apakah Anda yakin ingin approve KPI ini?')) {
-      return;
-    }
-
     setApproving(true);
 
     try {

@@ -42,9 +42,11 @@ const extractArrayPayload = (raw: unknown): ReimbursementItem[] => {
 /** GET /reimbursements → index() */
 export const getAllReimbursements = async (filters?: ReimbursementFilters) => {
   const response = await api.get("/reimbursements", { params: filters });
+  const raw = response.data;
   return {
-    items: extractArrayPayload(response.data),
-    raw: response.data,
+    items: extractArrayPayload(raw),
+    totalPages: raw?.data?.last_page ?? 1,
+    raw,
   };
 };
 
@@ -94,11 +96,13 @@ export const markReimbursementAsPaid = async (id: string) => {
 };
 
 /** GET /reimbursements/pending → pending() */
-export const getPendingReimbursements = async () => {
-  const response = await api.get("/reimbursements/pending");
+export const getPendingReimbursements = async (page = 1, perPage = 10) => {
+  const response = await api.get("/reimbursements/pending", { params: { page, per_page: perPage } });
+  const raw = response.data;
   return {
-    items: extractArrayPayload(response.data),
-    raw: response.data,
+    items: extractArrayPayload(raw),
+    totalPages: raw?.data?.last_page ?? 1,
+    raw,
   };
 };
 
@@ -125,13 +129,15 @@ export const getReimbursementStatistics = async (employeeId?: string) => {
 // ─── ESS (Employee Self-Service) endpoints ───────────────────────────────────
 
 /** GET /my/reimbursements → myReimbursements() */
-export const getMyReimbursements = async (status?: string) => {
+export const getMyReimbursements = async (status?: string, page = 1, perPage = 10) => {
   const response = await api.get("/my/reimbursements", {
-    params: status ? { status } : undefined,
+    params: { ...(status ? { status } : {}), page, per_page: perPage },
   });
+  const raw = response.data;
   return {
-    items: extractArrayPayload(response.data),
-    raw: response.data,
+    items: extractArrayPayload(raw),
+    totalPages: raw?.data?.last_page ?? 1,
+    raw,
   };
 };
 

@@ -68,7 +68,7 @@ const LeaveApprovalPage = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const result = await getPendingLeaves();
+      const result = await getPendingLeaves(currentPage, pageSize);
       const raw = result.items || [];
       setItems(raw);
     } catch (error: unknown) {
@@ -97,12 +97,9 @@ const LeaveApprovalPage = () => {
     });
   }, [items, searchText, activeTab]);
 
-  const paginatedItems = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return filteredItems.slice(startIndex, startIndex + pageSize);
-  }, [filteredItems, currentPage, pageSize]);
+  const paginatedItems = filteredItems;
 
-  const totalPages = Math.ceil(filteredItems.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   const summaryStats = useMemo(() => {
     const pending = items.filter(i => i.status === 'pending' || i.status === 'submitted').length;
@@ -328,7 +325,7 @@ const LeaveApprovalPage = () => {
                         {isAdmin && (
                           <td className="td-center">
                             <div className="action-btn-group">
-                              {item.status === 'pending' || item.status === 'submitted' ? (
+                              {(item.status === 'pending' || item.status === 'submitted') && item.can_act !== false ? (
                                 <>
                                   <button
                                     className="action-btn"

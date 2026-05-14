@@ -123,7 +123,6 @@ const KpiListPage = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if(!window.confirm('Hapus permanen KPI ini?')) return;
     setActionLoading(id + '_del');
     try {
       await deleteKpi(id);

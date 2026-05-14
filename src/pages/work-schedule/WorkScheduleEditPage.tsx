@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Alert } from "@/shared/ui/Alert";
+import { showToast } from '@/shared/ui/toast';
 import { ChevronLeft, Loader2, Tag } from "lucide-react";
 import { Card } from "@/shared/ui/Card";
 import "../dashboard/overview/OverviewPage.css";
@@ -13,8 +13,7 @@ const WorkScheduleEditPage = () => {
   const { id } = useParams<{ id: string }>();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
-  const [statusMessage, setStatusMessage] = useState("");
-  const [statusType, setStatusType] = useState<"success" | "error" | "info">("error");
+
 
   const [formData, setFormData] = useState<WorkScheduleFormState>({
     name: "",
@@ -35,8 +34,7 @@ const WorkScheduleEditPage = () => {
         grace_period: data.grace_period,
       });
     } catch (err: any) {
-      setStatusMessage(err.message || "Gagal memuat detail jadwal kerja");
-      setStatusType("error");
+      showToast(err.message || "Gagal memuat detail jadwal kerja", "error");
     } finally {
       setFetching(false);
     }
@@ -49,18 +47,15 @@ const WorkScheduleEditPage = () => {
   const handleUpdate = async () => {
     if (!id) return;
     setLoading(true);
-    setStatusMessage("");
     try {
       await updateWorkSchedule(id, {
         ...formData,
         grace_period: Number(formData.grace_period),
       });
-      setStatusMessage("Jadwal kerja berhasil diperbarui");
-      setStatusType("success");
+      showToast("Jadwal kerja berhasil diperbarui", "success");
       setTimeout(() => navigate("/work-schedules"), 1500);
     } catch (err: any) {
-      setStatusMessage(err.message || "Gagal memperbarui jadwal kerja");
-      setStatusType("error");
+      showToast(err.message || "Gagal memperbarui jadwal kerja", "error");
       setLoading(false);
     }
   };
@@ -95,15 +90,6 @@ const WorkScheduleEditPage = () => {
           </div>
         </div>
       </Card>
-
-      {statusMessage && (
-        <Alert
-          type={statusType}
-          message={statusMessage}
-          onClose={() => setStatusMessage("")}
-          dismissible
-        />
-      )}
 
       <WorkScheduleForm
         formData={formData}

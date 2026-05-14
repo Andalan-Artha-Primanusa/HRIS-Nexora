@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Save, Shield, Tag, FileText } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
-import { Alert } from '@/shared/ui/Alert';
+import { showToast } from '@/shared/ui/toast';
 import { createRole, updateRole, getRoleById } from '@/features/admin/api/admin.service';
 import '@/shared/styles/CrudPage.css';
 import "../dashboard/overview/OverviewPage.css";
@@ -15,8 +15,7 @@ const AdminRoleFormPage: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
-  const [statusMessage, setStatusMessage] = useState("");
-  const [alertType, setAlertType] = useState<"success" | "error" | "info">("info");
+
   
   const [formData, setFormData] = useState({
     name: '',
@@ -35,8 +34,7 @@ const AdminRoleFormPage: React.FC = () => {
             description: (data as any).description || ''
           });
         } catch (err: any) {
-          setStatusMessage(err.message || "Gagal memuat detail role.");
-          setAlertType("error");
+          showToast(err.message || "Gagal memuat detail role.", "error");
         } finally {
           setFetching(false);
         }
@@ -48,21 +46,18 @@ const AdminRoleFormPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setStatusMessage("");
     
     try {
       if (isEdit) {
         await updateRole(id, formData);
-        setStatusMessage("Peran berhasil diperbarui!");
+        showToast("Peran berhasil diperbarui!", "success");
       } else {
         await createRole(formData);
-        setStatusMessage("Peran baru berhasil dibuat!");
+        showToast("Peran baru berhasil dibuat!", "success");
       }
-      setAlertType("success");
       setTimeout(() => navigate('/admin/roles'), 1500);
     } catch (err: any) {
-      setStatusMessage(err.message || "Gagal menyimpan role.");
-      setAlertType("error");
+      showToast(err.message || "Gagal menyimpan role.", "error");
     } finally {
       setLoading(false);
     }
@@ -101,17 +96,6 @@ const AdminRoleFormPage: React.FC = () => {
           </div>
         </div>
       </Card>
-
-      {statusMessage && (
-        <div style={{ marginBottom: '2rem' }}>
-          <Alert 
-            type={alertType} 
-            message={statusMessage} 
-            onClose={() => setStatusMessage("")} 
-            dismissible 
-          />
-        </div>
-      )}
 
       <form onSubmit={handleSubmit}>
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>

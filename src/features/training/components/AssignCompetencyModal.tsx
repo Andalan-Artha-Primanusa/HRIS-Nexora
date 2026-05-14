@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal } from '@/shared/ui/Modal';
 import { api } from '@/shared/api/httpClient';
+import { showToast } from '@/shared/ui/toast';
 
 interface AssignCompetencyModalProps {
   isOpen: boolean;
@@ -73,7 +74,7 @@ export const AssignCompetencyModal: React.FC<AssignCompetencyModalProps> = ({
       onClose();
     } catch (err: any) {
       const msg = err.response?.data?.message || 'Gagal menetapkan kompetensi.';
-      alert(msg);
+      showToast(msg, 'error');
     } finally {
       setSaving(false);
     }

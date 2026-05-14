@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
-import { Alert } from "@/shared/ui/Alert";
+import { showToast } from '@/shared/ui/toast';
 import { Button } from "@/shared/ui/Button";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { ROLES } from "@/shared/types/rbac.types";
@@ -17,7 +17,7 @@ import "@/pages/dashboard/overview/OverviewPage.css";
 import "@/pages/payroll/PayrollShared.css";
 import "./AdminCrudPages.css";
 
-type AlertType = "success" | "error" | "info";
+
 
 const hasAdminAccess = (user: any) => {
   const roles = Array.isArray(user?.roles) ? user.roles : [];
@@ -71,8 +71,7 @@ const AdminBiometricDevicesPage = () => {
   const [devices, setDevices] = useState<BiometricDeviceItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [syncingId, setSyncingId] = useState<string | number | null>(null);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertType, setAlertType] = useState<AlertType>("info");
+
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
 
@@ -85,22 +84,16 @@ const AdminBiometricDevicesPage = () => {
     };
   }, [devices]);
 
-  const paginatedDevices = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return devices.slice(startIndex, startIndex + pageSize);
-  }, [devices, currentPage, pageSize]);
-  const totalPages = Math.ceil(devices.length / pageSize);
+  const paginatedDevices = devices;
+  const [totalPages, setTotalPages] = useState(1);
 
   const loadDevices = async () => {
     setLoading(true);
-    setAlertMessage("");
-
     try {
       const result = await getBiometricDevices();
       setDevices(Array.isArray(result.items) ? result.items : []);
     } catch (error: unknown) {
-      setAlertMessage(getErrorMessage(error as any));
-      setAlertType("error");
+      showToast(getErrorMessage(error as any), "error");
     } finally {
       setLoading(false);
     }
@@ -119,11 +112,9 @@ const AdminBiometricDevicesPage = () => {
       await syncBiometricAttendance({
         device_id: deviceId,
       });
-      setAlertMessage(`Sinkronisasi attendance untuk perangkat ${String((device as any).name || deviceId)} berhasil dijalankan.`);
-      setAlertType("success");
+      showToast(`Sinkronisasi attendance untuk perangkat ${String((device as any).name || deviceId)} berhasil dijalankan.`, "success");
     } catch (error: unknown) {
-      setAlertMessage(getErrorMessage(error as any));
-      setAlertType("error");
+      showToast(getErrorMessage(error as any), "error");
     } finally {
       setSyncingId(null);
     }
@@ -203,15 +194,6 @@ const AdminBiometricDevicesPage = () => {
           );
         })}
       </div>
-
-      {alertMessage && (
-        <Alert
-          type={alertType}
-          message={alertMessage}
-          onClose={() => setAlertMessage("")}
-          dismissible
-        />
-      )}
 
       <Card className="table-card" glass>
         <div className="table-header-bar">

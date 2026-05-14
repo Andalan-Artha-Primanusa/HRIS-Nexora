@@ -11,7 +11,7 @@ export const assetService = {
     return response.data;
   },
   // --- Asset Management (Admin/HR) ---
-  getAssets: async (params?: { status?: string; search?: string }) => {
+  getAssets: async (params?: { status?: string; search?: string; page?: number; per_page?: number }) => {
     const response = await api.get('/assets', { params });
     return response.data;
   },
@@ -33,8 +33,8 @@ export const assetService = {
   },
 
   // --- Assignment Transactions ---
-  getAssignments: async () => {
-    const response = await api.get('/assets/assignments');
+  getAssignments: async (page = 1, perPage = 10) => {
+    const response = await api.get('/assets/assignments', { params: { page, per_page: perPage } });
     return response.data;
   },
   assignAsset: async (assetId: string | number, data: {

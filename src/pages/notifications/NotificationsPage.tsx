@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
-import { Alert } from "@/shared/ui/Alert";
+import { showToast } from '@/shared/ui/toast';
 import { api } from "@/shared/api/httpClient";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { Bell, BellRing, Check, RefreshCw } from "lucide-react";
@@ -18,7 +18,7 @@ type NotificationItem = {
   created_at?: string;
 };
 
-type AlertType = "success" | "error" | "info";
+
 
 const toRecord = (value: unknown): Record<string, unknown> =>
   value && typeof value === "object" ? (value as Record<string, unknown>) : {};
@@ -58,17 +58,13 @@ const NotificationsPage = () => {
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [statusMessage, setStatusMessage] = useState("");
-  const [alertType, setAlertType] = useState<AlertType>("info");
+
   const [processingId, setProcessingId] = useState<string | number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
 
-  const paginatedItems = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return items.slice(startIndex, startIndex + pageSize);
-  }, [items, currentPage, pageSize]);
-  const totalPages = Math.ceil(items.length / pageSize);
+  const paginatedItems = items;
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => { setCurrentPage(1); }, []);
 
@@ -85,11 +81,9 @@ const NotificationsPage = () => {
       const unreadPayload = toRecord(extractPayload(unreadResult.data));
       const count = Number(unreadPayload.unread_count ?? unreadPayload.count ?? 0);
       setUnreadCount(Number.isFinite(count) ? count : 0);
-      setStatusMessage("Notifikasi berhasil dimuat.");
-      setAlertType("success");
+      showToast("Notifikasi berhasil dimuat.", "success");
     } catch (error: unknown) {
-      setStatusMessage(getErrorMessage(error as never));
-      setAlertType("error");
+      showToast(getErrorMessage(error as never), "error");
     } finally {
       setLoading(false);
     }
@@ -105,8 +99,7 @@ const NotificationsPage = () => {
       await api.put(`/notifications/${id}/read`, {});
       await loadData();
     } catch (error: unknown) {
-      setStatusMessage(getErrorMessage(error as never));
-      setAlertType("error");
+      showToast(getErrorMessage(error as never), "error");
     } finally {
       setProcessingId(null);
     }
@@ -118,8 +111,7 @@ const NotificationsPage = () => {
       await api.put("/notifications/read-all", {});
       await loadData();
     } catch (error: unknown) {
-      setStatusMessage(getErrorMessage(error as never));
-      setAlertType("error");
+      showToast(getErrorMessage(error as never), "error");
     } finally {
       setProcessingId(null);
     }
@@ -176,8 +168,6 @@ const NotificationsPage = () => {
           </Button>
         </div>
       </div>
-
-      {statusMessage && <Alert type={alertType} message={statusMessage} onClose={() => setStatusMessage("")} dismissible />}
 
       <div className="summary-grid">
         {summaryCards.map((card) => (

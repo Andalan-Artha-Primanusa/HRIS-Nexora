@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { RefreshCw, Bell, Mail, MessageSquare, Smartphone, CheckCircle, XCircle, Clock, Settings, ShieldCheck, UserCheck } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
+import { showToast } from '@/shared/ui/toast';
 import { api } from '@/shared/api/httpClient';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
@@ -114,10 +115,10 @@ const NotificationSettingsPage: React.FC = () => {
     setSaving(true);
     try {
       await api.put('/notification-settings', { settings });
-      alert('Notification settings saved successfully!');
+      showToast('Pengaturan notifikasi berhasil disimpan!', 'success');
     } catch (err) {
       console.error(err);
-      alert('Failed to save settings');
+      showToast('Gagal menyimpan pengaturan', 'error');
     } finally {
       setSaving(false);
     }

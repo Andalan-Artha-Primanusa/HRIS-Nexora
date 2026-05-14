@@ -15,6 +15,7 @@ import {
 import type { ReimbursementItem, ReimbursementCreatePayload, ReimbursementUpdatePayload } from "@/features/reimbursement/types/reimbursement.types";
 import { BarChart3, Clock3, CircleCheckBig, RefreshCw, DollarSign, Trash2, Edit, Receipt, DownloadCloud, Check, X } from "lucide-react";
 import { showToast } from "@/shared/ui/toast";
+import { RejectReasonModal } from "@/shared/components/RejectReasonModal";
 import "@/shared/styles/CrudPage.css";
 
 const formatDate = (dateString: string | undefined) => {
@@ -59,6 +60,7 @@ const ReimbursementsManagementPage = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [form, setForm] = useState(DEFAULT_FORM);
   const [deleteTarget, setDeleteTarget] = useState<ReimbursementItem | null>(null);
+  const [rejectTarget, setRejectTarget] = useState<{ id: string; actionId: string } | null>(null);
 
   const [allItemsRaw, setAllItemsRaw] = useState<ReimbursementItem[]>([]);
 
@@ -114,16 +116,13 @@ const ReimbursementsManagementPage = () => {
     ];
   }, [items, allItemsRaw]);
 
-  const paginatedItems = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return items.slice(startIndex, startIndex + pageSize);
-  }, [items, currentPage, pageSize]);
-  const totalPages = Math.ceil(items.length / pageSize);
+  const paginatedItems = items;
+  const [totalPages, setTotalPages] = useState(1);
 
   const loadData = async () => {
     setLoading(true);
     try {
-      const result = await getAllReimbursements();
+      const result = await getAllReimbursements({ page: currentPage, per_page: pageSize });
       const raw = result.items || [];
       setAllItemsRaw(raw);
       
@@ -416,7 +415,7 @@ const ReimbursementsManagementPage = () => {
                         </td>
 <td>
                             <div className="action-btn-group">
-                              {(item.status === 'pending' || item.status === 'submitted') && (
+                              {(item.status === 'pending' || item.status === 'submitted') && item.can_act !== false && (
                                 <>
                                   <button
                                     className="action-btn action-btn-success"
@@ -427,16 +426,11 @@ const ReimbursementsManagementPage = () => {
                                     <Check size={16} />
                                   </button>
                                   <button
-                                    className="action-btn action-btn-delete"
-                                    onClick={() => {
-                                       const reason = window.prompt("Alasan penolakan:");
-                                       if (reason !== null) {
-                                         void handleAction(String(item.id)+'_rej', () => rejectReimbursement(String(item.id), { note: reason || "Ditolak oleh Admin" }), "Pengajuan ditolak");
-                                       }
-                                    }}
-                                    disabled={actionLoading === String(item.id)+'_rej'}
-                                    title="Reject"
-                                  >
+                                     className="action-btn action-btn-delete"
+                                     onClick={() => setRejectTarget({ id: String(item.id), actionId: String(item.id)+'_rej' })}
+                                     disabled={actionLoading === String(item.id)+'_rej'}
+                                     title="Reject"
+                                   >
                                     <X size={16} />
                                   </button>
                                 </>
@@ -506,6 +500,19 @@ const ReimbursementsManagementPage = () => {
         loading={!!deleteTarget && actionLoading === String(deleteTarget.id) + '_del'}
         onConfirm={() => void handleDelete()}
         onCancel={() => setDeleteTarget(null)}
+      />
+
+      <RejectReasonModal
+        isOpen={rejectTarget !== null}
+        onClose={() => setRejectTarget(null)}
+        onConfirm={async (reason: string) => {
+          const target = rejectTarget;
+          if (!target) return;
+          setRejectTarget(null);
+          await handleAction(target.actionId, () => rejectReimbursement(target.id, { note: reason || "Ditolak oleh Admin" }), "Pengajuan ditolak");
+        }}
+        title="Alasan Penolakan"
+        confirmLabel="Tolak"
       />
     </div>
   );

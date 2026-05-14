@@ -42,11 +42,13 @@ const extractArrayPayload = (raw: unknown): LeaveItem[] => {
   return [];
 };
 
-export const getAllLeaves = async () => {
-  const response = await api.get("/leaves");
+export const getAllLeaves = async (page = 1, perPage = 10) => {
+  const response = await api.get("/leaves", { params: { page, per_page: perPage } });
+  const raw = response.data;
   return {
-    items: extractArrayPayload(response.data),
-    raw: response.data,
+    items: extractArrayPayload(raw),
+    totalPages: raw?.data?.last_page ?? 1,
+    raw,
   };
 };
 
@@ -82,20 +84,23 @@ export const deleteLeaveRequest = async (id: string) => {
   return { raw: response.data };
 };
 
-export const getPendingLeaves = async () => {
-  const response = await api.get("/leaves/pending");
+export const getPendingLeaves = async (page = 1, perPage = 10) => {
+  const response = await api.get("/leaves/pending", { params: { page, per_page: perPage } });
+  const raw = response.data;
   return {
-    items: extractArrayPayload(response.data),
-    raw: response.data,
+    items: extractArrayPayload(raw),
+    totalPages: raw?.data?.last_page ?? 1,
+    raw,
   };
 };
 
-export const getLeaveRequests = async (params?: { status?: string }) => {
-  const query = params?.status ? `?status=${params.status}` : "";
-  const response = await api.get(`/leaves${query}`);
+export const getLeaveRequests = async (params?: { status?: string; page?: number; per_page?: number }) => {
+  const response = await api.get("/leaves", { params });
+  const raw = response.data;
   return {
-    items: extractArrayPayload(response.data),
-    raw: response.data,
+    items: extractArrayPayload(raw),
+    totalPages: raw?.data?.last_page ?? 1,
+    raw,
   };
 };
 

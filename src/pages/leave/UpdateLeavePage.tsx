@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
-import { Alert } from '@/shared/ui/Alert';
+import { showToast } from '@/shared/ui/toast';
 import { getLeaveDetail, updateLeaveRequest } from '@/features/leave/api/leave.service';
 import { api } from '@/shared/api/httpClient';
 import type { LeaveUpdatePayload } from '@/features/leave/types/leave.types';
@@ -26,14 +26,11 @@ const UpdateLeavePage = () => {
   });
   const [leaveTypes, setLeaveTypes] = useState<{ id: number; name: string; code: string }[]>([]);
   const [loading, setLoading] = useState(true);
-  const [alertMessage, setAlertMessage] = useState('');
-  const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('error');
 
   useEffect(() => {
     const loadDetail = async () => {
       if (!id) {
-        setAlertMessage('Leave ID tidak ditemukan');
-        setAlertType('error');
+        showToast('Leave ID tidak ditemukan', 'error');
         setLoading(false);
         return;
       }
@@ -55,11 +52,9 @@ const UpdateLeavePage = () => {
           total_days: payload.total_days || 1,
           reason: payload.reason || '',
         });
-        setAlertMessage('');
       } catch (err: any) {
         const message = err.response?.data?.message || err.message || 'Gagal memuat data cuti';
-        setAlertMessage(message);
-        setAlertType('error');
+        showToast(message, 'error');
       } finally {
         setLoading(false);
       }
@@ -92,28 +87,23 @@ const UpdateLeavePage = () => {
 
   const validateForm = (): boolean => {
     if (!formData.type.trim()) {
-      setAlertMessage('Tipe leave wajib dipilih');
-      setAlertType('error');
+      showToast('Tipe leave wajib dipilih', 'error');
       return false;
     }
     if (!formData.start_date) {
-      setAlertMessage('Tanggal mulai wajib diisi');
-      setAlertType('error');
+      showToast('Tanggal mulai wajib diisi', 'error');
       return false;
     }
     if (!formData.end_date) {
-      setAlertMessage('Tanggal selesai wajib diisi');
-      setAlertType('error');
+      showToast('Tanggal selesai wajib diisi', 'error');
       return false;
     }
     if (new Date(formData.start_date) > new Date(formData.end_date)) {
-      setAlertMessage('Tanggal mulai harus sebelum tanggal selesai');
-      setAlertType('error');
+      showToast('Tanggal mulai harus sebelum tanggal selesai', 'error');
       return false;
     }
     if (!formData.reason.trim()) {
-      setAlertMessage('Alasan wajib diisi');
-      setAlertType('error');
+      showToast('Alasan wajib diisi', 'error');
       return false;
     }
     return true;
@@ -123,7 +113,6 @@ const UpdateLeavePage = () => {
     if (!validateForm() || !id) return;
 
     setLoading(true);
-    setAlertMessage('');
 
     try {
       const payload: LeaveUpdatePayload = {
@@ -134,15 +123,13 @@ const UpdateLeavePage = () => {
       };
 
       await updateLeaveRequest(id, payload);
-      setAlertMessage('Data cuti berhasil diperbarui!');
-      setAlertType('success');
+      showToast('Data cuti berhasil diperbarui!', 'success');
       setTimeout(() => {
         navigate('/leave/requests');
       }, 1500);
     } catch (err: any) {
       const message = err.response?.data?.message || err.message || 'Gagal memperbarui data cuti';
-      setAlertMessage(message);
-      setAlertType('error');
+      showToast(message, 'error');
     } finally {
       setLoading(false);
     }
@@ -201,15 +188,6 @@ const UpdateLeavePage = () => {
 
       {/* Form Card */}
       <Card className="leave-card" glass>
-        {alertMessage && (
-          <Alert 
-            type={alertType} 
-            message={alertMessage}
-            onClose={() => setAlertMessage('')}
-            dismissible
-          />
-        )}
-
         <form className="leave-form" onSubmit={(e) => { e.preventDefault(); void handleUpdateLeave(); }}>
           {/* Tipe Cuti */}
           <div className="leave-form-group">

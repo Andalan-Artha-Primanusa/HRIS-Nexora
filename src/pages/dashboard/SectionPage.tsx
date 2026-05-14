@@ -3118,12 +3118,7 @@ const SectionPage = () => {
                                     <button 
                                       className="action-btn action-btn-delete"
                                       onClick={() => {
-                                        if (window.confirm('Are you sure you want to delete this item?')) {
-                                          setFormState({ id: rowId });
-                                          // Note: In a real app we'd trigger a specific delete action
-                                          // but SectionPage is very generic.
-                                          alert('Hapus ID: ' + rowId + '. Silakan klik tombol hapus di panel operasional jika tersedia.');
-                                        }
+                                        setFormState({ id: rowId });
                                       }}
                                       title="Hapus"
                                     >

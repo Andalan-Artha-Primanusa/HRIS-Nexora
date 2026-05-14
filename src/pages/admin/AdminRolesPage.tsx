@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
 import { ConfirmDialog } from "@/shared/ui/ConfirmDialog";
-import { Alert } from "@/shared/ui/Alert";
+import { showToast } from '@/shared/ui/toast';
 import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { KeyRound, RefreshCw, Shield, Plus, Search, Filter, Edit, Trash2 } from "lucide-react";
 import { deleteRole, getAllRoles } from "@/features/admin/api/admin.service";
@@ -31,8 +31,7 @@ const AdminRolesPage = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [statusMessage, setStatusMessage] = useState("");
-  const [alertType, setAlertType] = useState<"success" | "error" | "info">("info");
+
   const [deleteTarget, setDeleteTarget] = useState<Role | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -66,12 +65,9 @@ const AdminRolesPage = () => {
     });
   }, [roles, searchText]);
 
-  const paginatedRoles = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return filteredRoles.slice(start, start + pageSize);
-  }, [filteredRoles, currentPage, pageSize]);
+  const paginatedRoles = filteredRoles;
 
-  const totalPages = Math.ceil(filteredRoles.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   const rolesSummaryCards = useMemo(
     () => [
@@ -110,8 +106,7 @@ const AdminRolesPage = () => {
 
   const requestDelete = (role: Role) => {
     if (role.id === 1 || role.name === "admin" || role.name === "super_admin") {
-      setStatusMessage("Peran sistem utama tidak dapat dihapus.");
-      setAlertType("error");
+      showToast("Peran sistem utama tidak dapat dihapus.", "error");
       return;
     }
 
@@ -124,13 +119,11 @@ const AdminRolesPage = () => {
     setDeleting(true);
     try {
       await deleteRole(deleteTarget.id);
-      setStatusMessage(`Peran "${deleteTarget.name}" berhasil dihapus.`);
-      setAlertType("success");
+      showToast(`Peran "${deleteTarget.name}" berhasil dihapus.`, "success");
       setDeleteTarget(null);
       void loadRoles();
     } catch (error: unknown) {
-      setStatusMessage(getErrorMessage(error as never));
-      setAlertType("error");
+      showToast(getErrorMessage(error as never), "error");
     } finally {
       setDeleting(false);
     }
@@ -194,8 +187,6 @@ const AdminRolesPage = () => {
           </div>
         </div>
       </Card>
-
-      {statusMessage && <Alert type={alertType} message={statusMessage} onClose={() => setStatusMessage("")} dismissible />}
 
       {/* Summary Cards */}
       <div className="employee-summary-wrapper">

@@ -665,13 +665,10 @@ const ProfilesPage = () => {
   }, [filteredProfiles, sortBy, sortOrder]);
 
   // Pagination Logic
-  const paginatedProfiles = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return sortedProfiles.slice(startIndex, startIndex + itemsPerPage);
-  }, [sortedProfiles, currentPage]);
+  const paginatedProfiles = sortedProfiles;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _totalPages = Math.ceil(sortedProfiles.length / itemsPerPage);
+  const [_totalPages, setTotalPages] = useState(1);
 
   // Get unique departments/positions for filters
   const uniqueDepartments = useMemo(() => {

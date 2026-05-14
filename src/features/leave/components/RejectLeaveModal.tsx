@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal } from '@/shared/ui/Modal';
 import { Button } from '@/shared/ui/Button';
+import { showToast } from '@/shared/ui/toast';
 
 interface RejectLeaveModalProps {
   isOpen: boolean;
@@ -28,7 +29,7 @@ export const RejectLeaveModal: React.FC<RejectLeaveModalProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!reason.trim()) {
-      alert('Silakan masukkan alasan penolakan');
+      showToast('Silakan masukkan alasan penolakan', 'error');
       return;
     }
     onConfirm(reason);

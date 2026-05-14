@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
-import { Alert } from '@/shared/ui/Alert';
+import { showToast } from '@/shared/ui/toast';
 import { api } from '@/shared/api/httpClient';
 import { Clock } from 'lucide-react';
 import './AttendancePages.css';
@@ -10,14 +10,11 @@ const AttendanceTodayPage = () => {
   const [today, setToday] = useState<Record<string, any> | null>(null);
   const [status, setStatus] = useState('Memuat data hari ini...');
   const [loading, setLoading] = useState(false);
-  const [alertMessage, setAlertMessage] = useState('');
-  const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('error');
+
 
   const loadToday = async () => {
     setLoading(true);
     setStatus('Mengambil data hari ini...');
-    setAlertMessage('');
-
     try {
       const result = await api.get('/attendance/today');
       const payload = result.data?.data ?? result.data;
@@ -26,8 +23,7 @@ const AttendanceTodayPage = () => {
     } catch (error: any) {
       setStatus('Gagal memuat data hari ini.');
       const message = error.response?.data?.message || error.message || 'Terjadi kesalahan';
-      setAlertMessage(message);
-      setAlertType('error');
+      showToast(message, 'error');
     } finally {
       setLoading(false);
     }
@@ -60,15 +56,6 @@ const AttendanceTodayPage = () => {
             {loading ? 'Memuat...' : 'Refresh Today'}
           </Button>
         </div>
-
-        {alertMessage && (
-          <Alert 
-            type={alertType} 
-            message={alertMessage}
-            onClose={() => setAlertMessage('')}
-            dismissible
-          />
-        )}
 
         {today ? (
           <div className="attendance-today-grid">

@@ -64,11 +64,8 @@ const MyPromotionsPage: React.FC = () => {
     });
   }, [items, searchText, activeTab]);
 
-  const paginatedItems = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return filteredItems.slice(startIndex, startIndex + pageSize);
-  }, [filteredItems, currentPage, pageSize]);
-  const totalPages = Math.ceil(filteredItems.length / pageSize);
+  const paginatedItems = filteredItems;
+  const [totalPages, setTotalPages] = useState(1);
 
   const summaryCards = useMemo(
     () => [

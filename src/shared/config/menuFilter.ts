@@ -4,7 +4,6 @@ import { api } from '@/shared/api/httpClient';
 
 let cachedAllowedKeys: string[] | null = null;
 let cachePromise: Promise<string[]> | null = null;
-let cachedAssignments: { key: string; assigned_role_ids: number[] }[] | null = null;
 
 const stripAdminKeys = (keys: string[], user: AuthUser | null): string[] => {
   if (!user) return keys;
@@ -13,26 +12,16 @@ const stripAdminKeys = (keys: string[], user: AuthUser | null): string[] => {
   return keys.filter(k => !k.startsWith('alat-admin'));
 };
 
+const isRole = (user: AuthUser, name: string): boolean =>
+  user.roles?.some((r: any) => r.name === name);
+
 const computeFromAssignments = (items: { key: string; assigned_role_ids: number[] }[], user: AuthUser): string[] | null => {
   if (!items.length) return null;
   const userRoleIds = new Set(user.roles.map((r: any) => r.id));
   const keys = items
-    .filter(m => m.assigned_role_ids.some(rid => userRoleIds.has(rid)))
+    .filter(m => m.assigned_role_ids.some((rid: number) => userRoleIds.has(rid)))
     .map(m => m.key);
-  return keys;
-};
-
-const loadFromLocalStorage = (user: AuthUser): string[] | null => {
-  try {
-    const raw = localStorage.getItem('menuAssignments');
-    if (!raw) return null;
-    const { items } = JSON.parse(raw);
-    if (!Array.isArray(items) || !items.length) return null;
-    const keys = computeFromAssignments(items, user);
-    return keys;
-  } catch {
-    return null;
-  }
+  return keys.length ? keys : null;
 };
 
 export const fetchAllowedMenuKeys = async (user: AuthUser | null = null): Promise<string[]> => {
@@ -40,50 +29,50 @@ export const fetchAllowedMenuKeys = async (user: AuthUser | null = null): Promis
   if (cachePromise) return cachePromise;
 
   cachePromise = (async () => {
-    // 1) Try localStorage cache (populated by super admin via MenuPermissionsPage)
-    if (user?.roles?.length) {
-      const localKeys = loadFromLocalStorage(user);
-      if (localKeys) {
-        cachedAllowedKeys = stripAdminKeys(localKeys, user);
-        return cachedAllowedKeys!;
-      }
+    if (!user?.roles?.length) {
+      cachedAllowedKeys = [];
+      return [];
     }
 
-    // 2) Try /admin/menus with role-ID computation
-    if (user?.roles?.length) {
+    const isEmployee = isRole(user, 'employee');
+
+    if (isEmployee) {
       try {
-        const adminRes = await api.get('/admin/menus', {
-          validateStatus: () => true,
-        });
-        if (adminRes.status === 200) {
-          const items: { key: string; assigned_role_ids: number[] }[] = adminRes.data?.data?.items ?? [];
-          if (items.length > 0) {
-            cachedAssignments = items;
-            const computed = computeFromAssignments(items, user);
-            if (computed) {
-              cachedAllowedKeys = stripAdminKeys(computed, user);
-              return cachedAllowedKeys!;
-            }
-          }
-        }
+        const res = await api.get('/user/menus');
+        const data = res.data?.data ?? [];
+        cachedAllowedKeys = stripAdminKeys(Array.isArray(data) ? data : [], user);
+        return cachedAllowedKeys!;
       } catch {
-        /* /admin/menus failed */
+        cachedAllowedKeys = [];
+        return [];
       }
     }
 
-    // 3) Fallback: try /user/menus
+    // admin / hr / manager / super_admin → /admin/menus with role-ID computation
+    try {
+      const adminRes = await api.get('/admin/menus', { validateStatus: () => true });
+      if (adminRes.status === 200) {
+        const items: { key: string; assigned_role_ids: number[] }[] = adminRes.data?.data?.items ?? [];
+        const computed = computeFromAssignments(items, user);
+        if (computed) {
+          cachedAllowedKeys = stripAdminKeys(computed, user);
+          return cachedAllowedKeys!;
+        }
+      }
+    } catch {
+      /* /admin/menus failed */
+    }
+
+    // fallback
     try {
       const res = await api.get('/user/menus');
       const data = res.data?.data ?? [];
-      cachedAllowedKeys = Array.isArray(data) ? data : [];
-      cachedAllowedKeys = stripAdminKeys(cachedAllowedKeys, user);
+      cachedAllowedKeys = stripAdminKeys(Array.isArray(data) ? data : [], user);
       return cachedAllowedKeys!;
     } catch {
-      /* both endpoints failed */
+      cachedAllowedKeys = [];
+      return [];
     }
-
-    cachedAllowedKeys = [];
-    return [];
   })();
 
   return cachePromise;

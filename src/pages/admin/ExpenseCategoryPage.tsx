@@ -78,12 +78,9 @@ const ExpenseCategoryPage = () => {
     });
   }, [filteredCategories]);
 
-  const paginatedCategories = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return sortedCategories.slice(startIndex, startIndex + pageSize);
-  }, [sortedCategories, currentPage, pageSize]);
+  const paginatedCategories = sortedCategories;
 
-  const totalPages = Math.ceil(sortedCategories.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   const activeCount = useMemo(() => categories.filter((c) => c.is_active).length, [categories]);
   const totalCategories = categories.length;
@@ -195,7 +192,7 @@ const ExpenseCategoryPage = () => {
       fetchData();
     } catch (err) {
       console.error(err);
-      alert('Failed to save category');
+      showToast('Gagal menyimpan kategori', 'error');
     }
   };
 

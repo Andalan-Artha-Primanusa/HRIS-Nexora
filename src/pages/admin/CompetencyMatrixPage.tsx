@@ -7,6 +7,7 @@ import { trainingService } from '@/features/training/api/training.service';
 import { CompetencyModal } from '@/features/training/components/CompetencyModal';
 import { AssignCompetencyModal } from '@/features/training/components/AssignCompetencyModal';
 import { AssignedEmployeesModal } from '@/features/training/components/AssignedEmployeesModal';
+import { showToast } from '@/shared/ui/toast';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/employee/EmployeesPage.css';
@@ -76,12 +77,9 @@ const CompetencyMatrixPage: React.FC = () => {
     });
   }, [items, searchText, selectedCategory, activeTab]);
 
-  const paginatedItems = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return filteredItems.slice(start, start + pageSize);
-  }, [filteredItems, currentPage, pageSize]);
+  const paginatedItems = filteredItems;
 
-  const totalPages = Math.ceil(filteredItems.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   const activeCount = items.filter((c) => c.status === 'active').length;
   const inactiveCount = items.filter((c) => c.status === 'inactive').length;
@@ -144,12 +142,13 @@ const CompetencyMatrixPage: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Yakin ingin menghapus kompetensi ini?')) return;
     try {
       await trainingService.deleteCompetency(id);
       fetchData();
-    } catch (err) {
+      showToast('Kompetensi berhasil dihapus', 'success');
+    } catch (err: any) {
       console.error('Gagal menghapus kompetensi', err);
+      showToast(err?.response?.data?.message || 'Gagal menghapus kompetensi', 'error');
     }
   };
 

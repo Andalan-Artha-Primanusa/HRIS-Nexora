@@ -47,12 +47,9 @@ const LocationsPage = () => {
     });
   }, [locations, searchText, selectedDepartment]);
 
-  const paginatedLocations = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return filteredLocations.slice(startIndex, startIndex + pageSize);
-  }, [filteredLocations, currentPage, pageSize]);
+  const paginatedLocations = filteredLocations;
 
-  const totalPages = Math.ceil(filteredLocations.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   const withCoordinateCount = locations.filter((location) => {
     const lat = parseFloat(String((location as any).latitude || 0));

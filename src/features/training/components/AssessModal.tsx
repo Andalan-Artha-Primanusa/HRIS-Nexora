@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal } from '@/shared/ui/Modal';
 import { api } from '@/shared/api/httpClient';
+import { showToast } from '@/shared/ui/toast';
 
 interface AssessModalProps {
   isOpen: boolean;
@@ -37,7 +38,7 @@ export const AssessModal: React.FC<AssessModalProps> = ({
       await onAssess(assignmentId, proficiencyLevel, notes);
       onClose();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Gagal memberi penilaian.');
+      showToast(err.response?.data?.message || 'Gagal memberi penilaian.', 'error');
     } finally {
       setSaving(false);
     }

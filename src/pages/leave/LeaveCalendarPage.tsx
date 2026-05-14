@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Card, CardHeader } from "@/shared/ui";
-import { Alert } from "@/shared/ui/Alert";
+import { showToast } from '@/shared/ui/toast';
 import { getLeaveCalendar } from "@/features/leave/api/leave.service";
 
 import { ChevronLeft, ChevronRight, CircleCheckBig, CircleX, Clock3, Calendar, RefreshCw } from "lucide-react";
@@ -20,8 +20,7 @@ interface CalendarEvent {
 const LeaveCalendarPage = () => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [currentDate, setCurrentDate] = useState(new Date(2026, 3, 1)); // April 2026
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('info');
+
   const [loading, setLoading] = useState(false);
 
   // Calculate statistics
@@ -49,12 +48,10 @@ const LeaveCalendarPage = () => {
       }));
       
       setEvents(parsedEvents);
-      setAlertMessage("Kalender cuti berhasil dimuat");
-      setAlertType('info');
+      showToast("Kalender cuti berhasil dimuat", 'info');
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Gagal memuat kalender cuti";
-      setAlertMessage(message);
-      setAlertType('error');
+      showToast(message, 'error');
     } finally {
       setLoading(false);
     }
@@ -155,15 +152,6 @@ const LeaveCalendarPage = () => {
           </div>
         </div>
       </Card>
-
-      {alertMessage && (
-        <Alert 
-          type={alertType} 
-          message={alertMessage}
-          onClose={() => setAlertMessage('')}
-          dismissible
-        />
-      )}
 
       {/* Summary Cards */}
       <div className="leave-requests-wrapper">

@@ -71,12 +71,9 @@ const ComplianceDashboardPage: React.FC = () => {
     });
   }, [documents, searchText, activeTab]);
 
-  const paginatedDocuments = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return filteredDocuments.slice(startIndex, startIndex + pageSize);
-  }, [filteredDocuments, currentPage, pageSize]);
+  const paginatedDocuments = filteredDocuments;
 
-  const totalPages = Math.ceil(filteredDocuments.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   const clearFilters = () => {
     setSearchText("");

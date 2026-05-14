@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { ShieldCheck, Database, UserX, FileText, Plus, AlertCircle, Trash2, Edit, ChevronLeft, RefreshCw } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
-import { Alert } from '@/shared/ui/Alert';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
 import { useNavigate } from 'react-router-dom';
+import { showToast } from '@/shared/ui/toast';
 import './AdminWorkforcePages.css';
 import '../dashboard/overview/OverviewPage.css';
 
@@ -36,8 +36,7 @@ const ComplianceSettingsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'retention' | 'privacy'>('retention');
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [alertMessage, setAlertMessage] = useState('');
-  const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('info');
+
 
   const [retentionPolicies, setRetentionPolicies] = useState<RetentionPolicy[]>([]);
   const [privacyRequests, setPrivacyRequests] = useState<PrivacyRequest[]>([]);
@@ -59,8 +58,7 @@ const ComplianceSettingsPage: React.FC = () => {
       setPrivacyRequests(Array.isArray(requestsRes.data?.data) ? requestsRes.data.data : []);
     } catch (err) {
       console.error('Failed to fetch compliance data:', err);
-      setAlertMessage('Gagal memuat data kepatuhan');
-      setAlertType('error');
+      showToast('Gagal memuat data kepatuhan', 'error');
     } finally {
       setLoading(false);
     }
@@ -72,21 +70,18 @@ const ComplianceSettingsPage: React.FC = () => {
 
   const handleCreatePolicy = async () => {
     if (!policyForm.module.trim() || !policyForm.retain_days) {
-      setAlertMessage('Nama modul dan durasi retensi wajib diisi');
-      setAlertType('error');
+      showToast('Nama modul dan durasi retensi wajib diisi', 'error');
       return;
     }
     setSaving(true);
     try {
       await api.post('/enterprise/compliance/retention-policies', policyForm);
-      setAlertMessage('Kebijakan retensi berhasil dibuat');
-      setAlertType('success');
+      showToast('Kebijakan retensi berhasil dibuat', 'success');
       // Reset form but keep it open for multiple creates
       setPolicyForm({ module: '', retain_days: 365, anonymize_after_expiry: false });
       await fetchData();
     } catch (err: any) {
-      setAlertMessage(err.response?.data?.message || 'Gagal membuat kebijakan retensi');
-      setAlertType('error');
+      showToast(err.response?.data?.message || 'Gagal membuat kebijakan retensi', 'error');
     } finally {
       setSaving(false);
     }
@@ -94,36 +89,30 @@ const ComplianceSettingsPage: React.FC = () => {
 
   const handleCreatePrivacyRequest = async () => {
     if (!privacyForm.request_type) {
-      setAlertMessage('Tipe permintaan wajib dipilih');
-      setAlertType('error');
+      showToast('Tipe permintaan wajib dipilih', 'error');
       return;
     }
     setSaving(true);
     try {
       await api.post('/enterprise/compliance/privacy-requests', privacyForm);
-      setAlertMessage('Permintaan privasi berhasil diajukan');
-      setAlertType('success');
+      showToast('Permintaan privasi berhasil diajukan', 'success');
       // Reset form but keep it open for multiple creates
       setPrivacyForm({ request_type: 'delete', description: '' });
       await fetchData();
     } catch (err: any) {
-      setAlertMessage(err.response?.data?.message || 'Gagal mengajukan permintaan privasi');
-      setAlertType('error');
+      showToast(err.response?.data?.message || 'Gagal mengajukan permintaan privasi', 'error');
     } finally {
       setSaving(false);
     }
   };
 
   const handleDeletePolicy = async (module: string) => {
-    if (!window.confirm(`Hapus kebijakan retensi untuk modul "${module}"?`)) return;
     try {
       await api.delete(`/enterprise/compliance/retention-policies/${module}`);
-      setAlertMessage('Kebijakan retensi dinonaktifkan');
-      setAlertType('success');
+      showToast('Kebijakan retensi dinonaktifkan', 'success');
       await fetchData();
     } catch (err: any) {
-      setAlertMessage(err.response?.data?.message || 'Gagal menonaktifkan kebijakan');
-      setAlertType('error');
+      showToast(err.response?.data?.message || 'Gagal menonaktifkan kebijakan', 'error');
     }
   };
 
@@ -179,9 +168,7 @@ const ComplianceSettingsPage: React.FC = () => {
         </div>
       </Card>
 
-      {alertMessage && (
-        <Alert type={alertType} message={alertMessage} onClose={() => setAlertMessage('')} dismissible />
-      )}
+
 
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
          <Button 

@@ -177,12 +177,9 @@ const AssetInventoryPage: React.FC = () => {
     });
   }, [filteredAssets]);
 
-  const paginatedAssets = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return sortedAssets.slice(startIndex, startIndex + pageSize);
-  }, [sortedAssets, currentPage, pageSize]);
+  const paginatedAssets = sortedAssets;
 
-  const totalPages = Math.ceil(sortedAssets.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   const summaryCards = useMemo(() => [
     {

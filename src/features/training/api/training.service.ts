@@ -31,8 +31,8 @@ export const trainingService = {
   // ==============================
   // Admin/HR Enrollments
   // ==============================
-  getEnrollments: async () => {
-    const response = await api.get('/training/enrollments');
+  getEnrollments: async (page = 1, perPage = 10) => {
+    const response = await api.get('/training/enrollments', { params: { page, per_page: perPage } });
     return response.data;
   },
   enrollEmployees: async (programId: string | number, employeeIds: number[]) => {
@@ -57,11 +57,11 @@ export const trainingService = {
   // ==============================
   // ESS (Employee Self-Service)
   // ==============================
-  getMyTrainings: async () => {
-    const response = await api.get('/my/trainings');
+  getMyTrainings: async (page = 1, perPage = 10) => {
+    const response = await api.get('/my/trainings', { params: { page, per_page: perPage } });
     return response.data;
   },
-  getAvailableTrainings: async (params?: { search?: string; per_page?: number }) => {
+  getAvailableTrainings: async (params?: { search?: string; page?: number; per_page?: number }) => {
     const response = await api.get('/my/trainings/available', { params });
     return response.data;
   },

@@ -31,11 +31,13 @@ const extractPayload = (raw: unknown) => {
 
 export const workforceService = {
   // Holidays
-  getHolidays: async () => {
-    const response = await api.get('/workforce/holidays');
+  getHolidays: async (page = 1, perPage = 10) => {
+    const response = await api.get('/workforce/holidays', { params: { page, per_page: perPage } });
+    const raw = response.data;
     return {
-      items: extractArrayPayload(response.data),
-      raw: response.data,
+      items: extractArrayPayload(raw),
+      totalPages: raw?.data?.last_page ?? 1,
+      raw,
     };
   },
   createHoliday: async (data: any) => {
@@ -67,11 +69,13 @@ export const workforceService = {
   },
 
   // Shift Swaps
-  getShiftSwaps: async () => {
-    const response = await api.get('/workforce/shift-swaps');
+  getShiftSwaps: async (page = 1, perPage = 10) => {
+    const response = await api.get('/workforce/shift-swaps', { params: { page, per_page: perPage } });
+    const raw = response.data;
     return {
-      items: extractArrayPayload(response.data),
-      raw: response.data,
+      items: extractArrayPayload(raw),
+      totalPages: raw?.data?.last_page ?? 1,
+      raw,
     };
   },
   createShiftSwap: async (data: any) => {
@@ -104,11 +108,13 @@ export const workforceService = {
   },
 
   // Overtime Rules
-  getOvertimeRules: async () => {
-    const response = await api.get('/workforce/overtime-rules');
+  getOvertimeRules: async (page = 1, perPage = 10) => {
+    const response = await api.get('/workforce/overtime-rules', { params: { page, per_page: perPage } });
+    const raw = response.data;
     return {
-      items: extractArrayPayload(response.data),
-      raw: response.data,
+      items: extractArrayPayload(raw),
+      totalPages: raw?.data?.last_page ?? 1,
+      raw,
     };
   },
   getOvertimeRule: async (id: string | number) => {
@@ -147,11 +153,13 @@ export const workforceService = {
       raw: response.data,
     };
   },
-  getComplianceDocuments: async () => {
-    const response = await api.get('/workforce/compliance/documents');
+  getComplianceDocuments: async (page = 1, perPage = 10) => {
+    const response = await api.get('/workforce/compliance/documents', { params: { page, per_page: perPage } });
+    const raw = response.data;
     return {
-      items: extractArrayPayload(response.data),
-      raw: response.data,
+      items: extractArrayPayload(raw),
+      totalPages: raw?.data?.last_page ?? 1,
+      raw,
     };
   }
 };

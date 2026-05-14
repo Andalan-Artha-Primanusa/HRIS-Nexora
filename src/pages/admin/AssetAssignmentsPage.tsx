@@ -108,12 +108,9 @@ const AssetAssignmentsPage: React.FC = () => {
   }, [filteredAssignments]);
 
   // Paginate
-  const paginatedAssignments = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return sortedAssignments.slice(startIndex, startIndex + pageSize);
-  }, [sortedAssignments, currentPage, pageSize]);
+  const paginatedAssignments = sortedAssignments;
 
-  const totalPages = Math.ceil(sortedAssignments.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   // Summary Cards
   const summaryCards = useMemo(() => [

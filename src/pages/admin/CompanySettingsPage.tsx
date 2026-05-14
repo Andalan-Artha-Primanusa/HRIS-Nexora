@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { RefreshCw, Save, Building2, Mail, Phone, MapPin, Globe, Clock, User, Briefcase, Settings, Landmark, Info, ShieldCheck, Upload, Trash2 } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
+import { showToast } from '@/shared/ui/toast';
 import { api } from '@/shared/api/httpClient';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
@@ -76,7 +77,7 @@ const CompanySettingsPage: React.FC = () => {
 
   const handleSave = async () => {
     if (!company.name) {
-      alert('Nama perusahaan wajib diisi');
+      showToast('Nama perusahaan wajib diisi', 'error');
       return;
     }
     setSaving(true);
@@ -95,11 +96,11 @@ const CompanySettingsPage: React.FC = () => {
           setCompanyId(newData.id);
         }
       }
-      alert('Pengaturan perusahaan berhasil disimpan!');
+      showToast('Pengaturan perusahaan berhasil disimpan!', 'success');
     } catch (err: any) {
-      console.error('Save error:', err.response?.data || err);
+      console.error(err);
       const errorMessage = err.response?.data?.message || err.response?.data?.error || 'Gagal menyimpan pengaturan';
-      alert(`Error: ${errorMessage}`);
+      showToast(errorMessage, 'error');
     } finally {
       setSaving(false);
     }
@@ -110,7 +111,7 @@ const CompanySettingsPage: React.FC = () => {
     if (!file) return;
     
     if (!companyId) {
-      alert('Simpan data perusahaan terlebih dahulu sebelum mengunggah logo');
+      showToast('Simpan data perusahaan terlebih dahulu sebelum mengunggah logo', 'error');
       return;
     }
 
@@ -127,10 +128,10 @@ const CompanySettingsPage: React.FC = () => {
         setCompany(prev => ({ ...prev, logo: updatedData.logo }));
         setLogoPreview(null);
       }
-      alert('Logo berhasil diunggah!');
+      showToast('Logo berhasil diunggah!', 'success');
     } catch (err: any) {
-      console.error('Logo upload error:', err.response?.data || err);
-      alert('Gagal mengunggah logo');
+      console.error(err);
+      showToast('Gagal mengunggah logo', 'error');
     } finally {
       setUploadingLogo(false);
     }
@@ -138,16 +139,15 @@ const CompanySettingsPage: React.FC = () => {
 
   const handleDeleteLogo = async () => {
     if (!companyId) return;
-    if (!confirm('Yakin ingin menghapus logo?')) return;
 
     try {
       await api.delete(`/company/${companyId}/logo`);
       setCompany(prev => ({ ...prev, logo: '' }));
       setLogoPreview(null);
-      alert('Logo berhasil dihapus!');
+      showToast('Logo berhasil dihapus!', 'success');
     } catch (err: any) {
-      console.error('Logo delete error:', err.response?.data || err);
-      alert('Gagal menghapus logo');
+      console.error(err);
+      showToast('Gagal menghapus logo', 'error');
     }
   };
 

@@ -34,10 +34,11 @@ const extractArrayPayload = (raw: any): GenericApiItem[] => {
   return [];
 };
 
-export const getMyKpi = async () => {
+export const getMyKpi = async (page = 1, perPage = 10) => {
   const token = sessionStorage.getItem("token");
   
   const response = await api.get("/my/kpi", {
+    params: { page, per_page: perPage },
     headers: {
       'Accept': 'application/json',
       'Authorization': `Bearer ${token}`
@@ -45,16 +46,19 @@ export const getMyKpi = async () => {
     validateStatus: (status) => (status >= 200 && status < 300) || status === 500
   });
   
+  const raw = response.data;
   return {
-    items: extractArrayPayload(response.data),
-    raw: response.data,
+    items: extractArrayPayload(raw),
+    totalPages: raw?.data?.last_page ?? 1,
+    raw,
   };
 };
 
-export const getMyKpiPeriods = async () => {
+export const getMyKpiPeriods = async (page = 1, perPage = 10) => {
   const token = sessionStorage.getItem("token");
 
   const response = await api.get("/my/kpi-periods", {
+    params: { page, per_page: perPage },
     headers: {
       'Accept': 'application/json',
       'Authorization': `Bearer ${token}`
@@ -62,9 +66,11 @@ export const getMyKpiPeriods = async () => {
     validateStatus: (status) => (status >= 200 && status < 300) || status === 500
   });
 
+  const raw = response.data;
   return {
-    items: extractArrayPayload(response.data),
-    raw: response.data,
+    items: extractArrayPayload(raw),
+    totalPages: raw?.data?.last_page ?? 1,
+    raw,
   };
 };
 
@@ -99,14 +105,16 @@ export const updateMyKpiPeriodItems = async (
   };
 };
 
-export const getMyReimbursements = async (status?: string) => {
+export const getMyReimbursements = async (status?: string, page = 1, perPage = 10) => {
   const response = await api.get("/my/reimbursements", {
-    params: status ? { status } : undefined,
+    params: { ...(status ? { status } : {}), page, per_page: perPage },
   });
 
+  const raw = response.data;
   return {
-    items: extractArrayPayload(response.data),
-    raw: response.data,
+    items: extractArrayPayload(raw),
+    totalPages: raw?.data?.last_page ?? 1,
+    raw,
   };
 };
 
@@ -126,12 +134,14 @@ export const submitMyReimbursement = async (id: string) => {
   };
 };
 
-export const getMyPayroll = async () => {
-  const response = await api.get("/my/payroll");
+export const getMyPayroll = async (page = 1, perPage = 10) => {
+  const response = await api.get("/my/payroll", { params: { page, per_page: perPage } });
+  const raw = response.data;
   // API returns { success, message, data: [...] }
   return {
-    items: extractArrayPayload(response.data),
-    raw: response.data,
+    items: extractArrayPayload(raw),
+    totalPages: raw?.data?.last_page ?? 1,
+    raw,
   };
 };
 

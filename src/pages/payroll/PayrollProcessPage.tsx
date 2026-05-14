@@ -95,7 +95,8 @@ const GenerateTab = () => {
 
   const loadPayroll = async () => {
     setLoading(true);
-    try { setItems(toSafeArray(await payrollService.getPayrollList())); }
+    try { setItems(toSafeArray(await payrollService.getPayrollList()));
+      const payrollResp = await payrollService.getPayrollList({ page: currentPage, per_page: pageSize }); }
     catch (err) { showToast(err instanceof Error ? err.message : "Gagal memuat", "error"); }
     finally { setLoading(false); }
   };
@@ -129,9 +130,9 @@ const GenerateTab = () => {
       (yearFilter === "all" || String(it.period ?? "").startsWith(yearFilter));
   }), [items, paymentFilter, yearFilter]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const [totalPages, setTotalPages] = useState(1);
   const safePage = Math.min(currentPage, totalPages);
-  const paginated = filtered.slice((safePage - 1) * pageSize, safePage * pageSize);
+  const paginated = filtered;
 
   const columns = [
     { key: "id", label: "ID" }, { key: "employee_id", label: "Karyawan" }, { key: "period", label: "Periode" },
@@ -356,8 +357,8 @@ const ApproveTab = () => {
   );
   const otherPayrolls = filteredPayrolls.filter(p => p.status === "approved" || p.status === "paid");
   const rejectedPayrolls = filteredPayrolls.filter(p => p.status === "rejected");
-  const paginatedPending = pendingPayrolls.slice((currentPagePending - 1) * pageSizePending, currentPagePending * pageSizePending);
-  const totalPagesPending = Math.max(1, Math.ceil(pendingPayrolls.length / pageSizePending));
+  const paginatedPending = pendingPayrolls;
+  const [totalPagesPending, setTotalPagesPending] = useState(1);
 
   const summaryCards = [
     { label: "Draft (Manager)", subtitle: "Menunggu approve manager", value: String(filteredPayrolls.filter(p => p.status === "draft").length), change: "Step 1", tone: "orange" as const, icon: Clock },
@@ -614,8 +615,8 @@ const PaymentTab = () => {
     }
     return true;
   });
-  const totalPagesRecent = Math.max(1, Math.ceil(filteredPayrolls.length / pageSizeRecent));
-  const recentPayrolls = filteredPayrolls.slice((currentPageRecent - 1) * pageSizeRecent, currentPageRecent * pageSizeRecent);
+  const [totalPagesRecent, setTotalPagesRecent] = useState(1);
+  const recentPayrolls = filteredPayrolls;
 
   const summaryCards = [
     { label: "All Payroll", subtitle: "Total", value: String(safePayrolls.length), tone: "blue" as const, icon: FileText },

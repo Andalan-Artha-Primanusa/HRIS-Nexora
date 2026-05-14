@@ -54,11 +54,13 @@ export const attendanceService = {
    * Employee: Get attendance history
    * GET /attendance/history
    */
-  getHistory: async () => {
-    const response = await api.get('/attendance/history');
+  getHistory: async (page = 1, perPage = 10) => {
+    const response = await api.get('/attendance/history', { params: { page, per_page: perPage } });
+    const raw = response.data;
     return {
-      items: extractArrayPayload(response.data),
-      raw: response.data,
+      items: extractArrayPayload(raw),
+      totalPages: raw?.data?.last_page ?? 1,
+      raw,
     };
   },
 

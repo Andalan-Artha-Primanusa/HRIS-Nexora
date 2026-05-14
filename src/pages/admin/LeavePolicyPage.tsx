@@ -12,6 +12,7 @@ import {
 import { Card } from '@/shared/ui/Card';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
+import { showToast } from '@/shared/ui/toast';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import './AdminLeavePages.css';
@@ -43,12 +44,9 @@ const LeavePolicyPage = () => {
     });
   }, [policies]);
 
-  const paginatedPolicies = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return sortedPolicies.slice(startIndex, startIndex + pageSize);
-  }, [sortedPolicies, currentPage, pageSize]);
+  const paginatedPolicies = sortedPolicies;
 
-  const totalPages = Math.ceil(sortedPolicies.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
   const paidCount = useMemo(() => policies.filter((p) => p.is_paid).length, [policies]);
   const activeCount = useMemo(() => policies.filter((p) => p.active).length, [policies]);
   const totalPolicies = policies.length;
@@ -122,13 +120,12 @@ const LeavePolicyPage = () => {
   }, []);
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus kebijakan ini?')) {
-      try {
-        await api.delete(`/leave-policies/${id}`);
-        fetchPolicies();
-      } catch (error) {
-        console.error('Error deleting policy:', error);
-      }
+    try {
+      await api.delete(`/leave-policies/${id}`);
+      fetchPolicies();
+      showToast('Kebijakan cuti berhasil dihapus', 'success');
+    } catch (error: any) {
+      showToast(error?.response?.data?.message || 'Gagal menghapus kebijakan cuti', 'error');
     }
   };
 

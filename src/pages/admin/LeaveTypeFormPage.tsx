@@ -3,14 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
+import { showToast } from '@/shared/ui/toast';
 import { 
   Save, 
   ArrowLeft, 
   CalendarDays, 
   RefreshCw,
   Info,
-  CheckCircle,
-  XCircle
 } from 'lucide-react';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
@@ -32,7 +31,6 @@ const LeaveTypeFormPage: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(isEdit);
-  const [message, setMessage] = useState('');
 
   useEffect(() => {
     if (isEdit) {
@@ -49,7 +47,7 @@ const LeaveTypeFormPage: React.FC = () => {
           });
         } catch (err) {
           console.error('Error fetching detail:', err);
-          setMessage('Gagal memuat data detail.');
+          showToast('Gagal memuat data detail.', 'error');
         } finally {
           setFetching(false);
         }
@@ -66,7 +64,6 @@ const LeaveTypeFormPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setMessage('');
 
     const payload = {
       ...formData,
@@ -77,10 +74,11 @@ const LeaveTypeFormPage: React.FC = () => {
     try {
       if (isEdit) {
         await api.put(`/leave-types/${id}`, payload);
-        setMessage('Jenis cuti berhasil diperbarui!');
+        showToast('Jenis cuti berhasil diperbarui!', 'success');
+        setTimeout(() => navigate('/leave/type'), 2000);
       } else {
         await api.post('/leave-types', payload);
-        setMessage('Jenis cuti baru berhasil ditambahkan!');
+        showToast('Jenis cuti baru berhasil ditambahkan!', 'success');
         setTimeout(() => navigate('/leave/type'), 2000);
       }
     } catch (err: any) {
@@ -88,9 +86,9 @@ const LeaveTypeFormPage: React.FC = () => {
       const errorData = err.response?.data;
       if (errorData?.errors) {
         const firstError = Object.values(errorData.errors)[0];
-        setMessage(`Validation Error: ${Array.isArray(firstError) ? firstError[0] : firstError}`);
+        showToast(`${Array.isArray(firstError) ? firstError[0] : firstError}`, 'error');
       } else {
-        setMessage(errorData?.message || 'Terjadi kesalahan saat menyimpan data.');
+        showToast(errorData?.message || 'Terjadi kesalahan saat menyimpan data.', 'error');
       }
     } finally {
       setLoading(false);
@@ -207,24 +205,6 @@ const LeaveTypeFormPage: React.FC = () => {
                   </select>
                 </div>
               </div>
-
-              {message && (
-                <div style={{ 
-                  marginTop: '1.5rem', 
-                  padding: '1rem', 
-                  borderRadius: '12px', 
-                  background: message.includes('berhasil') ? '#f0fdf4' : '#fef2f2',
-                  color: message.includes('berhasil') ? '#16a34a' : '#dc2626',
-                  fontSize: '0.9rem',
-                  fontWeight: 600,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}>
-                  {message.includes('berhasil') ? <CheckCircle size={18} /> : <XCircle size={18} />}
-                  {message}
-                </div>
-              )}
 
               <div style={{ marginTop: '2.5rem', display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
                 <Button variant="ghost" type="button" onClick={() => navigate('/leave/type')} style={{ background: '#f1f5f9', color: '#475569', border: '1px solid #cbd5e1', borderRadius: '12px', height: '48px', padding: '0 24px', fontWeight: 600 }}>

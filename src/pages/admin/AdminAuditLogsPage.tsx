@@ -71,12 +71,9 @@ const AdminAuditLogsPage = () => {
     });
   }, [filteredLogs]);
 
-  const paginatedLogs = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return sortedLogs.slice(startIndex, startIndex + pageSize);
-  }, [sortedLogs, currentPage, pageSize]);
+  const paginatedLogs = sortedLogs;
 
-  const totalPages = Math.ceil(sortedLogs.length / pageSize);
+  const [totalPages, setTotalPages] = useState(1);
 
   const clearFilters = () => {
     setSearchText('');
