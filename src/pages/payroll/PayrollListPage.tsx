@@ -309,7 +309,6 @@ const PayrollListPage = () => {
 
           <Card className="data-table-card">
             <div className="control-bar">
-              <div className="search-box"><Search size={18} /><input type="text" placeholder="Cari nama, ID payroll, atau ID karyawan..." value={searchText} onChange={(e) => setSearchText(e.target.value)} className="search-input" /></div>
               <div className="quick-controls">
                 <div className="control-group">
                   <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} className="sort-select">
@@ -320,6 +319,7 @@ const PayrollListPage = () => {
                 <button className={`filter-btn ${showFilters ? "active" : ""}`} onClick={() => setShowFilters(!showFilters)}><Filter size={18} /><span>Filter</span><ChevronDown size={14} style={{ transform: showFilters ? "rotate(180deg)" : "", transition: "transform 0.3s ease" }} /></button>
                 {(searchText||selectedEmployeeId||selectedPeriod||selectedStatus) && <button className="btn-clear" onClick={clearFilters}>Bersihkan</button>}
               </div>
+              <div className="search-box"><Search size={18} className="search-icon-inside" /><input type="text" placeholder="Cari nama, ID payroll, atau ID karyawan..." value={searchText} onChange={(e) => setSearchText(e.target.value)} className="search-input" /></div>
             </div>
 
             {showFilters && (

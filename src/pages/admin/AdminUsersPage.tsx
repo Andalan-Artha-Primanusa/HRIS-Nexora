@@ -238,6 +238,13 @@ const AdminUsersPage = () => {
       <Card className="control-section-card">
         <div className="control-section-inner">
           <div className="control-actions">
+            <button className={`filter-btn-rounded ${showFilters ? 'active' : ''}`} onClick={() => setShowFilters(!showFilters)}>
+              <Filter size={18} />
+              <span>Filter</span>
+            </button>
+          </div>
+
+          <div className="control-actions">
             <div className="search-box">
               <div className="search-icon-inside">
                 <Search size={18} />
@@ -250,10 +257,6 @@ const AdminUsersPage = () => {
                 className="search-input-pill"
               />
             </div>
-            <button className={`filter-btn-rounded ${showFilters ? 'active' : ''}`} onClick={() => setShowFilters(!showFilters)}>
-              <Filter size={18} />
-              <span>Filter</span>
-            </button>
           </div>
         </div>
 

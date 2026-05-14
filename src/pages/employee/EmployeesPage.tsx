@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { api } from "@/shared/api/httpClient";
 import { getAllLocations, getActiveLocations } from "@/features/location/api/location.service";
+import type { LocationItem } from "@/features/location/types/location.types";
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader } from "@/shared/ui";
-import { Button } from "@/shared/ui/Button";
 import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import {
   deleteEmployee,
@@ -67,9 +67,9 @@ const EmployeesPage = () => {
   const [offboardingReason, setOffboardingReason] = useState("");
 
   // Metadata State
-  const [allLocations, setAllLocations] = useState<Record<string, any>[]>([]);
-  // const [allUsers, setAllUsers] = useState<Record<string, any>[]>([]);
-  // const [allSchedules, setAllSchedules] = useState<Record<string, any>[]>([]);
+  const [allLocations, setAllLocations] = useState<LocationItem[]>([]);
+  // const [allUsers, setAllUsers] = useState<Record<string, unknown>[]>([]);
+  // const [allSchedules, setAllSchedules] = useState<Record<string, unknown>[]>([]);
   // const [allDepartments, setAllDepartments] = useState<string[]>([]);
 
   // Search & Filter State
@@ -152,9 +152,12 @@ const EmployeesPage = () => {
     });
   }, [filteredEmployees, sortBy, sortOrder]);
 
-  const paginatedEmployees = sortedEmployees;
+  const totalPages = Math.max(1, Math.ceil(sortedEmployees.length / pageSize));
 
-  const [totalPages, setTotalPages] = useState(1);
+  const paginatedEmployees = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return sortedEmployees.slice(startIndex, startIndex + pageSize);
+  }, [sortedEmployees, currentPage, pageSize]);
 
   const employeeSummaryCards = useMemo(
     () => [
@@ -216,7 +219,7 @@ const EmployeesPage = () => {
       console.log("🔍 Fetching metadata...");
 
       // Fetch Locations - managers should use the active list only
-      let locList: Record<string, any>[] = [];
+      let locList: LocationItem[] = [];
       try {
         if (canViewAdminMetadata) {
           const locs = await getAllLocations();
@@ -335,8 +338,8 @@ const EmployeesPage = () => {
       setActiveActionModal(null);
       setStatusMessage("Aksi berhasil diproses.");
       await loadEmployees();
-    } catch (e: any) {
-      setStatusMessage(e.message || "Gagal memproses aksi");
+    } catch (e: unknown) {
+      setStatusMessage(e instanceof Error ? e.message : "Gagal memproses aksi");
     } finally {
       setLoading(false);
     }
@@ -350,6 +353,10 @@ const EmployeesPage = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchText, selectedDepartment, selectedPosition, sortBy, sortOrder, activeTab]);
+
+  useEffect(() => {
+    setCurrentPage((page) => Math.min(page, totalPages));
+  }, [totalPages]);
 
 
 
