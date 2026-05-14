@@ -106,9 +106,9 @@ const PayrollReportsPage: React.FC = () => {
     });
   }, [data, searchText, activeFilterTab]);
 
-  const paginatedData = filteredData;
-
-  const [totalPages, setTotalPages] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(filteredData.length / pageSize));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedData = filteredData.slice((safePage - 1) * pageSize, safePage * pageSize);
 
   const taxSummary = useMemo(() => {
     const totals = data.reduce((acc, curr) => ({
@@ -303,11 +303,11 @@ const PayrollReportsPage: React.FC = () => {
               <div className="table-pagination">
                 <div className="pagination-info">Menampilkan <strong>{paginatedData.length}</strong> dari <strong>{filteredData.length}</strong> data</div>
                 <div className="pagination-controls">
-                  <button className="pagination-btn" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1}>‹</button>
+                  <button className="pagination-btn" onClick={() => setCurrentPage(Math.max(1, safePage - 1))} disabled={safePage === 1}>‹</button>
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <button key={page} className={`pagination-btn ${currentPage === page ? 'active' : ''}`} onClick={() => setCurrentPage(page)}>{page}</button>
+                    <button key={page} className={`pagination-btn ${safePage === page ? 'active' : ''}`} onClick={() => setCurrentPage(page)}>{page}</button>
                   ))}
-                  <button className="pagination-btn" onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages}>›</button>
+                  <button className="pagination-btn" onClick={() => setCurrentPage(Math.min(totalPages, safePage + 1))} disabled={safePage === totalPages}>›</button>
                 </div>
               </div>
             </>

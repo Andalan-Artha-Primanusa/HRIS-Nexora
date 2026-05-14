@@ -123,12 +123,13 @@ const PayrollListPage = () => {
   }, [filteredItems, sortBy, sortOrder]);
 
   const [totalPages, setTotalPages] = useState(1);
-  const paginatedItems = sortedItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const safePage = Math.max(1, Math.min(currentPage, totalPages));
+  const paginatedItems = sortedItems.slice((safePage - 1) * pageSize, safePage * pageSize);
 
   useEffect(() => {
-    const tp = Math.max(1, Math.ceil(sortedItems.length / pageSize));
-    setTotalPages(tp);
-    setCurrentPage((p) => Math.min(p, tp));
+    const nextTotalPages = Math.max(1, Math.ceil(sortedItems.length / pageSize));
+    setTotalPages(nextTotalPages);
+    setCurrentPage((page) => Math.min(page, nextTotalPages));
   }, [sortedItems, pageSize]);
 
   useEffect(() => { setCurrentPage(1); }, [searchText, selectedEmployeeId, selectedPeriod, selectedStatus, sortBy, sortOrder]);
@@ -383,11 +384,11 @@ const PayrollListPage = () => {
                       Menampilkan <strong>{paginatedItems.length}</strong> dari <strong>{sortedItems.length}</strong> data
                     </div>
                     <div className="pagination-controls">
-                      <button className="pagination-btn" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1}>‹</button>
+                      <button className="pagination-btn" onClick={() => setCurrentPage(Math.max(1, safePage - 1))} disabled={safePage === 1}>‹</button>
                       {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                        <button key={page} className={`pagination-btn ${currentPage === page ? 'active' : ''}`} onClick={() => setCurrentPage(page)}>{page}</button>
+                        <button key={page} className={`pagination-btn ${safePage === page ? 'active' : ''}`} onClick={() => setCurrentPage(page)}>{page}</button>
                       ))}
-                      <button className="pagination-btn" onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages}>›</button>
+                      <button className="pagination-btn" onClick={() => setCurrentPage(Math.min(totalPages, safePage + 1))} disabled={safePage === totalPages}>›</button>
                     </div>
                   </div>
                 )}

@@ -136,6 +136,8 @@ const GenerateTab = () => {
       (yearFilter === "all" || String(it.period ?? "").startsWith(yearFilter));
   }), [items, paymentFilter, yearFilter]);
 
+  const [totalPages, setTotalPages] = useState(1);
+  const safePage = Math.min(currentPage, totalPages);
   const paginated = filtered;
 
   const columns = [
@@ -265,10 +267,10 @@ const GenerateTab = () => {
               </div>
               <div className="pagination-controls">
                 <button className="pagination-btn" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1}>‹</button>
-                {Array.from({ length: generateTotalPages }, (_, i) => i + 1).map((page) => (
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                   <button key={page} className={`pagination-btn ${currentPage === page ? 'active' : ''}`} onClick={() => setCurrentPage(page)}>{page}</button>
                 ))}
-                <button className="pagination-btn" onClick={() => setCurrentPage(Math.min(generateTotalPages, currentPage + 1))} disabled={currentPage === generateTotalPages}>›</button>
+                <button className="pagination-btn" onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages}>›</button>
               </div>
             </div>
           )}
@@ -361,8 +363,9 @@ const ApproveTab = () => {
   );
   const otherPayrolls = filteredPayrolls.filter(p => p.status === "approved" || p.status === "paid");
   const rejectedPayrolls = filteredPayrolls.filter(p => p.status === "rejected");
-  const paginatedPending = pendingPayrolls;
-  const [totalPagesPending, setTotalPagesPending] = useState(1);
+  const totalPagesPending = Math.max(1, Math.ceil(pendingPayrolls.length / pageSizePending));
+  const safePagePending = Math.min(currentPagePending, totalPagesPending);
+  const paginatedPending = pendingPayrolls.slice((safePagePending - 1) * pageSizePending, safePagePending * pageSizePending);
 
   const summaryCards = [
     { label: "Draft (Manager)", subtitle: "Menunggu approve manager", value: String(filteredPayrolls.filter(p => p.status === "draft").length), change: "Step 1", tone: "orange" as const, icon: Clock },
@@ -435,11 +438,11 @@ const ApproveTab = () => {
               Menampilkan <strong>{paginatedPending.length}</strong> dari <strong>{pendingPayrolls.length}</strong> data
             </div>
             <div className="pagination-controls">
-              <button className="pagination-btn" onClick={() => setCurrentPagePending(Math.max(1, currentPagePending - 1))} disabled={currentPagePending === 1}>‹</button>
+              <button className="pagination-btn" onClick={() => setCurrentPagePending(Math.max(1, safePagePending - 1))} disabled={safePagePending === 1}>‹</button>
               {Array.from({ length: totalPagesPending }, (_, i) => i + 1).map((page) => (
-                <button key={page} className={`pagination-btn ${currentPagePending === page ? 'active' : ''}`} onClick={() => setCurrentPagePending(page)}>{page}</button>
+                <button key={page} className={`pagination-btn ${safePagePending === page ? 'active' : ''}`} onClick={() => setCurrentPagePending(page)}>{page}</button>
               ))}
-              <button className="pagination-btn" onClick={() => setCurrentPagePending(Math.min(totalPagesPending, currentPagePending + 1))} disabled={currentPagePending === totalPagesPending}>›</button>
+              <button className="pagination-btn" onClick={() => setCurrentPagePending(Math.min(totalPagesPending, safePagePending + 1))} disabled={safePagePending === totalPagesPending}>›</button>
             </div>
           </div>
         )}
@@ -619,8 +622,9 @@ const PaymentTab = () => {
     }
     return true;
   });
-  const [totalPagesRecent, setTotalPagesRecent] = useState(1);
-  const recentPayrolls = filteredPayrolls;
+  const totalPagesRecent = Math.max(1, Math.ceil(filteredPayrolls.length / pageSizeRecent));
+  const safePageRecent = Math.min(currentPageRecent, totalPagesRecent);
+  const recentPayrolls = filteredPayrolls.slice((safePageRecent - 1) * pageSizeRecent, safePageRecent * pageSizeRecent);
 
   const summaryCards = [
     { label: "All Payroll", subtitle: "Total", value: String(safePayrolls.length), tone: "blue" as const, icon: FileText },
@@ -783,11 +787,11 @@ const PaymentTab = () => {
               Menampilkan <strong>{recentPayrolls.length}</strong> dari <strong>{filteredPayrolls.length}</strong> data
             </div>
             <div className="pagination-controls">
-              <button className="pagination-btn" onClick={() => setCurrentPageRecent(Math.max(1, currentPageRecent - 1))} disabled={currentPageRecent === 1}>‹</button>
+              <button className="pagination-btn" onClick={() => setCurrentPageRecent(Math.max(1, safePageRecent - 1))} disabled={safePageRecent === 1}>‹</button>
               {Array.from({ length: totalPagesRecent }, (_, i) => i + 1).map((page) => (
-                <button key={page} className={`pagination-btn ${currentPageRecent === page ? 'active' : ''}`} onClick={() => setCurrentPageRecent(page)}>{page}</button>
+                <button key={page} className={`pagination-btn ${safePageRecent === page ? 'active' : ''}`} onClick={() => setCurrentPageRecent(page)}>{page}</button>
               ))}
-              <button className="pagination-btn" onClick={() => setCurrentPageRecent(Math.min(totalPagesRecent, currentPageRecent + 1))} disabled={currentPageRecent === totalPagesRecent}>›</button>
+              <button className="pagination-btn" onClick={() => setCurrentPageRecent(Math.min(totalPagesRecent, safePageRecent + 1))} disabled={safePageRecent === totalPagesRecent}>›</button>
             </div>
           </div>
         )}

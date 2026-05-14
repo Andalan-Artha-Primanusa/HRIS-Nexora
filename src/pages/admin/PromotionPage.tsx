@@ -3,6 +3,7 @@ import { Search, Filter, Plus, RefreshCw, CheckCircle, XCircle, Trash2, ArrowUpR
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
+import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { promotionService } from '@/features/organization/api/promotion.service';
 import { PromotionModal } from '@/features/organization/components/PromotionModal';
 import '@/shared/styles/CrudPage.css';
@@ -30,6 +31,8 @@ const PromotionPage: React.FC = () => {
   const [reportActionLoading, setReportActionLoading] = useState(false);
   const [historyModal, setHistoryModal] = useState<{ module: string; id: number } | null>(null);
   const [rejectModalId, setRejectModalId] = useState<string | number | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -103,14 +106,19 @@ const PromotionPage: React.FC = () => {
     }
   };
 
-  const handleDelete = async (id: string | number) => {
+  const handleDelete = async () => {
+    if (!deleteTarget?.id) return;
+    setDeleteLoading(true);
     try {
-      await promotionService.deletePromotion(id);
+      await promotionService.deletePromotion(deleteTarget.id);
       fetchData();
       showToast('Promosi berhasil dihapus', 'success');
+      setDeleteTarget(null);
     } catch (error: any) {
       console.error(error);
       showToast(error?.response?.data?.message || error?.message || 'Gagal menghapus promosi', 'error');
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -491,7 +499,7 @@ const PromotionPage: React.FC = () => {
                                   </button>
                                   <button
                                     className="action-btn action-btn-delete"
-                                    onClick={() => handleDelete(promo.id)}
+                                    onClick={() => setDeleteTarget(promo)}
                                     title="Hapus"
                                   >
                                     <Trash2 size={16} />
@@ -572,6 +580,17 @@ const PromotionPage: React.FC = () => {
       </div>
 
       <PromotionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleSave} />
+
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        title="Hapus Promosi"
+        message={`Pengajuan promosi "${deleteTarget?.employee?.user?.name || deleteTarget?.employee?.name || deleteTarget?.employee_name || 'ini'}" akan dihapus. Tindakan ini tidak dapat dibatalkan.`}
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        loading={deleteLoading}
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
 
       {/* Report Modal */}
       {reportModal && selectedPromo && (
