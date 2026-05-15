@@ -1,7 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
+<<<<<<< HEAD
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader } from "@/shared/ui";
 import { ConfirmDialog } from "@/shared/ui/ConfirmDialog";
+=======
+import { api } from "@/shared/api/httpClient";
+import { getAllLocations, getActiveLocations } from "@/features/location/api/location.service";
+import type { LocationItem } from "@/features/location/types/location.types";
+import { useNavigate } from "react-router-dom";
+import { Card, CardHeader, ConfirmDialog } from "@/shared/ui";
+>>>>>>> 5d9d0d74aafb4b4c58ee638b424b33317641d20c
 import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { showToast } from "@/shared/ui/toast";
 import {
@@ -44,6 +52,13 @@ const EmployeesPage = () => {
   const [items, setItems] = useState<EmployeeItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+<<<<<<< HEAD
+=======
+  const [deleteTarget, setDeleteTarget] = useState<EmployeeItem | null>(null);
+  // const [hasLoaded, setHasLoaded] = useState(false);
+
+  // Authentication & RBAC
+>>>>>>> 5d9d0d74aafb4b4c58ee638b424b33317641d20c
   const user = useAuthStore((state) => state.user);
   const allowedMenuKeys = useAuthStore((state) => state.allowedMenuKeys);
   
@@ -57,7 +72,17 @@ const EmployeesPage = () => {
   const [offboardingReason, setOffboardingReason] = useState("");
   const [allLocations, setAllLocations] = useState<LocationItem[]>([]);
 
+<<<<<<< HEAD
   // Search & Filter
+=======
+  // Metadata State
+  const [allLocations, setAllLocations] = useState<LocationItem[]>([]);
+  // const [allUsers, setAllUsers] = useState<Record<string, unknown>[]>([]);
+  // const [allSchedules, setAllSchedules] = useState<Record<string, unknown>[]>([]);
+  // const [allDepartments, setAllDepartments] = useState<string[]>([]);
+
+  // Search & Filter State
+>>>>>>> 5d9d0d74aafb4b4c58ee638b424b33317641d20c
   const [searchText, setSearchText] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [selectedDepartment, setSelectedDepartment] = useState("");
@@ -109,6 +134,7 @@ const EmployeesPage = () => {
       else if (activeTab === "Resigned") statusParam = "inactive";
       if (statusParam) params.status = statusParam;
 
+<<<<<<< HEAD
       const result = await getEmployeesPage(currentPage, pageSize, params);
       setItems(Array.isArray(result.items) ? result.items : []);
       setTotalPages(result.totalPages || 1);
@@ -122,6 +148,14 @@ const EmployeesPage = () => {
   const getErrorMessage = (error: any) => {
     return error?.response?.data?.message || error?.message || "Gagal memuat data";
   };
+=======
+  const totalPages = Math.max(1, Math.ceil(sortedEmployees.length / pageSize));
+
+  const paginatedEmployees = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return sortedEmployees.slice(startIndex, startIndex + pageSize);
+  }, [sortedEmployees, currentPage, pageSize]);
+>>>>>>> 5d9d0d74aafb4b4c58ee638b424b33317641d20c
 
   const confirmDeleteEmployee = async () => {
     if (!deleteTarget) return;
@@ -152,6 +186,167 @@ const EmployeesPage = () => {
     setCurrentPage(1);
   };
 
+<<<<<<< HEAD
+=======
+  const requireId = (idValue: string) => {
+    const id = idValue.trim();
+    if (!id) {
+      setStatusMessage("Employee ID wajib diisi.");
+      return null;
+    }
+    return id;
+  };
+
+  const loadMetadata = async () => {
+    try {
+      console.log("🔍 Fetching metadata...");
+
+      // Fetch Locations - managers should use the active list only
+      let locList: LocationItem[] = [];
+      try {
+        if (canViewAdminMetadata) {
+          const locs = await getAllLocations();
+          locList = Array.isArray(locs.items) ? locs.items : [];
+          console.log("📍 Locations fetched (all):", locList);
+        } else {
+          const active = await getActiveLocations();
+          locList = Array.isArray(active.items) ? active.items : [];
+          console.log("📍 Locations fetched (active only):", locList);
+        }
+      } catch (err) {
+        console.warn("⚠️ Fetch locations failed:", err);
+      }
+      setAllLocations(locList);
+
+      // Fetch Users - only admin/super admin can access the admin user listing
+      if (canViewAdminMetadata) {
+        try {
+          const usersRes = await api.get('/admin/users');
+          let usersList = usersRes.data?.data?.items || usersRes.data?.data || [];
+          if (!Array.isArray(usersList)) usersList = [];
+          console.log("👤 Users fetched:", usersList);
+          // setAllUsers(usersList);
+        } catch (err) {
+          console.warn("⚠️ Fetch users failed (likely permission):", err);
+        }
+      }
+
+      // Fetch Work Schedules - tolerate permission issues
+      try {
+        const schedRes = await api.get('/work-schedules');
+        let schedList = schedRes.data?.data || schedRes.data || [];
+        if (!Array.isArray(schedList)) schedList = [];
+        console.log("📅 Schedules fetched:", schedList);
+        // setAllSchedules(schedList);
+      } catch (err) {
+        console.warn("⚠️ Fetch schedules failed (likely permission):", err);
+      }
+
+      // Fetch Departments - tolerate permission errors
+      try {
+        const deptRes = await api.get('/organization/master-data');
+        const deptList = deptRes.data?.data?.departments;
+        const finalDeptList = Array.isArray(deptList) ? deptList : [];
+        console.log("🏢 Departments fetched:", finalDeptList);
+        // setAllDepartments(finalDeptList);
+      } catch (err) {
+        console.warn("⚠️ Fetch departments failed (likely permission):", err);
+      }
+    } catch (err) {
+      console.error("❌ Failed to load metadata:", err);
+    }
+  };
+
+  const loadEmployees = async () => {
+    setLoading(true);
+    setStatusMessage("Memuat semua employees...");
+    setErrorMessage(null);
+
+    try {
+      const result = await getAllEmployees();
+      setItems(result);
+      setStatusMessage("Semua employee berhasil dimuat.");
+      
+      // Load metadata in parallel
+      void loadMetadata();
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Gagal memuat employee.";
+      setStatusMessage(message);
+      setErrorMessage(message);
+    } finally {
+      setLoading(false);
+      // setHasLoaded(true);
+    }
+  };
+
+
+
+  const confirmDeleteEmployee = async () => {
+    if (!deleteTarget) return;
+
+    const id = requireId(String(deleteTarget.id));
+    if (!id) return;
+
+    setLoading(true);
+    setStatusMessage("Menghapus employee...");
+
+    try {
+      await deleteEmployee(id);
+      setStatusMessage("Employee berhasil dihapus.");
+      setDeleteTarget(null);
+      await loadEmployees();
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Gagal menghapus employee.";
+      setStatusMessage(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+
+  const handleLifecycleAction = async () => {
+    if (!selectedEmployeeId || !activeActionModal) return;
+    setLoading(true);
+    setStatusMessage("Memproses aksi karyawan...");
+    try {
+      if (activeActionModal === "onboarding_start") {
+        if (!onboardingDate) throw new Error("Tanggal masa percobaan wajib diisi");
+        await startOnboarding(selectedEmployeeId, { probation_end_date: onboardingDate });
+      } else if (activeActionModal === "onboarding_complete") {
+        await completeOnboarding(selectedEmployeeId);
+      } else if (activeActionModal === "offboarding_start") {
+        if (!offboardingDate || !offboardingReason) throw new Error("Tanggal dan alasan berhenti wajib diisi");
+        await startOffboarding(selectedEmployeeId, { termination_date: offboardingDate, termination_reason: offboardingReason });
+      } else if (activeActionModal === "offboarding_complete") {
+        await completeOffboarding(selectedEmployeeId);
+      }
+      setActiveActionModal(null);
+      setStatusMessage("Aksi berhasil diproses.");
+      await loadEmployees();
+    } catch (e: unknown) {
+      setStatusMessage(e instanceof Error ? e.message : "Gagal memproses aksi");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadEmployees();
+  }, []);
+
+  // Reset page on filter changes (like PayrollListPage)
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText, selectedDepartment, selectedPosition, sortBy, sortOrder, activeTab]);
+
+  useEffect(() => {
+    setCurrentPage((page) => Math.min(page, totalPages));
+  }, [totalPages]);
+
+
+
+>>>>>>> 5d9d0d74aafb4b4c58ee638b424b33317641d20c
   return (
     <div className="crud-page">
       {/* Header */}
@@ -291,8 +486,25 @@ const EmployeesPage = () => {
                         </td>
                         <td className="td-center">
                           <div className="action-btn-group">
+<<<<<<< HEAD
                             <button className="action-btn action-btn-edit" onClick={() => navigate(`/employees/update/${item.id}`)} title="Edit"><Pencil size={16} /></button>
                             <button className="action-btn action-btn-delete" onClick={() => setDeleteTarget(item)} title="Hapus"><Trash2 size={16} /></button>
+=======
+                            <button
+                              className="action-btn action-btn-edit"
+                              onClick={() => navigate(`/employees/update/${item.id}`)}
+                              title="Edit"
+                            >
+                              <Pencil size={16} />
+                            </button>
+                            <button
+                              className="action-btn action-btn-delete"
+                              onClick={() => setDeleteTarget(item)}
+                              title="Hapus"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+>>>>>>> 5d9d0d74aafb4b4c58ee638b424b33317641d20c
                           </div>
                         </td>
                       </tr>
@@ -335,10 +547,17 @@ const EmployeesPage = () => {
       <ConfirmDialog
         isOpen={!!deleteTarget}
         title="Hapus Karyawan"
+<<<<<<< HEAD
         message={`Karyawan "${deleteTarget?.user?.name || deleteTarget?.employee_code || "ini"}" akan dihapus secara permanen.`}
         confirmLabel="Hapus"
         cancelLabel="Batal"
         loading={loading}
+=======
+        message={`Karyawan "${deleteTarget?.user?.name || deleteTarget?.employee_code || "ini"}" akan dihapus. Tindakan ini tidak dapat dibatalkan.`}
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        loading={loading && !!deleteTarget}
+>>>>>>> 5d9d0d74aafb4b4c58ee638b424b33317641d20c
         onConfirm={() => void confirmDeleteEmployee()}
         onCancel={() => setDeleteTarget(null)}
       />

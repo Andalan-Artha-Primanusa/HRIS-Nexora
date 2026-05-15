@@ -182,16 +182,6 @@ const AttendanceReportsPage = () => {
       <Card className="control-section-card">
         <div className="control-section-inner">
           <div className="control-actions">
-            <div className="search-box">
-              <div className="search-icon-inside"><Search size={18} /></div>
-              <input
-                type="text"
-                placeholder="Cari nama atau ID karyawan..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="search-input-pill"
-              />
-            </div>
             <select
               className="filter-select-premium"
               value={filterStatus}
@@ -210,6 +200,19 @@ const AttendanceReportsPage = () => {
               className="filter-select-premium"
               style={{ height: '44px', minWidth: '160px' }}
             />
+          </div>
+
+          <div className="control-actions">
+            <div className="search-box">
+              <div className="search-icon-inside"><Search size={18} /></div>
+              <input
+                type="text"
+                placeholder="Cari nama atau ID karyawan..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="search-input-pill"
+              />
+            </div>
           </div>
         </div>
       </Card>

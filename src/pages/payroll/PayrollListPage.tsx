@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Card } from "@/shared/ui/Card";
+import { ConfirmDialog } from "@/shared/ui/ConfirmDialog";
 import { Modal } from "@/shared/ui/Modal";
 import { showToast } from "@/shared/ui/toast";
 import { ArrowDown, ArrowUp, Briefcase, Filter, RefreshCw, Search, ChevronDown, Plus, Pencil, Trash2, ArrowLeft, AlertCircle, Download, Banknote, FileText, X, Info } from "lucide-react";
@@ -52,6 +53,7 @@ const PayrollListPage = () => {
   const [view, setView] = useState<"list" | "form">("list");
   const [form, setForm] = useState<PayrollFormState>(DEFAULT_FORM);
   const [mode, setMode] = useState<"create" | "edit" | "delete">("create");
+  const [deleteTarget, setDeleteTarget] = useState<PayrollWithEmployeeName | null>(null);
 
   const [exportModal, setExportModal] = useState(false);
   const [exportPeriod, setExportPeriod] = useState(new Date().toISOString().slice(0, 7));
@@ -192,11 +194,14 @@ const PayrollListPage = () => {
   };
 
   const handleDelete = async () => {
+    if (!deleteTarget) return;
+
     setLoading(true);
     try {
-      await payrollService.deletePayroll(form.id);
+      await payrollService.deletePayroll(String(deleteTarget.id));
       showToast("Payroll berhasil dihapus", "success");
-      setView("list"); await loadData();
+      setDeleteTarget(null);
+      await loadData();
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Gagal", "error");
     } finally { setLoading(false); }
@@ -311,7 +316,6 @@ const PayrollListPage = () => {
 
           <Card className="data-table-card">
             <div className="control-bar">
-              <div className="search-box"><Search size={18} /><input type="text" placeholder="Cari nama, ID payroll, atau ID karyawan..." value={searchText} onChange={(e) => setSearchText(e.target.value)} className="search-input" /></div>
               <div className="quick-controls">
                 <div className="control-group">
                   <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} className="sort-select">
@@ -322,6 +326,7 @@ const PayrollListPage = () => {
                 <button className={`filter-btn ${showFilters ? "active" : ""}`} onClick={() => setShowFilters(!showFilters)}><Filter size={18} /><span>Filter</span><ChevronDown size={14} style={{ transform: showFilters ? "rotate(180deg)" : "", transition: "transform 0.3s ease" }} /></button>
                 {(searchText||selectedEmployeeId||selectedPeriod||selectedStatus) && <button className="btn-clear" onClick={clearFilters}>Bersihkan</button>}
               </div>
+              <div className="search-box"><Search size={18} className="search-icon-inside" /><input type="text" placeholder="Cari nama, ID payroll, atau ID karyawan..." value={searchText} onChange={(e) => setSearchText(e.target.value)} className="search-input" /></div>
             </div>
 
             {showFilters && (
@@ -382,7 +387,7 @@ const PayrollListPage = () => {
                           <td className="td-center">
                             <div className="action-btn-group" style={{ justifyContent: "center" }}>
                               <button className="action-btn action-btn-edit" title="Edit" onClick={() => { setForm({ id: String(item.id), employee_id: String(item.employee_id), period: item.period, allowance: String(item.allowance||""), bonus: String(item.bonus||"") }); setMode("edit"); setView("form"); }}><Pencil size={16} /></button>
-                              <button className="action-btn action-btn-delete" title="Hapus" onClick={() => { setForm({ id: String(item.id), employee_id: String(item.employee_id), period: item.period, allowance: "", bonus: "" }); setMode("delete"); setView("form"); }}><Trash2 size={16} /></button>
+                              <button className="action-btn action-btn-delete" title="Hapus" onClick={() => setDeleteTarget(item)}><Trash2 size={16} /></button>
                             </div>
                           </td>
                         </tr>
@@ -442,6 +447,17 @@ const PayrollListPage = () => {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        title="Hapus Payroll"
+        message={`Payroll untuk "${deleteTarget?.employeeName || `ID: ${deleteTarget?.employee_id || "-"}`}" periode "${deleteTarget?.period || "-"}" akan dihapus permanen.`}
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        loading={loading && !!deleteTarget}
+        onConfirm={() => void handleDelete()}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 };

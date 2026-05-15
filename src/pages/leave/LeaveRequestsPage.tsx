@@ -203,6 +203,19 @@ const LeaveRequestsPage = () => {
       <Card className="control-section-card">
         <div className="control-section-inner">
           <div className="control-actions">
+            <select 
+              className="control-select"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="">Semua Status</option>
+              <option value="pending">Menunggu</option>
+              <option value="approved">Disetujui</option>
+              <option value="rejected">Ditolak</option>
+            </select>
+          </div>
+
+          <div className="control-actions">
             <div className="search-box">
               <div className="search-icon-inside">
                 <Search size={18} />
@@ -216,6 +229,7 @@ const LeaveRequestsPage = () => {
               />
             </div>
           </div>
+<<<<<<< HEAD
           <select
             className="control-select"
             value={filterStatus}
@@ -226,6 +240,8 @@ const LeaveRequestsPage = () => {
             <option value="approved">Disetujui</option>
             <option value="rejected">Ditolak</option>
           </select>
+=======
+>>>>>>> 5d9d0d74aafb4b4c58ee638b424b33317641d20c
         </div>
       </Card>
 
