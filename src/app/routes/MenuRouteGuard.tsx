@@ -1,6 +1,7 @@
 import React from "react";
 import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
+import { LoadingState } from "@/shared/ui/DataStateDisplay";
 import { Shield } from "lucide-react";
 import { RBACUtils } from "@/shared/hooks/rbac";
 
@@ -17,7 +18,15 @@ interface MenuRouteGuardProps {
  */
 export const MenuRouteGuard: React.FC<MenuRouteGuardProps> = ({ menuKey, children }) => {
   const user = useAuthStore((state) => state.user);
-  const allowedMenuKeys = useAuthStore((state) => state.allowedMenuKeys);  // Otorisasi berhasil jika menuKey eksplisit terdaftar,
+  const allowedMenuKeys = useAuthStore((state) => state.allowedMenuKeys);
+  const menuKeysLoaded = useAuthStore((state) => state.menuKeysLoaded);
+
+  // Loading state: keys belum selesai di-fetch
+  if (!menuKeysLoaded) {
+    return <LoadingState message="Memeriksa otorisasi..." />;
+  }
+
+  // Otorisasi berhasil jika menuKey eksplisit terdaftar,
   // atau merupakan sub-item dari menu induk yang diizinkan
   const hasExplicitMenu =
     allowedMenuKeys.includes(menuKey) ||

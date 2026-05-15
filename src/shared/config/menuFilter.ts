@@ -27,6 +27,7 @@ const computeFromAssignments = (
 export const fetchAllowedMenuKeys = async (user: AuthUser | null = null): Promise<string[]> => {
   const storeKeys = useAuthStore.getState().allowedMenuKeys;
   if (storeKeys.length > 0) {
+    useAuthStore.getState().setMenuKeysLoaded(true);
     return storeKeys;
   }
   if (cachePromise) return cachePromise;
@@ -34,6 +35,7 @@ export const fetchAllowedMenuKeys = async (user: AuthUser | null = null): Promis
   cachePromise = (async () => {
     if (!user?.roles?.length) {
       useAuthStore.getState().setAllowedMenuKeys([]);
+      useAuthStore.getState().setMenuKeysLoaded(true);
       return [];
     }
 
@@ -49,6 +51,7 @@ export const fetchAllowedMenuKeys = async (user: AuthUser | null = null): Promis
         if (computed) {
           const finalKeys = stripAdminKeys(computed, user);
           useAuthStore.getState().setAllowedMenuKeys(finalKeys);
+          useAuthStore.getState().setMenuKeysLoaded(true);
           return finalKeys;
         }
       }
@@ -62,9 +65,11 @@ export const fetchAllowedMenuKeys = async (user: AuthUser | null = null): Promis
       const data = res.data?.data ?? [];
       const finalKeys = stripAdminKeys(Array.isArray(data) ? data : [], user);
       useAuthStore.getState().setAllowedMenuKeys(finalKeys);
+      useAuthStore.getState().setMenuKeysLoaded(true);
       return finalKeys;
     } catch {
       useAuthStore.getState().setAllowedMenuKeys([]);
+      useAuthStore.getState().setMenuKeysLoaded(true);
       return [];
     }
   })();
@@ -79,6 +84,7 @@ export const fetchAllowedMenuKeys = async (user: AuthUser | null = null): Promis
 export const clearMenuCache = () => {
   cachePromise = null;
   useAuthStore.getState().setAllowedMenuKeys([]);
+  useAuthStore.getState().setMenuKeysLoaded(false);
 };
 
 const collectKeys = (items: MenuItem[]): Set<string> => {

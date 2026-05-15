@@ -6,10 +6,12 @@ interface AuthState {
   token: string | null;
   isAuthenticated: boolean;
   allowedMenuKeys: string[];
+  menuKeysLoaded: boolean;
   setAuth: (user: AuthUser, token: string) => void;
   logout: () => void;
   updateUser: (user: AuthUser) => void;
   setAllowedMenuKeys: (keys: string[]) => void;
+  setMenuKeysLoaded: (loaded: boolean) => void;
 }
 
 const getStoredUser = (): AuthUser | null => {
@@ -84,6 +86,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   token: getStoredToken(),
   isAuthenticated: Boolean(getStoredToken()),
   allowedMenuKeys: [],
+  menuKeysLoaded: false,
   setAuth: (user: AuthUser, token: string) => {
     const authUser: AuthUser = {
       ...user,
@@ -107,10 +110,13 @@ export const useAuthStore = create<AuthState>((set) => ({
     sessionStorage.setItem("allowedMenuKeys", JSON.stringify(keys));
     set({ allowedMenuKeys: keys });
   },
+  setMenuKeysLoaded: (loaded: boolean) => {
+    set({ menuKeysLoaded: loaded });
+  },
   logout: () => {
     sessionStorage.removeItem("token");
     sessionStorage.removeItem("user");
     sessionStorage.removeItem("allowedMenuKeys");
-    set({ user: null, token: null, isAuthenticated: false, allowedMenuKeys: [] });
+    set({ user: null, token: null, isAuthenticated: false, allowedMenuKeys: [], menuKeysLoaded: false });
   },
 }));

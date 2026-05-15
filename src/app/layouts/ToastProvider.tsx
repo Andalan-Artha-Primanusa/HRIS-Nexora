@@ -12,6 +12,7 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
         position="top-right"
         reverseOrder={false}
         gutter={8}
+        containerStyle={{ zIndex: 99999 }}
         toastOptions={{
           duration: 4000,
           style: {

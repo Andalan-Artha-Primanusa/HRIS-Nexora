@@ -144,13 +144,15 @@ const extractAuthFromResponse = (data: unknown) => {
 export const useAuth = () => {
   const setAuth = useAuthStore.getState().setAuth;
   const setAllowedMenuKeys = useAuthStore.getState().setAllowedMenuKeys;
+  const setMenuKeysLoaded = useAuthStore.getState().setMenuKeysLoaded;
 
   const syncDynamicMenus = async () => {
     try {
       const keys = await fetchUserMenus();
       setAllowedMenuKeys(keys);
+      setMenuKeysLoaded(true);
     } catch {
-      // Abaikan jika sinkronisasi menu awal terputus
+      setMenuKeysLoaded(true);
     }
   };
 

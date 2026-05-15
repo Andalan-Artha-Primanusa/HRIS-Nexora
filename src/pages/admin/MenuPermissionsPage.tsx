@@ -55,9 +55,9 @@ const MenuPermissionsPage = () => {
     setSaving(menuKey);
     try {
       if (currentlyAssigned) {
-        await api.delete(`/admin/menus/${menuKey}/roles/${roleId}`);
+        await api.delete(`/admin/menus/${menuKey}/roles/${roleId}`, { skipToast: true } as any);
       } else {
-        await api.post("/admin/menus/assign-role", { menu_key: menuKey, role_id: roleId });
+        await api.post("/admin/menus/assign-role", { menu_key: menuKey, role_id: roleId }, { skipToast: true } as any);
       }
       setMenuItems((prev) =>
         prev.map((m) =>
