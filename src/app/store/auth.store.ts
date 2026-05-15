@@ -70,17 +70,6 @@ const getStoredUser = (): AuthUser | null => {
 
 const getStoredToken = (): string | null => sessionStorage.getItem("token");
 
-const getStoredMenuKeys = (): string[] => {
-  const raw = sessionStorage.getItem("allowedMenuKeys");
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? (parsed as string[]) : [];
-  } catch {
-    return [];
-  }
-};
-
 export const useAuthStore = create<AuthState>((set) => ({
   user: getStoredUser(),
   token: getStoredToken(),

@@ -10,6 +10,17 @@ import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
 import './NotificationSettingsPage.css';
 
+interface NotificationSetting {
+  id: number;
+  category: string;
+  label: string;
+  description: string;
+  email: boolean;
+  push: boolean;
+  in_app: boolean;
+  group?: 'leave' | 'payroll' | 'announcement' | 'system' | 'approval';
+}
+
 const NotificationSettingsPage: React.FC = () => {
   const user = useAuthStore((state) => state.user);
   const canAccess = RBACUtils.hasPermission(user, 'admin.email.manage');
@@ -19,19 +30,6 @@ const NotificationSettingsPage: React.FC = () => {
     );
   }
 
-interface NotificationSetting {
-  id: number;
-  category: string;
-  label: string;
-  description: string;
-  email: boolean;
-  push: boolean;
-  in_app: boolean;
-  // Kita tambahkan ini untuk filtering UI jika diperlukan
-  group?: 'leave' | 'payroll' | 'announcement' | 'system' | 'approval';
-}
-
-const NotificationSettingsPage: React.FC = () => {
   const [settings, setSettings] = useState<NotificationSetting[]>([]);
   const [loading, setLoading] = useState(true);
   const [_saving, setSaving] = useState(false);

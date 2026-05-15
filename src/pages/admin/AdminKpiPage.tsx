@@ -94,6 +94,28 @@ const PERIOD_LABELS: Record<string, string> = {
   annual: "Annual",
 };
 
+const getScoreColor = (score: number) => {
+  if (score >= 80) return "#10b981";
+  if (score >= 60) return "#f59e0b";
+  return "#ef4444";
+};
+
+const typeIcon = (periodType?: string) => {
+  switch (periodType) {
+    case "quarterly": return <Activity size={16} />;
+    case "semi_annual": return <BarChart3 size={16} />;
+    case "annual": return <Gauge size={16} />;
+    default: return <Activity size={16} />;
+  }
+};
+
+const getStatusClass = (status?: string) => {
+  const normalized = (status || "").toLowerCase();
+  if (["approved", "approve", "accepted", "done", "completed"].includes(normalized)) return "badge-soft badge-soft--green";
+  if (["submitted", "sent", "waiting_review"].includes(normalized)) return "badge-soft badge-soft--yellow";
+  return "badge-soft badge-soft--gray";
+};
+
 const AdminKpiPage = () => {
   const user = useAuthStore((state) => state.user);
   const canAccess = RBACUtils.hasPermission(user, "kpi.view");

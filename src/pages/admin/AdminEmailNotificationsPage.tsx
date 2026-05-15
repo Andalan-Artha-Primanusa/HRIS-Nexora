@@ -51,10 +51,9 @@ type ErrorWithResponse = {
 const extractList = <T,>(payload: ApiListPayload<T>): T[] =>
   Array.isArray(payload) ? payload : Array.isArray(payload.data) ? payload.data : [];
 
-const canAccess = RBACUtils.hasPermission(user, "admin.email.manage");
-
 const AdminEmailNotificationsPage = () => {
   const user = useAuthStore((state) => state.user);
+  const canAccess = RBACUtils.hasPermission(user, "admin.email.manage");
 
   const [items, setItems] = useState<EmailTemplateItem[]>([]);
   const [logs, setLogs] = useState<EmailLogItem[]>([]);

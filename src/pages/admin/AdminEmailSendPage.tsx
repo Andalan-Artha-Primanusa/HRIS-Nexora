@@ -35,10 +35,9 @@ type EmployeeRecipient = {
   };
 };
 
-const canAccess = RBACUtils.hasPermission(user, "admin.email.manage");
-
 const AdminEmailSendPage = () => {
   const user = useAuthStore((state) => state.user);
+  const canAccess = RBACUtils.hasPermission(user, "admin.email.manage");
 
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [employees, setEmployees] = useState<EmployeeRecipient[]>([]);
