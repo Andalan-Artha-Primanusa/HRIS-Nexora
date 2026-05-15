@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Card } from "@/shared/ui/Card";
+import { ConfirmDialog } from "@/shared/ui/ConfirmDialog";
 import { Modal } from "@/shared/ui/Modal";
 import { showToast } from "@/shared/ui/toast";
 import { ArrowDown, ArrowUp, Briefcase, Filter, RefreshCw, Search, ChevronDown, Plus, Pencil, Trash2, ArrowLeft, AlertCircle, Download, Banknote, FileText, X, Info } from "lucide-react";
@@ -10,6 +11,7 @@ import { PayrollStatusBadge } from "@/shared/ui/PayrollStatusBadge";
 import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import type { PayrollCreatePayload, PayrollUpdatePayload, PayrollItem } from "@/features/payroll/types/payroll.types";
 import type { EmployeeItem } from "@/features/employee/types/employee.types";
+import { parsePaginatedResponse } from "@/shared/api/pagination";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "./PayrollListPage.css";
@@ -46,10 +48,12 @@ const PayrollListPage = () => {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
+  const [totalItems, setTotalItems] = useState(0);
 
   const [view, setView] = useState<"list" | "form">("list");
   const [form, setForm] = useState<PayrollFormState>(DEFAULT_FORM);
   const [mode, setMode] = useState<"create" | "edit" | "delete">("create");
+  const [deleteTarget, setDeleteTarget] = useState<PayrollWithEmployeeName | null>(null);
 
   const [exportModal, setExportModal] = useState(false);
   const [exportPeriod, setExportPeriod] = useState(new Date().toISOString().slice(0, 7));
@@ -70,16 +74,11 @@ const PayrollListPage = () => {
     employee_id: payroll.employee_id ?? payroll.karyawan_id ?? payroll.employee?.id ?? '',
   });
 
-  const getEmployeeName = (emp: any): string => {
-    if (emp?.user?.name && typeof emp.user.name === "string") return emp.user.name;
-    if (emp?.name && typeof emp.name === "string") return emp.name;
-    if (emp?.fullName && typeof emp.fullName === "string") return emp.fullName;
-    if (emp?.full_name && typeof emp.full_name === "string") return emp.full_name;
-    return "";
-  };
-
   const employeesWithNames = useMemo(() => {
-    return employees.map((i: any) => ({ id: i.id, name: getEmployeeName(i) })).filter((i: any) => i.name && i.name.trim() !== "").sort((a: any, b: any) => a.name.localeCompare(b.name));
+    return employees.map((i: any) => ({ 
+      id: i.id, 
+      name: i.user?.name || i.full_name || i.fullName || `ID: ${i.id}` 
+    })).filter((i: any) => i.name && i.name.trim() !== "").sort((a: any, b: any) => a.name.localeCompare(b.name));
   }, [employees]);
 
   const uniquePeriods = useMemo(() => {
@@ -124,13 +123,7 @@ const PayrollListPage = () => {
 
   const [totalPages, setTotalPages] = useState(1);
   const safePage = Math.max(1, Math.min(currentPage, totalPages));
-  const paginatedItems = sortedItems.slice((safePage - 1) * pageSize, safePage * pageSize);
-
-  useEffect(() => {
-    const nextTotalPages = Math.max(1, Math.ceil(sortedItems.length / pageSize));
-    setTotalPages(nextTotalPages);
-    setCurrentPage((page) => Math.min(page, nextTotalPages));
-  }, [sortedItems, pageSize]);
+  const paginatedItems = sortedItems;
 
   useEffect(() => { setCurrentPage(1); }, [searchText, selectedEmployeeId, selectedPeriod, selectedStatus, sortBy, sortOrder]);
 
@@ -142,13 +135,22 @@ const PayrollListPage = () => {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const [payrollData, employeeData] = await Promise.all([payrollService.getPayrollList(), getAllEmployees()]);
-      const safePayrollData = toSafeArray(payrollData).map(normalizePayroll);
+      const [payrollData, employeeData] = await Promise.all([
+        payrollService.getPayrollList({ page: currentPage, per_page: pageSize }),
+        getAllEmployees(),
+      ]);
+      const parsed = parsePaginatedResponse<any>(payrollData);
+      const safePayrollData = parsed.items.map(normalizePayroll);
+      setTotalPages(parsed.totalPages);
+      setTotalItems(parsed.total);
+      
       const safeEmployeeData = Array.isArray(employeeData) ? employeeData : toSafeArray(employeeData);
       setEmployees(safeEmployeeData);
+
       const enrichedPayroll = safePayrollData.map((payroll: any) => {
-        const employee = safeEmployeeData.find((emp: any) => String(emp.id) === String(payroll.employee_id));
-        return { ...payroll, employeeName: getEmployeeName(employee) };
+        const emp = payroll.employee;
+        const name = emp?.user?.name || emp?.full_name || `EMP-${payroll.employee_id}`;
+        return { ...payroll, employeeName: name };
       });
       setItems(enrichedPayroll);
     } catch (err) {
@@ -157,6 +159,10 @@ const PayrollListPage = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    void loadData();
+  }, [currentPage, pageSize]);
 
   const getEmpLabel = (empId: string) => {
     const emp = employees.find((e) => String(e.id) === empId);
@@ -188,11 +194,14 @@ const PayrollListPage = () => {
   };
 
   const handleDelete = async () => {
+    if (!deleteTarget) return;
+
     setLoading(true);
     try {
-      await payrollService.deletePayroll(form.id);
+      await payrollService.deletePayroll(String(deleteTarget.id));
       showToast("Payroll berhasil dihapus", "success");
-      setView("list"); await loadData();
+      setDeleteTarget(null);
+      await loadData();
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Gagal", "error");
     } finally { setLoading(false); }
@@ -217,8 +226,6 @@ const PayrollListPage = () => {
       showToast(err instanceof Error ? err.message : "Gagal", "error");
     } finally { setExportLoading(false); }
   };
-
-  useEffect(() => { void loadData(); }, []);
 
   const formatCurrency = (v: number) => `Rp ${(v||0).toLocaleString("id-ID")}`;
 
@@ -309,7 +316,6 @@ const PayrollListPage = () => {
 
           <Card className="data-table-card">
             <div className="control-bar">
-              <div className="search-box"><Search size={18} /><input type="text" placeholder="Cari nama, ID payroll, atau ID karyawan..." value={searchText} onChange={(e) => setSearchText(e.target.value)} className="search-input" /></div>
               <div className="quick-controls">
                 <div className="control-group">
                   <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} className="sort-select">
@@ -320,6 +326,7 @@ const PayrollListPage = () => {
                 <button className={`filter-btn ${showFilters ? "active" : ""}`} onClick={() => setShowFilters(!showFilters)}><Filter size={18} /><span>Filter</span><ChevronDown size={14} style={{ transform: showFilters ? "rotate(180deg)" : "", transition: "transform 0.3s ease" }} /></button>
                 {(searchText||selectedEmployeeId||selectedPeriod||selectedStatus) && <button className="btn-clear" onClick={clearFilters}>Bersihkan</button>}
               </div>
+              <div className="search-box"><Search size={18} className="search-icon-inside" /><input type="text" placeholder="Cari nama, ID payroll, atau ID karyawan..." value={searchText} onChange={(e) => setSearchText(e.target.value)} className="search-input" /></div>
             </div>
 
             {showFilters && (
@@ -358,8 +365,19 @@ const PayrollListPage = () => {
                       {paginatedItems.map((item: any, idx) => (
                         <tr key={`${item.id}-${idx}`}>
                           <td className="crud-table-name">
-                            <div className="crud-table-avatar">{item.employeeName ? item.employeeName.charAt(0).toUpperCase() : "P"}</div>
-                            <span>{item.employeeName || `ID: ${item.employee_id}`}</span>
+                            <div className="cell-name">
+                              <div className="cell-avatar">
+                                {item.employee?.user?.profile?.avatar_url ? (
+                                  <img src={item.employee.user.profile.avatar_url} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                                ) : (
+                                  (item.employee?.user?.name || item.employeeName || 'P').charAt(0).toUpperCase()
+                                )}
+                              </div>
+                              <div className="cell-stacked">
+                                <span className="cell-name-text">{item.employee?.user?.name || item.employeeName || `ID: ${item.employee_id}`}</span>
+                                <span className="cell-stacked__sub">{item.employee?.department?.name || "-"} • {item.employee?.position?.name || "-"}</span>
+                              </div>
+                            </div>
                           </td>
                           <td><span className="crud-table-tag">{item.period || "-"}</span></td>
                           <td className="crud-table-amount">{formatCurrency(item.basic_salary||0)}</td>
@@ -369,7 +387,7 @@ const PayrollListPage = () => {
                           <td className="td-center">
                             <div className="action-btn-group" style={{ justifyContent: "center" }}>
                               <button className="action-btn action-btn-edit" title="Edit" onClick={() => { setForm({ id: String(item.id), employee_id: String(item.employee_id), period: item.period, allowance: String(item.allowance||""), bonus: String(item.bonus||"") }); setMode("edit"); setView("form"); }}><Pencil size={16} /></button>
-                              <button className="action-btn action-btn-delete" title="Hapus" onClick={() => { setForm({ id: String(item.id), employee_id: String(item.employee_id), period: item.period, allowance: "", bonus: "" }); setMode("delete"); setView("form"); }}><Trash2 size={16} /></button>
+                              <button className="action-btn action-btn-delete" title="Hapus" onClick={() => setDeleteTarget(item)}><Trash2 size={16} /></button>
                             </div>
                           </td>
                         </tr>
@@ -378,10 +396,10 @@ const PayrollListPage = () => {
                   </table>
                 </div>
 
-                {sortedItems.length > pageSize && (
+                {totalPages > 1 && (
                   <div className="table-pagination">
                     <div className="pagination-info">
-                      Menampilkan <strong>{paginatedItems.length}</strong> dari <strong>{sortedItems.length}</strong> data
+                      Menampilkan <strong>{paginatedItems.length}</strong> dari <strong>{totalItems}</strong> data
                     </div>
                     <div className="pagination-controls">
                       <button className="pagination-btn" onClick={() => setCurrentPage(Math.max(1, safePage - 1))} disabled={safePage === 1}>‹</button>
@@ -429,6 +447,17 @@ const PayrollListPage = () => {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        title="Hapus Payroll"
+        message={`Payroll untuk "${deleteTarget?.employeeName || `ID: ${deleteTarget?.employee_id || "-"}`}" periode "${deleteTarget?.period || "-"}" akan dihapus permanen.`}
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        loading={loading && !!deleteTarget}
+        onConfirm={() => void handleDelete()}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 };

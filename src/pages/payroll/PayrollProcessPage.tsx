@@ -11,6 +11,7 @@ import { payrollService, toSafeArray } from "@/features/payroll/api/payroll.serv
 import { getAllEmployees } from "@/features/employee/api/employee.service";
 import type { PayrollItem } from "@/features/payroll/types/payroll.types";
 import type { EmployeeItem } from "@/features/employee/types/employee.types";
+import { parsePaginatedResponse } from "@/shared/api/pagination";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "./PayrollListPage.css";
@@ -98,8 +99,9 @@ const GenerateTab = () => {
     setLoading(true);
     try {
       const payrollResp = await payrollService.getPayrollList({ page: currentPage, per_page: pageSize });
-      setItems(toSafeArray(payrollResp));
-      setGenerateTotalPages(payrollResp?.data?.last_page ?? 1);
+      const parsed = parsePaginatedResponse<PayrollItem>(payrollResp);
+      setItems(parsed.items.length ? parsed.items : toSafeArray(payrollResp));
+      setGenerateTotalPages(parsed.totalPages);
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Gagal memuat", "error");
     } finally {

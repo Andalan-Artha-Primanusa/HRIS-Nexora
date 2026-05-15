@@ -3,6 +3,7 @@ import { Modal } from '@/shared/ui/Modal';
 import { Button } from '@/shared/ui/Button';
 import { getAllEmployees } from '@/features/employee/api/employee.service';
 import { useAuthStore } from '@/app/store/auth.store';
+import { RBACUtils } from '@/shared/hooks/rbac';
 import { User, FileText, Calendar, MapPin, AlignLeft, Lock } from 'lucide-react';
 
 export const AssignmentLetterModal: React.FC<{
@@ -11,9 +12,7 @@ export const AssignmentLetterModal: React.FC<{
   onSave: (data: any) => void | Promise<void>;
 }> = ({ isOpen, onClose, onSave }) => {
   const user = useAuthStore((state) => state.user);
-  const isAdminOrHR = user?.roles?.some((r: any) =>
-    ['admin', 'hr', 'super_admin', 'manager'].includes(String(r.name ?? '').toLowerCase())
-  );
+  const canCreateForEmployees = RBACUtils.hasPermission(user, 'assignment_letter.create');
 
   const [employees, setEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -38,7 +37,7 @@ export const AssignmentLetterModal: React.FC<{
         location: '',
       });
     }
-  }, [isOpen, isAdminOrHR, user?.id]);
+  }, [isOpen, canCreateForEmployees, user?.id]);
 
   const extractArr = (res: any): any[] => {
     if (Array.isArray(res)) return res;
@@ -55,7 +54,7 @@ export const AssignmentLetterModal: React.FC<{
   };
 
   const fetchEmployees = async () => {
-    if (!isAdminOrHR) return;
+    if (!canCreateForEmployees) return;
     try {
       const data = await getAllEmployees();
       setEmployees(extractArr(data));
@@ -68,7 +67,7 @@ export const AssignmentLetterModal: React.FC<{
     e.preventDefault();
     setLoading(true);
     try {
-      const payload = isAdminOrHR
+      const payload = canCreateForEmployees
         ? formData
         : {
             title: formData.title,
@@ -98,11 +97,11 @@ export const AssignmentLetterModal: React.FC<{
             
             <div className="form-group">
               <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '8px', display: 'block' }}>
-                {isAdminOrHR ? 'Penerima Tugas' : 'Karyawan'}
+                {canCreateForEmployees ? 'Penerima Tugas' : 'Karyawan'}
               </label>
               <div style={{ position: 'relative' }}>
                 <User size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', zIndex: 1 }} />
-                {isAdminOrHR ? (
+                {canCreateForEmployees ? (
                   <select 
                     className="crud-input"
                     value={formData.user_id}

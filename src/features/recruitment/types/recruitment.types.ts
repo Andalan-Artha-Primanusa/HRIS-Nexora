@@ -23,6 +23,7 @@ export interface Candidate {
   status: 'active' | 'hired' | 'rejected' | 'withdrawn';
   source: string;
   resume_url?: string;
+  profile_photo_url?: string;
   job_opening_id: string | number;
   job_opening?: JobOpening;
   rating?: number;

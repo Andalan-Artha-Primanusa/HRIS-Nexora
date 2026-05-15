@@ -1,42 +1,20 @@
 import { api } from "@/shared/api/httpClient";
+import { extractArrayPayload, extractPayload, parsePaginatedResponse } from "@/shared/api/pagination";
 
 type UnknownRecord = Record<string, unknown>;
 
-const toRecord = (value: unknown): UnknownRecord =>
-  value && typeof value === "object" ? (value as UnknownRecord) : {};
-
-const extractArrayPayload = (raw: unknown) => {
-  if (Array.isArray(raw)) return raw;
-
-  const root = toRecord(raw);
-  for (const key of ["data", "items", "rows", "results"]) {
-    const level1 = root[key];
-    if (Array.isArray(level1)) return level1;
-
-    if (level1 && typeof level1 === "object") {
-      const nested = toRecord(level1);
-      for (const key2 of ["data", "items", "rows", "results"]) {
-        if (Array.isArray(nested[key2])) return nested[key2];
-      }
-    }
-  }
-
-  return [];
-};
-
-const extractPayload = (raw: unknown) => {
-  const root = toRecord(raw);
-  return root.data ?? raw;
-};
+const isUnknownRecord = (item: unknown): item is UnknownRecord =>
+  item !== null && typeof item === "object" && !Array.isArray(item);
 
 export const workforceService = {
   // Holidays
   getHolidays: async (page = 1, perPage = 10) => {
     const response = await api.get('/workforce/holidays', { params: { page, per_page: perPage } });
-    const raw = response.data;
+    const raw: unknown = response.data;
+    const parsed = parsePaginatedResponse(raw, isUnknownRecord);
     return {
-      items: extractArrayPayload(raw),
-      totalPages: raw?.data?.last_page ?? 1,
+      items: parsed.items,
+      totalPages: parsed.totalPages,
       raw,
     };
   },
@@ -71,10 +49,11 @@ export const workforceService = {
   // Shift Swaps
   getShiftSwaps: async (page = 1, perPage = 10) => {
     const response = await api.get('/workforce/shift-swaps', { params: { page, per_page: perPage } });
-    const raw = response.data;
+    const raw: unknown = response.data;
+    const parsed = parsePaginatedResponse(raw, isUnknownRecord);
     return {
-      items: extractArrayPayload(raw),
-      totalPages: raw?.data?.last_page ?? 1,
+      items: parsed.items,
+      totalPages: parsed.totalPages,
       raw,
     };
   },
@@ -110,10 +89,11 @@ export const workforceService = {
   // Overtime Rules
   getOvertimeRules: async (page = 1, perPage = 10) => {
     const response = await api.get('/workforce/overtime-rules', { params: { page, per_page: perPage } });
-    const raw = response.data;
+    const raw: unknown = response.data;
+    const parsed = parsePaginatedResponse(raw, isUnknownRecord);
     return {
-      items: extractArrayPayload(raw),
-      totalPages: raw?.data?.last_page ?? 1,
+      items: parsed.items,
+      totalPages: parsed.totalPages,
       raw,
     };
   },
@@ -155,10 +135,11 @@ export const workforceService = {
   },
   getComplianceDocuments: async (page = 1, perPage = 10) => {
     const response = await api.get('/workforce/compliance/documents', { params: { page, per_page: perPage } });
-    const raw = response.data;
+    const raw: unknown = response.data;
+    const parsed = parsePaginatedResponse(raw, isUnknownRecord);
     return {
-      items: extractArrayPayload(raw),
-      totalPages: raw?.data?.last_page ?? 1,
+      items: parsed.items,
+      totalPages: parsed.totalPages,
       raw,
     };
   }

@@ -16,6 +16,7 @@ import {
   toSafeArray,
 } from "@/features/payroll/api/payroll.service";
 import type { PayrollCreatePayload, PayrollItem, PayrollUpdatePayload } from "@/features/payroll/types/payroll.types";
+import { parsePaginatedResponse } from "@/shared/api/pagination";
 import "../admin/AdminCrudPages.css";
 
 type PayrollFormState = {
@@ -76,8 +77,9 @@ const PayrollManagementPage = () => {
 
     try {
       const result = await getAllPayroll({ page: currentPage, per_page: pageSize });
-      setItems(toSafeArray(result));
-      setTotalPages(result?.data?.last_page ?? 1);
+      const parsed = parsePaginatedResponse<PayrollItem>(result);
+      setItems(parsed.items.length ? parsed.items : toSafeArray(result));
+      setTotalPages(parsed.totalPages);
     } catch (error: unknown) {
       showToast(error instanceof Error ? error.message : "Gagal muat payroll", "error");
     } finally {
@@ -230,8 +232,7 @@ const PayrollManagementPage = () => {
 
   useEffect(() => {
     void loadPayroll();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [currentPage, pageSize]);
 
   return (
     <div className="crud-page">

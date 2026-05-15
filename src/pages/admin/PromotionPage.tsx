@@ -12,6 +12,7 @@ import '@/pages/employee/EmployeesPage.css';
 import { showToast } from '@/shared/ui/toast';
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 import { RejectReasonModal } from "@/shared/components/RejectReasonModal";
+import { parsePaginatedResponse } from '@/shared/api/pagination';
 
 const PromotionPage: React.FC = () => {
   const [items, setItems] = useState<any[]>([]);
@@ -33,27 +34,21 @@ const PromotionPage: React.FC = () => {
   const [rejectModalId, setRejectModalId] = useState<string | number | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [totalPromotions, setTotalPromotions] = useState(0);
 
   const fetchData = async () => {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const params: Record<string, string> = {};
+      const params: Record<string, string | number> = { page: currentPage, per_page: pageSize };
       if (searchText) params.search = searchText;
       if (selectedStatus) params.status = selectedStatus;
 
       const response = await promotionService.getPromotions(params);
-      let data: any[] = [];
-      if (response?.data?.data?.data && Array.isArray(response.data.data.data)) {
-        data = response.data.data.data;
-      } else if (response?.data?.data && Array.isArray(response.data.data)) {
-        data = response.data.data;
-      } else if (response?.data && Array.isArray(response.data)) {
-        data = response.data;
-      } else if (Array.isArray(response)) {
-        data = response;
-      }
-      setItems(data);
+      const parsed = parsePaginatedResponse<any>(response.data);
+      setItems(parsed.items);
+      setTotalPages(parsed.totalPages);
+      setTotalPromotions(parsed.total);
     } catch (error: any) {
       setErrorMessage(error?.response?.data?.message || 'Gagal memuat data promosi');
     } finally {
@@ -63,7 +58,7 @@ const PromotionPage: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [currentPage, pageSize, searchText, selectedStatus]);
 
   const handleSave = async (formData: any) => {
     try {
@@ -209,7 +204,7 @@ const PromotionPage: React.FC = () => {
       {
         label: 'Total Pengajuan',
         subtitle: 'Seluruh pengajuan promosi',
-        value: String(items.length),
+        value: String(totalPromotions),
         change: 'Data promosi tersimpan',
         tone: 'blue' as const,
         icon: ArrowUpRight,
@@ -247,7 +242,7 @@ const PromotionPage: React.FC = () => {
         icon: CheckCircle,
       },
     ],
-    [items, sortedItems.length, paginatedItems.length],
+    [items, sortedItems.length, paginatedItems.length, totalPromotions],
   );
 
   const clearFilters = () => {

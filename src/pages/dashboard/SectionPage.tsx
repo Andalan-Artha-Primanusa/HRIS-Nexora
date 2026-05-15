@@ -71,6 +71,15 @@ type CrudMode = 'create' | 'manage';
 
 const splitCrudPaths = new Set(['/profiles', '/leave/requests', '/leave/type', '/leave/policy', '/reimbursements']);
 
+const toFiniteNumber = (value: unknown, fallback: number): number => {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === 'string' && value.trim() !== '') {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return fallback;
+};
+
 const getCrudRouteBase = (pathname: string) => {
   for (const basePath of splitCrudPaths) {
     if (pathname === `${basePath}/create` || pathname === `${basePath}/manage`) {
@@ -1826,11 +1835,15 @@ const SectionPage = () => {
         let actualPayload = payload;
 
         // Laravel style pagination handling
-        if (payload && typeof payload === 'object' && !Array.isArray(payload) && Array.isArray((payload as any).data)) {
-          actualPayload = (payload as any).data;
-          setTotalPages((payload as any).last_page ?? 1);
-          setTotalItems((payload as any).total ?? actualPayload.length);
-          setCurrentPage((payload as any).current_page ?? page);
+        if (payload && typeof payload === 'object' && !Array.isArray(payload)) {
+          const paginatedPayload = payload as Record<string, unknown>;
+          const pageItems = paginatedPayload.data;
+          if (Array.isArray(pageItems)) {
+            actualPayload = pageItems;
+            setTotalPages(toFiniteNumber(paginatedPayload.last_page, 1));
+            setTotalItems(toFiniteNumber(paginatedPayload.total, pageItems.length));
+            setCurrentPage(toFiniteNumber(paginatedPayload.current_page, page));
+          }
         } else if (Array.isArray(payload)) {
           setTotalPages(1);
           setTotalItems(payload.length);

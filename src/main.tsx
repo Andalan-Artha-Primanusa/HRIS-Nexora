@@ -14,12 +14,15 @@ const initialTheme = storedTheme === 'dark' || storedTheme === 'light'
 
 document.documentElement.dataset.theme = initialTheme;
 
-class ErrorBoundary extends React.Component<{children: any}, {hasError: boolean, error: any}> {
-  constructor(props: any) {
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error: Error | null }
+> {
+  constructor(props: { children: React.ReactNode }) {
     super(props);
     this.state = { hasError: false, error: null };
   }
-  static getDerivedStateFromError(error: any) {
+  static getDerivedStateFromError(error: Error) {
     return { hasError: true, error };
   }
   render() {

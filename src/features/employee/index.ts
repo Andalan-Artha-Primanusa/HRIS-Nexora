@@ -16,6 +16,7 @@ export type {
 // Services
 export {
   getAllEmployees,
+  getEmployeesPage,
   getEmployeeDetail,
   createEmployee,
   updateEmployee,

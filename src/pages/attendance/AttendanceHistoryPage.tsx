@@ -27,14 +27,16 @@ const AttendanceHistoryPage = () => {
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
 
   const loadHistory = async () => {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const result = await attendanceService.getHistory();
+      const result = await attendanceService.getHistory(currentPage, pageSize);
       console.log('Attendance history response:', result);
       setHistory(result.items);
+      setTotalPages(result.totalPages);
     } catch (error: any) {
       const message = error.response?.data?.message || error.message || 'Terjadi kesalahan';
       console.error('Attendance history error:', error);
@@ -47,7 +49,7 @@ const AttendanceHistoryPage = () => {
 
   useEffect(() => {
     void loadHistory();
-  }, []);
+  }, [currentPage, pageSize]);
 
   // Filter & Sort & Paginate
   const filteredHistory = useMemo(() => {
@@ -75,8 +77,6 @@ const AttendanceHistoryPage = () => {
   }, [filteredHistory]);
 
   const paginatedHistory = sortedHistory;
-
-  const [totalPages, setTotalPages] = useState(1);
 
   const clearFilters = () => {
     setSearchText('');

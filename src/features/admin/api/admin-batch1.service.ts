@@ -1,4 +1,5 @@
 import { api } from "@/shared/api/httpClient";
+import { parsePaginatedResponse, type PaginationParams } from "@/shared/api/pagination";
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -105,10 +106,15 @@ export const createAdminEmailNotification = async (payload: {
 	return extractPayload(response.data);
 };
 
-export const getBiometricDevices = async () => {
-	const response = await api.get("/biometric/devices");
+export const getBiometricDevices = async (params: PaginationParams = {}) => {
+	const response = await api.get("/biometric/devices", { params });
+	const parsed = parsePaginatedResponse<UnknownRecord>(response.data);
 	return {
-		items: extractArrayPayload<UnknownRecord>(response.data),
+		items: parsed.items,
+		currentPage: parsed.currentPage,
+		totalPages: parsed.totalPages,
+		perPage: parsed.perPage,
+		total: parsed.total,
 		raw: response.data,
 	};
 };
@@ -138,10 +144,14 @@ export const syncBiometricAttendance = async (payload: { device_id: string | num
 	return extractPayload(response.data);
 };
 
-export const getAuditLogs = async () => {
-	const response = await api.get("/admin/audit-logs");
+export const getAuditLogs = async (params?: PaginationParams) => {
+	const response = await api.get("/admin/audit-logs", { params });
+	const parsed = parsePaginatedResponse<UnknownRecord>(response.data);
 	return {
-		items: extractArrayPayload<UnknownRecord>(response.data),
+		items: parsed.items,
+		totalPages: parsed.totalPages,
+		total: parsed.total,
+		currentPage: parsed.currentPage,
 		raw: response.data,
 	};
 };

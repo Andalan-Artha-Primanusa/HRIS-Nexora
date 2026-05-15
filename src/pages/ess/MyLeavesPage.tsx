@@ -408,10 +408,11 @@ const MyLeavesPage = () => {
                   <table className="data-table">
                     <thead>
                       <tr>
-                        <th style={{ width: "400px" }}>Jenis Cuti</th>
+                        <th style={{ width: "300px" }}>Jenis Cuti</th>
                         <th>Mulai</th>
                         <th>Selesai</th>
                         <th>Hari</th>
+                        <th>Persetujuan</th>
                         <th className="th-center">Status</th>
                         <th className="th-center" style={{ width: "120px" }}>
                           Aksi
@@ -426,8 +427,8 @@ const MyLeavesPage = () => {
                           <tr key={String(leave.id ?? index)}>
                             <td>
                               <div className="cell-name">
-                                <div className="cell-avatar">
-                                  {getLeaveTypeLabel(leave.type).charAt(0)}
+                                <div className="cell-avatar" style={{ background: '#f1f5f9', color: '#64748b' }}>
+                                  <Calendar size={14} />
                                 </div>
                                 <div className="cell-stacked">
                                   <span className="cell-name-text">{getLeaveTypeLabel(leave.type)}</span>
@@ -439,6 +440,22 @@ const MyLeavesPage = () => {
                             <td style={{ color: "#475569", fontWeight: 500 }}>{formatDate(leave.end_date)}</td>
                             <td>
                               <span style={{ color: "#64748b", fontWeight: 600 }}>{leave.total_days || 1} hari</span>
+                            </td>
+                            <td>
+                              <div className="cell-name">
+                                <img
+                                  src={leave.approver?.user?.profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(leave.approver?.user?.name || 'A')}&color=7F9CF5&background=EBF4FF`}
+                                  alt=""
+                                  className="cell-avatar"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(leave.approver?.user?.name || 'A')}&color=7F9CF5&background=EBF4FF`;
+                                  }}
+                                />
+                                <div className="cell-stacked">
+                                  <span className="cell-name-text">{leave.approver?.user?.name || 'System'}</span>
+                                  <span className="cell-stacked__sub">Approver</span>
+                                </div>
+                              </div>
                             </td>
                             <td className="td-center">
                               <span

@@ -4,7 +4,7 @@ import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { showToast } from '@/shared/ui/toast';
 import { getErrorMessage } from "@/shared/api/errorHandler";
-import { ROLES } from "@/shared/types/rbac.types";
+import { RBACUtils } from "@/shared/hooks/rbac";
 import { Download, FileSpreadsheet, RefreshCw, ShieldAlert, Upload, UploadCloud, CheckCircle2, FileText, Users } from "lucide-react";
 import {
   importEmployees,
@@ -18,11 +18,7 @@ import "./AdminCrudPages.css";
 
 
 const hasAdminAccess = (user: any) => {
-  const roles = Array.isArray(user?.roles) ? user.roles : [];
-  return roles.some((role: any) => {
-    const roleName = String(role?.name || role || "").toLowerCase();
-    return roleName === ROLES.ADMIN || roleName === ROLES.SUPER_ADMIN;
-  });
+  return RBACUtils.hasPermission(user, "admin.import.execute");
 };
 
 const AdminImportPage = () => {

@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, RefreshCw, ArrowUpRight, CheckCircle, Clock, XCircle, FileText, X, History } from 'lucide-react';
-import { Card, CardHeader } from '@/shared/ui';
+import { Card } from '@/shared/ui/Card';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { promotionService } from '@/features/organization/api/promotion.service';
+import { parsePaginatedResponse } from '@/shared/api/pagination';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/employee/EmployeesPage.css';
@@ -16,6 +17,7 @@ const MyPromotionsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('Semua');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
 
   const [reportModal, setReportModal] = useState(false);
   const [selectedPromo, setSelectedPromo] = useState<any>(null);
@@ -27,9 +29,14 @@ const MyPromotionsPage: React.FC = () => {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const response = await promotionService.getMyPromotions();
-      const payload = response?.data?.data || response?.data || response;
-      setItems(payload?.promotions || []);
+      const response = await promotionService.getMyPromotions({ page: currentPage, per_page: pageSize });
+      const payload = response?.data?.data ?? response?.data ?? response;
+      const promotionPayload = payload && typeof payload === 'object' && 'promotions' in payload
+        ? (payload as Record<string, unknown>).promotions
+        : payload;
+      const parsed = parsePaginatedResponse<Record<string, unknown>>(promotionPayload);
+      setItems(parsed.items);
+      setTotalPages(parsed.totalPages);
     } catch (error: any) {
       setErrorMessage(error?.response?.data?.message || 'Gagal memuat data promosi');
     } finally {
@@ -39,7 +46,7 @@ const MyPromotionsPage: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [currentPage, pageSize]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -65,8 +72,6 @@ const MyPromotionsPage: React.FC = () => {
   }, [items, searchText, activeTab]);
 
   const paginatedItems = filteredItems;
-  const [totalPages, setTotalPages] = useState(1);
-
   const summaryCards = useMemo(
     () => [
       {
@@ -340,19 +345,45 @@ const MyPromotionsPage: React.FC = () => {
                         </td>
                         <td className="td-center">{getStatusBadge(promo.status)}</td>
                         <td className="td-center">{getReportBadge(promo.report_status, promo.status)}</td>
-        <td className="td-center">
-          <div className="action-btn-group">
-            {promo.status === 'approved' && !promo.report_status && (
-              <button
-                className="action-btn"
-                style={{ background: '#dbeafe', color: '#2563eb' }}
-                onClick={() => openReportModal(promo)}
-                title="Submit Laporan"
-              >
-                <FileText size={16} />
-              </button>
-            )}
-            <button className="action-btn" style={{ color: '#8b5cf6', background: '#f5f3ff' }} onClick={() => setHistoryModal({ module: 'promotion', id: promo.id })} title="Riwayat Approval"><History size={16} /></button>
+                        <td className="td-center">
+                          <div className="action-btn-group">
+                            {promo.status === 'approved' && !promo.report_status && (
+                              <button
+                                className="action-btn"
+                                style={{ background: '#dbeafe', color: '#2563eb' }}
+                                onClick={() => openReportModal(promo)}
+                                title="Submit Laporan"
+                              >
+                                <FileText size={16} />
+                              </button>
+                            )}
+                            <button className="action-btn" style={{ color: '#8b5cf6', background: '#f5f3ff' }} onClick={() => setHistoryModal({ module: 'promotion', id: promo.id })} title="Riwayat Approval"><History size={16} /></button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          {totalPages > 1 && (
+            <div className="table-pagination">
+              <div className="pagination-info">
+                Menampilkan <strong>{paginatedItems.length}</strong> dari <strong>{filteredItems.length}</strong> data
+              </div>
+              <div className="pagination-controls">
+                <button className="pagination-btn" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1}>‹</button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button key={page} className={`pagination-btn ${currentPage === page ? 'active' : ''}`} onClick={() => setCurrentPage(page)}>{page}</button>
+                ))}
+                <button className="pagination-btn" onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages}>›</button>
+              </div>
+            </div>
+          )}
+          </>
+          )}
+        </div>
+      </div>
 
       {/* Report Modal */}
       {reportModal && selectedPromo && (
@@ -403,32 +434,7 @@ const MyPromotionsPage: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          {totalPages > 1 && (
-            <div className="table-pagination">
-              <div className="pagination-info">
-                Menampilkan <strong>{paginatedItems.length}</strong> dari <strong>{filteredItems.length}</strong> data
-              </div>
-              <div className="pagination-controls">
-                <button className="pagination-btn" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1}>‹</button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <button key={page} className={`pagination-btn ${currentPage === page ? 'active' : ''}`} onClick={() => setCurrentPage(page)}>{page}</button>
-                ))}
-                <button className="pagination-btn" onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages}>›</button>
-              </div>
-            </div>
-          )}
-          </>
-          )}
-        </div>
-      </div>
+
       {historyModal && (
         <ApprovalHistoryModal
           isOpen={!!historyModal}

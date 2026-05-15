@@ -1,17 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
-import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { getErrorMessage } from "@/shared/api/errorHandler";
-import { ROLES } from "@/shared/types/rbac.types";
-import { showToast } from '@/shared/ui/toast';
-import { Bell, Megaphone, RefreshCw, Send, Shield, Users } from "lucide-react";
+import { showToast } from "@/shared/ui/toast";
+import { Bell, Megaphone, RefreshCw, Send, Users } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "@/pages/payroll/PayrollShared.css";
 import "./AdminCrudPages.css";
-import { createAdminNotification, getAdminNotificationsSummary, sendAdminBroadcastNotification } from "@/features/admin/api/admin-batch1.service";
+import {
+  createAdminNotification,
+  getAdminNotificationsSummary,
+  sendAdminBroadcastNotification,
+} from "@/features/admin/api/admin-batch1.service";
 import { getAllEmployees } from "@/features/employee/api/employee.service";
+import type { EmployeeItem } from "@/features/employee/types/employee.types";
 
 type SummaryData = {
   total_notifications?: number;
@@ -22,45 +25,9 @@ type SummaryData = {
   recipients_count?: number;
 };
 
-const getRoleNames = (user: ReturnType<typeof useAuthStore.getState>["user"]) => (user?.roles ?? []).map((role) => role.name);
-
-const hasAdminAccess = (user: ReturnType<typeof useAuthStore.getState>["user"]) => {
-  const roleNames = getRoleNames(user);
-  return roleNames.includes(ROLES.ADMIN) || roleNames.includes(ROLES.SUPER_ADMIN);
-};
-
 const getNumber = (value: unknown) => (typeof value === "number" ? value : Number(value) || 0);
 
 const AdminNotificationsPage = () => {
-  const user = useAuthStore((state) => state.user);
-
-if (!hasAdminAccess(user)) {
-    return (
-      <div className="crud-page">
-        <Card className="hero-card">
-          <div className="hero-card-inner">
-            <div className="hero-content">
-              <div className="hero-badge">
-                <Shield size={16} />
-                <span>Admin Center</span>
-              </div>
-              <h1 className="hero-title">Akses Ditolak</h1>
-              <p className="hero-subtitle">
-                Anda tidak memiliki izin untuk mengakses halaman ini.
-              </p>
-            </div>
-          </div>
-        </Card>
-
-        <div className="">
-          <Card glass style={{ padding: '2rem', textAlign: 'center' }}>
-            <p>Silakan hubungi Administrator untuk mendapatkan akses.</p>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
   const [summary, setSummary] = useState<SummaryData>({});
 
   const [loading, setLoading] = useState(false);
@@ -71,7 +38,7 @@ if (!hasAdminAccess(user)) {
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [recipientId, setRecipientId] = useState("");
-  const [employees, setEmployees] = useState<any[]>([]);
+  const [employees, setEmployees] = useState<EmployeeItem[]>([]);
 
   const [broadcastTitle, setBroadcastTitle] = useState("");
   const [broadcastMessage, setBroadcastMessage] = useState("");
@@ -84,12 +51,12 @@ if (!hasAdminAccess(user)) {
     try {
       const [result, empResult] = await Promise.all([
         getAdminNotificationsSummary(),
-        getAllEmployees()
+        getAllEmployees(),
       ]);
       setSummary((result ?? {}) as SummaryData);
-      setEmployees(empResult);
+      setEmployees(Array.isArray(empResult) ? empResult : []);
     } catch (error: unknown) {
-      setErrorMessage(getErrorMessage(error as never));
+      setErrorMessage(getErrorMessage(error as Record<string, unknown>));
     } finally {
       setLoading(false);
     }
@@ -163,7 +130,7 @@ if (!hasAdminAccess(user)) {
       showToast("Notifikasi individual berhasil dibuat.", "success");
       await loadSummary();
     } catch (error: unknown) {
-      showToast(getErrorMessage(error as never), "error");
+      showToast(getErrorMessage(error as Record<string, unknown>), "error");
     } finally {
       setSendingDirect(false);
     }
@@ -186,7 +153,7 @@ if (!hasAdminAccess(user)) {
       showToast("Broadcast notifikasi berhasil dikirim.", "success");
       await loadSummary();
     } catch (error: unknown) {
-      showToast(getErrorMessage(error as never), "error");
+      showToast(getErrorMessage(error as Record<string, unknown>), "error");
     } finally {
       setSendingBroadcast(false);
     }
@@ -225,11 +192,33 @@ if (!hasAdminAccess(user)) {
                   <p className="leave-summary-label">{card.label}</p>
                   <p className="leave-summary-subtitle">{card.subtitle}</p>
                 </div>
-                <div className={`leave-summary-icon-wrapper leave-icon-${card.tone === 'blue' ? 'blue' : card.tone === 'green' ? 'green' : card.tone === 'orange' ? 'orange' : 'purple'}`}>
+                <div
+                  className={`leave-summary-icon-wrapper leave-icon-${
+                    card.tone === "blue"
+                      ? "blue"
+                      : card.tone === "green"
+                        ? "green"
+                        : card.tone === "orange"
+                          ? "orange"
+                          : "purple"
+                  }`}
+                >
                   <Icon size={28} />
                 </div>
               </div>
-              <div className={`leave-summary-value leave-value-${card.tone === 'blue' ? 'blue' : card.tone === 'green' ? 'green' : card.tone === 'orange' ? 'orange' : 'purple'}`}>{card.value}</div>
+              <div
+                className={`leave-summary-value leave-value-${
+                  card.tone === "blue"
+                    ? "blue"
+                    : card.tone === "green"
+                      ? "green"
+                      : card.tone === "orange"
+                        ? "orange"
+                        : "purple"
+                }`}
+              >
+                {card.value}
+              </div>
               <p className="leave-summary-trend">{card.change}</p>
             </div>
           );
@@ -248,22 +237,49 @@ if (!hasAdminAccess(user)) {
                 <div className="form-grid">
                   <div className="form-group">
                     <label htmlFor="notification-title">Judul</label>
-                    <input id="notification-title" className="form-input" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Contoh: Pengingat update profil" required />
+                    <input
+                      id="notification-title"
+                      className="form-input"
+                      value={title}
+                      onChange={(event) => setTitle(event.target.value)}
+                      placeholder="Contoh: Pengingat update profil"
+                      required
+                    />
                   </div>
                   <div className="form-group">
                     <label htmlFor="notification-recipient">Penerima (Karyawan)</label>
-                    <select id="notification-recipient" className="form-input" value={recipientId} onChange={(event) => setRecipientId(event.target.value)}>
+                    <select
+                      id="notification-recipient"
+                      className="form-input"
+                      value={recipientId}
+                      onChange={(event) => setRecipientId(event.target.value)}
+                    >
                       <option value="">-- Pilih Penerima (Opsional) --</option>
-                      {employees.map(emp => (
-                        <option key={emp.id} value={emp.user_id || emp.id}>
-                          {emp.user?.name || 'Karyawan'} ({emp.employee_code || emp.id})
-                        </option>
-                      ))}
+                      {employees.map((emp) => {
+                        const userSub = emp.user && typeof emp.user === "object" ? (emp.user as Record<string, unknown>) : {};
+                        const empValId = String(emp.user_id || emp.id || "");
+                        const empCodeLabel = String(emp.employee_code || emp.id || "");
+                        const nameLabel = typeof userSub.name === "string" ? userSub.name : "Karyawan";
+
+                        return (
+                          <option key={empValId} value={empValId}>
+                            {nameLabel} ({empCodeLabel})
+                          </option>
+                        );
+                      })}
                     </select>
                   </div>
                   <div className="form-group" style={{ gridColumn: "1 / -1" }}>
                     <label htmlFor="notification-message">Pesan</label>
-                    <textarea id="notification-message" className="form-input" value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Tulis isi notifikasi" rows={5} required />
+                    <textarea
+                      id="notification-message"
+                      className="form-input"
+                      value={message}
+                      onChange={(event) => setMessage(event.target.value)}
+                      placeholder="Tulis isi notifikasi"
+                      rows={5}
+                      required
+                    />
                   </div>
                 </div>
 
@@ -287,11 +303,23 @@ if (!hasAdminAccess(user)) {
                 <div className="form-grid">
                   <div className="form-group">
                     <label htmlFor="broadcast-title">Judul Broadcast</label>
-                    <input id="broadcast-title" className="form-input" value={broadcastTitle} onChange={(event) => setBroadcastTitle(event.target.value)} placeholder="Contoh: Informasi maintenance sistem" required />
+                    <input
+                      id="broadcast-title"
+                      className="form-input"
+                      value={broadcastTitle}
+                      onChange={(event) => setBroadcastTitle(event.target.value)}
+                      placeholder="Contoh: Informasi maintenance sistem"
+                      required
+                    />
                   </div>
                   <div className="form-group">
                     <label htmlFor="broadcast-audience">Audience</label>
-                    <select id="broadcast-audience" className="form-input" value={broadcastAudience} onChange={(event) => setBroadcastAudience(event.target.value)}>
+                    <select
+                      id="broadcast-audience"
+                      className="form-input"
+                      value={broadcastAudience}
+                      onChange={(event) => setBroadcastAudience(event.target.value)}
+                    >
                       <option value="all">Semua Pengguna</option>
                       <option value="employees">Employees</option>
                       <option value="managers">Managers</option>
@@ -300,7 +328,15 @@ if (!hasAdminAccess(user)) {
                   </div>
                   <div className="form-group" style={{ gridColumn: "1 / -1" }}>
                     <label htmlFor="broadcast-message">Pesan Broadcast</label>
-                    <textarea id="broadcast-message" className="form-input" value={broadcastMessage} onChange={(event) => setBroadcastMessage(event.target.value)} placeholder="Tulis pengumuman untuk seluruh target audience" rows={5} required />
+                    <textarea
+                      id="broadcast-message"
+                      className="form-input"
+                      value={broadcastMessage}
+                      onChange={(event) => setBroadcastMessage(event.target.value)}
+                      placeholder="Tulis pengumuman untuk seluruh target audience"
+                      rows={5}
+                      required
+                    />
                   </div>
                 </div>
 

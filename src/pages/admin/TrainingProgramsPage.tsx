@@ -13,6 +13,7 @@ import '@/pages/dashboard/overview/OverviewPage.css';
 import './TrainingProgramsPage.css';
 import { showToast } from '@/shared/ui/toast';
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
+import { parsePaginatedResponse } from '@/shared/api/pagination';
 
 const formatDateTime = (input: string) => {
   const date = new Date(input);
@@ -31,6 +32,7 @@ const TrainingProgramsPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
   const [showFilters, setShowFilters] = useState(false);
+  const [totalPrograms, setTotalPrograms] = useState(0);
 
   // History Modal State
   const [historyModal, setHistoryModal] = useState<{ module: string; id: number } | null>(null);
@@ -47,12 +49,14 @@ const TrainingProgramsPage: React.FC = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const data = await trainingService.getPrograms();
-      let programsArray: any[] = [];
-      if (Array.isArray(data)) programsArray = data;
-      else if (Array.isArray(data?.data)) programsArray = data.data;
-      else if (Array.isArray(data?.data?.data)) programsArray = data.data.data;
-      setPrograms(programsArray);
+      const params: Record<string, string | number> = { page: currentPage, per_page: pageSize };
+      if (searchQuery.trim()) params.search = searchQuery.trim();
+      if (activeTab !== 'Semua') params.status = activeTab.toLowerCase();
+      const data = await trainingService.getPrograms(params);
+      const parsed = parsePaginatedResponse<TrainingProgram>(data);
+      setPrograms(parsed.items);
+      setTotalPages(parsed.totalPages);
+      setTotalPrograms(parsed.total);
     } catch (error) {
       console.error('Error fetching programs:', error);
     } finally {
@@ -60,7 +64,7 @@ const TrainingProgramsPage: React.FC = () => {
     }
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { fetchData(); }, [currentPage, pageSize, searchQuery, activeTab]);
 
   // Filter Logic
   const filteredPrograms = useMemo(() => {
@@ -98,7 +102,7 @@ const TrainingProgramsPage: React.FC = () => {
     {
       label: "Total Program",
       subtitle: "Seluruh program pelatihan",
-      value: String(programs.length),
+      value: String(totalPrograms),
       change: "Program Pelatihan",
       tone: "blue" as const,
       icon: GraduationCap,
@@ -127,7 +131,7 @@ const TrainingProgramsPage: React.FC = () => {
       tone: "purple" as const,
       icon: BookTemplate,
     },
-  ], [programs, sortedPrograms.length, paginatedPrograms.length]);
+  ], [programs, sortedPrograms.length, paginatedPrograms.length, totalPrograms]);
 
   const clearFilters = () => {
     setSearchQuery('');

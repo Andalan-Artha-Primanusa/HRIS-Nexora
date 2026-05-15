@@ -339,9 +339,21 @@ const TrainingEnrollmentsPage: React.FC = () => {
                           </div>
                         </td>
                         <td>
-                          <div className="cell-stacked">
-                            <span className="cell-name-text">{enrollment.employee?.user?.name || enrollment.employee_name || 'Employee'}</span>
-                            <span className="cell-stacked__sub">{enrollment.employee?.employee_code || '-'}</span>
+                          <div className="cell-name">
+                            <img
+                              src={enrollment.employee?.user?.profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(enrollment.employee?.user?.name || enrollment.employee_name || 'U')}&color=7F9CF5&background=EBF4FF`}
+                              alt=""
+                              className="cell-avatar"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(enrollment.employee?.user?.name || enrollment.employee_name || 'U')}&color=7F9CF5&background=EBF4FF`;
+                              }}
+                            />
+                            <div className="cell-stacked">
+                              <span className="cell-name-text">{enrollment.employee?.user?.name || enrollment.employee_name || 'Employee'}</span>
+                              <span className="cell-stacked__sub">
+                                {enrollment.employee?.department?.name || 'No Dept'} • {enrollment.employee?.position?.name || 'No Pos'}
+                              </span>
+                            </div>
                           </div>
                         </td>
                         <td style={{ color: '#475569', fontWeight: 500 }}>{enrollment.start_date || 'N/A'}</td>

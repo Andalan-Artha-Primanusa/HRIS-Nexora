@@ -7,7 +7,7 @@ export const trainingService = {
   // ==============================
   // Admin/HR Training Programs
   // ==============================
-  getPrograms: async (params?: { status?: string; mode?: string; search?: string; per_page?: number }) => {
+  getPrograms: async (params?: { status?: string; mode?: string; search?: string; page?: number; per_page?: number }) => {
     const response = await api.get('/training/programs', { params });
     return response.data;
   },

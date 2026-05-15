@@ -1,4 +1,5 @@
 import {
+  fetchUserMenus,
   getGoogleAuthRedirect,
   handleGoogleAuthCallback,
   login,
@@ -7,7 +8,7 @@ import {
 } from "../api/auth.service";
 import type { RegisterPayload } from "../api/auth.service";
 import { useAuthStore } from "@/app/store/auth.store";
-import type { AuthUser } from "@/shared/types/rbac.types";
+import type { AuthUser, Role, Permission } from "@/shared/types/rbac.types";
 
 const TOKEN_KEYS = ["token", "access_token", "jwt", "bearer_token"];
 const USER_KEYS = ["user", "user_info", "userData", "profile"];
@@ -17,7 +18,7 @@ type UnknownRecord = Record<string, unknown>;
 const toRecord = (value: unknown): UnknownRecord =>
   value && typeof value === "object" ? (value as UnknownRecord) : {};
 
-const getFirstExistingValue = (source: UnknownRecord, keys: string[]) => {
+const getFirstExistingValue = (source: UnknownRecord, keys: string[]): unknown => {
   for (const key of keys) {
     if (source[key] !== undefined && source[key] !== null) {
       return source[key];
@@ -26,31 +27,34 @@ const getFirstExistingValue = (source: UnknownRecord, keys: string[]) => {
   return null;
 };
 
-const normalizeRoleValue = (value: unknown) => {
+const normalizeRoleValue = (value: unknown): Role | null => {
   if (typeof value === "string" && value.trim().length > 0) {
     return { id: 0, name: value.trim().toLowerCase(), display_name: value.trim() };
   }
 
   if (value && typeof value === "object") {
-    const role = value as any;
+    const role = value as UnknownRecord;
     const roleName = role.name || role.slug || role.role_name;
 
     if (typeof roleName === "string" && roleName.trim().length > 0) {
+      const rawPermissions = Array.isArray(role.permissions) ? role.permissions : [];
       return {
-        id: role.id || 0,
+        id: typeof role.id === 'number' ? role.id : 0,
         name: roleName.trim().toLowerCase(),
-        display_name: role.display_name || roleName,
-        description: role.description,
-        permissions: Array.isArray(role.permissions)
-          ? role.permissions.map((p: any) => ({
-              id: p.id,
-              name: p.name,
-              display_name: p.display_name || p.name,
-              description: p.description,
-            }))
-          : [],
-        created_at: role.created_at,
-        updated_at: role.updated_at,
+        display_name: typeof role.display_name === 'string' ? role.display_name : roleName,
+        description: typeof role.description === 'string' ? role.description : undefined,
+        permissions: rawPermissions.map((p: unknown) => {
+          const perm = toRecord(p);
+          const pName = typeof perm.name === 'string' ? perm.name : '';
+          return {
+            id: typeof perm.id === 'number' ? perm.id : 0,
+            name: pName,
+            display_name: typeof perm.display_name === 'string' ? perm.display_name : pName,
+            description: typeof perm.description === 'string' ? perm.description : undefined,
+          };
+        }),
+        created_at: typeof role.created_at === 'string' ? role.created_at : undefined,
+        updated_at: typeof role.updated_at === 'string' ? role.updated_at : undefined,
       };
     }
   }
@@ -66,15 +70,15 @@ const extractAuthFromResponse = (data: unknown) => {
   const responseData = toRecord(root.data ?? root);
   const nestedData = toRecord(responseData.data);
 
-  let user =
+  const user =
     getFirstExistingValue(responseData, USER_KEYS) ??
     getFirstExistingValue(nestedData, USER_KEYS) ??
     null;
 
   // Normalisasi roles dan permissions
   if (user && typeof user === "object") {
-    const userObj = user as any;
-    const normalizedRoles: any[] = [];
+    const userObj = user as UnknownRecord;
+    const normalizedRoles: Role[] = [];
 
     if (Array.isArray(userObj.roles)) {
       for (const role of userObj.roles) {
@@ -98,7 +102,7 @@ const extractAuthFromResponse = (data: unknown) => {
 
     userObj.roles = normalizedRoles;
 
-    const allPermissions = new Map<string, any>();
+    const allPermissions = new Map<string, Permission>();
     for (const role of normalizedRoles) {
       if (Array.isArray(role.permissions)) {
         for (const permission of role.permissions) {
@@ -110,9 +114,16 @@ const extractAuthFromResponse = (data: unknown) => {
     }
 
     if (Array.isArray(userObj.permissions)) {
-      for (const permission of userObj.permissions) {
-        if (permission.name && !allPermissions.has(permission.name)) {
-          allPermissions.set(permission.name, permission);
+      for (const p of userObj.permissions) {
+        const permission = toRecord(p);
+        const pName = typeof permission.name === 'string' ? permission.name : '';
+        if (pName && !allPermissions.has(pName)) {
+          allPermissions.set(pName, {
+            id: typeof permission.id === 'number' ? permission.id : 0,
+            name: pName,
+            display_name: typeof permission.display_name === 'string' ? permission.display_name : pName,
+            description: typeof permission.description === 'string' ? permission.description : undefined,
+          });
         }
       }
     }
@@ -130,13 +141,18 @@ const extractAuthFromResponse = (data: unknown) => {
   return { user, token };
 };
 
-
-
-
-
 export const useAuth = () => {
   const setAuth = useAuthStore.getState().setAuth;
-  // const clearAuth = useAuthStore.getState().logout;
+  const setAllowedMenuKeys = useAuthStore.getState().setAllowedMenuKeys;
+
+  const syncDynamicMenus = async () => {
+    try {
+      const keys = await fetchUserMenus();
+      setAllowedMenuKeys(keys);
+    } catch {
+      // Abaikan jika sinkronisasi menu awal terputus
+    }
+  };
 
   const handleLogin = async (payload: { email: string; password: string }) => {
     try {
@@ -148,11 +164,12 @@ export const useAuth = () => {
       }
 
       setAuth(user as AuthUser, token);
+      await syncDynamicMenus();
       return { user, token };
-    } catch (error: any) {
-      // Re-throw validation errors to be handled by the component
-      if (error.type === "validation") {
-        return { success: false, errors: error.errors };
+    } catch (error: unknown) {
+      const err = toRecord(error);
+      if (err.type === "validation") {
+        return { success: false, errors: err.errors };
       }
       throw error;
     }
@@ -168,10 +185,12 @@ export const useAuth = () => {
       }
 
       setAuth(user as AuthUser, token);
+      await syncDynamicMenus();
       return { user, token };
-    } catch (error: any) {
-      if (error.type === "validation") {
-        return { success: false, errors: error.errors };
+    } catch (error: unknown) {
+      const err = toRecord(error);
+      if (err.type === "validation") {
+        return { success: false, errors: err.errors };
       }
       throw error;
     }
@@ -179,7 +198,7 @@ export const useAuth = () => {
 
   const handleGoogleLogin = async () => {
     const responseData = await getGoogleAuthRedirect();
-    const data = responseData?.data ?? responseData;
+    const data = toRecord(responseData?.data ?? responseData);
     const redirectUrl = data?.url ?? data?.redirect_url ?? data?.redirectUrl ?? null;
 
     if (!redirectUrl) {
@@ -190,7 +209,6 @@ export const useAuth = () => {
   };
 
   const handleGoogleCallback = async (searchParams: URLSearchParams) => {
-    // Cek apakah backend mengirim token dan user secara langsung (alur baru)
     const directToken = searchParams.get("token");
     const directUserStr = searchParams.get("user");
 
@@ -199,13 +217,13 @@ export const useAuth = () => {
         const parsedUser = JSON.parse(decodeURIComponent(directUserStr));
         const userWithRoles = extractAuthFromResponse({ data: { user: parsedUser } }).user || parsedUser;
         setAuth(userWithRoles as AuthUser, directToken);
+        await syncDynamicMenus();
         return { user: userWithRoles, token: directToken };
       } catch (e) {
         console.error("Failed to parse user from URL params", e);
       }
     }
 
-    // Alur lama: memanggil API frontend dengan 'code'
     const code = searchParams.get("code");
     if (!code) throw new Error("Parameter code OAuth tidak ditemukan");
 
@@ -223,6 +241,7 @@ export const useAuth = () => {
     }
 
     setAuth(user as AuthUser, token);
+    await syncDynamicMenus();
     return { user, token };
   };
 
@@ -230,8 +249,7 @@ export const useAuth = () => {
     try {
       await logout();
     } catch {
-      // 🔒 Jika API logout gagal (misal token kadaluarsa), 
-      // tetap panggil logout lokal untuk membersihkan sisa data.
+      // Tetap terhapus di tingkat client melalui interceptor/store
     }
   };
 

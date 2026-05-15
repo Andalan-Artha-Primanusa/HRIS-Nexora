@@ -1,35 +1,83 @@
 /**
  * RBAC Utilities
- * Helper functions for checking permissions and roles
+ * Dynamic permissions, roles, and capability handlers driven by backend source of truth
  */
 
-import type { AuthUser, PermissionType, RoleType } from "@/shared/types/rbac.types";
+import type { AuthUser } from "@/shared/types/rbac.types";
 import { PERMISSIONS, ROLES } from "@/shared/types/rbac.types";
+
+const normalizeName = (value: string): string => value.trim().toLowerCase();
+
+const ROLE_PERMISSION_FALLBACKS: Record<string, string[] | "*"> = {
+  [ROLES.SUPER_ADMIN]: "*",
+  [ROLES.ADMIN]: "*",
+  [ROLES.HR]: [
+    "employee.view",
+    "leave.view",
+    "leave.create",
+    "leave.approve",
+    "reimbursement.view",
+    "reimbursement.approve",
+    "reimbursement.pay",
+    "reporting.dashboard",
+    "attendance.view_all",
+    "payroll.view",
+    "kpi.view",
+    "training.view",
+    "asset.view",
+    "document.view",
+  ],
+  [ROLES.MANAGER]: [
+    "employee.view",
+    "leave.view",
+    "leave.approve",
+    "reimbursement.view",
+    "reimbursement.approve",
+    "reporting.dashboard",
+    "attendance.view_all",
+    "payroll.view",
+    "kpi.view",
+    "training.view",
+    "asset.view",
+    "document.view",
+  ],
+};
 
 export class RBACUtils {
   /**
-   * Check if user has a specific permission
+   * Check if user has a specific permission/capability
    */
-  static hasPermission(user: AuthUser | null, permission: PermissionType | PermissionType[], requireAll = false): boolean {
+  static hasPermission(user: AuthUser | null, permission: string | string[], requireAll = false): boolean {
     if (!user) return false;
 
-    const permissions = Array.isArray(permission) ? permission : [permission];
-    const userPermissions = user.permissions?.map((p) => p.name) ?? [];
+    // Super admin has absolute access
+    const userRoles = user.roles?.map((r) => normalizeName(r.name)) ?? [];
+    if (userRoles.includes(ROLES.SUPER_ADMIN)) return true;
+
+    const permissions = (Array.isArray(permission) ? permission : [permission]).map(normalizeName);
+    const userPermissions = user.permissions?.map((p) => normalizeName(p.name)) ?? [];
+
+    const hasExplicitPermission = (perm: string) => userPermissions.includes(perm);
+    const hasRoleFallbackPermission = (perm: string) =>
+      userRoles.some((role) => {
+        const fallback = ROLE_PERMISSION_FALLBACKS[role];
+        return fallback === "*" || (Array.isArray(fallback) && fallback.includes(perm));
+      });
 
     if (requireAll) {
-      return permissions.every((p) => userPermissions.includes(p));
+      return permissions.every((p) => hasExplicitPermission(p) || hasRoleFallbackPermission(p));
     }
-    return permissions.some((p) => userPermissions.includes(p));
+    return permissions.some((p) => hasExplicitPermission(p) || hasRoleFallbackPermission(p));
   }
 
   /**
-   * Check if user has a specific role
+   * Check if user possesses a specific role string natively
    */
-  static hasRole(user: AuthUser | null, role: RoleType | RoleType[]): boolean {
+  static hasRole(user: AuthUser | null, role: string | string[]): boolean {
     if (!user) return false;
 
-    const roles = Array.isArray(role) ? role : [role];
-    const userRoles = user.roles?.map((r) => r.name) ?? [];
+    const roles = (Array.isArray(role) ? role : [role]).map(normalizeName);
+    const userRoles = user.roles?.map((r) => normalizeName(r.name)) ?? [];
 
     return roles.some((r) => userRoles.includes(r));
   }
@@ -42,87 +90,55 @@ export class RBACUtils {
   }
 
   /**
-   * Check if user is admin or super admin
-   */
-  static isAdmin(user: AuthUser | null): boolean {
-    return RBACUtils.hasRole(user, [ROLES.ADMIN, ROLES.SUPER_ADMIN]);
-  }
-
-  /**
-   * Check if user is HR
-   */
-  static isHR(user: AuthUser | null): boolean {
-    return RBACUtils.hasRole(user, ROLES.HR);
-  }
-
-  /**
-   * Check if user is Manager
-   */
-  static isManager(user: AuthUser | null): boolean {
-    return RBACUtils.hasRole(user, ROLES.MANAGER);
-  }
-
-  /**
-   * Check if user has admin access (can manage users and roles)
+   * Capability checks delegated purely to permission constants or backend definitions
    */
   static canManageUsers(user: AuthUser | null): boolean {
-    return RBACUtils.isSuperAdmin(user) || RBACUtils.hasPermission(user, PERMISSIONS.USER_ASSIGN_ROLE);
+    return RBACUtils.hasPermission(user, PERMISSIONS.USER_ASSIGN_ROLE);
   }
 
-  /**
-   * Check if user can manage roles
-   */
   static canManageRoles(user: AuthUser | null): boolean {
-    return RBACUtils.isSuperAdmin(user) || RBACUtils.hasPermission(user, PERMISSIONS.ROLE_ASSIGN_PERMISSION);
+    return RBACUtils.hasPermission(user, PERMISSIONS.ROLE_ASSIGN_PERMISSION);
   }
 
-  /**
-   * Check if user can view permissions
-   */
   static canViewPermissions(user: AuthUser | null): boolean {
-    return RBACUtils.isSuperAdmin(user) || RBACUtils.hasPermission(user, PERMISSIONS.PERMISSION_VIEW);
+    return RBACUtils.hasPermission(user, PERMISSIONS.PERMISSION_VIEW);
   }
 
-  /**
-   * Check if user can view roles
-   */
   static canViewRoles(user: AuthUser | null): boolean {
-    return RBACUtils.isSuperAdmin(user) || RBACUtils.hasPermission(user, PERMISSIONS.ROLE_VIEW);
+    return RBACUtils.hasPermission(user, PERMISSIONS.ROLE_VIEW);
   }
 
-  /**
-   * Check if user can view users
-   */
   static canViewUsers(user: AuthUser | null): boolean {
-    return RBACUtils.isSuperAdmin(user) || RBACUtils.hasPermission(user, PERMISSIONS.USER_VIEW);
+    return RBACUtils.hasPermission(user, PERMISSIONS.USER_VIEW);
   }
 
   /**
-   * Check if user can assign super admin role
+   * Dynamic formatter for roles created directly from database
    */
-  static canAssignSuperAdmin(user: AuthUser | null): boolean {
-    return RBACUtils.isSuperAdmin(user);
-  }
-
-  /**
-   * Get role display name
-   */
-  static getRoleDisplayName(role: RoleType): string {
-    const roleMap: Record<RoleType, string> = {
+  static getRoleDisplayName(role: string): string {
+    if (!role) return '-';
+    const roleMap: Record<string, string> = {
       super_admin: 'Super Admin',
       admin: 'Administrator',
       hr: 'HR Staff',
       manager: 'Manager',
       employee: 'Employee',
     };
-    return roleMap[role];
+    if (roleMap[role]) return roleMap[role];
+
+    // Dynamic Title Case fallback
+    return role
+      .split(/[_-]/)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
   }
 
   /**
-   * Get permission display name
+   * Dynamic formatter for permissions
    */
-  static getPermissionDisplayName(permission: PermissionType): string {
-    const permissionMap: Record<PermissionType, string> = {
+  static getPermissionDisplayName(permission: string): string {
+    if (!permission) return '-';
+    const permissionMap: Record<string, string> = {
       'employee.view': 'View Employees',
       'employee.create': 'Create Employees',
       'employee.update': 'Update Employees',
@@ -152,28 +168,29 @@ export class RBACUtils {
       'role.assign_permission': 'Assign Permissions to Roles',
       'permission.view': 'View Permissions',
     };
-    return permissionMap[permission];
+    if (permissionMap[permission]) return permissionMap[permission];
+
+    return permission
+      .split(/[._-]/)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
   }
 }
 
 /**
- * Hook-friendly wrapper for RBAC utilities with user from store
+ * Hook wrapper with type-safe operations
  */
 export const useRBAC = (user: AuthUser | null) => {
   return {
-    hasPermission: (permission: PermissionType | PermissionType[], requireAll?: boolean) =>
+    hasPermission: (permission: string | string[], requireAll?: boolean) =>
       RBACUtils.hasPermission(user, permission, requireAll),
-    hasRole: (role: RoleType | RoleType[]) =>
+    hasRole: (role: string | string[]) =>
       RBACUtils.hasRole(user, role),
     isSuperAdmin: () => RBACUtils.isSuperAdmin(user),
-    isAdmin: () => RBACUtils.isAdmin(user),
-    isHR: () => RBACUtils.isHR(user),
-    isManager: () => RBACUtils.isManager(user),
     canManageUsers: () => RBACUtils.canManageUsers(user),
     canManageRoles: () => RBACUtils.canManageRoles(user),
     canViewPermissions: () => RBACUtils.canViewPermissions(user),
     canViewRoles: () => RBACUtils.canViewRoles(user),
     canViewUsers: () => RBACUtils.canViewUsers(user),
-    canAssignSuperAdmin: () => RBACUtils.canAssignSuperAdmin(user),
   };
 };

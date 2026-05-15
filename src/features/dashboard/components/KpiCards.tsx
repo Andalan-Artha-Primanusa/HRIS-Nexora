@@ -3,14 +3,8 @@ import { Card } from '@/shared/ui/Card';
 import { Users, UserCheck, CalendarOff, Clock,TrendingDown, Target } from 'lucide-react';
 import { api } from '@/shared/api/httpClient';
 import { useAuthStore } from '@/app/store/auth.store';
+import { RBACUtils } from '@/shared/hooks/rbac';
 import './KpiCards.css';
-
-const DASHBOARD_METRIC_ROLES = ['super_admin', 'admin', 'hr', 'manager'];
-
-const hasAdminAccess = (user: ReturnType<typeof useAuthStore.getState>['user']) => {
-  const roles = user?.roles ?? [];
-  return roles.some((r: any) => DASHBOARD_METRIC_ROLES.includes(r.name));
-};
 
 type KpiCardItem = {
   title: string;
@@ -21,6 +15,10 @@ type KpiCardItem = {
 };
 
 type UnknownRecord = Record<string, unknown>;
+
+type KpiMetricItem = {
+  score?: number | string;
+};
 
 const toRecord = (value: unknown): UnknownRecord =>
   value && typeof value === 'object' ? (value as UnknownRecord) : {};
@@ -46,12 +44,25 @@ const getNumericValue = (raw: unknown): number | null => {
 };
 
 const getCountFromPayload = (raw: unknown): number => {
+  const root = toRecord(raw);
+  
+  // 1. Check if root.data is DIRECTLY a number (common for count/statistics APIs)
+  const directDataValue = getNumericValue(root.data);
+  if (directDataValue !== null) return directDataValue;
+
+  // 2. Try Laravel Pagination Style (root.data.total or root.total)
+  const dataNode = toRecord(root.data ?? root);
+  const total = getNumericValue(dataNode.total) ?? getNumericValue(root.total) ?? getNumericValue(root.count);
+  if (total !== null) return total;
+
   const payload = unwrapPayload(raw);
 
+  // 3. If payload is direct array
   if (Array.isArray(payload)) {
     return payload.length;
   }
 
+  // 4. Check inside payload record for arrays
   const payloadRecord = toRecord(payload);
   const arrayCandidates = [payloadRecord.items, payloadRecord.rows, payloadRecord.data, payloadRecord.results];
 
@@ -61,21 +72,17 @@ const getCountFromPayload = (raw: unknown): number => {
     }
   }
 
+  // 5. Last resort: any numeric value found in payload
   const numericCandidates = [
-    payloadRecord.count,
     payloadRecord.total,
+    payloadRecord.count,
     payloadRecord.total_count,
     payloadRecord.totalCount,
-    payloadRecord.present,
-    payloadRecord.present_count,
-    payloadRecord.presentCount,
   ];
 
   for (const candidate of numericCandidates) {
     const numericValue = getNumericValue(candidate);
-    if (numericValue !== null) {
-      return numericValue;
-    }
+    if (numericValue !== null) return numericValue;
   }
 
   return 0;
@@ -92,19 +99,26 @@ export const KpiCards: React.FC = () => {
   ]);
 
   const user = useAuthStore((state) => state.user);
-  const isAdmin = hasAdminAccess(user);
+  const canViewDashboardMetrics = RBACUtils.hasPermission(user, [
+    'reporting.dashboard',
+    'employee.view',
+    'attendance.view_all',
+    'leave.approve',
+    'reimbursement.view',
+    'kpi.view',
+  ]);
 
   useEffect(() => {
-    if (!isAdmin) return;
+    if (!canViewDashboardMetrics) return;
 
     const loadDashboardKpis = async () => {
       const [employees, attendanceToday, pendingLeaves, pendingReimbursements, kpisRes] =
         await Promise.allSettled([
-          api.get('/employees'),
-          api.get('/attendance/today'),
-          api.get('/leaves/pending'),
-          api.get('/reimbursements/pending'),
-          api.get('/kpis'),
+          api.get('employees'),
+          api.get('attendance/today'),
+          api.get('leaves/pending'),
+          api.get('reimbursements/pending'),
+          api.get('kpis'),
         ]);
 
       const employeesCount = employees.status === 'fulfilled' ? getCountFromPayload(employees.value.data) : 0;
@@ -116,10 +130,17 @@ export const KpiCards: React.FC = () => {
         pendingReimbursements.status === 'fulfilled'
           ? getCountFromPayload(pendingReimbursements.value.data)
           : 0;
+          
       const kpis = kpisRes.status === 'fulfilled' ? unwrapPayload(kpisRes.value.data) : [];
-      const kpiItems = Array.isArray(kpis) ? kpis : ((kpis as any)?.items || []);
+      const kpiPayload = toRecord(kpis);
+      const kpiItems: KpiMetricItem[] = Array.isArray(kpis)
+        ? kpis
+        : Array.isArray(kpiPayload.data)
+          ? (kpiPayload.data as KpiMetricItem[])
+          : [];
+          
       const avgKpiScore = kpiItems.length > 0
-        ? kpiItems.reduce((acc: number, k: any) => acc + (Number(k.score) || 0), 0) / kpiItems.length
+        ? kpiItems.reduce((acc, k) => acc + (Number(k.score) || 0), 0) / kpiItems.length
         : 0;
 
       const attendanceRate = employeesCount > 0 ? Math.round((presentTodayCount / employeesCount) * 100) : 0;
@@ -171,7 +192,11 @@ export const KpiCards: React.FC = () => {
     };
 
     void loadDashboardKpis();
-  }, [isAdmin]);
+  }, [canViewDashboardMetrics]);
+
+  if (!canViewDashboardMetrics) {
+    return null;
+  }
 
   return (
     <div className="kpi-grid">
@@ -195,4 +220,3 @@ export const KpiCards: React.FC = () => {
     </div>
   );
 };
-

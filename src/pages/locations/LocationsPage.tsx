@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardHeader, ConfirmDialog } from '@/shared/ui';
 import { Button } from '@/shared/ui/Button';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
-import { getAllLocations, deleteLocation } from '@/features/location/api/location.service';
+import { getLocationsPage, deleteLocation } from '@/features/location/api/location.service';
 import type { LocationItem } from '@/features/location/types/location.types';
 import { MapPinned, Pencil, Plus, RefreshCw, Trash2, MapPin, Search, Filter } from 'lucide-react';
 import '@/shared/styles/CrudPage.css';
@@ -26,22 +26,22 @@ const LocationsPage = () => {
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
+  const [totalLocations, setTotalLocations] = useState(0);
 
   // Extract unique departments for filter
   const uniqueDepartments = useMemo(() => {
-    return Array.from(new Set(locations.map((loc) => (loc as any).department).filter(Boolean))).sort();
+    return Array.from(new Set(locations.map((loc) => loc.department).filter(Boolean))).sort();
   }, [locations]);
 
-  // Filter & Paginate Logic
+  // Backend handles pagination; lightweight local filtering only reflects the loaded page.
   const filteredLocations = useMemo(() => {
     return locations.filter((location) => {
-      const loc = location as any;
       const searchStr = searchText.toLowerCase();
-      const nameMatch = loc.name?.toLowerCase().includes(searchStr);
-      const idMatch = String(loc.id).includes(searchStr);
+      const nameMatch = location.name?.toLowerCase().includes(searchStr);
+      const idMatch = String(location.id).includes(searchStr);
       const textMatch = !searchText || nameMatch || idMatch;
 
-      const deptMatch = !selectedDepartment || loc.department === selectedDepartment;
+      const deptMatch = !selectedDepartment || location.department === selectedDepartment;
 
       return textMatch && deptMatch;
     });
@@ -62,7 +62,7 @@ const LocationsPage = () => {
       {
         label: 'Total Lokasi',
         subtitle: 'Semua lokasi terdaftar',
-        value: String(locations.length),
+        value: String(totalLocations),
         change: 'Data lokasi aktif',
         tone: 'blue' as const,
         icon: MapPinned,
@@ -84,7 +84,7 @@ const LocationsPage = () => {
         icon: MapPin,
       },
     ],
-    [locations.length, filteredLocations.length, paginatedLocations.length, withCoordinateCount]
+    [totalLocations, filteredLocations.length, paginatedLocations.length, withCoordinateCount]
   );
 
   const clearFilters = () => {
@@ -98,10 +98,14 @@ const LocationsPage = () => {
     setErrorMessage(null);
 
     try {
-      const result = await getAllLocations();
+      const params: Record<string, string> = {};
+      if (searchText.trim()) params.search = searchText.trim();
+      const result = await getLocationsPage(currentPage, pageSize, params);
       setLocations(result.items);
-    } catch (err: any) {
-      const message = err.response?.data?.message || err.message || 'Gagal memuat locations';
+      setTotalPages(result.totalPages);
+      setTotalLocations(result.total);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Gagal memuat locations';
       setErrorMessage(message);
     } finally {
       setLoading(false);
@@ -117,8 +121,8 @@ const LocationsPage = () => {
       await loadLocations();
       setErrorMessage(null);
       setDeleteTarget(null);
-    } catch (err: any) {
-      const message = err.response?.data?.message || err.message || 'Gagal menghapus location';
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Gagal menghapus location';
       setErrorMessage(message);
     } finally {
       setDeleting(false);
@@ -127,7 +131,7 @@ const LocationsPage = () => {
 
   useEffect(() => {
     void loadLocations();
-  }, []);
+  }, [currentPage, pageSize, searchText]);
 
   // Reset page on filter changes
   useEffect(() => {

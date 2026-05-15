@@ -8,7 +8,8 @@ import { Alert } from "@/shared/ui/Alert";
 import { showToast } from '@/shared/ui/toast';
 import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { getErrorMessage } from "@/shared/api/errorHandler";
-import { ROLES } from "@/shared/types/rbac.types";
+import { RBACUtils } from "@/shared/hooks/rbac";
+import type { AuthUser } from "@/shared/types/rbac.types";
 
 import {
   Plus,
@@ -63,7 +64,7 @@ type KpiPeriod = {
   created_at: string;
   employee?: {
     id: number;
-    user?: { name: string };
+    user?: { name: string; profile?: { avatar_url?: string } };
   };
   items: KpiItem[];
 };
@@ -93,12 +94,7 @@ const PERIOD_LABELS: Record<string, string> = {
   annual: "Annual",
 };
 
-const getRoleNames = (user: any) => (user?.roles ?? []).map((role: any) => role.name);
-
-const hasAdminAccess = (user: any) => {
-  const roleNames = getRoleNames(user);
-  return roleNames.includes(ROLES.ADMIN) || roleNames.includes(ROLES.SUPER_ADMIN) || roleNames.includes(ROLES.HR) || roleNames.includes(ROLES.MANAGER);
-};
+const hasKpiAccess = (user: AuthUser | null) => RBACUtils.hasPermission(user, "kpi.view");
 
 const getStatusClass = (status?: string) => {
   const normalized = String(status || "").toLowerCase();
@@ -161,7 +157,7 @@ const AdminKpiPage = () => {
   };
 
   useEffect(() => {
-    if (hasAdminAccess(user)) loadData();
+    if (hasKpiAccess(user)) loadData();
   }, [user]);
 
   const filteredPeriods = useMemo(() => {
@@ -239,7 +235,7 @@ const AdminKpiPage = () => {
     setCurrentPage(1);
   };
 
-  if (!hasAdminAccess(user)) {
+  if (!hasKpiAccess(user)) {
     return (
       <div className="crud-page">
         <Alert type="error" message="Akses Ditolak. Anda tidak memiliki izin untuk mengelola KPI." />
@@ -357,31 +353,30 @@ const AdminKpiPage = () => {
                         >
                           <td className="td-center">
                             {expandedRows.has(period.id) ? (
-                              <ChevronDown size={16} className="opacity-50" />
+                              <ChevronDown size={16} />
                             ) : (
-                              <ChevronRight size={16} className="opacity-50" />
+                              <ChevronRight size={16} />
                             )}
                           </td>
                           <td>
                             <div className="cell-name">
-                              <div className="cell-avatar">
-                                {period.employee?.user?.name
-                                  ? period.employee.user.name.charAt(0).toUpperCase()
-                                  : "K"}
-                              </div>
+                              <img
+                                src={period.employee?.user?.profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(period.employee?.user?.name || 'K')}&color=7F9CF5&background=EBF4FF`}
+                                alt=""
+                                className="cell-avatar"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(period.employee?.user?.name || 'K')}&color=7F9CF5&background=EBF4FF`;
+                                }}
+                              />
                               <div className="cell-stacked">
-                                <span className="cell-name-text">
-                                  {period.employee?.user?.name || "Unknown"}
-                                </span>
-                                <span className="cell-stacked__sub">ID: {period.employee_id}</span>
+                                <span className="cell-name-text">{period.employee?.user?.name || "Unknown"}</span>
+                                <span className="cell-stacked__sub">Employee ID: {period.employee_id}</span>
                               </div>
                             </div>
                           </td>
                           <td>
                             <div className="cell-stacked">
-                              <span className="cell-name-text" style={{ fontSize: 14 }}>
-                                {period.period_label}
-                              </span>
+                              <span className="cell-name-text">{period.period_label}</span>
                               <span className="cell-stacked__sub" style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 2 }}>
                                 {typeIcon(period.period_type)}
                                 {PERIOD_LABELS[period.period_type] || period.period_type}
@@ -600,11 +595,15 @@ const AdminKpiPage = () => {
             </div>
             <div style={{ padding: 24 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-                <div className="cell-avatar" style={{ width: 48, height: 48, fontSize: 20 }}>
-                  {selectedPeriod.employee?.user?.name
-                    ? selectedPeriod.employee.user.name.charAt(0).toUpperCase()
-                    : "K"}
-                </div>
+                <img
+                  src={selectedPeriod.employee?.user?.profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedPeriod.employee?.user?.name || 'K')}&color=7F9CF5&background=EBF4FF`}
+                  alt=""
+                  className="cell-avatar"
+                  style={{ width: 48, height: 48, fontSize: 20 }}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedPeriod.employee?.user?.name || 'K')}&color=7F9CF5&background=EBF4FF`;
+                  }}
+                />
                 <div>
                   <h4 style={{ margin: 0, fontSize: 18 }}>
                     {selectedPeriod.employee?.user?.name || "Unknown"}
@@ -842,7 +841,7 @@ const AdminKpiPage = () => {
                           {toScoreNumber(item.score).toFixed(1)}
                         </div>
                       </div>
-                    );})}
+                    )})}
                   </div>
                 </div>
               )}

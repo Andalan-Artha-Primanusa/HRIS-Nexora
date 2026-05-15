@@ -23,6 +23,7 @@ import {
   toSafeArray,
 } from "@/features/payroll/api/payroll.service";
 import type { PayrollItem, PayrollStatus } from "@/features/payroll/types/payroll.types";
+import { parsePaginatedResponse } from "@/shared/api/pagination";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "./PayrollGeneratePage.css";
@@ -445,8 +446,9 @@ const PayrollGeneratePage = () => {
     setLoading(true);
     try {
       const result = await getAllPayroll({ page: currentPage, per_page: itemsPerPage });
-      setItems(toSafeArray(result));
-      setTotalPages(result?.data?.last_page ?? 1);
+      const parsed = parsePaginatedResponse<PayrollItem>(result);
+      setItems(parsed.items.length ? parsed.items : toSafeArray(result));
+      setTotalPages(parsed.totalPages);
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Gagal memuat payroll", "error");
     } finally {
@@ -473,7 +475,7 @@ const PayrollGeneratePage = () => {
 
   useEffect(() => {
     void loadPayroll();
-  }, []);
+  }, [currentPage, itemsPerPage]);
 
   /* ── Derived ── */
   const summaryCards = useMemo(() => {

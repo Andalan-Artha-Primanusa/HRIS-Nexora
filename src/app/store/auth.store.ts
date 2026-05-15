@@ -1,13 +1,15 @@
 import { create } from 'zustand';
-import type { AuthUser } from '@/shared/types/rbac.types';
+import type { AuthUser, Role, Permission } from '@/shared/types/rbac.types';
 
 interface AuthState {
   user: AuthUser | null;
   token: string | null;
   isAuthenticated: boolean;
+  allowedMenuKeys: string[];
   setAuth: (user: AuthUser, token: string) => void;
   logout: () => void;
   updateUser: (user: AuthUser) => void;
+  setAllowedMenuKeys: (keys: string[]) => void;
 }
 
 const getStoredUser = (): AuthUser | null => {
@@ -16,34 +18,32 @@ const getStoredUser = (): AuthUser | null => {
   if (!rawUser) return null;
 
   try {
-    const parsed = JSON.parse(rawUser) as AuthUser;
+    const parsed = JSON.parse(rawUser) as Record<string, unknown>;
     
-    // Ensure roles is an array
-    const roles = parsed.roles ?? [];
+    const roles: Role[] = Array.isArray(parsed.roles) ? (parsed.roles as Role[]) : [];
 
-    const fallbackRoleName =
-      typeof (parsed as any).role_name === "string"
-        ? (parsed as any).role_name.trim().toLowerCase()
-        : typeof (parsed as any).role === "string"
-          ? (parsed as any).role.trim().toLowerCase()
-          : typeof (parsed as any).position === "string"
-            ? (parsed as any).position.trim().toLowerCase()
-            : null;
+    let fallbackRoleName: string | null = null;
+    if (typeof parsed.role_name === "string") {
+      fallbackRoleName = parsed.role_name.trim().toLowerCase();
+    } else if (typeof parsed.role === "string") {
+      fallbackRoleName = parsed.role.trim().toLowerCase();
+    } else if (typeof parsed.position === "string") {
+      fallbackRoleName = parsed.position.trim().toLowerCase();
+    }
 
-    const normalizedRoles =
+    const normalizedRoles: Role[] =
       roles.length > 0
         ? roles
         : fallbackRoleName
-          ? [{ id: 0, name: fallbackRoleName, display_name: fallbackRoleName } as any]
+          ? [{ id: 0, name: fallbackRoleName, display_name: fallbackRoleName }]
           : [];
     
-    // If permissions are missing or empty, extract from roles
-    let permissions = parsed.permissions ?? [];
+    let permissions: Permission[] = Array.isArray(parsed.permissions) ? (parsed.permissions as Permission[]) : [];
     if (permissions.length === 0 && normalizedRoles.length > 0) {
-      const permMap = new Map<string, any>();
+      const permMap = new Map<string, Permission>();
       for (const role of normalizedRoles) {
         if (Array.isArray(role.permissions)) {
-          for (const perm of role.permissions) {
+          for (const perm of role.permissions as Permission[]) {
             if (perm.name && !permMap.has(perm.name)) {
               permMap.set(perm.name, perm);
             }
@@ -54,7 +54,10 @@ const getStoredUser = (): AuthUser | null => {
     }
     
     return {
-      ...parsed,
+      ...(parsed as unknown as AuthUser),
+      id: typeof parsed.id === 'number' ? parsed.id : 0,
+      name: typeof parsed.name === 'string' ? parsed.name : '',
+      email: typeof parsed.email === 'string' ? parsed.email : '',
       roles: normalizedRoles,
       permissions,
     };
@@ -63,12 +66,24 @@ const getStoredUser = (): AuthUser | null => {
   }
 };
 
-const getStoredToken = () => sessionStorage.getItem("token");
+const getStoredToken = (): string | null => sessionStorage.getItem("token");
+
+const getStoredMenuKeys = (): string[] => {
+  const raw = sessionStorage.getItem("allowedMenuKeys");
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as string[]) : [];
+  } catch {
+    return [];
+  }
+};
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: getStoredUser(),
   token: getStoredToken(),
   isAuthenticated: Boolean(getStoredToken()),
+  allowedMenuKeys: getStoredMenuKeys(),
   setAuth: (user: AuthUser, token: string) => {
     const authUser: AuthUser = {
       ...user,
@@ -88,9 +103,14 @@ export const useAuthStore = create<AuthState>((set) => ({
     sessionStorage.setItem("user", JSON.stringify(authUser));
     set({ user: authUser });
   },
+  setAllowedMenuKeys: (keys: string[]) => {
+    sessionStorage.setItem("allowedMenuKeys", JSON.stringify(keys));
+    set({ allowedMenuKeys: keys });
+  },
   logout: () => {
     sessionStorage.removeItem("token");
     sessionStorage.removeItem("user");
-    set({ user: null, token: null, isAuthenticated: false });
+    sessionStorage.removeItem("allowedMenuKeys");
+    set({ user: null, token: null, isAuthenticated: false, allowedMenuKeys: [] });
   },
 }));

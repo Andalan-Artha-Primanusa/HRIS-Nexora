@@ -1,4 +1,5 @@
 import { api } from "@/shared/api/httpClient";
+import { extractPayload, parsePaginatedResponse } from "@/shared/api/pagination";
 import type { AdminEntityItem, AssignPermissionsPayload, AssignRolesPayload, AdminUser, AdminRole, AdminPermission } from "../types/admin.types";
 
 type UnknownRecord = Record<string, unknown>;
@@ -6,29 +7,11 @@ type UnknownRecord = Record<string, unknown>;
 const toRecord = (value: unknown): UnknownRecord =>
   value && typeof value === "object" ? (value as UnknownRecord) : {};
 
-const extractPayload = (raw: unknown) => {
-  const root = toRecord(raw);
-  return root.data ?? raw;
-};
-
-const extractArrayPayload = (raw: unknown): AdminEntityItem[] => {
-  const payload = extractPayload(raw);
-
-  if (Array.isArray(payload)) {
-    return payload.filter((item): item is AdminEntityItem => !!item && typeof item === "object");
-  }
-
-  const payloadRecord = toRecord(payload);
-  const candidates = [payloadRecord.items, payloadRecord.rows, payloadRecord.data, payloadRecord.results];
-
-  for (const candidate of candidates) {
-    if (Array.isArray(candidate)) {
-      return candidate.filter((item): item is AdminEntityItem => !!item && typeof item === "object");
-    }
-  }
-
-  return [];
-};
+const isAdminEntityItem = (item: unknown): item is AdminEntityItem =>
+  item !== null && typeof item === "object";
+const isAdminUser = (item: unknown): item is AdminUser => isAdminEntityItem(item);
+const isAdminRole = (item: unknown): item is AdminRole => isAdminEntityItem(item);
+const isAdminPermission = (item: unknown): item is AdminPermission => isAdminEntityItem(item);
 
 /**
  * Get all users with pagination support
@@ -38,13 +21,14 @@ export const getAllUsers = async (page = 1, perPage = 50) => {
     params: { page, per_page: perPage }
   });
   const raw = response.data;
+  const parsed = parsePaginatedResponse<AdminUser>(raw, isAdminUser);
   return {
-    items: extractArrayPayload(raw) as unknown as AdminUser[],
-    totalPages: raw?.data?.last_page ?? 1,
+    items: parsed.items,
+    totalPages: parsed.totalPages,
     raw,
-    total: toRecord(raw).total,
-    page,
-    perPage,
+    total: parsed.total,
+    page: parsed.currentPage || page,
+    perPage: parsed.perPage || perPage,
   };
 };
 
@@ -83,13 +67,14 @@ export const getAllRoles = async (page = 1, perPage = 50) => {
     params: { page, per_page: perPage }
   });
   const raw = response.data;
+  const parsed = parsePaginatedResponse<AdminRole>(raw, isAdminRole);
   return {
-    items: extractArrayPayload(raw) as unknown as AdminRole[],
-    totalPages: raw?.data?.last_page ?? 1,
+    items: parsed.items,
+    totalPages: parsed.totalPages,
     raw,
-    total: toRecord(raw).total,
-    page,
-    perPage,
+    total: parsed.total,
+    page: parsed.currentPage || page,
+    perPage: parsed.perPage || perPage,
   };
 };
 
@@ -158,13 +143,14 @@ export const getAllPermissions = async (page = 1, perPage = 50) => {
     params: { page, per_page: perPage }
   });
   const raw = response.data;
+  const parsed = parsePaginatedResponse<AdminPermission>(raw, isAdminPermission);
   return {
-    items: extractArrayPayload(raw) as unknown as AdminPermission[],
-    totalPages: raw?.data?.last_page ?? 1,
+    items: parsed.items,
+    totalPages: parsed.totalPages,
     raw,
-    total: toRecord(raw).total,
-    page,
-    perPage,
+    total: parsed.total,
+    page: parsed.currentPage || page,
+    perPage: parsed.perPage || perPage,
   };
 };
 

@@ -80,10 +80,11 @@ const LoginPage = () => {
       if (result && "user" in result) {
         navigate(getRoleBasedDashboardPath(result.user));
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       // General errors are already handled by global toast, 
       // but we can show a fallback in the form if needed.
-      setFormError(err.message || "Terjadi kesalahan saat login.");
+      const errorObj = err && typeof err === "object" ? (err as Record<string, unknown>) : {};
+      setFormError(typeof errorObj.message === "string" ? errorObj.message : "Terjadi kesalahan saat login.");
     } finally {
       setIsSubmitting(false);
     }

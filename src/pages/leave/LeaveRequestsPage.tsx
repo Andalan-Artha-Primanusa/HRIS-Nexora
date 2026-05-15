@@ -1,32 +1,44 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Card, ConfirmDialog } from '@/shared/ui';
+import React, { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { Card, ConfirmDialog } from "@/shared/ui";
 import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
-import { getAllLeaves, deleteLeaveRequest, approveLeave, rejectLeave } from '@/features/leave/api/leave.service';
-import type { LeaveItem } from '@/features/leave/types/leave.types';
-import { LeaveSummary } from '@/features/leave/components/LeaveSummary';
-import { LeaveTable } from '@/features/leave/components/LeaveTable';
-import { LeaveDetailModal } from '@/features/leave/components/LeaveDetailModal';
-import { RejectLeaveModal } from '@/features/leave/components/RejectLeaveModal';
+import {
+  getAllLeaves,
+  deleteLeaveRequest,
+  approveLeave,
+  rejectLeave,
+} from "@/features/leave/api/leave.service";
+import type { LeaveItem } from "@/features/leave/types/leave.types";
+import { LeaveSummary } from "@/features/leave/components/LeaveSummary";
+import { LeaveTable } from "@/features/leave/components/LeaveTable";
+import { LeaveDetailModal } from "@/features/leave/components/LeaveDetailModal";
+import { RejectLeaveModal } from "@/features/leave/components/RejectLeaveModal";
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
-import { Plus, RefreshCw, Search, Calendar, History } from 'lucide-react';
-import { showToast } from '@/shared/ui/toast';
-import { useAuthStore } from '@/app/store/auth.store';
-import '@/shared/styles/CrudPage.css';
-import '@/pages/dashboard/overview/OverviewPage.css';
-import './LeaveShared.css';
+import { Plus, RefreshCw, Search, Calendar } from "lucide-react";
+import { showToast } from "@/shared/ui/toast";
+import { useAuthStore } from "@/app/store/auth.store";
+import { RBACUtils } from "@/shared/hooks/rbac";
+import "@/shared/styles/CrudPage.css";
+import "@/pages/dashboard/overview/OverviewPage.css";
+import "./LeaveShared.css";
 
 const LeaveRequestsPage = () => {
   const navigate = useNavigate();
-  const user = useAuthStore((state) => state.user) as any;
-  const isAdmin = user?.roles?.some((r: any) => ['super_admin', 'admin', 'hr', 'manager'].includes(r.name?.toLowerCase())) || false;
-  
+  const user = useAuthStore((state) => state.user);
+  const allowedMenuKeys = useAuthStore((state) => state.allowedMenuKeys);
+
+  // Otorisasi dinamis menghindari hardcode array role statis
+  const isAdmin =
+    RBACUtils.hasPermission(user, "leave.approve") ||
+    allowedMenuKeys.includes("cuti.persetujuan") ||
+    allowedMenuKeys.includes("leave.approval");
+
   const [items, setItems] = useState<LeaveItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedDetail, setSelectedDetail] = useState<any | null>(null);
+  const [selectedDetail, setSelectedDetail] = useState<LeaveItem | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [historyModal, setHistoryModal] = useState<{ module: string; id: number | string } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<LeaveItem | null>(null);
@@ -38,10 +50,11 @@ const LeaveRequestsPage = () => {
     setLoading(true);
     try {
       const result = await getAllLeaves(currentPage, perPage);
-      setItems(result.items);
+      setItems(Array.isArray(result.items) ? result.items : []);
       setTotalPages(result.totalPages ?? 1);
-    } catch (err: any) {
-      showToast(err.message || 'Gagal memuat pengajuan cuti', 'error');
+    } catch (err: unknown) {
+      const errorObj = err && typeof err === "object" ? (err as Record<string, unknown>) : {};
+      showToast(typeof errorObj.message === "string" ? errorObj.message : "Gagal memuat pengajuan cuti", "error");
     } finally {
       setLoading(false);
     }
@@ -50,12 +63,13 @@ const LeaveRequestsPage = () => {
   const handleApprove = async (id: string) => {
     setLoading(true);
     try {
-      await approveLeave(id, { note: 'Disetujui melalui manajemen' });
-      showToast('Pengajuan cuti disetujui', 'success');
+      await approveLeave(id, { note: "Disetujui melalui manajemen" });
+      showToast("Pengajuan cuti disetujui", "success");
       await loadLeaves();
       setIsDetailModalOpen(false);
-    } catch (err: any) {
-      showToast(err.message || 'Gagal menyetujui', 'error');
+    } catch (err: unknown) {
+      const errorObj = err && typeof err === "object" ? (err as Record<string, unknown>) : {};
+      showToast(typeof errorObj.message === "string" ? errorObj.message : "Gagal menyetujui", "error");
     } finally {
       setLoading(false);
     }
@@ -69,13 +83,14 @@ const LeaveRequestsPage = () => {
     if (!rejectTarget) return;
     setLoading(true);
     try {
-      await rejectLeave(rejectTarget, { note: reason || 'Ditolak melalui manajemen' });
-      showToast('Pengajuan cuti ditolak', 'success');
+      await rejectLeave(rejectTarget, { note: reason || "Ditolak melalui manajemen" });
+      showToast("Pengajuan cuti ditolak", "success");
       await loadLeaves();
       setIsDetailModalOpen(false);
       setRejectTarget(null);
-    } catch (err: any) {
-      showToast(err.message || 'Gagal menolak', 'error');
+    } catch (err: unknown) {
+      const errorObj = err && typeof err === "object" ? (err as Record<string, unknown>) : {};
+      showToast(typeof errorObj.message === "string" ? errorObj.message : "Gagal menolak", "error");
     } finally {
       setLoading(false);
     }
@@ -86,20 +101,23 @@ const LeaveRequestsPage = () => {
 
     setDeleting(true);
     try {
-      await deleteLeaveRequest(String((deleteTarget as any).id));
-      showToast('Pengajuan berhasil dihapus', 'success');
+      await deleteLeaveRequest(String(deleteTarget.id));
+      showToast("Pengajuan berhasil dihapus", "success");
       await loadLeaves();
       setDeleteTarget(null);
-    } catch (err: any) {
-      showToast(err.message || 'Gagal menghapus', 'error');
+    } catch (err: unknown) {
+      const errorObj = err && typeof err === "object" ? (err as Record<string, unknown>) : {};
+      showToast(typeof errorObj.message === "string" ? errorObj.message : "Gagal menghapus", "error");
     } finally {
       setDeleting(false);
     }
   };
 
-  const handleOpenDetail = (item: any) => {
-    setSelectedDetail(item);
-    setIsDetailModalOpen(true);
+  const handleOpenDetail = (item: unknown) => {
+    if (item && typeof item === "object") {
+      setSelectedDetail(item as LeaveItem);
+      setIsDetailModalOpen(true);
+    }
   };
 
   useEffect(() => {
@@ -108,18 +126,22 @@ const LeaveRequestsPage = () => {
 
   const stats = useMemo(() => {
     const total = items.length;
-    const pending = items.filter(i => String((i as any).status || '').toLowerCase() === 'pending').length;
-    const approved = items.filter(i => String((i as any).status || '').toLowerCase() === 'approved').length;
-    const rejected = items.filter(i => String((i as any).status || '').toLowerCase() === 'rejected').length;
+    const pending = items.filter((i) => String(i.status || "").toLowerCase() === "pending").length;
+    const approved = items.filter((i) => String(i.status || "").toLowerCase() === "approved").length;
+    const rejected = items.filter((i) => String(i.status || "").toLowerCase() === "rejected").length;
     return { total, pending, approved, rejected };
   }, [items]);
 
   const filteredItems = useMemo(() => {
-    return items.filter((item: any) => {
+    return items.filter((item) => {
       const q = searchQuery.toLowerCase();
-      const name = String(item.employee?.full_name || item.employee_name || item.user?.name || '').toLowerCase();
-      const id = String(item.employee_id || item.id || '').toLowerCase();
-      const status = String((item as any).status || '').toLowerCase();
+      const emp = item && typeof item === "object" ? (item as Record<string, unknown>) : {};
+      const empSub = emp.employee && typeof emp.employee === "object" ? (emp.employee as Record<string, unknown>) : {};
+      const userSub = emp.user && typeof emp.user === "object" ? (emp.user as Record<string, unknown>) : {};
+
+      const name = String(empSub.full_name || emp.employee_name || userSub.name || "").toLowerCase();
+      const id = String(emp.employee_id || emp.id || "").toLowerCase();
+      const status = String(emp.status || "").toLowerCase();
 
       const matchesSearch = name.includes(q) || id.includes(q);
       const matchesStatus = !filterStatus || status === filterStatus.toLowerCase();
@@ -151,10 +173,10 @@ const LeaveRequestsPage = () => {
           </div>
           <div className="hero-actions">
             <button className="btn-outline" onClick={() => void loadLeaves()}>
-              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
               Segarkan
             </button>
-            <button className="btn-primary" onClick={() => navigate('/leave/requests/create')}>
+            <button className="btn-primary" onClick={() => navigate("/leave/requests/create")}>
               <Plus size={16} />
               Buat Pengajuan
             </button>
@@ -181,8 +203,23 @@ const LeaveRequestsPage = () => {
       <Card className="control-section-card">
         <div className="control-section-inner">
           <div className="control-actions">
+            <select 
+              className="control-select"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="">Semua Status</option>
+              <option value="pending">Menunggu</option>
+              <option value="approved">Disetujui</option>
+              <option value="rejected">Ditolak</option>
+            </select>
+          </div>
+
+          <div className="control-actions">
             <div className="search-box">
-              <div className="search-icon-inside"><Search size={18} /></div>
+              <div className="search-icon-inside">
+                <Search size={18} />
+              </div>
               <input
                 type="text"
                 placeholder="Cari nama atau ID..."
@@ -192,16 +229,6 @@ const LeaveRequestsPage = () => {
               />
             </div>
           </div>
-          <select 
-            className="control-select"
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-          >
-            <option value="">Semua Status</option>
-            <option value="pending">Menunggu</option>
-            <option value="approved">Disetujui</option>
-            <option value="rejected">Ditolak</option>
-          </select>
         </div>
       </Card>
 
@@ -215,17 +242,17 @@ const LeaveRequestsPage = () => {
               <EmptyState title="Tidak ada pengajuan" message="Tidak ada data pengajuan cuti yang sesuai." />
             </div>
           ) : (
-            <LeaveTable 
-              items={paginatedItems} 
+            <LeaveTable
+              items={paginatedItems}
               onView={handleOpenDetail}
               onApprove={handleApprove}
               onReject={handleReject}
               onEdit={(id) => navigate(`/leave/requests/edit/${id}`)}
               onDelete={(id) => {
-                const item = items.find((entry: any) => String(entry.id) === String(id)) || null;
+                const item = items.find((entry) => String(entry.id) === String(id)) || null;
                 setDeleteTarget(item);
               }}
-              onHistory={(id) => setHistoryModal({ module: 'leave', id })}
+              onHistory={(id) => setHistoryModal({ module: "leave", id })}
               isAdmin={isAdmin}
             />
           )}
@@ -235,18 +262,36 @@ const LeaveRequestsPage = () => {
                 Menampilkan <strong>{paginatedItems.length}</strong> dari <strong>{filteredItems.length}</strong> data
               </div>
               <div className="pagination-controls">
-                <button className="pagination-btn" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1}>‹</button>
+                <button
+                  className="pagination-btn"
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                >
+                  ‹
+                </button>
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <button key={page} className={`pagination-btn ${currentPage === page ? 'active' : ''}`} onClick={() => setCurrentPage(page)}>{page}</button>
+                  <button
+                    key={page}
+                    className={`pagination-btn ${currentPage === page ? "active" : ""}`}
+                    onClick={() => setCurrentPage(page)}
+                  >
+                    {page}
+                  </button>
                 ))}
-                <button className="pagination-btn" onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages}>›</button>
+                <button
+                  className="pagination-btn"
+                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  ›
+                </button>
               </div>
             </div>
           )}
         </div>
       </div>
 
-      <LeaveDetailModal 
+      <LeaveDetailModal
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
         item={selectedDetail}
@@ -286,4 +331,3 @@ const LeaveRequestsPage = () => {
 };
 
 export default LeaveRequestsPage;
-

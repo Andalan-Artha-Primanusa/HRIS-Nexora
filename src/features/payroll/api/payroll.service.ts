@@ -30,158 +30,158 @@ const toSafeArray = (raw: any): any[] => {
 export const payrollService = {
 
   // ── Admin: List & CRUD ──────────────────────────────────
-  // GET /api/payroll
+  // GET api/payroll
   getPayrollList: async (params?: any) => {
-    const response = await api.get('/payroll', { params });
+    const response = await api.get('payroll', { params });
     return response.data;
   },
 
-  // POST /api/payroll  (create payroll for 1 employee, auto-calculate)
+  // POST api/payroll  (create payroll for 1 employee, auto-calculate)
   createPayroll: async (payload: any) => {
-    const response = await api.post('/payroll', payload);
+    const response = await api.post('payroll', payload);
     return response.data;
   },
 
-  // POST /api/payroll/generate/monthly (generate payroll for period)
+  // POST api/payroll/generate/monthly (generate payroll for period)
   generatePayroll: async (payload: { period: string; employee_ids?: number[] }) => {
-    const response = await api.post('/payroll/generate/monthly', payload);
+    const response = await api.post('payroll/generate/monthly', payload);
     return response.data;
   },
 
   // Backward compatibility
   generateMonthlyPayroll: async (period: string) => {
-    const response = await api.post('/payroll/generate/monthly', { period });
+    const response = await api.post('payroll/generate/monthly', { period });
     return response.data;
   },
 
-  // GET /api/payroll/{id}
+  // GET api/payroll/{id}
   getPayrollDetail: async (id: string | number) => {
-    const response = await api.get(`/payroll/${id}`);
+    const response = await api.get(`payroll/${id}`);
     return response.data;
   },
 
-  // GET /api/payroll/{id}/slip (Admin view slip)
+  // GET api/payroll/{id}/slip (Admin view slip)
   getPayrollSlip: async (id: string | number) => {
-    const response = await api.get(`/payroll/${id}/slip`);
+    const response = await api.get(`payroll/${id}/slip`);
     return response.data;
   },
 
-  // PUT /api/payroll/{id}  (update allowance/bonus, only when draft)
+  // PUT api/payroll/{id}  (update allowance/bonus, only when draft)
   updatePayroll: async (id: string | number, payload: any) => {
-    const response = await api.put(`/payroll/${id}`, payload);
+    const response = await api.put(`payroll/${id}`, payload);
     return response.data;
   },
 
-  // DELETE /api/payroll/{id}
+  // DELETE api/payroll/{id}
   deletePayroll: async (id: string | number) => {
-    const response = await api.delete(`/payroll/${id}`);
+    const response = await api.delete(`payroll/${id}`);
     return response.data;
   },
 
   // ── Admin: Workflow (draft → pending_hr → approved → paid) ──
-  // POST /api/payroll/{id}/approve (backward-compat: auto-routes to correct step)
+  // POST api/payroll/{id}/approve (backward-compat: auto-routes to correct step)
   approvePayroll: async (id: string | number) => {
-    const response = await api.post(`/payroll/${id}/approve`);
+    const response = await api.post(`payroll/${id}/approve`);
     return response.data;
   },
 
   // Backward compat alias
   approvePayrollSingle: async (id: string | number) => {
-    const response = await api.post(`/payroll/${id}/approve`);
+    const response = await api.post(`payroll/${id}/approve`);
     return response.data;
   },
 
-  // POST /api/payroll/{id}/manager-approve  (Step 1: draft → pending_hr)
+  // POST api/payroll/{id}/manager-approve  (Step 1: draft → pending_hr)
   managerApprovePayroll: async (id: string | number) => {
-    const response = await api.post(`/payroll/${id}/manager-approve`);
+    const response = await api.post(`payroll/${id}/manager-approve`);
     return response.data;
   },
 
-  // POST /api/payroll/{id}/hr-approve  (Step 2: pending_hr → approved)
+  // POST api/payroll/{id}/hr-approve  (Step 2: pending_hr → approved)
   hrApprovePayroll: async (id: string | number) => {
-    const response = await api.post(`/payroll/${id}/hr-approve`);
+    const response = await api.post(`payroll/${id}/hr-approve`);
     return response.data;
   },
 
-  // POST /api/payroll/{id}/reject  (draft|pending_hr → rejected)
+  // POST api/payroll/{id}/reject  (draft|pending_hr → rejected)
   rejectPayroll: async (id: string | number, reason: string) => {
-    const response = await api.post(`/payroll/${id}/reject`, { reason });
+    const response = await api.post(`payroll/${id}/reject`, { reason });
     return response.data;
   },
 
-  // POST /api/payroll/{id}/pay  (approved → paid, single)
+  // POST api/payroll/{id}/pay  (approved → paid, single)
   processPayment: async (id: string | number) => {
-    const response = await api.post(`/payroll/${id}/pay`);
+    const response = await api.post(`payroll/${id}/pay`);
     return response.data;
   },
 
-  // POST /api/payroll/bulk-pay  (bulk: all approved in period → paid)
+  // POST api/payroll/bulk-pay  (bulk: all approved in period → paid)
   bulkMarkAsPaid: async (period: string) => {
-    const response = await api.post('/payroll/bulk-pay', { period });
+    const response = await api.post('payroll/bulk-pay', { period });
     return response.data;
   },
 
 
   // ── Admin: Export ───────────────────────────────────────
-  // GET /api/payroll/{id}/export  (CSV)
+  // GET api/payroll/{id}/export  (CSV)
   exportCsv: async (id: string | number) => {
-    const response = await api.get(`/payroll/${id}/export`, { responseType: 'blob' });
+    const response = await api.get(`payroll/${id}/export`, { responseType: 'blob' });
     return response.data;
   },
 
-  // GET /api/payroll/{id}/export-pdf  (PDF)
+  // GET api/payroll/{id}/export-pdf  (PDF)
   exportPdf: async (id: string | number) => {
-    const response = await api.get(`/payroll/${id}/export-pdf`, { responseType: 'blob' });
+    const response = await api.get(`payroll/${id}/export-pdf`, { responseType: 'blob' });
     return response.data;
   },
 
   // ── Payroll Details (komponen tunjangan/potongan) ───────
-  // GET /api/payroll-details/{payroll_id}
+  // GET api/payroll-details/{payroll_id}
   getPayrollDetails: async (payrollId: string | number) => {
-    const response = await api.get(`/payroll-details/${payrollId}`);
+    const response = await api.get(`payroll-details/${payrollId}`);
     return response.data;
   },
 
-  // POST /api/payroll-details
+  // POST api/payroll-details
   addPayrollDetail: async (payload: any) => {
-    const response = await api.post('/payroll-details', payload);
+    const response = await api.post('payroll-details', payload);
     return response.data;
   },
 
-  // PUT /api/payroll-details/{id}
+  // PUT api/payroll-details/{id}
   updatePayrollDetail: async (id: string | number, payload: any) => {
-    const response = await api.put(`/payroll-details/${id}`, payload);
+    const response = await api.put(`payroll-details/${id}`, payload);
     return response.data;
   },
 
-  // DELETE /api/payroll-details/{id}
+  // DELETE api/payroll-details/{id}
   deletePayrollDetail: async (id: string | number) => {
-    const response = await api.delete(`/payroll-details/${id}`);
+    const response = await api.delete(`payroll-details/${id}`);
     return response.data;
   },
 
   // ── ESS Endpoints (My Payroll) ──────────────────────────
-  // GET /api/my/payroll
+  // GET api/my/payroll
   getMyPayroll: async (params?: any) => {
-    const response = await api.get('/my/payroll', { params });
+    const response = await api.get('my/payroll', { params });
     return response.data;
   },
 
-  // GET /api/my/payroll/{id}/slip  (get salary slip for employee - matches API)
+  // GET api/my/payroll/{id}/slip  (get salary slip for employee - matches API)
   getMySlip: async (id: string | number) => {
-    const response = await api.get(`/my/payroll/${id}/slip`);
+    const response = await api.get(`my/payroll/${id}/slip`);
     return response.data;
   },
 
-  // GET /api/my/payroll/{id}/export  (CSV)
+  // GET api/my/payroll/{id}/export  (CSV)
   exportMyPayrollCsv: async (id: string | number) => {
-    const response = await api.get(`/my/payroll/${id}/export`, { responseType: 'blob' });
+    const response = await api.get(`my/payroll/${id}/export`, { responseType: 'blob' });
     return response.data;
   },
 
-  // GET /api/my/payroll/{id}/export-pdf  (PDF)
+  // GET api/my/payroll/{id}/export-pdf  (PDF)
   exportMyPayrollPdf: async (id: string | number) => {
-    const response = await api.get(`/my/payroll/${id}/export-pdf`, { responseType: 'blob' });
+    const response = await api.get(`my/payroll/${id}/export-pdf`, { responseType: 'blob' });
     return response.data;
   },
 };

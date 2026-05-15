@@ -47,12 +47,13 @@ const ReimbursementApprovalPage = () => {
 
   const paginatedItems = items;
   const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
   const summaryCards = [
     {
       label: "Pending Requests",
       subtitle: "Pengajuan yang menunggu aksi",
-      value: String(items.length),
+      value: String(totalItems),
       change: "Prioritas review hari ini",
       tone: "blue" as const,
       icon: BarChart3,
@@ -60,7 +61,7 @@ const ReimbursementApprovalPage = () => {
     {
       label: "Ready to Review",
       subtitle: "Bukti telah dilampirkan",
-      value: String(items.length),
+      value: String(totalItems),
       change: "Tinjau kelengkapan",
       tone: "orange" as const,
       icon: Clock3,
@@ -91,6 +92,7 @@ const ReimbursementApprovalPage = () => {
       const result = await getAllReimbursements({ page: currentPage, per_page: pageSize });
       const allItems = result.items || [];
       setTotalPages(result.totalPages ?? 1);
+      setTotalItems(result.total ?? allItems.length);
       
       const pendingItems = allItems.filter(i => {
         const s = String(i.status).toLowerCase();
@@ -183,7 +185,7 @@ const ReimbursementApprovalPage = () => {
       <Card className="table-card" glass>
         <div className="table-header-bar">
           <h3>Pending Reimbursement Requests</h3>
-          <span className="table-count">{items.length} pengajuan</span>
+          <span className="table-count">{totalItems} pengajuan</span>
         </div>
 
         {loading && <div className="table-card-inner"><LoadingState message="Memuat data pengajuan reimbursement..." /></div>}
@@ -287,7 +289,7 @@ const ReimbursementApprovalPage = () => {
         {totalPages > 1 && (
           <div className="table-pagination">
             <div className="pagination-info">
-              Menampilkan {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, items.length)} dari {items.length}
+              Menampilkan <strong>{items.length}</strong> dari <strong>{totalItems}</strong> pengajuan
             </div>
             <div className="pagination-controls">
               <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)}>

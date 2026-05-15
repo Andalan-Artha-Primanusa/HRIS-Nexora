@@ -44,12 +44,16 @@ export const LeaveDetailModal: React.FC<LeaveDetailModalProps> = ({ isOpen, onCl
             <div className="detail-group">
               <label style={{ display: 'block', fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Pemohon</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
-                  {String(item.employee?.full_name || item.user?.name || 'E').charAt(0)}
+                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                  {(item.employee?.user?.profile?.avatar_url || item.user?.profile?.avatar_url) ? (
+                    <img src={item.employee?.user?.profile?.avatar_url || item.user?.profile?.avatar_url} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <span style={{ fontWeight: 700 }}>{String(item.employee?.user?.name || item.user?.name || 'E').charAt(0)}</span>
+                  )}
                 </div>
                 <div>
-                  <div style={{ fontWeight: 600, color: '#1e293b' }}>{item.employee?.full_name || item.employee_name || item.user?.name || 'Tidak diketahui'}</div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{item.employee?.position || item.employee?.position_name || item.department_name || 'Karyawan'}</div>
+                  <div style={{ fontWeight: 600, color: '#1e293b' }}>{item.employee?.user?.name || item.employee?.full_name || item.user?.name || 'Tidak diketahui'}</div>
+                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{item.employee?.department?.name || "-"} • {item.employee?.position?.name || "Karyawan"}</div>
                 </div>
               </div>
             </div>
@@ -61,6 +65,25 @@ export const LeaveDetailModal: React.FC<LeaveDetailModalProps> = ({ isOpen, onCl
               </span>
             </div>
           </div>
+
+          {(item.approver || status === 'approved' || status === 'rejected') && (
+            <div style={{ padding: '1rem', background: '#f0f9ff', borderRadius: '12px', border: '1px solid #e0f2fe', marginBottom: '1.5rem' }}>
+              <label style={{ display: 'block', fontSize: '0.70rem', color: '#0369a1', textTransform: 'uppercase', marginBottom: '0.75rem', fontWeight: 700, letterSpacing: '0.05em' }}>Penyetuju / Reviewer</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '1px solid #bae6fd' }}>
+                  {item.approver?.profile?.avatar_url ? (
+                    <img src={item.approver.profile.avatar_url} alt="Approver" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700 }}>{String(item.approver?.name || 'A').charAt(0)}</span>
+                  )}
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#0c4a6e' }}>{item.approver?.name || "Sistem / Admin"}</div>
+                  <div style={{ fontSize: '0.7rem', color: '#0ea5e9' }}>{item.approver?.employee?.position?.name || "Manager / HR"}</div>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div style={{ padding: '1.25rem', background: '#f8fafc', borderRadius: '16px', border: '1px solid #e2e8f0', marginBottom: '1.5rem' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
@@ -90,11 +113,11 @@ export const LeaveDetailModal: React.FC<LeaveDetailModalProps> = ({ isOpen, onCl
             </div>
           </div>
 
-          {item.notes && (
+          {(item.notes || item.rejection_reason) && (
             <div className="detail-group" style={{ marginTop: '1rem' }}>
-              <label style={{ display: 'block', fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Catatan Admin</label>
-              <div style={{ padding: '0.75rem', background: '#fffbeb', border: '1px solid #fef3c7', borderRadius: '12px', fontSize: '0.85rem', color: '#92400e' }}>
-                {item.notes}
+              <label style={{ display: 'block', fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '0.5rem' }}>{status === 'rejected' ? 'Alasan Penolakan' : 'Catatan Admin'}</label>
+              <div style={{ padding: '0.75rem', background: status === 'rejected' ? '#fef2f2' : '#fffbeb', border: '1px solid ' + (status === 'rejected' ? '#fee2e2' : '#fef3c7'), borderRadius: '12px', fontSize: '0.85rem', color: status === 'rejected' ? '#991b1b' : '#92400e' }}>
+                {item.notes || item.rejection_reason}
               </div>
             </div>
           )}

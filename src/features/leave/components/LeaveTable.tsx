@@ -54,16 +54,25 @@ export const LeaveTable: React.FC<LeaveTableProps> = ({ items, onView, onApprove
         <tbody>
           {items.map((item, index) => {
             const status = String(item.status || 'pending').toLowerCase();
-            const empName = item.employee?.full_name || item.employee_name || item.user?.name || `EMP-${item.employee_id}`;
+            const empName = item.employee?.user?.name || item.employee?.full_name || item.user?.name || `EMP-${item.employee_id}`;
+            const avatarUrl = item.employee?.user?.profile?.avatar_url || item.user?.profile?.avatar_url;
+            const deptName = item.employee?.department?.name || "-";
+            const posName = item.employee?.position?.name || "-";
             
             return (
               <tr key={item.id || index}>
                 <td>
                   <div className="cell-name">
-                    <div className="cell-avatar">{empName.charAt(0).toUpperCase()}</div>
+                    <div className="cell-avatar">
+                      {avatarUrl ? (
+                        <img src={avatarUrl} alt={empName} className="avatar-img" />
+                      ) : (
+                        empName.charAt(0).toUpperCase()
+                      )}
+                    </div>
                     <div className="cell-stacked">
                       <span className="cell-name-text">{empName}</span>
-                      <span className="cell-stacked__sub">ID: {item.employee_id || item.id}</span>
+                      <span className="cell-stacked__sub">{deptName} • {posName}</span>
                     </div>
                   </div>
                 </td>

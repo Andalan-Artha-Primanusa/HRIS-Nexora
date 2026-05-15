@@ -87,18 +87,19 @@ const WorkSchedulesPage = () => {
   const [loading, setLoading] = useState(false);
 
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | number | null>(null);
+  const [totalItems, setTotalItems] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
 
-  const paginatedSchedules = schedules;
-  const [totalPages, setTotalPages] = useState(1);
+  const totalPages = Math.ceil(totalItems / pageSize) || 1;
 
   const loadSchedules = async (options: { clearMessage?: boolean } = {}) => {
     const { clearMessage = true } = options;
     setLoading(true);
     try {
-      const result = await getAllWorkSchedules();
+      const result = await getAllWorkSchedules(currentPage, pageSize);
       setSchedules(result.items);
+      setTotalItems(result.total);
     } catch (error) {
       showToast(getErrorMessage(error, "Gagal memuat jadwal kerja"), "error");
     } finally {
@@ -122,7 +123,7 @@ const WorkSchedulesPage = () => {
 
   useEffect(() => {
     void loadSchedules();
-  }, []);
+  }, [currentPage]);
 
   const totalDuration = schedules.reduce((total, schedule) => {
     const duration = calculateShiftDuration(schedule);
@@ -139,7 +140,7 @@ const WorkSchedulesPage = () => {
     {
       label: "Total Jadwal",
       subtitle: "Shift yang terdaftar",
-      value: String(schedules.length),
+      value: String(totalItems),
       change: "Data shift aktif",
       tone: "blue" as const,
       icon: Clock,
@@ -239,7 +240,7 @@ const WorkSchedulesPage = () => {
       <Card className="table-card work-table-card">
         <div className="table-header-bar">
           <h3>Data Jadwal Kerja</h3>
-          <span className="table-count">{schedules.length} jadwal</span>
+          <span className="table-count">{totalItems} jadwal</span>
         </div>
 
         {loading && schedules.length === 0 ? (
@@ -261,7 +262,7 @@ const WorkSchedulesPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {paginatedSchedules.map((schedule) => (
+                {schedules.map((schedule) => (
                   <tr key={schedule.id}>
                     <td>
                       <div className="cell-name">
@@ -335,7 +336,7 @@ const WorkSchedulesPage = () => {
           {totalPages > 1 && (
             <div className="table-pagination">
               <div className="pagination-info">
-                Menampilkan {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, schedules.length)} dari {schedules.length}
+                Menampilkan {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, totalItems)} dari {totalItems}
               </div>
               <div className="pagination-controls">
                 <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)}>

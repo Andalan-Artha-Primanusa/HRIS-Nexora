@@ -5,6 +5,7 @@ import { Badge } from '@/shared/ui/Badge';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { PayrollStatusBadge } from '@/shared/ui/PayrollStatusBadge';
 import { payrollService, toSafeArray } from '@/features/payroll/api/payroll.service';
+import { parsePaginatedResponse } from '@/shared/api/pagination';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 
@@ -29,6 +30,7 @@ const PayrollReportsPage: React.FC = () => {
   const [activeFilterTab, setActiveFilterTab] = useState<"Semua" | "Pending" | "Approved">("Semua");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
   const [exportModal, setExportModal] = useState(false);
   const [exportPeriod, setExportPeriod] = useState(new Date().toISOString().slice(0, 7));
   const [exportType, setExportType] = useState<"bca" | "summary">("bca");
@@ -43,8 +45,9 @@ const PayrollReportsPage: React.FC = () => {
     setError(null);
     try {
       const response = await payrollService.getPayrollList({ page: currentPage, per_page: pageSize });
-      setData(toSafeArray(response));
-      setTotalPages(response?.data?.last_page ?? response?.last_page ?? 1);
+      const parsed = parsePaginatedResponse<any>(response);
+      setData(parsed.items.length ? parsed.items : toSafeArray(response));
+      setTotalPages(parsed.totalPages);
     } catch (err: any) {
       setError(err?.response?.data?.message || err.message || 'Gagal memuat data');
     } finally {
@@ -106,9 +109,8 @@ const PayrollReportsPage: React.FC = () => {
     });
   }, [data, searchText, activeFilterTab]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredData.length / pageSize));
   const safePage = Math.min(currentPage, totalPages);
-  const paginatedData = filteredData.slice((safePage - 1) * pageSize, safePage * pageSize);
+  const paginatedData = filteredData;
 
   const taxSummary = useMemo(() => {
     const totals = data.reduce((acc, curr) => ({
