@@ -87,18 +87,6 @@ export const clearMenuCache = () => {
   useAuthStore.getState().setMenuKeysLoaded(false);
 };
 
-const collectKeys = (items: MenuItem[]): Set<string> => {
-  const keys = new Set<string>();
-  const walk = (list: MenuItem[]) => {
-    for (const item of list) {
-      if (item.menuKey) keys.add(item.menuKey);
-      if (item.subItems) walk(item.subItems);
-    }
-  };
-  walk(items);
-  return keys;
-};
-
 const filterByKeys = (items: MenuItem[], allowedKeys: Set<string>): MenuItem[] => {
   return items
     .filter((item) => !item.menuKey || allowedKeys.has(item.menuKey))
@@ -119,14 +107,11 @@ export const filterMenuItems = (
 ): MenuItem[] => {
   if (!user) return [];
 
-  // Gunakan state terpusat jika allowedKeys opsional kosong
-  const effectiveKeys = allowedKeys && allowedKeys.length > 0 
-    ? allowedKeys 
+  const effectiveKeys = allowedKeys !== undefined
+    ? allowedKeys
     : useAuthStore.getState().allowedMenuKeys;
 
-  const keys = effectiveKeys && effectiveKeys.length > 0
-    ? new Set(effectiveKeys)
-    : collectKeys(items);
+  if (effectiveKeys.length === 0) return [];
 
-  return filterByKeys(items, keys);
+  return filterByKeys(items, new Set(effectiveKeys));
 };
