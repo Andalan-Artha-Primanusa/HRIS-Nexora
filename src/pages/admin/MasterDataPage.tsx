@@ -184,11 +184,7 @@ const MasterDataPage: React.FC = () => {
           department: `/departments/${editingItem.id}`,
           position:   `/positions/${editingItem.id}`,
         };
-        try {
-          await api.put(endpointMap[activeTab], formData);
-        } catch {
-          console.warn('PUT endpoint not available, applying local update only.');
-        }
+        await api.put(endpointMap[activeTab], formData);
 
         const updater = (prev: any[]): any[] =>
           prev.map((i) => i.id === editingItem.id ? { ...i, ...formData } : i);
@@ -201,22 +197,11 @@ const MasterDataPage: React.FC = () => {
           position:   '/positions',
         };
 
-        let newItem: any = null;
-        try {
-          const createRes = await api.post(endpointMap[activeTab], formData);
-          newItem = createRes.data?.data ?? createRes.data;
-        } catch {
-          console.warn('POST endpoint not available, applying local insert only.');
-        }
+        const createRes = await api.post(endpointMap[activeTab], formData);
+        const newItem = createRes.data?.data ?? createRes.data;
 
-        const localItem = newItem ?? {
-          id: Date.now(),
-          ...formData,
-          department_id: formData.department_id ? Number(formData.department_id) : undefined,
-        };
-
-        if (activeTab === 'department') setDepartments((p) => [...p, localItem]);
-        if (activeTab === 'position')   setPositions((p)   => [...p, localItem]);
+        if (activeTab === 'department') setDepartments((p) => [...p, newItem]);
+        if (activeTab === 'position')   setPositions((p)   => [...p, newItem]);
       }
 
       setShowModal(false);

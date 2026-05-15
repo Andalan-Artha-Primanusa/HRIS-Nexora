@@ -231,7 +231,6 @@ const ShiftSwapFormPage: React.FC = () => {
                 size="lg" 
                 disabled={saving} 
                 style={{ width: '100%', height: '60px', borderRadius: '20px', fontWeight: 800, fontSize: '1.1rem', boxShadow: '0 10px 20px rgba(37, 99, 235, 0.2)' }}
-                onClick={handleSubmit}
               >
                 {saving ? <RefreshCw className="animate-spin" style={{ marginRight: '10px' }} /> : <Save size={20} style={{ marginRight: '10px' }} />}
                 {saving ? 'Menyimpan...' : 'Simpan Request'}

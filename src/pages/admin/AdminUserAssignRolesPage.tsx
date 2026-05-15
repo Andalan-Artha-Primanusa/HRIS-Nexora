@@ -92,7 +92,6 @@ const AdminUserAssignRolesPage = () => {
     }
 
     setIsAssigning(true);
-    showToast("Sedang assign role...", 'info');
 
     try {
       await assignRolesToUser(selectedUser.id.toString(), { role_ids: selectedRoleIds });
