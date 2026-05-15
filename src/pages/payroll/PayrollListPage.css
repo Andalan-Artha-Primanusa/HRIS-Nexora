@@ -163,6 +163,10 @@
   padding: 1rem 1.5rem;
   background: #ffffff;
   border-radius: 16px 16px 0 0;
+}
+
+.table-toolbar-shell {
+  background: #ffffff;
   border-bottom: 1px solid #e2e8f0;
 }
 
@@ -285,6 +289,20 @@
   border-color: #2563eb;
 }
 
+.filter-count {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
 .btn-clear {
   padding: 0.75rem 1.25rem;
   background: transparent;
@@ -301,6 +319,83 @@
 
 .btn-clear:hover {
   background: #fef2f2;
+}
+
+.btn-clear.subtle {
+  border-color: #cbd5e1;
+  color: #475569;
+  background: #ffffff;
+}
+
+.btn-clear.subtle:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.active-filter-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 1.5rem 1rem;
+  background: #ffffff;
+}
+
+.active-filter-summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.active-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 34px;
+  padding: 0.35rem 0.45rem 0.35rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid #dbeafe;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.active-filter-chip.search-chip {
+  border-color: #e2e8f0;
+  background: #f8fafc;
+  color: #334155;
+}
+
+.active-filter-chip span {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.active-filter-chip strong {
+  font-weight: 700;
+}
+
+.active-filter-chip button {
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.1);
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.search-chip button {
+  background: rgba(100, 116, 139, 0.12);
+}
+
+.active-filter-chip button:hover {
+  background: rgba(37, 99, 235, 0.18);
 }
 
 /* Filter Panel */
@@ -762,6 +857,15 @@
 
   .control-bar .search-box {
     min-width: 100%;
+  }
+
+  .active-filter-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .active-filter-summary {
+    width: 100%;
   }
 
   .quick-controls {

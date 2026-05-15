@@ -73,7 +73,11 @@ const defaultMenuKeysForUser = (user: AuthUser): string[] => {
     "pelatihan-kompetensi.pelatihan",
   ]);
   addIf(keys, RBACUtils.hasPermission(user, "admin.import.execute"), ["master-data", "master-data.pusat-impor"]);
-  addIf(keys, RBACUtils.hasPermission(user, "admin.approval_flow.manage"), ["alur-persetujuan"]);
+  addIf(keys, RBACUtils.hasPermission(user, "admin.approval_flow.manage"), [
+    "alat-admin",
+    "alat-admin.sistem",
+    "alat-admin.sistem.alur-persetujuan",
+  ]);
 
   return Array.from(keys);
 };

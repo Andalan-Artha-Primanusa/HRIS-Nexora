@@ -131,6 +131,40 @@ const PayrollListPage = () => {
     setSearchText(""); setSelectedEmployeeId(""); setSelectedPeriod(""); setSelectedStatus(""); setSortBy("period"); setSortOrder("desc");
   };
 
+  const activeFilterChips = [
+    selectedEmployeeId
+      ? {
+          key: "employee",
+          label: "Karyawan",
+          value: employeesWithNames.find((employee) => String(employee.id) === selectedEmployeeId)?.name || selectedEmployeeId,
+          onClear: () => setSelectedEmployeeId(""),
+        }
+      : null,
+    selectedPeriod
+      ? {
+          key: "period",
+          label: "Periode",
+          value: selectedPeriod,
+          onClear: () => setSelectedPeriod(""),
+        }
+      : null,
+    selectedStatus
+      ? {
+          key: "status",
+          label: "Status",
+          value: selectedStatus,
+          onClear: () => setSelectedStatus(""),
+        }
+      : null,
+  ].filter(Boolean) as Array<{
+    key: string;
+    label: string;
+    value: string;
+    onClear: () => void;
+  }>;
+
+  const activeFilterCount = activeFilterChips.length;
+
   const loadData = async () => {
     setLoading(true);
     setErrorMessage(null);
@@ -315,18 +349,46 @@ const PayrollListPage = () => {
           </div>
 
           <Card className="data-table-card">
-            <div className="control-bar">
-              <div className="quick-controls">
-                <div className="control-group">
-                  <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} className="sort-select">
-                    <option value="period">Urut: Periode</option><option value="employee">Urut: Karyawan</option><option value="total">Urut: Total</option><option value="id">Urut: ID</option>
-                  </select>
-                  <button className="sort-order-btn" onClick={() => setSortOrder(s => s === "asc" ? "desc" : "asc")}>{sortOrder === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />}</button>
+            <div className="table-toolbar-shell">
+              <div className="control-bar">
+                <div className="quick-controls">
+                  <div className="control-group">
+                    <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} className="sort-select">
+                      <option value="period">Urut: Periode</option><option value="employee">Urut: Karyawan</option><option value="total">Urut: Total</option><option value="id">Urut: ID</option>
+                    </select>
+                    <button className="sort-order-btn" onClick={() => setSortOrder(s => s === "asc" ? "desc" : "asc")}>{sortOrder === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />}</button>
+                  </div>
+                  <button className={`filter-btn ${showFilters ? "active" : ""}`} onClick={() => setShowFilters(!showFilters)}>
+                    <Filter size={18} />
+                    <span>Filter</span>
+                    {activeFilterCount > 0 && <span className="filter-count">{activeFilterCount}</span>}
+                    <ChevronDown size={14} style={{ transform: showFilters ? "rotate(180deg)" : "", transition: "transform 0.3s ease" }} />
+                  </button>
                 </div>
-                <button className={`filter-btn ${showFilters ? "active" : ""}`} onClick={() => setShowFilters(!showFilters)}><Filter size={18} /><span>Filter</span><ChevronDown size={14} style={{ transform: showFilters ? "rotate(180deg)" : "", transition: "transform 0.3s ease" }} /></button>
-                {(searchText||selectedEmployeeId||selectedPeriod||selectedStatus) && <button className="btn-clear" onClick={clearFilters}>Bersihkan</button>}
+                <div className="search-box"><Search size={18} className="search-icon-inside" /><input type="text" placeholder="Cari nama, ID payroll, atau ID karyawan..." value={searchText} onChange={(e) => setSearchText(e.target.value)} className="search-input" /></div>
               </div>
-              <div className="search-box"><Search size={18} className="search-icon-inside" /><input type="text" placeholder="Cari nama, ID payroll, atau ID karyawan..." value={searchText} onChange={(e) => setSearchText(e.target.value)} className="search-input" /></div>
+
+              {(searchText || activeFilterCount > 0) && (
+                <div className="active-filter-row">
+                  <div className="active-filter-summary">
+                    {searchText && (
+                      <span className="active-filter-chip search-chip">
+                        <span>Cari</span>
+                        <strong>{searchText}</strong>
+                        <button onClick={() => setSearchText("")} aria-label="Hapus pencarian"><X size={14} /></button>
+                      </span>
+                    )}
+                    {activeFilterChips.map((chip) => (
+                      <span key={chip.key} className="active-filter-chip">
+                        <span>{chip.label}</span>
+                        <strong>{chip.value}</strong>
+                        <button onClick={chip.onClear} aria-label={`Hapus filter ${chip.label}`}><X size={14} /></button>
+                      </span>
+                    ))}
+                  </div>
+                  <button className="btn-clear subtle" onClick={clearFilters}>Reset semua</button>
+                </div>
+              )}
             </div>
 
             {showFilters && (
