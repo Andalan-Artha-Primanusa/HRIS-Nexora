@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, RefreshCw, Clock, CheckCircle, AlertCircle, Flag, X, Sparkles } from 'lucide-react';
-import { Card, CardHeader } from '@/shared/ui';
+import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { taskService } from '@/features/tasks/api/task.service';
+import { parsePaginatedResponse } from '@/shared/api/pagination';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/employee/EmployeesPage.css';
@@ -19,14 +20,20 @@ const MyTasksPage: React.FC = () => {
   const [completingTask, setCompletingTask] = useState<any>(null);
   const [completionNotes, setCompletionNotes] = useState('');
   const [submittingCompletion, setSubmittingCompletion] = useState(false);
+  const [totalPages, setTotalPages] = useState(1);
 
   const fetchData = async () => {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const response = await taskService.getMyTasks();
-      const payload = response?.data?.data || response?.data || response;
-      setTasks(payload?.tasks || []);
+      const response = await taskService.getMyTasks({ page: currentPage, per_page: pageSize });
+      const payload = response?.data?.data ?? response?.data ?? response;
+      const taskPayload = payload && typeof payload === 'object' && 'tasks' in payload
+        ? (payload as Record<string, unknown>).tasks
+        : payload;
+      const parsed = parsePaginatedResponse<Record<string, unknown>>(taskPayload);
+      setTasks(parsed.items);
+      setTotalPages(parsed.totalPages);
     } catch (error: any) {
       setErrorMessage(error?.response?.data?.message || 'Gagal memuat tugas');
     } finally {
@@ -36,7 +43,7 @@ const MyTasksPage: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [currentPage, pageSize]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -104,8 +111,6 @@ const MyTasksPage: React.FC = () => {
   }, [filteredTasks]);
 
   const paginatedTasks = sortedTasks;
-  const [totalPages, setTotalPages] = useState(1);
-
   const summaryCards = useMemo(
     () => [
       {
@@ -294,7 +299,7 @@ const MyTasksPage: React.FC = () => {
                     <tr key={task.id} style={isOverdue(task) ? { background: '#fef2f2' } : undefined}>
                       <td>
                         <div className="cell-name">
-                          <div className="cell-avatar">
+                          <div className="cell-avatar" style={{ background: '#f1f5f9', color: '#64748b' }}>
                             {task.title ? task.title.charAt(0).toUpperCase() : 'T'}
                           </div>
                           <div className="cell-stacked">
@@ -316,9 +321,19 @@ const MyTasksPage: React.FC = () => {
                         </div>
                       </td>
                       <td>
-                        <span style={{ color: '#64748b', fontWeight: 500 }}>
-                          {task.assigned_by?.profile?.full_name || task.assigned_by?.name || '-'}
-                        </span>
+                        <div className="cell-name">
+                          <img
+                            src={task.assigned_by?.profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(task.assigned_by?.name || 'U')}&color=7F9CF5&background=EBF4FF`}
+                            alt=""
+                            className="cell-avatar"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(task.assigned_by?.name || 'U')}&color=7F9CF5&background=EBF4FF`;
+                            }}
+                          />
+                          <span style={{ color: '#64748b', fontWeight: 500 }}>
+                            {task.assigned_by?.name || '-'}
+                          </span>
+                        </div>
                       </td>
                       <td className="td-center">
                         <div className="action-btn-group">
@@ -349,24 +364,24 @@ const MyTasksPage: React.FC = () => {
                 </tbody>
               </table>
             </div>
-          {totalPages > 1 && (
-            <div className="table-pagination">
-              <div className="pagination-info">
-                Menampilkan {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, sortedTasks.length)} dari {sortedTasks.length}
+            {totalPages > 1 && (
+              <div className="table-pagination">
+                <div className="pagination-info">
+                  Halaman <strong>{currentPage}</strong> dari <strong>{totalPages}</strong>
+                </div>
+                <div className="pagination-controls">
+                  <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}>
+                    Sebelumnya
+                  </Button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button key={page} className={`pagination-page-btn ${currentPage === page ? 'active' : ''}`} onClick={() => setCurrentPage(page)}>{page}</button>
+                  ))}
+                  <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}>
+                    Selanjutnya
+                  </Button>
+                </div>
               </div>
-              <div className="pagination-controls">
-                <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)}>
-                  Sebelumnya
-                </Button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                  <button key={page} className={`pagination-page-btn ${currentPage === page ? 'active' : ''}`} onClick={() => setCurrentPage(page)}>{page}</button>
-                ))}
-                <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage(prev => prev + 1)}>
-                  Selanjutnya
-                </Button>
-              </div>
-            </div>
-          )}
+            )}
           </>
           )}
         </div>

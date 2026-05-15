@@ -6,6 +6,7 @@ import overtimeService from '@/features/attendance/api/overtime.service';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
 import { useAuthStore } from '@/app/store/auth.store';
+import { RBACUtils } from '@/shared/hooks/rbac';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import { showToast } from '@/shared/ui/toast';
@@ -47,10 +48,7 @@ const OvertimeApprovalPage: React.FC = () => {
   const user = useAuthStore((state) => state.user);
 
   const canApproveOvertime = useMemo(() => {
-    return Boolean(
-      user?.permissions?.some((permission: any) => permission?.name === 'attendance.approve_all') ||
-      user?.roles?.some((role: any) => role?.name && ['super_admin', 'admin', 'hr', 'manager'].includes(role.name))
-    );
+    return RBACUtils.hasPermission(user, 'overtime.approve');
   }, [user]);
 
   const fetchData = async () => {

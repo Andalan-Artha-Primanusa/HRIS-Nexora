@@ -96,9 +96,20 @@ const MenuPermissionsPage = () => {
     );
   }, [menuItems, searchText]);
 
-  const paginatedItems = filteredItems;
+  const totalPages = useMemo(() => {
+    return Math.max(1, Math.ceil(filteredItems.length / pageSize));
+  }, [filteredItems.length, pageSize]);
 
-  const [totalPages, setTotalPages] = useState(1);
+  const paginatedItems = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredItems.slice(start, start + pageSize);
+  }, [filteredItems, currentPage, pageSize]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -287,7 +298,8 @@ const MenuPermissionsPage = () => {
               {/* Pagination */}
               <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan <strong>{paginatedItems.length}</strong> dari <strong>{filteredItems.length}</strong> menu
+                  Menampilkan <strong>{filteredItems.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}</strong>-
+                  <strong>{Math.min(currentPage * pageSize, filteredItems.length)}</strong> dari <strong>{filteredItems.length}</strong> menu
                 </div>
                 <div className="pagination-controls">
                   <button

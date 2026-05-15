@@ -1,20 +1,21 @@
 import { useEffect, useState, useMemo } from "react";
-import { Card, CardHeader } from "@/shared/ui";
+import { Card } from "@/shared/ui";
 import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { approveLeave, getPendingLeaves, rejectLeave } from "@/features/leave/api/leave.service";
 import { RejectLeaveModal } from "@/features/leave/components/RejectLeaveModal";
 import type { LeaveItem } from "@/features/leave/types/leave.types";
 import { RefreshCw, Check, X, Clock3, CheckCircle2, XCircle, Search, History } from "lucide-react";
 import { showToast } from "@/shared/ui/toast";
-import '@/shared/styles/CrudPage.css';
-import '@/pages/dashboard/overview/OverviewPage.css';
-import '@/pages/leave/LeaveApprovalPage.css';
-import '@/pages/admin/AdminPermissionsPage.css';
+import "@/shared/styles/CrudPage.css";
+import "@/pages/dashboard/overview/OverviewPage.css";
+import "@/pages/leave/LeaveApprovalPage.css";
+import "@/pages/admin/AdminPermissionsPage.css";
 import { useAuthStore } from "@/app/store/auth.store";
+import { RBACUtils } from "@/shared/hooks/rbac";
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 
-const formatDate = (dateString: string | undefined) => {
-  if (!dateString) return "-";
+const formatDate = (dateString: unknown) => {
+  if (typeof dateString !== "string" || !dateString) return "-";
   try {
     const date = new Date(dateString);
     return date.toLocaleDateString("id-ID", {
@@ -27,29 +28,46 @@ const formatDate = (dateString: string | undefined) => {
   }
 };
 
-const getLeaveTypeLabel = (type: string | undefined) => {
+const getLeaveTypeLabel = (type: unknown) => {
+  const typeStr = typeof type === "string" ? type : "";
   const typeMap: Record<string, string> = {
     annual: "Cuti Tahunan",
     sick: "Cuti Sakit",
     personal: "Cuti Pribadi",
     unpaid: "Cuti Tanpa Gaji",
   };
-  return typeMap[type?.toLowerCase() ?? ""] ?? type ?? "-";
+  const mapped = typeMap[typeStr.toLowerCase()];
+  if (mapped) return mapped;
+  return typeStr ? typeStr : "-";
 };
 
-const getEmployeeName = (leave: any) => {
-  if (typeof leave.employee === "string") return leave.employee;
-  if (typeof leave.employee_name === "string") return leave.employee_name;
-  if (leave.employee?.name) return leave.employee.name;
-  if (leave.employee?.user?.name) return leave.employee.user.name;
-  if (leave.user?.name) return leave.user.name;
-  if (leave.employee?.employee_code) return leave.employee.employee_code;
+const getEmployeeName = (leave: unknown): string => {
+  const item = leave && typeof leave === "object" ? (leave as Record<string, unknown>) : {};
+  if (typeof item.employee === "string") return item.employee;
+  if (typeof item.employee_name === "string") return item.employee_name;
+
+  const empObj = item.employee && typeof item.employee === "object" ? (item.employee as Record<string, unknown>) : {};
+  if (typeof empObj.name === "string") return empObj.name;
+
+  const empUserObj = empObj.user && typeof empObj.user === "object" ? (empObj.user as Record<string, unknown>) : {};
+  if (typeof empUserObj.name === "string") return empUserObj.name;
+
+  const userObj = item.user && typeof item.user === "object" ? (item.user as Record<string, unknown>) : {};
+  if (typeof userObj.name === "string") return userObj.name;
+
+  if (typeof empObj.employee_code === "string") return empObj.employee_code;
   return "-";
 };
 
 const LeaveApprovalPage = () => {
-  const user = useAuthStore((state) => state.user) as any;
-  const isAdmin = user?.roles?.some((r: any) => ['super_admin', 'admin', 'hr', 'manager'].includes(r.name?.toLowerCase())) || false;
+  const user = useAuthStore((state) => state.user);
+  const allowedMenuKeys = useAuthStore((state) => state.allowedMenuKeys);
+
+  // Otorisasi dinamis via kapabilitas
+  const isAdmin =
+    RBACUtils.hasPermission(user, "leave.approve") ||
+    allowedMenuKeys.includes("cuti.persetujuan") ||
+    allowedMenuKeys.includes("leave.approval");
 
   const [items, setItems] = useState<LeaveItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -62,15 +80,19 @@ const LeaveApprovalPage = () => {
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
-  const [historyModal, setHistoryModal] = useState<{ module: string; id: number } | null>(null);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [historyModal, setHistoryModal] = useState<{ module: string; id: number | string } | null>(null);
   const [rejectModal, setRejectModal] = useState<{ id: string | number; name: string } | null>(null);
 
   const loadData = async () => {
     setLoading(true);
     try {
       const result = await getPendingLeaves(currentPage, pageSize);
-      const raw = result.items || [];
+      const raw = Array.isArray(result.items) ? result.items : [];
       setItems(raw);
+      setTotalPages(result.totalPages ?? 1);
+      setTotalItems(result.total ?? raw.length);
     } catch (error: unknown) {
       console.error("Failed to load leaves:", error);
     } finally {
@@ -80,18 +102,19 @@ const LeaveApprovalPage = () => {
 
   useEffect(() => {
     void loadData();
-  }, []);
+  }, [currentPage, pageSize]);
 
   const filteredItems = useMemo(() => {
-    return items.filter(item => {
+    return items.filter((item) => {
       const empName = getEmployeeName(item).toLowerCase();
       const query = searchText.toLowerCase();
       const matchSearch = empName.includes(query);
 
       let statusMatch = true;
-      if (activeTab === "Pending") statusMatch = item.status === 'pending' || item.status === 'submitted';
-      else if (activeTab === "Approved") statusMatch = item.status === 'approved';
-      else if (activeTab === "Rejected") statusMatch = item.status === 'rejected';
+      const statusStr = typeof item.status === "string" ? item.status : "";
+      if (activeTab === "Pending") statusMatch = statusStr === "pending" || statusStr === "submitted";
+      else if (activeTab === "Approved") statusMatch = statusStr === "approved";
+      else if (activeTab === "Rejected") statusMatch = statusStr === "rejected";
 
       return matchSearch && statusMatch;
     });
@@ -99,12 +122,10 @@ const LeaveApprovalPage = () => {
 
   const paginatedItems = filteredItems;
 
-  const [totalPages, setTotalPages] = useState(1);
-
   const summaryStats = useMemo(() => {
-    const pending = items.filter(i => i.status === 'pending' || i.status === 'submitted').length;
-    const approved = items.filter(i => i.status === 'approved').length;
-    const rejected = items.filter(i => i.status === 'rejected').length;
+    const pending = items.filter((i) => i.status === "pending" || i.status === "submitted").length;
+    const approved = items.filter((i) => i.status === "approved").length;
+    const rejected = items.filter((i) => i.status === "rejected").length;
 
     return [
       { label: "Pending", subtitle: "Menunggu persetujuan", value: pending, tone: "blue" as const },
@@ -119,9 +140,13 @@ const LeaveApprovalPage = () => {
       await approveLeave(String(leaveId), { note: "Disetujui" });
       await loadData();
       showToast("Pengajuan disetujui", "success");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to approve:", error);
-      showToast(error?.response?.data?.message || error?.message || 'Gagal menyetujui cuti', 'error');
+      const errObj = error && typeof error === "object" ? (error as Record<string, unknown>) : {};
+      const responseObj = errObj.response && typeof errObj.response === "object" ? (errObj.response as Record<string, unknown>) : {};
+      const dataObj = responseObj.data && typeof responseObj.data === "object" ? (responseObj.data as Record<string, unknown>) : {};
+      const msg = typeof dataObj.message === "string" ? dataObj.message : typeof errObj.message === "string" ? errObj.message : "Gagal menyetujui cuti";
+      showToast(msg, "error");
     } finally {
       setActionLoading(null);
     }
@@ -136,25 +161,23 @@ const LeaveApprovalPage = () => {
       await loadData();
       showToast("Pengajuan ditolak", "success");
       setRejectModal(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to reject:", error);
-      showToast(error?.response?.data?.message || error?.message || 'Gagal menolak cuti', 'error');
+      const errObj = error && typeof error === "object" ? (error as Record<string, unknown>) : {};
+      const responseObj = errObj.response && typeof errObj.response === "object" ? (errObj.response as Record<string, unknown>) : {};
+      const dataObj = responseObj.data && typeof responseObj.data === "object" ? (responseObj.data as Record<string, unknown>) : {};
+      const msg = typeof dataObj.message === "string" ? dataObj.message : typeof errObj.message === "string" ? errObj.message : "Gagal menolak cuti";
+      showToast(msg, "error");
     } finally {
       setActionLoading(null);
     }
-  };
-
-  const clearFilters = () => {
-    setSearchText("");
-    setActiveTab("Semua");
-    setCurrentPage(1);
   };
 
   useEffect(() => {
     setCurrentPage(1);
   }, [searchText, activeTab]);
 
-  const getStatusClass = (status?: string) => {
+  const getStatusClass = (status?: unknown) => {
     const normalized = String(status || "").toLowerCase();
     if (normalized === "approved") return "status-badge status-badge--approved";
     if (normalized === "submitted" || normalized === "pending") return "status-badge status-badge--pending";
@@ -179,7 +202,7 @@ const LeaveApprovalPage = () => {
           </div>
           <div className="hero-actions">
             <button className="btn-outline" onClick={() => void loadData()} disabled={loading}>
-              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
               Segarkan
             </button>
           </div>
@@ -241,7 +264,9 @@ const LeaveApprovalPage = () => {
           {/* Search */}
           <div className="control-actions">
             <div className="search-box">
-              <div className="search-icon-inside"><Search size={18} /></div>
+              <div className="search-icon-inside">
+                <Search size={18} />
+              </div>
               <input
                 type="text"
                 placeholder="Cari karyawan..."
@@ -260,12 +285,14 @@ const LeaveApprovalPage = () => {
           {loading && <LoadingState message="Memuat pengajuan cuti..." />}
 
           {!loading && paginatedItems.length === 0 && (
-            <div style={{ padding: '5rem 0' }}>
+            <div style={{ padding: "5rem 0" }}>
               <EmptyState
                 title="Belum Ada Pengajuan"
-                message={searchText || activeTab !== "Semua"
-                  ? "Tidak ada pengajuan yang sesuai dengan kriteria Anda."
-                  : "Tidak ada pengajuan cuti yang perlu disetujui."}
+                message={
+                  searchText || activeTab !== "Semua"
+                    ? "Tidak ada pengajuan yang sesuai dengan kriteria Anda."
+                    : "Tidak ada pengajuan cuti yang perlu disetujui."
+                }
                 actionLabel="Segarkan"
                 onAction={() => void loadData()}
               />
@@ -278,93 +305,132 @@ const LeaveApprovalPage = () => {
                 <table className="data-table">
                   <thead>
                     <tr>
-                      <th style={{ width: '250px' }}>Karyawan</th>
+                      <th style={{ width: "250px" }}>Karyawan</th>
                       <th>Tipe Cuti</th>
                       <th>Tanggal</th>
                       <th>Hari</th>
                       <th>Alasan</th>
                       <th className="th-center">Status</th>
-                      {isAdmin && <th className="th-center" style={{ width: '140px' }}>Aksi</th>}
+                      {isAdmin && (
+                        <th className="th-center" style={{ width: "140px" }}>
+                          Aksi
+                        </th>
+                      )}
                     </tr>
                   </thead>
                   <tbody>
-                    {paginatedItems.map((item: any, index) => (
-                      <tr key={String(item.id ?? index)}>
-                        <td>
-                          <div className="cell-name">
-                            <div className="cell-avatar">
-                              {getEmployeeName(item).charAt(0).toUpperCase()}
-                            </div>
-                            <div className="cell-stacked">
-                              <span className="cell-name-text">{getEmployeeName(item)}</span>
-                              <span className="cell-stacked__sub">{item.employee?.employee_code || item.id}</span>
-                            </div>
-                          </div>
-                        </td>
-                        <td>
-                          <span className="badge-soft badge-soft--blue">{getLeaveTypeLabel(item.type)}</span>
-                        </td>
-                        <td>
-                          <div className="cell-stacked">
-                            <span className="cell-stacked__main" style={{ fontSize: '0.85rem' }}>{formatDate(item.start_date)}</span>
-                            <span className="cell-stacked__sub">hingga {formatDate(item.end_date)}</span>
-                          </div>
-                        </td>
-                        <td>
-                          <span style={{ fontWeight: 700, color: '#1e293b' }}>{item.total_days || 1} hari</span>
-                        </td>
-                        <td style={{ maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          {item.reason || "-"}
-                        </td>
-                        <td className="td-center">
-                          <span className={getStatusClass(item.status)}>
-                            {item.status === "approved" ? "Approved" :
-                              item.status === "submitted" || item.status === "pending" ? "Pending" : "Rejected"}
-                          </span>
-                        </td>
-                        {isAdmin && (
-                          <td className="td-center">
-                            <div className="action-btn-group">
-                              {(item.status === 'pending' || item.status === 'submitted') && item.can_act !== false ? (
-                                <>
-                                  <button
-                                    className="action-btn"
-                                    style={{ color: '#10b981' }}
-                                    onClick={() => handleApprove(item.id)}
-                                    disabled={actionLoading === String(item.id)}
-                                    title="Setujui"
-                                  >
-                                    <Check size={16} />
-                                  </button>
-                                  <button
-                                    className="action-btn action-btn-delete"
-                                    onClick={() => setRejectModal({ id: item.id, name: getEmployeeName(item) })}
-                                    disabled={actionLoading === String(item.id)}
-                                    title="Tolak"
-                                  >
-                                    <X size={16} />
-                                  </button>
-                                </>
-                              ) : null}
-                            <button className="action-btn" style={{ color: '#8b5cf6', background: '#f5f3ff' }} onClick={() => setHistoryModal({ module: 'leave', id: item.id })} title="Riwayat Approval"><History size={16} /></button>
+                    {paginatedItems.map((item, index) => {
+                      const empObj = item && typeof item.employee === "object" && item.employee ? (item.employee as Record<string, unknown>) : {};
+                      const empCode = typeof empObj.employee_code === "string" ? empObj.employee_code : String(item.id ?? index);
+                      const itemId = typeof item.id === "string" || typeof item.id === "number" ? item.id : index;
+
+                      return (
+                        <tr key={String(itemId)}>
+                          <td>
+                            <div className="cell-name">
+                              <div className="cell-avatar">
+                                {getEmployeeName(item).charAt(0).toUpperCase()}
+                              </div>
+                              <div className="cell-stacked">
+                                <span className="cell-name-text">{getEmployeeName(item)}</span>
+                                <span className="cell-stacked__sub">{empCode}</span>
+                              </div>
                             </div>
                           </td>
-                        )}
-                      </tr>
-                    ))}
+                          <td>
+                            <span className="badge-soft badge-soft--blue">
+                              {getLeaveTypeLabel(item.type)}
+                            </span>
+                          </td>
+                          <td>
+                            <div className="cell-stacked">
+                              <span className="cell-stacked__main" style={{ fontSize: "0.85rem" }}>
+                                {formatDate(item.start_date)}
+                              </span>
+                              <span className="cell-stacked__sub">hingga {formatDate(item.end_date)}</span>
+                            </div>
+                          </td>
+                          <td>
+                            <span style={{ fontWeight: 700, color: "#1e293b" }}>
+                              {String(item.total_days || 1)} hari
+                            </span>
+                          </td>
+                          <td
+                            style={{
+                              maxWidth: "200px",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {typeof item.reason === "string" ? item.reason : "-"}
+                          </td>
+                          <td className="td-center">
+                            <span className={getStatusClass(item.status)}>
+                              {item.status === "approved"
+                                ? "Approved"
+                                : item.status === "submitted" || item.status === "pending"
+                                  ? "Pending"
+                                  : "Rejected"}
+                            </span>
+                          </td>
+                          {isAdmin && (
+                            <td className="td-center">
+                              <div className="action-btn-group">
+                                {(item.status === "pending" || item.status === "submitted") &&
+                                item.can_act !== false ? (
+                                  <>
+                                    <button
+                                      className="action-btn"
+                                      style={{ color: "#10b981" }}
+                                      onClick={() => handleApprove(itemId)}
+                                      disabled={actionLoading === String(itemId)}
+                                      title="Setujui"
+                                    >
+                                      <Check size={16} />
+                                    </button>
+                                    <button
+                                      className="action-btn action-btn-delete"
+                                      onClick={() =>
+                                        setRejectModal({
+                                          id: String(itemId),
+                                          name: getEmployeeName(item),
+                                        })
+                                      }
+                                      disabled={actionLoading === String(itemId)}
+                                      title="Tolak"
+                                    >
+                                      <X size={16} />
+                                    </button>
+                                  </>
+                                ) : null}
+                                <button
+                                  className="action-btn"
+                                  style={{ color: "#8b5cf6", background: "#f5f3ff" }}
+                                  onClick={() => setHistoryModal({ module: "leave", id: String(itemId) })}
+                                  title="Riwayat Approval"
+                                >
+                                  <History size={16} />
+                                </button>
+                              </div>
+                            </td>
+                          )}
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
 
               {/* Pagination */}
-              <div className="table-pagination">
+                <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan <strong>{paginatedItems.length}</strong> dari <strong>{filteredItems.length}</strong> pengajuan
+                  Menampilkan <strong>{items.length}</strong> dari <strong>{totalItems}</strong> pengajuan
                 </div>
                 <div className="pagination-controls">
                   <button
                     className="pagination-btn"
-                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                     disabled={currentPage === 1}
                   >
                     ‹
@@ -372,7 +438,7 @@ const LeaveApprovalPage = () => {
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                     <button
                       key={page}
-                      className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
+                      className={`pagination-btn ${currentPage === page ? "active" : ""}`}
                       onClick={() => setCurrentPage(page)}
                     >
                       {page}
@@ -380,7 +446,7 @@ const LeaveApprovalPage = () => {
                   ))}
                   <button
                     className="pagination-btn"
-                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
                     disabled={currentPage === totalPages}
                   >
                     ›

@@ -1,47 +1,41 @@
 import { api } from "@/shared/api/httpClient";
+import { extractArrayPayload, extractPayload, parsePaginatedResponse, type PaginationParams } from "@/shared/api/pagination";
 import type { LocationCreatePayload, LocationItem, LocationUpdatePayload } from "../types/location.types";
 
-type UnknownRecord = Record<string, unknown>;
+const isLocationItem = (item: unknown): item is LocationItem =>
+  item !== null && typeof item === "object";
 
-const toRecord = (value: unknown): UnknownRecord =>
-  value && typeof value === "object" ? (value as UnknownRecord) : {};
-
-const extractPayload = (raw: unknown) => {
-  const root = toRecord(raw);
-  return root.data ?? raw;
-};
-
-const extractArrayPayload = (raw: unknown): LocationItem[] => {
-  const payload = extractPayload(raw);
-
-  if (Array.isArray(payload)) {
-    return payload.filter((item): item is LocationItem => !!item && typeof item === "object");
-  }
-
-  const payloadRecord = toRecord(payload);
-  const candidates = [payloadRecord.items, payloadRecord.rows, payloadRecord.data, payloadRecord.results];
-
-  for (const candidate of candidates) {
-    if (Array.isArray(candidate)) {
-      return candidate.filter((item): item is LocationItem => !!item && typeof item === "object");
-    }
-  }
-
-  return [];
+export const getLocationsPage = async (page = 1, perPage = 10, params: PaginationParams = {}) => {
+  const response = await api.get("/locations", { params: { ...params, page, per_page: perPage } });
+  const parsed = parsePaginatedResponse(response.data, isLocationItem);
+  return {
+    items: parsed.items,
+    totalPages: parsed.totalPages,
+    total: parsed.total,
+    currentPage: parsed.currentPage,
+    raw: response.data,
+  };
 };
 
 export const getAllLocations = async () => {
-  const response = await api.get("/locations");
-  return {
-    items: extractArrayPayload(response.data),
-    raw: response.data,
-  };
+  let page = 1;
+  const perPage = 100;
+  const items: LocationItem[] = [];
+
+  while (page <= 50) {
+    const result = await getLocationsPage(page, perPage);
+    items.push(...result.items);
+    if (page >= result.totalPages) break;
+    page += 1;
+  }
+
+  return { items, raw: items };
 };
 
 export const getActiveLocations = async () => {
   const response = await api.get("/attendance/locations");
   return {
-    items: extractArrayPayload(response.data),
+    items: extractArrayPayload(response.data, isLocationItem),
     raw: response.data,
   };
 };

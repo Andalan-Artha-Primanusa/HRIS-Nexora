@@ -150,8 +150,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
 
   // Debug logging
   if (user) {
-    console.log("[Sidebar] User permissions:", user.permissions?.map((p: any) => p.name));
-    console.log("[Sidebar] User roles:", user.roles?.map((r: any) => r.name));
+    console.log("[Sidebar] User permissions:", user.permissions?.map((p) => p.name));
+    console.log("[Sidebar] User roles:", user.roles?.map((r) => r.name));
     console.log("[Sidebar] Filtered menu items count:", filteredItems.length);
   }
 

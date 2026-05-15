@@ -6,6 +6,7 @@ import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDispl
 import { taskService } from '@/features/tasks/api/task.service';
 import { TaskModal } from '@/features/tasks/components/TaskModal';
 import { showToast } from '@/shared/ui/toast';
+import { parsePaginatedResponse } from '@/shared/api/pagination';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/employee/EmployeesPage.css';
@@ -27,28 +28,22 @@ const TaskManagementPage: React.FC = () => {
   const [submittingCompletion, setSubmittingCompletion] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<any>(null);
   const [deleting, setDeleting] = useState(false);
+  const [totalTasks, setTotalTasks] = useState(0);
 
   const fetchData = async () => {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const params: Record<string, string> = {};
+      const params: Record<string, string | number> = { page: currentPage, per_page: pageSize };
       if (searchText) params.search = searchText;
       if (selectedStatus) params.status = selectedStatus;
       if (selectedPriority) params.priority = selectedPriority;
 
       const response = await taskService.getTasks(params);
-      let data: any[] = [];
-      if (response?.data?.data?.data && Array.isArray(response.data.data.data)) {
-        data = response.data.data.data;
-      } else if (response?.data?.data && Array.isArray(response.data.data)) {
-        data = response.data.data;
-      } else if (response?.data && Array.isArray(response.data)) {
-        data = response.data;
-      } else if (Array.isArray(response)) {
-        data = response;
-      }
-      setItems(data);
+      const parsed = parsePaginatedResponse<any>(response.data);
+      setItems(parsed.items);
+      setTotalPages(parsed.totalPages);
+      setTotalTasks(parsed.total);
     } catch (error: any) {
       setErrorMessage(error?.response?.data?.message || 'Gagal memuat data tugas');
     } finally {
@@ -58,7 +53,7 @@ const TaskManagementPage: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [currentPage, pageSize, searchText, selectedStatus, selectedPriority]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -157,16 +152,15 @@ const TaskManagementPage: React.FC = () => {
     });
   }, [filteredItems]);
 
-  const paginatedItems = sortedItems;
-
   const [totalPages, setTotalPages] = useState(1);
+  const paginatedItems = sortedItems;
 
   const summaryCards = useMemo(
     () => [
       {
         label: 'Total Tugas',
         subtitle: 'Seluruh tugas',
-        value: String(items.length),
+        value: String(totalTasks),
         change: 'Data tugas tersimpan',
         tone: 'blue' as const,
         icon: Clock,
@@ -196,7 +190,7 @@ const TaskManagementPage: React.FC = () => {
         icon: AlertCircle,
       },
     ],
-    [items, sortedItems.length, paginatedItems.length],
+    [items, sortedItems.length, paginatedItems.length, totalTasks],
   );
 
   const clearFilters = () => {

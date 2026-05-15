@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BarChart3, ClipboardList, Users, Wallet, TrendingUp, Activity } from 'lucide-react';
+import { BarChart3, ClipboardList, Users, Wallet, TrendingUp, Activity, Clock3, CheckCircle2 } from 'lucide-react';
 import { KpiCards } from '@/features/dashboard/components/KpiCards';
 import { BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card } from '@/shared/ui/Card';
@@ -185,8 +185,13 @@ const formatPeriodLabel = (period: string) => {
 const OverviewPage: React.FC = () => {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
-  const isAdmin = RBACUtils.isAdmin(user) || RBACUtils.isHR(user) || RBACUtils.isManager(user);
-  const canLoadDetailedDashboardData = RBACUtils.isAdmin(user) || RBACUtils.isHR(user);
+  const allowedMenuKeys = useAuthStore((state) => state.allowedMenuKeys);
+  const canViewAdminOverview =
+    RBACUtils.hasPermission(user, "reporting.dashboard") ||
+    allowedMenuKeys.some(
+      (k) => k.startsWith("alat-admin") || k.startsWith("penggajian") || k.startsWith("laporan") || k.startsWith("manajemen-cuti")
+    );
+  const canLoadDetailedDashboardData = canViewAdminOverview;
 
   const [attendanceData, setAttendanceData] = useState<AttendanceTrendPoint[]>([]);
   const [departmentData, setDepartmentData] = useState<DepartmentPoint[]>([]);
@@ -239,12 +244,7 @@ const OverviewPage: React.FC = () => {
   ];
 
   useEffect(() => {
-    if (!isAdmin) {
-      setLoading(false);
-      return;
-    }
-
-    if (!canLoadDetailedDashboardData) {
+    if (!canViewAdminOverview) {
       setLoading(false);
       return;
     }
@@ -254,7 +254,7 @@ const OverviewPage: React.FC = () => {
       setError(null);
 
       try {
-        const canViewPayroll = RBACUtils.isAdmin(user) || RBACUtils.isHR(user) || RBACUtils.isManager(user);
+        const canViewPayroll = allowedMenuKeys.some((k) => k.startsWith("penggajian"));
         const canViewLeaves = RBACUtils.hasPermission(user, 'leave.view');
 
         const promises = [
@@ -273,15 +273,25 @@ const OverviewPage: React.FC = () => {
           promises.push(api.get('/leaves'));
         }
 
-        const [employeesRes, attendanceRes, leavesPendingRes, reimbursementsRes, todayAttendanceRes, payrollRes, allLeavesRes] = await Promise.allSettled(promises);
+        const results = await Promise.allSettled(promises);
+        
+        let cursor = 0;
+        const employeesRes = results[cursor++];
+        const attendanceRes = results[cursor++];
+        const leavesPendingRes = results[cursor++];
+        const reimbursementsRes = results[cursor++];
+        const todayAttendanceRes = results[cursor++];
+        const payrollRes = canViewPayroll ? results[cursor++] : null;
+        const allLeavesRes = canViewLeaves ? results[cursor++] : null;
 
-        const employees = employeesRes.status === 'fulfilled' ? extractArrayPayload(employeesRes.value.data) : [];
-        const attendanceRecords = attendanceRes.status === 'fulfilled' ? extractArrayPayload(attendanceRes.value.data) : [];
-        const pendingLeaveRecords = leavesPendingRes.status === 'fulfilled' ? extractArrayPayload(leavesPendingRes.value.data) : [];
-        const pendingReimbursementRecords = reimbursementsRes.status === 'fulfilled' ? extractArrayPayload(reimbursementsRes.value.data) : [];
-        const payrollRecords = payrollRes?.status === 'fulfilled' ? extractArrayPayload(payrollRes.value.data) : [];
-        const todayAttendancePayload = todayAttendanceRes.status === 'fulfilled' ? extractPayload(todayAttendanceRes.value.data) : {};
-        const allLeaves = allLeavesRes?.status === 'fulfilled' ? extractArrayPayload(allLeavesRes.value.data) : [];
+        const employees = employeesRes && employeesRes.status === 'fulfilled' ? extractArrayPayload(employeesRes.value.data) : [];
+        const attendanceRecords = attendanceRes && attendanceRes.status === 'fulfilled' ? extractArrayPayload(attendanceRes.value.data) : [];
+        const pendingLeaveRecords = leavesPendingRes && leavesPendingRes.status === 'fulfilled' ? extractArrayPayload(leavesPendingRes.value.data) : [];
+        const pendingReimbursementRecords = reimbursementsRes && reimbursementsRes.status === 'fulfilled' ? extractArrayPayload(reimbursementsRes.value.data) : [];
+        const todayAttendancePayload = todayAttendanceRes && todayAttendanceRes.status === 'fulfilled' ? extractPayload(todayAttendanceRes.value.data) : {};
+        
+        const payrollRecords = payrollRes && payrollRes.status === 'fulfilled' ? extractArrayPayload(payrollRes.value.data) : [];
+        const allLeaves = allLeavesRes && allLeavesRes.status === 'fulfilled' ? extractArrayPayload(allLeavesRes.value.data) : [];
 
         setTotalEmployees(employees.length);
         setActiveEmployees(
@@ -308,14 +318,10 @@ const OverviewPage: React.FC = () => {
         const attendanceAggregate = dayOrder.map((day) => ({ day, present: 0, absent: 0 }));
         attendanceRecords.forEach((record) => {
           const dayLabel = getWeekdayLabel(record);
-          if (!dayLabel) {
-            return;
-          }
+          if (!dayLabel) return;
 
           const target = attendanceAggregate.find((item) => item.day === dayLabel);
-          if (!target) {
-            return;
-          }
+          if (!target) return;
 
           if (isPresentRecord(record)) {
             target.present += 1;
@@ -372,7 +378,8 @@ const OverviewPage: React.FC = () => {
     };
 
     void loadDashboardData();
-  }, [isAdmin, canLoadDetailedDashboardData, user]);
+  }, [canViewAdminOverview, user, allowedMenuKeys]);
+
 
   return (
     <div className="crud-page">
@@ -381,12 +388,22 @@ const OverviewPage: React.FC = () => {
           <div className="hero-content">
             <div className="hero-badge">
               <Activity size={16} />
-              <span>Pusat Dashboard</span>
+              <span>{canViewAdminOverview ? 'Pusat Dashboard Admin' : 'Pusat Layanan Mandiri'}</span>
             </div>
-            <h1 className="hero-title">Ringkasan Dashboard</h1>
-            <p className="hero-subtitle">Selamat datang kembali, berikut informasi organisasi Anda hari ini.</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <img 
+                src={user?.profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'U')}&color=7F9CF5&background=EBF4FF`} 
+                alt="" 
+                className="cell-avatar" 
+                style={{ width: '48px', height: '48px', border: '2px solid rgba(255,255,255,0.2)' }}
+              />
+              <div>
+                <h1 className="hero-title">Halo, {user?.name?.split(' ')[0] || 'User'}!</h1>
+                <p className="hero-subtitle">Berikut ringkasan informasi Anda hari ini.</p>
+              </div>
+            </div>
           </div>
-          {isAdmin && (
+          {canViewAdminOverview && (
             <div className="hero-actions">
               <button className="btn-outline" onClick={() => navigate('/admin/analytics/people')}>
                 Lihat Analitik
@@ -405,9 +422,132 @@ const OverviewPage: React.FC = () => {
         </Card>
       )}
 
-      {isAdmin && <KpiCards />}
+      {canViewAdminOverview && <KpiCards />}
 
-      {isAdmin && (
+      {/* Non-Admin / Employee & Manager Sections */}
+      {!canViewAdminOverview && (
+        <div className="summary-grid" style={{ marginTop: '2rem' }}>
+          {/* Personal Leave Balance */}
+          <Card className="metric-card" onClick={() => navigate('/leave/balance')} style={{ cursor: 'pointer' }}>
+            <div className="metric-header">
+              <div>
+                <span className="metric-label">Saldo Cuti</span>
+                <p className="metric-subtitle">Cuti tahunan tersedia</p>
+              </div>
+              <span className="metric-icon metric-icon--blue">
+                <Wallet size={24} />
+              </span>
+            </div>
+            <div className="metric-value">12 Hari</div>
+            <div className="metric-change">
+              <span style={{ color: '#2563eb' }}>Lihat rincian saldo</span>
+            </div>
+          </Card>
+
+          {/* Pending Requests */}
+          <Card className="metric-card" onClick={() => navigate('/leave/history')} style={{ cursor: 'pointer' }}>
+            <div className="metric-header">
+              <div>
+                <span className="metric-label">Pengajuan Pending</span>
+                <p className="metric-subtitle">Menunggu persetujuan</p>
+              </div>
+              <span className="metric-icon metric-icon--orange">
+                <Clock3 size={24} />
+              </span>
+            </div>
+            <div className="metric-value">{pendingLeaves + pendingReimbursements}</div>
+            <div className="metric-change">
+              <span>Cuti & Reimbursement</span>
+            </div>
+          </Card>
+
+          {/* My Tasks */}
+          <Card className="metric-card" onClick={() => navigate('/tasks')} style={{ cursor: 'pointer' }}>
+            <div className="metric-header">
+              <div>
+                <span className="metric-label">Tugas Saya</span>
+                <p className="metric-subtitle">Deadline terdekat</p>
+              </div>
+              <span className="metric-icon metric-icon--purple">
+                <ClipboardList size={24} />
+              </span>
+            </div>
+            <div className="metric-value">3</div>
+            <div className="metric-change">
+              <span style={{ color: '#8b5cf6' }}>Segera selesaikan</span>
+            </div>
+          </Card>
+
+          {/* Presence Today */}
+          <Card className="metric-card">
+            <div className="metric-header">
+              <div>
+                <span className="metric-label">Status Kehadiran</span>
+                <p className="metric-subtitle">Hari ini</p>
+              </div>
+              <span className="metric-icon metric-icon--green">
+                <CheckCircle2 size={24} />
+              </span>
+            </div>
+            <div className="metric-value">Hadir</div>
+            <div className="metric-change">
+              <span>Shift: 08:00 - 17:00</span>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* Team Insight for Managers (If applicable) */}
+      {!canViewAdminOverview && RBACUtils.hasPermission(user, ['team.view']) && (
+        <>
+          <Card className="analytics-title-card" style={{ marginTop: '2rem' }}>
+            <div className="analytics-title-inner">
+              <div className="analytics-icon">
+                <Users size={24} />
+              </div>
+              <div>
+                <h2 className="analytics-title">Insight Tim Saya</h2>
+                <p className="analytics-subtitle">Pantau aktivitas anggota tim Anda</p>
+              </div>
+            </div>
+          </Card>
+          
+          <div className="summary-grid">
+             <Card className="metric-card">
+                <div className="metric-header">
+                  <div>
+                    <span className="metric-label">Kehadiran Tim</span>
+                    <p className="metric-subtitle">Anggota hadir hari ini</p>
+                  </div>
+                  <span className="metric-icon metric-icon--blue">
+                    <Users size={24} />
+                  </span>
+                </div>
+                <div className="metric-value">8 / 10</div>
+                <div className="metric-change">
+                  <span>2 Anggota absen</span>
+                </div>
+             </Card>
+             <Card className="metric-card" onClick={() => navigate('/leave/approvals')} style={{ cursor: 'pointer' }}>
+                <div className="metric-header">
+                  <div>
+                    <span className="metric-label">Persetujuan Tim</span>
+                    <p className="metric-subtitle">Perlu tindakan Anda</p>
+                  </div>
+                  <span className="metric-icon metric-icon--orange">
+                    <Activity size={24} />
+                  </span>
+                </div>
+                <div className="metric-value">5</div>
+                <div className="metric-change">
+                  <span style={{ color: '#f59e0b' }}>Tinjau pengajuan</span>
+                </div>
+             </Card>
+          </div>
+        </>
+      )}
+
+      {canViewAdminOverview && (
         <>
           <div className="summary-grid">
             {summaryCards.map((card) => {

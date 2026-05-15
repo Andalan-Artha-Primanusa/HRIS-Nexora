@@ -344,11 +344,21 @@ const AssetAssignmentsPage: React.FC = () => {
                             </div>
                           </td>
                           <td>
-                            <div className="cell-stacked">
-                              <span className="cell-stacked__main">{employeeName}</span>
-                              <span className="cell-stacked__sub">
-                                {assignment.employee?.user?.email || ''}
-                              </span>
+                            <div className="cell-name">
+                              <img
+                                src={assignment.employee?.user?.profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(employeeName || 'U')}&color=7F9CF5&background=EBF4FF`}
+                                alt=""
+                                className="cell-avatar"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(employeeName || 'U')}&color=7F9CF5&background=EBF4FF`;
+                                }}
+                              />
+                              <div className="cell-stacked">
+                                <span className="cell-name-text">{employeeName}</span>
+                                <span className="cell-stacked__sub">
+                                  {assignment.employee?.department?.name || 'No Dept'} • {assignment.employee?.position?.name || 'No Pos'}
+                                </span>
+                              </div>
                             </div>
                           </td>
                           <td>

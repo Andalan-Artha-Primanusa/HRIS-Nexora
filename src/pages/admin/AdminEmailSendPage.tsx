@@ -5,7 +5,8 @@ import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { showToast } from '@/shared/ui/toast';
-import { ROLES } from "@/shared/types/rbac.types";
+import { RBACUtils } from "@/shared/hooks/rbac";
+import type { AuthUser } from "@/shared/types/rbac.types";
 import { Mail, Send, Shield, Users, FileText } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
 import "./AdminCrudPages.css";
@@ -15,36 +16,33 @@ import {
 } from "@/features/admin/api/admin-batch1.service";
 import { getAllEmployees } from "@/features/employee/api/employee.service";
 
-const getRoleNames = (user: ReturnType<typeof useAuthStore.getState>["user"]) => (user?.roles ?? []).map((role) => role.name);
-
-const hasAdminAccess = (user: ReturnType<typeof useAuthStore.getState>["user"]) => {
-  const roleNames = getRoleNames(user);
-  return roleNames.includes(ROLES.ADMIN) || roleNames.includes(ROLES.SUPER_ADMIN);
+type EmailTemplate = {
+  key?: string;
+  name?: string;
+  subject?: string;
+  html_body?: string;
+  is_active?: boolean;
+  placeholders?: string[];
 };
+
+type EmployeeRecipient = {
+  id?: number | string;
+  user_id?: number | string;
+  email?: string;
+  user?: {
+    name?: string;
+    email?: string;
+  };
+};
+
+const canManageEmail = (user: AuthUser | null) => RBACUtils.hasPermission(user, "admin.email.manage");
 
 const AdminEmailSendPage = () => {
   const user = useAuthStore((state) => state.user);
+  const hasEmailAccess = canManageEmail(user);
 
-  if (!hasAdminAccess(user)) {
-    return (
-      <div className="crud-page">
-        <Card className="hero-card">
-          <div className="hero-card-inner">
-            <div className="hero-content">
-              <div className="hero-badge">
-                <Shield size={16} />
-                <span>Admin Center</span>
-              </div>
-              <h1 className="hero-title">Akses Ditolak</h1>
-            </div>
-          </div>
-        </Card>
-      </div>
-    );
-  }
-
-  const [templates, setTemplates] = useState<any[]>([]);
-  const [employees, setEmployees] = useState<any[]>([]);
+  const [templates, setTemplates] = useState<EmailTemplate[]>([]);
+  const [employees, setEmployees] = useState<EmployeeRecipient[]>([]);
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
 
@@ -65,7 +63,7 @@ const AdminEmailSendPage = () => {
       ]);
       setTemplates(Array.isArray(templatesResult) ? templatesResult : []);
       setEmployees(empResult);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(error);
     } finally {
       setLoading(false);
@@ -73,8 +71,27 @@ const AdminEmailSendPage = () => {
   };
 
   useEffect(() => {
+    if (!hasEmailAccess) return;
     void loadData();
-  }, []);
+  }, [hasEmailAccess]);
+
+  if (!hasEmailAccess) {
+    return (
+      <div className="crud-page">
+        <Card className="hero-card">
+          <div className="hero-card-inner">
+            <div className="hero-content">
+              <div className="hero-badge">
+                <Shield size={16} />
+                <span>Admin Center</span>
+              </div>
+              <h1 className="hero-title">Akses Ditolak</h1>
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   // Handle Template Change
   const handleTemplateChange = (templateKey: string) => {
@@ -120,8 +137,8 @@ const AdminEmailSendPage = () => {
       setSelectedTemplate("");
       setSubject("");
       setHtmlPreview("");
-    } catch (error) {
-      showToast(getErrorMessage(error as any), "error");
+    } catch (error: unknown) {
+      showToast(getErrorMessage(error), "error");
     } finally {
       setSending(false);
     }

@@ -5,40 +5,42 @@ import { useAuthStore } from '@/app/store/auth.store';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useRefreshUser } from '@/features/auth/hooks/useRefreshUser';
 import { api } from '@/shared/api/httpClient';
+import type { AuthUser } from '@/shared/types/rbac.types';
 import './Header.css';
 
 interface HeaderProps {
   toggleSidebar: () => void;
 }
 
-const getDisplayName = (user: any) => {
+type NotificationItem = {
+  id: number;
+  title?: string;
+  message?: string;
+  data?: {
+    title?: string;
+    message?: string;
+  };
+  read_at?: string | null;
+  created_at?: string;
+};
+
+const getDisplayName = (user: AuthUser | null) => {
   return (
     user?.name ||
-    user?.full_name ||
-    user?.fullname ||
-    user?.username ||
     user?.email ||
     "User"
   );
 };
 
-const getDisplayRole = (user: any) => {
-  // Check for normalized roles array first
+const getDisplayRole = (user: AuthUser | null) => {
   if (Array.isArray(user?.roles) && user.roles.length > 0) {
     const primaryRole = user.roles[0];
-    if (typeof primaryRole === "object" && primaryRole?.name) {
+    if (primaryRole?.name) {
       return primaryRole.name === "employee" ? "Employee" : primaryRole.name;
     }
   }
 
-  const role =
-    user?.role?.name ||
-    user?.role_name ||
-    user?.role ||
-    user?.position?.name ||
-    user?.position;
-
-  return typeof role === "string" && role.trim().length > 0 ? role : "Employee";
+  return "Employee";
 };
 
 const getInitials = (name: string) => {
@@ -65,7 +67,7 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
   const initials = getInitials(displayName);
 
   // Notification State
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [openNotifications, setOpenNotifications] = useState(false);
 
@@ -79,8 +81,9 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
         ? responseData 
         : (responseData && Array.isArray(responseData.data) ? responseData.data : []);
         
-      setNotifications(data);
-      setUnreadCount(data.filter((n: any) => !n.read_at).length);
+      const notificationsData = data as NotificationItem[];
+      setNotifications(notificationsData);
+      setUnreadCount(notificationsData.filter((n) => !n.read_at).length);
     } catch (error) {
       console.error("Failed to fetch notifications:", error);
       setNotifications([]);

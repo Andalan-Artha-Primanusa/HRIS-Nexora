@@ -7,6 +7,7 @@ import { trainingService } from '@/features/training/api/training.service';
 import { RBACUtils } from '@/shared/hooks/rbac';
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 import { showToast } from "@/shared/ui/toast";
+import { parsePaginatedResponse } from "@/shared/api/pagination";
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 
@@ -28,12 +29,13 @@ const MyTrainingsPage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [tab, setTab] = useState<'Semua' | 'Tersedia' | 'Berlangsung' | 'Selesai'>('Semua');
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [resultModal, setResultModal] = useState<any>(null);
   const [historyModal, setHistoryModal] = useState<{ module: string; id: number | string } | null>(null);
   const pageSize = 10;
 
-  const isEmployee = RBACUtils.hasRole(user, 'employee');
-  const isAdmin = RBACUtils.isAdmin(user) || RBACUtils.isHR(user) || RBACUtils.isSuperAdmin(user) || RBACUtils.isManager(user);
+  const isAdmin = RBACUtils.hasPermission(user, 'training.view');
+  const isEmployee = !isAdmin;
 
   const fetchData = async () => {
     setLoading(true);
@@ -41,20 +43,24 @@ const MyTrainingsPage: React.FC = () => {
     try {
       if (isEmployee) {
         const [myRes, availRes] = await Promise.all([
-          trainingService.getMyTrainings(),
-          trainingService.getAvailableTrainings(),
+          trainingService.getMyTrainings(page, pageSize),
+          trainingService.getAvailableTrainings({ page, per_page: pageSize }),
         ]);
-        setTrainings(Array.isArray(myRes) ? myRes : Array.isArray(myRes?.data) ? myRes.data : []);
-        setAvailable(Array.isArray(availRes) ? availRes : Array.isArray(availRes?.data?.data) ? availRes.data.data : Array.isArray(availRes?.data) ? availRes.data : []);
+        const myParsed = parsePaginatedResponse<any>(myRes);
+        const availableParsed = parsePaginatedResponse<any>(availRes);
+        setTrainings(myParsed.items);
+        setAvailable(availableParsed.items);
+        setTotalPages(tab === 'Tersedia' ? availableParsed.totalPages : myParsed.totalPages);
       } else if (isAdmin) {
         const [progRes, enrollRes] = await Promise.all([
-          trainingService.getPrograms(),
-          trainingService.getEnrollments(),
+          trainingService.getPrograms({ page, per_page: pageSize }),
+          trainingService.getEnrollments(page, pageSize),
         ]);
-        const programs = Array.isArray(progRes) ? progRes : Array.isArray(progRes?.data) ? progRes.data : Array.isArray(progRes?.data?.data) ? progRes.data.data : [];
-        const enrollments = Array.isArray(enrollRes) ? enrollRes : Array.isArray(enrollRes?.data) ? enrollRes.data : Array.isArray(enrollRes?.data?.data) ? enrollRes.data.data : [];
-        setTrainings(enrollments);
-        setAvailable(programs);
+        const programs = parsePaginatedResponse<any>(progRes);
+        const enrollments = parsePaginatedResponse<any>(enrollRes);
+        setTrainings(enrollments.items);
+        setAvailable(programs.items);
+        setTotalPages(tab === 'Tersedia' ? programs.totalPages : enrollments.totalPages);
       } else {
         setErrorMessage('Akses terbatas');
       }
@@ -66,7 +72,7 @@ const MyTrainingsPage: React.FC = () => {
     }
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { fetchData(); }, [isAdmin, isEmployee, page, pageSize, tab]);
 
   const handleEnroll = async (id: number) => {
     try {
@@ -256,10 +262,10 @@ const MyTrainingsPage: React.FC = () => {
                 <div className="pagination-info">Menampilkan <strong>{paginated.length}</strong> dari <strong>{sorted.length}</strong> pelatihan</div>
                 <div className="pagination-controls">
                   <button className="pagination-btn" onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1}>‹</button>
-                  {Array.from({ length: Math.ceil(sorted.length / pageSize) }, (_, i) => i + 1).map((p) => (
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
                     <button key={p} className={`pagination-btn ${page === p ? 'active' : ''}`} onClick={() => setPage(p)}>{p}</button>
                   ))}
-                  <button className="pagination-btn" onClick={() => setPage(Math.min(Math.ceil(sorted.length / pageSize), page + 1))} disabled={page === Math.ceil(sorted.length / pageSize)}>›</button>
+                  <button className="pagination-btn" onClick={() => setPage(Math.min(totalPages, page + 1))} disabled={page === totalPages}>›</button>
                 </div>
               </div>
             </>

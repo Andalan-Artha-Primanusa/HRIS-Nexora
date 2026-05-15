@@ -6,6 +6,7 @@ import { showToast } from "@/shared/ui/toast";
 import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { BarChart3, CheckCircle2, Receipt, Wallet, Download, Printer, RefreshCw, Search, Eye } from "lucide-react";
 import { getMyPayroll, getMyPayrollSlip, exportMyPayrollCsv, exportMyPayrollPdf } from "@/features/ess/api/ess.service";
+import { useAuthStore } from "@/app/store/auth.store";
 import type { GenericApiItem } from "@/features/ess/types/ess.types";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -13,6 +14,7 @@ import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 
 const MyPayrollPage = () => {
+  const user = useAuthStore((state) => state.user);
   const [items, setItems] = useState<GenericApiItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -519,54 +521,82 @@ const MyPayrollPage = () => {
           <div className="digital-slip" style={{ maxWidth: '800px', margin: '0 auto' }}>
             {/* Header - Blue & White Theme */}
             <div className="digital-slip-header" style={{ 
-              background: 'linear-gradient(135deg, #2563eb, #3b82f6)', 
+              background: 'linear-gradient(135deg, #1e3a8a, #2563eb)', 
               color: 'white', 
-              padding: '2rem', 
+              padding: '2.5rem 2rem', 
               borderRadius: '16px 16px 0 0',
               display: 'flex', 
               justifyContent: 'space-between', 
-              alignItems: 'center' 
+              alignItems: 'center',
+              position: 'relative',
+              overflow: 'hidden'
             }}>
-              <div className="digital-slip-brand" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div style={{ position: 'absolute', right: '-20px', top: '-20px', opacity: 0.1 }}>
+                <Receipt size={150} />
+              </div>
+              <div className="digital-slip-brand" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', position: 'relative', zIndex: 1 }}>
                 <div className="slip-logo" style={{ 
-                  background: 'rgba(255,255,255,0.2)', 
-                  padding: '12px 20px', 
-                  borderRadius: '12px',
-                  fontSize: '1.5rem',
-                  fontWeight: 'bold'
-                }}>HR</div>
+                  background: 'white', 
+                  color: '#1e3a8a',
+                  width: '64px',
+                  height: '64px',
+                  borderRadius: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '1.75rem',
+                  fontWeight: '900',
+                  boxShadow: '0 8px 16px rgba(0,0,0,0.1)'
+                }}>AP</div>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '1.5rem' }}>Slip Gaji Digital</h3>
-                  <p style={{ margin: '4px 0 0', opacity: 0.9 }}>Periode: {selectedSlip.period}</p>
+                  <h3 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 800, letterSpacing: '-0.5px' }}>Slip Gaji Digital</h3>
+                  <p style={{ margin: '4px 0 0', opacity: 0.9, fontSize: '1rem' }}>Periode: {selectedSlip.period}</p>
                 </div>
               </div>
-              <div className="digital-slip-status">
+              <div className="digital-slip-status" style={{ position: 'relative', zIndex: 1 }}>
                 <span className={`status-badge-${String(selectedSlip.status || 'draft').toLowerCase()}`} style={{
-                  background: selectedSlip.status === 'paid' ? '#10b981' : selectedSlip.status === 'approved' ? '#3b82f6' : '#f59e0b',
+                  background: 'rgba(255,255,255,0.2)',
+                  backdropFilter: 'blur(8px)',
                   color: 'white',
-                  padding: '8px 16px',
-                  borderRadius: '20px',
-                  fontWeight: 'bold',
-                  fontSize: '0.85rem'
+                  padding: '10px 20px',
+                  borderRadius: '12px',
+                  fontWeight: '600',
+                  fontSize: '0.9rem',
+                  border: '1px solid rgba(255,255,255,0.3)'
                 }}>
                   {String(selectedSlip.status || 'DRAFT').toUpperCase()}
                 </span>
               </div>
             </div>
 
-            {/* Employee Info */}
+            {/* Employee Info with Avatar */}
             {selectedSlip.employee && (
               <div className="slip-employee-info" style={{ 
                 margin: '1.5rem', 
                 padding: '1.5rem', 
-                background: '#eff6ff', 
-                borderRadius: '12px',
-                border: '1px solid #bfdbfe'
+                background: 'white', 
+                borderRadius: '16px',
+                border: '1px solid #e2e8f0',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1.5rem',
+                boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
               }}>
-                <p style={{ margin: '0 0 4px' }}><strong style={{ fontSize: '1.1rem' }}>{selectedSlip.employee.name}</strong></p>
-                <p style={{ margin: 0, fontSize: '0.875rem', color: '#64748b' }}>
-                  {selectedSlip.employee.employee_code} - {selectedSlip.employee.position} - {selectedSlip.employee.department}
-                </p>
+                <img 
+                  src={user?.profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedSlip.employee.name || 'U')}&color=7F9CF5&background=EBF4FF`}
+                  alt=""
+                  style={{ width: '64px', height: '64px', borderRadius: '14px', objectFit: 'cover' }}
+                />
+                <div style={{ flex: 1 }}>
+                  <h4 style={{ margin: '0 0 4px', fontSize: '1.25rem', color: '#1e293b', fontWeight: 700 }}>{selectedSlip.employee.name}</h4>
+                  <div style={{ display: 'flex', gap: '12px', fontSize: '0.875rem', color: '#64748b', flexWrap: 'wrap' }}>
+                    <span>ID: {selectedSlip.employee.employee_code}</span>
+                    <span>•</span>
+                    <span>{selectedSlip.employee.position}</span>
+                    <span>•</span>
+                    <span>{selectedSlip.employee.department}</span>
+                  </div>
+                </div>
               </div>
             )}
 

@@ -120,6 +120,7 @@ const MyKpiPage = () => {
   const [itemDrafts, setItemDrafts] = useState<KpiPeriodDraftMap>({});
   const [savingItemId, setSavingItemId] = useState<number | null>(null);
   const [submittingItemId, setSubmittingItemId] = useState<number | null>(null);
+  const [totalPages, setTotalPages] = useState(1);
   const pageSize = 10;
 
   const loadData = async () => {
@@ -137,6 +138,7 @@ const MyKpiPage = () => {
       });
 
       setPeriods(mappedPeriods);
+      setTotalPages(response.totalPages);
       return mappedPeriods;
     } catch (error) {
       console.error("KPI Period Fetch Error:", error);
@@ -149,7 +151,7 @@ const MyKpiPage = () => {
 
   useEffect(() => {
     void loadData();
-  }, []);
+  }, [currentPage]);
 
   useEffect(() => {
     if (!showDetail || !selectedPeriod) {
@@ -194,8 +196,6 @@ const MyKpiPage = () => {
     () => filteredPeriods,
     [filteredPeriods, currentPage, pageSize]
   );
-  const [totalPages, setTotalPages] = useState(1);
-
   const stats = useMemo(() => ({
     total: periods.length,
     draft: periods.filter((period) => normalizeStatus(period.status) === "draft").length,

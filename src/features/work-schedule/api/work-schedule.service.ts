@@ -13,19 +13,29 @@ import type {
 function extractListFromResponse(response: any): WorkScheduleItem[] {
   const data = response?.data;
   if (!data) return [];
+  
+  // Handle Laravel Paginator (data.data)
+  if (data.data && Array.isArray(data.data)) return data.data;
+  
   if (Array.isArray(data)) return data;
   if (data.items && Array.isArray(data.items)) return data.items;
   return [];
 }
 
 /**
- * Get all work schedules
+ * Get all work schedules with pagination support
  */
-export async function getAllWorkSchedules(): Promise<{ items: WorkScheduleItem[] }> {
+export async function getAllWorkSchedules(page: number = 1, perPage: number = 10): Promise<{ items: WorkScheduleItem[], total: number }> {
   try {
-    const response = await api.get<WorkScheduleListResponse>("/work-schedules");
+    const response = await api.get<WorkScheduleListResponse>("/work-schedules", {
+      params: { page, per_page: perPage }
+    });
+    
+    const rootData = response.data?.data as any;
     const items = extractListFromResponse(response.data);
-    return { items };
+    const total = rootData?.total ?? items.length;
+    
+    return { items, total };
   } catch (error: any) {
     console.error("Failed to fetch work schedules:", error);
     throw new Error(error.response?.data?.message || "Gagal memuat jadwal kerja");

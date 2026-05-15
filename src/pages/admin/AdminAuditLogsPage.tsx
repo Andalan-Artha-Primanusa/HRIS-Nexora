@@ -14,11 +14,9 @@ import "@/pages/dashboard/overview/OverviewPage.css";
 import "@/pages/payroll/PayrollShared.css";
 import "./AdminCrudPages.css";
 
-const canAccessPage = (user: any) => RBACUtils.isAdmin(user);
-
 const AdminAuditLogsPage = () => {
   const user = useAuthStore((state) => state.user);
-  const canAccess = canAccessPage(user);
+  const canAccess = RBACUtils.hasPermission(user, ["audit.logs.view", "admin.audit.view"]);
   const [logs, setLogs] = useState<AuditLogItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -29,14 +27,23 @@ const AdminAuditLogsPage = () => {
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalLogs, setTotalLogs] = useState(0);
 
   const loadLogs = async () => {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const responseData = await getAuditLogs();
+      const params: Record<string, string | number> = {
+        page: currentPage,
+        per_page: pageSize,
+      };
+      if (searchText.trim()) params.search = searchText.trim();
+      const responseData = await getAuditLogs(params);
       const logsArray = responseData?.items || [];
       setLogs(Array.isArray(logsArray) ? logsArray : []);
+      setTotalPages(responseData.totalPages ?? 1);
+      setTotalLogs(responseData.total ?? logsArray.length);
     } catch (error: unknown) {
       setErrorMessage(getErrorMessage(error as never));
     } finally {
@@ -46,9 +53,9 @@ const AdminAuditLogsPage = () => {
 
   useEffect(() => {
     void loadLogs();
-  }, []);
+  }, [currentPage, pageSize, searchText]);
 
-  // Filter & Sort & Paginate
+  // Backend handles pagination; local sort only orders the loaded page.
   const filteredLogs = useMemo(() => {
     if (!searchText) return logs;
     const q = searchText.toLowerCase();
@@ -56,7 +63,7 @@ const AdminAuditLogsPage = () => {
       const s = String;
       return (
         s(log.action)?.toLowerCase().includes(q) ||
-        s((log as any).user?.name || log.user_name)?.toLowerCase().includes(q) ||
+        s((log as AuditLogItem & { user?: { name?: string } }).user?.name || log.user_name)?.toLowerCase().includes(q) ||
         s(log.module)?.toLowerCase().includes(q) ||
         s(log.ip_address)?.includes(q)
       );
@@ -73,8 +80,6 @@ const AdminAuditLogsPage = () => {
 
   const paginatedLogs = sortedLogs;
 
-  const [totalPages, setTotalPages] = useState(1);
-
   const clearFilters = () => {
     setSearchText('');
     setCurrentPage(1);
@@ -88,7 +93,7 @@ const AdminAuditLogsPage = () => {
     () => [
       {
         label: "Total Logs",
-        value: String(logs.length),
+        value: String(totalLogs),
         subtitle: "Seluruh activity log",
         icon: ClipboardList,
         tone: "blue" as const,
@@ -111,7 +116,7 @@ const AdminAuditLogsPage = () => {
         change: "Modify operations",
       },
     ],
-    [logs, filteredLogs.length]
+    [logs, filteredLogs.length, totalLogs]
   );
 
   if (!canAccess) {
@@ -283,9 +288,14 @@ const AdminAuditLogsPage = () => {
                           <td><span className="cell-id">{String(logId)}</span></td>
                           <td>
                             <div className="cell-name">
-                              <div className="cell-avatar">
-                                {(eventName || 'E').charAt(0).toUpperCase()}
-                              </div>
+                              <img
+                                src={(log as any).causer?.profile?.avatar_url || (log as any).user?.profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(userName || 'U')}&color=7F9CF5&background=EBF4FF`}
+                                alt=""
+                                className="cell-avatar"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName || 'U')}&color=7F9CF5&background=EBF4FF`;
+                                }}
+                              />
                               <span className="cell-name-text">{eventName}</span>
                             </div>
                           </td>

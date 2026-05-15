@@ -3,6 +3,7 @@ import { lazy } from "react";
 const NotFoundPage = lazy(() => import("../../pages/error/NotFoundPage"));
 import { getRoleBasedDashboardPathFromStorage } from "@/features/auth/utils/roleRedirect";
 import { ProtectedRoute } from "./ProtectedRoute";
+import { MenuRouteGuard } from "./MenuRouteGuard";
 import { useAuthSession } from "./useAuthSession";
 import LoginPage from "../../pages/auth/login/LoginPage";
 import GoogleCallbackPage from "../../pages/auth/login/GoogleCallbackPage";
@@ -618,7 +619,11 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <LocationsPage />,
+            element: (
+              <MenuRouteGuard menuKey="alat-admin.master.lokasi">
+                <LocationsPage />
+              </MenuRouteGuard>
+            ),
           },
         ],
       },
@@ -628,7 +633,11 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <CreateLocationPage />,
+            element: (
+              <MenuRouteGuard menuKey="alat-admin.master.lokasi">
+                <CreateLocationPage />
+              </MenuRouteGuard>
+            ),
           },
         ],
       },
@@ -638,7 +647,11 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <EditLocationPage />,
+            element: (
+              <MenuRouteGuard menuKey="alat-admin.master.lokasi">
+                <EditLocationPage />
+              </MenuRouteGuard>
+            ),
           },
         ],
       },
@@ -648,7 +661,11 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <WorkSchedulesPage />,
+            element: (
+              <MenuRouteGuard menuKey="alat-admin.master.jadwal-kerja">
+                <WorkSchedulesPage />
+              </MenuRouteGuard>
+            ),
           },
         ],
       },
@@ -658,7 +675,11 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <WorkScheduleCreatePage />,
+            element: (
+              <MenuRouteGuard menuKey="alat-admin.master.jadwal-kerja">
+                <WorkScheduleCreatePage />
+              </MenuRouteGuard>
+            ),
           },
         ],
       },
@@ -668,7 +689,11 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <WorkScheduleEditPage />,
+            element: (
+              <MenuRouteGuard menuKey="alat-admin.master.jadwal-kerja">
+                <WorkScheduleEditPage />
+              </MenuRouteGuard>
+            ),
           },
         ],
       },
@@ -676,26 +701,131 @@ export const router = createBrowserRouter([
         path: "/admin",
         element: <DashboardLayout />,
         children: [
-          { path: "users", element: <AdminUsersPage /> },
-          { path: "users/assign-roles", element: <AdminUserAssignRolesPage /> },
-          { path: "roles", element: <AdminRolesPage /> },
-          { path: "roles/create", element: <AdminRoleFormPage /> },
-          { path: "roles/edit/:id", element: <AdminRoleFormPage /> },
-          { path: "roles/assign-permissions", element: <AdminRoleAssignPermissionsPage /> },
-          { path: "permissions", element: <AdminPermissionsPage /> },
-          { path: "menu-permissions", element: <MenuPermissionsPage /> },
-          { path: "notifications", element: <AdminNotificationsPage /> },
-          { path: "notifications/email-send", element: <AdminEmailSendPage /> },
-          { path: "notifications/email-logs", element: <AdminEmailNotificationsPage /> },
-          { path: "audit-logs", element: <AdminAuditLogsPage /> },
-          { path: "import", element: <AdminImportPage /> },
-          { path: "biometric-devices", element: <AdminBiometricDevicesPage /> },
+          {
+            path: "users",
+            element: (
+              <MenuRouteGuard menuKey="alat-admin.manajemen-akses.pengguna">
+                <AdminUsersPage />
+              </MenuRouteGuard>
+            ),
+          },
+          {
+            path: "users/assign-roles",
+            element: (
+              <MenuRouteGuard menuKey="alat-admin.manajemen-akses.pengguna">
+                <AdminUserAssignRolesPage />
+              </MenuRouteGuard>
+            ),
+          },
+          {
+            path: "roles",
+            element: (
+              <MenuRouteGuard menuKey="alat-admin.manajemen-akses.peran">
+                <AdminRolesPage />
+              </MenuRouteGuard>
+            ),
+          },
+          {
+            path: "roles/create",
+            element: (
+              <MenuRouteGuard menuKey="alat-admin.manajemen-akses.peran">
+                <AdminRoleFormPage />
+              </MenuRouteGuard>
+            ),
+          },
+          {
+            path: "roles/edit/:id",
+            element: (
+              <MenuRouteGuard menuKey="alat-admin.manajemen-akses.peran">
+                <AdminRoleFormPage />
+              </MenuRouteGuard>
+            ),
+          },
+          {
+            path: "roles/assign-permissions",
+            element: (
+              <MenuRouteGuard menuKey="alat-admin.manajemen-akses.peran">
+                <AdminRoleAssignPermissionsPage />
+              </MenuRouteGuard>
+            ),
+          },
+          {
+            path: "permissions",
+            element: (
+              <MenuRouteGuard menuKey="alat-admin.manajemen-akses.izin">
+                <AdminPermissionsPage />
+              </MenuRouteGuard>
+            ),
+          },
+          {
+            path: "menu-permissions",
+            element: (
+              <MenuRouteGuard menuKey="alat-admin.manajemen-akses.menu">
+                <MenuPermissionsPage />
+              </MenuRouteGuard>
+            ),
+          },
+          {
+            path: "notifications",
+            element: (
+              <MenuRouteGuard menuKey="alat-admin.notifikasi.admin">
+                <AdminNotificationsPage />
+              </MenuRouteGuard>
+            ),
+          },
+          {
+            path: "notifications/email-send",
+            element: (
+              <MenuRouteGuard menuKey="alat-admin.notifikasi.kirim-email">
+                <AdminEmailSendPage />
+              </MenuRouteGuard>
+            ),
+          },
+          {
+            path: "notifications/email-logs",
+            element: (
+              <MenuRouteGuard menuKey="alat-admin.notifikasi.log-email">
+                <AdminEmailNotificationsPage />
+              </MenuRouteGuard>
+            ),
+          },
+          {
+            path: "audit-logs",
+            element: (
+              <MenuRouteGuard menuKey="alat-admin.sistem.log-audit">
+                <AdminAuditLogsPage />
+              </MenuRouteGuard>
+            ),
+          },
+          {
+            path: "import",
+            element: (
+              <MenuRouteGuard menuKey="master-data.pusat-impor">
+                <AdminImportPage />
+              </MenuRouteGuard>
+            ),
+          },
+          {
+            path: "biometric-devices",
+            element: (
+              <MenuRouteGuard menuKey="alat-admin.sistem.biometrik">
+                <AdminBiometricDevicesPage />
+              </MenuRouteGuard>
+            ),
+          },
         ],
       },
       {
         element: <DashboardLayout />,
         children: [
-          { path: "/admin/biometric-devices", element: <AdminBiometricDevicesPage /> },
+          {
+            path: "/admin/biometric-devices",
+            element: (
+              <MenuRouteGuard menuKey="alat-admin.sistem.biometrik">
+                <AdminBiometricDevicesPage />
+              </MenuRouteGuard>
+            ),
+          },
 
           { path: "/recruitment/openings", element: <JobOpeningsPage /> },
           { path: "/recruitment/openings/create", element: <JobOpeningFormPage /> },
@@ -919,7 +1049,7 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    element: <ProtectedRoute role={["super_admin", "admin", "hr", "manager"]} />,
+    element: <ProtectedRoute />,
     children: [
       {
         path: "/employees",
@@ -927,7 +1057,11 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <EmployeesPage />,
+            element: (
+              <MenuRouteGuard menuKey="employees">
+                <EmployeesPage />
+              </MenuRouteGuard>
+            ),
           },
         ],
       },
@@ -937,7 +1071,11 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <EmployeeCreatePage />,
+            element: (
+              <MenuRouteGuard menuKey="employees">
+                <EmployeeCreatePage />
+              </MenuRouteGuard>
+            ),
           },
         ],
       },
@@ -947,7 +1085,11 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <EmployeeEditPage />,
+            element: (
+              <MenuRouteGuard menuKey="employees">
+                <EmployeeEditPage />
+              </MenuRouteGuard>
+            ),
           },
         ],
       },

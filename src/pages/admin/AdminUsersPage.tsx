@@ -327,9 +327,14 @@ const AdminUsersPage = () => {
                       <tr key={u.id}>
                         <td>
                           <div className="cell-name">
-                            <div className="cell-avatar">
-                              {u.name?.charAt(0).toUpperCase() || "U"}
-                            </div>
+                            <img
+                              src={(u as any).avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name || 'U')}&color=7F9CF5&background=EBF4FF`}
+                              alt=""
+                              className="cell-avatar"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name || 'U')}&color=7F9CF5&background=EBF4FF`;
+                              }}
+                            />
                             <div className="cell-stacked">
                               <span className="cell-name-text">{u.name}</span>
                               <span className="cell-stacked__sub">{u.id}</span>

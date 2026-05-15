@@ -1,4 +1,5 @@
 import { api } from "@/shared/api/httpClient";
+import { parsePaginatedResponse, type PaginatedResult, type PaginationParams } from "@/shared/api/pagination";
 import type { EmployeeCreatePayload, EmployeeItem, EmployeeUpdatePayload, EmployeeOnboardingPayload, EmployeeOffboardingPayload } from "../types/employee.types";
 
 /**
@@ -7,43 +8,12 @@ import type { EmployeeCreatePayload, EmployeeItem, EmployeeUpdatePayload, Employ
 interface ApiResponse<T = unknown> {
   success?: boolean;
   data?: T;
-  items?: T extends any[] ? T : never;
   message?: string;
   error?: string;
 }
 
-/**
- * Extract array from various API response formats
- */
-function extractArrayFromResponse(response: unknown): EmployeeItem[] {
-  if (!response || typeof response !== "object") {
-    return [];
-  }
-
-  const resp = response as Record<string, unknown>;
-
-  // Try direct array
-  if (Array.isArray(resp)) {
-    return resp.filter((item): item is EmployeeItem => item && typeof item === "object");
-  }
-
-  // Try common API response paths
-  const candidates: unknown[] = [
-    (resp.data as any)?.items || (resp.data as any)?.rows || (resp.data as any)?.data,
-    resp.items,
-    resp.rows,
-    resp.results,
-    resp.data,
-  ];
-
-  for (const candidate of candidates) {
-    if (Array.isArray(candidate)) {
-      return candidate.filter((item): item is EmployeeItem => item && typeof item === "object");
-    }
-  }
-
-  return [];
-}
+const isEmployeeItem = (item: unknown): item is EmployeeItem =>
+  item !== null && typeof item === "object";
 
 /**
  * Extract single item from API response
@@ -103,24 +73,13 @@ export async function getAllEmployees(): Promise<EmployeeItem[]> {
 
   try {
     while (hasMore) {
-      // Use standard page parameter; backend defaults to 15 per page usually
-      const response = await api.get<any>(`/employees?page=${currentPage}`);
-      
-      const payload = response.data;
-      if (!payload) break;
-
-      // Extract items for this page
-      const pageItems = extractArrayFromResponse(payload);
+      const result = await getEmployeesPage(currentPage, 100);
+      const pageItems = result.items;
       if (pageItems.length === 0) break;
 
       allItems = [...allItems, ...pageItems];
-
-      // Check for next page using common pagination metadata keys
-      // Supporting 'last_page', 'next_page_url', or comparing with 'total'
-      const meta = payload.data || payload; 
-      const lastPage = meta.last_page || (meta.total ? Math.ceil(meta.total / (meta.per_page || 15)) : 1);
       
-      if (currentPage >= lastPage || pageItems.length === 0) {
+      if (currentPage >= result.totalPages) {
         hasMore = false;
       } else {
         currentPage++;
@@ -130,7 +89,7 @@ export async function getAllEmployees(): Promise<EmployeeItem[]> {
       if (currentPage > 50) break; 
     }
 
-    if (typeof window !== "undefined" && (window as any).__DEBUG__) {
+    if (typeof window !== "undefined" && (window as Window & { __DEBUG__?: unknown }).__DEBUG__) {
       console.log("👥 All employee data consolidated:", {
         totalFetched: allItems.length,
         data: allItems,
@@ -145,12 +104,24 @@ export async function getAllEmployees(): Promise<EmployeeItem[]> {
   }
 }
 
+export async function getEmployeesPage(
+  page = 1,
+  perPage = 10,
+  params: PaginationParams = {}
+): Promise<PaginatedResult<EmployeeItem>> {
+  const response = await api.get<ApiResponse<unknown>>("employees", {
+    params: { ...params, page, per_page: perPage },
+  });
+
+  return parsePaginatedResponse<EmployeeItem>(response.data, isEmployeeItem);
+}
+
 /**
  * Get single employee record
  */
 export async function getEmployeeDetail(id: string | number): Promise<EmployeeItem> {
   try {
-    const response = await api.get<ApiResponse<EmployeeItem>>(`/employees/${id}`);
+    const response = await api.get<ApiResponse<EmployeeItem>>(`employees/${id}`);
 
     if (!response?.data) {
       throw new Error("No employee data found");
@@ -172,7 +143,7 @@ export async function getEmployeeDetail(id: string | number): Promise<EmployeeIt
  */
 export async function createEmployee(payload: EmployeeCreatePayload): Promise<EmployeeItem> {
   try {
-    const response = await api.post<ApiResponse<EmployeeItem>>("/employees", payload);
+    const response = await api.post<ApiResponse<EmployeeItem>>("employees", payload);
 
     if (!response?.data) {
       throw new Error("Invalid response after creating employee");
@@ -194,7 +165,7 @@ export async function createEmployee(payload: EmployeeCreatePayload): Promise<Em
  */
 export async function updateEmployee(id: string | number, payload: EmployeeUpdatePayload): Promise<EmployeeItem> {
   try {
-    const response = await api.put<ApiResponse<EmployeeItem>>(`/employees/${id}`, payload);
+    const response = await api.put<ApiResponse<EmployeeItem>>(`employees/${id}`, payload);
 
     if (!response?.data) {
       throw new Error("Invalid response after updating employee");
@@ -216,9 +187,9 @@ export async function updateEmployee(id: string | number, payload: EmployeeUpdat
  */
 export async function deleteEmployee(id: string | number): Promise<void> {
   try {
-    await api.delete(`/employees/${id}`);
+    await api.delete(`employees/${id}`);
 
-    if (typeof window !== "undefined" && (window as any).__DEBUG__) {
+    if (typeof window !== "undefined" && (window as Window & { __DEBUG__?: unknown }).__DEBUG__) {
       console.log(`🗑️ Employee ${id} deleted successfully`);
     }
   } catch (error) {
@@ -231,7 +202,7 @@ export async function deleteEmployee(id: string | number): Promise<void> {
  */
 export async function startOnboarding(id: string | number, payload: EmployeeOnboardingPayload): Promise<void> {
   try {
-    await api.put(`/employees/${id}/onboarding/start`, payload);
+    await api.put(`employees/${id}/onboarding/start`, payload);
   } catch (error) {
     handleApiError(error, `Failed to start onboarding for employee ${id}`);
   }
@@ -242,7 +213,7 @@ export async function startOnboarding(id: string | number, payload: EmployeeOnbo
  */
 export async function completeOnboarding(id: string | number): Promise<void> {
   try {
-    await api.put(`/employees/${id}/onboarding/complete`);
+    await api.put(`employees/${id}/onboarding/complete`);
   } catch (error) {
     handleApiError(error, `Failed to complete onboarding for employee ${id}`);
   }
@@ -253,7 +224,7 @@ export async function completeOnboarding(id: string | number): Promise<void> {
  */
 export async function startOffboarding(id: string | number, payload: EmployeeOffboardingPayload): Promise<void> {
   try {
-    await api.put(`/employees/${id}/offboarding/start`, payload);
+    await api.put(`employees/${id}/offboarding/start`, payload);
   } catch (error) {
     handleApiError(error, `Failed to start offboarding for employee ${id}`);
   }
@@ -264,7 +235,7 @@ export async function startOffboarding(id: string | number, payload: EmployeeOff
  */
 export async function completeOffboarding(id: string | number): Promise<void> {
   try {
-    await api.put(`/employees/${id}/offboarding/complete`);
+    await api.put(`employees/${id}/offboarding/complete`);
   } catch (error) {
     handleApiError(error, `Failed to complete offboarding for employee ${id}`);
   }

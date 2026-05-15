@@ -23,18 +23,20 @@ const AdminPermissionsPage = () => {
   const [selectedGuard, setSelectedGuard] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalPermissions, setTotalPermissions] = useState(0);
 
   // Extract unique guard names for filter
   const uniqueGuards = useMemo(() => {
     const guards = new Set<string>();
-    (permissions as any[]).forEach((p) => {
+    permissions.forEach((p) => {
       if (p.guard_name) guards.add(String(p.guard_name));
     });
     return Array.from(guards).sort();
   }, [permissions]);
 
   const filteredPermissions = useMemo(() => {
-    return (permissions as any[]).filter((item) => {
+    return permissions.filter((item) => {
       const searchStr = searchText.toLowerCase();
       if (searchStr) {
         const nameMatch = String(item.name || '').toLowerCase().includes(searchStr);
@@ -52,14 +54,12 @@ const AdminPermissionsPage = () => {
 
   const paginatedPermissions = filteredPermissions;
 
-  const [totalPages, setTotalPages] = useState(1);
-
   const permissionSummaryCards = useMemo(
     () => [
       {
         label: "Total Izin",
         subtitle: "Semua permission tersedia",
-        value: String(permissions.length),
+        value: String(totalPermissions),
         change: "Data permission sistem",
         tone: "blue" as const,
         icon: KeyRound,
@@ -81,7 +81,7 @@ const AdminPermissionsPage = () => {
         icon: Shield,
       },
     ],
-    [permissions.length, filteredPermissions.length, paginatedPermissions.length, uniqueGuards.length]
+    [totalPermissions, filteredPermissions.length, paginatedPermissions.length, uniqueGuards.length]
   );
 
   const clearFilters = () => {
@@ -94,9 +94,10 @@ const AdminPermissionsPage = () => {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const data = await getAllPermissions();
-      const permsArray = Array.isArray(data) ? data : (data as any).data || [];
-      setPermissions(permsArray);
+      const data = await getAllPermissions(currentPage, pageSize);
+      setPermissions(data.items.map((item) => ({ ...item })));
+      setTotalPages(data.totalPages);
+      setTotalPermissions(data.total);
     } catch (error: unknown) {
       setErrorMessage(getErrorMessage(error as never));
     } finally {
@@ -111,7 +112,7 @@ const AdminPermissionsPage = () => {
 
   useEffect(() => {
     void loadPermissions();
-  }, []);
+  }, [currentPage, pageSize]);
 
   if (!canViewPermissions) {
     return (
@@ -293,7 +294,7 @@ const AdminPermissionsPage = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {(paginatedPermissions as any[]).map((item, index) => (
+                    {paginatedPermissions.map((item, index) => (
                       <tr key={String(item.id ?? index)}>
                         <td>
                           <div className="cell-name">

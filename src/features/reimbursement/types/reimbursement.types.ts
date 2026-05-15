@@ -14,10 +14,14 @@ export interface ReimbursementItem {
   updated_at?: string;
   employee?: {
     id: string | number;
-    name: string;
+    name?: string;
     user?: {
       name: string;
-    }
+    };
+    department?: { id?: string | number; name?: string } | string | null;
+    position?: { id?: string | number; name?: string } | string | null;
+    departmentRel?: { id?: string | number; name?: string } | null;
+    positionRel?: { id?: string | number; name?: string } | null;
   };
   user?: {
     name: string;

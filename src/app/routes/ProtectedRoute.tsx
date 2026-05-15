@@ -26,7 +26,7 @@ export const ProtectedRoute = ({ role }: ProtectedRouteProps) => {
 
   // Role check if provided
   if (role && role.length > 0) {
-    const userRoles = user?.roles?.map((r: any) => r.name) || [];
+    const userRoles = user?.roles?.map((r) => r.name) || [];
     const hasRole = role.some((r) => userRoles.includes(r));
 
     if (!hasRole) {

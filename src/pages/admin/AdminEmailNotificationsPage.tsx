@@ -6,7 +6,8 @@ import { ConfirmDialog } from "@/shared/ui/ConfirmDialog";
 import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { showToast } from "@/shared/ui/toast";
-import { ROLES } from "@/shared/types/rbac.types";
+import { RBACUtils } from "@/shared/hooks/rbac";
+import type { AuthUser } from "@/shared/types/rbac.types";
 import { BellRing, RefreshCw, Search, Send, Shield, Layout, History, Trash2 } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
@@ -36,33 +37,25 @@ type EmailLogItem = {
   created_at?: string;
 };
 
-const getRoleNames = (user: ReturnType<typeof useAuthStore.getState>["user"]) => (user?.roles ?? []).map((role) => role.name);
+type ApiListPayload<T> = T[] | { data?: T[] };
 
-const hasAdminAccess = (user: ReturnType<typeof useAuthStore.getState>["user"]) => {
-  const roleNames = getRoleNames(user);
-  return roleNames.includes(ROLES.ADMIN) || roleNames.includes(ROLES.SUPER_ADMIN);
+type ErrorWithResponse = {
+  response?: {
+    data?: {
+      message?: string;
+      error?: string;
+    };
+  };
 };
+
+const extractList = <T,>(payload: ApiListPayload<T>): T[] =>
+  Array.isArray(payload) ? payload : Array.isArray(payload.data) ? payload.data : [];
+
+const canManageEmail = (user: AuthUser | null) => RBACUtils.hasPermission(user, "admin.email.manage");
 
 const AdminEmailNotificationsPage = () => {
   const user = useAuthStore((state) => state.user);
-
-  if (!hasAdminAccess(user)) {
-    return (
-      <div className="crud-page">
-        <Card className="hero-card">
-          <div className="hero-card-inner">
-            <div className="hero-content">
-              <div className="hero-badge">
-                <Shield size={16} />
-                <span>Admin Center</span>
-              </div>
-              <h1 className="hero-title">Akses Ditolak</h1>
-            </div>
-          </div>
-        </Card>
-      </div>
-    );
-  }
+  const hasEmailAccess = canManageEmail(user);
 
   const [items, setItems] = useState<EmailTemplateItem[]>([]);
   const [logs, setLogs] = useState<EmailLogItem[]>([]);
@@ -100,8 +93,8 @@ const AdminEmailNotificationsPage = () => {
         getAdminEmailNotifications(),
         getAdminEmailNotificationLogs(),
       ]);
-      setItems(Array.isArray(templatesResult) ? templatesResult : (templatesResult as any)?.data || []);
-      setLogs(Array.isArray(logsResult) ? logsResult : (logsResult as any)?.data || []);
+      setItems(extractList<EmailTemplateItem>(templatesResult));
+      setLogs(extractList<EmailLogItem>(logsResult));
     } catch (error: unknown) {
       setErrorMessage(getErrorMessage(error as never));
     } finally {
@@ -127,9 +120,10 @@ const AdminEmailNotificationsPage = () => {
         placeholders: [] 
       });
       void loadData();
-    } catch (error: any) {
-      console.error("Save Template Error:", error.response?.data || error);
-      const serverMessage = error.response?.data?.message || error.response?.data?.error;
+    } catch (error: unknown) {
+      const responseError = error as ErrorWithResponse;
+      console.error("Save Template Error:", responseError.response?.data || error);
+      const serverMessage = responseError.response?.data?.message || responseError.response?.data?.error;
       showToast(serverMessage ? `Server Error: ${serverMessage}` : getErrorMessage(error), "error");
     } finally {
       setSaving(false);
@@ -145,7 +139,7 @@ const AdminEmailNotificationsPage = () => {
       showToast("Template email berhasil dihapus", "success");
       setDeleteTarget(null);
       void loadData();
-    } catch (error: any) {
+    } catch (error: unknown) {
       showToast(getErrorMessage(error), "error");
     } finally {
       setDeleting(false);
@@ -153,8 +147,27 @@ const AdminEmailNotificationsPage = () => {
   };
 
   useEffect(() => {
+    if (!hasEmailAccess) return;
     void loadData();
-  }, []);
+  }, [hasEmailAccess]);
+
+  if (!hasEmailAccess) {
+    return (
+      <div className="crud-page">
+        <Card className="hero-card">
+          <div className="hero-card-inner">
+            <div className="hero-content">
+              <div className="hero-badge">
+                <Shield size={16} />
+                <span>Admin Center</span>
+              </div>
+              <h1 className="hero-title">Akses Ditolak</h1>
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   const filteredTemplates = useMemo(() => {
     if (!searchText) return items;

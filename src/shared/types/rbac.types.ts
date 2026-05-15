@@ -1,9 +1,10 @@
 /**
  * RBAC Types Definition
- * Defines all types for Role-Based Access Control
+ * Defines all types for Role-Based Access Control dynamic architecture
  */
 
-export type RoleType = 'super_admin' | 'admin' | 'hr' | 'manager' | 'employee';
+export type RoleType = string;
+export type PermissionType = string;
 
 export const ROLES = {
   SUPER_ADMIN: 'super_admin',
@@ -12,36 +13,6 @@ export const ROLES = {
   MANAGER: 'manager',
   EMPLOYEE: 'employee',
 } as const;
-
-export type PermissionType = 
-  | 'employee.view'
-  | 'employee.create'
-  | 'employee.update'
-  | 'employee.delete'
-  | 'leave.view'
-  | 'leave.create'
-  | 'leave.approve'
-  | 'attendance.view_all'
-  | 'attendance.delete'
-  | 'attendance.check_in'
-  | 'attendance.check_out'
-  | 'attendance.view_own'
-  | 'location.view'
-  | 'location.create'
-  | 'location.update'
-  | 'location.delete'
-  | 'profile.view_all'
-  | 'profile.update'
-  | 'profile.delete'
-  | 'payroll.view'
-  | 'payroll.create'
-  | 'payroll.update'
-  | 'payroll.delete'
-  | 'user.view'
-  | 'user.assign_role'
-  | 'role.view'
-  | 'role.assign_permission'
-  | 'permission.view';
 
 export const PERMISSIONS = {
   EMPLOYEE_VIEW: 'employee.view',
@@ -67,6 +38,10 @@ export const PERMISSIONS = {
   PAYROLL_CREATE: 'payroll.create',
   PAYROLL_UPDATE: 'payroll.update',
   PAYROLL_DELETE: 'payroll.delete',
+  KPI_VIEW: 'kpi.view',
+  REPORTING_DASHBOARD: 'reporting.dashboard',
+  ADMIN_EMAIL_MANAGE: 'admin.email.manage',
+  OVERTIME_VIEW: 'overtime.view',
   USER_VIEW: 'user.view',
   USER_ASSIGN_ROLE: 'user.assign_role',
   ROLE_VIEW: 'role.view',
@@ -74,37 +49,9 @@ export const PERMISSIONS = {
   PERMISSION_VIEW: 'permission.view',
 } as const;
 
-// Role hierarchy and default permissions
-export const ROLE_PERMISSIONS: Record<RoleType, PermissionType[]> = {
-  super_admin: [
-    PERMISSIONS.USER_VIEW,
-    PERMISSIONS.USER_ASSIGN_ROLE,
-    PERMISSIONS.ROLE_VIEW,
-    PERMISSIONS.ROLE_ASSIGN_PERMISSION,
-    PERMISSIONS.PERMISSION_VIEW,
-  ],
-  admin: [
-    PERMISSIONS.USER_VIEW,
-    PERMISSIONS.USER_ASSIGN_ROLE,
-    PERMISSIONS.ROLE_VIEW,
-    PERMISSIONS.ROLE_ASSIGN_PERMISSION,
-    PERMISSIONS.PERMISSION_VIEW,
-  ],
-  hr: [
-    PERMISSIONS.USER_VIEW,
-    PERMISSIONS.ROLE_VIEW,
-    PERMISSIONS.PERMISSION_VIEW,
-  ],
-  manager: [
-    PERMISSIONS.USER_VIEW,
-    PERMISSIONS.PAYROLL_VIEW,
-  ],
-  employee: [],
-};
-
 export interface Role {
   id: number;
-  name: RoleType;
+  name: string;
   display_name: string;
   description?: string;
   permissions_count?: number;
@@ -115,7 +62,7 @@ export interface Role {
 
 export interface Permission {
   id: number;
-  name: PermissionType;
+  name: string;
   display_name: string;
   description?: string;
   guard_name?: string;
@@ -127,11 +74,17 @@ export interface User {
   id: number;
   name: string;
   email: string;
+  profile?: {
+    avatar?: string;
+    avatar_url?: string;
+  } | null;
+  employee?: unknown;
   roles?: Role[];
   permissions?: Permission[];
   role_ids?: number[];
   created_at?: string;
   updated_at?: string;
+  [key: string]: unknown;
 }
 
 export interface AuthUser extends User {
@@ -143,8 +96,8 @@ export interface RBACContext {
   user: AuthUser | null;
   roles: Role[];
   permissions: Permission[];
-  hasPermission: (permission: PermissionType | PermissionType[]) => boolean;
-  hasRole: (role: RoleType | RoleType[]) => boolean;
+  hasPermission: (permission: string | string[]) => boolean;
+  hasRole: (role: string | string[]) => boolean;
   isSuperAdmin: () => boolean;
   isAdmin: () => boolean;
   canManageUsers: () => boolean;
@@ -153,6 +106,6 @@ export interface RBACContext {
 }
 
 export interface PermissionCheckOptions {
-  requireAll?: boolean; // If true, require ALL permissions. If false, require ANY
-  allowSuperAdmin?: boolean; // If true, super admin can always access (default: true)
+  requireAll?: boolean;
+  allowSuperAdmin?: boolean;
 }

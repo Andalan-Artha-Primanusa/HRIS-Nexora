@@ -10,6 +10,7 @@ import { getAllEmployees } from "@/features/employee/api/employee.service";
 import type { PayrollCreatePayload, PayrollUpdatePayload, PayrollItem } from "@/features/payroll/types/payroll.types";
 import { PaginationWithSize } from "@/shared/ui/Pagination";
 import type { EmployeeItem } from "@/features/employee/types/employee.types";
+import { parsePaginatedResponse } from "@/shared/api/pagination";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "@/pages/payroll/PayrollShared.css";
@@ -51,10 +52,12 @@ const PayrollCrudPage = () => {
     try {
       const [employeesData, payrollsData] = await Promise.all([
         getAllEmployees(),
-        payrollService.getPayrollList()
+        payrollService.getPayrollList({ page: currentPage, per_page: itemsPerPage })
       ]);
       setEmployees(toSafeArray(employeesData));
-      setPayrolls(toSafeArray(payrollsData));
+      const parsed = parsePaginatedResponse<PayrollItem>(payrollsData);
+      setPayrolls(parsed.items.length ? parsed.items : toSafeArray(payrollsData));
+      setTotalPages(parsed.totalPages);
     } catch (error) {
       showToast(error instanceof Error ? error.message : "Gagal memuat data", "error");
     } finally {
@@ -207,11 +210,11 @@ const PayrollCrudPage = () => {
 
   useEffect(() => {
     void loadData();
-  }, []);
+  }, [currentPage, itemsPerPage]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [payrolls, itemsPerPage, paymentFilter]);
+  }, [paymentFilter]);
 
   const filteredPayrolls = payrolls.filter((p) => {
     if (paymentFilter === 'all') return true;
@@ -220,13 +223,7 @@ const PayrollCrudPage = () => {
   });
 
   const [totalPages, setTotalPages] = useState(1);
-  const paginatedPayrolls = filteredPayrolls.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
-  useEffect(() => {
-    const nextTotalPages = Math.max(1, Math.ceil(filteredPayrolls.length / itemsPerPage));
-    setTotalPages(nextTotalPages);
-    setCurrentPage((page) => Math.min(page, nextTotalPages));
-  }, [filteredPayrolls, itemsPerPage]);
+  const paginatedPayrolls = filteredPayrolls;
 
   const getEmployeeName = (empId: string) => {
     const employee = employees.find((entry) => String(entry.id) === empId);

@@ -1,7 +1,7 @@
 import { api } from '@/shared/api/httpClient';
 
 export const taskService = {
-  getTasks: (params?: Record<string, string>) => {
+  getTasks: (params?: Record<string, string | number>) => {
     return api.get('/tasks', { params });
   },
 
@@ -21,7 +21,7 @@ export const taskService = {
     return api.delete(`/tasks/${id}`);
   },
 
-  getMyTasks: () => {
-    return api.get('/my/tasks');
+  getMyTasks: (params?: Record<string, string | number>) => {
+    return api.get('/my/tasks', { params });
   },
 };

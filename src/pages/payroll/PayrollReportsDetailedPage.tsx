@@ -4,6 +4,7 @@ import { Card } from '@/shared/ui/Card';
 import { Badge } from '@/shared/ui/Badge';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { payrollService, toSafeArray } from '@/features/payroll/api/payroll.service';
+import { parsePaginatedResponse } from '@/shared/api/pagination';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 
@@ -46,8 +47,9 @@ const PayrollReportsDetailedPage: React.FC = () => {
     setError(null);
     try {
       const response = await payrollService.getPayrollList({ page: currentPage, per_page: pageSize });
-      setData(toSafeArray(response));
-      setTotalPages(response?.data?.last_page ?? response?.last_page ?? 1);
+      const parsed = parsePaginatedResponse<any>(response);
+      setData(parsed.items.length ? parsed.items : toSafeArray(response));
+      setTotalPages(parsed.totalPages);
     } catch (err: any) {
       setError(err?.response?.data?.message || err.message || 'Gagal memuat data payroll');
     } finally {

@@ -1,12 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
-import { showToast } from '@/shared/ui/toast';
+import { showToast } from "@/shared/ui/toast";
 import { Button } from "@/shared/ui/Button";
 import { getErrorMessage } from "@/shared/api/errorHandler";
-import { ROLES } from "@/shared/types/rbac.types";
-import { MonitorCog, RefreshCw, Shield, Wifi, WifiOff, Plus, Edit2 } from "lucide-react";
+import { MonitorCog, RefreshCw, Wifi, WifiOff, Plus, Edit2 } from "lucide-react";
 import {
   getBiometricDevices,
   syncBiometricAttendance,
@@ -17,21 +15,11 @@ import "@/pages/dashboard/overview/OverviewPage.css";
 import "@/pages/payroll/PayrollShared.css";
 import "./AdminCrudPages.css";
 
-
-
-const hasAdminAccess = (user: any) => {
-  const roles = Array.isArray(user?.roles) ? user.roles : [];
-  return roles.some((role: any) => {
-    const roleName = String(role?.name || role || "").toLowerCase();
-    return roleName === ROLES.ADMIN || roleName === ROLES.SUPER_ADMIN;
-  });
-};
-
-const normalizeBoolean = (value: unknown) => {
+const normalizeBoolean = (value: unknown): boolean => {
   if (typeof value === "boolean") return value;
   if (typeof value === "number") return value === 1;
   if (typeof value === "string") {
-    const lowered = value.toLowerCase();
+    const lowered = value.trim().toLowerCase();
     return lowered === "true" || lowered === "1" || lowered === "online" || lowered === "active";
   }
   return false;
@@ -39,34 +27,6 @@ const normalizeBoolean = (value: unknown) => {
 
 const AdminBiometricDevicesPage = () => {
   const navigate = useNavigate();
-  const user = useAuthStore((state) => state.user);
-  const canAccess = hasAdminAccess(user);
-
-  if (!canAccess) {
-    return (
-      <div className="crud-page">
-        <Card className="hero-card">
-          <div className="hero-card-inner">
-            <div className="hero-content">
-              <div className="hero-badge">
-                <Shield size={16} />
-                <span>Admin Center</span>
-              </div>
-              <h1 className="hero-title">Akses Ditolak</h1>
-              <p className="hero-subtitle">
-                Anda tidak memiliki izin untuk mengakses halaman ini.
-              </p>
-            </div>
-          </div>
-        </Card>
-        <div className="">
-          <Card glass style={{ padding: '2rem', textAlign: 'center' }}>
-            <p>Silakan hubungi Administrator untuk mendapatkan akses.</p>
-          </Card>
-        </div>
-      </div>
-    );
-  }
 
   const [devices, setDevices] = useState<BiometricDeviceItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -74,26 +34,31 @@ const AdminBiometricDevicesPage = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalDevices, setTotalDevices] = useState(0);
 
   const summary = useMemo(() => {
-    const online = devices.filter((device) => normalizeBoolean((device as any).is_online ?? (device as any).online ?? (device as any).status === "online")).length;
+    const onlineCount = devices.filter((device) =>
+      normalizeBoolean(device.is_online ?? device.online ?? device.status === "online")
+    ).length;
     return {
-      total: devices.length,
-      online,
-      offline: Math.max(devices.length - online, 0),
+      total: totalDevices,
+      online: onlineCount,
+      offline: Math.max(devices.length - onlineCount, 0),
     };
-  }, [devices]);
+  }, [devices, totalDevices]);
 
   const paginatedDevices = devices;
-  const [totalPages, setTotalPages] = useState(1);
 
   const loadDevices = async () => {
     setLoading(true);
     try {
-      const result = await getBiometricDevices();
+      const result = await getBiometricDevices({ page: currentPage, per_page: pageSize });
       setDevices(Array.isArray(result.items) ? result.items : []);
+      setTotalPages(result.totalPages);
+      setTotalDevices(result.total);
     } catch (error: unknown) {
-      showToast(getErrorMessage(error as any), "error");
+      showToast(getErrorMessage(error as Record<string, unknown>), "error");
     } finally {
       setLoading(false);
     }
@@ -101,20 +66,22 @@ const AdminBiometricDevicesPage = () => {
 
   useEffect(() => {
     void loadDevices();
-  }, []);
+  }, [currentPage, pageSize]);
 
   const handleSync = async (device: BiometricDeviceItem) => {
-    const deviceId = (device as any).id;
+    const deviceId = device.id;
+    if (deviceId === undefined || deviceId === null) return;
+
     setSyncingId(deviceId);
-    // clear previous alerts handled via toast; no local alert state here
 
     try {
       await syncBiometricAttendance({
         device_id: deviceId,
       });
-      showToast(`Sinkronisasi attendance untuk perangkat ${String((device as any).name || deviceId)} berhasil dijalankan.`, "success");
+      const deviceName = typeof device.name === "string" ? device.name : String(deviceId);
+      showToast(`Sinkronisasi attendance untuk perangkat ${deviceName} berhasil dijalankan.`, "success");
     } catch (error: unknown) {
-      showToast(getErrorMessage(error as any), "error");
+      showToast(getErrorMessage(error as Record<string, unknown>), "error");
     } finally {
       setSyncingId(null);
     }
@@ -166,7 +133,7 @@ const AdminBiometricDevicesPage = () => {
               <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
               {loading ? "Memuat..." : "Segarkan"}
             </button>
-            <button className="btn-primary" onClick={() => navigate('/admin/biometric-devices/create')}>
+            <button className="btn-primary" onClick={() => navigate("/admin/biometric-devices/create")}>
               <Plus size={16} />
               Tambah Device
             </button>
@@ -184,11 +151,33 @@ const AdminBiometricDevicesPage = () => {
                   <p className="leave-summary-label">{card.label}</p>
                   <p className="leave-summary-subtitle">{card.subtitle}</p>
                 </div>
-                <div className={`leave-summary-icon-wrapper leave-icon-${card.tone === 'blue' ? 'blue' : card.tone === 'green' ? 'green' : card.tone === 'orange' ? 'orange' : 'purple'}`}>
+                <div
+                  className={`leave-summary-icon-wrapper leave-icon-${
+                    card.tone === "blue"
+                      ? "blue"
+                      : card.tone === "green"
+                        ? "green"
+                        : card.tone === "orange"
+                          ? "orange"
+                          : "purple"
+                  }`}
+                >
                   <Icon size={28} />
                 </div>
               </div>
-              <div className={`leave-summary-value leave-value-${card.tone === 'blue' ? 'blue' : card.tone === 'green' ? 'green' : card.tone === 'orange' ? 'orange' : 'purple'}`}>{card.value}</div>
+              <div
+                className={`leave-summary-value leave-value-${
+                  card.tone === "blue"
+                    ? "blue"
+                    : card.tone === "green"
+                      ? "green"
+                      : card.tone === "orange"
+                        ? "orange"
+                        : "purple"
+                }`}
+              >
+                {card.value}
+              </div>
               <p className="leave-summary-trend">Status device</p>
             </div>
           );
@@ -198,99 +187,138 @@ const AdminBiometricDevicesPage = () => {
       <Card className="table-card" glass>
         <div className="table-header-bar">
           <h3>Daftar Device</h3>
-          <span className="table-count">{devices.length} device</span>
+          <span className="table-count">{totalDevices} device</span>
         </div>
 
         {devices.length > 0 ? (
           <>
             <div className="table-card-inner">
-            <div className="table-wrap">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Device</th>
-                    <th>IP Address</th>
-                    <th>Lokasi</th>
-                    <th>Status</th>
-                    <th>Terakhir Sinkron</th>
-                    <th className="th-center">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedDevices.map((device, index) => {
-                    const deviceId = (device as any).id ?? index;
-                    const name = String((device as any).name || "Unnamed Device");
-                    const ipAddress = String((device as any).ip_address || (device as any).ip || "-");
-                    const location = String((device as any).location || (device as any).branch || "-");
-                    const isOnline = normalizeBoolean((device as any).is_online ?? (device as any).online ?? (device as any).status === "online");
-                    const lastSync = (device as any).last_sync_at || (device as any).last_synced_at || (device as any).updated_at || "-";
+              <div className="table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Device</th>
+                      <th>IP Address</th>
+                      <th>Lokasi</th>
+                      <th>Status</th>
+                      <th>Terakhir Sinkron</th>
+                      <th className="th-center">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedDevices.map((device, index) => {
+                      const deviceId = device.id ?? index;
+                      const name = typeof device.name === "string" && device.name ? device.name : "Unnamed Device";
+                      const ipAddress =
+                        typeof device.ip_address === "string"
+                          ? device.ip_address
+                          : typeof device.ip === "string"
+                            ? device.ip
+                            : "-";
+                      const location =
+                        typeof device.location === "string"
+                          ? device.location
+                          : typeof device.branch === "string"
+                            ? device.branch
+                            : "-";
+                      const isOnline = normalizeBoolean(
+                        device.is_online ?? device.online ?? device.status === "online"
+                      );
+                      const lastSync =
+                        device.last_sync_at || device.last_synced_at || device.updated_at || "-";
 
-                    return (
-                      <tr key={String(deviceId)}>
-                        <td><span className="cell-id">{String(deviceId)}</span></td>
-                        <td>
-                          <div className="cell-name">
-                            <div className="cell-avatar">
-                              <MonitorCog size={14} />
+                      return (
+                        <tr key={String(deviceId)}>
+                          <td>
+                            <span className="cell-id">{String(deviceId)}</span>
+                          </td>
+                          <td>
+                            <div className="cell-name">
+                              <div className="cell-avatar">
+                                <MonitorCog size={14} />
+                              </div>
+                              <span className="cell-name-text">{name}</span>
                             </div>
-                            <span className="cell-name-text">{name}</span>
-                          </div>
-                        </td>
-                        <td>{ipAddress}</td>
-                        <td>{location}</td>
-                        <td>
-                          <span className={`status-badge ${isOnline ? "status-badge--approved" : "status-badge--draft"}`}>
-                            {isOnline ? "online" : "offline"}
-                          </span>
-                        </td>
-                        <td className="cell-date">{String(lastSync)}</td>
-                        <td className="td-center">
-                          <div className="action-btn-group">
-                            <button
-                              className="action-btn action-btn-edit"
-                              onClick={() => navigate(`/admin/biometric-devices/edit/${deviceId}`)}
-                              title="Edit"
+                          </td>
+                          <td>{ipAddress}</td>
+                          <td>{location}</td>
+                          <td>
+                            <span
+                              className={`status-badge ${
+                                isOnline ? "status-badge--approved" : "status-badge--draft"
+                              }`}
                             >
-                              <Edit2 size={16} />
-                            </button>
-                            <button
-                              className="action-btn"
-                              onClick={() => void handleSync(device)}
-                              disabled={syncingId === deviceId}
-                              title="Sync"
-                              style={{ background: '#f1f5f9', color: '#64748b' }}
-                            >
-                              <RefreshCw size={16} className={syncingId === deviceId ? 'animate-spin' : ''} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-          {totalPages > 1 && (
-            <div className="table-pagination">
-              <div className="pagination-info">
-                Menampilkan {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, devices.length)} dari {devices.length}
-              </div>
-              <div className="pagination-controls">
-                <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)}>
-                  Sebelumnya
-                </Button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                  <button key={page} className={`pagination-page-btn ${currentPage === page ? 'active' : ''}`} onClick={() => setCurrentPage(page)}>{page}</button>
-                ))}
-                <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage(prev => prev + 1)}>
-                  Selanjutnya
-                </Button>
+                              {isOnline ? "online" : "offline"}
+                            </span>
+                          </td>
+                          <td className="cell-date">{String(lastSync)}</td>
+                          <td className="td-center">
+                            <div className="action-btn-group">
+                              <button
+                                className="action-btn action-btn-edit"
+                                onClick={() => navigate(`/admin/biometric-devices/edit/${deviceId}`)}
+                                title="Edit"
+                              >
+                                <Edit2 size={16} />
+                              </button>
+                              <button
+                                className="action-btn"
+                                onClick={() => void handleSync(device)}
+                                disabled={syncingId === deviceId}
+                                title="Sync"
+                                style={{ background: "#f1f5f9", color: "#64748b" }}
+                              >
+                                <RefreshCw
+                                  size={16}
+                                  className={syncingId === deviceId ? "animate-spin" : ""}
+                                />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
             </div>
-          )}
-        </>
+            {totalPages > 1 && (
+              <div className="table-pagination">
+                <div className="pagination-info">
+                  Menampilkan {(currentPage - 1) * pageSize + 1}-
+                  {Math.min(currentPage * pageSize, totalDevices)} dari {totalDevices}
+                </div>
+                <div className="pagination-controls">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage((prev) => prev - 1)}
+                  >
+                    Sebelumnya
+                  </Button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      className={`pagination-page-btn ${currentPage === page ? "active" : ""}`}
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage((prev) => prev + 1)}
+                  >
+                    Selanjutnya
+                  </Button>
+                </div>
+              </div>
+            )}
+          </>
         ) : (
           <div className="table-card-inner">
             <div className="empty-state">

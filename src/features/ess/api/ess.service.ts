@@ -1,38 +1,9 @@
 import { api } from "@/shared/api/httpClient";
+import { extractArrayPayload, extractPayload, parsePaginatedResponse } from "@/shared/api/pagination";
 import type { GenericApiItem, MyReimbursementPayload } from "../types/ess.types";
 
-type UnknownRecord = Record<string, unknown>;
-
-const toRecord = (value: unknown): UnknownRecord =>
-  value && typeof value === "object" ? (value as UnknownRecord) : {};
-
-const extractPayload = (raw: unknown) => {
-  const root = toRecord(raw);
-  return root.data ?? raw;
-};
-
-const extractArrayPayload = (raw: any): GenericApiItem[] => {
-  if (!raw) return [];
-  
-  // Pattern 1: Direct Array
-  if (Array.isArray(raw)) return raw;
-
-  // Pattern 2: Laravel standard { data: [...] } or { items: [...] }
-  const root = typeof raw === 'object' ? raw : {};
-  for (const key of ['data', 'items', 'rows', 'results', 'kpis', 'periods', 'kpi_periods', 'kpiPeriods']) {
-    const level1 = root[key];
-    if (Array.isArray(level1)) return level1;
-    
-    // Pattern 3: Laravel Paginated { data: { data: [...] } }
-    if (level1 && typeof level1 === 'object' && !Array.isArray(level1)) {
-      for (const key2 of ['data', 'items', 'rows', 'results', 'kpis', 'periods', 'kpi_periods', 'kpiPeriods']) {
-        if (Array.isArray(level1[key2])) return level1[key2];
-      }
-    }
-  }
-
-  return [];
-};
+const isGenericApiItem = (item: unknown): item is GenericApiItem =>
+  item !== null && typeof item === "object" && !Array.isArray(item);
 
 export const getMyKpi = async (page = 1, perPage = 10) => {
   const token = sessionStorage.getItem("token");
@@ -47,9 +18,10 @@ export const getMyKpi = async (page = 1, perPage = 10) => {
   });
   
   const raw = response.data;
+  const parsed = parsePaginatedResponse(raw, isGenericApiItem);
   return {
-    items: extractArrayPayload(raw),
-    totalPages: raw?.data?.last_page ?? 1,
+    items: parsed.items,
+    totalPages: parsed.totalPages,
     raw,
   };
 };
@@ -67,9 +39,10 @@ export const getMyKpiPeriods = async (page = 1, perPage = 10) => {
   });
 
   const raw = response.data;
+  const parsed = parsePaginatedResponse(raw, isGenericApiItem);
   return {
-    items: extractArrayPayload(raw),
-    totalPages: raw?.data?.last_page ?? 1,
+    items: parsed.items,
+    totalPages: parsed.totalPages,
     raw,
   };
 };
@@ -111,9 +84,10 @@ export const getMyReimbursements = async (status?: string, page = 1, perPage = 1
   });
 
   const raw = response.data;
+  const parsed = parsePaginatedResponse(raw, isGenericApiItem);
   return {
-    items: extractArrayPayload(raw),
-    totalPages: raw?.data?.last_page ?? 1,
+    items: parsed.items,
+    totalPages: parsed.totalPages,
     raw,
   };
 };
@@ -138,9 +112,10 @@ export const getMyPayroll = async (page = 1, perPage = 10) => {
   const response = await api.get("/my/payroll", { params: { page, per_page: perPage } });
   const raw = response.data;
   // API returns { success, message, data: [...] }
+  const parsed = parsePaginatedResponse(raw, isGenericApiItem);
   return {
-    items: extractArrayPayload(raw),
-    totalPages: raw?.data?.last_page ?? 1,
+    items: parsed.items,
+    totalPages: parsed.totalPages,
     raw,
   };
 };
@@ -179,7 +154,7 @@ export const exportMyPayrollPdf = async (id: string) => {
 export const getMyLeaves = async () => {
   const response = await api.get("/leaves/my");
   return {
-    items: extractArrayPayload(response.data),
+    items: extractArrayPayload(response.data, isGenericApiItem),
     raw: response.data,
   };
 };
@@ -204,7 +179,7 @@ export const checkOutAttendance = async () => {
 
 export const getAttendanceHistory = async () => {
   const response = await api.get("/attendance/history");
-  return { items: extractArrayPayload(response.data), raw: response.data };
+  return { items: extractArrayPayload(response.data, isGenericApiItem), raw: response.data };
 };
 
 export const getTodayAttendance = async () => {

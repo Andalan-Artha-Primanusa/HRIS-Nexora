@@ -8,6 +8,7 @@ import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
 import { useAuthStore } from '@/app/store/auth.store';
+import { RBACUtils } from '@/shared/hooks/rbac';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
 import './ReportsDashboardPage.css';
@@ -38,13 +39,13 @@ const ReportsAttendancePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const user = useAuthStore((state) => state.user);
+  const allowedMenuKeys = useAuthStore((state) => state.allowedMenuKeys);
 
   const canViewAttendanceReports = useMemo(() => {
-    return Boolean(
-      user?.permissions?.some((permission: any) => permission?.name === 'attendance.view_all') ||
-      user?.roles?.some((role: any) => role?.name && ['super_admin', 'admin', 'hr', 'manager'].includes(role.name))
-    );
-  }, [user]);
+    const hasPerm = RBACUtils.hasPermission(user, ["reporting.attendance", "attendance.view_all"]);
+    const hasMenuAccess = allowedMenuKeys.includes("laporan.absensi") || allowedMenuKeys.includes("attendance.reports");
+    return Boolean(hasPerm || hasMenuAccess);
+  }, [user, allowedMenuKeys]);
 
   const load = async () => {
     setLoading(true); setError(null);

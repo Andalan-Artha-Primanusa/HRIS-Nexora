@@ -1,26 +1,34 @@
 import { create } from 'zustand';
+import type { AuthUser } from '@/shared/types/rbac.types';
 
 interface AuthState {
-  user: any | null;
+  user: AuthUser | null;
   token: string | null;
   isAuthenticated: boolean;
-  setAuth: (user: any, token: string) => void;
+  setAuth: (user: AuthUser, token: string) => void;
   logout: () => void;
 }
 
-const getStoredUser = () => {
+const getStoredUser = (): AuthUser | null => {
   const rawUser = sessionStorage.getItem("user");
 
   if (!rawUser) return null;
 
   try {
-    return JSON.parse(rawUser);
+    const user = JSON.parse(rawUser) as Partial<AuthUser>;
+    return {
+      id: typeof user.id === "number" ? user.id : 0,
+      name: typeof user.name === "string" ? user.name : "",
+      email: typeof user.email === "string" ? user.email : "",
+      roles: Array.isArray(user.roles) ? user.roles : [],
+      permissions: Array.isArray(user.permissions) ? user.permissions : [],
+    };
   } catch {
     return null;
   }
 };
 
-const getStoredToken = () => sessionStorage.getItem("token");
+const getStoredToken = (): string | null => sessionStorage.getItem("token");
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: getStoredUser(),

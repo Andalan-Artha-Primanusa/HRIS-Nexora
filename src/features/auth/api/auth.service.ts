@@ -35,6 +35,12 @@ export interface GoogleAuthCallbackPayload {
   prompt?: string;
 }
 
+export interface UserMenusResponse {
+  success: boolean;
+  message: string;
+  data: string[];
+}
+
 /* =========================
    API CALL
  ========================= */
@@ -87,6 +93,15 @@ export const logout = async () => {
 export const verifyToken = async () => {
   const response = await api.get("/me");
   return response.data;
+};
+
+/**
+ * Fetch dynamic allowed menu keys for current user
+ */
+export const fetchUserMenus = async (): Promise<string[]> => {
+  const response = await api.get<UserMenusResponse>("/user/menus");
+  const data = response.data?.data;
+  return Array.isArray(data) ? data : [];
 };
 
 /**

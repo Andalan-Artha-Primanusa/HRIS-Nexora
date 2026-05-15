@@ -7,6 +7,7 @@ import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { assetService } from '@/features/assets/api/asset.service';
 import { api } from '@/shared/api/httpClient';
 import { showToast } from '@/shared/ui/toast';
+import { parsePaginatedResponse } from '@/shared/api/pagination';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/employee/EmployeesPage.css';
@@ -38,6 +39,7 @@ const AssetInventoryPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
   const [showFilters, setShowFilters] = useState(false);
+  const [totalAssets, setTotalAssets] = useState(0);
 
   const [assignModal, setAssignModal] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState<any>(null);
@@ -55,16 +57,14 @@ const AssetInventoryPage: React.FC = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await assetService.getAssets();
-      let assetsArray: any[] = [];
-      if (response?.data?.data && Array.isArray(response.data.data)) {
-        assetsArray = response.data.data;
-      } else if (response?.data && Array.isArray(response.data)) {
-        assetsArray = response.data;
-      } else if (Array.isArray(response)) {
-        assetsArray = response;
-      }
-      setAssets(assetsArray);
+      const params: Record<string, string | number> = { page: currentPage, per_page: pageSize };
+      if (searchQuery.trim()) params.search = searchQuery.trim();
+      if (activeTab !== 'Semua') params.status = activeTab.toLowerCase();
+      const response = await assetService.getAssets(params);
+      const parsed = parsePaginatedResponse<any>(response);
+      setAssets(parsed.items);
+      setTotalPages(parsed.totalPages);
+      setTotalAssets(parsed.total);
     } catch (error) {
       console.error('Failed to fetch assets:', error);
       setAssets([]);
@@ -86,6 +86,9 @@ const AssetInventoryPage: React.FC = () => {
 
   useEffect(() => {
     fetchData();
+  }, [currentPage, pageSize, searchQuery, activeTab]);
+
+  useEffect(() => {
     fetchEmployees();
   }, []);
 
@@ -185,7 +188,7 @@ const AssetInventoryPage: React.FC = () => {
     {
       label: "Total Aset",
       subtitle: "Seluruh aset perusahaan",
-      value: String(assets.length),
+      value: String(totalAssets),
       change: "Data aset tersimpan",
       tone: "blue" as const,
       icon: Package,
@@ -214,7 +217,7 @@ const AssetInventoryPage: React.FC = () => {
       tone: "purple" as const,
       icon: User,
     },
-  ], [assets, sortedAssets.length, paginatedAssets.length]);
+  ], [assets, sortedAssets.length, paginatedAssets.length, totalAssets]);
 
   const clearFilters = () => {
     setSearchQuery('');

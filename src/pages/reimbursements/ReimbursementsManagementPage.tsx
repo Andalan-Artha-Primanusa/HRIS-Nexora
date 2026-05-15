@@ -32,12 +32,15 @@ const formatDate = (dateString: string | undefined) => {
   }
 };
 
-const getEmployeeName = (item: any) => {
-  if (typeof item.employee_name === "string") return item.employee_name;
-  if (item.employee?.name) return item.employee.name;
-  if (item.employee?.user?.name) return item.employee.user.name;
-  if (item.user?.name) return item.user.name;
-  return `EMP-${String(item.employee_id).padStart(3, '0')}`;
+const getEmployeeInfo = (item: any) => {
+  const emp = item.employee;
+  const user = emp?.user || item.user;
+  const name = user?.name || emp?.full_name || item.employee_name || `EMP-${item.employee_id}`;
+  const avatarUrl = user?.profile?.avatar_url;
+  const deptName = emp?.department?.name || "-";
+  const posName = emp?.position?.name || "Karyawan";
+  
+  return { name, avatarUrl, deptName, posName };
 };
 
 const DEFAULT_FORM = {
@@ -382,9 +385,26 @@ const ReimbursementsManagementPage = () => {
                         <td>
                           <div className="cell-name">
                             <div className="cell-avatar">
-                              {getEmployeeName(item).charAt(0).toUpperCase()}
+                              {(() => {
+                                const info = getEmployeeInfo(item);
+                                return info.avatarUrl ? (
+                                  <img src={info.avatarUrl} alt={info.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                                ) : (
+                                  info.name.charAt(0).toUpperCase()
+                                );
+                              })()}
                             </div>
-                            <span className="cell-name-text">{getEmployeeName(item)}</span>
+                            <div className="cell-stacked">
+                              {(() => {
+                                const info = getEmployeeInfo(item);
+                                return (
+                                  <>
+                                    <span className="cell-name-text">{info.name}</span>
+                                    <span className="cell-stacked__sub">{info.deptName} • {info.posName}</span>
+                                  </>
+                                );
+                              })()}
+                            </div>
                           </div>
                         </td>
                         <td>
