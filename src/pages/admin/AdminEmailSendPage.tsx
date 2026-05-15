@@ -35,11 +35,10 @@ type EmployeeRecipient = {
   };
 };
 
-const canManageEmail = (user: AuthUser | null) => RBACUtils.hasPermission(user, "admin.email.manage");
+const canAccess = RBACUtils.hasPermission(user, "admin.email.manage");
 
 const AdminEmailSendPage = () => {
   const user = useAuthStore((state) => state.user);
-  const hasEmailAccess = canManageEmail(user);
 
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [employees, setEmployees] = useState<EmployeeRecipient[]>([]);
@@ -71,11 +70,11 @@ const AdminEmailSendPage = () => {
   };
 
   useEffect(() => {
-    if (!hasEmailAccess) return;
+    if (!canAccess) return;
     void loadData();
-  }, [hasEmailAccess]);
+  }, [canAccess]);
 
-  if (!hasEmailAccess) {
+  if (!canAccess) {
     return (
       <div className="crud-page">
         <Card className="hero-card">

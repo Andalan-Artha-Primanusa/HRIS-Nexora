@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Save, Calendar, MapPin, Info, CheckCircle2, RefreshCw, ChevronLeft } from 'lucide-react';
+import { Save, Calendar, MapPin, Info, CheckCircle2, RefreshCw, ChevronLeft, Shield } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { workforceService } from '@/features/workforce/api/workforce.service';
+import { useAuthStore } from '@/app/store/auth.store';
+import { RBACUtils } from '@/shared/hooks/rbac';
 import './AdminWorkforcePages.css';
 import '../dashboard/overview/OverviewPage.css';
 
@@ -17,6 +19,13 @@ const toHolidayFormState = (value: any) => ({
 });
 
 const HolidayFormPage: React.FC = () => {
+  const user = useAuthStore((state) => state.user);
+  const canAccess = RBACUtils.hasPermission(user, 'attendance.view_all');
+  if (!canAccess) {
+    return (
+      <div className="crud-page"><Card className="hero-card"><div className="hero-card-inner"><div className="hero-content"><div className="hero-badge"><Shield size={16} /><span>Admin Center</span></div><h1 className="hero-title">Akses Ditolak</h1><p className="hero-subtitle">Anda tidak memiliki izin untuk mengakses halaman ini.</p></div></div></Card></div>
+    );
+  }
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = !!id;

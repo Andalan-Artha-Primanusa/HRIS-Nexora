@@ -51,11 +51,10 @@ type ErrorWithResponse = {
 const extractList = <T,>(payload: ApiListPayload<T>): T[] =>
   Array.isArray(payload) ? payload : Array.isArray(payload.data) ? payload.data : [];
 
-const canManageEmail = (user: AuthUser | null) => RBACUtils.hasPermission(user, "admin.email.manage");
+const canAccess = RBACUtils.hasPermission(user, "admin.email.manage");
 
 const AdminEmailNotificationsPage = () => {
   const user = useAuthStore((state) => state.user);
-  const hasEmailAccess = canManageEmail(user);
 
   const [items, setItems] = useState<EmailTemplateItem[]>([]);
   const [logs, setLogs] = useState<EmailLogItem[]>([]);
@@ -147,11 +146,11 @@ const AdminEmailNotificationsPage = () => {
   };
 
   useEffect(() => {
-    if (!hasEmailAccess) return;
+    if (!canAccess) return;
     void loadData();
-  }, [hasEmailAccess]);
+  }, [canAccess]);
 
-  if (!hasEmailAccess) {
+  if (!canAccess) {
     return (
       <div className="crud-page">
         <Card className="hero-card">

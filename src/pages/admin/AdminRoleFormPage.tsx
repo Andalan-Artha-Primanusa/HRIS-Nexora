@@ -5,6 +5,7 @@ import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { showToast } from '@/shared/ui/toast';
 import { createRole, updateRole, getRoleById } from '@/features/admin/api/admin.service';
+import { ROLES } from '@/shared/types/rbac.types';
 import '@/shared/styles/CrudPage.css';
 import "../dashboard/overview/OverviewPage.css";
 
@@ -113,7 +114,7 @@ const AdminRoleFormPage: React.FC = () => {
                          onChange={handleChange} 
                          required 
                          placeholder="e.g. manager, hr_admin, supervisor"
-                         disabled={isEdit && (id === '1' || formData.name === 'admin' || formData.name === 'super_admin')}
+                          disabled={isEdit && (formData.name === ROLES.SUPER_ADMIN)}
                          style={{ width: '100%', padding: '0 16px', height: '50px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '1rem', color: '#0f172a', transition: 'all 0.2s', boxSizing: 'border-box' }}
                        />
                        <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b' }}>Gunakan huruf kecil dan garis bawah (snake_case) untuk konsistensi sistem.</p>

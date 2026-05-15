@@ -9,7 +9,7 @@ interface LeaveTableProps {
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
   onHistory?: (id: string) => void;
-  isAdmin?: boolean;
+  canApproveLeave?: boolean;
 }
 
 const getLeaveTypeLabel = (item: any) => {
@@ -37,7 +37,7 @@ const formatStatusLabel = (status: string) => {
   return 'Menunggu';
 };
 
-export const LeaveTable: React.FC<LeaveTableProps> = ({ items, onView, onApprove, onReject, onEdit, onDelete, onHistory, isAdmin }) => {
+export const LeaveTable: React.FC<LeaveTableProps> = ({ items, onView, onApprove, onReject, onEdit, onDelete, onHistory, canApproveLeave }) => {
   return (
     <div className="table-wrap">
       <table className="data-table">
@@ -95,7 +95,7 @@ export const LeaveTable: React.FC<LeaveTableProps> = ({ items, onView, onApprove
                       <Eye size={16} />
                     </button>
                     
-                    {isAdmin && status === 'pending' && (
+                    {canApproveLeave && status === 'pending' && (
                       <>
                         <button className="action-btn action-btn-approve" onClick={() => onApprove?.(String(item.id))} title="Setujui">
                           <Check size={16} />
@@ -106,7 +106,7 @@ export const LeaveTable: React.FC<LeaveTableProps> = ({ items, onView, onApprove
                       </>
                     )}
 
-                    {!isAdmin && status === 'pending' && onEdit && (
+                    {!canApproveLeave && status === 'pending' && onEdit && (
                        <button className="action-btn action-btn-edit" onClick={() => onEdit(String(item.id))} title="Edit">
                          <Pencil size={16} />
                        </button>

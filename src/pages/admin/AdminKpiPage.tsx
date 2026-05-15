@@ -94,32 +94,11 @@ const PERIOD_LABELS: Record<string, string> = {
   annual: "Annual",
 };
 
-const hasKpiAccess = (user: AuthUser | null) => RBACUtils.hasPermission(user, "kpi.view");
-
-const getStatusClass = (status?: string) => {
-  const normalized = String(status || "").toLowerCase();
-  if (normalized === "approved") return "status-badge status-badge--approved";
-  if (normalized === "submitted") return "status-badge status-badge--pending";
-  return "status-badge status-badge--draft";
-};
-
-const getScoreColor = (score: number) => {
-  if (score >= 90) return "#10b981";
-  if (score >= 75) return "#8b5cf6";
-  if (score >= 50) return "#f59e0b";
-  return "#ef4444";
-};
-
-const typeIcon = (type: string) => {
-  if (type === "quarterly") return <Activity size={14} />;
-  if (type === "semi_annual") return <BarChart3 size={14} />;
-  return <Gauge size={14} />;
-};
-
 const AdminKpiPage = () => {
+  const user = useAuthStore((state) => state.user);
+  const canAccess = RBACUtils.hasPermission(user, "kpi.view");
   const navigate = useNavigate();
   const location = useLocation();
-  const user = useAuthStore((state) => state.user);
 
   const [periods, setPeriods] = useState<KpiPeriod[]>([]);
   const [loading, setLoading] = useState(true);
@@ -157,7 +136,7 @@ const AdminKpiPage = () => {
   };
 
   useEffect(() => {
-    if (hasKpiAccess(user)) loadData();
+    if (canAccess) loadData();
   }, [user]);
 
   const filteredPeriods = useMemo(() => {
@@ -235,7 +214,7 @@ const AdminKpiPage = () => {
     setCurrentPage(1);
   };
 
-  if (!hasKpiAccess(user)) {
+  if (!canAccess) {
     return (
       <div className="crud-page">
         <Alert type="error" message="Akses Ditolak. Anda tidak memiliki izin untuk mengelola KPI." />

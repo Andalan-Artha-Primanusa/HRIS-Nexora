@@ -8,7 +8,7 @@ interface ReimbursementTableProps {
   onEdit?: (item: ReimbursementItem) => void;
   onDelete?: (item: ReimbursementItem) => void;
   onSubmit?: (item: ReimbursementItem) => void;
-  isAdmin?: boolean;
+  canApproveLeave?: boolean;
 }
 
 export const ReimbursementTable: React.FC<ReimbursementTableProps> = ({
@@ -17,7 +17,7 @@ export const ReimbursementTable: React.FC<ReimbursementTableProps> = ({
   onEdit,
   onDelete,
   onSubmit,
-  isAdmin = false
+  canApproveLeave = false
 }) => {
   const getStatusClass = (status: string) => {
     switch (status.toLowerCase()) {
@@ -52,7 +52,7 @@ export const ReimbursementTable: React.FC<ReimbursementTableProps> = ({
       <table className="crud-table">
         <thead>
           <tr>
-            {isAdmin && <th>Employee</th>}
+            {canApproveLeave && <th>Employee</th>}
             <th>Title</th>
             <th>Category</th>
             <th>Amount</th>
@@ -64,14 +64,14 @@ export const ReimbursementTable: React.FC<ReimbursementTableProps> = ({
         <tbody>
           {items.length === 0 ? (
             <tr>
-              <td colSpan={isAdmin ? 7 : 6} style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
+              <td colSpan={canApproveLeave ? 7 : 6} style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
                 No reimbursement records found.
               </td>
             </tr>
           ) : (
             items.map((item: any) => (
               <tr key={item.id}>
-                {isAdmin && (
+                {canApproveLeave && (
                   <td>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                       <span style={{ fontWeight: 600, color: '#1e3a8a' }}>

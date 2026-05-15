@@ -47,12 +47,12 @@ const OvertimeApprovalPage: React.FC = () => {
 
   const user = useAuthStore((state) => state.user);
 
-  const canApproveOvertime = useMemo(() => {
+  const canAccess = useMemo(() => {
     return RBACUtils.hasPermission(user, 'overtime.approve');
   }, [user]);
 
   const fetchData = async () => {
-        if (!canApproveOvertime) {
+        if (!canAccess) {
           setRequests([]);
           setLoading(false);
           return;
@@ -71,7 +71,7 @@ const OvertimeApprovalPage: React.FC = () => {
 
   useEffect(() => {
     void fetchData();
-  }, [canApproveOvertime]);
+  }, [canAccess]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -196,7 +196,7 @@ const OvertimeApprovalPage: React.FC = () => {
     { label: 'Ditolak', subtitle: 'Pengajuan ditolak', value: String(rejectedCount), tone: 'red' as const, icon: XCircle },
   ];
 
-  if (!canApproveOvertime) {
+  if (!canAccess) {
     return (
       <div className="crud-page">
         <Card className="hero-card">

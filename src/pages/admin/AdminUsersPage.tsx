@@ -6,16 +6,22 @@ import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { getAllUsers } from "@/features/admin/api/admin.service";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { RBACUtils } from "@/shared/hooks/rbac";
+import { ROLES } from "@/shared/types/rbac.types";
 import { RefreshCw, Search, UserPlus, Users, Shield, Filter } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "./AdminUsersPage.css";
 
+interface UserRoleInfo {
+  name: string;
+  display_name: string;
+}
+
 interface UserData {
   id: number;
   name: string;
   email: string;
-  role_names?: string[];
+  roles: UserRoleInfo[];
 }
 
 const AdminUsersPage = () => {
@@ -23,9 +29,8 @@ const AdminUsersPage = () => {
   const user = useAuthStore((state) => state.user);
   const canViewUsers = RBACUtils.canViewUsers(user);
 
-  const roleToneClass = (roleName: string) => {
-    if (roleName === "Super Administrator") return "badge-soft badge-soft--red";
-    if (roleName === "Administrator") return "badge-soft badge-soft--blue";
+  const roleToneClass = (role: UserRoleInfo) => {
+    if (role.name === ROLES.SUPER_ADMIN) return "badge-soft badge-soft--red";
     return "badge-soft badge-soft--green";
   };
 
@@ -74,8 +79,11 @@ const AdminUsersPage = () => {
         id: item.id,
         name: item.name,
         email: item.email,
-        role_names: Array.isArray(item.roles)
-          ? item.roles.map((r: any) => r.display_name || r.name)
+        roles: Array.isArray(item.roles)
+          ? item.roles.map((r: any) => ({
+              name: r.name || '',
+              display_name: r.display_name || r.name || '',
+            }))
           : [],
       }));
       setUsers(formattedUsers);
@@ -91,7 +99,7 @@ const AdminUsersPage = () => {
   const uniqueRoles = useMemo(() => {
     const roles = new Set<string>();
     users.forEach((u) => {
-      u.role_names?.forEach((role) => roles.add(role));
+      u.roles?.forEach((role) => roles.add(role.display_name));
     });
     return Array.from(roles).sort();
   }, [users]);
@@ -107,7 +115,7 @@ const AdminUsersPage = () => {
       }
 
       if (selectedRole) {
-        if (!u.role_names?.includes(selectedRole)) return false;
+        if (!u.roles?.some((role) => role.display_name === selectedRole)) return false;
       }
 
       return true;
@@ -346,14 +354,14 @@ const AdminUsersPage = () => {
                         </td>
                         <td style={{ color: '#475569', fontWeight: 500 }}>{u.email}</td>
                         <td>
-                          {u.role_names && u.role_names.length > 0 ? (
+                          {u.roles && u.roles.length > 0 ? (
                             <div className="admin-users-role-list">
-                              {u.role_names.map((role, idx) => (
+                              {u.roles.map((role, idx) => (
                                 <span
                                   key={idx}
                                   className={roleToneClass(role)}
                                 >
-                                  {role}
+                                  {role.display_name}
                                 </span>
                               ))}
                             </div>

@@ -6,8 +6,19 @@ import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
 import { useNavigate } from 'react-router-dom';
 import { showToast } from '@/shared/ui/toast';
+import { useAuthStore } from '@/app/store/auth.store';
+import { RBACUtils } from '@/shared/hooks/rbac';
 import './AdminWorkforcePages.css';
 import '../dashboard/overview/OverviewPage.css';
+
+const ComplianceSettingsPage: React.FC = () => {
+  const user = useAuthStore((state) => state.user);
+  const canAccess = RBACUtils.hasPermission(user, ['employee.view', 'admin.access']);
+  if (!canAccess) {
+    return (
+      <div className="crud-page"><Card className="hero-card"><div className="hero-card-inner"><div className="hero-content"><div className="hero-badge"><Shield size={16} /><span>Admin Center</span></div><h1 className="hero-title">Akses Ditolak</h1><p className="hero-subtitle">Anda tidak memiliki izin untuk mengakses halaman ini.</p></div></div></Card></div>
+    );
+  }
 
 interface RetentionPolicy {
   id: number;

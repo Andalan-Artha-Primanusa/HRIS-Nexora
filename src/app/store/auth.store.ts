@@ -83,7 +83,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: getStoredUser(),
   token: getStoredToken(),
   isAuthenticated: Boolean(getStoredToken()),
-  allowedMenuKeys: getStoredMenuKeys(),
+  allowedMenuKeys: [],
   setAuth: (user: AuthUser, token: string) => {
     const authUser: AuthUser = {
       ...user,

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
@@ -10,6 +10,7 @@ import {
   importEmployees,
   importUsers,
 } from "@/features/admin/api/admin-batch1.service";
+import { getAllRoles } from "@/features/admin/api/admin.service";
 
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
@@ -17,13 +18,9 @@ import "./AdminCrudPages.css";
 
 
 
-const hasAdminAccess = (user: any) => {
-  return RBACUtils.hasPermission(user, "admin.import.execute");
-};
-
 const AdminImportPage = () => {
   const user = useAuthStore((state) => state.user);
-  const canAccess = hasAdminAccess(user);
+  const canAccess = RBACUtils.hasPermission(user, "admin.import.execute");
 
   if (!canAccess) {
     return (
@@ -59,12 +56,29 @@ const AdminImportPage = () => {
   }
 
   const [userFile, setUserFile] = useState<File | null>(null);
-  const [userRole, setUserRole] = useState<string>("employee");
+  const [userRole, setUserRole] = useState<string>("");
   const [employeeFile, setEmployeeFile] = useState<File | null>(null);
   const [submittingUsers, setSubmittingUsers] = useState(false);
   const [submittingEmployees, setSubmittingEmployees] = useState(false);
   const [userImportResult, setUserImportResult] = useState<string | null>(null);
   const [employeeImportResult, setEmployeeImportResult] = useState<string | null>(null);
+  const [availableRoles, setAvailableRoles] = useState<{ name: string; display_name: string }[]>([]);
+
+  useEffect(() => {
+    getAllRoles(1, 100).then((res) => {
+      const roles = res.items.map((r: any) => ({
+        name: r.name,
+        display_name: r.display_name || r.name,
+      }));
+      setAvailableRoles(roles);
+      if (!userRole && roles.length > 0) {
+        setUserRole(roles[0].name);
+      }
+    }).catch(() => {
+      setAvailableRoles([{ name: "employee", display_name: "Employee" }]);
+      setUserRole("employee");
+    });
+  }, []);
 
 
   const summaryStats = useMemo(() => {
@@ -110,7 +124,7 @@ const AdminImportPage = () => {
       setUserImportResult(JSON.stringify(result, null, 2));
       showToast("Import users berhasil diproses.", "success");
       setUserFile(null);
-      setUserRole("employee");
+      setUserRole(availableRoles[0]?.name || "employee");
     } catch (error: unknown) {
       showToast(getErrorMessage(error as any), "error");
     } finally {
@@ -273,9 +287,9 @@ const AdminImportPage = () => {
                 onChange={(e) => setUserRole(e.target.value)}
                 className="crud-input"
               >
-                <option value="employee">Employee</option>
-                <option value="admin">Admin</option>
-                <option value="super_admin">Super Admin</option>
+                {availableRoles.map((r) => (
+                  <option key={r.name} value={r.name}>{r.display_name}</option>
+                ))}
               </select>
             </div>
 

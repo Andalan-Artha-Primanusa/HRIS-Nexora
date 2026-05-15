@@ -6,6 +6,7 @@ import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useRefreshUser } from '@/features/auth/hooks/useRefreshUser';
 import { api } from '@/shared/api/httpClient';
 import type { AuthUser } from '@/shared/types/rbac.types';
+import { RBACUtils } from '@/shared/hooks/rbac';
 import './Header.css';
 
 interface HeaderProps {
@@ -36,7 +37,7 @@ const getDisplayRole = (user: AuthUser | null) => {
   if (Array.isArray(user?.roles) && user.roles.length > 0) {
     const primaryRole = user.roles[0];
     if (primaryRole?.name) {
-      return primaryRole.name === "employee" ? "Employee" : primaryRole.name;
+      return RBACUtils.getRoleDisplayName(primaryRole.name);
     }
   }
 

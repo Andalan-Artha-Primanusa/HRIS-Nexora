@@ -191,6 +191,21 @@ Mencakup:
 5. ESS / My
 6. Modul pendukung lain yang tersisa
 
+### Gelombang 4 — deep dive modul sisa & lanjutan
+
+#### [`wave-4-flow-audit.md`](./wave-4-flow-audit.md)
+
+Audit mendalam untuk modul yang sebelumnya hanya disapuan cepat atau belum diaudit:
+
+1. Attendance (deep dive — pagination palsu, absent hardcoded, raw data dump)
+2. Dashboard & KPI (statistik dari page-1, KPI submit broken)
+3. Recruitment (7+ tombol mati, tanpa menu, mock data)
+4. Organization & Location (GPS block, dead buttons)
+5. Reporting (service mati, 5 sub-page unreachable)
+6. Engagement, Compliance, Benefits/Compensation (banyak mock data)
+7. HR Requests, Biometric, Tasks, Enterprise, Profile
+8. Career / Succession / IDP (fetch real tapi render mock)
+
 ---
 
 ## Rekomendasi pembagian baca per peran

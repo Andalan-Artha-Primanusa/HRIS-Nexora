@@ -10,7 +10,7 @@ interface ReimbursementModalProps {
   onSave: (data: any) => void | Promise<void>;
   initialData?: ReimbursementItem | null;
   employees?: any[]; // Only for admin
-  isAdmin?: boolean;
+  canApproveLeave?: boolean;
 }
 
 const CATEGORIES = [
@@ -30,7 +30,7 @@ export const ReimbursementModal: React.FC<ReimbursementModalProps> = ({
   onSave,
   initialData,
   employees = [],
-  isAdmin = false
+  canApproveLeave = false
 }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [fileError, setFileError] = useState('');
@@ -123,7 +123,7 @@ export const ReimbursementModal: React.FC<ReimbursementModalProps> = ({
         <form onSubmit={handleSubmit}>
           <div className="reimb-modal-body">
             <div className="form-grid">
-              {isAdmin && !initialData && (
+              {canApproveLeave && !initialData && (
                 <div className="form-group full">
                   <label>Karyawan</label>
                   <select 

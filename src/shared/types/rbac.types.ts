@@ -8,10 +8,6 @@ export type PermissionType = string;
 
 export const ROLES = {
   SUPER_ADMIN: 'super_admin',
-  ADMIN: 'admin',
-  HR: 'hr',
-  MANAGER: 'manager',
-  EMPLOYEE: 'employee',
 } as const;
 
 export const PERMISSIONS = {
@@ -99,7 +95,6 @@ export interface RBACContext {
   hasPermission: (permission: string | string[]) => boolean;
   hasRole: (role: string | string[]) => boolean;
   isSuperAdmin: () => boolean;
-  isAdmin: () => boolean;
   canManageUsers: () => boolean;
   canManageRoles: () => boolean;
   canManagePermissions: () => boolean;

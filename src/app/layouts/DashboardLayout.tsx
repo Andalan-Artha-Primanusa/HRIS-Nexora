@@ -3,8 +3,9 @@ import { useLocation, useOutlet } from 'react-router-dom';
 import { Sidebar } from '@/widgets/layout/Sidebar';
 import { Header } from '@/widgets/layout/Header';
 import { useAuthStore } from '@/app/store/auth.store';
-import { menuItems, type MenuItem } from '@/shared/config/menu';
-import { filterMenuItems, fetchAllowedMenuKeys } from '@/shared/config/menuFilter';
+import type { MenuItem } from '@/shared/config/menu';
+import { fetchAllowedMenuKeys, clearMenuCache, filterMenuItems } from '@/shared/config/menuFilter';
+import { menuItems } from '@/shared/config/menu';
 import { RouteSuspenseFallback } from '@/shared/ui';
 import NotFoundPage from '@/pages/error/NotFoundPage';
 
@@ -55,40 +56,45 @@ export default function DashboardLayout() {
     durationMs: number;
     capturedAt: string;
   } | null>(null);
+  const [allMenuPaths, setAllMenuPaths] = React.useState<string[]>([]);
+  const [availablePaths, setAvailablePaths] = React.useState<string[]>([]);
   const [allowedKeys, setAllowedKeys] = React.useState<string[] | undefined>();
   const user = useAuthStore((state) => state.user);
   const location = useLocation();
   const outlet = useOutlet();
 
-  const allMenuPaths = React.useMemo(
-    () => Array.from(new Set(flattenPaths(menuItems))),
-    []
-  );
-  const visibleMenu = React.useMemo(
-    () => filterMenuItems(user, menuItems, allowedKeys),
-    [user, allowedKeys]
-  );
-  const availablePaths = React.useMemo(
-    () => Array.from(new Set(flattenPaths(visibleMenu))),
-    [visibleMenu]
-  );
+  React.useEffect(() => {
+    if (!user) return;
+    fetchAllowedMenuKeys(user).then(setAllowedKeys);
+  }, [user]);
+
+  React.useEffect(() => {
+    if (!user) return;
+    const load = async () => {
+      setAllMenuPaths(Array.from(new Set(flattenPaths(menuItems))));
+      const keys = allowedKeys || await fetchAllowedMenuKeys(user);
+      const visible = filterMenuItems(user, menuItems, keys);
+      setAvailablePaths(Array.from(new Set(flattenPaths(visible))));
+    };
+    load();
+  }, [user, allowedKeys]);
+
+  React.useEffect(() => {
+    const handler = () => {
+      clearMenuCache();
+      fetchAllowedMenuKeys(user).then((keys) => {
+        setAllowedKeys(keys);
+      });
+    };
+    window.addEventListener('menu-cache-cleared', handler);
+    return () => window.removeEventListener('menu-cache-cleared', handler);
+  }, [user]);
+
   const isRouteBlocked = React.useMemo(() => {
     if (allowedKeys === undefined) return false;
     if (!user) return false;
     return allMenuPaths.includes(location.pathname) && !availablePaths.includes(location.pathname);
   }, [allowedKeys, user, allMenuPaths, availablePaths, location.pathname]);
-
-  React.useEffect(() => {
-    fetchAllowedMenuKeys(user).then(setAllowedKeys);
-  }, []);
-
-  React.useEffect(() => {
-    const handler = () => {
-      fetchAllowedMenuKeys(user).then(setAllowedKeys);
-    };
-    window.addEventListener('menu-cache-cleared', handler);
-    return () => window.removeEventListener('menu-cache-cleared', handler);
-  }, []);
 
   React.useEffect(() => {
     const prioritizedPaths = ['/dashboard', ...availablePaths]
@@ -186,4 +192,3 @@ export default function DashboardLayout() {
     </div>
   );
 };
-

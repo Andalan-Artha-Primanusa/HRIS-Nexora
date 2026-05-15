@@ -1,9 +1,18 @@
 import React from 'react';
-import { Bell, Plus, Settings, Clock, Zap } from 'lucide-react';
+import { Bell, Plus, Settings, Clock, Zap, Shield } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { useAuthStore } from '@/app/store/auth.store';
+import { RBACUtils } from '@/shared/hooks/rbac';
 
 const NotificationRulesPage: React.FC = () => {
+  const user = useAuthStore((state) => state.user);
+  const canAccess = RBACUtils.hasPermission(user, 'admin.email.manage');
+  if (!canAccess) {
+    return (
+      <div className="crud-page"><Card className="hero-card"><div className="hero-card-inner"><div className="hero-content"><div className="hero-badge"><Shield size={16} /><span>Admin Center</span></div><h1 className="hero-title">Akses Ditolak</h1><p className="hero-subtitle">Anda tidak memiliki izin untuk mengakses halaman ini.</p></div></div></Card></div>
+    );
+  }
   return (
     <div className="crud-page">
       <div className="crud-header">

@@ -10,7 +10,7 @@ interface ReimbursementDetailModalProps {
   onApprove?: (id: string, note?: string) => void;
   onReject?: (id: string, note: string) => void;
   onMarkPaid?: (id: string) => void;
-  isAdmin?: boolean;
+  canApproveLeave?: boolean;
 }
 
 export const ReimbursementDetailModal: React.FC<ReimbursementDetailModalProps> = ({
@@ -20,7 +20,7 @@ export const ReimbursementDetailModal: React.FC<ReimbursementDetailModalProps> =
   onApprove,
   onReject,
   onMarkPaid,
-  isAdmin = false
+  canApproveLeave = false
 }) => {
   const [note, setNote] = useState('');
   const [isRejecting, setIsRejecting] = useState(false);
@@ -67,7 +67,7 @@ export const ReimbursementDetailModal: React.FC<ReimbursementDetailModalProps> =
               <span className="detail-value">{item.title as string}</span>
             </div>
             
-            {isAdmin && item.employee && (
+            {canApproveLeave && item.employee && (
               <div className="detail-item">
                 <span className="detail-label">Employee</span>
                 <span className="detail-value">{(item.employee as any).full_name}</span>
@@ -137,7 +137,7 @@ export const ReimbursementDetailModal: React.FC<ReimbursementDetailModalProps> =
               </div>
             )}
 
-            {isAdmin && status === 'submitted' && isRejecting && (
+            {canApproveLeave && status === 'submitted' && isRejecting && (
               <div style={{ marginTop: '1rem' }}>
                 <label className="detail-label" style={{ display: 'block', marginBottom: '0.5rem', color: '#ef4444' }}>Rejection Reason (Required)</label>
                 <textarea 
@@ -156,7 +156,7 @@ export const ReimbursementDetailModal: React.FC<ReimbursementDetailModalProps> =
         <div className="reimb-modal-footer">
           <Button variant="ghost" onClick={onClose}>Close</Button>
           
-          {isAdmin && status === 'submitted' && !isRejecting && (
+          {canApproveLeave && status === 'submitted' && !isRejecting && (
             <>
               <Button variant="danger" onClick={() => setIsRejecting(true)}>
                 <XCircle size={18} style={{ marginRight: '8px' }} />
@@ -169,7 +169,7 @@ export const ReimbursementDetailModal: React.FC<ReimbursementDetailModalProps> =
             </>
           )}
 
-          {isAdmin && status === 'submitted' && isRejecting && (
+          {canApproveLeave && status === 'submitted' && isRejecting && (
             <>
               <Button variant="ghost" onClick={() => setIsRejecting(false)}>Back</Button>
               <Button variant="danger" disabled={!note.trim()} onClick={() => onReject?.(String(item.id), note)}>
@@ -178,7 +178,7 @@ export const ReimbursementDetailModal: React.FC<ReimbursementDetailModalProps> =
             </>
           )}
 
-          {isAdmin && status === 'approved' && onMarkPaid && (
+          {canApproveLeave && status === 'approved' && onMarkPaid && (
             <Button variant="primary" style={{ background: '#8b5cf6' }} onClick={() => onMarkPaid(String(item.id))}>
               <CreditCard size={18} style={{ marginRight: '8px' }} />
               Mark as Paid

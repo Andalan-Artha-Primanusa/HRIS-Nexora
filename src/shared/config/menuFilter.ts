@@ -2,7 +2,6 @@ import type { AuthUser } from "@/shared/types/rbac.types";
 import type { MenuItem } from "./menu";
 import { api } from "@/shared/api/httpClient";
 import { useAuthStore } from "@/app/store/auth.store";
-import { RBACUtils } from "@/shared/hooks/rbac";
 
 let cachePromise: Promise<string[]> | null = null;
 
@@ -22,82 +21,13 @@ const computeFromAssignments = (
   return keys.length ? keys : null;
 };
 
-const addIf = (keys: Set<string>, condition: boolean, menuKeys: string[]) => {
-  if (!condition) return;
-  menuKeys.forEach((key) => keys.add(key));
-};
-
-const defaultMenuKeysForUser = (user: AuthUser): string[] => {
-  const keys = new Set<string>();
-
-  addIf(keys, RBACUtils.hasPermission(user, "reporting.dashboard"), [
-    "dashboard",
-    "laporan-analitik",
-  ]);
-
-  addIf(keys, RBACUtils.hasPermission(user, "employee.view"), ["employees"]);
-
-  addIf(keys, RBACUtils.hasPermission(user, ["leave.view", "leave.create", "leave.approve"]), [
-    "manajemen-cuti",
-    "manajemen-cuti.permohonan",
-    "manajemen-cuti.kalender",
-    "manajemen-cuti.saldo",
-  ]);
-
-  addIf(keys, RBACUtils.hasPermission(user, "leave.approve"), [
-    "manajemen-cuti",
-    "manajemen-cuti.persetujuan",
-  ]);
-
-  addIf(keys, RBACUtils.hasPermission(user, ["reimbursement.view", "reimbursement.approve", "reimbursement.pay"]), [
-    "reimbursements",
-  ]);
-
-  addIf(keys, RBACUtils.hasPermission(user, "payroll.view"), [
-    "penggajian",
-    "penggajian.ringkasan",
-    "penggajian.daftar",
-    "penggajian.proses",
-    "penggajian.laporan",
-  ]);
-
-  addIf(keys, RBACUtils.hasPermission(user, "attendance.view_all"), [
-    "absensi-waktu",
-    "absensi-waktu.reports",
-  ]);
-
-  addIf(keys, RBACUtils.hasPermission(user, "kpi.view"), ["kpi-kinerja"]);
-  addIf(keys, RBACUtils.hasPermission(user, "asset.view"), ["assets"]);
-  addIf(keys, RBACUtils.hasPermission(user, "training.view"), [
-    "pelatihan-kompetensi",
-    "pelatihan-kompetensi.pelatihan",
-  ]);
-  addIf(keys, RBACUtils.hasPermission(user, "admin.import.execute"), ["master-data", "master-data.pusat-impor"]);
-  addIf(keys, RBACUtils.hasPermission(user, "admin.approval_flow.manage"), [
-    "alat-admin",
-    "alat-admin.sistem",
-    "alat-admin.sistem.alur-persetujuan",
-  ]);
-
-  return Array.from(keys);
-};
-
-const mergeWithDefaultKeys = (keys: string[], user: AuthUser): string[] => {
-  return Array.from(new Set([...keys, ...defaultMenuKeysForUser(user)]));
-};
-
 /**
  * Mengambil allowedMenuKeys terpusat dan memastikan sinkronisasi absolut dengan auth.store
  */
 export const fetchAllowedMenuKeys = async (user: AuthUser | null = null): Promise<string[]> => {
   const storeKeys = useAuthStore.getState().allowedMenuKeys;
   if (storeKeys.length > 0) {
-    if (!user) return storeKeys;
-    const mergedKeys = mergeWithDefaultKeys(storeKeys, user);
-    if (mergedKeys.length !== storeKeys.length) {
-      useAuthStore.getState().setAllowedMenuKeys(mergedKeys);
-    }
-    return mergedKeys;
+    return storeKeys;
   }
   if (cachePromise) return cachePromise;
 
@@ -117,7 +47,7 @@ export const fetchAllowedMenuKeys = async (user: AuthUser | null = null): Promis
         const items = adminRes.data?.data?.items ?? [];
         const computed = computeFromAssignments(items, user);
         if (computed) {
-          const finalKeys = mergeWithDefaultKeys(stripAdminKeys(computed, user), user);
+          const finalKeys = stripAdminKeys(computed, user);
           useAuthStore.getState().setAllowedMenuKeys(finalKeys);
           return finalKeys;
         }
@@ -130,7 +60,7 @@ export const fetchAllowedMenuKeys = async (user: AuthUser | null = null): Promis
     try {
       const res = await api.get<{ data?: string[] }>("/user/menus");
       const data = res.data?.data ?? [];
-      const finalKeys = mergeWithDefaultKeys(stripAdminKeys(Array.isArray(data) ? data : [], user), user);
+      const finalKeys = stripAdminKeys(Array.isArray(data) ? data : [], user);
       useAuthStore.getState().setAllowedMenuKeys(finalKeys);
       return finalKeys;
     } catch {
@@ -148,6 +78,7 @@ export const fetchAllowedMenuKeys = async (user: AuthUser | null = null): Promis
 
 export const clearMenuCache = () => {
   cachePromise = null;
+  useAuthStore.getState().setAllowedMenuKeys([]);
 };
 
 const collectKeys = (items: MenuItem[]): Set<string> => {
@@ -188,7 +119,7 @@ export const filterMenuItems = (
     : useAuthStore.getState().allowedMenuKeys;
 
   const keys = effectiveKeys && effectiveKeys.length > 0
-    ? new Set(mergeWithDefaultKeys(effectiveKeys, user))
+    ? new Set(effectiveKeys)
     : collectKeys(items);
 
   return filterByKeys(items, keys);

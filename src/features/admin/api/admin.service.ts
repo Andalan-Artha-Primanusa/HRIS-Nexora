@@ -7,11 +7,11 @@ type UnknownRecord = Record<string, unknown>;
 const toRecord = (value: unknown): UnknownRecord =>
   value && typeof value === "object" ? (value as UnknownRecord) : {};
 
-const isAdminEntityItem = (item: unknown): item is AdminEntityItem =>
+const isApiEntity = (item: unknown): item is AdminEntityItem =>
   item !== null && typeof item === "object";
-const isAdminUser = (item: unknown): item is AdminUser => isAdminEntityItem(item);
-const isAdminRole = (item: unknown): item is AdminRole => isAdminEntityItem(item);
-const isAdminPermission = (item: unknown): item is AdminPermission => isAdminEntityItem(item);
+const isApiUser = (item: unknown): item is AdminUser => isApiEntity(item);
+const isApiRole = (item: unknown): item is AdminRole => isApiEntity(item);
+const isApiPermission = (item: unknown): item is AdminPermission => isApiEntity(item);
 
 /**
  * Get all users with pagination support
@@ -21,7 +21,7 @@ export const getAllUsers = async (page = 1, perPage = 50) => {
     params: { page, per_page: perPage }
   });
   const raw = response.data;
-  const parsed = parsePaginatedResponse<AdminUser>(raw, isAdminUser);
+  const parsed = parsePaginatedResponse<AdminUser>(raw, isApiUser);
   return {
     items: parsed.items,
     totalPages: parsed.totalPages,
@@ -67,7 +67,7 @@ export const getAllRoles = async (page = 1, perPage = 50) => {
     params: { page, per_page: perPage }
   });
   const raw = response.data;
-  const parsed = parsePaginatedResponse<AdminRole>(raw, isAdminRole);
+  const parsed = parsePaginatedResponse<AdminRole>(raw, isApiRole);
   return {
     items: parsed.items,
     totalPages: parsed.totalPages,
@@ -143,7 +143,7 @@ export const getAllPermissions = async (page = 1, perPage = 50) => {
     params: { page, per_page: perPage }
   });
   const raw = response.data;
-  const parsed = parsePaginatedResponse<AdminPermission>(raw, isAdminPermission);
+  const parsed = parsePaginatedResponse<AdminPermission>(raw, isApiPermission);
   return {
     items: parsed.items,
     totalPages: parsed.totalPages,

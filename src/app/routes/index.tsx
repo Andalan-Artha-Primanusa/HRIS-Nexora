@@ -833,9 +833,9 @@ export const router = createBrowserRouter([
           { path: "/recruitment/candidates", element: <CandidatePipelinePage /> },
           { path: "/recruitment/talent-pool", element: <TalentPoolPage /> },
           
-          { path: "/performance/okrs", element: <OkrManagementPage /> },
-          { path: "/performance/okrs/create", element: <OkrFormPage /> },
-          { path: "/performance/okrs/edit/:id", element: <OkrFormPage /> },
+          { path: "/performance/okrs", element: <MenuRouteGuard menuKey="kpi-kinerja"><OkrManagementPage /></MenuRouteGuard> },
+          { path: "/performance/okrs/create", element: <MenuRouteGuard menuKey="kpi-kinerja"><OkrFormPage /></MenuRouteGuard> },
+          { path: "/performance/okrs/edit/:id", element: <MenuRouteGuard menuKey="kpi-kinerja"><OkrFormPage /></MenuRouteGuard> },
           
           { path: "/engagement/surveys", element: <EngagementSurveysPage /> },
           { path: "/engagement/surveys/create", element: <SurveyFormPage /> },
@@ -861,9 +861,9 @@ export const router = createBrowserRouter([
           { path: "/workforce/holidays/edit/:id", element: <HolidayFormPage /> },
 
           { path: "/training", element: <Navigate to="/training/programs" replace /> },
-          { path: "/training/programs", element: <TrainingManagementPage /> },
-          { path: "/training/programs/create", element: <TrainingFormPage /> },
-          { path: "/training/programs/edit/:id", element: <TrainingFormPage /> },
+          { path: "/training/programs", element: <MenuRouteGuard menuKey="pelatihan-kompetensi.pelatihan"><TrainingManagementPage /></MenuRouteGuard> },
+          { path: "/training/programs/create", element: <MenuRouteGuard menuKey="pelatihan-kompetensi.pelatihan"><TrainingFormPage /></MenuRouteGuard> },
+          { path: "/training/programs/edit/:id", element: <MenuRouteGuard menuKey="pelatihan-kompetensi.pelatihan"><TrainingFormPage /></MenuRouteGuard> },
           { path: "/training/enrollments", element: <Navigate to="/training/programs" replace /> },
 
           { path: "/competencies", element: <CompetencyMatrixPage /> },
@@ -883,13 +883,13 @@ export const router = createBrowserRouter([
           { path: "/workforce/overtime-rules/create", element: <OvertimeRuleFormPage /> },
           { path: "/workforce/overtime-rules/edit/:id", element: <OvertimeRuleFormPage /> },
 
-          { path: "/biometric/devices", element: <BiometricDevicesPage /> },
+          { path: "/biometric/devices", element: <MenuRouteGuard menuKey="alat-admin.sistem.biometrik"><BiometricDevicesPage /></MenuRouteGuard> },
           { path: "/enterprise/compensation", element: <CompensationPage /> },
-          { path: "/inventory/assets", element: <AssetManagementPage /> },
-          { path: "/assets", element: <AssetManagementPage /> },
+          { path: "/inventory/assets", element: <MenuRouteGuard menuKey="assets"><AssetManagementPage /></MenuRouteGuard> },
+          { path: "/assets", element: <MenuRouteGuard menuKey="assets"><AssetManagementPage /></MenuRouteGuard> },
           { path: "/assets/assignments", element: <Navigate to="/assets" replace /> },
-          { path: "/inventory/assets/create", element: <AssetFormPage /> },
-          { path: "/inventory/assets/edit/:id", element: <AssetFormPage /> },
+          { path: "/inventory/assets/create", element: <MenuRouteGuard menuKey="assets"><AssetFormPage /></MenuRouteGuard> },
+          { path: "/inventory/assets/edit/:id", element: <MenuRouteGuard menuKey="assets"><AssetFormPage /></MenuRouteGuard> },
           { path: "/tasks", element: <TaskManagementPage /> },
           { path: "/promotions", element: <PromotionPage /> },
           { path: "/admin/assignment-letters", element: <AssignmentLettersPage /> },
@@ -908,7 +908,7 @@ export const router = createBrowserRouter([
               { path: "notifications", element: <NotificationSettingsPage /> },
             ]
           },
-          { path: "/organization/master-data", element: <MasterDataPage /> },
+          { path: "/organization/master-data", element: <MenuRouteGuard menuKey="master-data"><MasterDataPage /></MenuRouteGuard> },
         ],
       },
       {

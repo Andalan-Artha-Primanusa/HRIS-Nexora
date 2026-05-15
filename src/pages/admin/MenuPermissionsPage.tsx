@@ -5,6 +5,7 @@ import { api } from "@/shared/api/httpClient";
 import { showToast } from "@/shared/ui/toast";
 import { clearMenuCache } from "@/shared/config/menuFilter";
 import { Shield, Search, Loader2, CheckSquare, Users, LayoutDashboard, Info } from "lucide-react";
+import { ROLES } from "@/shared/types/rbac.types";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "@/pages/employee/EmployeesPage.css";
@@ -72,6 +73,10 @@ const MenuPermissionsPage = () => {
       );
       clearMenuCache();
       window.dispatchEvent(new CustomEvent('menu-cache-cleared'));
+      showToast(
+        `Akses menu "${menuItems.find(m => m.key === menuKey)?.label || menuKey}" berhasil diperbarui`,
+        "success"
+      );
     } catch {
       showToast("Gagal memperbarui akses menu", "error");
     } finally {
@@ -250,7 +255,7 @@ const MenuPermissionsPage = () => {
                       <th>Path</th>
                       {roles.map((role) => (
                         <th key={role.id} className="th-center" style={{ minWidth: 100 }}>
-                          {role.name === "super_admin"
+                          {role.name === ROLES.SUPER_ADMIN
                             ? "Super Admin"
                             : role.name.charAt(0).toUpperCase() + role.name.slice(1)}
                         </th>

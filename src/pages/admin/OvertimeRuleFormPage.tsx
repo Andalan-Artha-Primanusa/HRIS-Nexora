@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save, Clock, DollarSign, Timer, Settings, Info, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Save, Clock, DollarSign, Timer, Settings, Info, RefreshCw, CheckCircle2, Shield } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { workforceService } from '@/features/workforce/api/workforce.service';
+import { useAuthStore } from '@/app/store/auth.store';
+import { RBACUtils } from '@/shared/hooks/rbac';
 import './AdminWorkforcePages.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
@@ -18,6 +20,13 @@ const toOvertimeRuleFormState = (value: any) => ({
 });
 
 const OvertimeRuleFormPage: React.FC = () => {
+  const user = useAuthStore((state) => state.user);
+  const canAccess = RBACUtils.hasPermission(user, 'overtime.view');
+  if (!canAccess) {
+    return (
+      <div className="crud-page"><Card className="hero-card"><div className="hero-card-inner"><div className="hero-content"><div className="hero-badge"><Shield size={16} /><span>Admin Center</span></div><h1 className="hero-title">Akses Ditolak</h1><p className="hero-subtitle">Anda tidak memiliki izin untuk mengakses halaman ini.</p></div></div></Card></div>
+    );
+  }
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = !!id;

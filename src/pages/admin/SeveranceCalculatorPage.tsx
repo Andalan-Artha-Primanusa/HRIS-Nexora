@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Calculator, Download, RefreshCw, BookTemplate } from 'lucide-react';
+import { Calculator, Download, RefreshCw, BookTemplate, Shield } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { getAllEmployees } from '@/features/employee/api/employee.service';
 import { legalService } from '@/features/legal/api/legal.service';
 import { api } from '@/shared/api/httpClient';
+import { useAuthStore } from '@/app/store/auth.store';
+import { RBACUtils } from '@/shared/hooks/rbac';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import '@/shared/styles/CrudPage.css';
@@ -12,6 +14,13 @@ import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
 
 const SeveranceCalculatorPage: React.FC = () => {
+  const user = useAuthStore((state) => state.user);
+  const canAccess = RBACUtils.hasPermission(user, 'payroll.view');
+  if (!canAccess) {
+    return (
+      <div className="crud-page"><Card className="hero-card"><div className="hero-card-inner"><div className="hero-content"><div className="hero-badge"><Shield size={16} /><span>Admin Center</span></div><h1 className="hero-title">Akses Ditolak</h1><p className="hero-subtitle">Anda tidak memiliki izin untuk mengakses halaman ini.</p></div></div></Card></div>
+    );
+  }
   const [employees, setEmployees] = useState<any[]>([]);
   const [selectedEmployee, setSelectedEmployee] = useState('');
   const [calculation, setCalculation] = useState<any>(null);

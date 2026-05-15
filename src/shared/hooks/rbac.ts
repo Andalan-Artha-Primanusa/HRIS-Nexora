@@ -10,37 +10,6 @@ const normalizeName = (value: string): string => value.trim().toLowerCase();
 
 const ROLE_PERMISSION_FALLBACKS: Record<string, string[] | "*"> = {
   [ROLES.SUPER_ADMIN]: "*",
-  [ROLES.ADMIN]: "*",
-  [ROLES.HR]: [
-    "employee.view",
-    "leave.view",
-    "leave.create",
-    "leave.approve",
-    "reimbursement.view",
-    "reimbursement.approve",
-    "reimbursement.pay",
-    "reporting.dashboard",
-    "attendance.view_all",
-    "payroll.view",
-    "kpi.view",
-    "training.view",
-    "asset.view",
-    "document.view",
-  ],
-  [ROLES.MANAGER]: [
-    "employee.view",
-    "leave.view",
-    "leave.approve",
-    "reimbursement.view",
-    "reimbursement.approve",
-    "reporting.dashboard",
-    "attendance.view_all",
-    "payroll.view",
-    "kpi.view",
-    "training.view",
-    "asset.view",
-    "document.view",
-  ],
 };
 
 export class RBACUtils {
@@ -117,16 +86,9 @@ export class RBACUtils {
    */
   static getRoleDisplayName(role: string): string {
     if (!role) return '-';
-    const roleMap: Record<string, string> = {
-      super_admin: 'Super Admin',
-      admin: 'Administrator',
-      hr: 'HR Staff',
-      manager: 'Manager',
-      employee: 'Employee',
-    };
-    if (roleMap[role]) return roleMap[role];
 
-    // Dynamic Title Case fallback
+    if (role === ROLES.SUPER_ADMIN) return 'Super Admin';
+
     return role
       .split(/[_-]/)
       .map((w) => w.charAt(0).toUpperCase() + w.slice(1))

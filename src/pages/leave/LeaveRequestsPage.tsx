@@ -28,7 +28,7 @@ const LeaveRequestsPage = () => {
   const allowedMenuKeys = useAuthStore((state) => state.allowedMenuKeys);
 
   // Otorisasi dinamis menghindari hardcode array role statis
-  const isAdmin =
+  const canApproveLeave =
     RBACUtils.hasPermission(user, "leave.approve") ||
     allowedMenuKeys.includes("cuti.persetujuan") ||
     allowedMenuKeys.includes("leave.approval");
@@ -253,7 +253,7 @@ const LeaveRequestsPage = () => {
                 setDeleteTarget(item);
               }}
               onHistory={(id) => setHistoryModal({ module: "leave", id })}
-              isAdmin={isAdmin}
+              canApproveLeave={canApproveLeave}
             />
           )}
           {totalPages > 1 && (
@@ -297,7 +297,7 @@ const LeaveRequestsPage = () => {
         item={selectedDetail}
         onApprove={handleApprove}
         onReject={handleReject}
-        isAdmin={isAdmin}
+        canApproveLeave={canApproveLeave}
       />
 
       {historyModal && (

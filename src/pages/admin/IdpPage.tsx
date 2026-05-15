@@ -1,10 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, CheckCircle2, Clock, BookOpen, TrendingUp } from 'lucide-react';
+import { Plus, CheckCircle2, Clock, BookOpen, TrendingUp, Shield } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { engagementService } from '@/features/engagement/api/engagement.service';
+import { useAuthStore } from '@/app/store/auth.store';
+import { RBACUtils } from '@/shared/hooks/rbac';
 
 const IdpPage: React.FC = () => {
+  const user = useAuthStore((state) => state.user);
+  const canAccess = RBACUtils.hasPermission(user, ['kpi.view', 'employee.view']);
+  if (!canAccess) {
+    return (
+      <div className="crud-page"><Card className="hero-card"><div className="hero-card-inner"><div className="hero-content"><div className="hero-badge"><Shield size={16} /><span>Admin Center</span></div><h1 className="hero-title">Akses Ditolak</h1><p className="hero-subtitle">Anda tidak memiliki izin untuk mengakses halaman ini.</p></div></div></Card></div>
+    );
+  }
   const [, setIdp] = useState<any>(null);
   const [, setLoading] = useState(true);
 

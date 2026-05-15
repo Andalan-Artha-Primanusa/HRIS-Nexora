@@ -34,14 +34,14 @@ const MyTrainingsPage: React.FC = () => {
   const [historyModal, setHistoryModal] = useState<{ module: string; id: number | string } | null>(null);
   const pageSize = 10;
 
-  const isAdmin = RBACUtils.hasPermission(user, 'training.view');
-  const isEmployee = !isAdmin;
+  const canViewAllTrainings = RBACUtils.hasPermission(user, 'training.view');
+  const isSelfService = !canViewAllTrainings;
 
   const fetchData = async () => {
     setLoading(true);
     setErrorMessage(null);
     try {
-      if (isEmployee) {
+      if (isSelfService) {
         const [myRes, availRes] = await Promise.all([
           trainingService.getMyTrainings(page, pageSize),
           trainingService.getAvailableTrainings({ page, per_page: pageSize }),
@@ -51,7 +51,7 @@ const MyTrainingsPage: React.FC = () => {
         setTrainings(myParsed.items);
         setAvailable(availableParsed.items);
         setTotalPages(tab === 'Tersedia' ? availableParsed.totalPages : myParsed.totalPages);
-      } else if (isAdmin) {
+      } else if (canViewAllTrainings) {
         const [progRes, enrollRes] = await Promise.all([
           trainingService.getPrograms({ page, per_page: pageSize }),
           trainingService.getEnrollments(page, pageSize),
@@ -72,7 +72,7 @@ const MyTrainingsPage: React.FC = () => {
     }
   };
 
-  useEffect(() => { fetchData(); }, [isAdmin, isEmployee, page, pageSize, tab]);
+  useEffect(() => { fetchData(); }, [canViewAllTrainings, isSelfService, page, pageSize, tab]);
 
   const handleEnroll = async (id: number) => {
     try {
@@ -117,7 +117,7 @@ const MyTrainingsPage: React.FC = () => {
             <div className="hero-badge"><GraduationCap size={16} /><span>Pengembangan Diri</span></div>
             <h1 className="hero-title">Pelatihan Saya</h1>
             <p className="hero-subtitle">
-              {isEmployee ? 'Ikuti pelatihan dan lacak kemajuan belajar Anda.' : 'Lihat program pelatihan dan enrollment.'}
+              {isSelfService ? 'Ikuti pelatihan dan lacak kemajuan belajar Anda.' : 'Lihat program pelatihan dan enrollment.'}
             </p>
           </div>
           <div className="hero-actions">
@@ -233,7 +233,7 @@ const MyTrainingsPage: React.FC = () => {
                           </td>
                           <td className="td-center">
                             {tab === 'Tersedia' ? (
-                              isEmployee ? (
+                              isSelfService ? (
                                 <button className="btn-primary" style={{ padding: '6px 14px', fontSize: '0.75rem' }} onClick={() => handleEnroll(t.id)}>Daftar</button>
                               ) : (
                                 <span className="badge-soft badge-soft--blue">Admin</span>

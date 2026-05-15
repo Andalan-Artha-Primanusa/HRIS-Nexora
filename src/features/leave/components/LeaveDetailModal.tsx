@@ -9,10 +9,10 @@ interface LeaveDetailModalProps {
   item: any;
   onApprove?: (id: string) => void;
   onReject?: (id: string) => void;
-  isAdmin?: boolean;
+  canApproveLeave?: boolean;
 }
 
-export const LeaveDetailModal: React.FC<LeaveDetailModalProps> = ({ isOpen, onClose, item, onApprove, onReject, isAdmin }) => {
+export const LeaveDetailModal: React.FC<LeaveDetailModalProps> = ({ isOpen, onClose, item, onApprove, onReject, canApproveLeave }) => {
   if (!isOpen || !item) return null;
 
   const formatDate = (date: any) => {
@@ -125,7 +125,7 @@ export const LeaveDetailModal: React.FC<LeaveDetailModalProps> = ({ isOpen, onCl
 
         <div className="modal-footer" style={{ padding: '1.25rem', borderTop: '1px solid rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', background: 'rgba(255,255,255,0.5)' }}>
           <Button variant="outline" onClick={onClose}>Tutup</Button>
-          {isAdmin && status === 'pending' && (
+          {canApproveLeave && status === 'pending' && (
             <>
               <Button variant="outline" style={{ color: '#ef4444', borderColor: '#ef4444' }} onClick={() => onReject?.(String(item.id))}>Tolak</Button>
               <Button variant="primary" onClick={() => onApprove?.(String(item.id))}>Setujui Cuti</Button>

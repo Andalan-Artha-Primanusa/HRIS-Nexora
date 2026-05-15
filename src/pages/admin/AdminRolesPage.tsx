@@ -9,6 +9,7 @@ import { KeyRound, RefreshCw, Shield, Plus, Search, Filter, Edit, Trash2 } from 
 import { deleteRole, getAllRoles } from "@/features/admin/api/admin.service";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { RBACUtils } from "@/shared/hooks/rbac";
+import { ROLES } from "@/shared/types/rbac.types";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "./AdminRolesPage.css";
@@ -106,8 +107,8 @@ const AdminRolesPage = () => {
   };
 
   const requestDelete = (role: Role) => {
-    if (role.id === 1 || role.name === "admin" || role.name === "super_admin") {
-      showToast("Peran sistem utama tidak dapat dihapus.", "error");
+    if (role.name === ROLES.SUPER_ADMIN) {
+      showToast("Peran Super Admin tidak dapat dihapus.", "error");
       return;
     }
 
@@ -339,7 +340,7 @@ const AdminRolesPage = () => {
                               className="action-btn action-btn-delete"
                               onClick={() => requestDelete(role)}
                               title="Hapus Peran"
-                              disabled={role.id === 1 || role.name === "admin" || role.name === "super_admin"}
+                              disabled={role.name === ROLES.SUPER_ADMIN}
                             >
                               <Trash2 size={16} />
                             </button>

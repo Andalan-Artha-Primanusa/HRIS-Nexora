@@ -64,7 +64,7 @@ const LeaveApprovalPage = () => {
   const allowedMenuKeys = useAuthStore((state) => state.allowedMenuKeys);
 
   // Otorisasi dinamis via kapabilitas
-  const isAdmin =
+  const canApproveLeave =
     RBACUtils.hasPermission(user, "leave.approve") ||
     allowedMenuKeys.includes("cuti.persetujuan") ||
     allowedMenuKeys.includes("leave.approval");
@@ -311,7 +311,7 @@ const LeaveApprovalPage = () => {
                       <th>Hari</th>
                       <th>Alasan</th>
                       <th className="th-center">Status</th>
-                      {isAdmin && (
+                      {canApproveLeave && (
                         <th className="th-center" style={{ width: "140px" }}>
                           Aksi
                         </th>
@@ -374,7 +374,7 @@ const LeaveApprovalPage = () => {
                                   : "Rejected"}
                             </span>
                           </td>
-                          {isAdmin && (
+                          {canApproveLeave && (
                             <td className="td-center">
                               <div className="action-btn-group">
                                 {(item.status === "pending" || item.status === "submitted") &&

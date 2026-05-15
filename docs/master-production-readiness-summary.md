@@ -249,11 +249,38 @@ Jika PM bertanya “apakah sudah sesuai?”:
 
 ---
 
-# 9. Lampiran Dokumen Audit
+# 9. Update dari Wave 4 — Temuan Baru
 
-- `C:\Users\iqbal\hris-frontend\docs\frontend-flow-map.md`
-- `C:\Users\iqbal\hris-frontend\docs\wave-1-flow-audit.md`
-- `C:\Users\iqbal\hris-frontend\docs\wave-1-fix-priority.md`
-- `C:\Users\iqbal\hris-frontend\docs\wave-2-flow-audit.md`
-- `C:\Users\iqbal\hris-frontend\docs\wave-3-flow-audit.md`
+Setelah audit lanjutan (Wave 4) terhadap modul yang sebelumnya belum diaudit secara mendalam, ditemukan beberapa temuan baru yang signifikan:
+
+### Temuan P0 baru dari Wave 4
+
+1. **Dashboard & KPI: Semua statistik dari page-1.** Admin dashboard menghitung total karyawan, tingkat kehadiran, pending leave, dsb dari data halaman 1 saja (Laravel default pagination). Semua angka dashboard bisa salah jika dataset > 15 record.
+2. **Engagement Analytics / Succession / IDP: Mock data override.** API nyata dipanggil, data di-fetch, tetapi UI menampilkan hardcoded mock data. Fitur terlihat selesai padahal tidak nyata.
+3. **Recruitment: 7+ tombol mati.** View Details, Schedule Interview, Make Offer, Send Message, drag-and-drop candidate — semuanya tidak berfungsi. Tidak ada menu sidebar, tidak ada route guard.
+4. **Reporting: Service layer mati total.** `reporting.service.ts` (3 methods) tidak pernah dipanggil oleh satu halaman pun. 5 sub-page laporan (attendance, leave, payroll, assets, employee) tidak reachable karena redirect ke dashboard.
+5. **Biometric: Menu link broken.** Menu mengarah ke `/admin/biometric-devices` tapi route aktual adalah `/biometric/devices`. 3/4 tombol aksi mati.
+
+### Modul yang patut dijadikan standar
+
+1. **Tasks Module** — Satu-satunya modul dengan real pagination, `LoadingState`/`ErrorState`/`EmptyState` konsisten, dan UX matang.
+2. **Profile Module** — TypeScript types terbukti, error handling terbaik, 0 console.log, extraction helper paling robust.
+3. **Compliance Settings** — Pattern `DataStateDisplay` diterapkan dengan benar.
+
+### Rekomendasi baru
+
+1. Buat endpoint aggregate `GET /api/dashboard/stats` di backend — jangan hitung statistik dari page-1 data.
+2. Putuskan nasib modul Engagement/Career: implementasi benar atau keluarkan dari scope release.
+3. Standardisasi pagination: pilih real server-side atau client-side slicing — jangan hybrid yang menyesatkan.
+4. Implementasi pattern `DataStateDisplay` di semua halaman (ikuti contoh Tasks/Compliance).
+5. Hapus semua tombol yang belum punya handler — atau sambungkan ke service yang sudah ada.
+
+# 10. Lampiran Dokumen Audit
+
+- [`frontend-flow-map.md`](./frontend-flow-map.md)
+- [`wave-1-flow-audit.md`](./wave-1-flow-audit.md)
+- [`wave-1-fix-priority.md`](./wave-1-fix-priority.md)
+- [`wave-2-flow-audit.md`](./wave-2-flow-audit.md)
+- [`wave-3-flow-audit.md`](./wave-3-flow-audit.md)
+- [`wave-4-flow-audit.md`](./wave-4-flow-audit.md)
 
