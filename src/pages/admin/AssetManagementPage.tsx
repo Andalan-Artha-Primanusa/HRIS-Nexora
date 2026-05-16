@@ -1,27 +1,16 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, RefreshCw, Package, Search, Filter, Laptop, Monitor, Smartphone, Briefcase, User, Trash2, Pencil, CheckCircle2, X, ArrowDownToLine, ArrowUpFromLine, Handshake, Box, CheckCircle, XCircle, History } from 'lucide-react';
+import { Plus, RefreshCw, Package, Search, Filter, Laptop, Monitor, Smartphone, Briefcase, User, Trash2, Pencil, CheckCircle2, X, ArrowDownToLine, ArrowUpFromLine } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { assetService } from '@/features/assets/api/asset.service';
-import { AssignAssetModal } from '@/features/assets/components/AssignAssetModal';
-import { ReturnAssetModal } from '@/features/assets/components/ReturnAssetModal';
 import { api } from '@/shared/api/httpClient';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/employee/EmployeesPage.css';
 import './AssetInventoryPage.css';
-import './AssetAssignmentsPage.css';
 import { showToast } from '@/shared/ui/toast';
-import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
-
-const formatDateTime = (input: string) => {
-  if (!input) return 'N/A';
-  const date = new Date(input);
-  if (Number.isNaN(date.getTime())) return input;
-  return new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(date);
-};
 
 const getAssetIcon = (category: string) => {
   const c = category?.toLowerCase() || '';
@@ -31,11 +20,11 @@ const getAssetIcon = (category: string) => {
   return Briefcase;
 };
 
-const TABS = ['Daftar Aset', 'Penugasan'] as const;
-type Tab = (typeof TABS)[number];
-
-const InventoryTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading, assets }) => {
+const AssetManagementPage: React.FC = () => {
   const navigate = useNavigate();
+  const [assets, setAssets] = useState<any[]>([]);
+  const [assignments, setAssignments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'Semua' | 'Tersedia' | 'Digunakan' | 'Perbaikan' | 'Dihapus'>('Semua');
   const [currentPage, setCurrentPage] = useState(1);
@@ -53,6 +42,49 @@ const InventoryTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading, 
   const [returningLoading, setReturningLoading] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  const fetchAssets = async () => {
+    setLoading(true);
+    try {
+      const [assetsRes, assignmentsRes] = await Promise.all([
+        assetService.getAssets(),
+        assetService.getAssignments().catch(() => ({})),
+      ]);
+      let assetsArray: any[] = [];
+      if (assetsRes?.data?.data && Array.isArray(assetsRes.data.data)) assetsArray = assetsRes.data.data;
+      else if (assetsRes?.data && Array.isArray(assetsRes.data)) assetsArray = assetsRes.data;
+      else if (Array.isArray(assetsRes)) assetsArray = assetsRes;
+      setAssets(assetsArray);
+
+      let assignmentsArray: any[] = [];
+      if (assignmentsRes?.data?.data && Array.isArray(assignmentsRes.data.data)) assignmentsArray = assignmentsRes.data.data;
+      else if (assignmentsRes?.data && Array.isArray(assignmentsRes.data)) assignmentsArray = assignmentsRes.data;
+      else if (Array.isArray(assignmentsRes)) assignmentsArray = assignmentsRes;
+      setAssignments(assignmentsArray);
+    } catch (error: any) {
+      console.error('Failed to fetch assets:', error);
+      showToast(error?.response?.data?.message || error?.message || 'Gagal memuat aset', 'error');
+      setAssets([]);
+      setAssignments([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const assetEmployeeMap = useMemo(() => {
+    const map = new Map<string | number, string>();
+    assignments.forEach((a) => {
+      if (!a.returned_at && a.status !== 'rejected') {
+        const employeeName = a.employee?.user?.name || a.employee?.full_name || a.employee?.name;
+        if (employeeName && a.asset?.id) {
+          map.set(a.asset.id, employeeName);
+        }
+      }
+    });
+    return map;
+  }, [assignments]);
+
+  useEffect(() => { fetchAssets(); }, []);
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -92,6 +124,7 @@ const InventoryTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading, 
       });
       closeAssignModal();
       showToast('Aset berhasil ditugaskan', 'success');
+      fetchAssets();
     } catch (error: any) {
       console.error('Failed to assign asset:', error);
       showToast(error?.response?.data?.message || error?.message || 'Gagal menugaskan aset', 'error');
@@ -123,6 +156,7 @@ const InventoryTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading, 
       });
       closeReturnModal();
       showToast('Aset berhasil dikembalikan', 'success');
+      fetchAssets();
     } catch (error: any) {
       console.error('Failed to return asset:', error);
       showToast(error?.response?.data?.message || error?.message || 'Gagal mengembalikan aset', 'error');
@@ -177,12 +211,12 @@ const InventoryTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading, 
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
-
     setDeleting(true);
     try {
       await assetService.deleteAsset(deleteTarget.id);
       showToast('Aset berhasil dihapus', 'success');
       setDeleteTarget(null);
+      fetchAssets();
     } catch (error: any) {
       console.error('Failed to delete asset:', error);
       showToast(error?.response?.data?.message || error?.message || 'Gagal menghapus aset', 'error');
@@ -203,13 +237,41 @@ const InventoryTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading, 
   };
 
   const getAssignedEmployee = (asset: any) => {
+    if (assetEmployeeMap?.has(asset.id)) {
+      return assetEmployeeMap.get(asset.id);
+    }
     const currentAssignment = asset.assignments?.find((a: any) => a.status === 'assigned');
     if (!currentAssignment) return null;
     return currentAssignment.employee?.user?.name || currentAssignment.employee?.full_name || '-';
   };
 
   return (
-    <>
+    <div className="crud-page asset-page">
+      <Card className="hero-card">
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Package size={16} />
+              <span>Inventaris Perusahaan</span>
+            </div>
+            <h1 className="hero-title">Aset & Properti</h1>
+            <p className="hero-subtitle">
+              Pantau distribusi, kondisi, dan status kepemilikan aset perusahaan secara terpusat.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn-primary" onClick={() => navigate('/inventory/assets/create')}>
+              <Plus size={16} />
+              Buat Aset Baru
+            </button>
+            <button className="btn-outline" onClick={() => { fetchAssets(); }} disabled={loading}>
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Segarkan
+            </button>
+          </div>
+        </div>
+      </Card>
+
       <div className="employee-summary-wrapper">
         {summaryCards.map((card) => {
           const Icon = card.icon;
@@ -426,374 +488,6 @@ const InventoryTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading, 
         onConfirm={() => void handleDelete()}
         onCancel={() => setDeleteTarget(null)}
       />
-    </>
-  );
-};
-
-const AssignmentsTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading, assets }) => {
-  const [assignments, setAssignments] = useState<any[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'Semua' | 'Aktif' | 'Dikembalikan'>('Semua');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(10);
-  const [showFilters, setShowFilters] = useState(false);
-  const [showAssignModal, setShowAssignModal] = useState(false);
-  const [returnTarget, setReturnTarget] = useState<{ id: string | number; name: string } | null>(null);
-  const [returning, setReturning] = useState(false);
-  const [historyModal, setHistoryModal] = useState<{ module: string; id: number | string } | null>(null);
-
-  const fetchAssignments = async () => {
-    try {
-      const res = await assetService.getAssignments();
-      let arr: any[] = [];
-      if (res?.data?.data && Array.isArray(res.data.data)) arr = res.data.data;
-      else if (res?.data && Array.isArray(res.data)) arr = res.data;
-      else if (Array.isArray(res)) arr = res;
-      setAssignments(arr);
-    } catch (error: any) {
-      console.error('Failed to fetch assignments:', error);
-      showToast(error?.response?.data?.message || error?.message || 'Gagal memuat penugasan', 'error');
-      setAssignments([]);
-    }
-  };
-
-  useEffect(() => { fetchAssignments(); }, []);
-
-  const filteredAssignments = useMemo(() => {
-    return assignments.filter((assignment) => {
-      const searchStr = searchQuery.toLowerCase();
-      const assetName = (assignment.asset?.name || '').toLowerCase();
-      const employeeName = (assignment.employee?.user?.name || assignment.employee?.full_name || assignment.employee?.name || '').toLowerCase();
-      const assetCode = (assignment.asset?.code || '').toLowerCase();
-      const textMatch = assetName.includes(searchStr) || employeeName.includes(searchStr) || assetCode.includes(searchStr);
-      const isReturned = !!assignment.returned_at;
-      let statusMatch = true;
-      if (activeTab === 'Aktif') statusMatch = !isReturned;
-      else if (activeTab === 'Dikembalikan') statusMatch = isReturned;
-      return textMatch && statusMatch;
-    });
-  }, [assignments, searchQuery, activeTab]);
-
-  const sortedAssignments = useMemo(() => {
-    return [...filteredAssignments].sort((a, b) => {
-      const dateA = new Date(a.assigned_at || a.assignment_date || a.created_at || 0).getTime();
-      const dateB = new Date(b.assigned_at || b.assignment_date || b.created_at || 0).getTime();
-      return dateB - dateA;
-    });
-  }, [filteredAssignments]);
-
-  const paginatedAssignments = sortedAssignments;
-
-  const [totalPages, setTotalPages] = useState(1);
-
-  const summaryCards = useMemo(() => [
-    { label: 'Total Penugasan', subtitle: 'Seluruh penugasan aset', value: String(assignments.length), change: 'Data penugasan', tone: 'blue' as const, icon: Handshake },
-    { label: 'Hasil Filter', subtitle: 'Penugasan sesuai pencarian', value: String(sortedAssignments.length), change: `${paginatedAssignments.length} data per halaman`, tone: 'green' as const, icon: Search },
-    { label: 'Aktif', subtitle: 'Penugasan yang sedang berlangsung', value: String(assignments.filter(a => !a.returned_at).length), change: 'Dalam penggunaan', tone: 'orange' as const, icon: CheckCircle },
-    { label: 'Dikembalikan', subtitle: 'Penugasan yang sudah selesai', value: String(assignments.filter(a => !!a.returned_at).length), change: 'Sudah kembali', tone: 'purple' as const, icon: XCircle },
-  ], [assignments, sortedAssignments.length, paginatedAssignments.length]);
-
-  const clearFilters = () => {
-    setSearchQuery('');
-    setActiveTab('Semua');
-    setCurrentPage(1);
-  };
-
-  const handleReturn = async (data: { return_note: string; returned_at: string; condition: string }) => {
-    if (!returnTarget) return;
-    setReturning(true);
-    try {
-      await assetService.returnAsset(returnTarget.id, data);
-      setReturnTarget(null);
-      fetchAssignments();
-      showToast('Aset berhasil dikembalikan', 'success');
-    } catch (error: any) {
-      console.error('Failed to return asset:', error);
-      showToast(error?.response?.data?.message || error?.message || 'Gagal mengembalikan aset', 'error');
-    } finally {
-      setReturning(false);
-    }
-  };
-
-  const getStatusBadge = (assignment: any) => {
-    if (assignment.status === 'approved') return <span className="badge-soft badge-soft--green">Disetujui</span>;
-    if (assignment.status === 'rejected') return <span className="badge-soft badge-soft--red">Ditolak</span>;
-    if (assignment.status === 'pending' || assignment.approval_flow_id) return <span className="badge-soft badge-soft--orange">Menunggu</span>;
-    if (!!assignment.returned_at) return <span className="badge-soft badge-soft--gray">Dikembalikan</span>;
-    return <span className="badge-soft badge-soft--green">Aktif</span>;
-  };
-
-  const handleApproveAssignment = async (assignment: any) => {
-    try {
-      await assetService.approveAssignment(assignment.id);
-      fetchAssignments();
-      showToast('Penugasan berhasil disetujui', 'success');
-    } catch (error: any) {
-      console.error(error);
-      showToast(error?.response?.data?.message || error?.message || 'Gagal menyetujui penugasan', 'error');
-    }
-  };
-
-  const handleRejectAssignment = async (assignment: any) => {
-    try {
-      await assetService.rejectAssignment(assignment.id);
-      fetchAssignments();
-      showToast('Penugasan berhasil ditolak', 'success');
-    } catch (error: any) {
-      console.error(error);
-      showToast(error?.response?.data?.message || error?.message || 'Gagal menolak penugasan', 'error');
-    }
-  };
-
-  return (
-    <>
-      <div className="assign-summary-wrapper">
-        {summaryCards.map((card) => {
-          const Icon = card.icon;
-          return (
-            <div key={card.label} className="assign-summary-card">
-              <div className="assign-summary-header">
-                <div>
-                  <p className="assign-summary-label">{card.label}</p>
-                  <p className="assign-summary-subtitle">{card.subtitle}</p>
-                </div>
-                <div className={`assign-summary-icon-wrapper assign-icon-${card.tone}`}>
-                  <Icon size={28} />
-                </div>
-              </div>
-              <div className={`assign-summary-value assign-value-${card.tone}`}>{card.value}</div>
-              <p className="assign-summary-trend">{card.change}</p>
-            </div>
-          );
-        })}
-      </div>
-
-      <Card className="analytics-title-card">
-        <div className="analytics-title-inner">
-          <div className="analytics-icon">
-            <Handshake size={24} />
-          </div>
-          <div>
-            <h2 className="analytics-title">Daftar Penugasan</h2>
-            <p className="analytics-subtitle">Kelola dan lihat semua penugasan aset</p>
-          </div>
-        </div>
-      </Card>
-
-      <Card className="control-section-card">
-        <div className="control-section-inner">
-          <div className="elyra-tabs">
-            {(['Semua', 'Aktif', 'Dikembalikan'] as const).map((tab) => (
-              <button key={tab} className={`elyra-tab ${activeTab === tab ? 'active' : ''}`} onClick={() => { setActiveTab(tab); setCurrentPage(1); }}>
-                {tab}
-              </button>
-            ))}
-          </div>
-          <div className="control-actions">
-            <div className="search-box">
-              <div className="search-icon-inside"><Search size={18} /></div>
-              <input type="text" placeholder="Cari penugasan..." value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }} className="search-input-pill" />
-            </div>
-            <button className={`filter-btn-rounded ${showFilters ? 'active' : ''}`} onClick={() => setShowFilters(!showFilters)}>
-              <Filter size={18} />
-              <span>Filter</span>
-            </button>
-          </div>
-        </div>
-        {showFilters && (
-          <div className="filter-dropdown">
-            <div className="filter-row">
-              {(searchQuery || activeTab !== 'Semua') && <button className="btn-clear-filter" onClick={clearFilters}>Hapus Filter</button>}
-            </div>
-          </div>
-        )}
-      </Card>
-
-      <div className="table-section">
-        <div className="wuw-table-area">
-          {loading && <LoadingState message="Memuat penugasan..." />}
-          {!loading && paginatedAssignments.length === 0 && (
-            <div style={{ padding: '5rem 0' }}>
-              <EmptyState title="Pencarian Kosong" message="Tidak ada penugasan yang sesuai dengan kriteria Anda." actionLabel="Bersihkan Filter" onAction={clearFilters} />
-            </div>
-          )}
-          {!loading && paginatedAssignments.length > 0 && (
-            <>
-              <div className="table-wrap">
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th style={{ width: '400px' }}>Penugasan</th>
-                      <th>Karyawan</th>
-                      <th>Tanggal Pinjam</th>
-                      <th>Tanggal Kembali</th>
-                      <th className="th-center">Status</th>
-                      <th className="th-center" style={{ width: '120px' }}>Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {paginatedAssignments.map((assignment) => {
-                      const employeeName = assignment.employee?.user?.name || assignment.employee?.full_name || assignment.employee?.name || '-';
-                      const assetName = assignment.asset?.name || '-';
-                      const assetCode = assignment.asset?.code || '-';
-                      return (
-                        <tr key={assignment.id}>
-                          <td>
-                            <div className="cell-name">
-                              <div className="cell-avatar"><Box size={20} /></div>
-                              <div className="cell-stacked">
-                                <span className="cell-name-text">{assetName}</span>
-                                <span className="cell-stacked__sub">{assetCode}</span>
-                              </div>
-                            </div>
-                          </td>
-                          <td>
-                            <div className="cell-stacked">
-                              <span className="cell-stacked__main">{employeeName}</span>
-                              <span className="cell-stacked__sub">{assignment.employee?.user?.email || ''}</span>
-                            </div>
-                          </td>
-                          <td>
-                            <div className="cell-stacked">
-                              <span className="cell-stacked__main" style={{ fontSize: '0.85rem' }}>{formatDateTime(assignment.assigned_at || assignment.assignment_date || assignment.created_at)}</span>
-                              <span className="cell-stacked__sub">Tanggal pinjam</span>
-                            </div>
-                          </td>
-                          <td>
-                            <div className="cell-stacked">
-                              <span className="cell-stacked__main" style={{ fontSize: '0.85rem' }}>{assignment.returned_at ? formatDateTime(assignment.returned_at) : '-'}</span>
-                              <span className="cell-stacked__sub">Tanggal kembali</span>
-                            </div>
-                          </td>
-                          <td className="td-center">{getStatusBadge(assignment)}</td>
-                          <td className="td-center">
-                            <div className="action-btn-group">
-                              {assignment.approval_flow_id && assignment.status !== 'approved' && assignment.status !== 'rejected' && assignment.can_act !== false && (
-                                <>
-                                  <button className="action-btn" style={{ color: '#10b981' }} onClick={() => handleApproveAssignment(assignment)} title="Setujui"><CheckCircle2 size={16} /></button>
-                                  <button className="action-btn" style={{ color: '#ef4444' }} onClick={() => handleRejectAssignment(assignment)} title="Tolak"><X size={16} /></button>
-                                </>
-                              )}
-                              {assignment.status === 'approved' && !assignment.returned_at && (
-                                <button className="action-btn action-btn-return" onClick={() => setReturnTarget({ id: assignment.id, name: assignment.asset?.name || 'Asset' })} title="Proses Pengembalian">
-                                  <CheckCircle size={16} />
-                                </button>
-                              )}
-                              {assignment.approval_flow_id && (
-                                <button className="action-btn" style={{ color: '#8b5cf6', background: '#f5f3ff' }} onClick={() => setHistoryModal({ module: 'asset_assignment', id: assignment.id })} title="Riwayat Approval"><History size={16} /></button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-              <div className="table-pagination">
-                <div className="pagination-info">Menampilkan <strong>{paginatedAssignments.length}</strong> dari <strong>{sortedAssignments.length}</strong> penugasan</div>
-                <div className="pagination-controls">
-                  <button className="pagination-btn" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1}>‹</button>
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <button key={page} className={`pagination-btn ${currentPage === page ? 'active' : ''}`} onClick={() => setCurrentPage(page)}>{page}</button>
-                  ))}
-                  <button className="pagination-btn" onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages}>›</button>
-                </div>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-
-      <AssignAssetModal isOpen={showAssignModal} onClose={() => setShowAssignModal(false)} onSave={async (formData: any) => {
-        await assetService.assignAsset(formData.asset_id, {
-          employee_id: formData.employee_id,
-          assignment_note: formData.assignment_note,
-          assigned_at: formData.assigned_at,
-        });
-        setShowAssignModal(false);
-        fetchAssignments();
-      }} assets={assets.filter(a => a.status?.toLowerCase() === 'available')} />
-
-      {returnTarget && (
-        <ReturnAssetModal isOpen={!!returnTarget} onClose={() => setReturnTarget(null)} onConfirm={handleReturn} assetName={returnTarget.name} loading={returning} />
-      )}
-
-      {historyModal && (
-        <ApprovalHistoryModal
-          isOpen={!!historyModal}
-          onClose={() => setHistoryModal(null)}
-          module={historyModal.module}
-          moduleId={historyModal.id}
-        />
-      )}
-    </>
-  );
-};
-
-const AssetManagementPage: React.FC = () => {
-  const navigate = useNavigate();
-  const [tab, setTab] = useState<Tab>('Daftar Aset');
-  const [assets, setAssets] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const fetchAssets = async () => {
-    setLoading(true);
-    try {
-      const response = await assetService.getAssets();
-      let assetsArray: any[] = [];
-      if (response?.data?.data && Array.isArray(response.data.data)) assetsArray = response.data.data;
-      else if (response?.data && Array.isArray(response.data)) assetsArray = response.data;
-      else if (Array.isArray(response)) assetsArray = response;
-      setAssets(assetsArray);
-    } catch (error: any) {
-      console.error('Failed to fetch assets:', error);
-      showToast(error?.response?.data?.message || error?.message || 'Gagal memuat aset', 'error');
-      setAssets([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { fetchAssets(); }, []);
-
-  return (
-    <div className="crud-page asset-page">
-      <Card className="hero-card">
-        <div className="hero-card-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Package size={16} />
-              <span>Inventaris Perusahaan</span>
-            </div>
-            <h1 className="hero-title">Aset & Properti</h1>
-            <p className="hero-subtitle">
-              Pantau distribusi, kondisi, dan status kepemilikan aset perusahaan secara terpusat.
-            </p>
-          </div>
-          <div className="hero-actions">
-            <button className="btn-primary" onClick={() => navigate('/inventory/assets/create')}>
-              <Plus size={16} />
-              Buat Aset Baru
-            </button>
-            <button className="btn-outline" onClick={() => { fetchAssets(); }} disabled={loading}>
-              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-              Segarkan
-            </button>
-          </div>
-        </div>
-      </Card>
-
-      <div className="elyra-tabs" style={{ marginBottom: '1.5rem' }}>
-        {TABS.map((t) => (
-          <button key={t} className={`elyra-tab ${tab === t ? 'active' : ''}`} onClick={() => setTab(t)}>
-            {t === 'Daftar Aset' ? <><Package size={16} /> {t}</> : <><Handshake size={16} /> {t}</>}
-          </button>
-        ))}
-      </div>
-
-      {tab === 'Daftar Aset' && <InventoryTab loading={loading} assets={assets} />}
-      {tab === 'Penugasan' && <AssignmentsTab loading={loading} assets={assets} />}
     </div>
   );
 };

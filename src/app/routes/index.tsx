@@ -887,7 +887,7 @@ export const router = createBrowserRouter([
           { path: "/enterprise/compensation", element: <CompensationPage /> },
           { path: "/inventory/assets", element: <MenuRouteGuard menuKey="assets"><AssetManagementPage /></MenuRouteGuard> },
           { path: "/assets", element: <MenuRouteGuard menuKey="assets"><AssetManagementPage /></MenuRouteGuard> },
-          { path: "/assets/assignments", element: <Navigate to="/assets" replace /> },
+
           { path: "/inventory/assets/create", element: <MenuRouteGuard menuKey="assets"><AssetFormPage /></MenuRouteGuard> },
           { path: "/inventory/assets/edit/:id", element: <MenuRouteGuard menuKey="assets"><AssetFormPage /></MenuRouteGuard> },
           { path: "/tasks", element: <TaskManagementPage /> },
