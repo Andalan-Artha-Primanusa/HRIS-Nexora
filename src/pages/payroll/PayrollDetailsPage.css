@@ -717,16 +717,6 @@
 }
 
 /* ── Modal ── */
-.payroll-details-modal-content {
-  padding: 1rem 0;
-}
-
-.payroll-details-modal-content p {
-  margin: 0;
-  line-height: 1.6;
-  color: #475569;
-}
-
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .payroll-details-tabs {

@@ -18,6 +18,7 @@ import {
   History
 } from 'lucide-react';
 import { Card, CardHeader } from '@/shared/ui';
+import { Modal } from '@/shared/ui/Modal';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { documentService } from '@/features/employee/api/document.service';
 import type { EmployeeDocument } from '@/features/employee/types/document.types';
@@ -180,29 +181,28 @@ const UploadDocumentModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSu
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="modal-container upload-modal" onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
-        <div className="modal-header">
-          <div className="modal-header-content">
-            <div className="modal-header-icon">
-              <Upload size={20} />
-            </div>
-            <div>
-              <h2 className="modal-title">Unggah Dokumen</h2>
-              <p className="modal-subtitle">Upload dokumen resmi ke file karyawan Anda</p>
-            </div>
-          </div>
-          <button className="modal-close-btn" onClick={onClose} type="button" disabled={submitting}>
-            <X size={20} />
-          </button>
-        </div>
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="modal-body">
+    <Modal isOpen={isOpen} onClose={onClose} title="Unggah Dokumen" size="md" footer={(
+      <>
+        <button type="button" className="btn-outline" onClick={onClose} disabled={submitting}>
+          Batal
+        </button>
+        <button type="submit" form="upload-document-form" className="btn-primary" disabled={submitting || !file}>
+          {submitting ? (
+            <>
+              <Loader2 size={16} className="animate-spin" />
+              Mengunggah...
+            </>
+          ) : (
+            <>
+              <Upload size={16} />
+              Unggah Dokumen
+            </>
+          )}
+        </button>
+      </>
+    )}>
+      <form id="upload-document-form" onSubmit={handleSubmit}>
           {/* Drop zone */}
           <div
             className={`upload-dropzone ${dragActive ? 'upload-dropzone--active' : ''} ${file ? 'upload-dropzone--has-file' : ''} ${errors.file ? 'upload-dropzone--error' : ''}`}
@@ -328,28 +328,8 @@ const UploadDocumentModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSu
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="modal-footer">
-            <button type="button" className="btn-outline" onClick={onClose} disabled={submitting}>
-              Batal
-            </button>
-            <button type="submit" className="btn-primary" disabled={submitting || !file}>
-              {submitting ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" />
-                  Mengunggah...
-                </>
-              ) : (
-                <>
-                  <Upload size={16} />
-                  Unggah Dokumen
-                </>
-              )}
-            </button>
-          </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 };
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, RefreshCw, Clock, CheckCircle, AlertCircle, Flag, X, Sparkles } from 'lucide-react';
+import { Search, RefreshCw, Clock, CheckCircle, AlertCircle, Flag } from 'lucide-react';
+import { Modal } from '@/shared/ui/Modal';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
@@ -387,62 +388,35 @@ const MyTasksPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Completion Modal Overlay */}
-      {completingTask && (
-        <div className="modal-overlay" onClick={closeCompletionModal}>
-          <div className="modal-completion" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-completion-header">
-              <div className="modal-completion-icon">
-                <Sparkles size={24} />
-              </div>
-              <div>
-                <h3 className="modal-completion-title">Tandai Tugas Selesai</h3>
-                <p className="modal-completion-task">{completingTask.title}</p>
-              </div>
-              <button className="modal-close-btn" onClick={closeCompletionModal}>
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="modal-completion-body">
-              <label className="modal-completion-label">
-                Catatan Penyelesaian
-              </label>
-              <textarea
-                className="modal-completion-textarea"
-                placeholder="Tulis catatan singkat tentang hasil pengerjaan tugas ini..."
-                value={completionNotes}
-                onChange={(e) => setCompletionNotes(e.target.value)}
-                rows={4}
-              />
-              <p className="modal-completion-hint">Opsional. Anda bisa mengosongkan jika tidak ada catatan.</p>
-            </div>
-
-            <div className="modal-completion-footer">
-              <button className="modal-btn-cancel" onClick={closeCompletionModal}>
-                Batal
-              </button>
-              <button
-                className="modal-btn-confirm"
-                onClick={handleCompleteTask}
-                disabled={submittingCompletion}
-              >
-                {submittingCompletion ? (
-                  <>
-                    <RefreshCw size={16} className="animate-spin" />
-                    Menyimpan...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle size={16} />
-                    Tandai Selesai
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Modal
+        isOpen={!!completingTask}
+        onClose={closeCompletionModal}
+        title="Tandai Tugas Selesai"
+        size="md"
+        footer={
+          <>
+            <button className="modal-btn-cancel" onClick={closeCompletionModal}>Batal</button>
+            <button className="modal-btn-confirm" onClick={handleCompleteTask} disabled={submittingCompletion}>
+              {submittingCompletion ? (
+                <><RefreshCw size={16} className="animate-spin" /> Menyimpan...</>
+              ) : (
+                <><CheckCircle size={16} /> Tandai Selesai</>
+              )}
+            </button>
+          </>
+        }
+      >
+        <p className="modal-completion-task" style={{ marginBottom: '1rem' }}>{completingTask?.title}</p>
+        <label className="modal-completion-label">Catatan Penyelesaian</label>
+        <textarea
+          className="modal-completion-textarea"
+          placeholder="Tulis catatan singkat tentang hasil pengerjaan tugas ini..."
+          value={completionNotes}
+          onChange={(e) => setCompletionNotes(e.target.value)}
+          rows={4}
+        />
+        <p className="modal-completion-hint">Opsional. Anda bisa mengosongkan jika tidak ada catatan.</p>
+      </Modal>
     </div>
   );
 };

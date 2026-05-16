@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
+import { Modal } from "@/shared/ui/Modal";
 import { ConfirmDialog } from "@/shared/ui/ConfirmDialog";
 import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { getErrorMessage } from "@/shared/api/errorHandler";
@@ -297,126 +298,66 @@ const AdminEmailNotificationsPage = () => {
         </div>
       </Card>
 
-      {/* Modal Tambah Template */}
-      {showModal && (
-        <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-          <Card style={{ width: '100%', maxWidth: '800px', padding: '2.5rem', maxHeight: '95vh', overflowY: 'auto', borderRadius: '20px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}>
-            <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '1rem', marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h2 style={{ margin: 0, color: '#1e293b' }}>Konfigurasi Template Email Lengkap</h2>
-              <span className="badge-soft badge-soft--blue">System Template Editor</span>
-            </div>
-            
-            <form onSubmit={handleAddTemplate}>
-              <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                <div className="form-group">
-                  <label style={{ fontWeight: 700, color: '#475569' }}>Key Unik (Sistem ID)</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    value={newTemplate.key} 
-                    onChange={e => setNewTemplate({...newTemplate, key: e.target.value})}
-                    required 
-                    placeholder="misal: leave_approval_notification"
-                  />
-                </div>
-                <div className="form-group">
-                  <label style={{ fontWeight: 700, color: '#475569' }}>Nama Template (Admin Display)</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    value={newTemplate.name} 
-                    onChange={e => setNewTemplate({...newTemplate, name: e.target.value})}
-                    required 
-                    placeholder="misal: Notifikasi Persetujuan Cuti"
-                  />
-                </div>
-                <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                  <label style={{ fontWeight: 700, color: '#475569' }}>Deskripsi Internal</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    value={newTemplate.description} 
-                    onChange={e => setNewTemplate({...newTemplate, description: e.target.value})}
-                    placeholder="Jelaskan kapan email ini otomatis terkirim..."
-                  />
-                </div>
-                <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                  <label style={{ fontWeight: 700, color: '#475569' }}>Subject Email Default</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    value={newTemplate.subject} 
-                    onChange={e => setNewTemplate({...newTemplate, subject: e.target.value})}
-                    required 
-                    placeholder="[HRIS] Permohonan Cuti Anda Telah Disetujui"
-                  />
-                </div>
-
-                {/* HTML Body */}
-                <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                  <label style={{ fontWeight: 700, color: '#475569' }}>Isi Email (Rich HTML Format)</label>
-                  <textarea 
-                    className="form-input" 
-                    rows={8}
-                    value={newTemplate.html_body} 
-                    onChange={e => setNewTemplate({...newTemplate, html_body: e.target.value})}
-                    required 
-                    placeholder="<h1>Halo {{name}},</h1><p>Permohonan cuti Anda telah disetujui...</p>"
-                    style={{ resize: 'vertical', fontFamily: "'Poppins', sans-serif" }}
-                  />
-                </div>
-
-                {/* Plain Text Body */}
-                <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                  <label style={{ fontWeight: 700, color: '#475569' }}>Isi Email (Plain Text - Fallback)</label>
-                  <textarea 
-                    className="form-input" 
-                    rows={4}
-                    value={newTemplate.text_body} 
-                    onChange={e => setNewTemplate({...newTemplate, text_body: e.target.value})}
-                    placeholder="Halo {{name}}, Permohonan cuti Anda telah disetujui..."
-                    style={{ resize: 'vertical', background: '#f8fafc' }}
-                  />
-                </div>
-
-                {/* Placeholders */}
-                <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                  <label style={{ fontWeight: 700, color: '#475569' }}>Dynamic Placeholders (Tags)</label>
-                  <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-                    <input 
-                      type="text" 
-                      className="form-input" 
-                      value={currentPlaceholder}
-                      onChange={e => setCurrentPlaceholder(e.target.value)}
-                      placeholder="Contoh: name, date, amount"
-                    />
-                    <Button type="button" onClick={() => {
-                      if (currentPlaceholder && !newTemplate.placeholders.includes(currentPlaceholder)) {
-                        setNewTemplate({...newTemplate, placeholders: [...newTemplate.placeholders, currentPlaceholder]});
-                        setCurrentPlaceholder('');
-                      }
-                    }}>Tambah</Button>
-                  </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                    {newTemplate.placeholders.map(ph => (
-                      <span key={ph} style={{ background: '#eff6ff', color: '#1d4ed8', padding: '4px 12px', borderRadius: '100px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600 }}>
-                        {`{{${ph}}}`}
-                        <button type="button" style={{ border: 'none', background: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '1rem' }} onClick={() => setNewTemplate({...newTemplate, placeholders: newTemplate.placeholders.filter(p => p !== ph)})}>×</button>
-                      </span>
-                    ))}
-                    {newTemplate.placeholders.length === 0 && <span style={{ color: '#94a3b8', fontSize: '0.85rem', fontStyle: 'italic' }}>Belum ada placeholder ditambahkan.</span>}
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '2.5rem', borderTop: '1px solid #f1f5f9', paddingTop: '1.5rem' }}>
-                <Button type="button" variant="outline" onClick={() => setShowModal(false)} style={{ padding: '0.75rem 2rem' }}>Batal</Button>
-                <Button type="submit" variant="primary" loading={saving} style={{ padding: '0.75rem 2rem' }}>Simpan Template Full-Spec</Button>
-              </div>
-            </form>
-          </Card>
+      <Modal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        title="Konfigurasi Template Email"
+        size="lg"
+        footer={
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+            <Button type="button" variant="outline" onClick={() => setShowModal(false)} style={{ padding: '0.75rem 2rem' }}>Batal</Button>
+            <Button type="submit" variant="primary" loading={saving} style={{ padding: '0.75rem 2rem' }} onClick={(e) => { const form = (e.target as HTMLElement).closest('form'); if (form) form.requestSubmit(); }}>Simpan Template Full-Spec</Button>
+          </div>
+        }
+      >
+        <div style={{ marginBottom: '1.5rem' }}>
+          <span className="badge-soft badge-soft--blue">System Template Editor</span>
         </div>
-      )}
+        <form onSubmit={handleAddTemplate}>
+          <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+            <div className="form-group">
+              <label style={{ fontWeight: 700, color: '#475569' }}>Key Unik (Sistem ID)</label>
+              <input type="text" className="form-input" value={newTemplate.key} onChange={e => setNewTemplate({...newTemplate, key: e.target.value})} required placeholder="misal: leave_approval_notification" />
+            </div>
+            <div className="form-group">
+              <label style={{ fontWeight: 700, color: '#475569' }}>Nama Template (Admin Display)</label>
+              <input type="text" className="form-input" value={newTemplate.name} onChange={e => setNewTemplate({...newTemplate, name: e.target.value})} required placeholder="misal: Notifikasi Persetujuan Cuti" />
+            </div>
+            <div className="form-group" style={{ gridColumn: 'span 2' }}>
+              <label style={{ fontWeight: 700, color: '#475569' }}>Deskripsi Internal</label>
+              <input type="text" className="form-input" value={newTemplate.description} onChange={e => setNewTemplate({...newTemplate, description: e.target.value})} placeholder="Jelaskan kapan email ini otomatis terkirim..." />
+            </div>
+            <div className="form-group" style={{ gridColumn: 'span 2' }}>
+              <label style={{ fontWeight: 700, color: '#475569' }}>Subject Email Default</label>
+              <input type="text" className="form-input" value={newTemplate.subject} onChange={e => setNewTemplate({...newTemplate, subject: e.target.value})} required placeholder="[HRIS] Permohonan Cuti Anda Telah Disetujui" />
+            </div>
+            <div className="form-group" style={{ gridColumn: 'span 2' }}>
+              <label style={{ fontWeight: 700, color: '#475569' }}>Isi Email (Rich HTML Format)</label>
+              <textarea className="form-input" rows={8} value={newTemplate.html_body} onChange={e => setNewTemplate({...newTemplate, html_body: e.target.value})} required placeholder="<h1>Halo {{name}},</h1><p>Permohonan cuti Anda telah disetujui...</p>" style={{ resize: 'vertical', fontFamily: "'Poppins', sans-serif" }} />
+            </div>
+            <div className="form-group" style={{ gridColumn: 'span 2' }}>
+              <label style={{ fontWeight: 700, color: '#475569' }}>Isi Email (Plain Text - Fallback)</label>
+              <textarea className="form-input" rows={4} value={newTemplate.text_body} onChange={e => setNewTemplate({...newTemplate, text_body: e.target.value})} placeholder="Halo {{name}}, Permohonan cuti Anda telah disetujui..." style={{ resize: 'vertical', background: '#f8fafc' }} />
+            </div>
+            <div className="form-group" style={{ gridColumn: 'span 2' }}>
+              <label style={{ fontWeight: 700, color: '#475569' }}>Dynamic Placeholders (Tags)</label>
+              <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                <input type="text" className="form-input" value={currentPlaceholder} onChange={e => setCurrentPlaceholder(e.target.value)} placeholder="Contoh: name, date, amount" />
+                <Button type="button" onClick={() => { if (currentPlaceholder && !newTemplate.placeholders.includes(currentPlaceholder)) { setNewTemplate({...newTemplate, placeholders: [...newTemplate.placeholders, currentPlaceholder]}); setCurrentPlaceholder(''); } }}>Tambah</Button>
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {newTemplate.placeholders.map(ph => (
+                  <span key={ph} style={{ background: '#eff6ff', color: '#1d4ed8', padding: '4px 12px', borderRadius: '100px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600 }}>
+                    {`{{${ph}}}`}
+                    <button type="button" style={{ border: 'none', background: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '1rem' }} onClick={() => setNewTemplate({...newTemplate, placeholders: newTemplate.placeholders.filter(p => p !== ph)})}>×</button>
+                  </span>
+                ))}
+                {newTemplate.placeholders.length === 0 && <span style={{ color: '#94a3b8', fontSize: '0.85rem', fontStyle: 'italic' }}>Belum ada placeholder ditambahkan.</span>}
+              </div>
+            </div>
+          </div>
+        </form>
+      </Modal>
 
       <div className="employee-summary-wrapper">
         {summaryCards.map((card) => {

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/shared/ui";
 import { Button } from "@/shared/ui/Button";
+import { Modal } from "@/shared/ui/Modal";
 import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import {
@@ -16,7 +17,6 @@ import {
   Star,
   Target,
   TrendingUp,
-  X,
 } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
@@ -481,153 +481,128 @@ const MyKpiPage = () => {
         </div>
       </div>
 
-      {showDetail && selectedPeriod && (
-        <div className="modal-overlay" style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, backdropFilter: "blur(4px)" }} onClick={() => setShowDetail(false)}>
-          <Card glass style={{ width: "90%", maxWidth: 860, padding: 0, overflow: "hidden" }} onClick={(event) => event.stopPropagation()}>
-            <div style={{ padding: "1.5rem", borderBottom: "1px solid #f1f5f9", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                <div style={{ background: "#f5f3ff", borderRadius: 12, padding: "0.5rem" }}><Star size={24} color="#8b5cf6" /></div>
+      <Modal
+        isOpen={showDetail && !!selectedPeriod}
+        onClose={() => setShowDetail(false)}
+        title="Detail KPI Periode"
+        size="lg"
+        footer={
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+            <Button variant="outline" style={{ flex: 1 }} onClick={() => setShowDetail(false)}>Tutup</Button>
+          </div>
+        }
+      >
+        {selectedPeriod && (
+          <div style={{ padding: 0 }}>
+            <div style={{ background: "#f8fafc", borderRadius: 12, padding: "1.25rem", marginBottom: "1.25rem" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8, gap: 12 }}>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: "1.1rem", color: "#1e293b", fontWeight: 700 }}>Detail KPI Periode</h3>
-                  <p style={{ margin: 0, fontSize: "0.8rem", color: "#64748b" }}>{formatRange(selectedPeriod.start_date, selectedPeriod.end_date)}</p>
+                  <h4 style={{ margin: 0, fontSize: "1rem", fontWeight: 700, color: "#1e293b" }}>{selectedPeriod.period_label || `Periode #${selectedPeriod.id}`}</h4>
+                  <p style={{ margin: "0.25rem 0 0", fontSize: "0.85rem", color: "#64748b" }}>{normalizePeriodType(selectedPeriod.period_type)}</p>
                 </div>
+                <span className={getStatusClass(selectedPeriod.status)}>{getStatusLabel(selectedPeriod.status)}</span>
               </div>
-              <button onClick={() => setShowDetail(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#64748b" }}><X size={20} /></button>
+              {selectedPeriod.notes && <p style={{ fontSize: "0.85rem", color: "#64748b", margin: 0 }}>{selectedPeriod.notes}</p>}
             </div>
-
-            <div style={{ padding: "1.5rem" }}>
-              <div style={{ background: "#f8fafc", borderRadius: 12, padding: "1.25rem", marginBottom: "1.25rem" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8, gap: 12 }}>
-                  <div>
-                    <h4 style={{ margin: 0, fontSize: "1rem", fontWeight: 700, color: "#1e293b" }}>{selectedPeriod.period_label || `Periode #${selectedPeriod.id}`}</h4>
-                    <p style={{ margin: "0.25rem 0 0", fontSize: "0.85rem", color: "#64748b" }}>{normalizePeriodType(selectedPeriod.period_type)}</p>
-                  </div>
-                  <span className={getStatusClass(selectedPeriod.status)}>{getStatusLabel(selectedPeriod.status)}</span>
-                </div>
-                {selectedPeriod.notes && <p style={{ fontSize: "0.85rem", color: "#64748b", margin: 0 }}>{selectedPeriod.notes}</p>}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: "1.25rem" }}>
+              <div style={{ textAlign: "center", padding: "1rem", background: "#f8fafc", borderRadius: 12 }}>
+                <div style={{ fontSize: "0.7rem", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>Item</div>
+                <div style={{ fontSize: "1.25rem", fontWeight: 700, color: "#1e293b" }}>{detailItems.length}</div>
               </div>
-
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: "1.25rem" }}>
-                <div style={{ textAlign: "center", padding: "1rem", background: "#f8fafc", borderRadius: 12 }}>
-                  <div style={{ fontSize: "0.7rem", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>Item</div>
-                  <div style={{ fontSize: "1.25rem", fontWeight: 700, color: "#1e293b" }}>{detailItems.length}</div>
-                </div>
-                <div style={{ textAlign: "center", padding: "1rem", background: "#f8fafc", borderRadius: 12 }}>
-                  <div style={{ fontSize: "0.7rem", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>Skor</div>
-                  <div style={{ fontSize: "1.25rem", fontWeight: 700, color: "#8b5cf6" }}>{toNumber(selectedPeriod.overall_score).toFixed(1)}%</div>
-                </div>
-                <div style={{ textAlign: "center", padding: "1rem", background: selectedPeriod.status === "approved" ? "#f0fdf4" : "#f5f3ff", borderRadius: 12 }}>
-                  <div style={{ fontSize: "0.7rem", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>Rentang</div>
-                  <div style={{ fontSize: "1rem", fontWeight: 700, color: "#1e293b" }}>{formatRange(selectedPeriod.start_date, selectedPeriod.end_date)}</div>
-                </div>
+              <div style={{ textAlign: "center", padding: "1rem", background: "#f8fafc", borderRadius: 12 }}>
+                <div style={{ fontSize: "0.7rem", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>Skor</div>
+                <div style={{ fontSize: "1.25rem", fontWeight: 700, color: "#8b5cf6" }}>{toNumber(selectedPeriod.overall_score).toFixed(1)}%</div>
               </div>
-
-              <div style={{ background: "#f8fafc", borderRadius: 12, padding: "1rem", marginBottom: "1.25rem" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.85rem", marginBottom: 6 }}>
-                  <span style={{ color: "#64748b" }}>Progress Capaian</span>
-                  <span style={{ fontWeight: 600, color: "#1e293b" }}>{Math.round(toNumber(selectedPeriod.overall_score))}%</span>
-                </div>
-                <div style={{ width: "100%", height: 8, background: "#e2e8f0", borderRadius: 4, overflow: "hidden" }}>
-                  <div style={{ width: `${Math.min(toNumber(selectedPeriod.overall_score), 100)}%`, height: "100%", background: toNumber(selectedPeriod.overall_score) >= 100 ? "#10b981" : "#8b5cf6", borderRadius: 4, transition: "width 0.5s" }} />
-                </div>
+              <div style={{ textAlign: "center", padding: "1rem", background: selectedPeriod.status === "approved" ? "#f0fdf4" : "#f5f3ff", borderRadius: 12 }}>
+                <div style={{ fontSize: "0.7rem", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>Rentang</div>
+                <div style={{ fontSize: "1rem", fontWeight: 700, color: "#1e293b" }}>{formatRange(selectedPeriod.start_date, selectedPeriod.end_date)}</div>
               </div>
-
-              <div style={{ marginBottom: "1.25rem" }}>
-                <div className="kpi-card-title" style={{ marginBottom: 12 }}>
-                  <ListChecks size={18} />
-                  <span>Daftar Item KPI</span>
-                </div>
-
-                <div className="table-wrap">
-                  <table className="data-table">
-                    <thead>
-                      <tr>
-                        <th>Indikator</th>
-                        <th>Kategori</th>
-                        <th>Target</th>
-                        <th>Capaian</th>
-                        <th>Skor</th>
-                        <th>Status / Aksi</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {detailItems.length > 0 ? (
-                        detailItems.map((item) => {
-                          const score = toNumber(item.score);
-                          const canEdit = normalizeStatus(selectedPeriod.status) === "draft";
-                            const itemStatus = normalizeStatus(item.status);
-                          return (
-                            <tr key={item.id}>
-                              <td>
-                                <div className="cell-stacked">
-                                  <span className="cell-name-text" style={{ fontSize: 13 }}>{item.indicator}</span>
-                                  {item.description && <span className="cell-stacked__sub">{item.description.substring(0, 80)}</span>}
-                                </div>
-                              </td>
-                              <td><span className="badge-soft badge-soft--blue" style={{ fontSize: 11 }}>{item.category || "-"}</span></td>
-                              <td><span style={{ fontWeight: 600 }}>{toNumber(item.target).toLocaleString()}</span></td>
-                              <td>
+            </div>
+            <div style={{ background: "#f8fafc", borderRadius: 12, padding: "1rem", marginBottom: "1.25rem" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.85rem", marginBottom: 6 }}>
+                <span style={{ color: "#64748b" }}>Progress Capaian</span>
+                <span style={{ fontWeight: 600, color: "#1e293b" }}>{Math.round(toNumber(selectedPeriod.overall_score))}%</span>
+              </div>
+              <div style={{ width: "100%", height: 8, background: "#e2e8f0", borderRadius: 4, overflow: "hidden" }}>
+                <div style={{ width: `${Math.min(toNumber(selectedPeriod.overall_score), 100)}%`, height: "100%", background: toNumber(selectedPeriod.overall_score) >= 100 ? "#10b981" : "#8b5cf6", borderRadius: 4, transition: "width 0.5s" }} />
+              </div>
+            </div>
+            <div style={{ marginBottom: "1.25rem" }}>
+              <div className="kpi-card-title" style={{ marginBottom: 12 }}>
+                <ListChecks size={18} />
+                <span>Daftar Item KPI</span>
+              </div>
+              <div className="table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Indikator</th>
+                      <th>Kategori</th>
+                      <th>Target</th>
+                      <th>Capaian</th>
+                      <th>Skor</th>
+                      <th>Status / Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {detailItems.length > 0 ? (
+                      detailItems.map((item) => {
+                        const score = toNumber(item.score);
+                        const canEdit = normalizeStatus(selectedPeriod.status) === "draft";
+                        const itemStatus = normalizeStatus(item.status);
+                        return (
+                          <tr key={item.id}>
+                            <td>
+                              <div className="cell-stacked">
+                                <span className="cell-name-text" style={{ fontSize: 13 }}>{item.indicator}</span>
+                                {item.description && <span className="cell-stacked__sub">{item.description.substring(0, 80)}</span>}
+                              </div>
+                            </td>
+                            <td><span className="badge-soft badge-soft--blue" style={{ fontSize: 11 }}>{item.category || "-"}</span></td>
+                            <td><span style={{ fontWeight: 600 }}>{toNumber(item.target).toLocaleString()}</span></td>
+                            <td>
+                              {canEdit && itemStatus === "draft" ? (
+                                <input type="number" min="0" value={itemDrafts[item.id] ?? ""}
+                                  onChange={(event) => setItemDrafts((current) => ({ ...current, [item.id]: event.target.value }))}
+                                  style={{ width: "100%", padding: "0.55rem 0.7rem", borderRadius: 10, border: "1px solid #cbd5e1", background: "#fff" }}
+                                  placeholder="Isi capaian" />
+                              ) : (
+                                <span style={{ fontWeight: 500 }}>{toNumber(item.achievement).toLocaleString()}</span>
+                              )}
+                            </td>
+                            <td><span style={{ fontWeight: 600, color: score >= 75 ? "#16a34a" : score >= 50 ? "#d97706" : "#ef4444" }}>{score.toFixed(1)}</span></td>
+                            <td>
+                              <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "flex-start" }}>
+                                <span className={getItemStatusClass(item.status)}>{getItemStatusLabel(item.status)}</span>
                                 {canEdit && itemStatus === "draft" ? (
-                                  <input
-                                    type="number"
-                                    min="0"
-                                    value={itemDrafts[item.id] ?? ""}
-                                    onChange={(event) => setItemDrafts((current) => ({ ...current, [item.id]: event.target.value }))}
-                                    style={{ width: "100%", padding: "0.55rem 0.7rem", borderRadius: 10, border: "1px solid #cbd5e1", background: "#fff" }}
-                                    placeholder="Isi capaian"
-                                  />
-                                ) : (
-                                  <span style={{ fontWeight: 500 }}>{toNumber(item.achievement).toLocaleString()}</span>
-                                )}
-                              </td>
-                              <td><span style={{ fontWeight: 600, color: score >= 75 ? "#16a34a" : score >= 50 ? "#d97706" : "#ef4444" }}>{score.toFixed(1)}</span></td>
-                              <td>
-                                <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "flex-start" }}>
-                                  <span className={getItemStatusClass(item.status)}>{getItemStatusLabel(item.status)}</span>
-                                  {canEdit && itemStatus === "draft" ? (
-                                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                                      <button
-                                        className="action-btn"
-                                        style={{ color: "#6366f1", background: "#eef2ff" }}
-                                        onClick={() => void handleSaveItem(item)}
-                                        disabled={savingItemId === item.id}
-                                        title="Simpan capaian"
-                                      >
-                                        <CheckCircle2 size={16} />
-                                      </button>
-                                      <button
-                                        className="action-btn"
-                                        style={{ color: "#10b981", background: "#ecfdf5" }}
-                                        onClick={() => void handleSubmitItem(item)}
-                                        disabled={submittingItemId === item.id}
-                                        title="Ajukan item"
-                                      >
-                                        <Send size={16} />
-                                      </button>
-                                    </div>
-                                  ) : null}
-                                </div>
-                              </td>
-                            </tr>
-                          );
-                        })
-                      ) : (
-                        <tr>
-                          <td colSpan={6} style={{ textAlign: "center", padding: "2rem", color: "#64748b" }}>Belum ada item KPI di periode ini.</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-                <Button variant="outline" style={{ flex: 1 }} onClick={() => setShowDetail(false)}>Tutup</Button>
+                                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                                    <button className="action-btn" style={{ color: "#6366f1", background: "#eef2ff" }}
+                                      onClick={() => void handleSaveItem(item)} disabled={savingItemId === item.id} title="Simpan capaian">
+                                      <CheckCircle2 size={16} />
+                                    </button>
+                                    <button className="action-btn" style={{ color: "#10b981", background: "#ecfdf5" }}
+                                      onClick={() => void handleSubmitItem(item)} disabled={submittingItemId === item.id} title="Ajukan item">
+                                      <Send size={16} />
+                                    </button>
+                                  </div>
+                                ) : null}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    ) : (
+                      <tr>
+                        <td colSpan={6} style={{ textAlign: "center", padding: "2rem", color: "#64748b" }}>Belum ada item KPI di periode ini.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
-          </Card>
-        </div>
-      )}
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { RefreshCw, Wallet, Search, Filter, Clock, CheckCircle, XCircle, Eye, Trash2, FileText, History } from 'lucide-react';
 import { Card, CardHeader, ConfirmDialog } from '@/shared/ui';
+import { Modal } from '@/shared/ui/Modal';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import {
   getAllReimbursements,
@@ -464,118 +465,78 @@ const AdminReimbursementsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Detail Modal */}
-      {showDetailModal && selectedItem && (
-        <div className="modal-overlay" onClick={() => setShowDetailModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>Detail Klaim</h3>
-              <button className="modal-close" onClick={() => setShowDetailModal(false)}>×</button>
-            </div>
-            <div className="modal-body">
-              <div className="detail-row">
-                <span className="detail-label">Judul</span>
-                <span className="detail-value">{selectedItem.title}</span>
-              </div>
-              <div className="detail-row">
-                <span className="detail-label">Deskripsi</span>
-                <span className="detail-value">{selectedItem.description || '-'}</span>
-              </div>
-              <div className="detail-row">
-                <span className="detail-label">Kategori</span>
-                <span className="detail-value">{selectedItem.category}</span>
-              </div>
-              <div className="detail-row">
-                <span className="detail-label">Nominal</span>
-                <span className="detail-value" style={{ fontWeight: 700, color: '#1e293b' }}>{formatCurrency(selectedItem.amount)}</span>
-              </div>
-              <div className="detail-row">
-                <span className="detail-label">Tanggal</span>
-                <span className="detail-value">{selectedItem.expense_date ? formatDateTime(selectedItem.expense_date) : '-'}</span>
-              </div>
-              <div className="detail-row">
-                <span className="detail-label">Status</span>
-                <span className="detail-value">{getStatusBadge(selectedItem.status)}</span>
-              </div>
-              <div className="detail-row">
-                <span className="detail-label">Karyawan</span>
-                <span className="detail-value">{selectedItem.employee?.user?.name || selectedItem.employee_name || '-'}</span>
-              </div>
-              {selectedItem.note && (
-                <div className="detail-row">
-                  <span className="detail-label">Catatan</span>
-                  <span className="detail-value">{selectedItem.note}</span>
-                </div>
-              )}
-            </div>
+      <Modal isOpen={showDetailModal && !!selectedItem} onClose={() => setShowDetailModal(false)} title="Detail Klaim" size="md"
+        footer={<button className="btn-outline" onClick={() => setShowDetailModal(false)} style={{ padding: '8px 20px', borderRadius: 8, cursor: 'pointer' }}>Tutup</button>}
+      >
+        <div className="modal-body" style={{ padding: 0 }}>
+          <div className="detail-row">
+            <span className="detail-label">Judul</span>
+            <span className="detail-value">{selectedItem?.title}</span>
           </div>
+          <div className="detail-row">
+            <span className="detail-label">Deskripsi</span>
+            <span className="detail-value">{selectedItem?.description || '-'}</span>
+          </div>
+          <div className="detail-row">
+            <span className="detail-label">Kategori</span>
+            <span className="detail-value">{selectedItem?.category}</span>
+          </div>
+          <div className="detail-row">
+            <span className="detail-label">Nominal</span>
+            <span className="detail-value" style={{ fontWeight: 700, color: '#1e293b' }}>{selectedItem && formatCurrency(selectedItem.amount)}</span>
+          </div>
+          <div className="detail-row">
+            <span className="detail-label">Tanggal</span>
+            <span className="detail-value">{selectedItem?.expense_date ? formatDateTime(selectedItem.expense_date) : '-'}</span>
+          </div>
+          <div className="detail-row">
+            <span className="detail-label">Status</span>
+            <span className="detail-value">{selectedItem && getStatusBadge(selectedItem.status)}</span>
+          </div>
+          <div className="detail-row">
+            <span className="detail-label">Karyawan</span>
+            <span className="detail-value">{selectedItem?.employee?.user?.name || selectedItem?.employee_name || '-'}</span>
+          </div>
+          {selectedItem?.note && (
+            <div className="detail-row">
+              <span className="detail-label">Catatan</span>
+              <span className="detail-value">{selectedItem.note}</span>
+            </div>
+          )}
         </div>
-      )}
+      </Modal>
 
-      {/* Approve Modal */}
-      {showApproveModal && selectedItem && (
-        <div className="modal-overlay" onClick={() => setShowApproveModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>Setujui Klaim</h3>
-              <button className="modal-close" onClick={() => setShowApproveModal(false)}>×</button>
-            </div>
-            <div className="modal-body">
-              <p>Apakah Anda yakin ingin menyetujui klaim <strong>"{selectedItem.title}"</strong>?</p>
-              <div className="form-group" style={{ marginTop: '1rem' }}>
-                <label>Catatan (Opsional)</label>
-                <textarea
-                  className="form-control"
-                  rows={3}
-                  value={actionNote}
-                  onChange={(e) => setActionNote(e.target.value)}
-                  placeholder="Tambahkan catatan..."
-                />
-              </div>
-            </div>
-            <div className="modal-footer">
-              <button className="btn-outline" onClick={() => setShowApproveModal(false)}>Batal</button>
-              <button className="btn-primary" onClick={confirmApprove}>
-                <CheckCircle size={16} style={{ marginRight: '8px' }} />
-                Setujui
-              </button>
-            </div>
-          </div>
+      <Modal isOpen={showApproveModal && !!selectedItem} onClose={() => setShowApproveModal(false)} title="Setujui Klaim" size="sm"
+        footer={<>
+          <button className="btn-outline" onClick={() => setShowApproveModal(false)}>Batal</button>
+          <button className="btn-primary" onClick={confirmApprove}>
+            <CheckCircle size={16} style={{ marginRight: '8px' }} />
+            Setujui
+          </button>
+        </>}
+      >
+        <p>Apakah Anda yakin ingin menyetujui klaim <strong>"{selectedItem?.title}"</strong>?</p>
+        <div className="form-group" style={{ marginTop: '1rem' }}>
+          <label>Catatan (Opsional)</label>
+          <textarea className="form-control" rows={3} value={actionNote} onChange={(e) => setActionNote(e.target.value)} placeholder="Tambahkan catatan..." />
         </div>
-      )}
+      </Modal>
 
-      {/* Reject Modal */}
-      {showRejectModal && selectedItem && (
-        <div className="modal-overlay" onClick={() => setShowRejectModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>Tolak Klaim</h3>
-              <button className="modal-close" onClick={() => setShowRejectModal(false)}>×</button>
-            </div>
-            <div className="modal-body">
-              <p>Apakah Anda yakin ingin menolak klaim <strong>"{selectedItem.title}"</strong>?</p>
-              <div className="form-group" style={{ marginTop: '1rem' }}>
-                <label>Alasan Penolakan <span style={{ color: '#ef4444' }}>*</span></label>
-                <textarea
-                  className="form-control"
-                  rows={3}
-                  value={actionNote}
-                  onChange={(e) => setActionNote(e.target.value)}
-                  placeholder="Masukkan alasan penolakan..."
-                  required
-                />
-              </div>
-            </div>
-            <div className="modal-footer">
-              <button className="btn-outline" onClick={() => setShowRejectModal(false)}>Batal</button>
-              <button className="btn-danger" onClick={confirmReject} disabled={!actionNote.trim()}>
-                <XCircle size={16} style={{ marginRight: '8px' }} />
-                Tolak
-              </button>
-            </div>
-          </div>
+      <Modal isOpen={showRejectModal && !!selectedItem} onClose={() => setShowRejectModal(false)} title="Tolak Klaim" size="sm"
+        footer={<>
+          <button className="btn-outline" onClick={() => setShowRejectModal(false)}>Batal</button>
+          <button className="btn-danger" onClick={confirmReject} disabled={!actionNote.trim()}>
+            <XCircle size={16} style={{ marginRight: '8px' }} />
+            Tolak
+          </button>
+        </>}
+      >
+        <p>Apakah Anda yakin ingin menolak klaim <strong>"{selectedItem?.title}"</strong>?</p>
+        <div className="form-group" style={{ marginTop: '1rem' }}>
+          <label>Alasan Penolakan <span style={{ color: '#ef4444' }}>*</span></label>
+          <textarea className="form-control" rows={3} value={actionNote} onChange={(e) => setActionNote(e.target.value)} placeholder="Masukkan alasan penolakan..." required />
         </div>
-      )}
+      </Modal>
 
       {historyModal && (
         <ApprovalHistoryModal

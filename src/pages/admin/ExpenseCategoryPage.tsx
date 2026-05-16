@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Plus, RefreshCw, Pencil, Trash2, Search, Tag, CheckCircle, FileText, Receipt } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { Modal } from '@/shared/ui/Modal';
 import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
@@ -460,101 +461,64 @@ const ExpenseCategoryPage = () => {
         </div>
       </div>
 
-      {/* Modal */}
-      {showModal && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>{editingCategory ? 'Edit Kategori' : 'Tambah Kategori'}</h3>
-              <button className="modal-close" onClick={() => setShowModal(false)}>×</button>
+      <Modal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        title={editingCategory ? 'Edit Kategori' : 'Tambah Kategori'}
+        size="md"
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setShowModal(false)}>Batal</Button>
+            <Button variant="primary" onClick={handleSave}>
+              {editingCategory ? 'Update' : 'Tambah'}
+            </Button>
+          </>
+        }
+      >
+        <div className="modal-body" style={{ padding: 0 }}>
+          <div className="form-row">
+            <div className="form-group">
+              <label>Nama Kategori <span className="required">*</span></label>
+              <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="e.g., Medical Expenses" />
             </div>
-            <div className="modal-body">
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Nama Kategori <span className="required">*</span></label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g., Medical Expenses"
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Kode <span className="required">*</span></label>
-                  <input
-                    type="text"
-                    value={formData.code}
-                    onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                    placeholder="e.g., MED"
-                  />
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label>Deskripsi</label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Deskripsikan kategori ini..."
-                  rows={3}
-                />
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Max Claim</label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={formData.max_claim ? Number(formData.max_claim).toLocaleString("id-ID") : ""}
-                    onChange={(e) => setFormData({ ...formData, max_claim: e.target.value.replace(/\D/g, "") })}
-                    placeholder="0"
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Tipe Kategori</label>
-                  <select
-                    value={formData.category_type}
-                    onChange={(e) => setFormData({ ...formData, category_type: e.target.value as any })}
-                  >
-                    <option value="medical">Medical</option>
-                    <option value="travel">Travel</option>
-                    <option value="meals">Meals</option>
-                    <option value="accommodation">Accommodation</option>
-                    <option value="transport">Transport</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="form-row checkboxes">
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={formData.is_active}
-                    onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                  />
-                  <span>Active</span>
-                </label>
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={formData.requires_receipt}
-                    onChange={(e) => setFormData({ ...formData, requires_receipt: e.target.checked })}
-                  />
-                  <span>Requires Receipt</span>
-                </label>
-              </div>
-            </div>
-            <div className="modal-footer">
-              <Button variant="outline" onClick={() => setShowModal(false)}>Batal</Button>
-              <Button variant="primary" onClick={handleSave}>
-                {editingCategory ? 'Update' : 'Tambah'}
-              </Button>
+            <div className="form-group">
+              <label>Kode <span className="required">*</span></label>
+              <input type="text" value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })} placeholder="e.g., MED" />
             </div>
           </div>
+          <div className="form-group">
+            <label>Deskripsi</label>
+            <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Deskripsikan kategori ini..." rows={3} />
+          </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label>Max Claim</label>
+              <input type="text" inputMode="numeric" value={formData.max_claim ? Number(formData.max_claim).toLocaleString("id-ID") : ""} onChange={(e) => setFormData({ ...formData, max_claim: e.target.value.replace(/\D/g, "") })} placeholder="0" />
+            </div>
+            <div className="form-group">
+              <label>Tipe Kategori</label>
+              <select value={formData.category_type} onChange={(e) => setFormData({ ...formData, category_type: e.target.value as any })}>
+                <option value="medical">Medical</option>
+                <option value="travel">Travel</option>
+                <option value="meals">Meals</option>
+                <option value="accommodation">Accommodation</option>
+                <option value="transport">Transport</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+          <div className="form-row checkboxes">
+            <label className="checkbox-label">
+              <input type="checkbox" checked={formData.is_active} onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })} />
+              <span>Active</span>
+            </label>
+            <label className="checkbox-label">
+              <input type="checkbox" checked={formData.requires_receipt} onChange={(e) => setFormData({ ...formData, requires_receipt: e.target.checked })} />
+              <span>Requires Receipt</span>
+            </label>
+          </div>
         </div>
-      )}
+      </Modal>
 
       <ConfirmDialog
         isOpen={!!deleteTarget}

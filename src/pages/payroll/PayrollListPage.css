@@ -632,14 +632,14 @@
 }
 
 /* Export modal field polish */
-.modal-completion .payroll-export-period-input {
+.payroll-export-period-input {
   width: 100%;
   max-width: none;
   margin-top: 0.5rem;
   background-color: #f8fafc;
 }
 
-.modal-completion .payroll-export-period-input:focus {
+.payroll-export-period-input:focus {
   background-color: #ffffff;
 }
 

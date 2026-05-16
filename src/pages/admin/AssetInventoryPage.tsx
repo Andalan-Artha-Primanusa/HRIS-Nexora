@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, RefreshCw, Package, Search, Filter, Laptop, Monitor, Smartphone, Briefcase, User, Trash2, Pencil, CheckCircle2, X, ArrowDownToLine, ArrowUpFromLine } from 'lucide-react';
+import { Plus, RefreshCw, Package, Search, Filter, Laptop, Monitor, Smartphone, Briefcase, User, Trash2, Pencil, CheckCircle2, ArrowDownToLine, ArrowUpFromLine } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
+import { Modal } from '@/shared/ui/Modal';
 import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { assetService } from '@/features/assets/api/asset.service';
@@ -511,114 +512,84 @@ const AssetInventoryPage: React.FC = () => {
       </div>
 
       {/* Assign Modal */}
-      {assignModal && selectedAsset && (
-        <div className="modal-overlay" onClick={closeAssignModal}>
-          <div className="modal-completion" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-completion-header">
-              <div className="modal-completion-icon">
-                <User size={24} />
-              </div>
-              <div>
-                <h3 className="modal-completion-title">Assign Aset</h3>
-                <p className="modal-completion-task">{selectedAsset.name} ({selectedAsset.code})</p>
-              </div>
-              <button className="modal-close-btn" onClick={closeAssignModal}>
-                <X size={20} />
-              </button>
-            </div>
+      <Modal isOpen={assignModal && !!selectedAsset} onClose={closeAssignModal} title="Assign Aset" size="md"
+        footer={
+          <>
+            <button className="modal-btn-cancel" onClick={closeAssignModal}>Batal</button>
+            <button
+              className="modal-btn-confirm"
+              onClick={handleAssign}
+              disabled={assigningLoading || !selectedEmployee}
+            >
+              {assigningLoading ? (
+                <><RefreshCw size={16} className="animate-spin" /> Menyimpan...</>
+              ) : (
+                <><ArrowDownToLine size={16} /> Assign Aset</>
+              )}
+            </button>
+          </>
+        }
+      >
+        <p className="modal-completion-task">{selectedAsset?.name} ({selectedAsset?.code})</p>
 
-            <div className="modal-completion-body">
-              <label className="modal-completion-label">Pilih Karyawan</label>
-              <select
-                className="modal-completion-select"
-                value={selectedEmployee}
-                onChange={(e) => setSelectedEmployee(e.target.value)}
-              >
-                <option value="">-- Pilih Karyawan --</option>
-                {employees.map((emp) => (
-                  <option key={emp.id} value={emp.id}>
-                    {emp.user?.name || emp.full_name || `Employee #${emp.id}`} - {emp.position || '-'}
-                  </option>
-                ))}
-              </select>
+        <label className="modal-completion-label">Pilih Karyawan</label>
+        <select
+          className="modal-completion-select"
+          value={selectedEmployee}
+          onChange={(e) => setSelectedEmployee(e.target.value)}
+        >
+          <option value="">-- Pilih Karyawan --</option>
+          {employees.map((emp) => (
+            <option key={emp.id} value={emp.id}>
+              {emp.user?.name || emp.full_name || `Employee #${emp.id}`} - {emp.position || '-'}
+            </option>
+          ))}
+        </select>
 
-              <label className="modal-completion-label" style={{ marginTop: '1rem' }}>Catatan Assignment</label>
-              <textarea
-                className="modal-completion-textarea"
-                placeholder="Catatan tambahan (opsional)..."
-                value={assignmentNote}
-                onChange={(e) => setAssignmentNote(e.target.value)}
-                rows={3}
-              />
-            </div>
-
-            <div className="modal-completion-footer">
-              <button className="modal-btn-cancel" onClick={closeAssignModal}>Batal</button>
-              <button
-                className="modal-btn-confirm"
-                onClick={handleAssign}
-                disabled={assigningLoading || !selectedEmployee}
-              >
-                {assigningLoading ? (
-                  <><RefreshCw size={16} className="animate-spin" /> Menyimpan...</>
-                ) : (
-                  <><ArrowDownToLine size={16} /> Assign Aset</>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+        <label className="modal-completion-label" style={{ marginTop: '1rem' }}>Catatan Assignment</label>
+        <textarea
+          className="modal-completion-textarea"
+          placeholder="Catatan tambahan (opsional)..."
+          value={assignmentNote}
+          onChange={(e) => setAssignmentNote(e.target.value)}
+          rows={3}
+        />
+      </Modal>
 
       {/* Return Modal */}
-      {returnModal && selectedAssignment && (
-        <div className="modal-overlay" onClick={closeReturnModal}>
-          <div className="modal-completion" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-completion-header">
-              <div className="modal-completion-icon" style={{ background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)', color: '#d97706' }}>
-                <ArrowUpFromLine size={24} />
-              </div>
-              <div>
-                <h3 className="modal-completion-title">Kembalikan Aset</h3>
-                <p className="modal-completion-task">
-                  Dari: {selectedAssignment.employee?.user?.name || selectedAssignment.employee?.full_name || '-'}
-                </p>
-              </div>
-              <button className="modal-close-btn" onClick={closeReturnModal}>
-                <X size={20} />
-              </button>
-            </div>
+      <Modal isOpen={returnModal && !!selectedAssignment} onClose={closeReturnModal} title="Kembalikan Aset" size="md"
+        footer={
+          <>
+            <button className="modal-btn-cancel" onClick={closeReturnModal}>Batal</button>
+            <button
+              className="modal-btn-confirm"
+              onClick={handleReturn}
+              disabled={returningLoading}
+              style={{ background: 'linear-gradient(135deg, #d97706 0%, #b45309 100%)', boxShadow: '0 4px 14px rgba(217, 119, 6, 0.3)' }}
+            >
+              {returningLoading ? (
+                <><RefreshCw size={16} className="animate-spin" /> Memproses...</>
+              ) : (
+                <><ArrowUpFromLine size={16} /> Kembalikan</>
+              )}
+            </button>
+          </>
+        }
+      >
+        <p className="modal-completion-task">
+          Dari: {selectedAssignment?.employee?.user?.name || selectedAssignment?.employee?.full_name || '-'}
+        </p>
 
-            <div className="modal-completion-body">
-              <label className="modal-completion-label">Catatan Pengembalian</label>
-              <textarea
-                className="modal-completion-textarea"
-                placeholder="Kondisi aset saat dikembalikan..."
-                value={returnNote}
-                onChange={(e) => setReturnNote(e.target.value)}
-                rows={3}
-              />
-              <p className="modal-completion-hint">Opsional. Kosongkan jika tidak ada catatan.</p>
-            </div>
-
-            <div className="modal-completion-footer">
-              <button className="modal-btn-cancel" onClick={closeReturnModal}>Batal</button>
-              <button
-                className="modal-btn-confirm"
-                onClick={handleReturn}
-                disabled={returningLoading}
-                style={{ background: 'linear-gradient(135deg, #d97706 0%, #b45309 100%)', boxShadow: '0 4px 14px rgba(217, 119, 6, 0.3)' }}
-              >
-                {returningLoading ? (
-                  <><RefreshCw size={16} className="animate-spin" /> Memproses...</>
-                ) : (
-                  <><ArrowUpFromLine size={16} /> Kembalikan</>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+        <label className="modal-completion-label">Catatan Pengembalian</label>
+        <textarea
+          className="modal-completion-textarea"
+          placeholder="Kondisi aset saat dikembalikan..."
+          value={returnNote}
+          onChange={(e) => setReturnNote(e.target.value)}
+          rows={3}
+        />
+        <p className="modal-completion-hint">Opsional. Kosongkan jika tidak ada catatan.</p>
+      </Modal>
 
       <ConfirmDialog
         isOpen={!!deleteTarget}

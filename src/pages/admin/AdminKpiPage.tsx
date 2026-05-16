@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
+import { Modal } from "@/shared/ui/Modal";
 import { ConfirmDialog } from "@/shared/ui/ConfirmDialog";
 import { Alert } from "@/shared/ui/Alert";
 import { showToast } from '@/shared/ui/toast';
@@ -551,53 +552,23 @@ const AdminKpiPage = () => {
         </div>
       </div>
 
-      {showDetail && selectedPeriod && (
-        <div
-          className="modal-overlay"
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: "rgba(0,0,0,0.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-            backdropFilter: "blur(4px)",
-          }}
-        >
-          <Card
-            glass
-            style={{
-              width: "90%",
-              maxWidth: 700,
-              padding: 0,
-              overflow: "hidden",
-              maxHeight: "90vh",
-              overflowY: "auto",
-            }}
-          >
-            <div
-              className="table-header-bar"
-              style={{
-                padding: "16px 24px",
-                borderBottom: "1px solid rgba(0,0,0,0.05)",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <h3 style={{ margin: 0 }}>Detail Periode KPI</h3>
-              <Button variant="ghost" size="sm" onClick={() => setShowDetail(false)}>
-                ×
-              </Button>
-            </div>
-            <div style={{ padding: 24 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-                <img
-                  src={selectedPeriod.employee?.user?.profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedPeriod.employee?.user?.name || 'K')}&color=7F9CF5&background=EBF4FF`}
+      <Modal
+        isOpen={showDetail && !!selectedPeriod}
+        onClose={() => setShowDetail(false)}
+        title="Detail Periode KPI"
+        size="lg"
+        footer={
+          <div style={{ display: "flex", gap: 12 }}>
+            <Button variant="outline" style={{ flex: 1 }} onClick={() => { setShowDetail(false); handleEdit(selectedPeriod!); }}>
+              <Pencil size={16} /> Edit
+            </Button>
+          </div>
+        }
+      >
+        {selectedPeriod && (<>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+            <img
+              src={selectedPeriod.employee?.user?.profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedPeriod.employee?.user?.name || 'K')}&color=7F9CF5&background=EBF4FF`}
                   alt=""
                   className="cell-avatar"
                   style={{ width: 48, height: 48, fontSize: 20 }}
@@ -859,10 +830,8 @@ const AdminKpiPage = () => {
                   <Pencil size={16} /> Edit
                 </Button>
               </div>
-            </div>
-          </Card>
-        </div>
-      )}
+            </>)}
+      </Modal>
 
       <ConfirmDialog
         isOpen={!!deleteTarget}

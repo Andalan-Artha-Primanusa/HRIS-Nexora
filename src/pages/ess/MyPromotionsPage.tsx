@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, RefreshCw, ArrowUpRight, CheckCircle, Clock, XCircle, FileText, X, History } from 'lucide-react';
+import { Search, RefreshCw, ArrowUpRight, CheckCircle, Clock, XCircle, FileText, History } from 'lucide-react';
+import { Modal } from '@/shared/ui/Modal';
 import { Card } from '@/shared/ui/Card';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { promotionService } from '@/features/organization/api/promotion.service';
@@ -385,55 +386,38 @@ const MyPromotionsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Report Modal */}
-      {reportModal && selectedPromo && (
-        <div className="modal-overlay" onClick={closeReportModal}>
-          <div className="modal-completion" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-completion-header">
-              <div className="modal-completion-icon" style={{ background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)', color: '#2563eb' }}>
-                <FileText size={24} />
-              </div>
-              <div>
-                <h3 className="modal-completion-title">Submit Laporan Kegiatan</h3>
-                <p className="modal-completion-task">
-                  {selectedPromo.to_value}
-                </p>
-              </div>
-              <button className="modal-close-btn" onClick={closeReportModal}>
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="modal-completion-body">
-              <label className="modal-completion-label">Laporan Kegiatan</label>
-              <textarea
-                className="modal-completion-textarea"
-                placeholder="Deskripsikan kegiatan dan pencapaian Anda setelah promosi..."
-                value={reportContent}
-                onChange={(e) => setReportContent(e.target.value)}
-                rows={5}
-              />
-              <p className="modal-completion-hint">Laporan akan direview oleh HR/Admin sebelum promosi dinyatakan selesai.</p>
-            </div>
-
-            <div className="modal-completion-footer">
-              <button className="modal-btn-cancel" onClick={closeReportModal}>Batal</button>
-              <button
-                className="modal-btn-confirm"
-                onClick={handleSubmitReport}
-                disabled={submittingReport || !reportContent.trim()}
-                style={{ background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.3)' }}
-              >
-                {submittingReport ? (
-                  <><RefreshCw size={16} className="animate-spin" /> Mengirim...</>
-                ) : (
-                  <><FileText size={16} /> Submit Laporan</>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Modal
+        isOpen={reportModal && !!selectedPromo}
+        onClose={closeReportModal}
+        title="Submit Laporan Kegiatan"
+        size="md"
+        footer={
+          <>
+            <button className="modal-btn-cancel" onClick={closeReportModal}>Batal</button>
+            <button className="modal-btn-confirm" onClick={handleSubmitReport}
+              disabled={submittingReport || !reportContent.trim()}
+              style={{ background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.3)' }}
+            >
+              {submittingReport ? (
+                <><RefreshCw size={16} className="animate-spin" /> Mengirim...</>
+              ) : (
+                <><FileText size={16} /> Submit Laporan</>
+              )}
+            </button>
+          </>
+        }
+      >
+        <p className="modal-completion-task" style={{ marginBottom: '1rem' }}>{selectedPromo?.to_value}</p>
+        <label className="modal-completion-label">Laporan Kegiatan</label>
+        <textarea
+          className="modal-completion-textarea"
+          placeholder="Deskripsikan kegiatan dan pencapaian Anda setelah promosi..."
+          value={reportContent}
+          onChange={(e) => setReportContent(e.target.value)}
+          rows={5}
+        />
+        <p className="modal-completion-hint">Laporan akan direview oleh HR/Admin sebelum promosi dinyatakan selesai.</p>
+      </Modal>
 
       {historyModal && (
         <ApprovalHistoryModal

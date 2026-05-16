@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Filter, Plus, RefreshCw, CheckCircle, XCircle, Trash2, ArrowUpRight, FileText, X, History } from 'lucide-react';
+import { Search, Filter, Plus, RefreshCw, CheckCircle, XCircle, Trash2, ArrowUpRight, FileText, History } from 'lucide-react';
+import { Modal } from '@/shared/ui/Modal';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
@@ -587,83 +588,61 @@ const PromotionPage: React.FC = () => {
         onCancel={() => setDeleteTarget(null)}
       />
 
-      {/* Report Modal */}
-      {reportModal && selectedPromo && (
-        <div className="modal-overlay" onClick={closeReportModal}>
-          <div className="modal-completion" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-completion-header">
-              <div className="modal-completion-icon" style={{ background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)', color: viewingReport ? '#2563eb' : '#dc2626' }}>
-                <FileText size={24} />
-              </div>
-              <div>
-                <h3 className="modal-completion-title">
-                  {viewingReport ? 'Laporan Kegiatan' : 'Tolak Laporan'}
-                </h3>
-                <p className="modal-completion-task">
-                  {selectedPromo.employee?.user?.name || '-'} → {selectedPromo.to_value}
-                </p>
-              </div>
-              <button className="modal-close-btn" onClick={closeReportModal}>
-                <X size={20} />
+      <Modal
+        isOpen={reportModal && !!selectedPromo}
+        onClose={closeReportModal}
+        title={viewingReport ? 'Laporan Kegiatan' : 'Tolak Laporan'}
+        size="md"
+        footer={
+          viewingReport ? (
+            <>
+              <button className="modal-btn-cancel" onClick={closeReportModal}>Tutup</button>
+              <button className="modal-btn-confirm" onClick={() => selectedPromo && handleApproveReport(selectedPromo.id)}
+                disabled={reportActionLoading}
+                style={{ background: 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)', boxShadow: '0 4px 14px rgba(22, 163, 74, 0.3)' }}
+              >
+                {reportActionLoading ? (
+                  <><RefreshCw size={16} className="animate-spin" /> Memproses...</>
+                ) : (
+                  <><CheckCircle size={16} /> Setujui Laporan</>
+                )}
               </button>
+            </>
+          ) : (
+            <>
+              <button className="modal-btn-cancel" onClick={closeReportModal}>Batal</button>
+              <button className="modal-btn-confirm" onClick={submitRejectReport}
+                disabled={reportActionLoading || !rejectionReason.trim()}
+                style={{ background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)', boxShadow: '0 4px 14px rgba(220, 38, 38, 0.3)' }}
+              >
+                {reportActionLoading ? (
+                  <><RefreshCw size={16} className="animate-spin" /> Memproses...</>
+                ) : (
+                  <><XCircle size={16} /> Tolak Laporan</>
+                )}
+              </button>
+            </>
+          )
+        }
+      >
+        <p className="modal-completion-task" style={{ marginBottom: '1rem' }}>
+          {selectedPromo?.employee?.user?.name || '-'} → {selectedPromo?.to_value}
+        </p>
+        {viewingReport ? (
+          <>
+            <label className="modal-completion-label">Isi Laporan</label>
+            <div className="modal-completion-textarea" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '12px', borderRadius: '8px', minHeight: '120px', whiteSpace: 'pre-wrap' }}>
+              {selectedPromo?.activity_report || 'Tidak ada laporan.'}
             </div>
-
-            {viewingReport ? (
-              <>
-                <div className="modal-completion-body">
-                  <label className="modal-completion-label">Isi Laporan</label>
-                  <div className="modal-completion-textarea" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '12px', borderRadius: '8px', minHeight: '120px', whiteSpace: 'pre-wrap' }}>
-                    {selectedPromo.activity_report || 'Tidak ada laporan.'}
-                  </div>
-                </div>
-                <div className="modal-completion-footer">
-                  <button className="modal-btn-cancel" onClick={closeReportModal}>Tutup</button>
-                  <button
-                    className="modal-btn-confirm"
-                    onClick={() => handleApproveReport(selectedPromo.id)}
-                    disabled={reportActionLoading}
-                    style={{ background: 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)', boxShadow: '0 4px 14px rgba(22, 163, 74, 0.3)' }}
-                  >
-                    {reportActionLoading ? (
-                      <><RefreshCw size={16} className="animate-spin" /> Memproses...</>
-                    ) : (
-                      <><CheckCircle size={16} /> Setujui Laporan</>
-                    )}
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="modal-completion-body">
-                  <label className="modal-completion-label">Alasan Penolakan</label>
-                  <textarea
-                    className="modal-completion-textarea"
-                    placeholder="Jelaskan alasan penolakan laporan ini..."
-                    value={rejectionReason}
-                    onChange={(e) => setRejectionReason(e.target.value)}
-                    rows={4}
-                  />
-                </div>
-                <div className="modal-completion-footer">
-                  <button className="modal-btn-cancel" onClick={closeReportModal}>Batal</button>
-                  <button
-                    className="modal-btn-confirm"
-                    onClick={submitRejectReport}
-                    disabled={reportActionLoading || !rejectionReason.trim()}
-                    style={{ background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)', boxShadow: '0 4px 14px rgba(220, 38, 38, 0.3)' }}
-                  >
-                    {reportActionLoading ? (
-                      <><RefreshCw size={16} className="animate-spin" /> Memproses...</>
-                    ) : (
-                      <><XCircle size={16} /> Tolak Laporan</>
-                    )}
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+          </>
+        ) : (
+          <>
+            <label className="modal-completion-label">Alasan Penolakan</label>
+            <textarea className="modal-completion-textarea" placeholder="Jelaskan alasan penolakan laporan ini..."
+              value={rejectionReason} onChange={(e) => setRejectionReason(e.target.value)} rows={4} />
+          </>
+        )}
+      </Modal>
       {historyModal && (
         <ApprovalHistoryModal
           isOpen={!!historyModal}

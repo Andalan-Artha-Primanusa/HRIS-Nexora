@@ -3,7 +3,7 @@ import { Card } from "@/shared/ui/Card";
 import { ConfirmDialog } from "@/shared/ui/ConfirmDialog";
 import { Modal } from "@/shared/ui/Modal";
 import { showToast } from "@/shared/ui/toast";
-import { ArrowDown, ArrowUp, Briefcase, Filter, RefreshCw, Search, ChevronDown, Plus, Pencil, Trash2, ArrowLeft, AlertCircle, Download, Banknote, FileText, X, Info } from "lucide-react";
+import { ArrowDown, ArrowUp, Briefcase, Filter, RefreshCw, Search, ChevronDown, Plus, Pencil, Trash2, ArrowLeft, AlertCircle, Download, Banknote, FileText, Info, X } from "lucide-react";
 
 import { payrollService, toSafeArray } from "@/features/payroll/api/payroll.service";
 import { getAllEmployees } from "@/features/employee/api/employee.service";
@@ -478,37 +478,34 @@ const PayrollListPage = () => {
         </>
       )}
 
-      {exportModal && (
-        <div className="modal-overlay" onClick={() => setExportModal(false)}>
-          <div className="modal-completion" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-completion-header">
-              <div className="modal-completion-icon" style={{ background: "linear-gradient(135deg, #dbeafe, #bfdbfe)", color: "#2563eb" }}><Download size={24} /></div>
-              <div><h3 className="modal-completion-title">Export Payroll</h3><p className="modal-completion-task">Pilih tipe dan periode</p></div>
-              <button className="modal-close-btn" onClick={() => setExportModal(false)}><X size={20} /></button>
-            </div>
-            <div className="modal-completion-body">
-              <label className="modal-completion-label">Tipe Export</label>
-              <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 8 }}>
-                {([["bca", "BCA KlikPay CSV", "Format siap import ke BCA KlikPay", Banknote], ["summary", "Summary Lengkap", "Detail gaji, tunjangan, potongan, BPJS, PPh21", FileText]] as const).map(([key, title, desc, Icon]) => (
-                  <label key={key} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderRadius: 12, border: exportType === key ? "2px solid #2563eb" : "2px solid #e2e8f0", background: exportType === key ? "#eff6ff" : "#fff", cursor: "pointer" }} onClick={() => setExportType(key)}>
-                    <input type="radio" name="exportTypeList" checked={exportType === key} onChange={() => setExportType(key)} style={{ accentColor: "#2563eb" }} />
-                    <Icon size={20} color="#2563eb" />
-                    <div><div style={{ fontWeight: 600, color: "#1e293b" }}>{title}</div><div style={{ fontSize: "0.8rem", color: "#64748b" }}>{desc}</div></div>
-                  </label>
-                ))}
-              </div>
-              <label className="modal-completion-label" style={{ marginTop: 16 }}>Periode</label>
-              <input type="month" className="crud-input payroll-control payroll-month-input payroll-export-period-input" value={exportPeriod} onChange={(e) => setExportPeriod(e.target.value)} />
-            </div>
-            <div className="modal-completion-footer">
-              <button className="modal-btn-cancel" onClick={() => setExportModal(false)}>Batal</button>
-              <button className="modal-btn-confirm" onClick={handleExport} disabled={exportLoading} style={{ background: "linear-gradient(135deg, #2563eb, #1d4ed8)" }}>
-                {exportLoading ? <><RefreshCw size={16} className="animate-spin" /> Memproses...</> : <><Download size={16} /> Download CSV</>}
-              </button>
-            </div>
-          </div>
+      <Modal
+        isOpen={exportModal}
+        onClose={() => setExportModal(false)}
+        title="Export Payroll"
+        size="md"
+        footer={
+          <>
+            <button className="modal-btn-cancel" onClick={() => setExportModal(false)}>Batal</button>
+            <button className="modal-btn-confirm" onClick={handleExport} disabled={exportLoading} style={{ background: "linear-gradient(135deg, #2563eb, #1d4ed8)" }}>
+              {exportLoading ? <><RefreshCw size={16} className="animate-spin" /> Memproses...</> : <><Download size={16} /> Download CSV</>}
+            </button>
+          </>
+        }
+      >
+        <p className="modal-completion-task" style={{ marginBottom: '1rem' }}>Pilih tipe dan periode</p>
+        <label className="modal-completion-label">Tipe Export</label>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 8 }}>
+          {([["bca", "BCA KlikPay CSV", "Format siap import ke BCA KlikPay", Banknote], ["summary", "Summary Lengkap", "Detail gaji, tunjangan, potongan, BPJS, PPh21", FileText]] as const).map(([key, title, desc, Icon]) => (
+            <label key={key} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderRadius: 12, border: exportType === key ? "2px solid #2563eb" : "2px solid #e2e8f0", background: exportType === key ? "#eff6ff" : "#fff", cursor: "pointer" }} onClick={() => setExportType(key)}>
+              <input type="radio" name="exportTypeList" checked={exportType === key} onChange={() => setExportType(key)} style={{ accentColor: "#2563eb" }} />
+              <Icon size={20} color="#2563eb" />
+              <div><div style={{ fontWeight: 600, color: "#1e293b" }}>{title}</div><div style={{ fontSize: "0.8rem", color: "#64748b" }}>{desc}</div></div>
+            </label>
+          ))}
         </div>
-      )}
+        <label className="modal-completion-label" style={{ marginTop: 16 }}>Periode</label>
+        <input type="month" className="crud-input payroll-control payroll-month-input payroll-export-period-input" value={exportPeriod} onChange={(e) => setExportPeriod(e.target.value)} />
+      </Modal>
 
       <ConfirmDialog
         isOpen={!!deleteTarget}

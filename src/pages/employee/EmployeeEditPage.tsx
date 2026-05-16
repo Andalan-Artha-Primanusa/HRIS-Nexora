@@ -84,7 +84,7 @@ const EmployeeEditPage = () => {
         });
       } catch (error: unknown) {
         if (cancelled) return;
-        showToast(`Gagal: ${message}`, 'error');
+        showToast(`Gagal: ${error}`, 'error');
       } finally {
         if (!cancelled) setLoading(false);
       }

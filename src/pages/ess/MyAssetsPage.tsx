@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { RefreshCw, Package, Laptop, Monitor, Smartphone, Briefcase, ArrowUpFromLine, X, CheckCircle, Clock, Search, History } from 'lucide-react';
+import { RefreshCw, Package, Laptop, Monitor, Smartphone, Briefcase, ArrowUpFromLine, CheckCircle, Clock, Search, History } from 'lucide-react';
+import { Modal } from '@/shared/ui/Modal';
 import { Card, CardHeader } from '@/shared/ui';
 import { Button } from '@/shared/ui/Button';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
@@ -353,55 +354,39 @@ const MyAssetsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Return Modal */}
-      {returnModal && selectedAssignment && (
-        <div className="modal-overlay" onClick={closeReturnModal}>
-          <div className="modal-completion" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-completion-header">
-              <div className="modal-completion-icon" style={{ background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)', color: '#d97706' }}>
-                <ArrowUpFromLine size={24} />
-              </div>
-              <div>
-                <h3 className="modal-completion-title">Kembalikan Aset</h3>
-                <p className="modal-completion-task">
-                  {getAsset(selectedAssignment).name} ({getAsset(selectedAssignment).code})
-                </p>
-              </div>
-              <button className="modal-close-btn" onClick={closeReturnModal}>
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="modal-completion-body">
-              <label className="modal-completion-label">Catatan Pengembalian</label>
-              <textarea
-                className="modal-completion-textarea"
-                placeholder="Kondisi aset saat dikembalikan..."
-                value={returnNote}
-                onChange={(e) => setReturnNote(e.target.value)}
-                rows={3}
-              />
-              <p className="modal-completion-hint">Opsional. Kosongkan jika tidak ada catatan.</p>
-            </div>
-
-            <div className="modal-completion-footer">
-              <button className="modal-btn-cancel" onClick={closeReturnModal}>Batal</button>
-              <button
-                className="modal-btn-confirm"
-                onClick={handleReturn}
-                disabled={returningLoading}
-                style={{ background: 'linear-gradient(135deg, #d97706 0%, #b45309 100%)', boxShadow: '0 4px 14px rgba(217, 119, 6, 0.3)' }}
-              >
-                {returningLoading ? (
-                  <><RefreshCw size={16} className="animate-spin" /> Memproses...</>
-                ) : (
-                  <><ArrowUpFromLine size={16} /> Kembalikan Aset</>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Modal
+        isOpen={returnModal && !!selectedAssignment}
+        onClose={closeReturnModal}
+        title="Kembalikan Aset"
+        size="md"
+        footer={
+          <>
+            <button className="modal-btn-cancel" onClick={closeReturnModal}>Batal</button>
+            <button className="modal-btn-confirm" onClick={handleReturn} disabled={returningLoading}
+              style={{ background: 'linear-gradient(135deg, #d97706 0%, #b45309 100%)', boxShadow: '0 4px 14px rgba(217, 119, 6, 0.3)' }}
+            >
+              {returningLoading ? (
+                <><RefreshCw size={16} className="animate-spin" /> Memproses...</>
+              ) : (
+                <><ArrowUpFromLine size={16} /> Kembalikan Aset</>
+              )}
+            </button>
+          </>
+        }
+      >
+        <p className="modal-completion-task" style={{ marginBottom: '1rem' }}>
+          {selectedAssignment && getAsset(selectedAssignment).name} ({selectedAssignment && getAsset(selectedAssignment).code})
+        </p>
+        <label className="modal-completion-label">Catatan Pengembalian</label>
+        <textarea
+          className="modal-completion-textarea"
+          placeholder="Kondisi aset saat dikembalikan..."
+          value={returnNote}
+          onChange={(e) => setReturnNote(e.target.value)}
+          rows={3}
+        />
+        <p className="modal-completion-hint">Opsional. Kosongkan jika tidak ada catatan.</p>
+      </Modal>
       {historyModal && (
         <ApprovalHistoryModal
           isOpen={!!historyModal}

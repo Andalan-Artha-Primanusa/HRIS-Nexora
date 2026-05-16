@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Plus, RefreshCw, Edit, Trash2, Search, Building2, Briefcase, Database, CheckCircle } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { Modal } from '@/shared/ui/Modal';
 import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
@@ -484,104 +485,60 @@ const MasterDataPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal */}
-      {showModal && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>
-                {editingItem
-                  ? `Edit ${tabLabel(activeTab)}`
-                  : `Tambah ${tabLabel(activeTab)}`}
-              </h3>
-              <button className="modal-close" onClick={() => setShowModal(false)}>×</button>
-            </div>
-
-            <div className="modal-body">
-              {/* Name */}
-              <div className="form-group">
-                <label>Nama <span className="required">*</span></label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder={`Masukkan nama ${activeTab}`}
-                />
-              </div>
-
-              {/* Code */}
-              <div className="form-group">
-                <label>Kode</label>
-                <input
-                  type="text"
-                  value={formData.code}
-                  onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                  placeholder="cth. DEPT-001"
-                />
-              </div>
-
-              {/* Description */}
-              <div className="form-group">
-                <label>Deskripsi</label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder={`Deskripsikan ${activeTab}...`}
-                  rows={3}
-                />
-              </div>
-
-              {/* Position-specific fields */}
-              {activeTab === 'position' && (
-                <>
-                  <div className="form-group">
-                    <label>Level</label>
-                    <select
-                      value={formData.level}
-                      onChange={(e) => setFormData({ ...formData, level: e.target.value })}
-                    >
-                      <option value="Junior">Junior</option>
-                      <option value="Mid">Mid</option>
-                      <option value="Senior">Senior</option>
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label>Departemen</label>
-                    <select
-                      value={formData.department_id}
-                      onChange={(e) => setFormData({ ...formData, department_id: e.target.value })}
-                    >
-                      <option value="">Pilih Departemen</option>
-                      {departments.map((dept) => (
-                        <option key={dept.id} value={dept.id}>{dept.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                </>
-              )}
-
-
-
-              {/* Active toggle */}
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={formData.is_active}
-                  onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                />
-                <span>Aktif</span>
-              </label>
-            </div>
-
-            <div className="modal-footer">
-              <Button variant="outline" onClick={() => setShowModal(false)}>Batal</Button>
-              <Button variant="primary" onClick={handleSave}>
-                {editingItem ? 'Update' : 'Simpan'}
-              </Button>
-            </div>
+      <Modal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        title={editingItem ? `Edit ${tabLabel(activeTab)}` : `Tambah ${tabLabel(activeTab)}`}
+        size="md"
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setShowModal(false)}>Batal</Button>
+            <Button variant="primary" onClick={handleSave}>
+              {editingItem ? 'Update' : 'Simpan'}
+            </Button>
+          </>
+        }
+      >
+        <div className="modal-body" style={{ padding: 0 }}>
+          <div className="form-group">
+            <label>Nama <span className="required">*</span></label>
+            <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder={`Masukkan nama ${activeTab}`} />
           </div>
+          <div className="form-group">
+            <label>Kode</label>
+            <input type="text" value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })} placeholder="cth. DEPT-001" />
+          </div>
+          <div className="form-group">
+            <label>Deskripsi</label>
+            <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder={`Deskripsikan ${activeTab}...`} rows={3} />
+          </div>
+          {activeTab === 'position' && (
+            <>
+              <div className="form-group">
+                <label>Level</label>
+                <select value={formData.level} onChange={(e) => setFormData({ ...formData, level: e.target.value })}>
+                  <option value="Junior">Junior</option>
+                  <option value="Mid">Mid</option>
+                  <option value="Senior">Senior</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Departemen</label>
+                <select value={formData.department_id} onChange={(e) => setFormData({ ...formData, department_id: e.target.value })}>
+                  <option value="">Pilih Departemen</option>
+                  {departments.map((dept) => (
+                    <option key={dept.id} value={dept.id}>{dept.name}</option>
+                  ))}
+                </select>
+              </div>
+            </>
+          )}
+          <label className="checkbox-label">
+            <input type="checkbox" checked={formData.is_active} onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })} />
+            <span>Aktif</span>
+          </label>
         </div>
-      )}
+      </Modal>
 
       <ConfirmDialog
         isOpen={!!deleteTarget}

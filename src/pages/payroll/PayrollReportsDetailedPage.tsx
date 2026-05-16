@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, RefreshCw, FileText, DollarSign, Receipt, Users, Eye, Download, X, AlertCircle } from 'lucide-react';
+import { Search, RefreshCw, FileText, DollarSign, Receipt, Users, Eye, Download, AlertCircle } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Badge } from '@/shared/ui/Badge';
+import { Modal } from '@/shared/ui/Modal';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { payrollService, toSafeArray } from '@/features/payroll/api/payroll.service';
 import { parsePaginatedResponse } from '@/shared/api/pagination';
@@ -384,215 +385,106 @@ const PayrollReportsDetailedPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Export Modal */}
-      {exportModal && (
-        <div className="modal-overlay" onClick={() => setExportModal(false)}>
-          <div className="modal-completion" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-completion-header">
-              <div className="modal-completion-icon" style={{ background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)', color: '#2563eb' }}>
-                <Download size={24} />
-              </div>
-              <div>
-                <h3 className="modal-completion-title">Export Payroll</h3>
-                <p className="modal-completion-task">Pilih tipe export dan periode</p>
-              </div>
-              <button className="modal-close-btn" onClick={() => setExportModal(false)}>
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="modal-completion-body">
-              <label className="modal-completion-label">Tipe Export</label>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '8px' }}>
-                <label
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: '12px',
-                    padding: '12px 16px', borderRadius: '12px',
-                    border: exportType === 'bca' ? '2px solid #2563eb' : '2px solid #e2e8f0',
-                    background: exportType === 'bca' ? '#eff6ff' : '#fff',
-                    cursor: 'pointer',
-                  }}
-                  onClick={() => setExportType('bca')}
-                >
-                  <input type="radio" name="exportTypeReport" checked={exportType === 'bca'} onChange={() => setExportType('bca')} style={{ accentColor: '#2563eb' }} />
-                  <DollarSign size={20} color="#2563eb" />
-                  <div>
-                    <div style={{ fontWeight: 600, color: '#1e293b' }}>BCA KlikPay CSV</div>
-                    <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Format siap import ke BCA KlikPay</div>
-                  </div>
-                </label>
-
-                <label
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: '12px',
-                    padding: '12px 16px', borderRadius: '12px',
-                    border: exportType === 'summary' ? '2px solid #2563eb' : '2px solid #e2e8f0',
-                    background: exportType === 'summary' ? '#eff6ff' : '#fff',
-                    cursor: 'pointer',
-                  }}
-                  onClick={() => setExportType('summary')}
-                >
-                  <input type="radio" name="exportTypeReport" checked={exportType === 'summary'} onChange={() => setExportType('summary')} style={{ accentColor: '#2563eb' }} />
-                  <FileText size={20} color="#2563eb" />
-                  <div>
-                    <div style={{ fontWeight: 600, color: '#1e293b' }}>Summary Lengkap</div>
-                    <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Detail gaji, tunjangan, potongan, BPJS, PPh21</div>
-                  </div>
-                </label>
-              </div>
-
-              <label className="modal-completion-label" style={{ marginTop: '16px' }}>Periode</label>
-              <input
-                type="month"
-                className="crud-input"
-                value={exportPeriod}
-                onChange={(e) => setExportPeriod(e.target.value)}
-                style={{ width: '100%', marginTop: '8px' }}
-              />
-            </div>
-
-            <div className="modal-completion-footer">
-              <button className="modal-btn-cancel" onClick={() => setExportModal(false)}>Batal</button>
-              <button
-                className="modal-btn-confirm"
-                onClick={handleExport}
-                disabled={exportLoading}
-                style={{ background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.3)' }}
-              >
-                {exportLoading ? (
-                  <><RefreshCw size={16} className="animate-spin" /> Memproses...</>
-                ) : (
-                  <><Download size={16} /> Download CSV</>
-                )}
-              </button>
-            </div>
-          </div>
+      <Modal isOpen={exportModal} onClose={() => setExportModal(false)} title="Export Payroll" size="md"
+        footer={<>
+          <button className="modal-btn-cancel" onClick={() => setExportModal(false)}>Batal</button>
+          <button className="modal-btn-confirm" onClick={handleExport} disabled={exportLoading}
+            style={{ background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.3)' }}>
+            {exportLoading ? <><RefreshCw size={16} className="animate-spin" /> Memproses...</> : <><Download size={16} /> Download CSV</>}
+          </button>
+        </>}
+      >
+        <p className="modal-completion-task" style={{ marginBottom: '1rem' }}>Pilih tipe export dan periode</p>
+        <label className="modal-completion-label">Tipe Export</label>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '8px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', borderRadius: '12px', border: exportType === 'bca' ? '2px solid #2563eb' : '2px solid #e2e8f0', background: exportType === 'bca' ? '#eff6ff' : '#fff', cursor: 'pointer' }} onClick={() => setExportType('bca')}>
+            <input type="radio" name="exportTypeReport" checked={exportType === 'bca'} onChange={() => setExportType('bca')} style={{ accentColor: '#2563eb' }} />
+            <DollarSign size={20} color="#2563eb" />
+            <div><div style={{ fontWeight: 600, color: '#1e293b' }}>BCA KlikPay CSV</div><div style={{ fontSize: '0.8rem', color: '#64748b' }}>Format siap import ke BCA KlikPay</div></div>
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', borderRadius: '12px', border: exportType === 'summary' ? '2px solid #2563eb' : '2px solid #e2e8f0', background: exportType === 'summary' ? '#eff6ff' : '#fff', cursor: 'pointer' }} onClick={() => setExportType('summary')}>
+            <input type="radio" name="exportTypeReport" checked={exportType === 'summary'} onChange={() => setExportType('summary')} style={{ accentColor: '#2563eb' }} />
+            <FileText size={20} color="#2563eb" />
+            <div><div style={{ fontWeight: 600, color: '#1e293b' }}>Summary Lengkap</div><div style={{ fontSize: '0.8rem', color: '#64748b' }}>Detail gaji, tunjangan, potongan, BPJS, PPh21</div></div>
+          </label>
         </div>
-      )}
+        <label className="modal-completion-label" style={{ marginTop: '16px' }}>Periode</label>
+        <input type="month" className="crud-input" value={exportPeriod} onChange={(e) => setExportPeriod(e.target.value)} style={{ width: '100%', marginTop: '8px' }} />
+      </Modal>
 
-      {/* Export Error Popup */}
-      {exportError && (
-        <div className="modal-overlay" onClick={() => setExportError(null)}>
-          <div className="modal-completion" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px' }}>
-            <div className="modal-completion-header">
-              <div className="modal-completion-icon" style={{ background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)', color: '#dc2626' }}>
-                <AlertCircle size={24} />
-              </div>
-              <div>
-                <h3 className="modal-completion-title">Export Gagal</h3>
-                <p className="modal-completion-task">Tidak bisa mengunduh file</p>
-              </div>
-              <button className="modal-close-btn" onClick={() => setExportError(null)}>
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="modal-completion-body">
-              <div style={{ padding: '16px', background: '#fef2f2', borderRadius: '12px', border: '1px solid #fecaca' }}>
-                <p style={{ color: '#991b1b', fontWeight: 600, margin: '0 0 8px' }}>Penyebab:</p>
-                <p style={{ color: '#7f1d1d', margin: 0, fontSize: '0.9rem', lineHeight: '1.6' }}>{exportError}</p>
-              </div>
-              <div style={{ marginTop: '12px', padding: '12px', background: '#f8fafc', borderRadius: '8px', fontSize: '0.85rem', color: '#475569', lineHeight: '1.6' }}>
-                <strong>Solusi:</strong> Pastikan sudah generate payroll untuk periode <strong>{exportPeriod}</strong> dan statusnya sudah approved/paid.
-              </div>
-            </div>
-
-            <div className="modal-completion-footer">
-              <button className="modal-btn-cancel" onClick={() => setExportError(null)}>Tutup</button>
-              <button
-                className="modal-btn-confirm"
-                onClick={() => { setExportError(null); setExportModal(true); }}
-                style={{ background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)' }}
-              >
-                Coba Lagi
-              </button>
-            </div>
-          </div>
+      <Modal isOpen={!!exportError} onClose={() => setExportError(null)} title="Export Gagal" size="md"
+        footer={<>
+          <button className="modal-btn-cancel" onClick={() => setExportError(null)}>Tutup</button>
+          <button className="modal-btn-confirm" onClick={() => { setExportError(null); setExportModal(true); }} style={{ background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)' }}>Coba Lagi</button>
+        </>}
+      >
+        <p className="modal-completion-task" style={{ marginBottom: '1rem' }}>Tidak bisa mengunduh file</p>
+        <div style={{ padding: '16px', background: '#fef2f2', borderRadius: '12px', border: '1px solid #fecaca' }}>
+          <p style={{ color: '#991b1b', fontWeight: 600, margin: '0 0 8px' }}>Penyebab:</p>
+          <p style={{ color: '#7f1d1d', margin: 0, fontSize: '0.9rem', lineHeight: '1.6' }}>{exportError}</p>
         </div>
-      )}
+        <div style={{ marginTop: '12px', padding: '12px', background: '#f8fafc', borderRadius: '8px', fontSize: '0.85rem', color: '#475569', lineHeight: '1.6' }}>
+          <strong>Solusi:</strong> Pastikan sudah generate payroll untuk periode <strong>{exportPeriod}</strong> dan statusnya sudah approved/paid.
+        </div>
+      </Modal>
 
-      {/* Detail Modal */}
-      {detailModal && selectedPayroll && (
-        <div className="modal-overlay" onClick={() => setDetailModal(false)}>
-          <div className="modal-completion" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px' }}>
-            <div className="modal-completion-header">
-              <div className="modal-completion-icon" style={{ background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)', color: '#2563eb' }}>
-                <FileText size={24} />
+      <Modal isOpen={detailModal && !!selectedPayroll} onClose={() => setDetailModal(false)} title="Detail Payroll" size="lg"
+        footer={<button className="modal-btn-cancel" onClick={() => setDetailModal(false)}>Tutup</button>}
+      >
+        <p className="modal-completion-task" style={{ marginBottom: '1rem' }}>{selectedPayroll?.employee?.name || selectedPayroll?.employee?.user?.name || '-'} • {selectedPayroll?.period || '-'}</p>
+        {detailLoading ? (
+          <div style={{ textAlign: 'center', padding: '24px', color: '#64748b' }}>
+            <RefreshCw size={24} className="animate-spin" style={{ margin: '0 auto 8px' }} />
+            <p>Memuat detail...</p>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
+                <p style={{ fontSize: '0.75rem', color: '#64748b', margin: 0 }}>Gaji Pokok</p>
+                <p style={{ fontWeight: 600, color: '#1e293b', margin: '4px 0 0' }}>{formatCurrency(selectedPayroll?.summary?.basic_salary ?? selectedPayroll?.basic_salary ?? 0)}</p>
               </div>
-              <div>
-                <h3 className="modal-completion-title">Detail Payroll</h3>
-                <p className="modal-completion-task">
-                  {selectedPayroll?.employee?.name || selectedPayroll?.employee?.user?.name || '-'} • {selectedPayroll?.period || '-'}
-                </p>
+              <div style={{ padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
+                <p style={{ fontSize: '0.75rem', color: '#64748b', margin: 0 }}>Tunjangan</p>
+                <p style={{ fontWeight: 600, color: '#1e293b', margin: '4px 0 0' }}>{formatCurrency(selectedPayroll?.summary?.allowance ?? selectedPayroll?.allowance ?? 0)}</p>
               </div>
-              <button className="modal-close-btn" onClick={() => setDetailModal(false)}>
-                <X size={20} />
-              </button>
+              <div style={{ padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
+                <p style={{ fontSize: '0.75rem', color: '#64748b', margin: 0 }}>Bonus</p>
+                <p style={{ fontWeight: 600, color: '#1e293b', margin: '4px 0 0' }}>{formatCurrency(selectedPayroll?.summary?.bonus ?? selectedPayroll?.bonus ?? 0)}</p>
+              </div>
+              <div style={{ padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
+                <p style={{ fontSize: '0.75rem', color: '#64748b', margin: 0 }}>Gross Pay</p>
+                <p style={{ fontWeight: 600, color: '#1e293b', margin: '4px 0 0' }}>{formatCurrency(selectedPayroll?.summary?.gross_pay ?? 0)}</p>
+              </div>
             </div>
-
-            <div className="modal-completion-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {detailLoading ? (
-                <div style={{ textAlign: 'center', padding: '24px', color: '#64748b' }}>
-                  <RefreshCw size={24} className="animate-spin" style={{ margin: '0 auto 8px' }} />
-                  <p>Memuat detail...</p>
+            <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '12px' }}>
+              <p style={{ fontWeight: 600, color: '#1e293b', marginBottom: '8px' }}>Potongan</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: '#fef2f2', borderRadius: '8px' }}>
+                  <span style={{ color: '#64748b' }}>PPh 21</span>
+                  <span style={{ fontWeight: 600, color: '#e11d48' }}>{formatCurrency(selectedPayroll?.summary?.pph21 ?? selectedPayroll?.pph21 ?? 0)}</span>
                 </div>
-              ) : (
-                <>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                    <div style={{ padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
-                      <p style={{ fontSize: '0.75rem', color: '#64748b', margin: 0 }}>Gaji Pokok</p>
-                      <p style={{ fontWeight: 600, color: '#1e293b', margin: '4px 0 0' }}>{formatCurrency(selectedPayroll?.summary?.basic_salary ?? selectedPayroll?.basic_salary ?? 0)}</p>
-                    </div>
-                    <div style={{ padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
-                      <p style={{ fontSize: '0.75rem', color: '#64748b', margin: 0 }}>Tunjangan</p>
-                      <p style={{ fontWeight: 600, color: '#1e293b', margin: '4px 0 0' }}>{formatCurrency(selectedPayroll?.summary?.allowance ?? selectedPayroll?.allowance ?? 0)}</p>
-                    </div>
-                    <div style={{ padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
-                      <p style={{ fontSize: '0.75rem', color: '#64748b', margin: 0 }}>Bonus</p>
-                      <p style={{ fontWeight: 600, color: '#1e293b', margin: '4px 0 0' }}>{formatCurrency(selectedPayroll?.summary?.bonus ?? selectedPayroll?.bonus ?? 0)}</p>
-                    </div>
-                    <div style={{ padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
-                      <p style={{ fontSize: '0.75rem', color: '#64748b', margin: 0 }}>Gross Pay</p>
-                      <p style={{ fontWeight: 600, color: '#1e293b', margin: '4px 0 0' }}>{formatCurrency(selectedPayroll?.summary?.gross_pay ?? 0)}</p>
-                    </div>
-                  </div>
-
-                  <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '12px' }}>
-                    <p style={{ fontWeight: 600, color: '#1e293b', marginBottom: '8px' }}>Potongan</p>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: '#fef2f2', borderRadius: '8px' }}>
-                        <span style={{ color: '#64748b' }}>PPh 21</span>
-                        <span style={{ fontWeight: 600, color: '#e11d48' }}>{formatCurrency(selectedPayroll?.summary?.pph21 ?? selectedPayroll?.pph21 ?? 0)}</span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: '#fef2f2', borderRadius: '8px' }}>
-                        <span style={{ color: '#64748b' }}>BPJS Kesehatan</span>
-                        <span style={{ fontWeight: 600, color: '#e11d48' }}>{formatCurrency(selectedPayroll?.summary?.bpjs_kesehatan ?? selectedPayroll?.bpjs_kesehatan ?? 0)}</span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: '#fef2f2', borderRadius: '8px' }}>
-                        <span style={{ color: '#64748b' }}>BPJS Ketenagakerjaan</span>
-                        <span style={{ fontWeight: 600, color: '#e11d48' }}>{formatCurrency(selectedPayroll?.summary?.bpjs_ketenagakerjaan ?? selectedPayroll?.bpjs_ketenagakerjaan ?? 0)}</span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: '#fee2e2', borderRadius: '8px', fontWeight: 600 }}>
-                        <span style={{ color: '#991b1b' }}>Total Potongan</span>
-                        <span style={{ color: '#dc2626' }}>{formatCurrency(selectedPayroll?.summary?.total_deduction ?? selectedPayroll?.total_deduction ?? 0)}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div style={{ padding: '16px', background: '#f0fdf4', borderRadius: '12px', textAlign: 'center' }}>
-                    <p style={{ fontSize: '0.75rem', color: '#166534', margin: 0 }}>Take Home Pay</p>
-                    <p style={{ fontSize: '1.5rem', fontWeight: 700, color: '#059669', margin: '4px 0 0' }}>{formatCurrency(selectedPayroll?.summary?.take_home_pay ?? selectedPayroll?.take_home_pay ?? 0)}</p>
-                  </div>
-                </>
-              )}
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: '#fef2f2', borderRadius: '8px' }}>
+                  <span style={{ color: '#64748b' }}>BPJS Kesehatan</span>
+                  <span style={{ fontWeight: 600, color: '#e11d48' }}>{formatCurrency(selectedPayroll?.summary?.bpjs_kesehatan ?? selectedPayroll?.bpjs_kesehatan ?? 0)}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: '#fef2f2', borderRadius: '8px' }}>
+                  <span style={{ color: '#64748b' }}>BPJS Ketenagakerjaan</span>
+                  <span style={{ fontWeight: 600, color: '#e11d48' }}>{formatCurrency(selectedPayroll?.summary?.bpjs_ketenagakerjaan ?? selectedPayroll?.bpjs_ketenagakerjaan ?? 0)}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: '#fee2e2', borderRadius: '8px', fontWeight: 600 }}>
+                  <span style={{ color: '#991b1b' }}>Total Potongan</span>
+                  <span style={{ color: '#dc2626' }}>{formatCurrency(selectedPayroll?.summary?.total_deduction ?? selectedPayroll?.total_deduction ?? 0)}</span>
+                </div>
+              </div>
             </div>
-
-            <div className="modal-completion-footer">
-              <button className="modal-btn-cancel" onClick={() => setDetailModal(false)}>Tutup</button>
+            <div style={{ padding: '16px', background: '#f0fdf4', borderRadius: '12px', textAlign: 'center' }}>
+              <p style={{ fontSize: '0.75rem', color: '#166534', margin: 0 }}>Take Home Pay</p>
+              <p style={{ fontSize: '1.5rem', fontWeight: 700, color: '#059669', margin: '4px 0 0' }}>{formatCurrency(selectedPayroll?.summary?.take_home_pay ?? selectedPayroll?.take_home_pay ?? 0)}</p>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
     </div>
   );
 };

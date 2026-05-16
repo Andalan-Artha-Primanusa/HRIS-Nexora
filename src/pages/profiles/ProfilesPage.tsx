@@ -14,12 +14,12 @@ import {
   Building2,
   Search,
   RefreshCw,
-  X,
 } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
 import { Alert } from "@/shared/ui/Alert";
 import { Button } from "@/shared/ui/Button";
+import { Modal } from "@/shared/ui/Modal";
 import { useProfiles } from "@/features/profile/hooks/useProfiles";
 import type { Profile, ProfilePayload } from "@/features/profile/types/profile.types";
 import "./ProfilesPage.css";
@@ -400,37 +400,17 @@ const ErrorModal = ({ errors, isOpen, onClose }: ErrorModalProps) => {
   if (!isOpen || errors.length === 0) return null;
 
   return (
-    <div className="error-modal-overlay">
-      <div className="error-modal">
-        <div className="error-modal-header">
-          <div className="error-modal-title">
-            <AlertCircle size={24} className="error-icon" />
-            <h2>Validasi Data Gagal</h2>
+    <Modal isOpen={isOpen} onClose={onClose} title="Validasi Data Gagal" size="md" footer={<Button variant="primary" size="md" onClick={onClose}>Perbaiki Data</Button>}>
+      <p className="error-modal-subtitle">Terdapat {errors.length} kesalahan yang perlu diperbaiki:</p>
+      <div className="error-list">
+        {errors.map((error, index) => (
+          <div key={index} className="error-item">
+            <span className="error-field">{error.field.replace(/_/g, " ").toUpperCase()}</span>
+            <span className="error-message">{error.message}</span>
           </div>
-          <button className="error-modal-close" onClick={onClose}>
-            <X size={20} />
-          </button>
-        </div>
-
-        <div className="error-modal-body">
-          <p className="error-modal-subtitle">Terdapat {errors.length} kesalahan yang perlu diperbaiki:</p>
-          <div className="error-list">
-            {errors.map((error, index) => (
-              <div key={index} className="error-item">
-                <span className="error-field">{error.field.replace(/_/g, " ").toUpperCase()}</span>
-                <span className="error-message">{error.message}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="error-modal-footer">
-          <Button variant="primary" size="md" onClick={onClose}>
-            Perbaiki Data
-          </Button>
-        </div>
+        ))}
       </div>
-    </div>
+    </Modal>
   );
 };
 
