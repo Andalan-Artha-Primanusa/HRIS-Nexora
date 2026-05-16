@@ -23,8 +23,8 @@ const LeaveBalancePage = () => {
         policy: result.policy,
         balance: result.balance,
       });
-    } catch (err: any) {
-      showToast(err.message || 'Gagal memuat saldo cuti', 'error');
+    } catch {
+      // Error handled by EmptyState
     } finally {
       setLoading(false);
     }

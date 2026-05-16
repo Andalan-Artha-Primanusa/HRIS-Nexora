@@ -243,11 +243,12 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
           <div className="form-group">
             <span>GAJI POKOK (Rp)</span>
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
               className="form-input"
-              value={formData.salary}
-              onChange={(e) => setFormData((prev) => ({ ...prev, salary: e.target.value }))}
-              placeholder="Contoh: 8500000"
+              value={formData.salary ? Number(formData.salary).toLocaleString("id-ID") : ""}
+              onChange={(e) => setFormData((prev) => ({ ...prev, salary: e.target.value.replace(/\D/g, "") }))}
+              placeholder="Contoh: 8.500.000"
               min="0"
             />
           </div>

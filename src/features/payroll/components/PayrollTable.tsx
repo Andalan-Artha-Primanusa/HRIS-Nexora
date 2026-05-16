@@ -38,11 +38,7 @@ const formatDisplayValue = (value: unknown): string => {
   if (typeof value === "number") {
     // Format as currency if looks like money
     if (value > 1000) {
-      return new Intl.NumberFormat("id-ID", {
-        style: "currency",
-        currency: "IDR",
-        minimumFractionDigits: 0,
-      }).format(value);
+      return `Rp ${value.toLocaleString("id-ID")}`;
     }
     return String(value);
   }

@@ -1514,14 +1514,14 @@ const SectionPage = () => {
             }
             if (payload.payroll) {
               stats.push({ label: 'Payroll Records', value: String(payload.payroll.records_count ?? 0), description: '', variant: 'default' });
-              stats.push({ label: 'Total Take Home Pay', value: `Rp${Number(payload.payroll.total_take_home_pay ?? 0).toLocaleString('id-ID')}`, description: '', variant: 'success' });
-              stats.push({ label: 'Total Deduction', value: `Rp${Number(payload.payroll.total_deduction ?? 0).toLocaleString('id-ID')}`, description: '', variant: 'danger' });
+              stats.push({ label: 'Total Take Home Pay', value: `Rp ${Number(payload.payroll.total_take_home_pay ?? 0).toLocaleString('id-ID')}`, description: '', variant: 'success' });
+              stats.push({ label: 'Total Deduction', value: `Rp ${Number(payload.payroll.total_deduction ?? 0).toLocaleString('id-ID')}`, description: '', variant: 'danger' });
             }
             if (payload.reimbursement) {
               stats.push({ label: 'Reimbursements', value: String(payload.reimbursement.records_count ?? 0), description: '', variant: 'default' });
               stats.push({ label: 'Pending Reimbursements', value: String(payload.reimbursement.pending_count ?? 0), description: '', variant: 'warning' });
-              stats.push({ label: 'Total Reimburse Amount', value: `Rp${Number(payload.reimbursement.total_amount ?? 0).toLocaleString('id-ID')}`, description: '', variant: 'success' });
-              stats.push({ label: 'Pending Amount', value: `Rp${Number(payload.reimbursement.pending_amount ?? 0).toLocaleString('id-ID')}`, description: '', variant: 'warning' });
+              stats.push({ label: 'Total Reimburse Amount', value: `Rp ${Number(payload.reimbursement.total_amount ?? 0).toLocaleString('id-ID')}`, description: '', variant: 'success' });
+              stats.push({ label: 'Pending Amount', value: `Rp ${Number(payload.reimbursement.pending_amount ?? 0).toLocaleString('id-ID')}`, description: '', variant: 'warning' });
             }
             if (payload.leave) {
               stats.push({ label: 'Leave Pending', value: String(payload.leave.by_status?.pending ?? 0), description: '', variant: 'warning' });

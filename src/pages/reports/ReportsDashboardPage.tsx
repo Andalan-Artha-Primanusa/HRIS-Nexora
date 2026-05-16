@@ -43,7 +43,7 @@ const fmtMonth = (period: string) => {
   return Number.isNaN(d.getTime()) ? period : d.toLocaleDateString('id-ID', { month: 'short', year: 'numeric' });
 };
 
-const fmtRp = (n: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
+const fmtRp = (n: number) => `Rp ${(n || 0).toLocaleString("id-ID")}`;
 
 const STORAGE_KEY = 'hris_report_widget_order';
 

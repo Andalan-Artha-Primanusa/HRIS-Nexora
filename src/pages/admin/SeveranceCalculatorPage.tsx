@@ -97,13 +97,7 @@ const SeveranceCalculatorPage: React.FC = () => {
     }
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      maximumFractionDigits: 0
-    }).format(amount);
-  };
+  const formatCurrency = (amount: number) => `Rp ${(amount || 0).toLocaleString("id-ID")}`;
 
   const exportPDF = () => {
     if (!calculation) return;

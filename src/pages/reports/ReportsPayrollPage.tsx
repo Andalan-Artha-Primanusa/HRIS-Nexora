@@ -22,7 +22,7 @@ const getNum = (v: unknown) => { if (typeof v === 'number' && Number.isFinite(v)
 
 const TT = { contentStyle: { backgroundColor:'#fff', border:'1px solid #dbeafe', borderRadius:'8px' }, labelStyle: { color:'#1e40af', fontWeight:'bold' as const } };
 const fmtMonth = (period: string) => { if (!period) return period; const [y,m] = period.split('-'); const d = new Date(Number(y),Number(m)-1,1); return Number.isNaN(d.getTime()) ? period : d.toLocaleDateString('id-ID',{month:'short',year:'numeric'}); };
-const fmtRp = (n: number) => new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(n);
+const fmtRp = (n: number) => `Rp ${(n || 0).toLocaleString("id-ID")}`;
 
 const MetricCard: React.FC<{label:string;sub:string;value:string;tone:string;icon:React.ElementType}> = ({label,sub,value,tone,icon:Icon}) => (
   <Card className="report-metric-card" glass>

@@ -26,9 +26,7 @@ const getStatusClass = (status?: string) => {
   return "status-badge status-badge--draft";
 };
 
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
-};
+const formatCurrency = (amount: number) => `Rp ${(amount || 0).toLocaleString("id-ID")}`;
 
 const formatDate = (value?: string) => {
   if (!value) return "—";
@@ -146,16 +144,16 @@ const MyReimbursementsPage: React.FC = () => {
 
       if (selectedItem) {
         await updateMyReimbursement(String(selectedItem.id), payload);
-        showToast("Klaim reimbursement berhasil diperbarui.", "success");
+        showToast("Klaim penggantian berhasil diperbarui.", "success");
       } else {
         await createMyReimbursement(payload);
-        showToast("Klaim reimbursement berhasil dibuat sebagai draft.", "success");
+        showToast("Klaim penggantian berhasil dibuat sebagai konsep.", "success");
       }
       setIsModalOpen(false);
       await fetchData();
     } catch (error: any) {
       console.error('Failed to save reimbursement:', error);
-      showToast(getActionErrorMessage(error, "Gagal menyimpan klaim reimbursement."), "error");
+      showToast(getActionErrorMessage(error, "Gagal menyimpan klaim penggantian."), "error");
     }
   };
 
@@ -166,11 +164,11 @@ const MyReimbursementsPage: React.FC = () => {
     try {
       await deleteMyReimbursement(String(deleteTarget.id));
       await fetchData();
-      showToast("Klaim reimbursement berhasil dihapus.", "success");
+      showToast("Klaim penggantian berhasil dihapus.", "success");
       setDeleteTarget(null);
     } catch (error: any) {
       console.error('Failed to delete reimbursement:', error);
-      showToast(getActionErrorMessage(error, "Gagal menghapus klaim reimbursement."), "error");
+      showToast(getActionErrorMessage(error, "Gagal menghapus klaim penggantian."), "error");
     } finally {
       setDeleting(false);
     }
@@ -180,10 +178,10 @@ const MyReimbursementsPage: React.FC = () => {
     try {
       await submitMyReimbursement(String(item.id));
       await fetchData();
-      showToast("Klaim reimbursement berhasil diajukan.", "success");
+      showToast("Klaim penggantian berhasil diajukan.", "success");
     } catch (error: any) {
       console.error('Failed to submit reimbursement:', error);
-      showToast(getActionErrorMessage(error, "Gagal mengajukan klaim reimbursement."), "error");
+      showToast(getActionErrorMessage(error, "Gagal mengajukan klaim penggantian."), "error");
     }
   };
 

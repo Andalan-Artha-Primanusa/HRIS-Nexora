@@ -150,7 +150,7 @@ const AdminNotificationsPage = () => {
       setBroadcastTitle("");
       setBroadcastMessage("");
       setBroadcastAudience("all");
-      showToast("Broadcast notifikasi berhasil dikirim.", "success");
+      showToast("Notifikasi siaran berhasil dikirim.", "success");
       await loadSummary();
     } catch (error: unknown) {
       showToast(getErrorMessage(error as Record<string, unknown>), "error");

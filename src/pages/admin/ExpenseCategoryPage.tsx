@@ -202,7 +202,7 @@ const ExpenseCategoryPage = () => {
     setDeleting(true);
     try {
       await api.delete(`/expense-categories/${deleteTarget.id}`);
-      showToast('Kategori expense berhasil dihapus', 'success');
+      showToast('Kategori biaya berhasil dihapus', 'success');
       setDeleteTarget(null);
       fetchData();
     } catch (err: any) {
@@ -504,9 +504,10 @@ const ExpenseCategoryPage = () => {
                 <div className="form-group">
                   <label>Max Claim</label>
                   <input
-                    type="number"
-                    value={formData.max_claim}
-                    onChange={(e) => setFormData({ ...formData, max_claim: e.target.value })}
+                    type="text"
+                    inputMode="numeric"
+                    value={formData.max_claim ? Number(formData.max_claim).toLocaleString("id-ID") : ""}
+                    onChange={(e) => setFormData({ ...formData, max_claim: e.target.value.replace(/\D/g, "") })}
                     placeholder="0"
                   />
                 </div>

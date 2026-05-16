@@ -94,7 +94,7 @@ const ShiftSwapsPage: React.FC = () => {
     } catch (error: any) {
       const msg = error?.response?.data?.message || error?.message || 'Gagal menyetujui';
       if (msg.includes('Approval flow') || msg.includes('No approval flow')) {
-        showToast('Tidak bisa menyetujui karena belum ada alur persetujuan (approval flow) untuk Shift Swap. Silakan buat di menu Alur Persetujuan terlebih dahulu.', 'error');
+        showToast('Tidak bisa menyetujui karena belum ada alur persetujuan untuk penukaran shift. Silakan buat di menu Alur Persetujuan terlebih dahulu.', 'error');
       } else {
         showToast(msg, 'error');
       }

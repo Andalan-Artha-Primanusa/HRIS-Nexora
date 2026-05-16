@@ -87,7 +87,7 @@ const AdminUserAssignRolesPage = () => {
     if (!selectedUser) return;
 
     if (selectedRoleIds.length === 0) {
-      showToast("Pilih minimal satu role.", 'info');
+      showToast("Pilih minimal satu peran.", 'info');
       return;
     }
 
@@ -100,7 +100,7 @@ const AdminUserAssignRolesPage = () => {
       setSelectedRoleIds([]);
       await loadUsers();
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal assign role.";
+      const message = error instanceof Error ? error.message : "Gagal menetapkan peran.";
       showToast(message, 'error');
     } finally {
       setIsAssigning(false);

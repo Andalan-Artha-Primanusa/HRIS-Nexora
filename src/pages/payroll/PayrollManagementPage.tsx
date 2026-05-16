@@ -112,10 +112,10 @@ const PayrollManagementPage = () => {
 
     try {
       await generateMonthlyPayroll({ period: form.period });
-      showToast("Payroll bulanan berhasil di-generate", "success");
+      showToast("Payroll bulanan berhasil dibuat", "success");
       await loadPayroll();
     } catch (error: unknown) {
-      showToast(error instanceof Error ? error.message : "Gagal generate payroll", "error");
+      showToast(error instanceof Error ? error.message : "Gagal membuat payroll", "error");
     } finally {
       setLoading(false);
     }
@@ -161,7 +161,7 @@ const PayrollManagementPage = () => {
       showToast("Payroll berhasil diperbarui", "success");
       await loadPayroll();
     } catch (error: unknown) {
-      showToast(error instanceof Error ? error.message : "Gagal update payroll", "error");
+      showToast(error instanceof Error ? error.message : "Gagal memperbarui payroll", "error");
     } finally {
       setLoading(false);
     }
@@ -203,7 +203,7 @@ const PayrollManagementPage = () => {
       showToast("Payroll berhasil disetujui", "success");
       await loadPayroll();
     } catch (error: unknown) {
-      showToast(error instanceof Error ? error.message : "Gagal approve payroll", "error");
+      showToast(error instanceof Error ? error.message : "Gagal menyetujui payroll", "error");
     } finally {
       setLoading(false);
     }
@@ -224,7 +224,7 @@ const PayrollManagementPage = () => {
       showToast("Payroll berhasil ditandai dibayar", "success");
       await loadPayroll();
     } catch (error: unknown) {
-      showToast(error instanceof Error ? error.message : "Gagal mark as paid", "error");
+      showToast(error instanceof Error ? error.message : "Gagal menandai sebagai dibayar", "error");
     } finally {
       setLoading(false);
     }
@@ -290,17 +290,21 @@ const PayrollManagementPage = () => {
           <label>
             <strong style={{ color: "#2563eb" }}>Tunjangan</strong>
             <input
+              type="text"
+              inputMode="numeric"
               className="crud-input"
-              value={form.allowance}
-              onChange={(event) => setForm((prev) => ({ ...prev, allowance: event.target.value }))}
+              value={form.allowance ? Number(form.allowance).toLocaleString("id-ID") : ""}
+              onChange={(event) => setForm((prev) => ({ ...prev, allowance: event.target.value.replace(/\D/g, "") }))}
             />
           </label>
           <label>
             <strong style={{ color: "#2563eb" }}>Bonus</strong>
             <input
+              type="text"
+              inputMode="numeric"
               className="crud-input"
-              value={form.bonus}
-              onChange={(event) => setForm((prev) => ({ ...prev, bonus: event.target.value }))}
+              value={form.bonus ? Number(form.bonus).toLocaleString("id-ID") : ""}
+              onChange={(event) => setForm((prev) => ({ ...prev, bonus: event.target.value.replace(/\D/g, "") }))}
             />
           </label>
         </div>

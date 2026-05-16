@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { showToast } from '@/shared/ui/toast';
@@ -15,7 +15,11 @@ const AttendanceCheckOutPage = () => {
   const [loading, setLoading] = useState(false);
 
 
+  const gpsFired = useRef(false);
+
   const detectGPS = () => {
+    if (gpsFired.current) return;
+    gpsFired.current = true;
     setStatus('Mendeteksi lokasi GPS...');
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(

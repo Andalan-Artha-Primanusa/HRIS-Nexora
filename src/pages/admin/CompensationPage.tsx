@@ -72,7 +72,7 @@ const CompensationPage: React.FC = () => {
                             <div style={{ fontSize: '0.85rem' }}>{item.bank_name}</div>
                             <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{item.account_number}</div>
                          </td>
-                         <td style={{ fontWeight: 700 }}>Rp {item.amount?.toLocaleString()}</td>
+                         <td style={{ fontWeight: 700 }}>Rp {item.amount?.toLocaleString("id-ID")}</td>
                          <td><span className="status-pill status-approved">Verified</span></td>
                       </tr>
                     ))}

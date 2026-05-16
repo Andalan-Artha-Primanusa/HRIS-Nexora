@@ -29,7 +29,8 @@ export const RejectReasonModal = ({
       await onConfirm(reason);
       setReason("");
       onClose();
-    } catch {
+    } catch (err) {
+      console.error("Reject reason submission failed:", err);
     } finally {
       setSubmitting(false);
     }

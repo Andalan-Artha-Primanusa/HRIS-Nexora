@@ -312,7 +312,7 @@ const ReimbursementsManagementPage = () => {
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>Nominal (Rp)</label>
-                  <input style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none' }} type="number" value={form.amount} onChange={(e) => setForm(f => ({...f, amount: e.target.value}))} />
+                  <input style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none' }} type="text" inputMode="numeric" value={form.amount ? Number(form.amount).toLocaleString("id-ID") : ""} onChange={(e) => setForm(f => ({...f, amount: e.target.value.replace(/\D/g, "")}))} />
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>Tanggal Transaksi</label>

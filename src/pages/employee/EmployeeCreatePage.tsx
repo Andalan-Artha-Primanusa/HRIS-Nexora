@@ -53,12 +53,12 @@ const EmployeeCreatePage = () => {
   const handleCreate = async () => {
     // Client-side validation
     if (!createForm.user_id) {
-      showToast("Gagal: Silakan pilih User System terlebih dahulu.", 'error');
+      showToast("Gagal: Silakan pilih pengguna terlebih dahulu.", 'error');
       return;
     }
 
     setLoading(true);
-    showToast("Menyimpan employee...", 'info');
+    showToast("Menyimpan data karyawan...", 'info');
 
     try {
       const payload: EmployeeCreatePayload = {
@@ -84,7 +84,7 @@ const EmployeeCreatePage = () => {
         const messages = Object.values(validationErrors).flat().join(", ");
         showToast(`Gagal: ${messages}`, 'error');
       } else {
-        showToast(error.message || "Gagal membuat employee", 'error');
+        showToast(error.message || "Gagal membuat data karyawan", 'error');
       }
     } finally {
       setLoading(false);

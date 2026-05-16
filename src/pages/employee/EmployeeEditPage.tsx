@@ -53,13 +53,14 @@ const EmployeeEditPage = () => {
 
   useEffect(() => {
     if (!routeEmployeeId) return;
+    let cancelled = false;
 
     const loadUpdateDetail = async () => {
       setLoading(true);
-      showToast("Memuat detail employee untuk update...", 'info');
 
       try {
         const result = await getEmployeeDetail(routeEmployeeId);
+        if (cancelled) return;
 
         const hireDate = result?.hire_date ? result.hire_date.split("T")[0] : "";
         const salary = result?.salary ? String(Math.floor(Number(result.salary))) : "";
@@ -81,28 +82,27 @@ const EmployeeEditPage = () => {
           manager_id: formatId(result?.manager_id),
           work_schedule_id: formatId(result?.work_schedule_id),
         });
-
-        showToast("Detail employee berhasil dimuat.", 'info');
       } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : "Gagal memuat detail employee.";
+        if (cancelled) return;
         showToast(`Gagal: ${message}`, 'error');
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     void loadUpdateDetail();
+    return () => { cancelled = true; };
   }, [routeEmployeeId]);
 
   const handleUpdate = async () => {
     const targetId = updateForm.id;
     if (!targetId) {
-      showToast("Gagal: ID tidak ditemukan untuk update.", 'error');
+      showToast("Gagal: ID tidak ditemukan.", 'error');
       return;
     }
 
     setLoading(true);
-    showToast("Mengupdate employee...", 'info');
+    showToast("Memperbarui data karyawan...", 'info');
 
     try {
       const payload: EmployeeUpdatePayload = {
@@ -132,7 +132,7 @@ const EmployeeEditPage = () => {
         const messages = Object.values(validationErrors).flat().join(", ");
         showToast(`Gagal: ${messages}`, 'error');
       } else {
-        showToast(error.message || "Gagal mengupdate employee", 'error');
+        showToast(error.message || "Gagal memperbarui data karyawan", 'error');
       }
     } finally {
       setLoading(false);

@@ -122,7 +122,7 @@ const AdminEmailNotificationsPage = () => {
       const responseError = error as ErrorWithResponse;
       console.error("Save Template Error:", responseError.response?.data || error);
       const serverMessage = responseError.response?.data?.message || responseError.response?.data?.error;
-      showToast(serverMessage ? `Server Error: ${serverMessage}` : getErrorMessage(error), "error");
+      showToast(serverMessage ? `Kesalahan server: ${serverMessage}` : getErrorMessage(error), "error");
     } finally {
       setSaving(false);
     }

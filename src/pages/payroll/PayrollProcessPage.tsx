@@ -113,7 +113,7 @@ const GenerateTab = () => {
     setLoading(true);
     try {
       await payrollService.generatePayroll({ period });
-      showToast(`Payroll berhasil di-generate untuk ${period}`, "success");
+      showToast(`Payroll berhasil dibuat untuk ${period}`, "success");
       await loadPayroll();
     } catch (err) { showToast(err instanceof Error ? err.message : "Gagal", "error"); }
     finally { setLoading(false); }
@@ -313,14 +313,14 @@ const ApproveTab = () => {
   const handleApprove = async () => {
     if (!selectedPayroll) { showToast("Pilih payroll terlebih dahulu", "error"); return; }
     if (selectedPayroll.status === "approved" || selectedPayroll.status === "paid") {
-      showToast(`Status: ${selectedPayroll.status}`, "error"); return;
+      showToast(`Status saat ini: ${selectedPayroll.status}`, "error"); return;
     }
     if (selectedPayroll.status === "rejected") { showToast("Payroll ini sudah ditolak.", "error"); return; }
     setLoading(true);
     try {
       if (selectedPayroll.status === "draft") {
         await payrollService.managerApprovePayroll(String(selectedPayroll.id));
-        showToast(`Payroll #${selectedPayroll.id} disetujui Manager — menunggu HR`, "success");
+        showToast(`Payroll #${selectedPayroll.id} disetujui Manajer — menunggu HR`, "success");
       } else if (selectedPayroll.status === "pending_hr") {
         await payrollService.hrApprovePayroll(String(selectedPayroll.id));
         showToast(`Payroll #${selectedPayroll.id} disetujui HR — siap dibayar`, "success");
@@ -330,7 +330,7 @@ const ApproveTab = () => {
       }
       setSelectedPayroll(null);
       await loadData();
-    } catch (err) { showToast(err instanceof Error ? err.message : "Gagal approve", "error"); }
+    } catch (err) { showToast(err instanceof Error ? err.message : "Gagal menyetujui", "error"); }
     finally { setLoading(false); }
   };
 
@@ -572,7 +572,7 @@ const PaymentTab = () => {
     if (!selectedPayroll) { showToast("Pilih payroll", "error"); return; }
     if (selectedPayroll.status === "paid") { showToast("Payroll ini sudah dibayar.", "error"); return; }
     if (selectedPayroll.status !== "approved") {
-      showToast(`Hanya payroll berstatus 'approved' yang bisa ditandai dibayar. Status saat ini: ${selectedPayroll.status}`, "error");
+      showToast(`Hanya payroll berstatus sudah disetujui yang bisa ditandai dibayar. Status saat ini: ${selectedPayroll.status}`, "error");
       return;
     }
     setLoading(true);

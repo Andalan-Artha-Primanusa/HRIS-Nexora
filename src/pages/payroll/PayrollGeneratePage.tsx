@@ -442,7 +442,7 @@ const PayrollGeneratePage = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
   /* ── API ── */
-  const loadPayroll = async () => {
+  const loadPayroll = async (silent = false) => {
     setLoading(true);
     try {
       const result = await getAllPayroll({ page: currentPage, per_page: itemsPerPage });
@@ -450,7 +450,7 @@ const PayrollGeneratePage = () => {
       setItems(parsed.items.length ? parsed.items : toSafeArray(result));
       setTotalPages(parsed.totalPages);
     } catch (err) {
-      showToast(err instanceof Error ? err.message : "Gagal memuat payroll", "error");
+      if (!silent) showToast(err instanceof Error ? err.message : "Gagal memuat payroll", "error");
     } finally {
       setLoading(false);
     }
@@ -464,17 +464,17 @@ const PayrollGeneratePage = () => {
     setLoading(true);
     try {
       await generateMonthlyPayroll({ period });
-      showToast(`Payroll berhasil di-generate untuk periode ${period}`, "success");
+      showToast(`Payroll berhasil dibuat untuk periode ${period}`, "success");
       await loadPayroll();
     } catch (err) {
-      showToast(err instanceof Error ? err.message : "Gagal generate payroll", "error");
+      showToast(err instanceof Error ? err.message : "Gagal membuat payroll", "error");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    void loadPayroll();
+    void loadPayroll(true);
   }, [currentPage, itemsPerPage]);
 
   /* ── Derived ── */

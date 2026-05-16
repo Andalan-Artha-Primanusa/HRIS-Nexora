@@ -28,9 +28,9 @@ const UpdateLeavePage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
     const loadDetail = async () => {
       if (!id) {
-        showToast('Leave ID tidak ditemukan', 'error');
         setLoading(false);
         return;
       }
@@ -40,6 +40,7 @@ const UpdateLeavePage = () => {
           getLeaveDetail(id),
           api.get('/leave-types').catch(() => ({ data: { data: [] } })),
         ]);
+        if (cancelled) return;
         const payload = detailResult.payload as Record<string, any>;
         const types = typesRes.data?.data ?? [];
         setLeaveTypes(types);
@@ -53,14 +54,16 @@ const UpdateLeavePage = () => {
           reason: payload.reason || '',
         });
       } catch (err: any) {
+        if (cancelled) return;
         const message = err.response?.data?.message || err.message || 'Gagal memuat data cuti';
         showToast(message, 'error');
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     void loadDetail();
+    return () => { cancelled = true; };
   }, [id]);
 
   useEffect(() => {

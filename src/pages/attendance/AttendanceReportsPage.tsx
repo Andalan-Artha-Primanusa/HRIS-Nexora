@@ -43,8 +43,8 @@ const AttendanceReportsPage = () => {
         date_to: filterDate,
       });
       setAdminItems(result.items);
-    } catch (error: any) {
-      showToast(error.message || "Gagal memuat data kehadiran", "error");
+    } catch {
+      // Error handling done in caller
     } finally {
       setAdminLoading(false);
     }

@@ -97,7 +97,7 @@ const PayrollCrudPage = () => {
     }
 
     if (!form.period) {
-      showToast("Masukkan periode (YYYY-MM)", "error");
+      showToast("Masukkan periode (Tahun-Bulan)", "error");
       return;
     }
 
@@ -130,11 +130,11 @@ const PayrollCrudPage = () => {
       };
       const payrollId = String(form.id).replace(/^[A-Z]+/, "").replace(/^0+/, "") || form.id;
       await payrollService.updatePayroll(payrollId, payload);
-      showToast("Payroll berhasil diupdate", "success");
+      showToast("Payroll berhasil diperbarui", "success");
       setView("list");
       await loadData();
     } catch (error) {
-      showToast(error instanceof Error ? error.message : "Gagal update payroll", "error");
+      showToast(error instanceof Error ? error.message : "Gagal memperbarui payroll", "error");
     } finally {
       setLoading(false);
     }
@@ -184,7 +184,7 @@ const PayrollCrudPage = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Gagal mengunduh file export");
+        throw new Error("Gagal mengunduh file");
       }
 
       const blob = await response.blob();
@@ -200,9 +200,9 @@ const PayrollCrudPage = () => {
       window.URL.revokeObjectURL(downloadUrl);
 
       setExportModal(false);
-      showToast("Export berhasil", "success");
+      showToast("Ekspor berhasil", "success");
     } catch (error) {
-      showToast(error instanceof Error ? error.message : "Gagal export", "error");
+      showToast(error instanceof Error ? error.message : "Gagal mengekspor", "error");
     } finally {
       setExportLoading(false);
     }
@@ -413,22 +413,24 @@ const PayrollCrudPage = () => {
                 <label>
                   <strong>Tunjangan Tambahan</strong>
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     className="crud-input"
-                    value={form.allowance}
-                    onChange={(e) => setForm((prev) => ({ ...prev, allowance: e.target.value }))}
-                    placeholder="Contoh: 1500000"
+                    value={form.allowance ? Number(form.allowance).toLocaleString("id-ID") : ""}
+                    onChange={(e) => setForm((prev) => ({ ...prev, allowance: e.target.value.replace(/\D/g, "") }))}
+                    placeholder="Contoh: 1.500.000"
                   />
                 </label>
 
                 <label>
                   <strong>Bonus / Insentif</strong>
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     className="crud-input"
-                    value={form.bonus}
-                    onChange={(e) => setForm((prev) => ({ ...prev, bonus: e.target.value }))}
-                    placeholder="Contoh: 500000"
+                    value={form.bonus ? Number(form.bonus).toLocaleString("id-ID") : ""}
+                    onChange={(e) => setForm((prev) => ({ ...prev, bonus: e.target.value.replace(/\D/g, "") }))}
+                    placeholder="Contoh: 500.000"
                   />
                 </label>
 

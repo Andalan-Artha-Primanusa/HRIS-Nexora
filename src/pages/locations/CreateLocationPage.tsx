@@ -83,11 +83,11 @@ const CreateLocationPage = () => {
       return false;
     }
     if (!formData.latitude) {
-      showToast('Latitude wajib diisi', 'error');
+      showToast('Latitude (garis lintang) wajib diisi', 'error');
       return false;
     }
     if (!formData.longitude) {
-      showToast('Longitude wajib diisi', 'error');
+      showToast('Longitude (garis bujur) wajib diisi', 'error');
       return false;
     }
     if (!formData.radius || parseFloat(formData.radius) <= 0) {

@@ -8,6 +8,39 @@ export interface ApiError {
   errors?: Record<string, string>;
 }
 
+const EN_TO_ID: Record<string, string> = {
+  "Payroll has already been processed": "Payroll sudah diproses",
+  "Payroll is not in draft status": "Payroll bukan dalam status draft",
+  "Payroll not found": "Payroll tidak ditemukan",
+  "Forbidden": "Anda tidak memiliki izin",
+  "You cannot access this payroll": "Anda tidak dapat mengakses payroll ini",
+  "You are not authorized": "Anda tidak memiliki izin",
+  "No payroll data available": "Tidak ada data payroll",
+  "Payroll data retrieved successfully": "Data payroll berhasil diambil",
+  "Leave request has already been processed": "Pengajuan cuti sudah diproses",
+  "Failed to": "Gagal",
+  "success": "berhasil",
+  "created": "dibuat",
+  "updated": "diperbarui",
+  "deleted": "dihapus",
+  "saved": "disimpan",
+  "approved": "disetujui",
+  "rejected": "ditolak",
+  "Pending": "Menunggu",
+  "Active": "Aktif",
+  "Inactive": "Tidak Aktif",
+};
+
+const translateMessage = (msg: string): string => {
+  if (EN_TO_ID[msg]) return EN_TO_ID[msg];
+  for (const [en, id] of Object.entries(EN_TO_ID)) {
+    if (msg.toLowerCase().includes(en.toLowerCase())) {
+      return msg.replace(new RegExp(en, 'gi'), id);
+    }
+  }
+  return msg;
+};
+
 /**
  * Standardize error response from Axios
  */
@@ -15,43 +48,34 @@ export const parseApiError = (error: unknown): ApiError => {
   const axiosError = error as AxiosError<any>;
   const status = axiosError.response?.status;
   const data = axiosError.response?.data;
+  let message = "";
 
   // 1. Unauthorized
   if (status === 401) {
-    return {
-      type: "unauthorized",
-      message: data?.message || "Sesi anda telah berakhir. Silahkan login kembali.",
-    };
+    message = data?.message || "Sesi anda telah berakhir. Silahkan login kembali.";
+    return { type: "unauthorized", message: translateMessage(message) };
   }
 
   // 2. Validation Error
   if (status === 422) {
-    return {
-      type: "validation",
-      message: data?.message || "Data yang dinput tidak valid.",
-      errors: data?.errors || {},
-    };
+    message = data?.message || "Data yang diinput tidak valid.";
+    return { type: "validation", message: translateMessage(message), errors: data?.errors || {} };
   }
 
   if (status === 403) {
-    return {
-      type: "general",
-      message: data?.message && data.message !== "Forbidden"
-        ? data.message
-        : "Anda tidak memiliki izin untuk melakukan aksi ini.",
-    };
+    message = data?.message && data.message !== "Forbidden"
+      ? data.message
+      : "Anda tidak memiliki izin untuk melakukan aksi ini.";
+    return { type: "general", message: translateMessage(message) };
   }
 
   // 3. General Error
-  return {
-    type: "general",
-    message: data?.message || axiosError.message || "Terjadi kesalahan pada server.",
-  };
+  message = data?.message || axiosError.message || "Terjadi kesalahan pada server.";
+  return { type: "general", message: translateMessage(message) };
 };
 
 /**
  * Helper to get only the message string from an error
- * 💡 Digunakan oleh banyak komponen untuk menampilakan pesan error singkat
  */
 export const getErrorMessage = (error: unknown): string => {
   return parseApiError(error).message;

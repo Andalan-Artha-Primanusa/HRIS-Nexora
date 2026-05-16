@@ -7,6 +7,7 @@ import { Modal } from "@/shared/ui/Modal";
 import { getAllPayroll, payrollService, toSafeArray } from "@/features/payroll/api/payroll.service";
 import { getAllEmployees } from "@/features/employee/api/employee.service";
 import { showToast } from "@/shared/ui/toast";
+import { getErrorMessage } from "@/shared/api/errorHandler";
 import type { PayrollDetail, PayrollItem } from "@/features/payroll/types/payroll.types";
 import type { EmployeeItem } from "@/features/employee/types/employee.types";
 import "@/shared/styles/CrudPage.css";
@@ -106,7 +107,6 @@ const PayrollDetailsPage = () => {
       setAllEmployees(Array.isArray(employeeResponse) ? employeeResponse : toSafeArray(employeeResponse));
     } catch (error) {
       console.error("Failed to fetch payroll metadata", error);
-      showToast("Gagal memuat data payroll dan karyawan", "error");
     }
   };
 
@@ -131,8 +131,7 @@ const PayrollDetailsPage = () => {
       setItems(safeDetails);
       if (!silent) showToast(`Berhasil memuat ${safeDetails.length} komponen`, "success");
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal memuat detail payroll";
-      showToast(message, "error");
+      showToast(getErrorMessage(error), "error");
     } finally {
       setLoading(false);
     }
@@ -181,9 +180,11 @@ const PayrollDetailsPage = () => {
       } else {
         await payrollService.addPayrollDetail({
           payroll_id: Number(id),
-          type: detailType,
-          name: detailName.trim(),
-          amount: Number(detailAmount) || 0,
+          details: [{
+            type: detailType,
+            name: detailName.trim(),
+            amount: Number(detailAmount) || 0,
+          }],
         });
         showToast("Komponen berhasil ditambahkan", "success");
       }
@@ -191,8 +192,7 @@ const PayrollDetailsPage = () => {
       setFormOpen(false);
       await loadPayrollDetails(true);
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal menyimpan komponen";
-      showToast(message, "error");
+      showToast(getErrorMessage(error), "error");
     } finally {
       setLoading(false);
     }
@@ -220,8 +220,7 @@ const PayrollDetailsPage = () => {
       setDeleteDialogOpen(false);
       await loadPayrollDetails(true);
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal hapus detail";
-      showToast(message, "error");
+      showToast(getErrorMessage(error), "error");
     } finally {
       setLoading(false);
     }
@@ -458,7 +457,7 @@ const PayrollDetailsPage = () => {
           </label>
           <label>
             Jumlah
-            <input className="crud-input" type="number" min="0" placeholder="0" value={detailAmount} onChange={(event) => setDetailAmount(event.target.value)} />
+            <input className="crud-input" type="text" inputMode="numeric" min="0" placeholder="0" value={detailAmount ? Number(detailAmount).toLocaleString("id-ID") : ""} onChange={(event) => setDetailAmount(event.target.value.replace(/\D/g, ""))} />
           </label>
         </div>
       </Modal>

@@ -10,11 +10,7 @@ import '@/pages/dashboard/overview/OverviewPage.css';
 
 const formatCurrency = (value: number | string) => {
   const num = typeof value === 'string' ? parseFloat(value) : value;
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    maximumFractionDigits: 0,
-  }).format(num || 0);
+  return `Rp ${(num || 0).toLocaleString("id-ID")}`;
 };
 
 const PayrollTaxPage: React.FC = () => {

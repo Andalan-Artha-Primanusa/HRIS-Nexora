@@ -18,12 +18,10 @@ const AttendanceTodayPage = () => {
     try {
       const result = await api.get('/attendance/today');
       const payload = result.data?.data ?? result.data;
-      setToday(payload);
+      if (payload) setToday(payload);
       setStatus('Attendance hari ini berhasil dimuat.');
     } catch (error: any) {
       setStatus('Gagal memuat data hari ini.');
-      const message = error.response?.data?.message || error.message || 'Terjadi kesalahan';
-      showToast(message, 'error');
     } finally {
       setLoading(false);
     }

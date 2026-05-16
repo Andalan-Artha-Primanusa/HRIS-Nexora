@@ -81,7 +81,7 @@ export const PromotionModal: React.FC<PromotionModalProps> = ({ isOpen, onClose,
   const formatIDR = (value: string) => {
     if (!value) return '';
     const num = value.replace(/\D/g, '');
-    return new Intl.NumberFormat('id-ID').format(Number(num));
+    return Number(num).toLocaleString("id-ID");
   };
 
   return (

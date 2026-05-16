@@ -112,7 +112,7 @@ const AdminImportPage = () => {
     event.preventDefault();
 
     if (!userFile) {
-      showToast("Silakan pilih file users terlebih dahulu.", "error");
+      showToast("Silakan pilih file pengguna terlebih dahulu.", "error");
       return;
     }
 
@@ -122,7 +122,7 @@ const AdminImportPage = () => {
     try {
       const result = await importUsers(userFile, userRole);
       setUserImportResult(JSON.stringify(result, null, 2));
-      showToast("Import users berhasil diproses.", "success");
+      showToast("Import pengguna berhasil diproses.", "success");
       setUserFile(null);
       setUserRole(availableRoles[0]?.name || "employee");
     } catch (error: unknown) {
@@ -136,7 +136,7 @@ const AdminImportPage = () => {
     event.preventDefault();
 
     if (!employeeFile) {
-      showToast("Silakan pilih file employees terlebih dahulu.", "error");
+      showToast("Silakan pilih file karyawan terlebih dahulu.", "error");
       return;
     }
 
@@ -149,7 +149,7 @@ const AdminImportPage = () => {
 
       const result = await importEmployees(formData);
       setEmployeeImportResult(JSON.stringify(result, null, 2));
-      showToast("Import employees berhasil diproses.", "success");
+      showToast("Import karyawan berhasil diproses.", "success");
       setEmployeeFile(null);
     } catch (error: unknown) {
       showToast(getErrorMessage(error as any), "error");

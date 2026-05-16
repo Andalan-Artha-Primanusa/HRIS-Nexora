@@ -143,21 +143,13 @@ const formatDate = (value: unknown) => {
 
 const formatCurrency = (value: unknown) => {
   if (typeof value === "number") {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      maximumFractionDigits: 0,
-    }).format(value);
+    return `Rp ${value.toLocaleString("id-ID")}`;
   }
 
   if (typeof value === "string") {
     const parsed = Number(value);
     if (!Number.isNaN(parsed)) {
-      return new Intl.NumberFormat("id-ID", {
-        style: "currency",
-        currency: "IDR",
-        maximumFractionDigits: 0,
-      }).format(parsed);
+      return `Rp ${parsed.toLocaleString("id-ID")}`;
     }
     return value;
   }

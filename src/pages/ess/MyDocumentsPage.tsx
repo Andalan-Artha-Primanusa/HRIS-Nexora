@@ -462,7 +462,7 @@ const MyDocumentsPage: React.FC = () => {
       window.URL.revokeObjectURL(url);
     } catch (err: any) {
       console.error(err);
-      showToast(err?.response?.data?.message || err?.message || 'Gagal mengunduh file. Pastikan dokumen fisik tersedia di server.', 'error');
+      showToast(err?.response?.data?.message || err?.message || 'Gagal mengunduh berkas. Pastikan dokumen tersedia.', 'error');
     }
   };
 

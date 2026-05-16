@@ -74,7 +74,7 @@ const PayrollPaymentPage = () => {
       return;
     }
     if (selectedPayroll.status !== "approved") {
-      showToast(`Hanya payroll berstatus 'approved' yang bisa ditandai dibayar. Status saat ini: ${selectedPayroll.status}`, "error");
+      showToast(`Hanya payroll berstatus sudah disetujui yang bisa ditandai dibayar. Status saat ini: ${selectedPayroll.status}`, "error");
       return;
     }
     setLoading(true);
@@ -93,7 +93,7 @@ const PayrollPaymentPage = () => {
 
   const handleBulkPay = async () => {
     if (!bulkPeriod) {
-      showToast("Pilih periode terlebih dahulu sebelum bulk pay", "error");
+      showToast("Pilih periode terlebih dahulu sebelum pembayaran massal", "error");
       setBulkPayModal(false);
       return;
     }
@@ -101,7 +101,7 @@ const PayrollPaymentPage = () => {
     try {
       const result = await payrollService.bulkMarkAsPaid(bulkPeriod);
       const total = result?.data?.total_paid ?? result?.total_paid ?? approvedForBulk.length;
-      showToast(`✅ Bulk pay selesai — ${total} payroll periode ${bulkPeriod} berhasil ditandai dibayar`, "success");
+      showToast(`Pembayaran massal selesai — ${total} payroll periode ${bulkPeriod} berhasil ditandai dibayar`, "success");
       setBulkPayModal(false);
       await loadData();
     } catch (error) {

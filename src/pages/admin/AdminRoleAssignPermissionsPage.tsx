@@ -128,17 +128,17 @@ const AdminRoleAssignPermissionsPage = () => {
     if (!selectedRole) return;
 
     if (selectedPermissionIds.length === 0) {
-      showToast("Pilih minimal satu permission.", 'info');
+      showToast("Pilih minimal satu izin.", 'info');
       return;
     }
 
     if (selectedRole.id === 1) {
-      showToast("Hanya Super Admin yang dapat memodifikasi role Super Admin.", 'error');
+      showToast("Hanya Super Admin yang dapat memodifikasi peran Super Admin.", 'error');
       return;
     }
 
     setIsAssigning(true);
-    showToast("Sedang assign permission...", 'info');
+    showToast("Sedang menetapkan izin...", 'info');
 
     try {
       await assignPermissionsToRole(selectedRole.id.toString(), { permission_ids: selectedPermissionIds });
@@ -147,7 +147,7 @@ const AdminRoleAssignPermissionsPage = () => {
       setSelectedPermissionIds([]);
       await loadRoles();
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal assign permission ke role.";
+      const message = error instanceof Error ? error.message : "Gagal menetapkan izin ke peran.";
       showToast(message, 'error');
     } finally {
       setIsAssigning(false);

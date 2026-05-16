@@ -33,13 +33,7 @@ export const TaxCalculator: React.FC<TaxCalculatorProps> = ({ income, setIncome,
     fetchCompany();
   }, []);
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      maximumFractionDigits: 0
-    }).format(amount);
-  };
+  const formatCurrency = (amount: number) => `Rp ${(amount || 0).toLocaleString("id-ID")}`;
 
   const exportPDF = () => {
     if (!result) return;
@@ -159,13 +153,14 @@ export const TaxCalculator: React.FC<TaxCalculatorProps> = ({ income, setIncome,
             <div style={{ position: 'relative' }}>
                <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontWeight: 700, color: '#2563eb' }}>Rp</span>
                <input 
-                 type="number" 
-                 className="crud-input" 
-                 value={income}
-                 onChange={(e) => setIncome(Number(e.target.value))}
-                 style={{ paddingLeft: '45px', width: '100%', fontSize: '1.1rem', fontWeight: 600 }}
-                 placeholder="0"
-               />
+                  type="text" 
+                  inputMode="numeric"
+                  className="crud-input" 
+                  value={income ? Number(income).toLocaleString("id-ID") : ""}
+                  onChange={(e) => setIncome(Number(e.target.value.replace(/\D/g, "")) || 0)}
+                  style={{ paddingLeft: '45px', width: '100%', fontSize: '1.1rem', fontWeight: 600 }}
+                  placeholder="0"
+                />
             </div>
           </div>
           <Button variant="primary" style={{ width: '100%', height: '48px', fontSize: '1rem' }} onClick={onCalculate} disabled={loading || income <= 0}>

@@ -81,7 +81,7 @@ const ReportsAssetsPage: React.FC = () => {
     return [...m].map(([name,value]) => ({name,value}));
   }, [assignments]);
 
-  const fmtRp = (n: number) => new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(n);
+  const fmtRp = (n: number) => `Rp ${(n || 0).toLocaleString("id-ID")}`;
 
   return (
     <div className="reports-dashboard">

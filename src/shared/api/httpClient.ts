@@ -42,24 +42,9 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// 🚀 Global Response Interceptor (Error Handling & Toast)
+// 🚀 Global Response Interceptor (Error Handling Only — auth level)
 api.interceptors.response.use(
   (response) => {
-    const method = response.config.method?.toUpperCase();
-    const url = response.config.url || "";
-    
-    // Tampilkan toast sukses otomatis untuk mutasi (POST, PUT, DELETE)
-    const isMutation = ["POST", "PUT", "DELETE", "PATCH"].includes(method || "");
-    const isSilentUrl = url.includes("/me") || url.includes("/logout"); // Biarkan /me dan /logout tetap senyap di sini
-    const skipToast = Boolean((response.config as any).skipToast);
-
-    if (isMutation && !isSilentUrl && !skipToast && response.status >= 200 && response.status < 300) {
-      const message = response.data?.message || (url.includes("/login") ? "Login Berhasil" : "Aksi berhasil dilakukan");
-      showToast(message, "success");
-    }
-
-
-    
     return response;
   },
   (error) => {
@@ -80,10 +65,8 @@ api.interceptors.response.use(
       }, 1000);
     }
 
-    // 2. Handle General Errors (NOT validation errors)
-    if (parsedError.type === "general") {
-      showToast(parsedError.message, "error");
-    }
+    // Note: General errors are NOT shown here to avoid double toasts.
+    // Each page handles its own error display in try-catch blocks.
 
     // Return the standard parsed error object
     return Promise.reject(parsedError);

@@ -31,13 +31,7 @@ const PayrollSlipPage = () => {
     void loadSlip();
   }, [id]);
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-    }).format(value);
-  };
+  const formatCurrency = (value: number) => `Rp ${(value || 0).toLocaleString("id-ID")}`;
 
   if (loading) {
     return (

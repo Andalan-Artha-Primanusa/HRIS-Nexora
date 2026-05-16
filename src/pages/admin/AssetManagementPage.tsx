@@ -37,7 +37,7 @@ type Tab = (typeof TABS)[number];
 const InventoryTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading, assets }) => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'Semua' | 'Available' | 'Assigned' | 'Maintenance' | 'Retired'>('Semua');
+  const [activeTab, setActiveTab] = useState<'Semua' | 'Tersedia' | 'Digunakan' | 'Perbaikan' | 'Dihapus'>('Semua');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
   const [showFilters, setShowFilters] = useState(false);
@@ -141,10 +141,10 @@ const InventoryTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading, 
       const textMatch = nameMatch || codeMatch || serialMatch || brandMatch;
 
       let statusMatch = true;
-      if (activeTab === 'Available') statusMatch = asset.status?.toLowerCase() === 'available';
-      else if (activeTab === 'Assigned') statusMatch = asset.status?.toLowerCase() === 'assigned';
-      else if (activeTab === 'Maintenance') statusMatch = asset.status?.toLowerCase() === 'maintenance';
-      else if (activeTab === 'Retired') statusMatch = asset.status?.toLowerCase() === 'retired';
+      if (activeTab === 'Tersedia') statusMatch = asset.status?.toLowerCase() === 'available';
+      else if (activeTab === 'Digunakan') statusMatch = asset.status?.toLowerCase() === 'assigned';
+      else if (activeTab === 'Perbaikan') statusMatch = asset.status?.toLowerCase() === 'maintenance';
+      else if (activeTab === 'Dihapus') statusMatch = asset.status?.toLowerCase() === 'retired';
 
       return textMatch && statusMatch;
     });
@@ -195,8 +195,8 @@ const InventoryTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading, 
     const statusMap: Record<string, { label: string; class: string }> = {
       'available': { label: 'Tersedia', class: 'badge-soft--green' },
       'assigned': { label: 'Digunakan', class: 'badge-soft--blue' },
-      'maintenance': { label: 'Maintenance', class: 'badge-soft--yellow' },
-      'retired': { label: 'Retired', class: 'badge-soft--gray' },
+      'maintenance': { label: 'Perbaikan', class: 'badge-soft--yellow' },
+      'retired': { label: 'Dihapus', class: 'badge-soft--gray' },
     };
     const info = statusMap[status?.toLowerCase()] || { label: status, class: 'badge-soft--gray' };
     return <span className={`badge-soft ${info.class}`}>{info.label}</span>;
@@ -246,7 +246,7 @@ const InventoryTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading, 
       <Card className="control-section-card">
         <div className="control-section-inner">
           <div className="elyra-tabs">
-            {(['Semua', 'Available', 'Assigned', 'Maintenance', 'Retired'] as const).map((tab) => (
+            {(['Semua', 'Tersedia', 'Digunakan', 'Perbaikan', 'Dihapus'] as const).map((tab) => (
               <button key={tab} className={`elyra-tab ${activeTab === tab ? 'active' : ''}`} onClick={() => { setActiveTab(tab); setCurrentPage(1); }}>
                 {tab}
               </button>
@@ -304,7 +304,7 @@ const InventoryTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading, 
                               <div className="cell-avatar"><IconComponent size={20} /></div>
                               <div className="cell-stacked">
                                 <span className="cell-name-text">{asset.name}</span>
-                                <span className="cell-stacked__sub">{asset.serial_number || 'No SN'}</span>
+                                <span className="cell-stacked__sub">{asset.serial_number || '-'}</span>
                               </div>
                             </div>
                           </td>
@@ -363,7 +363,7 @@ const InventoryTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading, 
             <div className="modal-completion-header">
               <div className="modal-completion-icon"><User size={24} /></div>
               <div>
-                <h3 className="modal-completion-title">Assign Aset</h3>
+                <h3 className="modal-completion-title">Tugaskan Aset</h3>
                 <p className="modal-completion-task">{selectedAsset.name} ({selectedAsset.code})</p>
               </div>
               <button className="modal-close-btn" onClick={closeAssignModal}><X size={20} /></button>
@@ -373,7 +373,7 @@ const InventoryTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading, 
               <select className="modal-completion-select" value={selectedEmployee} onChange={(e) => setSelectedEmployee(e.target.value)}>
                 <option value="">-- Pilih Karyawan --</option>
                 {employees.map((emp) => (
-                  <option key={emp.id} value={emp.id}>{emp.user?.name || emp.full_name || `Employee #${emp.id}`} - {emp.position || '-'}</option>
+                  <option key={emp.id} value={emp.id}>{emp.user?.name || emp.full_name || `Karyawan #${emp.id}`} - {emp.position || '-'}</option>
                 ))}
               </select>
               <label className="modal-completion-label" style={{ marginTop: '1rem' }}>Catatan Assignment</label>
@@ -382,7 +382,7 @@ const InventoryTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading, 
             <div className="modal-completion-footer">
               <button className="modal-btn-cancel" onClick={closeAssignModal}>Batal</button>
               <button className="modal-btn-confirm" onClick={handleAssign} disabled={assigningLoading || !selectedEmployee}>
-                {assigningLoading ? <><RefreshCw size={16} className="animate-spin" /> Menyimpan...</> : <><ArrowDownToLine size={16} /> Assign Aset</>}
+                {assigningLoading ? <><RefreshCw size={16} className="animate-spin" /> Menyimpan...</> : <><ArrowDownToLine size={16} /> Tugaskan</>}
               </button>
             </div>
           </div>
@@ -433,7 +433,7 @@ const InventoryTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading, 
 const AssignmentsTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading, assets }) => {
   const [assignments, setAssignments] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'Semua' | 'Active' | 'Returned'>('Semua');
+  const [activeTab, setActiveTab] = useState<'Semua' | 'Aktif' | 'Dikembalikan'>('Semua');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
   const [showFilters, setShowFilters] = useState(false);
@@ -468,8 +468,8 @@ const AssignmentsTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading
       const textMatch = assetName.includes(searchStr) || employeeName.includes(searchStr) || assetCode.includes(searchStr);
       const isReturned = !!assignment.returned_at;
       let statusMatch = true;
-      if (activeTab === 'Active') statusMatch = !isReturned;
-      else if (activeTab === 'Returned') statusMatch = isReturned;
+      if (activeTab === 'Aktif') statusMatch = !isReturned;
+      else if (activeTab === 'Dikembalikan') statusMatch = isReturned;
       return textMatch && statusMatch;
     });
   }, [assignments, searchQuery, activeTab]);
@@ -583,9 +583,9 @@ const AssignmentsTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading
       <Card className="control-section-card">
         <div className="control-section-inner">
           <div className="elyra-tabs">
-            {(['Semua', 'Active', 'Returned'] as const).map((tab) => (
+            {(['Semua', 'Aktif', 'Dikembalikan'] as const).map((tab) => (
               <button key={tab} className={`elyra-tab ${activeTab === tab ? 'active' : ''}`} onClick={() => { setActiveTab(tab); setCurrentPage(1); }}>
-                {tab === 'Active' ? 'Aktif' : tab === 'Returned' ? 'Dikembalikan' : tab}
+                {tab}
               </button>
             ))}
           </div>
@@ -633,9 +633,9 @@ const AssignmentsTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading
                   </thead>
                   <tbody>
                     {paginatedAssignments.map((assignment) => {
-                      const employeeName = assignment.employee?.user?.name || assignment.employee?.full_name || assignment.employee?.name || 'Unknown';
-                      const assetName = assignment.asset?.name || 'Unknown Asset';
-                      const assetCode = assignment.asset?.code || 'NO-CODE';
+                      const employeeName = assignment.employee?.user?.name || assignment.employee?.full_name || assignment.employee?.name || '-';
+                      const assetName = assignment.asset?.name || '-';
+                      const assetCode = assignment.asset?.code || '-';
                       return (
                         <tr key={assignment.id}>
                           <td>
@@ -732,6 +732,7 @@ const AssignmentsTab: React.FC<{ loading: boolean; assets: any[] }> = ({ loading
 };
 
 const AssetManagementPage: React.FC = () => {
+  const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>('Daftar Aset');
   const [assets, setAssets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -771,6 +772,10 @@ const AssetManagementPage: React.FC = () => {
             </p>
           </div>
           <div className="hero-actions">
+            <button className="btn-primary" onClick={() => navigate('/inventory/assets/create')}>
+              <Plus size={16} />
+              Buat Aset Baru
+            </button>
             <button className="btn-outline" onClick={() => { fetchAssets(); }} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan

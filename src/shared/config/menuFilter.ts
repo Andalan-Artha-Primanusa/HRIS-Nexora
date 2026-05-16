@@ -5,7 +5,7 @@ import { useAuthStore } from "@/app/store/auth.store";
 
 let cachePromise: Promise<string[]> | null = null;
 
-const stripAdminKeys = (keys: string[], _user: AuthUser | null): string[] => {
+const stripAdminKeys = (keys: string[]): string[] => {
   return keys;
 };
 
@@ -49,7 +49,7 @@ export const fetchAllowedMenuKeys = async (user: AuthUser | null = null): Promis
         const items = adminRes.data?.data?.items ?? [];
         const computed = computeFromAssignments(items, user);
         if (computed) {
-          const finalKeys = stripAdminKeys(computed, user);
+          const finalKeys = stripAdminKeys(computed);
           useAuthStore.getState().setAllowedMenuKeys(finalKeys);
           useAuthStore.getState().setMenuKeysLoaded(true);
           return finalKeys;
@@ -63,7 +63,7 @@ export const fetchAllowedMenuKeys = async (user: AuthUser | null = null): Promis
     try {
       const res = await api.get<{ data?: string[] }>("/user/menus");
       const data = res.data?.data ?? [];
-      const finalKeys = stripAdminKeys(Array.isArray(data) ? data : [], user);
+      const finalKeys = stripAdminKeys(Array.isArray(data) ? data : []);
       useAuthStore.getState().setAllowedMenuKeys(finalKeys);
       useAuthStore.getState().setMenuKeysLoaded(true);
       return finalKeys;

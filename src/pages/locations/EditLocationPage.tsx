@@ -30,7 +30,7 @@ const EditLocationPage = () => {
   useEffect(() => {
     const loadDetail = async () => {
       if (!id) {
-        showToast('Location ID tidak ditemukan', 'error');
+        showToast('ID lokasi tidak ditemukan', 'error');
         setLoading(false);
         return;
       }
@@ -106,7 +106,7 @@ const EditLocationPage = () => {
       };
 
       await updateLocation(id, payload);
-      showToast('Lokasi berhasil diupdate!', 'success');
+      showToast('Lokasi berhasil diperbarui!', 'success');
       setTimeout(() => {
         navigate('/locations');
       }, 1500);

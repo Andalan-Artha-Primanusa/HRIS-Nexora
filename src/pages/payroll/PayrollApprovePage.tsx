@@ -92,7 +92,7 @@ const PayrollApprovePage = () => {
       const id = String(selectedPayroll.id);
       if (pendingAction === "manager-approve") {
         await payrollService.managerApprovePayroll(id);
-        showToast(`Payroll #${id} berhasil disetujui Manager → menunggu HR`, "success");
+        showToast(`Payroll #${id} berhasil disetujui Manajer → menunggu HR`, "success");
       } else if (pendingAction === "hr-approve") {
         await payrollService.hrApprovePayroll(id);
         showToast(`Payroll #${id} disetujui HR → siap dibayar`, "success");
@@ -134,10 +134,8 @@ const PayrollApprovePage = () => {
   // ── Shared table row renderer ─────────────────────────────
   const renderRow = (p: PayrollItem, actions: React.ReactNode) => (
     <tr key={p.id}>
-      <td className="crud-table-name">
         <div className="crud-table-avatar">{getEmployeeName(p.employee_id).charAt(0).toUpperCase()}</div>
         <span>{getEmployeeName(p.employee_id)}</span>
-      </td>
       <td><span className="crud-table-tag">{p.period}</span></td>
       <td className="crud-table-amount">{fmt(p.basic_salary)}</td>
       <td className="crud-table-amount crud-table-amount-green">{fmt(p.take_home_pay || p.net_salary)}</td>

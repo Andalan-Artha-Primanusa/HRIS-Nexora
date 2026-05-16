@@ -63,7 +63,7 @@ const KpiApprovePage = () => {
         navigate('/kpis');
       }, 1000);
     } catch (error: any) {
-      showToast(error?.response?.data?.message || 'Gagal approve KPI.', 'error');
+      showToast(error?.response?.data?.message || 'Gagal menyetujui KPI.', 'error');
       console.error(error);
     } finally {
       setApproving(false);

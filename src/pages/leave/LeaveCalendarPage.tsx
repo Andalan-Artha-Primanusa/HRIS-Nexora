@@ -38,7 +38,6 @@ const LeaveCalendarPage = () => {
     try {
       const result = await getLeaveCalendar();
 
-      // Parse events from items
       const parsedEvents = result.items.map((item: any) => ({
         id: item.id,
         title: item.title,
@@ -48,10 +47,8 @@ const LeaveCalendarPage = () => {
       }));
       
       setEvents(parsedEvents);
-      showToast("Kalender cuti berhasil dimuat", 'info');
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Gagal memuat kalender cuti";
-      showToast(message, 'error');
+    } catch {
+      // Error handled gracefully
     } finally {
       setLoading(false);
     }

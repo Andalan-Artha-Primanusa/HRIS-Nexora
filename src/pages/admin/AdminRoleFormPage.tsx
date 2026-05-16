@@ -35,7 +35,7 @@ const AdminRoleFormPage: React.FC = () => {
             description: (data as any).description || ''
           });
         } catch (err: any) {
-          showToast(err.message || "Gagal memuat detail role.", "error");
+          showToast(err.message || "Gagal memuat detail peran.", "error");
         } finally {
           setFetching(false);
         }
@@ -58,7 +58,7 @@ const AdminRoleFormPage: React.FC = () => {
       }
       setTimeout(() => navigate('/admin/roles'), 1500);
     } catch (err: any) {
-      showToast(err.message || "Gagal menyimpan role.", "error");
+      showToast(err.message || "Gagal menyimpan peran.", "error");
     } finally {
       setLoading(false);
     }

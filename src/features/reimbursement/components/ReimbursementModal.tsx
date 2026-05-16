@@ -174,12 +174,13 @@ export const ReimbursementModal: React.FC<ReimbursementModalProps> = ({
               <div className="form-group">
                 <label>Jumlah (Rp)</label>
                 <input 
-                  type="number" 
+                  type="text" 
+                  inputMode="numeric"
                   name="amount" 
                   className="form-control" 
                   placeholder="0"
-                  value={formData.amount}
-                  onChange={handleChange}
+                  value={formData.amount ? Number(formData.amount).toLocaleString("id-ID") : ""}
+                  onChange={(e) => setFormData((prev: any) => ({ ...prev, amount: e.target.value.replace(/\D/g, "") }))}
                   required 
                 />
               </div>

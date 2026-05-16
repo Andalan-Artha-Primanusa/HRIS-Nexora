@@ -89,7 +89,7 @@ const BenefitManagementPage: React.FC = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
                   <span style={{ color: '#64748b' }}>Monthly Value</span>
-                  <span style={{ fontWeight: 700, color: '#1e293b' }}>Rp {benefit.amount?.toLocaleString() || 0}</span>
+                  <span style={{ fontWeight: 700, color: '#1e293b' }}>Rp {benefit.amount?.toLocaleString("id-ID") || 0}</span>
                </div>
                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
                   <span style={{ color: '#64748b' }}>Assigned Count</span>

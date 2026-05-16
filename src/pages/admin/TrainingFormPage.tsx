@@ -190,7 +190,7 @@ const TrainingFormPage: React.FC = () => {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
               <div className="form-group">
                 <label>Budget</label>
-                <input name="budget" type="number" value={formData.budget} onChange={handleChange} className="form-control" />
+                <input name="budget" type="text" inputMode="numeric" value={formData.budget ? Number(formData.budget).toLocaleString("id-ID") : ""} onChange={(e) => setFormData({ ...formData, budget: Number(e.target.value.replace(/\D/g, "")) || 0 })} className="form-control" />
               </div>
               <div className="form-group">
                 <label>Status</label>

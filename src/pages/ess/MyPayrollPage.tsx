@@ -120,7 +120,7 @@ const MyPayrollPage = () => {
       link.parentNode?.removeChild(link);
     } catch (error) {
       console.error("Failed to download PDF:", error);
-      showToast('Gagal mengunduh PDF. Silakan coba lagi.', 'error');
+      showToast('Gagal mengunduh berkas PDF. Silakan coba lagi.', 'error');
     }
   };
 
@@ -137,7 +137,7 @@ const MyPayrollPage = () => {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Failed to download CSV:", error);
-      showToast('Gagal mengunduh CSV. Silakan coba lagi.', 'error');
+      showToast('Gagal mengunduh berkas CSV. Silakan coba lagi.', 'error');
     }
   };
 

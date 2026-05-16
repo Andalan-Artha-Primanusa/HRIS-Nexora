@@ -224,7 +224,7 @@ const OvertimePage = () => {
 
   const handleAddReason = async (record: OvertimeRecord) => {
     if (!record.request_id) {
-      showToast('Data lembur belum punya request untuk diisi alasan.', 'info');
+      showToast('Data lembur belum memiliki pengajuan untuk diisi alasan.', 'info');
       return;
     }
     setSelectedRecord(record);
@@ -304,7 +304,7 @@ const OvertimePage = () => {
         const payload = toRecord(createRes?.data ?? createRes);
         requestId = toNullableNumber(payload.id) ?? toNullableNumber(payload.request_id) ?? undefined;
       } catch (err: unknown) {
-        showToast(getApiErrorMessage(err, 'Gagal membuat request lembur'), 'error');
+        showToast(getApiErrorMessage(err, 'Gagal membuat pengajuan lembur'), 'error');
         return;
       }
     }

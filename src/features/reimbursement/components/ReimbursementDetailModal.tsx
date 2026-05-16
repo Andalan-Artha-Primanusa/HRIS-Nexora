@@ -27,13 +27,7 @@ export const ReimbursementDetailModal: React.FC<ReimbursementDetailModalProps> =
 
   if (!isOpen || !item) return null;
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      maximumFractionDigits: 0
-    }).format(amount);
-  };
+  const formatCurrency = (amount: number) => `Rp ${(amount || 0).toLocaleString("id-ID")}`;
 
   const formatDate = (dateStr: any) => {
     if (!dateStr) return '-';

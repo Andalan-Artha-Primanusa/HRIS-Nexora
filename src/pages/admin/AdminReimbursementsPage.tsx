@@ -22,9 +22,7 @@ const formatDateTime = (input: string) => {
   return new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(date);
 };
 
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
-};
+const formatCurrency = (amount: number) => `Rp ${(amount || 0).toLocaleString("id-ID")}`;
 
 const AdminReimbursementsPage: React.FC = () => {
   const [items, setItems] = useState<ReimbursementItem[]>([]);

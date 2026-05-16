@@ -79,7 +79,7 @@ const AdminBiometricDevicesPage = () => {
         device_id: deviceId,
       });
       const deviceName = typeof device.name === "string" ? device.name : String(deviceId);
-      showToast(`Sinkronisasi attendance untuk perangkat ${deviceName} berhasil dijalankan.`, "success");
+      showToast(`Sinkronisasi kehadiran untuk perangkat ${deviceName} berhasil dijalankan.`, "success");
     } catch (error: unknown) {
       showToast(getErrorMessage(error as Record<string, unknown>), "error");
     } finally {

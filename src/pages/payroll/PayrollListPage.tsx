@@ -220,7 +220,7 @@ const PayrollListPage = () => {
     setLoading(true);
     try {
       await payrollService.updatePayroll(form.id, { allowance: Number(form.allowance)||0, bonus: Number(form.bonus)||0 });
-      showToast("Payroll berhasil diupdate", "success");
+      showToast("Payroll berhasil diperbarui", "success");
       setView("list"); await loadData();
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Gagal", "error");
@@ -249,19 +249,19 @@ const PayrollListPage = () => {
       const baseUrl = import.meta.env.VITE_API_URL || "";
       const endpoint = exportType === "bca" ? `/payroll/export/bca-klikpay?period=${exportPeriod}` : `/payroll/export/summary?period=${exportPeriod}`;
       const res = await fetch(`${baseUrl}${endpoint}`, { headers: { Authorization: `Bearer ${token}` } });
-      if (!res.ok) throw new Error("Gagal export");
+      if (!res.ok) throw new Error("Gagal mengekspor");
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a"); a.href = url; a.download = `${exportType === "bca" ? "bca-klikpay" : "payroll-summary"}-${exportPeriod}.csv`;
       document.body.appendChild(a); a.click(); a.remove(); window.URL.revokeObjectURL(url);
       setExportModal(false);
-      showToast("Export berhasil", "success");
+      showToast("Ekspor berhasil", "success");
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Gagal", "error");
     } finally { setExportLoading(false); }
   };
 
-  const formatCurrency = (v: number) => `Rp ${(v||0).toLocaleString("id-ID")}`;
+  const formatCurrency = (v: number | string) => `Rp ${Number(v||0).toLocaleString("id-ID")}`;
 
   const formContent = (
     <Card className="crud-card payroll-form-card" glass>
@@ -284,11 +284,11 @@ const PayrollListPage = () => {
           </label>
           <label className="payroll-field">
             <strong>Tunjangan</strong>
-            <input type="number" className="crud-input payroll-control" value={form.allowance} onChange={(e) => setForm({...form, allowance: e.target.value})} placeholder="1500000" />
+            <input type="text" inputMode="numeric" className="crud-input payroll-control" value={form.allowance ? Number(form.allowance).toLocaleString("id-ID") : ""} onChange={(e) => setForm({...form, allowance: e.target.value.replace(/\D/g, "")})} placeholder="1.500.000" />
           </label>
           <label className="payroll-field">
             <strong>Bonus</strong>
-            <input type="number" className="crud-input payroll-control" value={form.bonus} onChange={(e) => setForm({...form, bonus: e.target.value})} placeholder="500000" />
+            <input type="text" inputMode="numeric" className="crud-input payroll-control" value={form.bonus ? Number(form.bonus).toLocaleString("id-ID") : ""} onChange={(e) => setForm({...form, bonus: e.target.value.replace(/\D/g, "")})} placeholder="500.000" />
           </label>
           <div className="payroll-field-full">
             <Card glass className="crud-info-card payroll-info-card">

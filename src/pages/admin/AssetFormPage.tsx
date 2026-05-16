@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { 
-  ArrowLeft, Save, Box, Package, Tag, 
-  Hash, Info, Truck, DollarSign, Calendar 
+import {
+  ArrowLeft, Save, Box, Package, Tag,
+  Hash, Info, Truck, DollarSign, Calendar
 } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
@@ -10,6 +10,192 @@ import { Alert } from '@/shared/ui/Alert';
 import { assetService } from '@/features/assets/api/asset.service';
 import '@/shared/styles/CrudPage.css';
 import "../dashboard/overview/OverviewPage.css";
+
+const FORM_STYLES = `
+.asset-form-page .form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.asset-form-page .form-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.asset-form-page .form-column {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.asset-form-page .field-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.asset-form-page .field-full {
+  grid-column: 1 / -1;
+}
+
+.asset-form-page .field-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.asset-form-page .field-required {
+  color: #ef4444;
+}
+
+.asset-form-page .field-input {
+  width: 100%;
+  height: 50px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  font-size: 1rem;
+  color: #0f172a;
+  box-sizing: border-box;
+  transition: all 0.2s;
+}
+
+.asset-form-page .field-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.asset-form-page .field-input-icon {
+  width: 100%;
+  height: 50px;
+  padding: 0 16px 0 44px;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  font-size: 1rem;
+  color: #0f172a;
+  box-sizing: border-box;
+  transition: all 0.2s;
+}
+
+.asset-form-page .field-input-icon:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.asset-form-page .field-select {
+  width: 100%;
+  height: 50px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  font-size: 1rem;
+  color: #0f172a;
+  box-sizing: border-box;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.asset-form-page .field-select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.asset-form-page .field-textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  font-size: 1rem;
+  color: #0f172a;
+  box-sizing: border-box;
+  transition: all 0.2s;
+  resize: vertical;
+  min-height: 120px;
+  font-family: inherit;
+}
+
+.asset-form-page .field-textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.asset-form-page .input-wrapper {
+  position: relative;
+}
+
+.asset-form-page .input-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.asset-form-page .input-prefix {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 0.9rem;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+.asset-form-page .section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.asset-form-page .section-icon {
+  padding: 10px;
+  border-radius: 12px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.asset-form-page .section-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #1e3a8a;
+}
+
+.asset-form-page .submit-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+  .asset-form-page .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .asset-form-page .field-group {
+    grid-template-columns: 1fr;
+  }
+}
+`;
 
 const AssetFormPage: React.FC = () => {
   const navigate = useNavigate();
@@ -19,7 +205,7 @@ const AssetFormPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  
+
   const [formData, setFormData] = useState({
     code: '',
     name: '',
@@ -75,9 +261,9 @@ const AssetFormPage: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData({ 
-      ...formData, 
-      [name]: name === 'purchase_price' ? Number(value) : value 
+    setFormData({
+      ...formData,
+      [name]: name === 'purchase_price' ? Number(value) : value
     });
   };
 
@@ -89,15 +275,17 @@ const AssetFormPage: React.FC = () => {
   );
 
   return (
-    <div className="crud-page">
+    <div className="crud-page asset-form-page">
+      <style>{FORM_STYLES}</style>
+
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <Package size={16} />
-              <span>Inventory System</span>
+              <span>Inventaris Aset</span>
             </div>
-            <h1 className="hero-title">{isEdit ? 'Edit Asset' : 'Tambah Asset Baru'}</h1>
+            <h1 className="hero-title">{isEdit ? 'Edit Aset' : 'Tambah Aset Baru'}</h1>
             <p className="hero-subtitle">
               {isEdit ? 'Perbarui informasi detail aset perusahaan.' : 'Daftarkan aset baru ke dalam sistem inventaris.'}
             </p>
@@ -118,92 +306,91 @@ const AssetFormPage: React.FC = () => {
       )}
 
       <form onSubmit={handleSubmit}>
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
-          {/* Left Column: Main Info */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+        <div className="form-grid">
+          <div className="form-column">
             <Card glass style={{ padding: '2.5rem', borderRadius: '32px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '2rem' }}>
-                <div style={{ padding: '10px', background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', borderRadius: '12px', color: 'white', boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)' }}>
+              <div className="section-header">
+                <div className="section-icon" style={{ background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)' }}>
                   <Box size={22} />
                 </div>
-                <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: '#1e3a8a' }}>Informasi Utama</h3>
+                <h3 className="section-title">Informasi Utama</h3>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-                  <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b', marginBottom: '8px', display: 'block' }}>Nama Aset <span style={{ color: '#ef4444' }}>*</span></label>
-                  <div style={{ position: 'relative' }}>
-                    <Tag size={16} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                    <input 
-                      name="name" 
-                      value={formData.name} 
-                      onChange={handleChange} 
-                      required 
-                      placeholder="e.g. MacBook Pro M3 14-inch" 
-                      style={{ width: '100%', height: '50px', padding: '0 16px 0 44px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '1rem', color: '#0f172a', transition: 'all 0.2s', boxSizing: 'border-box' }}
+              <div className="field-group">
+                <div className="field-full">
+                  <label className="field-label">Nama Aset <span className="field-required">*</span></label>
+                  <div className="input-wrapper">
+                    <Tag size={16} className="input-icon" />
+                    <input
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      required
+                      placeholder="MacBook Pro M3 14-inch"
+                      className="field-input-icon"
                     />
                   </div>
                 </div>
 
-                <div className="form-group">
-                  <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b', marginBottom: '8px', display: 'block' }}>Kode Aset <span style={{ color: '#ef4444' }}>*</span></label>
-                  <input 
-                    name="code" 
-                    value={formData.code} 
-                    onChange={handleChange} 
-                    required 
-                    placeholder="AST-001" 
-                    style={{ width: '100%', height: '50px', padding: '0 16px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '1rem', color: '#0f172a', transition: 'all 0.2s', boxSizing: 'border-box' }}
+                <div>
+                  <label className="field-label">Kode Aset <span className="field-required">*</span></label>
+                  <input
+                    name="code"
+                    value={formData.code}
+                    onChange={handleChange}
+                    required
+                    placeholder="AST-001"
+                    className="field-input"
                   />
                 </div>
 
-                <div className="form-group">
-                  <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b', marginBottom: '8px', display: 'block' }}>Kategori</label>
-                  <select 
-                    name="category" 
-                    value={formData.category} 
-                    onChange={handleChange} 
-                    style={{ width: '100%', height: '50px', padding: '0 16px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '1rem', color: '#0f172a', transition: 'all 0.2s', boxSizing: 'border-box' }}
+                <div>
+                  <label className="field-label">Kategori</label>
+                  <select
+                    name="category"
+                    value={formData.category}
+                    onChange={handleChange}
+                    className="field-select"
                   >
-                    <option value="Electronics">Electronics</option>
-                    <option value="Furniture">Furniture</option>
-                    <option value="Vehicle">Vehicle</option>
-                    <option value="Other">Other</option>
+                    <option value="Electronics">Elektronik</option>
+                    <option value="Furniture">Furnitur</option>
+                    <option value="Vehicle">Kendaraan</option>
+                    <option value="Other">Lainnya</option>
                   </select>
                 </div>
 
-                <div className="form-group">
-                  <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b', marginBottom: '8px', display: 'block' }}>Merek</label>
-                  <input 
-                    name="brand" 
-                    value={formData.brand} 
-                    onChange={handleChange} 
-                    placeholder="e.g. Apple" 
-                    style={{ width: '100%', height: '50px', padding: '0 16px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '1rem', color: '#0f172a', transition: 'all 0.2s', boxSizing: 'border-box' }}
+                <div>
+                  <label className="field-label">Merek</label>
+                  <input
+                    name="brand"
+                    value={formData.brand}
+                    onChange={handleChange}
+                    placeholder="Apple"
+                    className="field-input"
                   />
                 </div>
 
-                <div className="form-group">
-                  <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b', marginBottom: '8px', display: 'block' }}>Model</label>
-                  <input 
-                    name="model" 
-                    value={formData.model} 
-                    onChange={handleChange} 
-                    placeholder="e.g. A2918" 
-                    style={{ width: '100%', height: '50px', padding: '0 16px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '1rem', color: '#0f172a', transition: 'all 0.2s', boxSizing: 'border-box' }}
+                <div>
+                  <label className="field-label">Model</label>
+                  <input
+                    name="model"
+                    value={formData.model}
+                    onChange={handleChange}
+                    placeholder="A2918"
+                    className="field-input"
                   />
                 </div>
-                
-                <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-                  <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b', marginBottom: '8px', display: 'block' }}>Nomor Seri</label>
-                  <div style={{ position: 'relative' }}>
-                    <Hash size={16} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                    <input 
-                      name="serial_number" 
-                      value={formData.serial_number} 
-                      onChange={handleChange} 
-                      placeholder="SN123456789" 
-                      style={{ width: '100%', height: '50px', padding: '0 16px 0 44px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '1rem', color: '#0f172a', transition: 'all 0.2s', boxSizing: 'border-box' }}
+
+                <div className="field-full">
+                  <label className="field-label">Nomor Seri</label>
+                  <div className="input-wrapper">
+                    <Hash size={16} className="input-icon" />
+                    <input
+                      name="serial_number"
+                      value={formData.serial_number}
+                      onChange={handleChange}
+                      placeholder="SN123456789"
+                      className="field-input-icon"
                     />
                   </div>
                 </div>
@@ -211,43 +398,42 @@ const AssetFormPage: React.FC = () => {
             </Card>
 
             <Card glass style={{ padding: '2.5rem', borderRadius: '32px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '2rem' }}>
-                <div style={{ padding: '10px', background: 'linear-gradient(135deg, #10b981, #059669)', borderRadius: '12px', color: 'white', boxShadow: '0 4px 12px rgba(5, 150, 105, 0.2)' }}>
+              <div className="section-header">
+                <div className="section-icon" style={{ background: 'linear-gradient(135deg, #10b981, #059669)', boxShadow: '0 4px 12px rgba(5, 150, 105, 0.2)' }}>
                   <Info size={22} />
                 </div>
-                <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: '#1e3a8a' }}>Catatan Tambahan</h3>
+                <h3 className="section-title">Catatan Tambahan</h3>
               </div>
-              <div className="form-group">
-                <textarea 
-                  name="notes" 
-                  value={formData.notes} 
-                  onChange={handleChange} 
-                  rows={4} 
-                  placeholder="Tambahkan informasi spesifik mengenai aset ini..." 
-                  style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '1rem', color: '#0f172a', transition: 'all 0.2s', boxSizing: 'border-box', resize: 'vertical', minHeight: '120px' }}
+              <div>
+                <textarea
+                  name="notes"
+                  value={formData.notes}
+                  onChange={handleChange}
+                  rows={4}
+                  placeholder="Tambahkan informasi spesifik mengenai aset ini..."
+                  className="field-textarea"
                 />
               </div>
             </Card>
           </div>
 
-          {/* Right Column: Status & Finance */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          <div className="form-column">
             <Card glass style={{ padding: '2rem', borderRadius: '28px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1.5rem' }}>
-                <div style={{ padding: '8px', background: '#fef3c7', borderRadius: '10px', color: '#d97706' }}>
+              <div className="section-header">
+                <div style={{ padding: '8px', background: '#fef3c7', borderRadius: '10px', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Truck size={20} />
                 </div>
                 <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#1e3a8a' }}>Kondisi & Status</h4>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                <div className="form-group">
-                  <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b', marginBottom: '6px', display: 'block' }}>Kondisi Aset</label>
-                  <select 
-                    name="condition" 
-                    value={formData.condition} 
-                    onChange={handleChange} 
-                    style={{ width: '100%', height: '50px', padding: '0 16px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '1rem', color: '#0f172a', boxSizing: 'border-box' }}
+                <div>
+                  <label className="field-label">Kondisi Aset</label>
+                  <select
+                    name="condition"
+                    value={formData.condition}
+                    onChange={handleChange}
+                    className="field-select"
                   >
                     <option value="new">Baru</option>
                     <option value="good">Baik</option>
@@ -256,84 +442,92 @@ const AssetFormPage: React.FC = () => {
                   </select>
                 </div>
 
-                <div className="form-group">
-                  <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b', marginBottom: '6px', display: 'block' }}>Status Inventaris</label>
-                  <select 
-                    name="status" 
-                    value={formData.status} 
-                    onChange={handleChange} 
-                    style={{ width: '100%', height: '50px', padding: '0 16px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '1rem', color: '#0f172a', boxSizing: 'border-box' }}
+                <div>
+                  <label className="field-label">Status Inventaris</label>
+                  <select
+                    name="status"
+                    value={formData.status}
+                    onChange={handleChange}
+                    className="field-select"
                   >
                     <option value="available">Tersedia</option>
-                    <option value="in_use">Digunakan</option>
-                    <option value="maintenance">Maintenance</option>
-                    <option value="retired">Retired</option>
+                    <option value="assigned">Digunakan</option>
+                    <option value="maintenance">Perbaikan</option>
+                    <option value="retired">Dihapus</option>
                   </select>
                 </div>
               </div>
             </Card>
 
             <Card glass style={{ padding: '2rem', borderRadius: '28px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1.5rem' }}>
-                <div style={{ padding: '8px', background: '#dcfce7', borderRadius: '10px', color: '#16a34a' }}>
+              <div className="section-header">
+                <div style={{ padding: '8px', background: '#dcfce7', borderRadius: '10px', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <DollarSign size={20} />
                 </div>
                 <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#1e3a8a' }}>Detail Finansial</h4>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                <div className="form-group">
-                  <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b', marginBottom: '6px', display: 'block' }}>Harga Beli (IDR)</label>
-                  <div style={{ position: 'relative' }}>
-                    <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '0.9rem', fontWeight: 700 }}>Rp</span>
-                    <input 
-                      name="purchase_price" 
-                      type="number" 
-                      value={formData.purchase_price} 
-                      onChange={handleChange} 
-                      placeholder="25000000" 
+                <div>
+                  <label className="field-label">Harga Beli (Rp)</label>
+                  <div className="input-wrapper">
+                    <span className="input-prefix">Rp</span>
+                    <input
+                      name="purchase_price"
+                      type="text"
+                      inputMode="numeric"
+                      value={formData.purchase_price ? Number(formData.purchase_price).toLocaleString("id-ID") : ""}
+                      onChange={(e) => setFormData({ ...formData, purchase_price: Number(e.target.value.replace(/\D/g, "")) || 0 })}
+                      placeholder="25.000.000"
                       style={{ width: '100%', height: '50px', padding: '0 12px 0 40px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '1rem', color: '#0f172a', boxSizing: 'border-box' }}
+                      onFocus={(e) => { e.target.style.outline = 'none'; e.target.style.borderColor = '#2563eb'; e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)'; }}
+                      onBlur={(e) => { e.target.style.borderColor = '#cbd5e1'; e.target.style.boxShadow = 'none'; }}
                     />
                   </div>
                 </div>
-                <div className="form-group">
-                  <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b', marginBottom: '6px', display: 'block' }}>Tanggal Pembelian</label>
-                  <div style={{ position: 'relative' }}>
-                    <Calendar size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                    <input 
-                      name="purchase_date" 
-                      type="date" 
-                      value={formData.purchase_date} 
-                      onChange={handleChange} 
+                <div>
+                  <label className="field-label">Tanggal Pembelian</label>
+                  <div className="input-wrapper">
+                    <Calendar size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
+                    <input
+                      name="purchase_date"
+                      type="date"
+                      value={formData.purchase_date}
+                      onChange={handleChange}
                       style={{ width: '100%', height: '50px', padding: '0 12px 0 40px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '1rem', color: '#0f172a', boxSizing: 'border-box' }}
+                      onFocus={(e) => { e.target.style.outline = 'none'; e.target.style.borderColor = '#2563eb'; e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)'; }}
+                      onBlur={(e) => { e.target.style.borderColor = '#cbd5e1'; e.target.style.boxShadow = 'none'; }}
                     />
                   </div>
                 </div>
               </div>
             </Card>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
-              <Button 
-                type="submit" 
-                variant="primary" 
-                size="lg" 
-                disabled={loading} 
-                style={{ 
-                  width: '100%', 
-                  height: '60px', 
-                  borderRadius: '20px', 
-                  fontSize: '1.1rem', 
+            <div className="submit-section">
+              <Button
+                type="submit"
+                variant="primary"
+                size="lg"
+                fullWidth
+                disabled={loading}
+                style={{
+                  height: '60px',
+                  borderRadius: '20px',
+                  fontSize: '1.1rem',
                   fontWeight: 800,
                   boxShadow: '0 10px 20px rgba(37, 99, 235, 0.2)'
                 }}
               >
-                <Save size={20} style={{ marginRight: '10px' }} />
+                <Save size={20} />
                 {loading ? 'Menyimpan...' : isEdit ? 'Perbarui Aset' : 'Simpan Aset'}
               </Button>
-              <Button 
-                type="button" 
-                onClick={() => navigate('/inventory/assets')} 
-                style={{ width: '100%', height: '54px', borderRadius: '20px', fontWeight: 700, background: '#f1f5f9', color: '#475569', border: '1px solid #cbd5e1' }}
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                fullWidth
+                onClick={() => navigate('/inventory/assets')}
+                style={{ height: '54px', borderRadius: '20px', fontWeight: 700 }}
               >
                 Batalkan
               </Button>

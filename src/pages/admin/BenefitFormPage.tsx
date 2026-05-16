@@ -145,7 +145,7 @@ const BenefitFormPage: React.FC = () => {
                        <label>Monetary Value</label>
                        <div style={{ position: 'relative' }}>
                           <DollarSign size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                          <input name="amount" type="number" value={formData.amount} onChange={handleChange} className="form-control" style={{ paddingLeft: '40px' }} placeholder="0" />
+                           <input name="amount" type="text" inputMode="numeric" value={formData.amount ? Number(formData.amount).toLocaleString("id-ID") : ""} onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value.replace(/\D/g, "")) || 0 })} className="form-control" style={{ paddingLeft: '40px' }} placeholder="0" />
                        </div>
                     </div>
                     <div className="form-group">

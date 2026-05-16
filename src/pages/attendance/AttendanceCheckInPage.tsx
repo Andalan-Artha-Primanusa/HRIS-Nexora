@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { showToast } from '@/shared/ui/toast';
@@ -21,7 +21,11 @@ const AttendanceCheckInPage = () => {
   const [userDepartment, setUserDepartment] = useState<string>('');
   // const user = useAuthStore((state) => state.user);
 
+  const gpsFired = useRef(false);
+
   const detectGPS = () => {
+    if (gpsFired.current) return;
+    gpsFired.current = true;
     setStatus('Mendeteksi lokasi GPS...');
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -129,7 +133,7 @@ const AttendanceCheckInPage = () => {
       });
 
       setStatus('Check-in berhasil');
-      showToast(`Anda telah berhasil check-in pada ${now.toLocaleTimeString('id-ID')}`, 'success');
+      showToast(`Anda telah berhasil melakukan absensi masuk pada ${now.toLocaleTimeString('id-ID')}`, 'success');
     } catch (error: any) {
       setStatus('Check-in gagal');
       const message = error.response?.data?.message || error.message || 'Terjadi kesalahan';
