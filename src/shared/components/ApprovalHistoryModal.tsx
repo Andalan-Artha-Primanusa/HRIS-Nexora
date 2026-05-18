@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Modal } from "@/shared/ui/Modal";
 import { organizationService } from "@/features/organization/api/organization.service";
 import { CheckCircle2, XCircle, Clock, User, Shield, Loader2 } from "lucide-react";
@@ -8,9 +8,11 @@ interface ApprovalHistoryModalProps {
   onClose: () => void;
   module: string;
   moduleId: number | string;
+  fallbackHistory?: HistoryItem[];
+  fallbackTotalSteps?: number;
 }
 
-type HistoryItem = {
+export type HistoryItem = {
   id: number;
   step_order: number;
   role_id: number;
@@ -22,39 +24,51 @@ type HistoryItem = {
   user?: { name?: string; email?: string };
 };
 
-export const ApprovalHistoryModal = ({ isOpen, onClose, module, moduleId }: ApprovalHistoryModalProps) => {
+export const ApprovalHistoryModal = ({
+  isOpen,
+  onClose,
+  module,
+  moduleId,
+  fallbackHistory = [],
+  fallbackTotalSteps = 0,
+}: ApprovalHistoryModalProps) => {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalSteps, setTotalSteps] = useState(0);
+
+  const fetchHistory = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await organizationService.getApprovalHistory(module, moduleId);
+      const raw = Array.isArray(res) ? res : Array.isArray(res?.data) ? res.data : [];
+      const nextHistory = raw.length > 0 ? raw : fallbackHistory;
+      setHistory(nextHistory);
+      if (res?.meta?.total_steps) {
+        setTotalSteps(res.meta.total_steps);
+      } else if (fallbackTotalSteps) {
+        setTotalSteps(fallbackTotalSteps);
+      } else {
+        const maxStep = nextHistory.reduce((max: number, h: HistoryItem) => Math.max(max, h.step_order || 0), 0);
+        setTotalSteps(maxStep);
+      }
+    } catch {
+      setHistory(fallbackHistory);
+      setTotalSteps(fallbackTotalSteps);
+    } finally {
+      setLoading(false);
+    }
+  }, [fallbackHistory, fallbackTotalSteps, module, moduleId]);
 
   useEffect(() => {
     if (isOpen && moduleId) {
       fetchHistory();
     }
-  }, [isOpen, moduleId]);
-
-  const fetchHistory = async () => {
-    setLoading(true);
-    try {
-      const res = await organizationService.getApprovalHistory(module, moduleId);
-      const raw = Array.isArray(res) ? res : res?.data || [];
-      setHistory(raw);
-      if (res?.meta?.total_steps) {
-        setTotalSteps(res.meta.total_steps);
-      } else {
-        const maxStep = raw.reduce((max: number, h: HistoryItem) => Math.max(max, h.step_order || 0), 0);
-        setTotalSteps(maxStep);
-      }
-    } catch {
-      setHistory([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [fetchHistory, isOpen, moduleId]);
 
   const completedSteps = history.filter(h => h.action !== "pending").length;
-  const currentStep = Math.min(completedSteps + 1, totalSteps);
-  const effectiveTotal = totalSteps;
+  const currentStep = totalSteps > 0 ? Math.min(completedSteps + 1, totalSteps) : 0;
+  const effectiveTotal = Math.max(totalSteps, 0);
+  const progress = effectiveTotal > 0 ? Math.round((completedSteps / effectiveTotal) * 100) : 0;
 
   const moduleLabels: Record<string, string> = {
     assignment_letter: "surat tugas",
@@ -79,18 +93,18 @@ export const ApprovalHistoryModal = ({ isOpen, onClose, module, moduleId }: Appr
         {moduleLabel} #{moduleId}
       </p>
 
-      {!loading && history.length > 0 && (
+      {!loading && history.length > 0 && effectiveTotal > 0 && (
         <div style={{ marginBottom: "1rem" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
             <span style={{ fontSize: "0.8rem", fontWeight: 600, color: "#475569" }}>
               Progres: Tahap {currentStep} dari {effectiveTotal}
             </span>
             <span style={{ fontSize: "0.75rem", color: "#94a3b8" }}>
-              {Math.round((completedSteps / effectiveTotal) * 100)}%
+              {progress}%
             </span>
           </div>
           <div style={{ width: "100%", height: "6px", background: "#f1f5f9", borderRadius: "3px", overflow: "hidden" }}>
-            <div style={{ width: `${Math.round((completedSteps / effectiveTotal) * 100)}%`, height: "100%", background: "linear-gradient(90deg, #8b5cf6, #6366f1)", borderRadius: "3px", transition: "width 0.3s ease" }} />
+            <div style={{ width: `${progress}%`, height: "100%", background: "linear-gradient(90deg, #8b5cf6, #6366f1)", borderRadius: "3px", transition: "width 0.3s ease" }} />
           </div>
         </div>
       )}
@@ -102,7 +116,7 @@ export const ApprovalHistoryModal = ({ isOpen, onClose, module, moduleId }: Appr
         </div>
       ) : history.length === 0 ? (
         <div style={{ textAlign: "center", padding: "2rem", color: "#94a3b8" }}>
-          <p>Riwayat persetujuan tidak ditemukan.</p>
+          <p>Belum ada aktivitas persetujuan untuk klaim ini.</p>
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>

@@ -12,24 +12,64 @@ import type {
 const isReimbursementItem = (item: unknown): item is ReimbursementItem =>
   item !== null && typeof item === "object";
 
+const toRecord = (value: unknown): Record<string, unknown> =>
+  value !== null && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
+
+const firstString = (...values: unknown[]): string | undefined => {
+  for (const value of values) {
+    if (typeof value === "string" && value.trim()) return value.trim();
+    if (typeof value === "number" && Number.isFinite(value)) return String(value);
+  }
+  return undefined;
+};
+
+const firstNumber = (...values: unknown[]): number => {
+  for (const value of values) {
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+    if (typeof value === "string" && value.trim() !== "") {
+      const parsed = Number(value);
+      if (Number.isFinite(parsed)) return parsed;
+    }
+  }
+  return 0;
+};
+
 const normalizeReimbursementItem = (item: ReimbursementItem): ReimbursementItem => {
-  if (!item.employee) return item;
+  const raw = toRecord(item);
+  const employee = toRecord(item.employee);
+  const employeeUser = toRecord(employee.user);
+  const user = toRecord(item.user);
+  const approvalFlow = item.approval_flow ?? item.approvalFlow;
   const department =
-    typeof item.employee.department === "object" && item.employee.department !== null
+    typeof item.employee?.department === "object" && item.employee.department !== null
       ? item.employee.department
-      : item.employee.departmentRel ?? item.employee.department ?? null;
+      : item.employee?.departmentRel ?? item.employee?.department ?? null;
   const position =
-    typeof item.employee.position === "object" && item.employee.position !== null
+    typeof item.employee?.position === "object" && item.employee.position !== null
       ? item.employee.position
-      : item.employee.positionRel ?? item.employee.position ?? null;
+      : item.employee?.positionRel ?? item.employee?.position ?? null;
 
   return {
     ...item,
-    employee: {
-      ...item.employee,
-      department,
-      position,
-    },
+    title: firstString(item.title, raw.name, raw.claim_title, raw.subject) ?? `Klaim #${String(item.id ?? "")}`,
+    description: firstString(item.description, raw.reason, raw.notes, raw.note),
+    amount: firstNumber(item.amount, raw.total_amount, raw.nominal, raw.value),
+    category: firstString(item.category, raw.expense_category, raw.category_name, raw.type) ?? "other",
+    expense_date: firstString(item.expense_date, raw.date, raw.claim_date, raw.created_at) ?? "",
+    status: firstString(item.status, raw.approval_status) ?? "draft",
+    employee_name:
+      firstString(item.employee_name, employeeUser.name, employee.name, user.name, raw.employee_name, raw.requester_name) ??
+      undefined,
+    approval_flow: approvalFlow,
+    approvalFlow,
+    employee: item.employee
+      ? {
+          ...item.employee,
+          department,
+          position,
+          user: item.employee.user,
+        }
+      : item.employee,
   };
 };
 

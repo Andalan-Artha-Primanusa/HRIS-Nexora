@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { RefreshCw, Wallet, Search, Filter, Clock, CheckCircle, XCircle, Eye, Trash2, FileText, History } from 'lucide-react';
-import { Card, CardHeader, ConfirmDialog } from '@/shared/ui';
+import { Card, ConfirmDialog } from '@/shared/ui';
 import { Modal } from '@/shared/ui/Modal';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import {
@@ -16,8 +16,10 @@ import '@/pages/dashboard/overview/OverviewPage.css';
 import './AdminReimbursementsPage.css';
 import { showToast } from '@/shared/ui/toast';
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
+import type { HistoryItem } from "@/shared/components/ApprovalHistoryModal";
 
-const formatDateTime = (input: string) => {
+const formatDateTime = (input?: string) => {
+  if (!input) return "-";
   const date = new Date(input);
   if (Number.isNaN(date.getTime())) return input;
   return new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(date);
@@ -25,9 +27,107 @@ const formatDateTime = (input: string) => {
 
 const formatCurrency = (amount: number) => `Rp ${(amount || 0).toLocaleString("id-ID")}`;
 
+const getErrorMessage = (error: unknown, fallback: string) => {
+  const record = error && typeof error === "object" ? (error as Record<string, unknown>) : {};
+  const response = record.response && typeof record.response === "object" ? (record.response as Record<string, unknown>) : {};
+  const data = response.data && typeof response.data === "object" ? (response.data as Record<string, unknown>) : {};
+  return typeof data.message === "string"
+    ? data.message
+    : typeof record.message === "string"
+      ? record.message
+      : fallback;
+};
+
+const categoryLabels: Record<string, string> = {
+  travel: "Perjalanan",
+  medical: "Medis",
+  office_supplies: "Perlengkapan Kantor",
+  training: "Pelatihan",
+  meal: "Makan",
+  accommodation: "Akomodasi",
+  transportation: "Transportasi",
+  other: "Lainnya",
+};
+
+const fallbackText = (...values: unknown[]) => {
+  for (const value of values) {
+    if (typeof value === "string" && value.trim()) return value.trim();
+    if (typeof value === "number" && Number.isFinite(value)) return String(value);
+  }
+  return "-";
+};
+
+const getEmployeeName = (item: ReimbursementItem) =>
+  fallbackText(item.employee?.user?.name, item.employee_name, item.employee?.name, item.user?.name);
+
+const getTitle = (item: ReimbursementItem) => fallbackText(item.title, item.description, `Klaim #${item.id}`);
+
+const getCategoryLabel = (category?: string) => {
+  const key = String(category || "other").trim();
+  return categoryLabels[key] || key.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+};
+
+const buildFallbackApprovalHistory = (item: ReimbursementItem): { history: HistoryItem[]; totalSteps: number } => {
+  const flow = item.approval_flow ?? item.approvalFlow;
+  const steps = [...(flow?.steps ?? [])].sort((a, b) => Number(a.step_order ?? 0) - Number(b.step_order ?? 0));
+
+  if (steps.length > 0) {
+    const currentStep = Number(item.current_step || 1);
+    const isFinalApproved = item.status === "approved" || item.status === "paid";
+    const isRejected = item.status === "rejected";
+
+    return {
+      totalSteps: steps.length,
+      history: steps.map((step, index) => {
+        const stepOrder = Number(step.step_order || index + 1);
+        const action =
+          isFinalApproved || stepOrder < currentStep
+            ? "approved"
+            : isRejected && stepOrder === currentStep
+              ? "rejected"
+              : "pending";
+
+        return {
+          id: Number(step.id ?? stepOrder),
+          step_order: stepOrder,
+          role_id: Number(step.role_id ?? 0),
+          user_id: typeof step.user_id === "number" ? step.user_id : undefined,
+          action,
+          note: action === "rejected" ? item.approval_note : undefined,
+          acted_at: action === "pending" ? "" : item.approved_at || item.updated_at || item.submitted_at || "",
+          role: step.role,
+          user: step.user,
+        };
+      }),
+    };
+  }
+
+  if (["approved", "rejected", "paid", "submitted"].includes(item.status)) {
+    const action = item.status === "rejected" ? "rejected" : item.status === "submitted" ? "pending" : "approved";
+    return {
+      totalSteps: 1,
+      history: [
+        {
+          id: Number(item.id) || 1,
+          step_order: 1,
+          role_id: 0,
+          user_id: typeof item.approved_by === "number" ? item.approved_by : undefined,
+          action,
+          note: item.approval_note,
+          acted_at: action === "pending" ? "" : item.approved_at || item.updated_at || "",
+          role: { display_name: "Approver", name: "approver" },
+          user: item.approver,
+        },
+      ],
+    };
+  }
+
+  return { history: [], totalSteps: 0 };
+};
+
 const AdminReimbursementsPage: React.FC = () => {
   const [items, setItems] = useState<ReimbursementItem[]>([]);
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -36,7 +136,7 @@ const AdminReimbursementsPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
   const [showFilters, setShowFilters] = useState(false);
-  const [historyModal, setHistoryModal] = useState<{ module: string; id: number | string } | null>(null);
+  const [historyModal, setHistoryModal] = useState<{ module: string; id: number | string; item: ReimbursementItem } | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
@@ -45,7 +145,7 @@ const AdminReimbursementsPage: React.FC = () => {
   const [deleteTarget, setDeleteTarget] = useState<ReimbursementItem | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const [reimbData, statsData] = await Promise.all([
@@ -54,23 +154,27 @@ const AdminReimbursementsPage: React.FC = () => {
       ]);
       setItems(reimbData.items || []);
       setTotalPages(reimbData.totalPages ?? 1);
-      setStats(statsData.payload);
+      setStats(
+        statsData.payload && typeof statsData.payload === "object"
+          ? (statsData.payload as Record<string, unknown>)
+          : null
+      );
     } catch (error) {
       console.error('Failed to fetch reimbursements:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, pageSize]);
 
-  useEffect(() => { fetchData(); }, [currentPage]);
+  useEffect(() => { fetchData(); }, [fetchData]);
 
   // Filter Logic
   const filteredItems = useMemo(() => {
     return (items || []).filter(item => {
       const searchStr = searchQuery.toLowerCase();
-      const titleMatch = (item.title || '').toLowerCase().includes(searchStr);
+      const titleMatch = getTitle(item).toLowerCase().includes(searchStr);
       const reasonMatch = (item.description || '').toLowerCase().includes(searchStr);
-      const empMatch = (item.employee?.user?.name || item.employee_name || '').toLowerCase().includes(searchStr);
+      const empMatch = getEmployeeName(item).toLowerCase().includes(searchStr);
       const textMatch = titleMatch || reasonMatch || empMatch;
 
       let statusMatch = true;
@@ -164,9 +268,9 @@ const AdminReimbursementsPage: React.FC = () => {
       setShowApproveModal(false);
       fetchData();
       showToast('Klaim berhasil disetujui', 'success');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to approve:', error);
-      showToast(error?.response?.data?.message || error?.message || 'Gagal menyetujui klaim', 'error');
+      showToast(getErrorMessage(error, 'Gagal menyetujui klaim'), 'error');
     }
   };
 
@@ -177,9 +281,9 @@ const AdminReimbursementsPage: React.FC = () => {
       setShowRejectModal(false);
       fetchData();
       showToast('Klaim berhasil ditolak', 'success');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to reject:', error);
-      showToast(error?.response?.data?.message || error?.message || 'Gagal menolak klaim', 'error');
+      showToast(getErrorMessage(error, 'Gagal menolak klaim'), 'error');
     }
   };
 
@@ -192,9 +296,9 @@ const AdminReimbursementsPage: React.FC = () => {
       showToast('Klaim berhasil dihapus', 'success');
       setDeleteTarget(null);
       fetchData();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to delete:', error);
-      showToast(error?.response?.data?.message || error?.message || 'Gagal menghapus klaim', 'error');
+      showToast(getErrorMessage(error, 'Gagal menghapus klaim'), 'error');
     } finally {
       setDeleting(false);
     }
@@ -215,6 +319,11 @@ const AdminReimbursementsPage: React.FC = () => {
       </span>
     );
   };
+
+  const approvalHistoryFallback = useMemo(
+    () => (historyModal ? buildFallbackApprovalHistory(historyModal.item) : { history: [], totalSteps: 0 }),
+    [historyModal]
+  );
 
   return (
     <div className="crud-page reimbursement-page">
@@ -365,21 +474,21 @@ const AdminReimbursementsPage: React.FC = () => {
                         <td>
                           <div className="cell-name">
                             <div className="cell-avatar">
-                              {(item.title || 'R').charAt(0).toUpperCase()}
+                              {getTitle(item).charAt(0).toUpperCase()}
                             </div>
                             <div className="cell-stacked">
-                              <span className="cell-name-text">{item.title}</span>
+                              <span className="cell-name-text">{getTitle(item)}</span>
                               <span className="cell-stacked__sub">
-                                {item.employee?.user?.name || item.employee_name || 'Unknown'}
+                                {getEmployeeName(item)}
                               </span>
                             </div>
                           </div>
                         </td>
-                        <td><span className="badge-soft badge-soft--blue">{item.category || "-"}</span></td>
+                        <td><span className="badge-soft badge-soft--blue">{getCategoryLabel(item.category)}</span></td>
                         <td><span style={{ color: '#1e293b', fontWeight: 700 }}>{formatCurrency(item.amount)}</span></td>
                         <td>
                           <div className="cell-stacked">
-                            <span className="cell-stacked__main" style={{ fontSize: '0.85rem' }}>{item.expense_date ? formatDateTime(item.expense_date) : "-"}</span>
+                            <span className="cell-stacked__main" style={{ fontSize: '0.85rem' }}>{formatDateTime(item.expense_date)}</span>
                             <span className="cell-stacked__sub">Tanggal klaim</span>
                           </div>
                         </td>
@@ -395,7 +504,7 @@ const AdminReimbursementsPage: React.FC = () => {
                             >
                               <Eye size={16} />
                             </button>
-                            <button className="action-btn" style={{ color: '#8b5cf6', background: '#f5f3ff' }} onClick={() => setHistoryModal({ module: 'reimbursement', id: item.id })} title="Riwayat Approval"><History size={16} /></button>
+                            <button className="action-btn" style={{ color: '#8b5cf6', background: '#f5f3ff' }} onClick={() => setHistoryModal({ module: 'reimbursement', id: item.id, item })} title="Riwayat Approval"><History size={16} /></button>
                             {item.status === 'submitted' && (
                               <>
                                 <button
@@ -471,7 +580,7 @@ const AdminReimbursementsPage: React.FC = () => {
         <div className="modal-body" style={{ padding: 0 }}>
           <div className="detail-row">
             <span className="detail-label">Judul</span>
-            <span className="detail-value">{selectedItem?.title}</span>
+            <span className="detail-value">{selectedItem ? getTitle(selectedItem) : '-'}</span>
           </div>
           <div className="detail-row">
             <span className="detail-label">Deskripsi</span>
@@ -479,7 +588,7 @@ const AdminReimbursementsPage: React.FC = () => {
           </div>
           <div className="detail-row">
             <span className="detail-label">Kategori</span>
-            <span className="detail-value">{selectedItem?.category}</span>
+            <span className="detail-value">{selectedItem ? getCategoryLabel(selectedItem.category) : '-'}</span>
           </div>
           <div className="detail-row">
             <span className="detail-label">Nominal</span>
@@ -487,7 +596,7 @@ const AdminReimbursementsPage: React.FC = () => {
           </div>
           <div className="detail-row">
             <span className="detail-label">Tanggal</span>
-            <span className="detail-value">{selectedItem?.expense_date ? formatDateTime(selectedItem.expense_date) : '-'}</span>
+            <span className="detail-value">{formatDateTime(selectedItem?.expense_date)}</span>
           </div>
           <div className="detail-row">
             <span className="detail-label">Status</span>
@@ -495,7 +604,7 @@ const AdminReimbursementsPage: React.FC = () => {
           </div>
           <div className="detail-row">
             <span className="detail-label">Karyawan</span>
-            <span className="detail-value">{selectedItem?.employee?.user?.name || selectedItem?.employee_name || '-'}</span>
+            <span className="detail-value">{selectedItem ? getEmployeeName(selectedItem) : '-'}</span>
           </div>
           {selectedItem?.note && (
             <div className="detail-row">
@@ -515,7 +624,7 @@ const AdminReimbursementsPage: React.FC = () => {
           </button>
         </>}
       >
-        <p>Apakah Anda yakin ingin menyetujui klaim <strong>"{selectedItem?.title}"</strong>?</p>
+        <p>Apakah Anda yakin ingin menyetujui klaim <strong>"{selectedItem ? getTitle(selectedItem) : '-'}"</strong>?</p>
         <div className="form-group" style={{ marginTop: '1rem' }}>
           <label>Catatan (Opsional)</label>
           <textarea className="form-control" rows={3} value={actionNote} onChange={(e) => setActionNote(e.target.value)} placeholder="Tambahkan catatan..." />
@@ -531,7 +640,7 @@ const AdminReimbursementsPage: React.FC = () => {
           </button>
         </>}
       >
-        <p>Apakah Anda yakin ingin menolak klaim <strong>"{selectedItem?.title}"</strong>?</p>
+        <p>Apakah Anda yakin ingin menolak klaim <strong>"{selectedItem ? getTitle(selectedItem) : '-'}"</strong>?</p>
         <div className="form-group" style={{ marginTop: '1rem' }}>
           <label>Alasan Penolakan <span style={{ color: '#ef4444' }}>*</span></label>
           <textarea className="form-control" rows={3} value={actionNote} onChange={(e) => setActionNote(e.target.value)} placeholder="Masukkan alasan penolakan..." required />
@@ -544,13 +653,15 @@ const AdminReimbursementsPage: React.FC = () => {
           onClose={() => setHistoryModal(null)}
           module={historyModal.module}
           moduleId={historyModal.id}
+          fallbackHistory={approvalHistoryFallback.history}
+          fallbackTotalSteps={approvalHistoryFallback.totalSteps}
         />
       )}
 
       <ConfirmDialog
         isOpen={!!deleteTarget}
         title="Hapus Klaim Reimbursement"
-        message={`Klaim "${String(deleteTarget?.title || "ini")}" akan dihapus. Tindakan ini tidak dapat dibatalkan.`}
+        message={`Klaim "${deleteTarget ? getTitle(deleteTarget) : "ini"}" akan dihapus. Tindakan ini tidak dapat dibatalkan.`}
         confirmLabel="Hapus"
         cancelLabel="Batal"
         loading={deleting}

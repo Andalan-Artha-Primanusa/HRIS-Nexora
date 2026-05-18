@@ -10,6 +10,13 @@ export interface ReimbursementItem {
   status: string;
   receipt_path?: string;
   note?: string;
+  approval_note?: string;
+  submitted_at?: string;
+  approved_at?: string;
+  paid_at?: string;
+  approved_by?: string | number | null;
+  approval_flow_id?: string | number | null;
+  current_step?: number | null;
   created_at?: string;
   updated_at?: string;
   employee?: {
@@ -23,6 +30,25 @@ export interface ReimbursementItem {
     departmentRel?: { id?: string | number; name?: string } | null;
     positionRel?: { id?: string | number; name?: string } | null;
   };
+  approver?: {
+    id?: string | number;
+    name?: string;
+    email?: string;
+  };
+  approval_flow?: {
+    id?: string | number;
+    name?: string;
+    module?: string;
+    steps?: Array<{
+      id?: string | number;
+      step_order?: number;
+      role_id?: number;
+      user_id?: number | null;
+      role?: { id?: string | number; name?: string; display_name?: string };
+      user?: { id?: string | number; name?: string; email?: string };
+    }>;
+  };
+  approvalFlow?: ReimbursementItem["approval_flow"];
   user?: {
     name: string;
   };
