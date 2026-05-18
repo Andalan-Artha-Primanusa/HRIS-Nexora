@@ -38,6 +38,7 @@ const AssignmentLettersPage: React.FC = () => {
       setLetters(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
+      showToast(err?.message || 'Gagal memuat surat tugas', 'error');
       setLetters([]);
     } finally {
       setLoading(false);

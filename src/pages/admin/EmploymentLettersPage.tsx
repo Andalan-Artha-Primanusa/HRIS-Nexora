@@ -66,9 +66,11 @@ const EmploymentLettersPage: React.FC = () => {
     });
   }, [employees, searchText, activeTab]);
 
-  const paginatedEmployees = filteredEmployees;
-
-  const [totalPages, setTotalPages] = useState(1);
+  const totalPages = Math.ceil(filteredEmployees.length / pageSize);
+  const paginatedEmployees = filteredEmployees.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   const clearFilters = () => {
     setSearchText("");
@@ -80,6 +82,13 @@ const EmploymentLettersPage: React.FC = () => {
     setCurrentPage(1);
   }, [searchText, activeTab]);
 
+  const refreshEmployees = async () => {
+    try {
+      const data = await getAllEmployees();
+      setEmployees(Array.isArray(data) ? data : []);
+    } catch { }
+  };
+
   const handleGenerate = async (id: string | number, type: 'experience' | 'employment') => {
     try {
       if (type === 'experience') {
@@ -88,6 +97,7 @@ const EmploymentLettersPage: React.FC = () => {
         await legalService.generateEmploymentLetter(id);
       }
       showToast('Surat berhasil dibuat!', 'success');
+      await refreshEmployees();
     } catch (err) {
       showToast('Gagal membuat surat', 'error');
     }

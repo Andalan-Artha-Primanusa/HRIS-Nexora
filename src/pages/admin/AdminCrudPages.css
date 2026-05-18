@@ -1,4 +1,4 @@
-@import url('./../../shared/ui/DataTable.css');
+@import url('./../../shared/ui/Table.css');
 
 .crud-page {
   --primary: #2563eb;
