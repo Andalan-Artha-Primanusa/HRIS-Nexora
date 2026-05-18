@@ -8,6 +8,8 @@ import { getEmployeeDetail, updateEmployee } from "@/features/employee/api/emplo
 import { getAllLocations } from "@/features/location/api/location.service";
 import { getAllUsers } from "@/features/admin/api/admin.service";
 import { getAllWorkSchedules } from "@/features/work-schedule/api/work-schedule.service";
+import { useAuthStore } from "@/app/store/auth.store";
+import { RBACUtils } from "@/shared/hooks/rbac";
 import type { EmployeeUpdatePayload } from "@/features/employee/types/employee.types";
 import EmployeeForm, { DEFAULT_FORM } from "./components/EmployeeForm";
 import type { EmployeeFormState } from "./components/EmployeeForm";
@@ -17,6 +19,8 @@ import "../dashboard/overview/OverviewPage.css";
 const EmployeeEditPage = () => {
   const navigate = useNavigate();
   const { id: routeEmployeeId } = useParams<{ id: string }>();
+  const user = useAuthStore((state) => state.user);
+  const canUpdateEmployee = RBACUtils.hasPermission(user, ["employee.update", "admin.access"]);
 
   const [updateForm, setUpdateForm] = useState<EmployeeFormState>(DEFAULT_FORM);
   const [loading, setLoading] = useState(false);
@@ -48,10 +52,20 @@ const EmployeeEditPage = () => {
   };
 
   useEffect(() => {
+    if (!user) return;
+
+    if (!canUpdateEmployee) {
+      showToast("Anda tidak memiliki izin mengubah data karyawan.", "error");
+      navigate("/employees", { replace: true });
+      return;
+    }
+
     void loadMetadata();
-  }, []);
+  }, [canUpdateEmployee, navigate, user]);
 
   useEffect(() => {
+    if (!user) return;
+    if (!canUpdateEmployee) return;
     if (!routeEmployeeId) return;
     let cancelled = false;
 
@@ -92,9 +106,14 @@ const EmployeeEditPage = () => {
 
     void loadUpdateDetail();
     return () => { cancelled = true; };
-  }, [routeEmployeeId]);
+  }, [canUpdateEmployee, routeEmployeeId, user]);
 
   const handleUpdate = async () => {
+    if (!canUpdateEmployee) {
+      showToast("Anda tidak memiliki izin mengubah data karyawan.", "error");
+      return;
+    }
+
     const targetId = updateForm.id;
     if (!targetId) {
       showToast("Gagal: ID tidak ditemukan.", 'error');

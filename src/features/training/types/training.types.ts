@@ -1,6 +1,7 @@
 export interface TrainingProgram {
   id: string | number;
   title: string;
+  category?: string;
   description?: string;
   provider?: string;
   mode?: 'online' | 'offline' | 'hybrid';
@@ -15,7 +16,6 @@ export interface TrainingProgram {
   nama?: string;
   deskripsi?: string;
   jadwal?: string;
-  category?: string;
 }
 
 export interface TrainingEnrollment {

@@ -30,12 +30,18 @@ const MyTrainingsPage: React.FC = () => {
   const [tab, setTab] = useState<'Semua' | 'Tersedia' | 'Berlangsung' | 'Selesai'>('Semua');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
   const [resultModal, setResultModal] = useState<any>(null);
   const [historyModal, setHistoryModal] = useState<{ module: string; id: number | string } | null>(null);
   const pageSize = 10;
 
-  const canViewAllTrainings = RBACUtils.hasPermission(user, 'training.view');
-  const isSelfService = !canViewAllTrainings;
+  const canManageTrainings = RBACUtils.hasPermission(user, [
+    'training.create',
+    'training.update',
+    'training.delete',
+    'training.enroll',
+  ]);
+  const isSelfService = !canManageTrainings;
 
   const fetchData = async () => {
     setLoading(true);
@@ -51,7 +57,8 @@ const MyTrainingsPage: React.FC = () => {
         setTrainings(myParsed.items);
         setAvailable(availableParsed.items);
         setTotalPages(tab === 'Tersedia' ? availableParsed.totalPages : myParsed.totalPages);
-      } else if (canViewAllTrainings) {
+        setTotalRecords(tab === 'Tersedia' ? availableParsed.total : myParsed.total);
+      } else if (canManageTrainings) {
         const [progRes, enrollRes] = await Promise.all([
           trainingService.getPrograms({ page, per_page: pageSize }),
           trainingService.getEnrollments(page, pageSize),
@@ -61,6 +68,7 @@ const MyTrainingsPage: React.FC = () => {
         setTrainings(enrollments.items);
         setAvailable(programs.items);
         setTotalPages(tab === 'Tersedia' ? programs.totalPages : enrollments.totalPages);
+        setTotalRecords(tab === 'Tersedia' ? programs.total : enrollments.total);
       } else {
         setErrorMessage('Akses terbatas');
       }
@@ -72,7 +80,7 @@ const MyTrainingsPage: React.FC = () => {
     }
   };
 
-  useEffect(() => { fetchData(); }, [canViewAllTrainings, isSelfService, page, pageSize, tab]);
+  useEffect(() => { fetchData(); }, [canManageTrainings, isSelfService, page, pageSize, tab]);
 
   const handleEnroll = async (id: number) => {
     try {
@@ -81,7 +89,7 @@ const MyTrainingsPage: React.FC = () => {
       showToast('Pendaftaran berhasil diajukan', 'success');
       fetchData();
     } catch (e: any) {
-      showToast(e.response?.data?.message || 'Gagal mendaftar', 'error');
+      showToast(e.response?.data?.message || e.message || 'Gagal mendaftar', 'error');
       setLoading(false);
     }
   };
@@ -134,7 +142,7 @@ const MyTrainingsPage: React.FC = () => {
             <div><p className="employee-summary-label">Total Pelatihan</p><p className="employee-summary-subtitle">Semua pelatihan</p></div>
             <div className="employee-summary-icon-wrapper employee-icon-blue"><GraduationCap size={28} /></div>
           </div>
-          <div className="employee-summary-value employee-value-blue">{trainings.length}</div>
+          <div className="employee-summary-value employee-value-blue">{totalRecords}</div>
           <p className="employee-summary-trend">Data tersimpan</p>
         </div>
         <div className="employee-summary-card">
@@ -193,7 +201,7 @@ const MyTrainingsPage: React.FC = () => {
                       <th style={{ width: '380px' }}>Pelatihan</th>
                       <th>Kategori</th>
                       <th>Status</th>
-                      <th>Progress</th>
+                      <th>Skor / Progress</th>
                       <th className="th-center" style={{ width: '110px' }}>Aksi</th>
                     </tr>
                   </thead>
@@ -222,12 +230,12 @@ const MyTrainingsPage: React.FC = () => {
                             </span>
                           </td>
                           <td>
-                            {tab !== 'Tersedia' && t.progress !== undefined ? (
+                            {tab !== 'Tersedia' && t.score !== undefined && t.score !== null ? (
                               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                 <div style={{ width: 64, height: 6, background: '#e2e8f0', borderRadius: 3, overflow: 'hidden' }}>
-                                  <div style={{ width: `${Math.min(t.progress, 100)}%`, height: '100%', background: '#10b981', borderRadius: 3 }} />
+                                  <div style={{ width: `${Math.min(t.score, 100)}%`, height: '100%', background: '#10b981', borderRadius: 3 }} />
                                 </div>
-                                <span style={{ fontSize: '0.8rem', color: '#64748b' }}>{t.progress}%</span>
+                                <span style={{ fontSize: '0.8rem', color: '#64748b' }}>{Number(t.score)}%</span>
                               </div>
                             ) : <span style={{ color: '#94a3b8' }}>-</span>}
                           </td>
@@ -247,7 +255,7 @@ const MyTrainingsPage: React.FC = () => {
                                 {cfg.label}
                               </span>
                             )}
-                            {tab !== 'Tersedia' && (
+                            {tab !== 'Tersedia' && t.approval_flow_id && (
                               <button className="action-btn" style={{ color: '#8b5cf6', background: '#f5f3ff', marginLeft: 8, verticalAlign: 'middle' }} onClick={() => setHistoryModal({ module: 'training', id: t.id })} title="Riwayat Approval"><History size={16} /></button>
                             )}
                           </td>
@@ -259,7 +267,7 @@ const MyTrainingsPage: React.FC = () => {
               </div>
 
               <div className="table-pagination">
-                <div className="pagination-info">Menampilkan <strong>{paginated.length}</strong> dari <strong>{sorted.length}</strong> pelatihan</div>
+                <div className="pagination-info">Menampilkan <strong>{paginated.length}</strong> dari <strong>{totalRecords}</strong> data</div>
                 <div className="pagination-controls">
                   <button className="pagination-btn" onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1}>‹</button>
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (

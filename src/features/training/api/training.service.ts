@@ -45,6 +45,14 @@ export const trainingService = {
     const response = await api.put(`/training/enrollments/${enrollmentId}/complete`, data || {});
     return response.data;
   },
+  updateEnrollmentProgress: async (enrollmentId: string | number, data: { score: number; notes?: string }) => {
+    const response = await api.put(`/training/enrollments/${enrollmentId}/progress`, data);
+    return response.data;
+  },
+  getProgressHistory: async (enrollmentId: string | number) => {
+    const response = await api.get(`/training/enrollments/${enrollmentId}/progress-history`);
+    return response.data;
+  },
   approveEnrollment: async (id: string | number) => {
     const response = await api.put(`/training/enrollments/${id}/approve`);
     return response.data;

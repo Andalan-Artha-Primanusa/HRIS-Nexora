@@ -8,6 +8,8 @@ import { createEmployee } from "@/features/employee/api/employee.service";
 import { getAllLocations } from "@/features/location/api/location.service";
 import { getAllUsers } from "@/features/admin/api/admin.service";
 import { getAllWorkSchedules } from "@/features/work-schedule/api/work-schedule.service";
+import { useAuthStore } from "@/app/store/auth.store";
+import { RBACUtils } from "@/shared/hooks/rbac";
 import type { EmployeeCreatePayload } from "@/features/employee/types/employee.types";
 import EmployeeForm, { DEFAULT_FORM } from "./components/EmployeeForm";
 import type { EmployeeFormState } from "./components/EmployeeForm";
@@ -16,6 +18,8 @@ import "../dashboard/overview/OverviewPage.css";
 
 const EmployeeCreatePage = () => {
   const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
+  const canCreateEmployee = RBACUtils.hasPermission(user, ["employee.create", "admin.access"]);
 
   const [createForm, setCreateForm] = useState<EmployeeFormState>(DEFAULT_FORM);
   const [loading, setLoading] = useState(false);
@@ -47,10 +51,23 @@ const EmployeeCreatePage = () => {
   };
 
   useEffect(() => {
+    if (!user) return;
+
+    if (!canCreateEmployee) {
+      showToast("Anda tidak memiliki izin menambah karyawan.", "error");
+      navigate("/employees", { replace: true });
+      return;
+    }
+
     void loadMetadata();
-  }, []);
+  }, [canCreateEmployee, navigate, user]);
 
   const handleCreate = async () => {
+    if (!canCreateEmployee) {
+      showToast("Anda tidak memiliki izin menambah karyawan.", "error");
+      return;
+    }
+
     // Client-side validation
     if (!createForm.user_id) {
       showToast("Gagal: Silakan pilih pengguna terlebih dahulu.", 'error');

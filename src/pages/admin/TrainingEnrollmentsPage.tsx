@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { showToast } from '@/shared/ui/toast';
-import { RefreshCw, GraduationCap, Users, Search, Filter, CheckCircle, Clock, XCircle, BookOpen, Award, X, Loader2 } from 'lucide-react';
+import { RefreshCw, GraduationCap, Users, Search, Filter, CheckCircle, Clock, XCircle, BookOpen, Award, X, Loader2, History, TrendingUp, Save } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Modal } from '@/shared/ui/Modal';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
+import { ApprovalHistoryModal } from '@/shared/components/ApprovalHistoryModal';
 import { trainingService } from '@/features/training/api/training.service';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
@@ -31,12 +32,21 @@ const TrainingEnrollmentsPage: React.FC = () => {
   const [completing, setCompleting] = useState(false);
   const [completeData, setCompleteData] = useState({ score: '', notes: '', certificate_path: '' });
 
+  // History Modals
+  const [historyModal, setHistoryModal] = useState<{ module: string; id: number | string } | null>(null);
+  const [progressHistoryModal, setProgressHistoryModal] = useState<number | null>(null);
+  const [progressHistories, setProgressHistories] = useState<any[]>([]);
+  const [loadingHistories, setLoadingHistories] = useState(false);
+
   const fetchData = async () => {
     setLoading(true);
     try {
       const data = await trainingService.getEnrollments();
-      const enrollmentsArray = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
-      setEnrollments(enrollmentsArray);
+      let arr: any[] = [];
+      if (Array.isArray(data)) arr = data;
+      else if (Array.isArray(data?.data)) arr = data.data;
+      else if (data?.data?.data && Array.isArray(data?.data?.data)) arr = data.data.data;
+      setEnrollments(arr);
     } catch (error) {
       console.error('Error fetching enrollments:', error);
     } finally {
@@ -92,8 +102,9 @@ const TrainingEnrollmentsPage: React.FC = () => {
     if (!completingEnrollmentId) return;
     setCompleting(true);
     try {
-      const payload: any = {};
-      if (completeData.score) payload.score = Number(completeData.score);
+      const payload: any = {
+        score: 100, // Progress otomatis menjadi 100 saat selesai
+      };
       if (completeData.notes) payload.notes = completeData.notes;
       if (completeData.certificate_path) payload.certificate_path = completeData.certificate_path;
       await trainingService.completeTraining(completingEnrollmentId, payload);
@@ -105,6 +116,48 @@ const TrainingEnrollmentsPage: React.FC = () => {
       showToast(err.response?.data?.message || err?.message || 'Gagal menandai pelatihan selesai', 'error');
     } finally {
       setCompleting(false);
+    }
+  };
+
+  const handleUpdateProgress = async () => {
+    if (!completingEnrollmentId) return;
+    const scoreVal = Number(completeData.score);
+    if (completeData.score === '' || Number.isNaN(scoreVal) || scoreVal < 0 || scoreVal > 100) {
+      showToast('Nilai progress harus bernilai antara 0 sampai 100', 'error');
+      return;
+    }
+    setCompleting(true);
+    try {
+      await trainingService.updateEnrollmentProgress(completingEnrollmentId, {
+        score: scoreVal,
+        notes: completeData.notes,
+      });
+      closeCompleteModal();
+      fetchData();
+      showToast('Progress berhasil disimpan', 'success');
+    } catch (err: any) {
+      console.error(err);
+      showToast(err.response?.data?.message || err?.message || 'Gagal menyimpan progress', 'error');
+    } finally {
+      setCompleting(false);
+    }
+  };
+
+  const openProgressHistory = async (id: number) => {
+    setProgressHistoryModal(id);
+    setLoadingHistories(true);
+    try {
+      const data = await trainingService.getProgressHistory(id);
+      let arr: any[] = [];
+      if (Array.isArray(data)) arr = data;
+      else if (Array.isArray(data?.data)) arr = data.data;
+      else if (Array.isArray(data?.data?.data)) arr = data.data.data;
+      setProgressHistories(arr);
+    } catch (err) {
+      console.error(err);
+      showToast('Gagal memuat riwayat progress', 'error');
+    } finally {
+      setLoadingHistories(false);
     }
   };
 
@@ -320,7 +373,7 @@ const TrainingEnrollmentsPage: React.FC = () => {
                       <th>Karyawan</th>
                       <th>Tanggal Mulai</th>
                       <th>Status</th>
-                      <th>Progress</th>
+                      <th>Skor / Progress</th>
                       <th className="th-center" style={{ width: '120px' }}>Aksi</th>
                     </tr>
                   </thead>
@@ -356,17 +409,21 @@ const TrainingEnrollmentsPage: React.FC = () => {
                             </div>
                           </div>
                         </td>
-                        <td style={{ color: '#475569', fontWeight: 500 }}>{enrollment.start_date || 'N/A'}</td>
+                        <td style={{ color: '#475569', fontWeight: 500 }}>
+                          {enrollment.program?.start_date
+                            ? new Date(enrollment.program.start_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+                            : 'N/A'}
+                        </td>
                         <td className="td-center">
                           {getStatusBadge(enrollment.status)}
                         </td>
                         <td>
-                          {enrollment.progress !== undefined ? (
+                          {enrollment.score !== undefined && enrollment.score !== null ? (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                               <div style={{ width: '60px', height: '6px', background: '#e2e8f0', borderRadius: '3px', overflow: 'hidden' }}>
-                                <div style={{ width: `${enrollment.progress}%`, height: '100%', background: '#10b981', borderRadius: '3px' }} />
+                                <div style={{ width: `${enrollment.score}%`, height: '100%', background: '#10b981', borderRadius: '3px' }} />
                               </div>
-                              <span style={{ fontSize: '0.85rem', color: '#64748b' }}>{enrollment.progress}%</span>
+                              <span style={{ fontSize: '0.85rem', color: '#64748b' }}>{Number(enrollment.score)}%</span>
                             </div>
                           ) : '-'}
                         </td>
@@ -397,9 +454,26 @@ const TrainingEnrollmentsPage: React.FC = () => {
                                 className="action-btn"
                                 style={{ color: '#8b5cf6', background: '#f5f3ff' }}
                                 onClick={() => openCompleteModal(enrollment)}
-                                title="Tandai Selesai"
+                                title="Update Progress"
                               >
                                 <Award size={16} />
+                              </button>
+                            )}
+                            <button
+                                className="action-btn"
+                                style={{ color: '#3b82f6', background: '#eff6ff' }}
+                                onClick={() => openProgressHistory(enrollment.id)}
+                                title="Riwayat Progress"
+                            >
+                                <TrendingUp size={16} />
+                            </button>
+                            {enrollment.approval_flow_id && (
+                              <button 
+                                className="action-btn" 
+                                onClick={() => setHistoryModal({ module: 'training', id: enrollment.id })} 
+                                title="Riwayat Approval"
+                              >
+                                <History size={16} />
                               </button>
                             )}
                             <button
@@ -457,7 +531,7 @@ const TrainingEnrollmentsPage: React.FC = () => {
       <Modal
         isOpen={completeModalOpen}
         onClose={closeCompleteModal}
-        title={`Tandai Selesai — ${completingEnrollmentName}`}
+        title={`Update Progress / Selesai — ${completingEnrollmentName}`}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div className="form-group">
@@ -496,6 +570,19 @@ const TrainingEnrollmentsPage: React.FC = () => {
             <button
               type="button"
               className="btn-primary"
+              style={{ flex: 1, padding: '0.75rem', borderRadius: '10px', fontWeight: 600, background: '#3b82f6' }}
+              onClick={handleUpdateProgress}
+              disabled={completing}
+            >
+              {completing ? (
+                <><Loader2 size={16} className="animate-spin" style={{ marginRight: '6px' }} />Menyimpan...</>
+              ) : (
+                <><Save size={16} style={{ marginRight: '6px' }} />Simpan Progress</>
+              )}
+            </button>
+            <button
+              type="button"
+              className="btn-primary"
               style={{ flex: 1, padding: '0.75rem', borderRadius: '10px', fontWeight: 600 }}
               onClick={handleComplete}
               disabled={completing}
@@ -518,6 +605,57 @@ const TrainingEnrollmentsPage: React.FC = () => {
           </div>
         </div>
       </Modal>
+
+      {/* Progress History Modal */}
+      <Modal isOpen={!!progressHistoryModal} onClose={() => setProgressHistoryModal(null)} title="Riwayat Progress Pelatihan">
+        {loadingHistories ? (
+          <div style={{ padding: '2rem', display: 'flex', justifyContent: 'center' }}><Loader2 className="animate-spin" /></div>
+        ) : (
+          <div style={{ overflowX: 'auto', maxHeight: '400px' }}>
+            {progressHistories.length === 0 ? (
+              <p style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>Belum ada riwayat progress.</p>
+            ) : (
+              <table className="data-table" style={{ width: '100%', fontSize: '0.85rem' }}>
+                <thead>
+                  <tr>
+                    <th>Waktu</th>
+                    <th>Oleh</th>
+                    <th>Perubahan Skor</th>
+                    <th>Status</th>
+                    <th>Catatan</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {progressHistories.map(h => (
+                    <tr key={h.id}>
+                      <td>{new Date(h.created_at).toLocaleString()}</td>
+                      <td>{h.user?.name || 'Sistem'}</td>
+                      <td>
+                        <span style={{ color: '#64748b' }}>{h.old_score || 0}%</span>
+                        <span style={{ margin: '0 4px' }}>→</span>
+                        <span style={{ color: '#10b981', fontWeight: 500 }}>{h.new_score || 0}%</span>
+                      </td>
+                      <td>
+                        {h.old_status} → {h.new_status}
+                      </td>
+                      <td style={{ color: '#64748b' }}>{h.notes || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
+      </Modal>
+
+      {historyModal && (
+        <ApprovalHistoryModal 
+          isOpen={!!historyModal} 
+          onClose={() => setHistoryModal(null)} 
+          module={historyModal.module} 
+          moduleId={historyModal.id} 
+        />
+      )}
     </div>
   );
 };

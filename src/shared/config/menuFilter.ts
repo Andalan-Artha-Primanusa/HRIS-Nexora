@@ -2,11 +2,30 @@ import type { AuthUser } from "@/shared/types/rbac.types";
 import type { MenuItem } from "./menu";
 import { api } from "@/shared/api/httpClient";
 import { useAuthStore } from "@/app/store/auth.store";
+import { RBACUtils } from "@/shared/hooks/rbac";
 
 let cachePromise: Promise<string[]> | null = null;
 
 const stripAdminKeys = (keys: string[]): string[] => {
   return keys;
+};
+
+const hasEmployeeManagementCapability = (user: AuthUser): boolean =>
+  RBACUtils.hasPermission(user, [
+    "employee.create",
+    "employee.update",
+    "employee.delete",
+    "employee.onboard",
+    "employee.offboard",
+    "admin.access",
+  ]);
+
+const isAllowedByCapability = (user: AuthUser, item: MenuItem): boolean => {
+  if (item.menuKey?.startsWith("employees")) {
+    return hasEmployeeManagementCapability(user);
+  }
+
+  return true;
 };
 
 const computeFromAssignments = (
@@ -87,12 +106,12 @@ export const clearMenuCache = () => {
   useAuthStore.getState().setMenuKeysLoaded(false);
 };
 
-const filterByKeys = (items: MenuItem[], allowedKeys: Set<string>): MenuItem[] => {
+const filterByKeys = (items: MenuItem[], allowedKeys: Set<string>, user: AuthUser): MenuItem[] => {
   return items
-    .filter((item) => !item.menuKey || allowedKeys.has(item.menuKey))
+    .filter((item) => (!item.menuKey || allowedKeys.has(item.menuKey)) && isAllowedByCapability(user, item))
     .map((item) => ({
       ...item,
-      subItems: item.subItems ? filterByKeys(item.subItems, allowedKeys) : undefined,
+      subItems: item.subItems ? filterByKeys(item.subItems, allowedKeys, user) : undefined,
     }))
     .filter((item) => !item.subItems || item.subItems.length > 0);
 };
@@ -113,5 +132,5 @@ export const filterMenuItems = (
 
   if (effectiveKeys.length === 0) return [];
 
-  return filterByKeys(items, new Set(effectiveKeys));
+  return filterByKeys(items, new Set(effectiveKeys), user);
 };

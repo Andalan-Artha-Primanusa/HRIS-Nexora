@@ -47,7 +47,10 @@ const EmployeesPage = () => {
   const user = useAuthStore((state) => state.user);
   const allowedMenuKeys = useAuthStore((state) => state.allowedMenuKeys);
   
-  const canManageEmployees = RBACUtils.hasPermission(user, ["employee.manage", "admin.access"]);
+  const canCreateEmployee = RBACUtils.hasPermission(user, ["employee.create", "admin.access"]);
+  const canUpdateEmployee = RBACUtils.hasPermission(user, ["employee.update", "admin.access"]);
+  const canDeleteEmployee = RBACUtils.hasPermission(user, ["employee.delete", "admin.access"]);
+  const canManageEmployees = canCreateEmployee || canUpdateEmployee || canDeleteEmployee;
   const canViewAdminMetadata = RBACUtils.hasPermission(user, ["admin.access"]);
 
   const [activeActionModal, setActiveActionModal] = useState<"onboarding_start" | "onboarding_complete" | "offboarding_start" | "offboarding_complete" | null>(null);
@@ -125,6 +128,12 @@ const EmployeesPage = () => {
 
   const confirmDeleteEmployee = async () => {
     if (!deleteTarget) return;
+    if (!canDeleteEmployee) {
+      showToast("Anda tidak memiliki izin menghapus karyawan", "error");
+      setDeleteTarget(null);
+      return;
+    }
+
     setLoading(true);
     try {
       await deleteEmployee(String(deleteTarget.id));
@@ -166,7 +175,7 @@ const EmployeesPage = () => {
             <button className="btn-outline" onClick={() => void loadEmployees()} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} /> Segarkan
             </button>
-            {canManageEmployees && (
+            {canCreateEmployee && (
               <button className="btn-primary" onClick={() => navigate("/employees/add")}>
                 <Plus size={16} /> Tambah Karyawan
               </button>
@@ -253,7 +262,7 @@ const EmployeesPage = () => {
                       <th>Lokasi</th>
                       <th>Tanggal Masuk</th>
                       <th className="th-center">Status</th>
-                      <th className="th-center" style={{ width: '120px' }}>Aksi</th>
+                      {canManageEmployees && <th className="th-center" style={{ width: '120px' }}>Aksi</th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -289,12 +298,18 @@ const EmployeesPage = () => {
                             {item.status === "active" ? "Aktif" : item.status === "pending" ? "Probation" : "Resigned"}
                           </span>
                         </td>
-                        <td className="td-center">
-                          <div className="action-btn-group">
-                            <button className="action-btn action-btn-edit" onClick={() => navigate(`/employees/update/${item.id}`)} title="Edit"><Pencil size={16} /></button>
-                            <button className="action-btn action-btn-delete" onClick={() => setDeleteTarget(item)} title="Hapus"><Trash2 size={16} /></button>
-                          </div>
-                        </td>
+                        {canManageEmployees && (
+                          <td className="td-center">
+                            <div className="action-btn-group">
+                              {canUpdateEmployee && (
+                                <button className="action-btn action-btn-edit" onClick={() => navigate(`/employees/update/${item.id}`)} title="Edit"><Pencil size={16} /></button>
+                              )}
+                              {canDeleteEmployee && (
+                                <button className="action-btn action-btn-delete" onClick={() => setDeleteTarget(item)} title="Hapus"><Trash2 size={16} /></button>
+                              )}
+                            </div>
+                          </td>
+                        )}
                       </tr>
                     ))}
                   </tbody>

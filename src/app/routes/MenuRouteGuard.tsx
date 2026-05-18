@@ -31,13 +31,23 @@ export const MenuRouteGuard: React.FC<MenuRouteGuardProps> = ({ menuKey, childre
   const hasExplicitMenu =
     allowedMenuKeys.includes(menuKey) ||
     allowedMenuKeys.some((key) => menuKey.startsWith(`${key}.`));
+  const hasEmployeeManagementCapability = RBACUtils.hasPermission(user, [
+    "employee.create",
+    "employee.update",
+    "employee.delete",
+    "employee.onboard",
+    "employee.offboard",
+    "admin.access",
+  ]);
   const hasCapabilityFallback =
     (menuKey.startsWith("manajemen-cuti") && RBACUtils.hasPermission(user, ["leave.view", "leave.approve"])) ||
     (menuKey.startsWith("reimbursements") && RBACUtils.hasPermission(user, ["reimbursement.view", "reimbursement.approve", "reimbursement.pay"])) ||
     (menuKey.startsWith("laporan-analitik") && RBACUtils.hasPermission(user, "reporting.dashboard")) ||
     (menuKey.startsWith("penggajian") && RBACUtils.hasPermission(user, "payroll.view")) ||
-    (menuKey.startsWith("employees") && RBACUtils.hasPermission(user, "employee.view"));
-  const isAllowed = hasExplicitMenu || hasCapabilityFallback;
+    (menuKey.startsWith("employees") && hasEmployeeManagementCapability);
+  const isAllowed = menuKey.startsWith("employees")
+    ? hasEmployeeManagementCapability && (hasExplicitMenu || hasCapabilityFallback)
+    : hasExplicitMenu || hasCapabilityFallback;
 
   if (!isAllowed) {
     return (

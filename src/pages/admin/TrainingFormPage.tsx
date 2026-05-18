@@ -4,8 +4,48 @@ import { Save, BookOpen, Calendar, ChevronLeft } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { trainingService } from '@/features/training/api/training.service';
+import type { TrainingProgram } from '@/features/training/types/training.types';
+import { showToast } from '@/shared/ui/toast';
 import '@/shared/styles/CrudPage.css';
 import '../dashboard/overview/OverviewPage.css';
+import './TrainingFormPage.css';
+
+const categorySuggestions = [
+  'Umum',
+  'Leadership',
+  'Teknis',
+  'Kepatuhan',
+  'Onboarding',
+  'Soft Skill',
+  'Keselamatan',
+  'Produk',
+];
+
+type TrainingMode = NonNullable<TrainingProgram['mode']>;
+type TrainingStatus = TrainingProgram['status'];
+
+interface TrainingFormState {
+  title: string;
+  category: string;
+  description: string;
+  mode: TrainingMode;
+  provider: string;
+  start_date: string;
+  end_date: string;
+  budget: number;
+  status: TrainingStatus;
+}
+
+const getErrorMessage = (error: unknown, fallback: string) => {
+  const record = error && typeof error === 'object' ? (error as Record<string, unknown>) : {};
+  const response = record.response && typeof record.response === 'object' ? (record.response as Record<string, unknown>) : {};
+  const data = response.data && typeof response.data === 'object' ? (response.data as Record<string, unknown>) : {};
+  return typeof data.message === 'string'
+    ? data.message
+    : typeof record.message === 'string'
+      ? record.message
+      : fallback;
+};
 
 const TrainingFormPage: React.FC = () => {
   const navigate = useNavigate();
@@ -14,17 +54,9 @@ const TrainingFormPage: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
-  const [formData, setFormData] = useState<{
-    title: string;
-    description: string;
-    mode: string;
-    provider: string;
-    start_date: string;
-    end_date: string;
-    budget: number;
-    status: string;
-  }>({
+  const [formData, setFormData] = useState<TrainingFormState>({
     title: '',
+    category: '',
     description: '',
     mode: 'offline',
     provider: 'Internal',
@@ -40,9 +72,10 @@ const TrainingFormPage: React.FC = () => {
       setFetching(true);
       try {
         const data = await trainingService.getProgram(id);
-        const trainingData = data?.data || data || {};
+        const trainingData: Partial<TrainingProgram> = data.data ?? {};
         setFormData({
           title: trainingData.title || '',
+          category: trainingData.category || '',
           description: trainingData.description || '',
           mode: trainingData.mode || 'offline',
           provider: trainingData.provider || 'Internal',
@@ -65,8 +98,9 @@ const TrainingFormPage: React.FC = () => {
     setLoading(true);
     try {
       // Build payload exactly matching backend expectation
-      const apiData = {
+      const apiData: Partial<TrainingProgram> = {
         title: formData.title.trim(),
+        category: formData.category.trim() || undefined,
         mode: formData.mode,
         description: formData.description.trim(),
         provider: formData.provider.trim() || 'Internal',
@@ -76,33 +110,29 @@ const TrainingFormPage: React.FC = () => {
         status: formData.status
       };
 
-      console.log('Submitting training create/update payload:', apiData);
-
       if (isEdit) {
-        await trainingService.updateProgram(id, apiData as any);
+        await trainingService.updateProgram(id, apiData);
       } else {
-        await trainingService.createProgram(apiData as any);
+        await trainingService.createProgram(apiData);
       }
+      showToast(isEdit ? 'Program berhasil diperbarui' : 'Program berhasil dibuat', 'success');
       navigate('/training/programs');
-    } catch (err: any) {
-      // Better logging for validation errors (422)
-      console.error('Error details:', err?.response?.data || err?.message || err);
-      if (err?.response?.status === 422) {
-        console.error('Validation error payload:', err.response.data);
-      }
+    } catch (err: unknown) {
+      console.error('Error saving training program:', err);
+      showToast(getErrorMessage(err, 'Gagal menyimpan program pelatihan'), 'error');
     } finally {
       setLoading(false);
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData({ ...formData, [e.target.name]: e.target.value } as TrainingFormState);
   };
 
   if (fetching) return <div style={{ padding: '2rem', textAlign: 'center' }}>Loading training details...</div>;
 
   return (
-    <div className="crud-page">
+    <div className="crud-page training-form-page">
       <Card className="hero-card" style={{ marginBottom: '2rem' }}>
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -133,6 +163,24 @@ const TrainingFormPage: React.FC = () => {
               <div className="form-group">
                 <label>Program Title</label>
                 <input name="title" value={formData.title} onChange={handleChange} className="form-control" required placeholder="e.g. Pelatihan Leadership" />
+              </div>
+
+              <div className="form-group">
+                <label>Category</label>
+                <input
+                  name="category"
+                  value={formData.category}
+                  onChange={handleChange}
+                  className="form-control"
+                  list="training-category-suggestions"
+                  placeholder="Contoh: Leadership, Frontend, Safety, HR Compliance"
+                  maxLength={100}
+                />
+                <datalist id="training-category-suggestions">
+                  {categorySuggestions.map(category => (
+                    <option key={category} value={category} />
+                  ))}
+                </datalist>
               </div>
 
               <div className="form-group">
@@ -176,7 +224,10 @@ const TrainingFormPage: React.FC = () => {
                 </div>
                 <div className="form-group">
                   <label>Provider</label>
-                  <input name="provider" value={formData.provider} onChange={handleChange} className="form-control" placeholder="Internal or External provider" />
+                  <select name="provider" value={formData.provider} onChange={handleChange} className="form-control">
+                    <option value="Internal">Internal</option>
+                    <option value="External">External</option>
+                  </select>
                 </div>
               </div>
             </div>
