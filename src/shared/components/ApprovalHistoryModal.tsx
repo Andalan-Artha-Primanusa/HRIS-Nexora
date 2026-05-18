@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { Modal } from "@/shared/ui/Modal";
 import { organizationService } from "@/features/organization/api/organization.service";
 import { CheckCircle2, XCircle, Clock, User, Shield, Loader2 } from "lucide-react";
@@ -36,32 +36,44 @@ export const ApprovalHistoryModal = ({
   const [loading, setLoading] = useState(false);
   const [totalSteps, setTotalSteps] = useState(0);
 
+  const fallbackHistoryRef = useRef(fallbackHistory);
+  const fallbackTotalStepsRef = useRef(fallbackTotalSteps);
+
+  useEffect(() => {
+    fallbackHistoryRef.current = fallbackHistory;
+    fallbackTotalStepsRef.current = fallbackTotalSteps;
+  }, [fallbackHistory, fallbackTotalSteps]);
+
   const fetchHistory = useCallback(async () => {
     setLoading(true);
     try {
       const res = await organizationService.getApprovalHistory(module, moduleId);
       const raw = Array.isArray(res) ? res : Array.isArray(res?.data) ? res.data : [];
-      const nextHistory = raw.length > 0 ? raw : fallbackHistory;
+      const nextHistory = raw.length > 0 ? raw : fallbackHistoryRef.current;
       setHistory(nextHistory);
       if (res?.meta?.total_steps) {
         setTotalSteps(res.meta.total_steps);
-      } else if (fallbackTotalSteps) {
-        setTotalSteps(fallbackTotalSteps);
+      } else if (fallbackTotalStepsRef.current) {
+        setTotalSteps(fallbackTotalStepsRef.current);
       } else {
         const maxStep = nextHistory.reduce((max: number, h: HistoryItem) => Math.max(max, h.step_order || 0), 0);
         setTotalSteps(maxStep);
       }
     } catch {
-      setHistory(fallbackHistory);
-      setTotalSteps(fallbackTotalSteps);
+      setHistory(fallbackHistoryRef.current);
+      setTotalSteps(fallbackTotalStepsRef.current);
     } finally {
       setLoading(false);
     }
-  }, [fallbackHistory, fallbackTotalSteps, module, moduleId]);
+  }, [module, moduleId]);
 
   useEffect(() => {
     if (isOpen && moduleId) {
       fetchHistory();
+    } else if (!isOpen) {
+      setHistory([]);
+      setTotalSteps(0);
+      setLoading(false);
     }
   }, [fetchHistory, isOpen, moduleId]);
 
