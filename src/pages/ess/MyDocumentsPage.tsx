@@ -23,6 +23,7 @@ import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { documentService } from '@/features/employee/api/document.service';
 import type { EmployeeDocument } from '@/features/employee/types/document.types';
 import { showToast } from '@/shared/ui/toast';
+import { getErrorMessage } from '@/shared/api/errorHandler';
 import { api } from '@/shared/api/httpClient';
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 import '@/shared/styles/CrudPage.css';
@@ -61,6 +62,82 @@ const CATEGORIES = [
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
+const extractEmployeeId = (raw: unknown): string | null => {
+  const root = raw && typeof raw === 'object' ? raw as Record<string, any> : {};
+  const payload = root.data ?? root;
+  const candidates = [
+    payload?.id,
+    payload?.employee?.id,
+    payload?.profile?.employee?.id,
+    payload?.user?.employee?.id,
+    payload?.user?.employee_id,
+    payload?.employeeId,
+    payload?.employee_id,
+  ];
+
+  const value = candidates.find((candidate) => candidate !== undefined && candidate !== null && candidate !== '');
+  return value === undefined ? null : String(value);
+};
+
+const getStoredEmployeeId = (): string | null => {
+  try {
+    const rawUser = sessionStorage.getItem('user');
+    return rawUser ? extractEmployeeId(JSON.parse(rawUser)) : null;
+  } catch {
+    return null;
+  }
+};
+
+const resolveCurrentEmployeeId = async (): Promise<string | null> => {
+  const storedEmployeeId = getStoredEmployeeId();
+  if (storedEmployeeId) return storedEmployeeId;
+
+  for (const endpoint of ['/me', '/my/profile']) {
+    try {
+      const response = await api.get(endpoint);
+      const employeeId = extractEmployeeId(response.data);
+      if (employeeId) return employeeId;
+    } catch {
+      // Some accounts, especially admin-only users, do not have ESS profile data.
+    }
+  }
+
+  return null;
+};
+
+const getDocumentFileName = (doc: EmployeeDocument): string => {
+  if (doc.file_name) return doc.file_name;
+  return String(doc.file_path || '').split('/').filter(Boolean).pop() || '';
+};
+
+const getStoredDocumentFileName = (doc: EmployeeDocument): string => {
+  const pathCandidates = [doc.file_path, doc.file_url];
+  for (const path of pathCandidates) {
+    const cleanPath = String(path || '').split('?')[0];
+    const fileName = cleanPath.split('/').filter(Boolean).pop();
+    if (fileName) return fileName;
+  }
+
+  return getDocumentFileName(doc);
+};
+
+const getBackendOrigin = () => String(api.defaults.baseURL || '').replace(/\/api\/?$/, '');
+
+const getDocumentStorageUrl = (doc: EmployeeDocument): string => {
+  if (doc.file_url) {
+    if (/^https?:\/\//i.test(doc.file_url)) return doc.file_url;
+    const path = doc.file_url.startsWith('/') ? doc.file_url : `/${doc.file_url}`;
+    return `${getBackendOrigin()}${path}`;
+  }
+
+  return '';
+};
+
+const getDocumentDownloadUrl = (doc: EmployeeDocument): string => {
+  const fileName = getStoredDocumentFileName(doc);
+  return `${api.defaults.baseURL}/documents/${encodeURIComponent(fileName)}`;
+};
+
 const UploadDocumentModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const [title, setTitle] = useState('');
   const [documentType, setDocumentType] = useState('');
@@ -70,6 +147,7 @@ const UploadDocumentModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSu
   const [dragActive, setDragActive] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [formError, setFormError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Reset form when modal opens/closes
@@ -83,6 +161,7 @@ const UploadDocumentModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSu
       setDragActive(false);
       setSubmitting(false);
       setErrors({});
+      setFormError('');
     }
   }, [isOpen]);
 
@@ -109,6 +188,7 @@ const UploadDocumentModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSu
     }
 
     setFile(selectedFile);
+    setFormError('');
     setErrors(prev => {
       const { file: _, ...rest } = prev;
       return rest;
@@ -155,13 +235,23 @@ const UploadDocumentModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSu
       if (expiresAt) formData.append('expires_at', expiresAt);
       formData.append('file', file!);
 
+      const employeeId = await resolveCurrentEmployeeId();
+      if (!employeeId) {
+        const message = 'Akun Anda belum terhubung ke data karyawan, sehingga dokumen tidak dapat diunggah dari halaman ESS.';
+        setFormError(message);
+        showToast(message, 'error');
+        return;
+      }
+      formData.append('employee_id', employeeId);
+
       await documentService.uploadDocument(formData);
       showToast('Dokumen berhasil diunggah', 'success');
       onSuccess();
       onClose();
     } catch (err: any) {
       console.error('Upload failed', err);
-      showToast(err?.response?.data?.message || err?.message || 'Gagal mengunggah dokumen', 'error');
+      const message = getErrorMessage(err) || 'Gagal mengunggah dokumen';
+      showToast(message, 'error');
       // Handle validation errors from API
       if (err?.errors) {
         const apiErrors: Record<string, string> = {};
@@ -169,6 +259,11 @@ const UploadDocumentModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSu
           apiErrors[key] = Array.isArray(messages) ? messages[0] : String(messages);
         }
         setErrors(apiErrors);
+        if (apiErrors.employee_id) {
+          setFormError('Akun Anda belum terhubung ke data karyawan, sehingga dokumen tidak dapat diunggah.');
+        }
+      } else {
+        setFormError(message);
       }
     } finally {
       setSubmitting(false);
@@ -203,6 +298,21 @@ const UploadDocumentModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSu
       </>
     )}>
       <form id="upload-document-form" onSubmit={handleSubmit}>
+          {formError && (
+            <div style={{
+              marginBottom: '1rem',
+              padding: '0.85rem 1rem',
+              borderRadius: 12,
+              background: '#fef2f2',
+              color: '#991b1b',
+              border: '1px solid #fecaca',
+              fontSize: '0.86rem',
+              fontWeight: 600,
+            }}>
+              {formError}
+            </div>
+          )}
+
           {/* Drop zone */}
           <div
             className={`upload-dropzone ${dragActive ? 'upload-dropzone--active' : ''} ${file ? 'upload-dropzone--has-file' : ''} ${errors.file ? 'upload-dropzone--error' : ''}`}
@@ -341,6 +451,7 @@ const MyDocumentsPage: React.FC = () => {
   const [documents, setDocuments] = useState<EmployeeDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<EmployeeDocument | null>(null);
 
   const [searchText, setSearchText] = useState("");
   const [activeTab, setActiveTab] = useState<TabType>("Semua");
@@ -427,7 +538,23 @@ const MyDocumentsPage: React.FC = () => {
 
   const handleDownload = async (doc: EmployeeDocument) => {
     try {
-      const response = await api.get(`/documents/${doc.id}/download`, {
+      const fileName = getDocumentFileName(doc);
+      const storedFileName = getStoredDocumentFileName(doc);
+      if (!fileName) {
+        showToast('Nama file dokumen tidak tersedia.', 'error');
+        return;
+      }
+
+      const downloadUrl = getDocumentDownloadUrl(doc);
+
+      if (!storedFileName) {
+        const storageUrl = getDocumentStorageUrl(doc);
+        if (storageUrl) window.open(storageUrl, '_blank', 'noopener,noreferrer');
+        else showToast('Lokasi file dokumen tidak tersedia.', 'error');
+        return;
+      }
+
+      const response = await api.get(downloadUrl, {
         responseType: 'blob'
       });
       
@@ -435,14 +562,14 @@ const MyDocumentsPage: React.FC = () => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = doc.file_name || "document.pdf";
+      a.download = fileName || "document.pdf";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     } catch (err: any) {
       console.error(err);
-      showToast(err?.response?.data?.message || err?.message || 'Gagal mengunduh berkas. Pastikan dokumen tersedia.', 'error');
+      showToast(getErrorMessage(err) || 'Gagal mengunduh berkas. Pastikan dokumen tersedia.', 'error');
     }
   };
 
@@ -656,7 +783,7 @@ const MyDocumentsPage: React.FC = () => {
                             </button>
                             <button
                               className="action-btn action-btn-edit"
-                              onClick={() => {}}
+                              onClick={() => setSelectedDocument(doc)}
                               title="Lihat Detail"
                             >
                               <Eye size={16} />
@@ -713,6 +840,44 @@ const MyDocumentsPage: React.FC = () => {
         onClose={() => setShowUploadModal(false)}
         onSuccess={handleUploadSuccess}
       />
+
+      <Modal
+        isOpen={!!selectedDocument}
+        onClose={() => setSelectedDocument(null)}
+        title="Detail Dokumen"
+        size="md"
+        footer={(
+          <>
+            <button className="modal-btn-cancel" onClick={() => setSelectedDocument(null)}>Tutup</button>
+            {selectedDocument && (
+              <button className="modal-btn-confirm" onClick={() => handleDownload(selectedDocument)}>
+                <Download size={16} />
+                Download
+              </button>
+            )}
+          </>
+        )}
+      >
+        {selectedDocument && (
+          <div style={{ display: 'grid', gap: '0.85rem' }}>
+            {[
+              ['Judul', selectedDocument.title],
+              ['Tipe', selectedDocument.document_type?.replace('_', ' ') || '-'],
+              ['Kategori', selectedDocument.category || '-'],
+              ['Status', selectedDocument.status || '-'],
+              ['Nama File', getDocumentFileName(selectedDocument) || '-'],
+              ['Ukuran', selectedDocument.file_size ? `${(selectedDocument.file_size / 1024).toFixed(1)} KB` : '-'],
+              ['Kadaluarsa', selectedDocument.expires_at ? new Date(selectedDocument.expires_at).toLocaleDateString('id-ID') : '-'],
+              ['Catatan Review', selectedDocument.review_notes || '-'],
+            ].map(([label, value]) => (
+              <div key={label} style={{ display: 'grid', gap: 4 }}>
+                <span style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase' }}>{label}</span>
+                <span style={{ color: '#0f172a', fontWeight: 600 }}>{value}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </Modal>
 
       {historyModal && (
         <ApprovalHistoryModal

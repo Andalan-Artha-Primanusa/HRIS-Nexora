@@ -2,14 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/shared/ui";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
-import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
+import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import {
   ArrowUpRight,
   BarChart3,
   CheckCircle2,
   Eye,
-  FileText,
   ListChecks,
   RefreshCw,
   Search,
@@ -20,6 +19,7 @@ import {
 } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
+import "./MyKpiPage.css";
 import { getMyKpiPeriods, submitMyKpiPeriod, updateMyKpiPeriodItems } from "@/features/ess/api/ess.service";
 import { showToast } from "@/shared/ui/toast";
 
@@ -115,6 +115,7 @@ const MyKpiPage = () => {
   const [searchText, setSearchText] = useState("");
   const [activeTab, setActiveTab] = useState<(typeof TAB_OPTIONS)[number]>("Semua");
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemDrafts, setItemDrafts] = useState<KpiPeriodDraftMap>({});
@@ -125,6 +126,7 @@ const MyKpiPage = () => {
 
   const loadData = async () => {
     setLoading(true);
+    setErrorMessage("");
     try {
       const response = await getMyKpiPeriods(currentPage, pageSize);
       const items = Array.isArray(response.items) ? response.items : [];
@@ -142,7 +144,10 @@ const MyKpiPage = () => {
       return mappedPeriods;
     } catch (error) {
       console.error("KPI Period Fetch Error:", error);
-      showToast(getErrorMessage(error as never) || "Gagal memuat KPI periode", "error");
+      const message = getErrorMessage(error as never) || "Gagal memuat KPI periode";
+      setPeriods([]);
+      setTotalPages(1);
+      setErrorMessage(message);
       return [] as KpiPeriodRecord[];
     } finally {
       setLoading(false);
@@ -382,24 +387,22 @@ const MyKpiPage = () => {
         </div>
       </Card>
 
-
-
-      <Card className="kpi-card" glass>
-        <div className="kpi-card-title">
-          <FileText size={18} />
-          <span>Ringkasan KPI Periode ESS</span>
-        </div>
-        <p className="kpi-hint">
-          Data diambil dari GET /my/kpi-periods. Di sini employee mengisi capaian item KPI periode, lalu submit.
-        </p>
-      </Card>
-
       <div className="table-section">
-        <div className="wuw-table-area">
+        <div className="wuw-table-area my-kpi-table-area">
           {loading && <LoadingState message="Memuat KPI periode..." />}
 
-          {!loading && paginatedPeriods.length === 0 && (
-            <div style={{ padding: "5rem 0" }}>
+          {!loading && errorMessage && (
+            <div className="my-kpi-empty-wrap">
+              <ErrorState
+                message="Gagal Memuat KPI Periode"
+                error={errorMessage}
+                onRetry={loadData}
+              />
+            </div>
+          )}
+
+          {!loading && !errorMessage && paginatedPeriods.length === 0 && (
+            <div className="my-kpi-empty-wrap">
               <EmptyState
                 title="Belum Ada KPI Periode"
                 message={searchText || activeTab !== "Semua" ? "Tidak ada KPI periode yang sesuai." : "Anda belum memiliki KPI periode yang ditugaskan."}
@@ -409,7 +412,7 @@ const MyKpiPage = () => {
             </div>
           )}
 
-          {!loading && paginatedPeriods.length > 0 && (
+          {!loading && !errorMessage && paginatedPeriods.length > 0 && (
             <>
               <div className="table-wrap">
                 <table className="data-table">
