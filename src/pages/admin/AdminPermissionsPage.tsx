@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuthStore } from "@/app/store/auth.store";
-import { Card, CardHeader } from "@/shared/ui";
+import { Card, Modal, Button } from "@/shared/ui";
 import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { RBACUtils } from "@/shared/hooks/rbac";
-import { getAllPermissions } from "@/features/admin/api/admin.service";
+import { getAllPermissions, getPermissionById } from "@/features/admin/api/admin.service";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import type { AdminEntityItem } from "@/features/admin/types/admin.types";
 import { KeyRound, RefreshCw, Search, Shield, Filter } from "lucide-react";
@@ -25,6 +25,9 @@ const AdminPermissionsPage = () => {
   const [pageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalPermissions, setTotalPermissions] = useState(0);
+  const [selectedPermission, setSelectedPermission] = useState<AdminEntityItem | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState<string | null>(null);
 
   // Extract unique guard names for filter
   const uniqueGuards = useMemo(() => {
@@ -104,6 +107,45 @@ const AdminPermissionsPage = () => {
       setLoading(false);
     }
   };
+
+  const openPermissionDetail = async (permission: AdminEntityItem) => {
+    setSelectedPermission(permission);
+    setDetailError(null);
+
+    const permissionId = permission.id;
+    if (!permissionId) return;
+
+    setDetailLoading(true);
+    try {
+      const result = await getPermissionById(permissionId as string | number);
+      const detail = result.data && typeof result.data === "object"
+        ? (result.data as AdminEntityItem)
+        : permission;
+      setSelectedPermission({ ...permission, ...detail });
+    } catch (error: unknown) {
+      setDetailError(getErrorMessage(error as never));
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const closePermissionDetail = () => {
+    setSelectedPermission(null);
+    setDetailError(null);
+    setDetailLoading(false);
+  };
+
+  const extraPermissionEntries = useMemo(() => {
+    if (!selectedPermission) return [];
+
+    const hiddenKeys = new Set(["id", "name", "guard_name", "created_at", "updated_at"]);
+    return Object.entries(selectedPermission)
+      .filter(([key, value]) => !hiddenKeys.has(key) && value !== null && value !== undefined && value !== "")
+      .map(([key, value]) => [
+        key,
+        typeof value === "object" ? JSON.stringify(value, null, 2) : String(value),
+      ]);
+  }, [selectedPermission]);
 
   // Reset page on filter changes
   useEffect(() => {
@@ -318,6 +360,7 @@ const AdminPermissionsPage = () => {
                             <button
                               className="action-btn action-btn-edit"
                               title="Lihat Detail"
+                              onClick={() => void openPermissionDetail(item)}
                             >
                               <KeyRound size={16} />
                             </button>
@@ -364,6 +407,73 @@ const AdminPermissionsPage = () => {
           )}
         </div>
       </div>
+
+      <Modal
+        isOpen={Boolean(selectedPermission)}
+        onClose={closePermissionDetail}
+        title="Detail Izin"
+        size="md"
+        footer={
+          <Button variant="secondary" onClick={closePermissionDetail}>
+            Tutup
+          </Button>
+        }
+      >
+        {selectedPermission && (
+          <div className="permission-detail">
+            <div className="permission-detail__header">
+              <div className="permission-detail__icon">
+                <KeyRound size={22} />
+              </div>
+              <div>
+                <p className="permission-detail__label">Permission</p>
+                <h3>{String(selectedPermission.name || "-")}</h3>
+              </div>
+            </div>
+
+            {detailLoading && (
+              <div className="permission-detail__notice">Memuat detail izin...</div>
+            )}
+
+            {detailError && (
+              <div className="permission-detail__notice permission-detail__notice--error">
+                Detail terbaru tidak dapat dimuat. Menampilkan data dari tabel. {detailError}
+              </div>
+            )}
+
+            <div className="permission-detail__grid">
+              <div className="permission-detail__item">
+                <span>ID</span>
+                <strong>{String(selectedPermission.id || "-")}</strong>
+              </div>
+              <div className="permission-detail__item">
+                <span>Penjaga Akses</span>
+                <strong>{String(selectedPermission.guard_name || "-")}</strong>
+              </div>
+              <div className="permission-detail__item">
+                <span>Dibuat</span>
+                <strong>{String(selectedPermission.created_at || "-")}</strong>
+              </div>
+              <div className="permission-detail__item">
+                <span>Diperbarui</span>
+                <strong>{String(selectedPermission.updated_at || "-")}</strong>
+              </div>
+            </div>
+
+            {extraPermissionEntries.length > 0 && (
+              <div className="permission-detail__extra">
+                <p>Informasi Tambahan</p>
+                {extraPermissionEntries.map(([key, value]) => (
+                  <div className="permission-detail__extra-row" key={key}>
+                    <span>{key}</span>
+                    <code>{value}</code>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };

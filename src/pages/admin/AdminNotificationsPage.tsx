@@ -8,6 +8,7 @@ import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "@/pages/payroll/PayrollShared.css";
 import "./AdminCrudPages.css";
+import "./AdminNotificationsPage.css";
 import {
   createAdminNotification,
   getAdminNotificationsSummary,
@@ -160,7 +161,7 @@ const AdminNotificationsPage = () => {
   };
 
   return (
-    <div className="crud-page">
+    <div className="crud-page admin-notifications-page">
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
@@ -225,16 +226,19 @@ const AdminNotificationsPage = () => {
         })}
       </div>
 
-      <div className="">
-        <div className="form-grid">
-          <Card className="table-card" glass>
-            <div className="table-header-bar">
-              <h3>Kirim Notifikasi Individual</h3>
-              <span className="table-count">POST /admin/notifications</span>
+      <div className="notification-form-stack">
+        <div className="notification-form-grid">
+          <Card className="table-card notification-form-card" glass>
+            <div className="table-header-bar notification-form-header">
+              <div>
+                <h3>Kirim Notifikasi Individual</h3>
+                <p>Kirim pesan langsung ke satu karyawan, atau kosongkan penerima untuk target default.</p>
+              </div>
+              <span className="notification-form-badge">Notifikasi Individual</span>
             </div>
             <div className="table-card-inner">
               <form className="crud-form" onSubmit={handleCreateNotification}>
-                <div className="form-grid">
+                <div className="notification-fields-grid">
                   <div className="form-group">
                     <label htmlFor="notification-title">Judul</label>
                     <input
@@ -293,14 +297,17 @@ const AdminNotificationsPage = () => {
             </div>
           </Card>
 
-          <Card className="table-card" glass>
-            <div className="table-header-bar">
-              <h3>Broadcast Notifikasi</h3>
-              <span className="table-count">POST /admin/notifications/broadcast</span>
+          <Card className="table-card notification-form-card" glass>
+            <div className="table-header-bar notification-form-header">
+              <div>
+                <h3>Broadcast Notifikasi</h3>
+                <p>Kirim pengumuman ke kelompok pengguna yang dipilih.</p>
+              </div>
+              <span className="notification-form-badge">Broadcast</span>
             </div>
             <div className="table-card-inner">
               <form className="crud-form" onSubmit={handleBroadcast}>
-                <div className="form-grid">
+                <div className="notification-fields-grid">
                   <div className="form-group">
                     <label htmlFor="broadcast-title">Judul Broadcast</label>
                     <input
