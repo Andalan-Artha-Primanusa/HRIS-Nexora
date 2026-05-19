@@ -3,6 +3,7 @@ import { Search, RefreshCw, ArrowUpRight, CheckCircle, Clock, XCircle, FileText,
 import { Modal } from '@/shared/ui/Modal';
 import { Card } from '@/shared/ui/Card';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
+import { useAuthStore } from '@/app/store/auth.store';
 import { promotionService } from '@/features/organization/api/promotion.service';
 import { parsePaginatedResponse } from '@/shared/api/pagination';
 import '@/shared/styles/CrudPage.css';
@@ -10,7 +11,17 @@ import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/employee/EmployeesPage.css';
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 
+const toIdString = (value: unknown) => {
+  if (value === null || value === undefined) return null;
+  const id = String(value).trim();
+  return id ? id : null;
+};
+
+const toRecord = (value: unknown): Record<string, unknown> =>
+  value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
+
 const MyPromotionsPage: React.FC = () => {
+  const user = useAuthStore((state) => state.user);
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -25,6 +36,28 @@ const MyPromotionsPage: React.FC = () => {
   const [reportContent, setReportContent] = useState('');
   const [submittingReport, setSubmittingReport] = useState(false);
   const [historyModal, setHistoryModal] = useState<{ module: string; id: number | string } | null>(null);
+
+  const currentEmployeeIds = useMemo(() => {
+    const employee = toRecord(user?.employee);
+    return new Set(
+      [
+        toIdString(employee.id),
+        toIdString(user?.employee_id),
+      ].filter((id): id is string => Boolean(id)),
+    );
+  }, [user]);
+
+  const isOwnPromotion = (promo: any) => {
+    if (currentEmployeeIds.size === 0) return false;
+
+    const promotionEmployee = toRecord(promo?.employee);
+    const promotionEmployeeIds = [
+      toIdString(promo?.employee_id),
+      toIdString(promotionEmployee.id),
+    ].filter((id): id is string => Boolean(id));
+
+    return promotionEmployeeIds.some((id) => currentEmployeeIds.has(id));
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -125,6 +158,7 @@ const MyPromotionsPage: React.FC = () => {
   };
 
   const openReportModal = (promo: any) => {
+    if (!isOwnPromotion(promo)) return;
     setSelectedPromo(promo);
     setReportContent('');
     setReportModal(true);
@@ -137,7 +171,7 @@ const MyPromotionsPage: React.FC = () => {
   };
 
   const handleSubmitReport = async () => {
-    if (!selectedPromo || !reportContent.trim()) return;
+    if (!selectedPromo || !reportContent.trim() || !isOwnPromotion(selectedPromo)) return;
     setSubmittingReport(true);
     try {
       await promotionService.submitReport(selectedPromo.id, {
@@ -308,6 +342,7 @@ const MyPromotionsPage: React.FC = () => {
                 <tbody>
                   {paginatedItems.map((promo) => {
                     const remarks = getRemarks(promo.remarks);
+                    const canSubmitReport = isOwnPromotion(promo) && promo.status === 'approved' && !promo.report_status;
                     return (
                       <tr key={promo.id}>
                         <td>
@@ -348,7 +383,7 @@ const MyPromotionsPage: React.FC = () => {
                         <td className="td-center">{getReportBadge(promo.report_status, promo.status)}</td>
                         <td className="td-center">
                           <div className="action-btn-group">
-                            {promo.status === 'approved' && !promo.report_status && (
+                            {canSubmitReport && (
                               <button
                                 className="action-btn"
                                 style={{ background: '#dbeafe', color: '#2563eb' }}
