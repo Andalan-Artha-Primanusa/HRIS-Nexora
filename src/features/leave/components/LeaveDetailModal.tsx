@@ -12,6 +12,24 @@ interface LeaveDetailModalProps {
   canApproveLeave?: boolean;
 }
 
+const getNestedName = (...values: any[]) =>
+  values.find((value) => typeof value === 'string' && value.trim()) || '';
+
+const getEmployeeSubtitle = (employee: any) => {
+  const departmentName = getNestedName(
+    employee?.department?.name,
+    employee?.departmentRel?.name,
+    employee?.department_rel?.name
+  );
+  const positionName = getNestedName(
+    employee?.position?.name,
+    employee?.positionRel?.name,
+    employee?.position_rel?.name
+  );
+
+  return [departmentName, positionName].filter(Boolean).join(' • ');
+};
+
 export const LeaveDetailModal: React.FC<LeaveDetailModalProps> = ({ isOpen, onClose, item, onApprove, onReject, canApproveLeave }) => {
   if (!item) return null;
 
@@ -22,6 +40,7 @@ export const LeaveDetailModal: React.FC<LeaveDetailModalProps> = ({ isOpen, onCl
 
   const status = String(item.status || 'pending').toLowerCase();
   const statusLabel = status === 'approved' ? 'DISETUJUI' : status === 'rejected' ? 'DITOLAK' : status === 'submitted' ? 'DIAJUKAN' : 'MENUNGGU';
+  const employeeSubtitle = getEmployeeSubtitle(item.employee);
 
   const footer = (
     <>
@@ -57,7 +76,7 @@ export const LeaveDetailModal: React.FC<LeaveDetailModalProps> = ({ isOpen, onCl
             </div>
             <div>
               <div style={{ fontWeight: 600, color: '#1e293b' }}>{item.employee?.user?.name || item.employee?.full_name || item.user?.name || 'Tidak diketahui'}</div>
-              <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{item.employee?.department?.name || "-"} • {item.employee?.position?.name || "Karyawan"}</div>
+              {employeeSubtitle && <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{employeeSubtitle}</div>}
             </div>
           </div>
         </div>

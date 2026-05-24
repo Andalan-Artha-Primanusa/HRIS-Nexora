@@ -37,6 +37,24 @@ const formatStatusLabel = (status: string) => {
   return 'Menunggu';
 };
 
+const getNestedName = (...values: any[]) =>
+  values.find((value) => typeof value === 'string' && value.trim()) || '';
+
+const getEmployeeSubtitle = (employee: any) => {
+  const departmentName = getNestedName(
+    employee?.department?.name,
+    employee?.departmentRel?.name,
+    employee?.department_rel?.name
+  );
+  const positionName = getNestedName(
+    employee?.position?.name,
+    employee?.positionRel?.name,
+    employee?.position_rel?.name
+  );
+
+  return [departmentName, positionName].filter(Boolean).join(' • ');
+};
+
 export const LeaveTable: React.FC<LeaveTableProps> = ({ items, onView, onApprove, onReject, onEdit, onDelete, onHistory, canApproveLeave }) => {
   return (
     <div className="table-wrap">
@@ -56,8 +74,7 @@ export const LeaveTable: React.FC<LeaveTableProps> = ({ items, onView, onApprove
             const status = String(item.status || 'pending').toLowerCase();
             const empName = item.employee?.user?.name || item.employee?.full_name || item.user?.name || `EMP-${item.employee_id}`;
             const avatarUrl = item.employee?.user?.profile?.avatar_url || item.user?.profile?.avatar_url;
-            const deptName = item.employee?.department?.name || "-";
-            const posName = item.employee?.position?.name || "-";
+            const employeeSubtitle = getEmployeeSubtitle(item.employee);
             
             return (
               <tr key={item.id || index}>
@@ -72,7 +89,7 @@ export const LeaveTable: React.FC<LeaveTableProps> = ({ items, onView, onApprove
                     </div>
                     <div className="cell-stacked">
                       <span className="cell-name-text">{empName}</span>
-                      <span className="cell-stacked__sub">{deptName} • {posName}</span>
+                      {employeeSubtitle && <span className="cell-stacked__sub">{employeeSubtitle}</span>}
                     </div>
                   </div>
                 </td>
