@@ -117,6 +117,8 @@ const getStatusClass = (status?: string) => {
   return "badge-soft badge-soft--gray";
 };
 
+const getInitial = (value?: string | null) => (value?.trim().charAt(0) || "K").toUpperCase();
+
 const AdminKpiPage = () => {
   const user = useAuthStore((state) => state.user);
   const canAccess = RBACUtils.hasPermission(user, "kpi.view");
@@ -362,14 +364,7 @@ const AdminKpiPage = () => {
                           </td>
                           <td>
                             <div className="cell-name">
-                              <img
-                                src={period.employee?.user?.profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(period.employee?.user?.name || 'K')}&color=7F9CF5&background=EBF4FF`}
-                                alt=""
-                                className="cell-avatar"
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(period.employee?.user?.name || 'K')}&color=7F9CF5&background=EBF4FF`;
-                                }}
-                              />
+                              <div className="cell-avatar">{getInitial(period.employee?.user?.name)}</div>
                               <div className="cell-stacked">
                                 <span className="cell-name-text">{period.employee?.user?.name || "Unknown"}</span>
                                 <span className="cell-stacked__sub">Employee ID: {period.employee_id}</span>
@@ -567,15 +562,9 @@ const AdminKpiPage = () => {
       >
         {selectedPeriod && (<>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-            <img
-              src={selectedPeriod.employee?.user?.profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedPeriod.employee?.user?.name || 'K')}&color=7F9CF5&background=EBF4FF`}
-                  alt=""
-                  className="cell-avatar"
-                  style={{ width: 48, height: 48, fontSize: 20 }}
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedPeriod.employee?.user?.name || 'K')}&color=7F9CF5&background=EBF4FF`;
-                  }}
-                />
+            <div className="cell-avatar" style={{ width: 48, height: 48, fontSize: 20 }}>
+              {getInitial(selectedPeriod.employee?.user?.name)}
+            </div>
                 <div>
                   <h4 style={{ margin: 0, fontSize: 18 }}>
                     {selectedPeriod.employee?.user?.name || "Unknown"}

@@ -14,6 +14,8 @@ import "@/pages/dashboard/overview/OverviewPage.css";
 import "@/pages/payroll/PayrollShared.css";
 import "./AdminCrudPages.css";
 
+const getInitial = (value?: string | null) => (value?.trim().charAt(0) || "U").toUpperCase();
+
 const AdminAuditLogsPage = () => {
   const user = useAuthStore((state) => state.user);
   const canAccess = RBACUtils.hasPermission(user, ["audit.logs.view", "admin.audit.view"]);
@@ -288,14 +290,7 @@ const AdminAuditLogsPage = () => {
                           <td><span className="cell-id">{String(logId)}</span></td>
                           <td>
                             <div className="cell-name">
-                              <img
-                                src={(log as any).causer?.profile?.avatar_url || (log as any).user?.profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(userName || 'U')}&color=7F9CF5&background=EBF4FF`}
-                                alt=""
-                                className="cell-avatar"
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName || 'U')}&color=7F9CF5&background=EBF4FF`;
-                                }}
-                              />
+                              <div className="cell-avatar">{getInitial(userName)}</div>
                               <span className="cell-name-text">{eventName}</span>
                             </div>
                           </td>

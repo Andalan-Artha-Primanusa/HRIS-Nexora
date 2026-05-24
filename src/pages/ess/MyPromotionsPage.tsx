@@ -20,6 +20,8 @@ const toIdString = (value: unknown) => {
 const toRecord = (value: unknown): Record<string, unknown> =>
   value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
 
+const getInitial = (value?: string | null) => (value?.trim().charAt(0) || 'K').toUpperCase();
+
 const MyPromotionsPage: React.FC = () => {
   const user = useAuthStore((state) => state.user);
   const [items, setItems] = useState<any[]>([]);
@@ -230,6 +232,9 @@ const MyPromotionsPage: React.FC = () => {
     }
   };
 
+  const getPromotionEmployeeName = (promo: any) =>
+    promo.employee?.user?.name || promo.employee?.full_name || user?.name || 'Karyawan';
+
   return (
     <div className="crud-page">
       <Card className="hero-card">
@@ -330,6 +335,7 @@ const MyPromotionsPage: React.FC = () => {
               <table className="data-table">
                 <thead>
                   <tr>
+                    <th style={{ width: '220px' }}>Karyawan</th>
                     <th style={{ width: '250px' }}>Jabatan</th>
                     <th>Alasan</th>
                     <th>Tanggal Efektif</th>
@@ -345,6 +351,15 @@ const MyPromotionsPage: React.FC = () => {
                     const canSubmitReport = isOwnPromotion(promo) && promo.status === 'approved' && !promo.report_status;
                     return (
                       <tr key={promo.id}>
+                        <td>
+                          <div className="cell-name">
+                            <div className="cell-avatar">{getInitial(getPromotionEmployeeName(promo))}</div>
+                            <div className="cell-stacked">
+                              <span className="cell-name-text">{getPromotionEmployeeName(promo)}</span>
+                              <span className="cell-stacked__sub">{promo.employee?.employee_code || promo.employee_id || 'Promosi saya'}</span>
+                            </div>
+                          </div>
+                        </td>
                         <td>
                           <div className="cell-stacked">
                             <span className="cell-stacked__sub" style={{ textDecoration: 'line-through', color: '#94a3b8' }}>

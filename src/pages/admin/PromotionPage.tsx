@@ -15,6 +15,14 @@ import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 import { RejectReasonModal } from "@/shared/components/RejectReasonModal";
 import { parsePaginatedResponse } from '@/shared/api/pagination';
 
+const getInitial = (value?: string | null) => (value?.trim().charAt(0) || 'K').toUpperCase();
+
+const getEmployeeName = (promo: any) =>
+  promo.employee?.user?.name || promo.employee?.full_name || promo.employee_name || '-';
+
+const getInitiatorName = (promo: any) =>
+  promo.initiator?.user?.name || promo.initiator?.full_name || promo.initiator_name || '';
+
 const PromotionPage: React.FC = () => {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -438,13 +446,14 @@ const PromotionPage: React.FC = () => {
                       return (
                         <tr key={promo.id}>
                           <td>
-                            <div className="cell-stacked">
-                              <span className="cell-stacked__main">
-                                {promo.employee?.user?.name || promo.employee?.full_name || '-'}
-                              </span>
-                              <span className="cell-stacked__sub">
-                                oleh {promo.initiator?.user?.name || promo.initiator?.full_name || '-'}
-                              </span>
+                            <div className="cell-name">
+                              <div className="cell-avatar">{getInitial(getEmployeeName(promo))}</div>
+                              <div className="cell-stacked">
+                                <span className="cell-name-text">{getEmployeeName(promo)}</span>
+                                {getInitiatorName(promo) && (
+                                  <span className="cell-stacked__sub">oleh {getInitiatorName(promo)}</span>
+                                )}
+                              </div>
                             </div>
                           </td>
                           <td>

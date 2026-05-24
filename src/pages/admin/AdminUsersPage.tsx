@@ -24,6 +24,8 @@ interface UserData {
   roles: UserRoleInfo[];
 }
 
+const getInitial = (value?: string | null) => (value?.trim().charAt(0) || "U").toUpperCase();
+
 const AdminUsersPage = () => {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
@@ -338,14 +340,7 @@ const AdminUsersPage = () => {
                       <tr key={u.id}>
                         <td>
                           <div className="cell-name">
-                            <img
-                              src={(u as any).avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name || 'U')}&color=7F9CF5&background=EBF4FF`}
-                              alt=""
-                              className="cell-avatar"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name || 'U')}&color=7F9CF5&background=EBF4FF`;
-                              }}
-                            />
+                            <div className="cell-avatar">{getInitial(u.name)}</div>
                             <div className="cell-stacked">
                               <span className="cell-name-text">{u.name}</span>
                               <span className="cell-stacked__sub">{u.id}</span>

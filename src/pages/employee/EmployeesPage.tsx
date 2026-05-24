@@ -39,6 +39,8 @@ const formatDateTime = (input: string) => {
   return new Intl.DateTimeFormat("id-ID", { dateStyle: "medium" }).format(date);
 };
 
+const getInitial = (value?: string | null) => (value?.trim().charAt(0) || "U").toUpperCase();
+
 const EmployeesPage = () => {
   const navigate = useNavigate();
   const [items, setItems] = useState<EmployeeItem[]>([]);
@@ -270,14 +272,7 @@ const EmployeesPage = () => {
                       <tr key={item.id}>
                         <td>
                           <div className="cell-name">
-                            <img
-                              src={(item.user as { profile?: { avatar_url?: string } } | undefined)?.profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(item.user?.name || 'U')}&color=7F9CF5&background=EBF4FF`}
-                              alt=""
-                              className="cell-avatar"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(item.user?.name || 'U')}&color=7F9CF5&background=EBF4FF`;
-                              }}
-                            />
+                            <div className="cell-avatar">{getInitial(item.user?.name)}</div>
                             <div className="cell-stacked">
                               <span className="cell-name-text">{item.user?.name || "Unknown"}</span>
                               <span className="cell-stacked__sub">{item.employee_code || item.id}</span>
