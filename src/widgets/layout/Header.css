@@ -22,17 +22,27 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
-  min-width: 48px;
-  min-height: 48px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
   flex-shrink: 0;
-  border-radius: 12px;
+  border-radius: 10px;
   border: none;
   background: transparent;
   color: var(--header-icon-color);
   cursor: pointer;
   transition: all 0.2s ease;
+}
+
+/* Hamburger / sidebar toggle - slightly bigger */
+.sidebar-toggle-btn {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  min-height: 42px;
+  border-radius: 10px;
+  color: var(--gray-700);
 }
 
 .icon-button:hover {
@@ -297,4 +307,153 @@
 
 .rotating {
   animation: rotate 1s linear infinite;
+}
+
+/* ============================================================
+   HEADER RESPONSIVE STYLES
+   ============================================================ */
+
+/* .header-btn-desktop: hanya tampil di layar lebar */
+.header-btn-desktop {
+  /* visible by default on desktop */
+}
+
+/* Tablet: 768px - 1024px */
+@media (max-width: 1024px) {
+  .header-left {
+    gap: 0.5rem;
+  }
+
+  .header-right {
+    gap: 0.5rem;
+  }
+
+  .header-actions {
+    gap: 0.25rem;
+  }
+
+  .header-btn-desktop {
+    display: none;
+  }
+
+  .user-info {
+    display: none;
+  }
+
+  .user-profile {
+    gap: 0.5rem;
+    padding-left: 0.5rem;
+    border-left: 1px solid var(--header-profile-border);
+  }
+
+  .avatar {
+    width: 38px;
+    height: 38px;
+    font-size: 0.875rem;
+    font-weight: 700;
+  }
+}
+
+/* Mobile: < 768px */
+@media (max-width: 767px) {
+  .header-left {
+    gap: 0.25rem;
+  }
+
+  .header-right {
+    gap: 0.25rem;
+  }
+
+  .header-actions {
+    gap: 0.15rem;
+  }
+
+  .header-btn-desktop {
+    display: none;
+  }
+
+  .icon-button {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    min-height: 38px;
+    border-radius: 9px;
+  }
+
+  .sidebar-toggle-btn {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    min-height: 38px;
+  }
+
+  .user-info {
+    display: none;
+  }
+
+  .user-profile {
+    gap: 0.35rem;
+    padding-left: 0.35rem;
+    border-left: 1px solid var(--header-profile-border);
+  }
+
+  .avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  /* Notification dropdown: full-width on mobile */
+  .notification-dropdown {
+    position: fixed;
+    top: var(--header-height, 72px);
+    left: 0;
+    right: 0;
+    width: 100%;
+    margin-top: 0;
+    border-radius: 0 0 20px 20px;
+    max-height: 80vh;
+    overflow-y: auto;
+    z-index: 300;
+  }
+
+  /* User dropdown on mobile */
+  .user-dropdown {
+    right: 0;
+    min-width: 180px;
+  }
+
+  /* Notification badge smaller on mobile */
+  .notification-badge {
+    width: 16px;
+    height: 16px;
+    font-size: 0.6rem;
+    top: 4px;
+    right: 4px;
+  }
+}
+
+/* Extra-small phones < 480px */
+@media (max-width: 480px) {
+  .icon-button {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    min-height: 34px;
+    border-radius: 8px;
+  }
+
+  .sidebar-toggle-btn {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    min-height: 34px;
+  }
+
+  .avatar {
+    width: 34px;
+    height: 34px;
+    font-size: 0.75rem;
+  }
 }

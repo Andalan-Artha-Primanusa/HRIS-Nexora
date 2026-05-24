@@ -3,12 +3,34 @@
   min-height: var(--header-height);
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   padding: 0 1.25rem;
   border-bottom: 1px solid rgba(226, 232, 240, 0.8);
-  background: #fff;
+  background: var(--white);
+  flex-shrink: 0;
+  gap: 0.5rem;
+}
+
+.sidebar-close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--gray-500);
+  cursor: pointer;
+  transition: all 0.2s ease;
   flex-shrink: 0;
 }
+
+.sidebar-close-btn:hover {
+  background: var(--gray-100);
+  color: var(--gray-800);
+}
+
 
 .dashboard-sidebar {
   border-right: 1px solid rgba(226, 232, 240, 0.5);

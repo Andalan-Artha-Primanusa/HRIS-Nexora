@@ -147,11 +147,11 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
     <header className="dashboard-header">
       <div className="header-left">
         <button 
-          className="icon-button" 
+          className="icon-button sidebar-toggle-btn" 
           onClick={toggleSidebar}
           aria-label="Toggle Sidebar"
         >
-          <Menu size={40} />
+          <Menu size={22} />
         </button>
       </div>
       
@@ -159,13 +159,13 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
         <div className="header-actions" role="group" aria-label="Header actions">
           <button 
             type="button"
-            className="icon-button" 
+            className="icon-button header-btn-desktop" 
             onClick={(event) => void onRefreshUser(event)}
             disabled={isRefreshing}
             aria-label="Refresh user data"
             title="Refresh user data & roles"
           >
-            <RotateCw size={24} className={isRefreshing ? 'rotating header-action-icon' : 'header-action-icon'} />
+            <RotateCw size={20} className={isRefreshing ? 'rotating header-action-icon' : 'header-action-icon'} />
           </button>
 
           <button
@@ -174,7 +174,7 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
             title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
             onClick={() => setIsDarkMode((prev) => !prev)}
           >
-            {isDarkMode ? <Moon size={24} className="header-action-icon" /> : <Sun size={24} className="header-action-icon" />}
+            {isDarkMode ? <Moon size={20} className="header-action-icon" /> : <Sun size={20} className="header-action-icon" />}
           </button>
           
           <div className="notification-wrapper">
@@ -183,7 +183,7 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
               aria-label="Notifications"
               onClick={() => setOpenNotifications(!openNotifications)}
             >
-              <Bell size={24} className="header-action-icon" />
+              <Bell size={20} className="header-action-icon" />
               {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
             </button>
 

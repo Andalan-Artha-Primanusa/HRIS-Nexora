@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, X } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import './Sidebar.css';
 
@@ -11,6 +11,8 @@ import { filterMenuItems, fetchAllowedMenuKeys } from '@/shared/config/menuFilte
 
 interface SidebarProps {
   collapsed: boolean;
+  isMobileOpen?: boolean;
+  onClose?: () => void;
 }
 
 // 🔥 cek recursive apakah ada child yg active
@@ -130,7 +132,7 @@ const MenuItemComponent: React.FC<{
   );
 };
 
-export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ collapsed, isMobileOpen, onClose }) => {
   const user = useAuthStore((state) => state.user);
   const [allowedKeys, setAllowedKeys] = React.useState<string[] | undefined>();
 
@@ -157,13 +159,26 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
     console.log("[Sidebar] Filtered menu items count:", filteredItems.length);
   }
 
+  // When mobile drawer is open, always show full expanded sidebar regardless of collapsed state
+  const effectiveCollapsed = isMobileOpen ? false : collapsed;
+
   return (
-    <aside className={clsx('dashboard-sidebar', collapsed && 'collapsed')}>
+    <aside className={clsx('dashboard-sidebar', collapsed && 'collapsed', isMobileOpen && 'mobile-open')}>
       <div className="sidebar-logo">
+        {isMobileOpen && (
+          <button
+            className="sidebar-close-btn"
+            onClick={onClose}
+            aria-label="Close sidebar"
+            title="Close menu"
+          >
+            <X size={20} />
+          </button>
+        )}
         <img
           src="/logo-mahya2.png"
           alt="MAHYA Logo"
-          className={clsx('company-logo', collapsed && 'collapsed')}
+          className={clsx('company-logo', effectiveCollapsed && 'collapsed')}
         />
       </div>
 
@@ -173,7 +188,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
             <MenuItemComponent
               key={idx}
               item={item}
-              collapsed={collapsed}
+              collapsed={effectiveCollapsed}
               level={0}
             />
           ))}

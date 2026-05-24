@@ -357,3 +357,81 @@
   font-size: 0.85rem;
   color: #94a3b8;
 }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .employee-summary-wrapper {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.875rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .employee-summary-card {
+    padding: 1.125rem;
+  }
+
+  .employee-summary-icon-wrapper {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+  }
+
+  .employee-summary-value {
+    font-size: 1.5rem;
+  }
+
+  .charts-grid-2 {
+    grid-template-columns: 1fr;
+    gap: 0.875rem;
+    margin-bottom: 1rem;
+  }
+
+  .chart-card {
+    padding: 1rem 1.125rem;
+  }
+
+  .table-header-bar {
+    padding: 1rem 1.125rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .employee-summary-wrapper {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .employee-summary-header {
+    margin-bottom: 0.75rem;
+  }
+
+  .data-table {
+    min-width: 480px;
+  }
+}
+
+@media (max-width: 480px) {
+  .employee-summary-wrapper {
+    gap: 0.625rem;
+    margin-bottom: 1rem;
+  }
+
+  .employee-summary-card {
+    padding: 1rem;
+  }
+
+  .employee-summary-value {
+    font-size: 1.35rem;
+  }
+
+  .btn-primary,
+  .btn-outline {
+    padding: 0.6rem 1rem;
+    font-size: 0.875rem;
+  }
+}
