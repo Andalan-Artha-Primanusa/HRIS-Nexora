@@ -61,6 +61,11 @@ const LeaveBalancePage = () => {
     return value || '-';
   };
 
+  const formatEmptyPolicyValue = (value: any, emptyLabel: string) => {
+    if (value === null || value === undefined || value === '') return emptyLabel;
+    return value;
+  };
+
   return (
     <div className="crud-page">
       {/* Header - Same style as Leave Requests */}
@@ -249,15 +254,15 @@ const LeaveBalancePage = () => {
                 </tr>
                 <tr>
                   <td><strong>Periode Diblokir</strong></td>
-                  <td>{data.policy.blackout_ranges || '-'}</td>
+                  <td>{formatEmptyPolicyValue(data.policy.blackout_ranges, 'Tidak ada periode diblokir')}</td>
                 </tr>
                 <tr>
                   <td><strong>ID Kalender Libur</strong></td>
-                  <td>{data.policy.holiday_calendar_id ?? '-'}</td>
+                  <td>{formatEmptyPolicyValue(data.policy.holiday_calendar_id, 'Tidak menggunakan kalender libur khusus')}</td>
                 </tr>
                 <tr>
                   <td><strong>Catatan</strong></td>
-                  <td>{data.policy.notes || '-'}</td>
+                  <td>{formatEmptyPolicyValue(data.policy.notes, 'Tidak ada catatan')}</td>
                 </tr>
                 <tr>
                   <td><strong>Dibuat</strong></td>
