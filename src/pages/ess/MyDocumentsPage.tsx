@@ -28,6 +28,7 @@ import { api } from '@/shared/api/httpClient';
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
+import './MyDocumentsPage.css';
 
 type TabType = "Semua" | "contract" | "letter" | "identity" | "pending" | "approved";
 
@@ -297,7 +298,7 @@ const UploadDocumentModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSu
         </button>
       </>
     )}>
-      <form id="upload-document-form" onSubmit={handleSubmit}>
+      <form id="upload-document-form" className="document-upload-form" onSubmit={handleSubmit}>
           {formError && (
             <div style={{
               marginBottom: '1rem',
@@ -368,7 +369,7 @@ const UploadDocumentModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSu
           {/* Form fields */}
           <div className="form-grid">
             {/* Title */}
-            <div className="form-group form-group--full">
+            <div className="form-group">
               <label className="form-label">
                 Judul Dokumen <span className="required">*</span>
               </label>
@@ -580,7 +581,7 @@ const MyDocumentsPage: React.FC = () => {
   };
 
   return (
-    <div className="crud-page">
+    <div className="crud-page my-documents-page">
       {/* Header */}
       <Card className="hero-card">
         <div className="hero-card-inner">

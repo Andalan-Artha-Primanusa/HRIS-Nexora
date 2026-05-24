@@ -82,6 +82,7 @@ export const menuItems: MenuItem[] = [
     icon: FileText,
     menuKey: 'legal-dokumen',
     subItems: [
+      { label: 'Review Dokumen', path: '/documents/review' },
       { label: 'Surat Tugas', path: '/admin/assignment-letters', menuKey: 'legal-dokumen.surat-tugas' },
       { label: 'Pembuat Surat', path: '/legal/letters', menuKey: 'legal-dokumen.generator' },
       { label: 'Kalkulator Pesangon', path: '/legal/severance', menuKey: 'legal-dokumen.kalkulator' },

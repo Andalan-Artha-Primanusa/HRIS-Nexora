@@ -89,6 +89,7 @@ const HolidayCalendarPage = lazy(() => import("../../pages/admin/HolidayCalendar
 const TrainingManagementPage = lazy(() => import("../../pages/admin/TrainingManagementPage"));
 const CompetencyMatrixPage = lazy(() => import("../../pages/admin/CompetencyMatrixPage"));
 const ApprovalFlowPage = lazy(() => import("../../pages/admin/ApprovalFlowPage"));
+const DocumentReviewPage = lazy(() => import("../../pages/admin/DocumentReviewPage"));
 const ProgressiveTaxPage = lazy(() => import("../../pages/admin/ProgressiveTaxPage"));
 const SuccessionMatrixPage = lazy(() => import("../../pages/admin/SuccessionMatrixPage"));
 const IdpPage = lazy(() => import("../../pages/admin/IdpPage"));
@@ -166,7 +167,6 @@ const sectionRoutes = [
   { path: "/organization/summary" },
   { path: "/organization/chart" },
   { path: "/organization/team" },
-  { path: "/documents/review" },
   { path: "/documents/expiring" },
   { path: "/notifications" },
   { path: "/attendance/timesheet" },
@@ -265,6 +265,20 @@ export const router = createBrowserRouter([
         path: "/approval-flows",
         element: <DashboardLayout />,
         children: [{ index: true, element: <ApprovalFlowPage /> }],
+      },
+      {
+        path: "/documents/review",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: (
+              <MenuRouteGuard menuKey="legal-dokumen">
+                <DocumentReviewPage />
+              </MenuRouteGuard>
+            ),
+          },
+        ],
       },
       {
         path: "/dashboard",
