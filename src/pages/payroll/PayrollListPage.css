@@ -746,12 +746,70 @@
 
 .crud-table-tag {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 64px;
   padding: 0.35rem 0.75rem;
   border-radius: 999px;
   font-size: 0.75rem;
   font-weight: 600;
   background: #f1f5f9;
   color: #475569;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.payroll-list-table {
+  min-width: 850px;
+  table-layout: fixed;
+}
+
+.payroll-list-table .payroll-col-employee { width: 28%; }
+.payroll-list-table .payroll-col-period { width: 12%; }
+.payroll-list-table .payroll-col-money { width: 15%; }
+.payroll-list-table .payroll-col-status { width: 17%; }
+.payroll-list-table .payroll-col-actions { width: 9%; }
+
+.payroll-list-table .crud-table-name {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.payroll-list-table th,
+.payroll-list-table td {
+  vertical-align: middle;
+}
+
+.payroll-list-table .cell-name {
+  min-width: 0;
+}
+
+.payroll-list-table .cell-stacked {
+  min-width: 0;
+}
+
+.payroll-list-table .cell-name-text,
+.payroll-list-table .cell-stacked__sub {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.payroll-list-table .crud-table-amount,
+.payroll-list-table .crud-table-amount-green {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.payroll-list-table td:nth-child(2),
+.payroll-list-table td:nth-child(6),
+.payroll-list-table td:nth-child(7) {
+  white-space: nowrap;
+}
+
+.payroll-list-table td:nth-child(6) {
+  text-align: left;
 }
 
 /* Status Badge Overrides */
