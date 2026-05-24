@@ -38,6 +38,10 @@ interface OvertimeRecord {
     full_name: string;
     department?: { name: string };
     position?: { name: string };
+    departmentRel?: { name: string };
+    positionRel?: { name: string };
+    department_rel?: { name: string };
+    position_rel?: { name: string };
     user?: {
       name: string;
       profile?: { avatar_url: string };
@@ -81,6 +85,17 @@ const toEvidenceList = (value: unknown): OvertimeEvidence[] =>
 const getApiErrorMessage = (error: unknown, fallback: string) => {
   const err = error as ApiErrorLike;
   return err.response?.data?.message || err.message || fallback;
+};
+
+const getEmployeeDepartmentName = (employee?: OvertimeRecord['employee']) =>
+  employee?.departmentRel?.name || employee?.department_rel?.name || employee?.department?.name || '';
+
+const getEmployeePositionName = (employee?: OvertimeRecord['employee']) =>
+  employee?.positionRel?.name || employee?.position_rel?.name || employee?.position?.name || '';
+
+const getEmployeeSubtitle = (employee?: OvertimeRecord['employee']) => {
+  const parts = [getEmployeeDepartmentName(employee), getEmployeePositionName(employee)].filter(Boolean);
+  return parts.join(' • ');
 };
 
 const toOvertimeRecord = (record: unknown): OvertimeRecord => {
@@ -482,7 +497,9 @@ const OvertimePage = () => {
                             </div>
                             <div className="cell-stacked">
                               <span className="cell-name-text">{record.employee?.user?.name || record.employee?.full_name || 'User'}</span>
-                              <span className="cell-stacked__sub">{record.employee?.department?.name || "-"} • {record.employee?.position?.name || "-"}</span>
+                              {getEmployeeSubtitle(record.employee) && (
+                                <span className="cell-stacked__sub">{getEmployeeSubtitle(record.employee)}</span>
+                              )}
                             </div>
                           </div>
                         </td>
