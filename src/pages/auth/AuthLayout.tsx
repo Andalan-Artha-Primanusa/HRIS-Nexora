@@ -11,11 +11,14 @@ interface AuthLayoutProps {
 
 const AuthLayout = ({ title, subtitle, children, footer, visualContent }: AuthLayoutProps) => {
   useEffect(() => {
+    const isMobile = window.innerWidth <= 560;
     const prevHtmlOverflow = document.documentElement.style.overflow;
     const prevBodyOverflow = document.body.style.overflow;
 
-    document.documentElement.style.overflow = "hidden";
-    document.body.style.overflow = "hidden";
+    if (!isMobile) {
+      document.documentElement.style.overflow = "hidden";
+      document.body.style.overflow = "hidden";
+    }
 
     return () => {
       document.documentElement.style.overflow = prevHtmlOverflow;

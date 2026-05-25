@@ -256,7 +256,9 @@
 }
 
 .auth-password-wrap .auth-input {
-  padding-right: 3rem;
+  padding-right: 3.5rem !important;
+  position: relative;
+  z-index: 1;
 }
 
 .auth-password-toggle {
@@ -264,6 +266,9 @@
   top: 50%;
   right: 0.8rem;
   transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  padding: 0;
   border: none;
   background: transparent;
   color: #667085;
@@ -271,6 +276,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  z-index: 2;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .auth-password-toggle:hover {
@@ -318,7 +326,8 @@
   color: #ffffff;
   font-size: 1.08rem;
   font-weight: 600;
-  display: inline-flex;
+  display: flex;
+  width: 100%;
   align-items: center;
   justify-content: center;
   gap: 0.45rem;
@@ -355,7 +364,8 @@
   color: #111827;
   font-size: 1.02rem;
   font-weight: 600;
-  display: inline-flex;
+  display: flex;
+  width: 100%;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
@@ -474,6 +484,8 @@
     min-height: 100dvh;
     padding: 1rem;
     align-items: center;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .auth-card {
@@ -486,15 +498,19 @@
 @media (max-width: 560px) {
   .auth-form-panel {
     min-height: 100svh;
-    padding: 0.75rem;
+    padding: 1rem 0.75rem;
     align-items: flex-start;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .auth-card {
     width: 100%;
     max-width: 100%;
-    padding: 1rem;
+    padding: 1.25rem;
     border-radius: 14px;
+    margin-top: auto;
+    margin-bottom: auto;
   }
 
   .auth-title {
@@ -511,7 +527,7 @@
   .auth-input,
   .auth-primary-button,
   .auth-social-button {
-    height: 44px;
+    height: 46px;
     border-radius: 11px;
     font-size: 0.98rem;
   }
