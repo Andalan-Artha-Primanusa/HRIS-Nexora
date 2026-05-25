@@ -383,22 +383,28 @@ const DocumentReviewPage = () => {
                         </div>
                       </td>
                       <td>{renderStatus(document)}</td>
-                      <td>
-                        <div className="document-review-actions">
-                          <button title="Unduh" onClick={() => void downloadDocument(document)}><Download size={16} /></button>
-                          <button title="Detail" onClick={() => setSelectedDocument(document)}><Eye size={16} /></button>
-                          <button title="Riwayat Persetujuan" onClick={() => setHistoryDocument(document)}><History size={16} /></button>
+                      <td className="td-center">
+                        <div className="action-btn-group document-review-actions">
+                          <button className="action-btn document-review-action document-review-action--download" title="Unduh" onClick={() => void downloadDocument(document)}>
+                            <Download size={16} />
+                          </button>
+                          <button className="action-btn document-review-action document-review-action--view" title="Detail" onClick={() => setSelectedDocument(document)}>
+                            <Eye size={16} />
+                          </button>
+                          <button className="action-btn document-review-action document-review-action--history" title="Riwayat Persetujuan" onClick={() => setHistoryDocument(document)}>
+                            <History size={16} />
+                          </button>
                           {canProcess(document) && (
                             <>
                               <button
-                                className="approve"
+                                className="action-btn document-review-action document-review-action--approve"
                                 title="Setujui"
                                 onClick={() => setDecision({ document, action: 'approve' })}
                               >
                                 <CheckCircle2 size={16} />
                               </button>
                               <button
-                                className="reject"
+                                className="action-btn document-review-action document-review-action--reject"
                                 title="Tolak"
                                 onClick={() => setDecision({ document, action: 'reject' })}
                               >
