@@ -154,7 +154,7 @@ const ProgramsTab: React.FC = () => {
 
       <div className="table-section integrated-table-section">
         <div className="wuw-table-area integrated-table-area">
-      <Card className="control-section-card integrated-control-card integrated-table-toolbar">
+      <Card className="control-section-card integrated-control-card integrated-table-toolbar integrated-table-toolbar--stack-left">
         <div className="control-section-inner">
           <div className="elyra-tabs">
             {(['Semua', 'Active', 'Draft', 'Completed', 'Cancelled'] as const).map(tab => (

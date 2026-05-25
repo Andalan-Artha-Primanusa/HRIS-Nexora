@@ -389,7 +389,7 @@ const AdminReimbursementsPage: React.FC = () => {
       {/* Table Section with integrated controls */}
       <div className="table-section integrated-table-section">
         <div className="wuw-table-area integrated-table-area">
-      <Card className="control-section-card integrated-control-card integrated-table-toolbar">
+      <Card className="control-section-card integrated-control-card integrated-table-toolbar integrated-table-toolbar--stack-left">
         <div className="control-section-inner">
           {/* Tabs */}
           <div className="elyra-tabs">
