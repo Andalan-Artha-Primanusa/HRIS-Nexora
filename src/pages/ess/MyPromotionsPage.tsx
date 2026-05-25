@@ -286,7 +286,13 @@ const MyPromotionsPage: React.FC = () => {
       if (promoStatus === 'approved') {
         return <span className="badge-soft badge-soft--orange">Perlu Laporan</span>;
       }
-      return <span className="badge-soft badge-soft--gray">-</span>;
+      if (promoStatus === 'rejected') {
+        return <span className="badge-soft badge-soft--gray">Tidak Berlaku</span>;
+      }
+      if (promoStatus === 'pending') {
+        return <span className="badge-soft badge-soft--gray">Menunggu</span>;
+      }
+      return <span className="badge-soft badge-soft--gray">Belum Ada</span>;
     }
     const map: Record<string, { label: string; class: string }> = {
       submitted: { label: 'Dikirim', class: 'badge-soft--purple' },
