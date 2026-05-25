@@ -5,6 +5,7 @@ import { getRoleBasedDashboardPathFromStorage } from "@/features/auth/utils/role
 import { ProtectedRoute } from "./ProtectedRoute";
 import { MenuRouteGuard } from "./MenuRouteGuard";
 import { useAuthSession } from "./useAuthSession";
+import { LoadingState } from "@/shared/ui/DataStateDisplay";
 import LoginPage from "../../pages/auth/login/LoginPage";
 import GoogleCallbackPage from "../../pages/auth/login/GoogleCallbackPage";
 import RegisterPage from "../../pages/auth/register/RegisterPage";
@@ -207,7 +208,11 @@ const RootRedirect = () => {
   const dashboardPath = getRoleBasedDashboardPathFromStorage();
 
   if (authStatus === "checking") {
-    return null;
+    return (
+      <div style={{ display: 'flex', height: '100vh', width: '100vw', alignItems: 'center', justifyContent: 'center' }}>
+        <LoadingState message="Memeriksa sesi..." />
+      </div>
+    );
   }
 
   return authStatus === "authenticated" ? (
@@ -222,7 +227,11 @@ const GuestRoute = () => {
   const dashboardPath = getRoleBasedDashboardPathFromStorage();
 
   if (authStatus === "checking") {
-    return null;
+    return (
+      <div style={{ display: 'flex', height: '100vh', width: '100vw', alignItems: 'center', justifyContent: 'center' }}>
+        <LoadingState message="Memeriksa sesi..." />
+      </div>
+    );
   }
 
   return authStatus === "authenticated" ? <Navigate to={dashboardPath} replace /> : <Outlet />;
@@ -602,11 +611,7 @@ export const router = createBrowserRouter([
           },
         ],
       },
-      {
-        path: "/my/reimbursements",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <MyReimbursementsPage /> }],
-      },
+
       {
         path: "/reimbursements",
         element: <DashboardLayout />,
