@@ -5,6 +5,7 @@ import { Card } from '@/shared/ui/Card';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { useAuthStore } from '@/app/store/auth.store';
 import { promotionService } from '@/features/organization/api/promotion.service';
+import { organizationService } from '@/features/organization/api/organization.service';
 import { parsePaginatedResponse } from '@/shared/api/pagination';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
@@ -20,7 +21,60 @@ const toIdString = (value: unknown) => {
 const toRecord = (value: unknown): Record<string, unknown> =>
   value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
 
+const firstText = (...values: unknown[]) => {
+  for (const value of values) {
+    if (typeof value === 'string' && value.trim()) return value.trim();
+    if (typeof value === 'number' && Number.isFinite(value)) return String(value);
+  }
+  return '';
+};
+
 const getInitial = (value?: string | null) => (value?.trim().charAt(0) || 'K').toUpperCase();
+
+const getUserName = (value: unknown) => {
+  const record = toRecord(value);
+  const user = toRecord(record.user);
+  return firstText(record.name, user.name, record.email);
+};
+
+const getPromotionApproverName = (promo: any) => {
+  const approver = toRecord(promo?.approver);
+  const approvedBy = toRecord(promo?.approved_by);
+  const approvedByUser = toRecord(promo?.approvedBy);
+  return firstText(
+    promo?.approver_name,
+    approver.name,
+    approver.email,
+    promo?.approved_by_name,
+    approvedBy.name,
+    approvedBy.email,
+    approvedByUser.name,
+    approvedByUser.email,
+  );
+};
+
+const getHistoryApproverName = (response: any) => {
+  const rows = Array.isArray(response)
+    ? response
+    : Array.isArray(response?.data)
+      ? response.data
+      : [];
+  const acted = [...rows]
+    .reverse()
+    .find((item) => String(item?.action || '').toLowerCase() !== 'pending' && getUserName(item?.user));
+
+  return acted ? getUserName(acted.user) : '';
+};
+
+const getApproverDisplay = (promo: any) => {
+  const approverName = getPromotionApproverName(promo);
+  if (approverName) return approverName;
+
+  const status = String(promo?.status || '').toLowerCase();
+  if (['approved', 'completed', 'rejected'].includes(status)) return 'Sistem / Admin';
+
+  return '-';
+};
 
 const MyPromotionsPage: React.FC = () => {
   const user = useAuthStore((state) => state.user);
@@ -71,7 +125,32 @@ const MyPromotionsPage: React.FC = () => {
         ? (payload as Record<string, unknown>).promotions
         : payload;
       const parsed = parsePaginatedResponse<Record<string, unknown>>(promotionPayload);
-      setItems(parsed.items);
+      const enrichedItems = await Promise.all(
+        parsed.items.map(async (promo) => {
+          const status = String(promo?.status || '').toLowerCase();
+          if (getPromotionApproverName(promo) || !['approved', 'completed', 'rejected'].includes(status) || !promo?.id) {
+            return promo;
+          }
+
+          try {
+            const history = await organizationService.getApprovalHistory('promotion', promo.id as string | number);
+            const approverName = getHistoryApproverName(history);
+            if (!approverName) return promo;
+
+            return {
+              ...promo,
+              approver_name: approverName,
+              approver: {
+                ...toRecord(promo.approver),
+                name: approverName,
+              },
+            };
+          } catch {
+            return promo;
+          }
+        }),
+      );
+      setItems(enrichedItems);
       setTotalPages(parsed.totalPages);
     } catch (error: any) {
       setErrorMessage(error?.response?.data?.message || 'Gagal memuat data promosi');
@@ -391,7 +470,7 @@ const MyPromotionsPage: React.FC = () => {
                         </td>
                         <td>
                           <span style={{ color: '#64748b', fontWeight: 500 }}>
-                            {promo.approver?.name || '-'}
+                            {getApproverDisplay(promo)}
                           </span>
                         </td>
                         <td className="td-center">{getStatusBadge(promo.status)}</td>
