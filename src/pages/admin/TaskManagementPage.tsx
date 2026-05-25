@@ -286,97 +286,95 @@ const TaskManagementPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* Control Section */}
-      <Card className="control-section-card">
-        <div className="control-section-inner">
-          {/* Tabs */}
-          <div className="elyra-tabs">
-            {[
-              { value: '', label: 'Semua' },
-              { value: 'pending', label: 'Menunggu' },
-              { value: 'in_progress', label: 'Dikerjakan' },
-              { value: 'completed', label: 'Selesai' },
-              { value: 'cancelled', label: 'Dibatalkan' },
-            ].map((tab) => (
-              <button
-                key={tab.value}
-                className={`elyra-tab ${selectedStatus === tab.value ? 'active' : ''}`}
-                onClick={() => setSelectedStatus(tab.value)}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Search & Filter */}
-          <div className="control-actions">
-            <div className="search-box">
-              <div className="search-icon-inside"><Search size={18} /></div>
-              <input
-                type="text"
-                placeholder="Cari tugas..."
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                className="search-input-pill"
-              />
-            </div>
-            <button
-              className={`filter-btn-rounded ${showFilters ? 'active' : ''}`}
-              onClick={() => setShowFilters(!showFilters)}
-            >
-              <Filter size={18} />
-              <span>Filter</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Filter Panel */}
-        {showFilters && (
-          <div className="filter-dropdown">
-            <div className="filter-row">
-              <div className="filter-group">
-                <label>Status</label>
-                <select
-                  value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="filter-select-premium"
-                >
-                  <option value="">Semua Status</option>
-                  {uniqueStatuses.map((status) => (
-                    <option key={status} value={status}>
-                      {status === 'pending' ? 'Menunggu' : status === 'in_progress' ? 'Dikerjakan' : status === 'completed' ? 'Selesai' : status === 'cancelled' ? 'Dibatalkan' : status}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="filter-group">
-                <label>Prioritas</label>
-                <select
-                  value={selectedPriority}
-                  onChange={(e) => setSelectedPriority(e.target.value)}
-                  className="filter-select-premium"
-                >
-                  <option value="">Semua Prioritas</option>
-                  {uniquePriorities.map((priority) => (
-                    <option key={priority} value={priority}>
-                      {priority === 'low' ? 'Rendah' : priority === 'medium' ? 'Sedang' : priority === 'high' ? 'Tinggi' : priority === 'urgent' ? 'Mendesak' : priority}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {(searchText || selectedStatus || selectedPriority) && (
-                <button className="btn-clear-filter" onClick={clearFilters}>
-                  Hapus Filter
-                </button>
-              )}
-            </div>
-          </div>
-        )}
-      </Card>
-
       {/* Table Section */}
-      <div className="table-section">
-        <div className="wuw-table-area">
+      <div className="table-section task-table-section">
+        <div className="wuw-table-area task-table-area">
+          <div className="table-toolbar task-table-toolbar">
+            <div className="control-section-inner">
+              {/* Tabs */}
+              <div className="elyra-tabs">
+                {[
+                  { value: '', label: 'Semua' },
+                  { value: 'pending', label: 'Menunggu' },
+                  { value: 'in_progress', label: 'Dikerjakan' },
+                  { value: 'completed', label: 'Selesai' },
+                  { value: 'cancelled', label: 'Dibatalkan' },
+                ].map((tab) => (
+                  <button
+                    key={tab.value}
+                    className={`elyra-tab ${selectedStatus === tab.value ? 'active' : ''}`}
+                    onClick={() => setSelectedStatus(tab.value)}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Search & Filter */}
+              <div className="control-actions">
+                <div className="search-box">
+                  <div className="search-icon-inside"><Search size={18} /></div>
+                  <input
+                    type="text"
+                    placeholder="Cari tugas..."
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    className="search-input-pill"
+                  />
+                </div>
+                <button
+                  className={`filter-btn-rounded ${showFilters ? 'active' : ''}`}
+                  onClick={() => setShowFilters(!showFilters)}
+                >
+                  <Filter size={18} />
+                  <span>Filter</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Filter Panel */}
+            {showFilters && (
+              <div className="filter-dropdown">
+                <div className="filter-row">
+                  <div className="filter-group">
+                    <label>Status</label>
+                    <select
+                      value={selectedStatus}
+                      onChange={(e) => setSelectedStatus(e.target.value)}
+                      className="filter-select-premium"
+                    >
+                      <option value="">Semua Status</option>
+                      {uniqueStatuses.map((status) => (
+                        <option key={status} value={status}>
+                          {status === 'pending' ? 'Menunggu' : status === 'in_progress' ? 'Dikerjakan' : status === 'completed' ? 'Selesai' : status === 'cancelled' ? 'Dibatalkan' : status}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="filter-group">
+                    <label>Prioritas</label>
+                    <select
+                      value={selectedPriority}
+                      onChange={(e) => setSelectedPriority(e.target.value)}
+                      className="filter-select-premium"
+                    >
+                      <option value="">Semua Prioritas</option>
+                      {uniquePriorities.map((priority) => (
+                        <option key={priority} value={priority}>
+                          {priority === 'low' ? 'Rendah' : priority === 'medium' ? 'Sedang' : priority === 'high' ? 'Tinggi' : priority === 'urgent' ? 'Mendesak' : priority}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {(searchText || selectedStatus || selectedPriority) && (
+                    <button className="btn-clear-filter" onClick={clearFilters}>
+                      Hapus Filter
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
           {loading && <LoadingState message="Memuat tugas..." />}
           {!loading && errorMessage && (
             <ErrorState message="Koneksi Terputus" error={errorMessage} onRetry={fetchData} />

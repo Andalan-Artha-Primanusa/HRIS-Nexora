@@ -291,39 +291,46 @@ const DocumentReviewPage = () => {
         ))}
       </div>
 
-      <Card className="document-review-list-card">
-        <div className="document-review-heading">
+      <Card className="analytics-title-card">
+        <div className="analytics-title-inner">
+          <div className="analytics-icon">
+            <FileCheck2 size={24} />
+          </div>
           <div>
-            <h2>Antrean Persetujuan Dokumen</h2>
-            <p>Setujui atau tolak hanya ketika role Anda menjadi tahap aktif.</p>
+            <h2 className="analytics-title">Antrean Persetujuan Dokumen</h2>
+            <p className="analytics-subtitle">Setujui atau tolak hanya ketika role Anda menjadi tahap aktif.</p>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="document-review-list-card">
+        <div className="document-review-toolbar">
+          <div className="document-review-tabs">
+            {[
+              ['pending', 'Menunggu'],
+              ['approved', 'Disetujui'],
+              ['rejected', 'Ditolak'],
+              ['expired', 'Kedaluwarsa'],
+              ['all', 'Semua'],
+            ].map(([key, label]) => (
+              <button
+                type="button"
+                key={key}
+                className={activeFilter === key ? 'active' : ''}
+                onClick={() => setActiveFilter(key as DocumentStatusFilter)}
+              >
+                {label} <span>{counters[key as DocumentStatusFilter]}</span>
+              </button>
+            ))}
           </div>
           <div className="document-review-search">
-            <Search size={17} />
+            <Search size={18} />
             <input
               value={searchText}
               onChange={(event) => setSearchText(event.target.value)}
               placeholder="Cari dokumen atau karyawan..."
             />
           </div>
-        </div>
-
-        <div className="document-review-tabs">
-          {[
-            ['pending', 'Menunggu'],
-            ['approved', 'Disetujui'],
-            ['rejected', 'Ditolak'],
-            ['expired', 'Kedaluwarsa'],
-            ['all', 'Semua'],
-          ].map(([key, label]) => (
-            <button
-              type="button"
-              key={key}
-              className={activeFilter === key ? 'active' : ''}
-              onClick={() => setActiveFilter(key as DocumentStatusFilter)}
-            >
-              {label} <span>{counters[key as DocumentStatusFilter]}</span>
-            </button>
-          ))}
         </div>
 
         {loading ? (

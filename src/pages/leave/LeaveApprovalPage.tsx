@@ -245,43 +245,41 @@ const LeaveApprovalPage = () => {
         </div>
       </Card>
 
-      {/* Control Section */}
-      <Card className="control-section-card">
-        <div className="control-section-inner">
-          {/* Tabs */}
-          <div className="elyra-tabs">
-            {["Semua", "Pending", "Approved", "Rejected"].map((tab) => (
-              <button
-                key={tab}
-                className={`elyra-tab ${activeTab === tab ? "active" : ""}`}
-                onClick={() => setActiveTab(tab as "Semua" | "Pending" | "Approved" | "Rejected")}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-
-          {/* Search */}
-          <div className="control-actions">
-            <div className="search-box">
-              <div className="search-icon-inside">
-                <Search size={18} />
+      {/* Table Section */}
+      <div className="table-section leave-approval-table-section">
+        <div className="wuw-table-area leave-approval-table-area">
+          <div className="table-toolbar leave-approval-table-toolbar">
+            <div className="control-section-inner">
+              {/* Tabs */}
+              <div className="elyra-tabs">
+                {["Semua", "Pending", "Approved", "Rejected"].map((tab) => (
+                  <button
+                    key={tab}
+                    className={`elyra-tab ${activeTab === tab ? "active" : ""}`}
+                    onClick={() => setActiveTab(tab as "Semua" | "Pending" | "Approved" | "Rejected")}
+                  >
+                    {tab}
+                  </button>
+                ))}
               </div>
-              <input
-                type="text"
-                placeholder="Cari karyawan..."
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                className="search-input-pill"
-              />
+
+              {/* Search */}
+              <div className="control-actions">
+                <div className="search-box">
+                  <div className="search-icon-inside">
+                    <Search size={18} />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Cari karyawan..."
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    className="search-input-pill"
+                  />
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </Card>
-
-      {/* Table Section */}
-      <div className="table-section">
-        <div className="wuw-table-area">
           {loading && <LoadingState message="Memuat pengajuan cuti..." />}
 
           {!loading && paginatedItems.length === 0 && (

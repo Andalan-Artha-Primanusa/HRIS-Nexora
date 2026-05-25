@@ -306,37 +306,36 @@ const AssetManagementPage: React.FC = () => {
         </div>
       </Card>
 
-      <Card className="control-section-card">
-        <div className="control-section-inner">
-          <div className="elyra-tabs">
-            {(['Semua', 'Tersedia', 'Digunakan', 'Perbaikan', 'Dihapus'] as const).map((tab) => (
-              <button key={tab} className={`elyra-tab ${activeTab === tab ? 'active' : ''}`} onClick={() => { setActiveTab(tab); setCurrentPage(1); }}>
-                {tab}
-              </button>
-            ))}
-          </div>
-          <div className="control-actions">
-            <div className="search-box">
-              <div className="search-icon-inside"><Search size={18} /></div>
-              <input type="text" placeholder="Cari aset..." value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }} className="search-input-pill" />
-            </div>
-            <button className={`filter-btn-rounded ${showFilters ? 'active' : ''}`} onClick={() => setShowFilters(!showFilters)}>
-              <Filter size={18} />
-              <span>Filter</span>
-            </button>
-          </div>
-        </div>
-        {showFilters && (
-          <div className="filter-dropdown">
-            <div className="filter-row">
-              {(searchQuery || activeTab !== 'Semua') && <button className="btn-clear-filter" onClick={clearFilters}>Hapus Filter</button>}
-            </div>
-          </div>
-        )}
-      </Card>
-
-      <div className="table-section">
+      <div className="table-section asset-table-section">
         <div className="wuw-table-area">
+          <div className="table-toolbar">
+            <div className="control-section-inner">
+              <div className="elyra-tabs">
+                {(['Semua', 'Tersedia', 'Digunakan', 'Perbaikan', 'Dihapus'] as const).map((tab) => (
+                  <button key={tab} className={`elyra-tab ${activeTab === tab ? 'active' : ''}`} onClick={() => { setActiveTab(tab); setCurrentPage(1); }}>
+                    {tab}
+                  </button>
+                ))}
+              </div>
+              <div className="control-actions">
+                <div className="search-box">
+                  <div className="search-icon-inside"><Search size={18} /></div>
+                  <input type="text" placeholder="Cari aset..." value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }} className="search-input-pill" />
+                </div>
+                <button className={`filter-btn-rounded ${showFilters ? 'active' : ''}`} onClick={() => setShowFilters(!showFilters)}>
+                  <Filter size={18} />
+                  <span>Filter</span>
+                </button>
+              </div>
+            </div>
+            {showFilters && (
+              <div className="filter-dropdown">
+                <div className="filter-row">
+                  {(searchQuery || activeTab !== 'Semua') && <button className="btn-clear-filter" onClick={clearFilters}>Hapus Filter</button>}
+                </div>
+              </div>
+            )}
+          </div>
           {loading && <LoadingState message="Memuat aset..." />}
           {!loading && paginatedAssets.length === 0 && (
             <div style={{ padding: '5rem 0' }}>

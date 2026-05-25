@@ -1,16 +1,7 @@
-.control-section-card {
-  background: #ffffff !important;
-  border-radius: 16px !important;
-  border: 1px solid #e2e8f0 !important;
+.legal-table-toolbar {
+  background: #ffffff;
   padding: 1.5rem !important;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
-}
-
-.control-section-card:hover {
-  transform: none !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
-  border-color: #e2e8f0 !important;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .control-section-inner {
@@ -129,9 +120,9 @@
 }
 
 .tab-button.active {
-  background: #ffffff;
-  color: #1e293b;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  background: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
 }
 
 .tab-count {
@@ -144,7 +135,7 @@
 }
 
 .tab-button.active .tab-count {
-  background: #2563eb;
+  background: rgba(255, 255, 255, 0.2);
   color: #ffffff;
 }
 

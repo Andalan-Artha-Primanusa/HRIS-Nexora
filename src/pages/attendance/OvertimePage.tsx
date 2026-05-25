@@ -448,26 +448,25 @@ const OvertimePage = () => {
         ))}
       </div>
 
-      <Card className="control-section-card">
-        <div className="control-section-inner">
-          <div className="elyra-tabs">
-            {(['Semua', 'Pending', 'Approved', 'Rejected'] as const).map((tab) => (
-              <button key={tab} className={`elyra-tab ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
-                {tab} {tab !== 'Semua' && <span className="tab-count">{tab === 'Pending' ? pendingCount : tab === 'Approved' ? approvedCount : rejectedCount}</span>}
-              </button>
-            ))}
-          </div>
-          <div className="control-actions">
-            <div className="search-box">
-              <div className="search-icon-inside"><Search size={18} /></div>
-              <input type="text" placeholder="Cari lembur..." value={searchText} onChange={(e) => setSearchText(e.target.value)} className="search-input-pill" />
+      <div className="table-section overtime-table-section">
+        <div className="wuw-table-area overtime-table-area">
+          <div className="table-toolbar overtime-table-toolbar">
+            <div className="control-section-inner">
+              <div className="elyra-tabs">
+                {(['Semua', 'Pending', 'Approved', 'Rejected'] as const).map((tab) => (
+                  <button key={tab} className={`elyra-tab ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
+                    {tab} {tab !== 'Semua' && <span className="tab-count">{tab === 'Pending' ? pendingCount : tab === 'Approved' ? approvedCount : rejectedCount}</span>}
+                  </button>
+                ))}
+              </div>
+              <div className="control-actions">
+                <div className="search-box">
+                  <div className="search-icon-inside"><Search size={18} /></div>
+                  <input type="text" placeholder="Cari lembur..." value={searchText} onChange={(e) => setSearchText(e.target.value)} className="search-input-pill" />
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </Card>
-
-      <div className="table-section">
-        <div className="wuw-table-area">
           {loading && <LoadingState message="Memuat lembur..." />}
           {!loading && filteredRecords.length === 0 && <EmptyState title="Belum Ada Lembur" message="Tidak ada data lembur yang ditemukan." />}
           {!loading && filteredRecords.length > 0 && (

@@ -255,16 +255,12 @@
 }
 
 /* ============================================ */
-/* Control Section - Same style as Dashboard     */
+/* Table Toolbar                                 */
 /* ============================================ */
 
-.control-section-card {
-  background: #ffffff;
-  border-radius: 16px;
-  border: 1px solid #e2e8f0;
+.table-toolbar {
   padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  box-shadow: var(--shadow-sm);
+  background: #ffffff;
 }
 
 .control-section-inner {
@@ -460,8 +456,20 @@
   overflow: hidden;
 }
 
+.employee-table-area,
+.task-table-area,
+.payroll-report-table-area {
+  box-shadow: var(--shadow-sm);
+}
+
 .table-wrap {
   overflow-x: auto;
+}
+
+.employee-table-area .table-wrap,
+.task-table-area .table-wrap,
+.payroll-report-table-area .table-wrap {
+  border-top: 1px solid #e2e8f0;
 }
 
 .data-table {
@@ -613,6 +621,18 @@
   text-align: center;
 }
 
+.employee-table-area > .loading-state,
+.employee-table-area > .empty-state,
+.employee-table-area > .error-state,
+.task-table-area > .loading-state,
+.task-table-area > .empty-state,
+.task-table-area > .error-state,
+.payroll-report-table-area > .loading-state,
+.payroll-report-table-area > .empty-state,
+.payroll-report-table-area > .error-state {
+  border-top: 1px solid #e2e8f0;
+}
+
 .loading-state {
   color: #64748b;
 }
@@ -684,6 +704,12 @@
 /* Table Section Wrapper */
 .table-section {
   margin-top: 1.5rem;
+}
+
+.employee-table-section,
+.task-table-section,
+.payroll-report-table-section {
+  margin-top: 0;
 }
 
 /* Responsive */

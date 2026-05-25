@@ -163,52 +163,50 @@ const EmploymentLettersPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* Control Section */}
-      <Card className="control-section-card">
-        <div className="control-section-inner">
-          <div className="search-filter-group">
-            <div className="search-input-wrapper">
-              <Search size={18} className="search-icon" />
-              <input
-                type="text"
-                className="search-input"
-                placeholder="Cari karyawan berdasarkan nama, ID, atau departemen..."
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-              />
-              {searchText && (
-                <button className="clear-search-btn" onClick={() => setSearchText("")}>×</button>
-              )}
-            </div>
-            <Button variant="outline" size="sm" onClick={clearFilters} disabled={!searchText && activeTab === "Semua"}>
-              <RefreshCw size={14} />
-              Reset
-            </Button>
-          </div>
-
-          <div className="tabs-container">
-            {(["Semua", "Has Letter", "No Letter"] as const).map((tab) => (
-              <button
-                key={tab}
-                className={`tab-button ${activeTab === tab ? 'active' : ''}`}
-                onClick={() => setActiveTab(tab)}
-              >
-                {tab === "Has Letter" ? "Memiliki Surat" : tab === "No Letter" ? "Belum Ada Surat" : tab}
-                {tab !== "Semua" && (
-                  <span className="tab-count">
-                    {tab === "Has Letter"
-                      ? employees.filter(emp => emp.has_letter || emp.letter_count > 0).length
-                      : employees.filter(emp => !emp.has_letter && !emp.letter_count).length}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      </Card>
-
       {/* Data Table */}
       <Card className="data-table-card">
+        <div className="legal-table-toolbar">
+          <div className="control-section-inner">
+            <div className="search-filter-group">
+              <div className="search-input-wrapper">
+                <Search size={18} className="search-icon" />
+                <input
+                  type="text"
+                  className="search-input"
+                  placeholder="Cari karyawan berdasarkan nama, ID, atau departemen..."
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                />
+                {searchText && (
+                  <button className="clear-search-btn" onClick={() => setSearchText("")}>×</button>
+                )}
+              </div>
+              <Button variant="outline" size="sm" onClick={clearFilters} disabled={!searchText && activeTab === "Semua"}>
+                <RefreshCw size={14} />
+                Reset
+              </Button>
+            </div>
+
+            <div className="tabs-container">
+              {(["Semua", "Has Letter", "No Letter"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  className={`tab-button ${activeTab === tab ? 'active' : ''}`}
+                  onClick={() => setActiveTab(tab)}
+                >
+                  {tab === "Has Letter" ? "Memiliki Surat" : tab === "No Letter" ? "Belum Ada Surat" : tab}
+                  {tab !== "Semua" && (
+                    <span className="tab-count">
+                      {tab === "Has Letter"
+                        ? employees.filter(emp => emp.has_letter || emp.letter_count > 0).length
+                        : employees.filter(emp => !emp.has_letter && !emp.letter_count).length}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
         <div className="data-table-header">
           <h3 className="data-table-title">
             Daftar Karyawan
