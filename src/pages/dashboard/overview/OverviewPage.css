@@ -302,6 +302,7 @@
 
   .hero-actions {
     width: 100%;
+    flex-direction: column;
   }
 
   .hero-actions button {
