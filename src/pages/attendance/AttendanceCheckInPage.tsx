@@ -3,12 +3,23 @@ import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { showToast } from '@/shared/ui/toast';
 import { api } from '@/shared/api/httpClient';
-import { CheckCircle2, MapPin, Building2, Clock, LogIn } from 'lucide-react';
+import { CheckCircle2, MapPin, Building2, Clock, LogIn, Navigation, RefreshCw } from 'lucide-react';
 import type { LocationItem } from '@/features/location/types/location.types';
 import { getActiveLocations } from '@/features/location/api/location.service';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
 import './AttendancePages.css';
+
+const getTextValue = (...values: unknown[]) => {
+  for (const value of values) {
+    if (typeof value === 'string' && value.trim()) return value.trim();
+    if (typeof value === 'number' && Number.isFinite(value)) return String(value);
+  }
+  return '';
+};
+
+const getRecord = (value: unknown): Record<string, unknown> =>
+  value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
 
 const AttendanceCheckInPage = () => {
   const [latitude, setLatitude] = useState<number | null>(null);
@@ -23,8 +34,8 @@ const AttendanceCheckInPage = () => {
 
   const gpsFired = useRef(false);
 
-  const detectGPS = () => {
-    if (gpsFired.current) return;
+  const detectGPS = (force = false) => {
+    if (gpsFired.current && !force) return;
     gpsFired.current = true;
     setStatus('Mendeteksi lokasi GPS...');
     if (navigator.geolocation) {
@@ -60,7 +71,14 @@ const AttendanceCheckInPage = () => {
         // 1. Get user profile for department and direct location assignment
         const profileRes = await api.get('/me');
         const employeeData = profileRes.data?.data?.employee;
-        const dept = employeeData?.department || '';
+        const department = getRecord(employeeData?.department);
+        const departmentRel = getRecord(employeeData?.department_rel ?? employeeData?.departmentRel);
+        const dept = getTextValue(
+          department.name,
+          departmentRel.name,
+          employeeData?.department_name,
+          typeof employeeData?.department === 'string' ? employeeData.department : '',
+        );
         const assignedLocationId = employeeData?.location_id;
         
         setUserDepartment(dept);
@@ -158,7 +176,7 @@ const AttendanceCheckInPage = () => {
             </p>
           </div>
           <div className="hero-actions">
-            <button className="btn-outline" onClick={detectGPS}>
+            <button className="btn-outline" onClick={() => detectGPS(true)}>
               <Clock size={16} />
               Deteksi Lokasi
             </button>
@@ -174,18 +192,21 @@ const AttendanceCheckInPage = () => {
         </div>
       </div>
 
-      <Card className="attendance-form-card" glass>
+      <Card className="attendance-form-card attendance-check-card" glass>
         <div className="attendance-form-section">
-          <label className="attendance-label">
-            <Building2 size={18} style={{ display: 'inline', marginRight: '0.5rem' }} />
-            Tujuan Lokasi Kerja (Sesuai Departemen: {userDepartment || '...'})
+          <label className="attendance-field-label" htmlFor="attendance-location">
+            <span className="attendance-field-icon"><Building2 size={16} /></span>
+            <span>
+              Tujuan Lokasi Kerja
+              <small>Sesuai departemen: {userDepartment || 'Belum terdeteksi'}</small>
+            </span>
           </label>
           <select 
-            className="attendance-input"
+            id="attendance-location"
+            className="attendance-select"
             value={selectedLocationId}
             onChange={(e) => setSelectedLocationId(e.target.value)}
             disabled={loading || locations.length === 0}
-            style={{ width: '100%', marginBottom: '1.5rem', appearance: 'auto' }}
           >
             {locations.length === 0 ? (
               <option value="">Tidak ada lokasi tersedia</option>
@@ -200,25 +221,30 @@ const AttendanceCheckInPage = () => {
         </div>
 
         <div className="attendance-form-grid">
-          <label>
-            <MapPin size={18} style={{ display: 'inline', marginRight: '0.5rem' }} />
-            Latitude (GPS)
-            <input value={latitude?.toFixed(6) || 'Mendeteksi...'} disabled style={{ backgroundColor: '#f5f5f5' }} />
-          </label>
-          <label>
-            <MapPin size={18} style={{ display: 'inline', marginRight: '0.5rem' }} />
-            Longitude (GPS)
-            <input value={longitude?.toFixed(6) || 'Mendeteksi...'} disabled style={{ backgroundColor: '#f5f5f5' }} />
-          </label>
+          <div className="attendance-field">
+            <label className="attendance-field-label" htmlFor="attendance-latitude">
+              <span className="attendance-field-icon"><MapPin size={16} /></span>
+              <span>Latitude (GPS)</span>
+            </label>
+            <input id="attendance-latitude" value={latitude?.toFixed(6) || 'Mendeteksi...'} disabled />
+          </div>
+          <div className="attendance-field">
+            <label className="attendance-field-label" htmlFor="attendance-longitude">
+              <span className="attendance-field-icon"><MapPin size={16} /></span>
+              <span>Longitude (GPS)</span>
+            </label>
+            <input id="attendance-longitude" value={longitude?.toFixed(6) || 'Mendeteksi...'} disabled />
+          </div>
         </div>
 
         <div className="attendance-action-row">
           <Button 
             variant="outline" 
             size="md" 
-            onClick={detectGPS} 
+            onClick={() => detectGPS(true)} 
             disabled={loading}
           >
+            <RefreshCw size={16} />
             Refresh GPS
           </Button>
           <Button 
@@ -227,6 +253,7 @@ const AttendanceCheckInPage = () => {
             onClick={handleCheckIn} 
             disabled={loading || latitude === null || longitude === null || !selectedLocationId}
           >
+            <Navigation size={16} />
             {loading ? 'Mengirim...' : 'Check In Sekarang'}
           </Button>
         </div>
