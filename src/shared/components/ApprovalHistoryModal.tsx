@@ -128,7 +128,7 @@ export const ApprovalHistoryModal = ({
         </div>
       ) : history.length === 0 ? (
         <div style={{ textAlign: "center", padding: "2rem", color: "#94a3b8" }}>
-          <p>Belum ada aktivitas persetujuan untuk klaim ini.</p>
+          <p>Belum ada aktivitas persetujuan untuk {moduleLabel} ini.</p>
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
