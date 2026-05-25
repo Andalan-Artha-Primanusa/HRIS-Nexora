@@ -172,7 +172,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, isMobileOpen, onClo
             aria-label="Close sidebar"
             title="Close menu"
           >
-            <X size={20} />
+            <X size={24} />
           </button>
         )}
         <img
