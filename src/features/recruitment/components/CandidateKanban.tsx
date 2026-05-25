@@ -49,14 +49,9 @@ export const CandidateKanban: React.FC<CandidateKanbanProps> = ({ candidates, on
               {stageCandidates.map((candidate) => (
                 <div key={candidate.id} className="kanban-card" onClick={() => onViewCandidate(candidate)}>
                   <div className="kanban-card-header" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                    <img 
-                      src={candidate.profile_photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(candidate.full_name || 'C')}&color=7F9CF5&background=EBF4FF`} 
-                      alt="" 
-                      style={{ width: '40px', height: '40px', borderRadius: '10px', objectFit: 'cover' }}
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(candidate.full_name || 'C')}&color=7F9CF5&background=EBF4FF`;
-                      }}
-                    />
+                    <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#EBF4FF', color: '#7F9CF5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.1rem' }}>
+                      {(candidate.full_name || 'C').charAt(0).toUpperCase()}
+                    </div>
                     <div style={{ flex: 1 }}>
                       <h4 className="kanban-card-name" style={{ margin: 0, fontSize: '0.95rem', color: '#0f172a' }}>{candidate.full_name}</h4>
                       <span style={{ fontSize: '0.75rem', color: '#64748b' }}>#{candidate.id}</span>

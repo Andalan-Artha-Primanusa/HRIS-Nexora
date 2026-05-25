@@ -65,7 +65,7 @@ type KpiPeriod = {
   created_at: string;
   employee?: {
     id: number;
-    user?: { name: string; profile?: { avatar_url?: string } };
+    user?: { name: string };
   };
   items: KpiItem[];
 };

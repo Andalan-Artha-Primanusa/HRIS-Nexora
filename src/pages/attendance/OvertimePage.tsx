@@ -44,7 +44,7 @@ interface OvertimeRecord {
     position_rel?: { name: string };
     user?: {
       name: string;
-      profile?: { avatar_url: string };
+      profile?: any;
     };
   };
 }
@@ -491,9 +491,7 @@ const OvertimePage = () => {
                         <td>
                           <div className="cell-name">
                             <div className="cell-avatar">
-                              {record.employee?.user?.profile?.avatar_url ? (
-                                <img src={record.employee.user.profile.avatar_url} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
-                              ) : ( (record.employee?.user?.name || record.employee?.full_name || 'E').charAt(0).toUpperCase() )}
+                              {(record.employee?.user?.name || record.employee?.full_name || 'E').charAt(0).toUpperCase()}
                             </div>
                             <div className="cell-stacked">
                               <span className="cell-name-text">{record.employee?.user?.name || record.employee?.full_name || 'User'}</span>

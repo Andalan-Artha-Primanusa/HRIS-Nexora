@@ -36,11 +36,10 @@ const getEmployeeInfo = (item: any) => {
   const emp = item.employee;
   const user = emp?.user || item.user;
   const name = user?.name || emp?.full_name || item.employee_name || `EMP-${item.employee_id}`;
-  const avatarUrl = user?.profile?.avatar_url;
   const deptName = emp?.department?.name || "-";
   const posName = emp?.position?.name || "Karyawan";
   
-  return { name, avatarUrl, deptName, posName };
+  return { name, deptName, posName };
 };
 
 const DEFAULT_FORM = {
@@ -387,11 +386,7 @@ const ReimbursementsManagementPage = () => {
                             <div className="cell-avatar">
                               {(() => {
                                 const info = getEmployeeInfo(item);
-                                return info.avatarUrl ? (
-                                  <img src={info.avatarUrl} alt={info.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
-                                ) : (
-                                  info.name.charAt(0).toUpperCase()
-                                );
+                                return info.name.charAt(0).toUpperCase();
                               })()}
                             </div>
                             <div className="cell-stacked">

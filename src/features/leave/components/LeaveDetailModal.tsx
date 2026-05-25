@@ -68,11 +68,7 @@ export const LeaveDetailModal: React.FC<LeaveDetailModalProps> = ({ isOpen, onCl
           <label style={{ display: 'block', fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Pemohon</label>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-              {(item.employee?.user?.profile?.avatar_url || item.user?.profile?.avatar_url) ? (
-                <img src={item.employee?.user?.profile?.avatar_url || item.user?.profile?.avatar_url} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              ) : (
                 <span style={{ fontWeight: 700 }}>{String(item.employee?.user?.name || item.user?.name || 'E').charAt(0)}</span>
-              )}
             </div>
             <div>
               <div style={{ fontWeight: 600, color: '#1e293b' }}>{item.employee?.user?.name || item.employee?.full_name || item.user?.name || 'Tidak diketahui'}</div>
@@ -94,11 +90,7 @@ export const LeaveDetailModal: React.FC<LeaveDetailModalProps> = ({ isOpen, onCl
           <label style={{ display: 'block', fontSize: '0.70rem', color: '#0369a1', textTransform: 'uppercase', marginBottom: '0.75rem', fontWeight: 700, letterSpacing: '0.05em' }}>Penyetuju / Reviewer</label>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '1px solid #bae6fd' }}>
-              {item.approver?.profile?.avatar_url ? (
-                <img src={item.approver.profile.avatar_url} alt="Approver" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              ) : (
                 <span style={{ fontSize: '0.75rem', fontWeight: 700 }}>{String(item.approver?.name || 'A').charAt(0)}</span>
-              )}
             </div>
             <div>
               <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#0c4a6e' }}>{item.approver?.name || "Sistem / Admin"}</div>

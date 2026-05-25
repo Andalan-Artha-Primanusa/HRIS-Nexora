@@ -456,11 +456,7 @@ const PayrollListPage = () => {
                           <td className="crud-table-name">
                             <div className="cell-name">
                               <div className="cell-avatar">
-                                {item.employee?.user?.profile?.avatar_url ? (
-                                  <img src={item.employee.user.profile.avatar_url} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
-                                ) : (
-                                  (item.employee?.user?.name || item.employeeName || 'P').charAt(0).toUpperCase()
-                                )}
+                                {(item.employee?.user?.name || item.employeeName || 'P').charAt(0).toUpperCase()}
                               </div>
                               <div className="cell-stacked">
                                 <span className="cell-name-text">{item.employee?.user?.name || item.employeeName || `ID: ${item.employee_id}`}</span>

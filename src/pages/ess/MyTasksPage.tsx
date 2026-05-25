@@ -323,14 +323,9 @@ const MyTasksPage: React.FC = () => {
                       </td>
                       <td>
                         <div className="cell-name">
-                          <img
-                            src={task.assigned_by?.profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(task.assigned_by?.name || 'U')}&color=7F9CF5&background=EBF4FF`}
-                            alt=""
-                            className="cell-avatar"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(task.assigned_by?.name || 'U')}&color=7F9CF5&background=EBF4FF`;
-                            }}
-                          />
+                          <div className="cell-avatar" style={{ background: '#EBF4FF', color: '#7F9CF5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                            {(task.assigned_by?.name || 'U').charAt(0).toUpperCase()}
+                          </div>
                           <span style={{ color: '#64748b', fontWeight: 500 }}>
                             {task.assigned_by?.name || '-'}
                           </span>
