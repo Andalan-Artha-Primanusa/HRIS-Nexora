@@ -202,8 +202,10 @@ const AttendanceHistoryPage = () => {
         />
       </Card>
 
-      {/* Control Section */}
-      <Card className="control-section-card">
+      {/* Table Section with integrated controls */}
+      <div className="table-section integrated-table-section">
+        <div className="wuw-table-area integrated-table-area">
+      <Card className="control-section-card integrated-control-card integrated-table-toolbar">
         <div className="control-section-inner">
           {/* Tabs */}
           <div className="elyra-tabs">
@@ -235,9 +237,6 @@ const AttendanceHistoryPage = () => {
         </div>
       </Card>
 
-      {/* Table Section */}
-      <div className="table-section">
-        <div className="wuw-table-area">
           {loading && <LoadingState message="Memuat riwayat kehadiran..." />}
           {!loading && errorMessage && <ErrorState message="Koneksi Terputus" error={errorMessage} onRetry={loadHistory} />}
 

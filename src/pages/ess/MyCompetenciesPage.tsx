@@ -231,7 +231,9 @@ const MyCompetenciesPage: React.FC = () => {
         </div>
       </Card>
 
-      <Card className="control-section-card">
+      <div className="table-section integrated-table-section">
+        <div className="wuw-table-area integrated-table-area">
+      <Card className="control-section-card integrated-control-card integrated-table-toolbar">
         <div className="control-section-inner">
           <div className="elyra-tabs">
             {(['Semua', 'Sudah Dinilai', 'Belum Dinilai'] as const).map((tab) => (
@@ -261,8 +263,6 @@ const MyCompetenciesPage: React.FC = () => {
         </div>
       </Card>
 
-      <div className="table-section">
-        <div className="wuw-table-area">
           {loading && <LoadingState message="Memuat kompetensi..." />}
           {!loading && errorMessage && <ErrorState message="Koneksi Terputus" error={errorMessage} onRetry={fetchData} />}
 

@@ -152,7 +152,9 @@ const ProgramsTab: React.FC = () => {
         </div>
       </Card>
 
-      <Card className="control-section-card">
+      <div className="table-section integrated-table-section">
+        <div className="wuw-table-area integrated-table-area">
+      <Card className="control-section-card integrated-control-card integrated-table-toolbar">
         <div className="control-section-inner">
           <div className="elyra-tabs">
             {(['Semua', 'Active', 'Draft', 'Completed', 'Cancelled'] as const).map(tab => (
@@ -171,8 +173,6 @@ const ProgramsTab: React.FC = () => {
         {showFilters && <div className="filter-dropdown"><div className="filter-row">{(searchQuery || activeTab !== 'Semua') && <button className="btn-clear-filter" onClick={clearFilters}>Hapus Filter</button>}</div></div>}
       </Card>
 
-      <div className="table-section">
-        <div className="wuw-table-area">
           {loading && <LoadingState message="Memuat program..." />}
           {!loading && paginated.length === 0 && (
             <div style={{ padding: '5rem 0' }}><EmptyState title="Pencarian Kosong" message="Tidak ada program yang sesuai." actionLabel="Bersihkan Filter" onAction={clearFilters} /></div>

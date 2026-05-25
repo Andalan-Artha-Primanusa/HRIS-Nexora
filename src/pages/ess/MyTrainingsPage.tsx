@@ -189,7 +189,9 @@ const MyTrainingsPage: React.FC = () => {
         </div>
       </div>
 
-      <Card className="control-section-card">
+      <div className="table-section integrated-table-section">
+        <div className="wuw-table-area integrated-table-area">
+      <Card className="control-section-card integrated-control-card integrated-table-toolbar">
         <div className="control-section-inner">
           <div className="elyra-tabs">
             {(['Semua', 'Tersedia', 'Berlangsung', 'Selesai'] as const).map((t) => (
@@ -208,8 +210,6 @@ const MyTrainingsPage: React.FC = () => {
         </div>
       </Card>
 
-      <div className="table-section">
-        <div className="wuw-table-area">
           {loading && <LoadingState message="Memuat pelatihan..." />}
           {!loading && errorMessage && <ErrorState message="Terjadi Kesalahan" error={errorMessage} onRetry={fetchData} />}
           {!loading && !errorMessage && paginated.length === 0 && (

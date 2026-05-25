@@ -605,6 +605,77 @@
   border-radius: 3px;
 }
 
+/* Opt-in integrated toolbar treatment for table listing pages. */
+.integrated-table-area .integrated-table-toolbar.control-section-card {
+  margin: 0 !important;
+  padding: 1.5rem !important;
+  border: 0 !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  border-radius: 0 !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
+}
+
+.integrated-table-toolbar .control-section-inner {
+  justify-content: space-between;
+  row-gap: 1rem;
+}
+
+.integrated-table-toolbar .control-actions:last-child {
+  margin-left: auto;
+}
+
+.integrated-table-toolbar .elyra-tabs .elyra-tab:hover {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.integrated-table-toolbar .elyra-tabs .elyra-tab.active,
+.integrated-table-toolbar .elyra-tabs .elyra-tab.active:hover {
+  background: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+}
+
+.integrated-table-section.table-section {
+  margin-top: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+.integrated-table-area.wuw-table-area {
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+@media (max-width: 1100px) {
+  .integrated-table-toolbar .control-actions:last-child {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 640px) {
+  .integrated-table-toolbar .elyra-tabs {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .integrated-table-toolbar .control-actions:last-child {
+    justify-content: stretch;
+  }
+
+  .integrated-table-toolbar .search-box {
+    min-width: 0;
+    flex: 1 1 100%;
+  }
+}
+
 /* ============================================ */
 /* THE Table                                    */
 /* ============================================ */

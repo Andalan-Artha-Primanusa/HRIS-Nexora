@@ -365,7 +365,9 @@ const MyKpiPage = () => {
         </div>
       </div>
 
-      <Card className="control-section-card">
+      <div className="table-section integrated-table-section">
+        <div className="wuw-table-area my-kpi-table-area integrated-table-area">
+      <Card className="control-section-card integrated-control-card integrated-table-toolbar">
         <div className="control-section-inner">
           <div className="elyra-tabs">
             {TAB_OPTIONS.map((tab) => (
@@ -387,8 +389,6 @@ const MyKpiPage = () => {
         </div>
       </Card>
 
-      <div className="table-section">
-        <div className="wuw-table-area my-kpi-table-area">
           {loading && <LoadingState message="Memuat KPI periode..." />}
 
           {!loading && errorMessage && (

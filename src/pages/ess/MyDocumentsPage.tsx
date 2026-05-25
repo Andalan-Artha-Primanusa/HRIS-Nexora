@@ -647,8 +647,10 @@ const MyDocumentsPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* Control Section */}
-      <Card className="control-section-card">
+      {/* Table Section with integrated controls */}
+      <div className="table-section integrated-table-section">
+        <div className="wuw-table-area integrated-table-area">
+      <Card className="control-section-card integrated-control-card integrated-table-toolbar">
         <div className="control-section-inner">
           <div className="elyra-tabs">
             {(["Semua", "contract", "letter", "identity", "pending", "approved"] as TabType[]).map((tab) => (
@@ -677,9 +679,6 @@ const MyDocumentsPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* Table Section */}
-      <div className="table-section">
-        <div className="wuw-table-area">
           {loading && <LoadingState message="Memuat dokumen..." />}
 
           {!loading && paginatedDocuments.length === 0 && (

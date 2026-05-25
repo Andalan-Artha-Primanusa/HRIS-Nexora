@@ -152,7 +152,9 @@ const OvertimeRulesPage: React.FC = () => {
         </div>
       </Card>
 
-      <Card className="control-section-card">
+      <div className="table-section integrated-table-section">
+        <div className="wuw-table-area integrated-table-area">
+      <Card className="control-section-card integrated-control-card integrated-table-toolbar">
         <div className="control-section-inner">
           <div className="elyra-tabs">
             {["Semua", "Active", "Inactive"].map((tab) => (
@@ -181,8 +183,6 @@ const OvertimeRulesPage: React.FC = () => {
         </div>
       </Card>
 
-      <div className="table-section">
-        <div className="wuw-table-area">
           {loading && <LoadingState message="Memuat aturan lembur..." />}
 
           {!loading && paginatedRules.length === 0 && (

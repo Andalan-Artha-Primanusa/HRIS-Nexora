@@ -274,7 +274,9 @@ const AdminKpiPage = () => {
         </div>
       </Card>
 
-      <Card className="control-section-card">
+      <div className="table-section integrated-table-section">
+        <div className="wuw-table-area integrated-table-area">
+      <Card className="control-section-card integrated-control-card integrated-table-toolbar">
         <div className="control-section-inner">
           <div className="elyra-tabs">
             {(["Semua", "Draft", "Submitted", "Approved"] as const).map((tab) => (
@@ -314,8 +316,6 @@ const AdminKpiPage = () => {
         </div>
       </Card>
 
-      <div className="table-section">
-        <div className="wuw-table-area">
           {loading && <LoadingState message="Memuat periode KPI..." />}
 
           {!loading && paginatedPeriods.length === 0 && (

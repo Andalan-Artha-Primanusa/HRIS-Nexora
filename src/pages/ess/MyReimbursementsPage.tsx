@@ -324,8 +324,10 @@ const MyReimbursementsPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* Control Section */}
-      <Card className="control-section-card">
+      {/* Table Section with integrated controls */}
+      <div className="table-section integrated-table-section">
+        <div className="wuw-table-area integrated-table-area">
+      <Card className="control-section-card integrated-control-card integrated-table-toolbar">
         <div className="control-section-inner">
           {/* Tabs */}
           <div className="elyra-tabs">
@@ -356,9 +358,6 @@ const MyReimbursementsPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* Table Section */}
-      <div className="table-section">
-        <div className="wuw-table-area">
           {loading && <LoadingState message="Memuat klaim..." />}
 
           {!loading && paginatedItems.length === 0 && (

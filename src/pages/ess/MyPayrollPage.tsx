@@ -357,8 +357,10 @@ const MyPayrollPage = () => {
         </div>
       </Card>
 
-      {/* Control Section */}
-      <Card className="control-section-card">
+      {/* Table Section with integrated controls */}
+      <div className="table-section integrated-table-section">
+        <div className="wuw-table-area integrated-table-area">
+      <Card className="control-section-card integrated-control-card integrated-table-toolbar">
         <div className="control-section-inner">
           {/* Tabs */}
           <div className="elyra-tabs">
@@ -390,9 +392,6 @@ const MyPayrollPage = () => {
         </div>
       </Card>
 
-      {/* Table Section */}
-      <div className="table-section">
-        <div className="wuw-table-area">
           {loading && <LoadingState message="Memuat data slip gaji..." />}
           {!loading && errorMessage && <ErrorState message="Koneksi Terputus" error={errorMessage} onRetry={loadPayroll} />}
 

@@ -343,8 +343,10 @@ const MasterDataPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* Controls */}
-      <Card className="control-section-card">
+      {/* Table with integrated controls */}
+      <div className="table-section integrated-table-section">
+        <div className="wuw-table-area integrated-table-area">
+      <Card className="control-section-card integrated-control-card integrated-table-toolbar">
         <div className="control-section-inner">
           <div className="elyra-tabs">
             {tabs.map((tab) => (
@@ -376,9 +378,6 @@ const MasterDataPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* Table */}
-      <div className="table-section">
-        <div className="wuw-table-area">
           {loading && <LoadingState message={`Memuat ${activeTab}...`} />}
           {!loading && errorMessage && (
             <ErrorState message="Koneksi Terputus" error={errorMessage} onRetry={fetchData} />
