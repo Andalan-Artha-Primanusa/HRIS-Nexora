@@ -115,8 +115,35 @@
 .wuw-table-area {
   background: white;
   border-radius: 16px;
+  border: 1px solid #e2e8f0;
   overflow: hidden;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+}
+
+.notification-table-section {
+  margin-top: 0;
+}
+
+.notification-table-area .notification-table-toolbar {
+  margin: 0 !important;
+  padding: 1.5rem !important;
+  border: 0 !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  border-radius: 0 !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
+}
+
+.notification-table-area .elyra-tab:hover {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.notification-table-area .elyra-tab.active,
+.notification-table-area .elyra-tab.active:hover {
+  background: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
 }
 
 .data-table {

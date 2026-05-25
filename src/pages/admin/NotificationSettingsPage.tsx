@@ -357,8 +357,10 @@ const NotificationSettingsPage: React.FC = () => {
         </div>
       )}
 
-      {/* Control Section */}
-      <Card className="control-section-card">
+      {/* Table Section with integrated controls */}
+      <div className="table-section notification-table-section">
+        <div className="wuw-table-area notification-table-area">
+      <Card className="control-section-card notification-table-toolbar">
         <div className="control-section-inner">
           <div className="elyra-tabs">
             {categories.map((cat) => (
@@ -375,9 +377,6 @@ const NotificationSettingsPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* Table Section */}
-      <div className="table-section">
-        <div className="wuw-table-area">
           {loading ? (
             <div className="settings-loading-state" style={{ padding: '5rem 0' }}>
               <RefreshCw size={48} className="animate-spin" color="#2563eb" />
