@@ -4,7 +4,7 @@ import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 import { Card } from '@/shared/ui/Card';
 import { api } from '@/shared/api/httpClient';
 import { useAuthStore } from '@/app/store/auth.store';
-import { FileText } from 'lucide-react';
+import { FileText, Activity } from 'lucide-react';
 import { getMyLeaveBalance, getMyLeaves, getTodayAttendance, getAttendanceHistory } from '@/features/ess/api/ess.service';
 import "./EmployeeDashboardPage.css";
 
@@ -275,15 +275,25 @@ const EmployeeDashboardPage = () => {
         <div className="hero-card-inner">
           <div className="hero-content">
             <div className="hero-badge">
-              <span style={{ fontSize: '16px' }}>📈</span>
+              <Activity size={16} />
               <span>Dashboard Karyawan</span>
             </div>
-            <h1 className="hero-title">Selamat Datang, {userName}</h1>
-            <p className="hero-subtitle">
-              Lihat ringkasan aktivitas dan status cuti Anda.
-            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div 
+                className="cell-avatar" 
+                style={{ width: '48px', height: '48px', border: '2px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.2)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.2rem', borderRadius: '50%' }}
+              >
+                {(user?.name || 'U').charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <h1 className="hero-title">Halo, {user?.name?.split(' ')[0] || 'User'}!</h1>
+                <p className="hero-subtitle">
+                  Lihat ringkasan aktivitas dan status cuti Anda.
+                </p>
+              </div>
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          <div className="hero-actions">
             <button className="btn-primary" onClick={() => navigate('/leave/requests')}>
               Ajukan Cuti
             </button>
