@@ -33,6 +33,7 @@ export const ReimbursementModal: React.FC<ReimbursementModalProps> = ({
   employees = [],
   canApproveLeave = false
 }) => {
+  const formId = initialData ? `reimbursement-form-${initialData.id}` : 'reimbursement-form-new';
   const [isSaving, setIsSaving] = useState(false);
   const [fileError, setFileError] = useState('');
   const [formData, setFormData] = useState<any>({
@@ -120,14 +121,14 @@ export const ReimbursementModal: React.FC<ReimbursementModalProps> = ({
       footer={
         <>
           <Button variant="ghost" type="button" onClick={onClose} disabled={isSaving}>Batal</Button>
-          <Button variant="primary" type="submit" loading={isSaving} onClick={(e) => { const form = (e.target as HTMLElement).closest('form'); if (form) form.requestSubmit(); }}>
+          <Button variant="primary" type="submit" form={formId} loading={isSaving}>
             <Save size={18} style={{ marginRight: '8px' }} />
             {initialData ? 'Update' : 'Simpan Draft'}
           </Button>
         </>
       }
     >
-      <form onSubmit={handleSubmit}>
+      <form id={formId} onSubmit={handleSubmit}>
         <div className="reimb-modal-body" style={{ padding: 0 }}>
           <div className="form-grid">
             {canApproveLeave && !initialData && (
