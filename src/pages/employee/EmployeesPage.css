@@ -893,3 +893,134 @@
 .animate-spin {
   animation: spin 1s linear infinite;
 }
+
+/* ============================================ */
+/* DARK MODE OVERRIDES                          */
+/* ============================================ */
+
+/* Toolbar: unified dark surface */
+[data-theme='dark'] .table-toolbar {
+  background: #1e293b !important;
+  border-bottom: 1px solid #334155 !important;
+}
+
+/* Tabs container: subtle pill-group background */
+[data-theme='dark'] .elyra-tabs {
+  background: rgba(15, 23, 42, 0.5) !important;
+  border: 1px solid #334155 !important;
+}
+
+/* Individual tab: muted text */
+[data-theme='dark'] .elyra-tab {
+  color: #94a3b8 !important;
+}
+
+[data-theme='dark'] .elyra-tab:hover {
+  background: rgba(96, 165, 250, 0.08) !important;
+  color: #e2e8f0 !important;
+}
+
+/* Active tab: clear but not harsh */
+[data-theme='dark'] .elyra-tab.active {
+  background: #334155 !important;
+  color: #f8fafc !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Control actions area: fully transparent, inherits from toolbar */
+[data-theme='dark'] .control-actions {
+  background: transparent !important;
+  border-color: transparent !important;
+}
+
+/* Search box wrapper: invisible */
+[data-theme='dark'] .control-actions .search-box {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Search icon */
+[data-theme='dark'] .control-actions .search-icon-inside {
+  color: #64748b !important;
+}
+
+/* Search pill: subtle surface on top of toolbar */
+[data-theme='dark'] .search-input-pill,
+[data-theme='dark'] .control-actions .search-input-pill {
+  background: rgba(15, 23, 42, 0.5) !important;
+  color: #e2e8f0 !important;
+  border: 1px solid #334155 !important;
+  border-radius: 999px !important;
+}
+
+[data-theme='dark'] .search-input-pill::placeholder,
+[data-theme='dark'] .control-actions .search-input-pill::placeholder {
+  color: #64748b !important;
+}
+
+[data-theme='dark'] .search-input-pill:focus,
+[data-theme='dark'] .control-actions .search-input-pill:focus {
+  background: rgba(15, 23, 42, 0.8) !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+  outline: none !important;
+}
+
+/* Filter button: matches search pill style */
+[data-theme='dark'] .control-actions .filter-btn-rounded {
+  background: rgba(15, 23, 42, 0.5) !important;
+  color: #94a3b8 !important;
+  border: 1px solid #334155 !important;
+}
+
+[data-theme='dark'] .control-actions .filter-btn-rounded:hover {
+  background: #334155 !important;
+  color: #e2e8f0 !important;
+  border-color: #475569 !important;
+}
+
+[data-theme='dark'] .control-actions .filter-btn-rounded.active {
+  background: #3b82f6 !important;
+  color: #ffffff !important;
+  border-color: #3b82f6 !important;
+}
+
+/* Filter dropdown area */
+[data-theme='dark'] .filter-dropdown {
+  border-top-color: #334155 !important;
+}
+
+/* Filter group label */
+[data-theme='dark'] .filter-group label {
+  color: #94a3b8 !important;
+}
+
+/* Filter select dropdowns */
+[data-theme='dark'] .filter-group .filter-select-premium {
+  background: #0f172a !important;
+  color: #e2e8f0 !important;
+  border: 1px solid #334155 !important;
+}
+
+[data-theme='dark'] .filter-group .filter-select-premium:focus {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+}
+
+/* Clear filter button */
+[data-theme='dark'] .btn-clear-filter {
+  border-color: #f87171 !important;
+  color: #f87171 !important;
+}
+
+[data-theme='dark'] .btn-clear-filter:hover {
+  background: rgba(239, 68, 68, 0.1) !important;
+}
+
+/* Table area */
+[data-theme='dark'] .wuw-table-area {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
