@@ -1024,3 +1024,30 @@
   border-color: #334155 !important;
 }
 
+/* Pagination */
+[data-theme='dark'] .table-pagination {
+  background: #1e293b !important;
+  border-top-color: #334155 !important;
+}
+
+[data-theme='dark'] .pagination-info {
+  color: #94a3b8 !important;
+}
+
+[data-theme='dark'] .pagination-btn {
+  background: rgba(15, 23, 42, 0.5) !important;
+  border-color: #334155 !important;
+  color: #94a3b8 !important;
+}
+
+[data-theme='dark'] .pagination-btn:hover:not(:disabled) {
+  background: #334155 !important;
+  color: #e2e8f0 !important;
+  border-color: #475569 !important;
+}
+
+[data-theme='dark'] .pagination-btn.active {
+  background: #3b82f6 !important;
+  color: #ffffff !important;
+  border-color: #3b82f6 !important;
+}
