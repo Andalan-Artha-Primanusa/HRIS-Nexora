@@ -4,7 +4,7 @@ import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 import { Card } from '@/shared/ui/Card';
 import { api } from '@/shared/api/httpClient';
 import { useAuthStore } from '@/app/store/auth.store';
-import { FileText, Activity } from 'lucide-react';
+import { FileText, Activity, CalendarDays, Clock, CheckCircle2, XCircle } from 'lucide-react';
 import { getMyLeaveBalance, getMyLeaves, getTodayAttendance, getAttendanceHistory } from '@/features/ess/api/ess.service';
 import "./EmployeeDashboardPage.css";
 
@@ -210,28 +210,28 @@ const EmployeeDashboardPage = () => {
       label: 'Saldo Cuti',
       value: loading ? '-' : `${leaveBalance} hari`,
       subtitle: `${leaveUsed} hari terpakai`,
-      icon: '📅',
+      icon: <CalendarDays size={24} />,
       color: 'blue' as const,
     },
     {
       label: 'Cuti Pending',
       value: loading ? '-' : String(pendingLeaves.length),
       subtitle: 'Menunggu persetujuan',
-      icon: '⏰',
+      icon: <Clock size={24} />,
       color: 'orange' as const,
     },
     {
       label: 'Status Hari Ini',
       value: loading ? '-' : (todayAttendance ? 'Hadir' : 'Belum Check-in'),
       subtitle: todayAttendance ? new Date(todayAttendance.check_in_time || '').toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : 'Silakan check-in',
-      icon: todayAttendance ? '✅' : '❌',
+      icon: todayAttendance ? <CheckCircle2 size={24} /> : <XCircle size={24} />,
       color: todayAttendance ? 'green' as const : 'red' as const,
     },
     {
       label: 'Total Cuti',
       value: loading ? '-' : String(allLeaves.length),
       subtitle: 'Semua pengajuan',
-      icon: '📄',
+      icon: <FileText size={24} />,
       color: 'purple' as const,
     },
   ], [loading, leaveBalance, leaveUsed, pendingLeaves.length, todayAttendance, allLeaves.length]);
@@ -314,7 +314,7 @@ const EmployeeDashboardPage = () => {
                   <p className="employee-summary-label">{card.label}</p>
                   <p className="employee-summary-subtitle">{card.subtitle}</p>
                 </div>
-                <div className={`employee-summary-icon-wrapper employee-icon-${card.color}`} style={{ fontSize: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className={`employee-summary-icon-wrapper employee-icon-${card.color}`}>
                   {card.icon}
                 </div>
               </div>
