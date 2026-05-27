@@ -17,6 +17,7 @@ import type { EmployeeItem } from "@/features/employee/types/employee.types";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "./PayrollListPage.css";
+import "./PayrollShared.css";
 import "./PayrollApprovePage.css";
 
 type ApproveAction = "manager-approve" | "hr-approve" | "reject" | null;

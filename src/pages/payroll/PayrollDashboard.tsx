@@ -29,6 +29,7 @@ import {
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "./PayrollListPage.css";
+import "./PayrollShared.css";
 import "./PayrollDashboard.css";
 
 const PayrollDashboard: React.FC = () => {

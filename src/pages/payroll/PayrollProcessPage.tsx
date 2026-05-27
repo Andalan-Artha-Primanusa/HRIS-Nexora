@@ -188,11 +188,11 @@ const GenerateTab = () => {
             </select>
           </label>
           <span style={{ fontSize: "0.7rem", fontWeight: 800, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 6 }}>Periode terpilih</span>
-          <div style={{ padding: "10px 12px", borderRadius: 10, border: "1px solid #e0e7ff", background: "#eef2ff", fontSize: 15, fontWeight: 800, color: "#6366f1", textAlign: "center", marginBottom: "1rem" }}>{period}</div>
-          <hr style={{ border: "none", borderTop: "1px solid #f1f5f9", margin: "1.25rem 0" }} />
-          <div style={{ display: "flex", gap: 10, background: "#f0f9ff", border: "1px solid #bae6fd", borderRadius: 10, padding: 12, marginBottom: "1.25rem" }}>
-            <AlertCircle size={15} color="#0369a1" style={{ flexShrink: 0, marginTop: 1 }} />
-            <p style={{ fontSize: 12, color: "#0369a1", lineHeight: 1.6, margin: 0 }}>Kalkulasi tunjangan, bonus, dan potongan untuk <strong>semua karyawan aktif</strong> di periode {period}.</p>
+          <div className="period-box" style={{ padding: "10px 12px", borderRadius: 10, fontSize: 15, fontWeight: 800, textAlign: "center", marginBottom: "1rem" }}>{period}</div>
+          <hr style={{ border: "none", borderTop: "1px solid var(--border-color, #f1f5f9)", margin: "1.25rem 0" }} />
+          <div className="info-box" style={{ display: "flex", gap: 10, borderRadius: 10, padding: 12, marginBottom: "1.25rem" }}>
+            <AlertCircle size={15} className="info-icon" style={{ flexShrink: 0, marginTop: 1 }} />
+            <p className="info-text" style={{ fontSize: 12, lineHeight: 1.6, margin: 0 }}>Kalkulasi tunjangan, bonus, dan potongan untuk <strong>semua karyawan aktif</strong> di periode {period}.</p>
           </div>
           <button onClick={() => void generateMonthly()} disabled={loading}
             style={{ width: "100%", padding: 12, borderRadius: 12, border: "none", background: "linear-gradient(135deg, #2563eb, #1d4ed8)", color: "#fff", fontSize: 14, fontWeight: 700, fontFamily: "'Poppins', sans-serif", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
@@ -203,17 +203,18 @@ const GenerateTab = () => {
 
         <Card className="crud-table-card">
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: "1rem", flexWrap: "wrap" }}>
-            <p style={{ fontSize: "1.25rem", fontWeight: 700, color: "#1e293b", margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
+            <p className="list-title" style={{ fontSize: "1.25rem", fontWeight: 700, margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
               <BarChart3 size={15} color="#6366f1" /> Daftar Payroll <span style={{ fontSize: 11, color: "#94a3b8", fontWeight: 400, marginLeft: 4 }}>({filtered.length} records)</span>
             </p>
             <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <select style={{ padding: "5px 10px", borderRadius: 8, border: "1.5px solid #e2e8f0", fontSize: 12, color: "#64748b", fontFamily: "'Poppins', sans-serif" }} value={yearFilter} onChange={(e) => { setYearFilter(e.target.value); setCurrentPage(1); }}>
+              <select className="sort-select" style={{ padding: "5px 10px", borderRadius: 8, fontSize: 12, fontFamily: "'Poppins', sans-serif" }} value={yearFilter} onChange={(e) => { setYearFilter(e.target.value); setCurrentPage(1); }}>
                 <option value="all">Semua Tahun</option>
                 {YEARS.map(y => <option key={y} value={String(y)}>{y}</option>)}
               </select>
               {(["all", "paid", "unpaid"] as const).map(f => (
                 <button key={f} onClick={() => { setPaymentFilter(f); setCurrentPage(1); }}
-                  style={{ padding: "5px 14px", borderRadius: 16, border: paymentFilter === f ? "1.5px solid #6366f1" : "1.5px solid #e2e8f0", background: paymentFilter === f ? "#eef2ff" : "#fff", color: paymentFilter === f ? "#6366f1" : "#94a3b8", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "'Poppins', sans-serif" }}>
+                  className={`filter-btn ${paymentFilter === f ? 'active' : ''}`}
+                  style={{ padding: "5px 14px", borderRadius: 16, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "'Poppins', sans-serif" }}>
                   {f === "all" ? "Semua" : f === "paid" ? "Dibayar" : "Tertunda"}
                 </button>
               ))}
@@ -228,12 +229,12 @@ const GenerateTab = () => {
           ) : paginated.length === 0 ? (
             <div style={{ padding: "3rem 1rem", textAlign: "center", color: "#cbd5e1", fontSize: 13 }}>Tidak ada data payroll.</div>
           ) : (
-            <div style={{ border: "1px solid #e2e8f0", borderRadius: 12, overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 720 }}>
+            <div className="crud-table-wrap">
+              <table className="crud-table">
                 <thead>
                   <tr>
                     {columns.map(col => (
-                      <th key={col.key} style={{ padding: "10px 12px", textAlign: "left", fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.06em", borderBottom: "1px solid #e2e8f0", background: "#f8fafc" }}>{col.label}</th>
+                      <th key={col.key} className={["basic_salary", "allowance", "bonus", "total_deduction", "take_home_pay"].includes(col.key) ? "text-right" : "text-left"} style={{ padding: "10px 12px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{col.label}</th>
                     ))}
                   </tr>
                 </thead>
@@ -241,15 +242,15 @@ const GenerateTab = () => {
                   {paginated.map((item, idx) => {
                     const emp = (item as any).employee as Record<string, any> | undefined;
                     return (
-                      <tr key={String(item.id ?? idx)} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                      <tr key={String(item.id ?? idx)}>
                         {columns.map(col => {
                           const val = (item as any)[col.key];
-                          if (col.key === "id") return <td key={col.key} style={{ padding: "11px 12px", verticalAlign: "middle" }}><span style={{ fontSize: 12, color: "#cbd5e1" }}>#{String(val ?? "").padStart(3, "0")}</span></td>;
-                          if (col.key === "employee_id") return <td key={col.key} style={{ padding: "11px 12px", verticalAlign: "middle" }}><span style={{ fontWeight: 600, fontSize: 13, color: "#1e293b", whiteSpace: "nowrap" }}>{emp?.user?.name ?? `EMP-${String(val).padStart(3, "0")}`}</span></td>;
-                          if (col.key === "period") return <td key={col.key} style={{ padding: "11px 12px", verticalAlign: "middle" }}><span style={{ display: "inline-block", padding: "3px 9px", borderRadius: 6, background: "#f1f5f9", border: "1px solid #e2e8f0", fontSize: 11, color: "#64748b", letterSpacing: "0.04em", whiteSpace: "nowrap" }}>{String(val ?? "-")}</span></td>;
+                          if (col.key === "id") return <td key={col.key} style={{ padding: "11px 12px", verticalAlign: "middle" }}><span className="crud-table-id">#{String(val ?? "").padStart(3, "0")}</span></td>;
+                          if (col.key === "employee_id") return <td key={col.key} style={{ padding: "11px 12px", verticalAlign: "middle" }}><span className="crud-table-name" style={{ fontWeight: 600 }}>{emp?.user?.name ?? `EMP-${String(val).padStart(3, "0")}`}</span></td>;
+                          if (col.key === "period") return <td key={col.key} style={{ padding: "11px 12px", verticalAlign: "middle" }}><span className="crud-table-tag">{String(val ?? "-")}</span></td>;
                           if (["basic_salary", "allowance", "bonus", "total_deduction", "take_home_pay"].includes(col.key)) {
-                            const c = col.key === "take_home_pay" ? "#6366f1" : col.key === "total_deduction" ? "#f43f5e" : "#334155";
-                            return <td key={col.key} style={{ padding: "11px 12px", verticalAlign: "middle" }}><span style={{ fontFamily: "'Poppins', sans-serif", fontSize: 12, whiteSpace: "nowrap", color: c, fontWeight: col.key === "take_home_pay" ? 700 : 500 }}>{formatCurrency(val)}</span></td>;
+                            const isTotal = col.key === "take_home_pay";
+                            return <td key={col.key} className="text-right" style={{ padding: "11px 12px", verticalAlign: "middle" }}><span className={isTotal ? "crud-table-amount-green" : "crud-table-amount"} style={col.key === "total_deduction" ? {color: "#f43f5e"} : {}}>{formatCurrency(val)}</span></td>;
                           }
                           if (col.key === "status") return <td key={col.key} style={{ padding: "11px 12px", verticalAlign: "middle" }}><PayrollStatusBadge status={String(val) as any} size="sm" /></td>;
                           return <td key={col.key} style={{ padding: "11px 12px", verticalAlign: "middle" }}><span>{String(val ?? "-")}</span></td>;
@@ -637,7 +638,7 @@ const PaymentTab = () => {
   return (
     <>
       {/* ── PANEL BAYAR MASSAL ── */}
-      <Card style={{ padding: '1.5rem', background: 'linear-gradient(135deg, #f0fdf4, #ecfdf5)', border: '1.5px solid #86efac', borderRadius: 16, marginBottom: '0.5rem' }}>
+      <Card className="bulk-pay-card" style={{ padding: '1.5rem', background: 'linear-gradient(135deg, #f0fdf4, #ecfdf5)', border: '1.5px solid #86efac', borderRadius: 16, marginBottom: '0.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: '1.25rem' }}>
           <div style={{ width: 40, height: 40, borderRadius: 10, background: 'linear-gradient(135deg,#10b981,#059669)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Zap size={20} color="#fff" />

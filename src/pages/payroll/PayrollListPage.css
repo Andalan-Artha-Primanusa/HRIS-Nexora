@@ -1057,7 +1057,7 @@
 
 /* Sort & Filter Controls */
 [data-theme='dark'] .sort-select {
-  background: #0f172a !important;
+  background-color: #0f172a !important;
   color: #e2e8f0 !important;
   border-color: #334155 !important;
 }

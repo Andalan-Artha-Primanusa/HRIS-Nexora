@@ -622,3 +622,442 @@
 .animate-spin {
   animation: spin 1s linear infinite;
 }
+
+/* ============================================ */
+/* DARK MODE — Shared Payroll Overrides         */
+/* ============================================ */
+
+/* Summary Cards */
+[data-theme='dark'] .payroll-summary-card,
+[data-theme='dark'] .leave-summary-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+[data-theme='dark'] .payroll-summary-card:hover,
+[data-theme='dark'] .leave-summary-card:hover {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15) !important;
+}
+
+[data-theme='dark'] .payroll-summary-label,
+[data-theme='dark'] .leave-summary-label {
+  color: #94a3b8 !important;
+}
+
+[data-theme='dark'] .payroll-summary-subtitle,
+[data-theme='dark'] .leave-summary-subtitle {
+  color: #64748b !important;
+}
+
+[data-theme='dark'] .payroll-summary-value,
+[data-theme='dark'] .leave-summary-value {
+  color: #f1f5f9 !important;
+}
+
+[data-theme='dark'] .payroll-value-blue,
+[data-theme='dark'] .leave-value-blue {
+  color: #60a5fa !important;
+}
+
+[data-theme='dark'] .payroll-value-green,
+[data-theme='dark'] .leave-value-green {
+  color: #34d399 !important;
+}
+
+[data-theme='dark'] .payroll-value-orange,
+[data-theme='dark'] .leave-value-orange {
+  color: #fbbf24 !important;
+}
+
+[data-theme='dark'] .payroll-value-red,
+[data-theme='dark'] .leave-value-red {
+  color: #f87171 !important;
+}
+
+[data-theme='dark'] .payroll-value-purple,
+[data-theme='dark'] .leave-value-purple {
+  color: #a78bfa !important;
+}
+
+[data-theme='dark'] .payroll-summary-trend,
+[data-theme='dark'] .leave-summary-trend {
+  color: #64748b !important;
+}
+
+/* Icon Wrappers — keep gradient but mute for dark */
+[data-theme='dark'] .payroll-icon-blue,
+[data-theme='dark'] .leave-icon-blue {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25) !important;
+}
+
+[data-theme='dark'] .payroll-icon-green,
+[data-theme='dark'] .leave-icon-green {
+  background: linear-gradient(135deg, #059669, #047857) !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25) !important;
+}
+
+[data-theme='dark'] .payroll-icon-orange,
+[data-theme='dark'] .leave-icon-orange {
+  background: linear-gradient(135deg, #d97706, #b45309) !important;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25) !important;
+}
+
+[data-theme='dark'] .payroll-icon-red,
+[data-theme='dark'] .leave-icon-red {
+  background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25) !important;
+}
+
+[data-theme='dark'] .payroll-icon-purple,
+[data-theme='dark'] .leave-icon-purple {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9) !important;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25) !important;
+}
+
+/* Control Bar */
+[data-theme='dark'] .control-bar {
+  background: #1e293b !important;
+}
+
+[data-theme='dark'] .search-box {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+}
+
+[data-theme='dark'] .search-box:focus-within {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+}
+
+[data-theme='dark'] .search-box svg {
+  color: #64748b !important;
+}
+
+[data-theme='dark'] .search-input {
+  color: #e2e8f0 !important;
+}
+
+[data-theme='dark'] .search-input::placeholder {
+  color: #64748b !important;
+}
+
+[data-theme='dark'] .sort-select {
+  background-color: #0f172a !important;
+  color: #e2e8f0 !important;
+  border-color: #334155 !important;
+}
+
+[data-theme='dark'] .sort-order-btn {
+  background: #0f172a !important;
+  color: #94a3b8 !important;
+  border-color: #334155 !important;
+}
+
+[data-theme='dark'] .sort-order-btn:hover {
+  background: #334155 !important;
+  color: #e2e8f0 !important;
+}
+
+[data-theme='dark'] .filter-btn {
+  background: #0f172a !important;
+  color: #94a3b8 !important;
+  border-color: #334155 !important;
+}
+
+[data-theme='dark'] .filter-btn:hover {
+  background: #334155 !important;
+  color: #e2e8f0 !important;
+}
+
+[data-theme='dark'] .filter-btn.active {
+  background: #3b82f6 !important;
+  color: #fff !important;
+  border-color: #3b82f6 !important;
+}
+
+[data-theme='dark'] .btn-clear {
+  border-color: #f87171 !important;
+  color: #f87171 !important;
+}
+
+[data-theme='dark'] .btn-clear:hover {
+  background: rgba(239, 68, 68, 0.1) !important;
+}
+
+/* Filter Panel */
+[data-theme='dark'] .filter-panel {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+}
+
+[data-theme='dark'] .filter-group label {
+  color: #94a3b8 !important;
+}
+
+[data-theme='dark'] .filter-select {
+  background: #1e293b !important;
+  color: #e2e8f0 !important;
+  border-color: #334155 !important;
+}
+
+[data-theme='dark'] .filter-select:focus {
+  border-color: #3b82f6 !important;
+}
+
+/* Analytics Title Card */
+[data-theme='dark'] .analytics-title-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+[data-theme='dark'] .analytics-title {
+  color: #f1f5f9 !important;
+}
+
+[data-theme='dark'] .analytics-subtitle {
+  color: #94a3b8 !important;
+}
+
+[data-theme='dark'] .analytics-icon {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+}
+
+/* Chart Cards */
+[data-theme='dark'] .payroll-chart-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  backdrop-filter: none !important;
+}
+
+[data-theme='dark'] .payroll-section-title {
+  color: #f1f5f9 !important;
+}
+
+[data-theme='dark'] .chart-subtitle {
+  color: #94a3b8 !important;
+}
+
+[data-theme='dark'] .chart-empty {
+  color: #64748b !important;
+}
+
+/* Data Table Card */
+[data-theme='dark'] .data-table-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+[data-theme='dark'] .data-table-header {
+  background: #1e293b !important;
+  border-bottom-color: #334155 !important;
+}
+
+[data-theme='dark'] .data-table-title {
+  color: #f1f5f9 !important;
+}
+
+[data-theme='dark'] .data-table-count {
+  color: #64748b !important;
+}
+
+/* Table */
+[data-theme='dark'] .payroll-table-card,
+[data-theme='dark'] .crud-table-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+[data-theme='dark'] .payroll-table thead,
+[data-theme='dark'] .crud-table thead {
+  background: #0f172a !important;
+}
+
+[data-theme='dark'] .payroll-table th,
+[data-theme='dark'] .crud-table th {
+  color: #94a3b8 !important;
+  border-bottom-color: #334155 !important;
+}
+
+[data-theme='dark'] .payroll-table td,
+[data-theme='dark'] .crud-table td {
+  color: #e2e8f0 !important;
+  border-bottom-color: #1e293b !important;
+}
+
+[data-theme='dark'] .payroll-table tbody tr:hover,
+[data-theme='dark'] .crud-table tbody tr:hover {
+  background: rgba(59, 130, 246, 0.04) !important;
+}
+
+[data-theme='dark'] .payroll-table-id,
+[data-theme='dark'] .crud-table-id {
+  color: #60a5fa !important;
+}
+
+[data-theme='dark'] .crud-table-sub {
+  color: #64748b !important;
+}
+
+[data-theme='dark'] .crud-table-avatar {
+  background: linear-gradient(135deg, #1e3a5f, #1e40af) !important;
+  color: #93c5fd !important;
+}
+
+[data-theme='dark'] .crud-table-amount {
+  color: #e2e8f0 !important;
+}
+
+[data-theme='dark'] .crud-table-amount-green {
+  color: #34d399 !important;
+}
+
+[data-theme='dark'] .crud-table-tag {
+  background: #334155 !important;
+  color: #cbd5e1 !important;
+}
+
+/* Pagination */
+[data-theme='dark'] .pagination {
+  background: #0f172a !important;
+  border-top-color: #334155 !important;
+}
+
+[data-theme='dark'] .pagination__info {
+  color: #94a3b8 !important;
+}
+
+[data-theme='dark'] .pagination__controls .btn-outline {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #94a3b8 !important;
+}
+
+[data-theme='dark'] .pagination__controls .btn-outline:hover:not(:disabled) {
+  background: #3b82f6 !important;
+  color: #fff !important;
+  border-color: #3b82f6 !important;
+}
+
+/* Hero Card - Already handled by index.css but ensure consistency */
+[data-theme='dark'] .hero-card {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+}
+
+/* Status Badges */
+[data-theme='dark'] .status-draft {
+  background: #334155 !important;
+  color: #94a3b8 !important;
+}
+
+[data-theme='dark'] .status-pending {
+  background: rgba(245, 158, 11, 0.15) !important;
+  color: #fbbf24 !important;
+}
+
+[data-theme='dark'] .status-approved,
+[data-theme='dark'] .status-paid {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #34d399 !important;
+}
+
+[data-theme='dark'] .status-rejected {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #f87171 !important;
+}
+
+/* Payroll Form Card */
+[data-theme='dark'] .payroll-form-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+[data-theme='dark'] .payroll-info-card {
+  background: rgba(59, 130, 246, 0.08) !important;
+  border-color: rgba(59, 130, 246, 0.2) !important;
+  color: #93c5fd !important;
+}
+
+[data-theme='dark'] .payroll-form-header h2 {
+  color: #f1f5f9 !important;
+}
+
+[data-theme='dark'] .payroll-field strong {
+  color: #cbd5e1 !important;
+}
+
+/* Approve Page specific dark */
+[data-theme='dark'] .payroll-approve-summary-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+[data-theme='dark'] .payroll-approve-summary-label {
+  color: #94a3b8 !important;
+}
+
+[data-theme='dark'] .payroll-approve-summary-subtitle {
+  color: #64748b !important;
+}
+
+[data-theme='dark'] .payroll-approve-summary-value {
+  color: #60a5fa !important;
+}
+
+[data-theme='dark'] .payroll-approve-summary-change {
+  color: #94a3b8 !important;
+}
+
+[data-theme='dark'] .payroll-approve-summary-icon--orange {
+  background: rgba(245, 158, 11, 0.15) !important;
+  color: #fbbf24 !important;
+}
+
+[data-theme='dark'] .payroll-approve-summary-icon--blue {
+  background: rgba(37, 99, 235, 0.15) !important;
+  color: #60a5fa !important;
+}
+
+[data-theme='dark'] .payroll-approve-summary-icon--green {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #34d399 !important;
+}
+
+[data-theme='dark'] .payroll-approve-summary-icon--purple {
+  background: rgba(139, 92, 246, 0.15) !important;
+  color: #a78bfa !important;
+}
+
+/* Active Filter Chips */
+[data-theme='dark'] .active-filter-row {
+  background: #1e293b !important;
+}
+
+[data-theme='dark'] .active-filter-chip {
+  background: #1e3a5f !important;
+  border-color: #1e40af !important;
+  color: #93c5fd !important;
+}
+
+[data-theme='dark'] .active-filter-chip span {
+  color: #94a3b8 !important;
+}
+
+/* Export Modal */
+[data-theme='dark'] .payroll-export-type-selector {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+}
+
+[data-theme='dark'] .payroll-export-type-option {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
+}
+
+[data-theme='dark'] .payroll-export-type-option.active {
+  border-color: #3b82f6 !important;
+  background: rgba(59, 130, 246, 0.1) !important;
+}
