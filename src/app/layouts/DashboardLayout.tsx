@@ -51,6 +51,9 @@ const flattenPaths = (items: MenuItem[]): string[] => {
 
 export default function DashboardLayout() {
   const [collapsed, setCollapsed] = React.useState(false);
+  const [isMobileOpen, setIsMobileOpen] = React.useState(false);
+  const [isMobile, setIsMobile] = React.useState(false);
+  const [isTablet, setIsTablet] = React.useState(false);
   const [prefetchStats, setPrefetchStats] = React.useState<{
     routeCount: number;
     durationMs: number;
@@ -62,6 +65,30 @@ export default function DashboardLayout() {
   const user = useAuthStore((state) => state.user);
   const location = useLocation();
   const outlet = useOutlet();
+
+  // Detect screen size and auto-manage sidebar state
+  React.useEffect(() => {
+    const checkSize = () => {
+      const w = window.innerWidth;
+      const mobile = w < 768;
+      const tablet = w >= 768 && w < 1024;
+      setIsMobile(mobile);
+      setIsTablet(tablet);
+      // Auto-collapse on tablet, close drawer on mobile when resizing to desktop
+      if (w >= 1024) {
+        setIsMobileOpen(false);
+        setCollapsed(false);
+      } else if (tablet) {
+        setIsMobileOpen(false);
+        setCollapsed(true);
+      } else if (mobile) {
+        setIsMobileOpen(false);
+      }
+    };
+    checkSize();
+    window.addEventListener('resize', checkSize);
+    return () => window.removeEventListener('resize', checkSize);
+  }, []);
 
   React.useEffect(() => {
     if (!user) return;
@@ -167,12 +194,28 @@ export default function DashboardLayout() {
   }, [availablePaths, location.pathname]);
 
   const toggleSidebar = () => {
-    setCollapsed(!collapsed);
+    if (isMobile || isTablet) {
+      // On mobile/tablet: toggle drawer open/close
+      setIsMobileOpen((prev) => !prev);
+    } else {
+      // On desktop: toggle collapse
+      setCollapsed((prev) => !prev);
+    }
+  };
+
+  const closeMobileSidebar = () => {
+    setIsMobileOpen(false);
   };
 
   return (
     <div className="dashboard-layout">
-      <Sidebar collapsed={collapsed} />
+      {/* Overlay backdrop for mobile/tablet */}
+      <div
+        className={`sidebar-overlay ${isMobileOpen ? 'visible' : ''}`}
+        onClick={closeMobileSidebar}
+        aria-hidden="true"
+      />
+      <Sidebar collapsed={collapsed} isMobileOpen={isMobileOpen} onClose={closeMobileSidebar} />
       <div className="dashboard-main">
         <Header toggleSidebar={toggleSidebar} />
         <main className="dashboard-content">

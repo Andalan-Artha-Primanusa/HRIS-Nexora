@@ -391,12 +391,12 @@ const OverviewPage: React.FC = () => {
               <span>{canViewAdminOverview ? 'Pusat Dashboard Admin' : 'Pusat Layanan Mandiri'}</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <img 
-                src={user?.profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'U')}&color=7F9CF5&background=EBF4FF`} 
-                alt="" 
+              <div 
                 className="cell-avatar" 
-                style={{ width: '48px', height: '48px', border: '2px solid rgba(255,255,255,0.2)' }}
-              />
+                style={{ width: '48px', height: '48px', border: '2px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.2)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.2rem' }}
+              >
+                {(user?.name || 'U').charAt(0).toUpperCase()}
+              </div>
               <div>
                 <h1 className="hero-title">Good Morning, {user?.name?.split(' ')[0] || 'HR Team'}!</h1>
                 <p className="hero-subtitle">Here’s an overview of your workforce today.</p>

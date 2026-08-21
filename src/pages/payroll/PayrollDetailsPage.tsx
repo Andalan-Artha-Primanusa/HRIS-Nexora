@@ -307,7 +307,7 @@ const PayrollDetailsPage = () => {
         })}
       </div>
 
-      <Card className="payroll-details-card payroll-component-list-card">
+      <Card className="crud-table-card payroll-component-list-card">
         <div className="payroll-details-overview-header">
           <div>
             <h2>{componentType === "allowance" ? "Daftar Tunjangan" : "Daftar Potongan"}</h2>
@@ -346,8 +346,8 @@ const PayrollDetailsPage = () => {
           </Button>
         </div>
 
-        <div className="payroll-details-table-wrap">
-          <table className="payroll-details-table">
+        <div className="crud-table-wrap">
+          <table className="crud-table">
             <thead>
               <tr>
                 <th style={{ width: 90 }}>ID</th>
@@ -361,7 +361,7 @@ const PayrollDetailsPage = () => {
               {paginatedOverview.length > 0 ? (
                 paginatedOverview.map((item, index) => (
                   <tr key={String(item.id ?? index)}>
-                    <td><span className="payroll-component-id">#{String(item.id ?? "-")}</span></td>
+                    <td><span className="crud-table-id">#{String(item.id ?? "-")}</span></td>
                     <td>
                       <div className="payroll-component-name">
                         <span>{item.name || item.description || "-"}</span>
@@ -373,7 +373,7 @@ const PayrollDetailsPage = () => {
                         {String(item.type).toLowerCase() === "deduction" ? "Potongan" : "Tunjangan"}
                       </span>
                     </td>
-                    <td><strong>Rp {Number(item.amount || 0).toLocaleString("id-ID")}</strong></td>
+                    <td><span className="crud-table-amount">Rp {Number(item.amount || 0).toLocaleString("id-ID")}</span></td>
                     <td className="td-center">
                       <div className="action-btn-group">
                         <button className="action-btn action-btn-edit" title="Detail" onClick={() => setViewDetail(item)}>

@@ -65,7 +65,7 @@ type KpiPeriod = {
   created_at: string;
   employee?: {
     id: number;
-    user?: { name: string; profile?: { avatar_url?: string } };
+    user?: { name: string };
   };
   items: KpiItem[];
 };
@@ -116,6 +116,8 @@ const getStatusClass = (status?: string) => {
   if (["submitted", "sent", "waiting_review"].includes(normalized)) return "badge-soft badge-soft--yellow";
   return "badge-soft badge-soft--gray";
 };
+
+const getInitial = (value?: string | null) => (value?.trim().charAt(0) || "K").toUpperCase();
 
 const AdminKpiPage = () => {
   const user = useAuthStore((state) => state.user);
@@ -272,7 +274,9 @@ const AdminKpiPage = () => {
         </div>
       </Card>
 
-      <Card className="control-section-card">
+      <div className="table-section integrated-table-section">
+        <div className="wuw-table-area integrated-table-area">
+      <Card className="control-section-card integrated-control-card integrated-table-toolbar">
         <div className="control-section-inner">
           <div className="elyra-tabs">
             {(["Semua", "Draft", "Submitted", "Approved"] as const).map((tab) => (
@@ -312,8 +316,6 @@ const AdminKpiPage = () => {
         </div>
       </Card>
 
-      <div className="table-section">
-        <div className="wuw-table-area">
           {loading && <LoadingState message="Memuat periode KPI..." />}
 
           {!loading && paginatedPeriods.length === 0 && (
@@ -362,14 +364,7 @@ const AdminKpiPage = () => {
                           </td>
                           <td>
                             <div className="cell-name">
-                              <img
-                                src={period.employee?.user?.profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(period.employee?.user?.name || 'K')}&color=7F9CF5&background=EBF4FF`}
-                                alt=""
-                                className="cell-avatar"
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(period.employee?.user?.name || 'K')}&color=7F9CF5&background=EBF4FF`;
-                                }}
-                              />
+                              <div className="cell-avatar">{getInitial(period.employee?.user?.name)}</div>
                               <div className="cell-stacked">
                                 <span className="cell-name-text">{period.employee?.user?.name || "Unknown"}</span>
                                 <span className="cell-stacked__sub">Employee ID: {period.employee_id}</span>
@@ -567,15 +562,9 @@ const AdminKpiPage = () => {
       >
         {selectedPeriod && (<>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-            <img
-              src={selectedPeriod.employee?.user?.profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedPeriod.employee?.user?.name || 'K')}&color=7F9CF5&background=EBF4FF`}
-                  alt=""
-                  className="cell-avatar"
-                  style={{ width: 48, height: 48, fontSize: 20 }}
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedPeriod.employee?.user?.name || 'K')}&color=7F9CF5&background=EBF4FF`;
-                  }}
-                />
+            <div className="cell-avatar" style={{ width: 48, height: 48, fontSize: 20 }}>
+              {getInitial(selectedPeriod.employee?.user?.name)}
+            </div>
                 <div>
                   <h4 style={{ margin: 0, fontSize: 18 }}>
                     {selectedPeriod.employee?.user?.name || "Unknown"}

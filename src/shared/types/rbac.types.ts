@@ -70,10 +70,6 @@ export interface User {
   id: number;
   name: string;
   email: string;
-  profile?: {
-    avatar?: string;
-    avatar_url?: string;
-  } | null;
   employee?: unknown;
   roles?: Role[];
   permissions?: Permission[];

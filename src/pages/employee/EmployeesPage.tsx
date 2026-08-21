@@ -39,6 +39,8 @@ const formatDateTime = (input: string) => {
   return new Intl.DateTimeFormat("id-ID", { dateStyle: "medium" }).format(date);
 };
 
+const getInitial = (value?: string | null) => (value?.trim().charAt(0) || "U").toUpperCase();
+
 const EmployeesPage = () => {
   const navigate = useNavigate();
   const [items, setItems] = useState<EmployeeItem[]>([]);
@@ -205,47 +207,45 @@ const EmployeesPage = () => {
         ))}
       </div>
 
-      {/* Control Section */}
-      <Card className="control-section-card">
-        <div className="control-section-inner">
-          <div className="elyra-tabs">
-            {(["Semua", "Aktif", "Probation", "Resigned"] as const).map((tab) => (
-              <button key={tab} className={`elyra-tab ${activeTab === tab ? "active" : ""}`} onClick={() => setActiveTab(tab)}>{tab}</button>
-            ))}
-          </div>
-          <div className="control-actions">
-            <div className="search-box">
-              <div className="search-icon-inside"><Search size={18} /></div>
-              <input type="text" placeholder="Cari karyawan..." value={searchText} onChange={(e) => setSearchText(e.target.value)} className="search-input-pill" />
-            </div>
-            <button className={`filter-btn-rounded ${showFilters ? "active" : ""}`} onClick={() => setShowFilters(!showFilters)}><Filter size={18} /><span>Filter</span></button>
-          </div>
-        </div>
-        {showFilters && (
-          <div className="filter-dropdown" style={{ display: 'block', padding: '1.5rem', borderTop: '1px solid rgba(0,0,0,0.05)' }}>
-            <div className="filter-row" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-              <div className="filter-group" style={{ flex: 1, minWidth: '200px' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 600 }}>Departemen</label>
-                <select value={selectedDepartment} onChange={(e) => setSelectedDepartment(e.target.value)} className="filter-select-premium">
-                  <option value="">Semua Departemen</option>
-                  {uniqueDepartments.map(d => <option key={d} value={d}>{d}</option>)}
-                </select>
-              </div>
-              <div className="filter-group" style={{ flex: 1, minWidth: '200px' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 600 }}>Jabatan</label>
-                <select value={selectedPosition} onChange={(e) => setSelectedPosition(e.target.value)} className="filter-select-premium">
-                  <option value="">Semua Jabatan</option>
-                  {uniquePositions.map(p => <option key={p} value={p}>{p}</option>)}
-                </select>
-              </div>
-            </div>
-          </div>
-        )}
-      </Card>
-
       {/* Table Section */}
-      <div className="table-section">
-        <div className="wuw-table-area">
+      <div className="table-section employee-table-section">
+        <div className="wuw-table-area employee-table-area">
+          <div className="table-toolbar employee-table-toolbar">
+            <div className="control-section-inner">
+              <div className="elyra-tabs">
+                {(["Semua", "Aktif", "Probation", "Resigned"] as const).map((tab) => (
+                  <button key={tab} className={`elyra-tab ${activeTab === tab ? "active" : ""}`} onClick={() => setActiveTab(tab)}>{tab}</button>
+                ))}
+              </div>
+              <div className="control-actions">
+                <div className="search-box">
+                  <div className="search-icon-inside"><Search size={18} /></div>
+                  <input type="text" placeholder="Cari karyawan..." value={searchText} onChange={(e) => setSearchText(e.target.value)} className="search-input-pill" />
+                </div>
+                <button className={`filter-btn-rounded ${showFilters ? "active" : ""}`} onClick={() => setShowFilters(!showFilters)}><Filter size={18} /><span>Filter</span></button>
+              </div>
+            </div>
+            {showFilters && (
+              <div className="filter-dropdown">
+                <div className="filter-row">
+                  <div className="filter-group">
+                    <label>Departemen</label>
+                    <select value={selectedDepartment} onChange={(e) => setSelectedDepartment(e.target.value)} className="filter-select-premium">
+                      <option value="">Semua Departemen</option>
+                      {uniqueDepartments.map(d => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                  </div>
+                  <div className="filter-group">
+                    <label>Jabatan</label>
+                    <select value={selectedPosition} onChange={(e) => setSelectedPosition(e.target.value)} className="filter-select-premium">
+                      <option value="">Semua Jabatan</option>
+                      {uniquePositions.map(p => <option key={p} value={p}>{p}</option>)}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
           {loading && <LoadingState message="Memuat data karyawan..." />}
           {!loading && errorMessage && <ErrorState message="Terjadi Kesalahan" error={errorMessage} onRetry={loadEmployees} />}
           {!loading && !errorMessage && items.length === 0 && <EmptyState title="Tidak ada data" message="Sesuaikan filter atau pencarian Anda." onAction={clearFilters} actionLabel="Reset Filter" />}
@@ -270,14 +270,7 @@ const EmployeesPage = () => {
                       <tr key={item.id}>
                         <td>
                           <div className="cell-name">
-                            <img
-                              src={(item.user as { profile?: { avatar_url?: string } } | undefined)?.profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(item.user?.name || 'U')}&color=7F9CF5&background=EBF4FF`}
-                              alt=""
-                              className="cell-avatar"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(item.user?.name || 'U')}&color=7F9CF5&background=EBF4FF`;
-                              }}
-                            />
+                            <div className="cell-avatar">{getInitial(item.user?.name)}</div>
                             <div className="cell-stacked">
                               <span className="cell-name-text">{item.user?.name || "Unknown"}</span>
                               <span className="cell-stacked__sub">{item.employee_code || item.id}</span>

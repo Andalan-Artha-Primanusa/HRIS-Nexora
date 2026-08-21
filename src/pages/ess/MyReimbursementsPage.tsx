@@ -17,6 +17,7 @@ import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/features/reimbursement/Reimbursement.css';
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
+import type { HistoryItem } from "@/shared/components/ApprovalHistoryModal";
 
 const getStatusClass = (status?: string) => {
   const normalized = String(status || "").toLowerCase();
@@ -40,13 +41,71 @@ const getActionErrorMessage = (error: any, fallback: string) => {
   return message === "Forbidden" ? fallback : message || fallback;
 };
 
+const buildFallbackApprovalHistory = (item: ReimbursementItem): { history: HistoryItem[]; totalSteps: number } => {
+  const flow = item.approval_flow ?? item.approvalFlow;
+  const steps = [...(flow?.steps ?? [])].sort((a, b) => Number(a.step_order ?? 0) - Number(b.step_order ?? 0));
+
+  if (steps.length > 0) {
+    const currentStep = Number(item.current_step || 1);
+    const isFinalApproved = item.status === "approved" || item.status === "paid";
+    const isRejected = item.status === "rejected";
+
+    return {
+      totalSteps: steps.length,
+      history: steps.map((step, index) => {
+        const stepOrder = Number(step.step_order || index + 1);
+        const action =
+          isFinalApproved || stepOrder < currentStep
+            ? "approved"
+            : isRejected && stepOrder === currentStep
+              ? "rejected"
+              : "pending";
+
+        return {
+          id: Number(step.id ?? stepOrder),
+          step_order: stepOrder,
+          role_id: Number(step.role_id ?? 0),
+          user_id: typeof step.user_id === "number" ? step.user_id : undefined,
+          action,
+          note: action === "rejected" ? item.approval_note : undefined,
+          acted_at: action === "pending" ? "" : item.approved_at || item.updated_at || item.submitted_at || "",
+          role: step.role,
+          user: step.user,
+        };
+      }),
+    };
+  }
+
+  if (["approved", "rejected", "paid", "submitted"].includes(item.status)) {
+    const action = item.status === "rejected" ? "rejected" : item.status === "submitted" ? "pending" : "approved";
+    return {
+      totalSteps: 1,
+      history: [
+        {
+          id: Number(item.id) || 1,
+          step_order: 1,
+          role_id: 0,
+          user_id: typeof item.approved_by === "number" ? item.approved_by : undefined,
+          action,
+          note: item.approval_note,
+          acted_at: action === "pending" ? "" : item.approved_at || item.updated_at || item.submitted_at || "",
+          role: { display_name: "Approver", name: "approver" },
+          user: item.approver,
+        },
+      ],
+    };
+  }
+
+  return { history: [], totalSteps: 0 };
+};
+
 const MyReimbursementsPage: React.FC = () => {
   const [items, setItems] = useState<ReimbursementItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<ReimbursementItem | null>(null);
-  const [historyModal, setHistoryModal] = useState<{ module: string; id: number | string } | null>(null);
+  const [historyModal, setHistoryModal] = useState<{ module: string; id: number | string; item: ReimbursementItem } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<ReimbursementItem | null>(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -110,6 +169,11 @@ const MyReimbursementsPage: React.FC = () => {
       { label: "Total Nilai", subtitle: "Nilai seluruh klaim", value: formatCurrency(totalAmount), tone: "purple" as const },
     ];
   }, [items]);
+
+  const approvalHistoryFallback = useMemo(
+    () => (historyModal ? buildFallbackApprovalHistory(historyModal.item) : { history: [], totalSteps: 0 }),
+    [historyModal]
+  );
 
   const handleOpenCreate = () => {
     setSelectedItem(null);
@@ -260,8 +324,10 @@ const MyReimbursementsPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* Control Section */}
-      <Card className="control-section-card">
+      {/* Table Section with integrated controls */}
+      <div className="table-section integrated-table-section">
+        <div className="wuw-table-area integrated-table-area">
+      <Card className="control-section-card integrated-control-card integrated-table-toolbar">
         <div className="control-section-inner">
           {/* Tabs */}
           <div className="elyra-tabs">
@@ -292,9 +358,6 @@ const MyReimbursementsPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* Table Section */}
-      <div className="table-section">
-        <div className="wuw-table-area">
           {loading && <LoadingState message="Memuat klaim..." />}
 
           {!loading && paginatedItems.length === 0 && (
@@ -391,7 +454,7 @@ const MyReimbursementsPage: React.FC = () => {
                                 <Trash2 size={16} />
                               </button>
                             )}
-                            <button className="action-btn" style={{ color: '#8b5cf6', background: '#f5f3ff' }} onClick={() => setHistoryModal({ module: 'reimbursement', id: item.id })} title="Riwayat Approval"><History size={16} /></button>
+                            <button className="action-btn" style={{ color: '#8b5cf6', background: '#f5f3ff' }} onClick={() => setHistoryModal({ module: 'reimbursement', id: item.id, item })} title="Riwayat Approval"><History size={16} /></button>
                           </div>
                         </td>
                       </tr>
@@ -455,6 +518,8 @@ const MyReimbursementsPage: React.FC = () => {
           onClose={() => setHistoryModal(null)}
           module={historyModal.module}
           moduleId={historyModal.id}
+          fallbackHistory={approvalHistoryFallback.history}
+          fallbackTotalSteps={approvalHistoryFallback.totalSteps}
         />
       )}
 

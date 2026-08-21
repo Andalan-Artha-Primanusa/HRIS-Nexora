@@ -780,3 +780,138 @@
   }
 }
 
+<<<<<<< HEAD
+=======
+/* ============================================ */
+/* DARK MODE OVERRIDES                          */
+/* ============================================ */
+
+/* Top Tabs */
+[data-theme='dark'] .payroll-component-tabs {
+  background: #0f172a !important;
+}
+
+[data-theme='dark'] .payroll-component-tab {
+  color: #94a3b8 !important;
+}
+
+[data-theme='dark'] .payroll-component-tab:hover:not(.is-active) {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: #e2e8f0 !important;
+}
+
+[data-theme='dark'] .payroll-component-tab.is-active {
+  background: #1e293b !important;
+  color: #fff !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Summary Cards */
+[data-theme='dark'] .payroll-details-summary-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+[data-theme='dark'] .payroll-details-summary-card:hover {
+  border-color: #475569 !important;
+}
+
+[data-theme='dark'] .payroll-summary-label {
+  color: #94a3b8 !important;
+}
+
+[data-theme='dark'] .payroll-summary-subtitle {
+  color: #64748b !important;
+}
+
+[data-theme='dark'] .payroll-summary-value {
+  color: #f1f5f9 !important;
+}
+
+[data-theme='dark'] .payroll-summary-icon.blue {
+  background: rgba(37, 99, 235, 0.1) !important;
+  color: #60a5fa !important;
+}
+
+[data-theme='dark'] .payroll-summary-icon.green {
+  background: rgba(16, 185, 129, 0.1) !important;
+  color: #34d399 !important;
+}
+
+[data-theme='dark'] .payroll-summary-icon.orange {
+  background: rgba(245, 158, 11, 0.1) !important;
+  color: #fbbf24 !important;
+}
+
+[data-theme='dark'] .payroll-summary-icon.purple {
+  background: rgba(139, 92, 246, 0.1) !important;
+  color: #a78bfa !important;
+}
+
+/* Search and Toolbar */
+[data-theme='dark'] .payroll-search-control {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+  color: #94a3b8 !important;
+}
+
+[data-theme='dark'] .payroll-search-control:focus-within {
+  background: #1e293b !important;
+  border-color: #3b82f6 !important;
+}
+
+[data-theme='dark'] .payroll-search-control input {
+  color: #e2e8f0 !important;
+}
+
+[data-theme='dark'] .crud-table-card select.crud-input,
+[data-theme='dark'] .crud-table-card input.crud-input {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
+}
+
+/* Fix arrows for specific inputs */
+[data-theme='dark'] .crud-table-card select.crud-input {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 10px center !important;
+}
+
+/* Text Overrides inside Card */
+[data-theme='dark'] .payroll-details-overview-header h2 {
+  color: #f1f5f9 !important;
+}
+
+[data-theme='dark'] .payroll-list-subtitle {
+  color: #94a3b8 !important;
+}
+
+[data-theme='dark'] .payroll-component-name small {
+  color: #94a3b8 !important;
+}
+
+/* Pagination Overrides */
+[data-theme='dark'] .payroll-pagination-info {
+  color: #94a3b8 !important;
+}
+
+[data-theme='dark'] .payroll-pagination-btn {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+  color: #94a3b8 !important;
+}
+
+[data-theme='dark'] .payroll-pagination-btn:hover:not(:disabled) {
+  background: #1e293b !important;
+  border-color: #475569 !important;
+  color: #e2e8f0 !important;
+}
+
+[data-theme='dark'] .payroll-pagination-btn.active {
+  background: rgba(59, 130, 246, 0.15) !important;
+  border-color: #3b82f6 !important;
+  color: #60a5fa !important;
+}
+>>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7

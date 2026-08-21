@@ -393,14 +393,9 @@ const TrainingEnrollmentsPage: React.FC = () => {
                         </td>
                         <td>
                           <div className="cell-name">
-                            <img
-                              src={enrollment.employee?.user?.profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(enrollment.employee?.user?.name || enrollment.employee_name || 'U')}&color=7F9CF5&background=EBF4FF`}
-                              alt=""
-                              className="cell-avatar"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(enrollment.employee?.user?.name || enrollment.employee_name || 'U')}&color=7F9CF5&background=EBF4FF`;
-                              }}
-                            />
+                            <div className="cell-avatar">
+                              {(enrollment.employee?.user?.name || enrollment.employee_name || 'U').charAt(0).toUpperCase()}
+                            </div>
                             <div className="cell-stacked">
                               <span className="cell-name-text">{enrollment.employee?.user?.name || enrollment.employee_name || 'Employee'}</span>
                               <span className="cell-stacked__sub">

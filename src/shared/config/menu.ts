@@ -66,7 +66,96 @@ export const menuItems: MenuItem[] = [
     menuKey: 'approval-center',
   },
   {
+<<<<<<< HEAD
     label: 'Reports',
+=======
+    label: 'Hukum & Dokumen',
+    icon: FileText,
+    menuKey: 'legal-dokumen',
+    subItems: [
+      { label: 'Review Dokumen', path: '/documents/review' },
+      { label: 'Surat Tugas', path: '/admin/assignment-letters', menuKey: 'legal-dokumen.surat-tugas' },
+      { label: 'Pembuat Surat', path: '/legal/letters', menuKey: 'legal-dokumen.generator' },
+      { label: 'Kalkulator Pesangon', path: '/legal/severance', menuKey: 'legal-dokumen.kalkulator' },
+      { label: 'PPh21 Progresif', path: '/legal/tax', menuKey: 'legal-dokumen.pph21' },
+    ]
+  },
+  {
+    label: 'Manajemen Penggantian Biaya',
+    icon: Receipt,
+    path: '/reimbursements',
+    menuKey: 'reimbursements',
+  },
+  {
+    label: 'Pelatihan & Kompetensi',
+    icon: Target,
+    menuKey: 'pelatihan-kompetensi',
+    subItems: [
+      { label: 'Pelatihan & Pendaftaran', path: '/training/programs', menuKey: 'pelatihan-kompetensi.pelatihan' },
+      { label: 'Kompetensi', path: '/competencies', menuKey: 'pelatihan-kompetensi.kompetensi' },
+    ]
+  },
+  {
+    label: 'Karier & Promosi',
+    icon: ArrowUpRight,
+    path: '/promotions',
+    menuKey: 'karir-promosi',
+  },
+  {
+  label: 'KPI & Kinerja',
+  icon: Target,
+  path: '/kpis',
+  menuKey: 'kpi-kinerja',
+},
+  {
+  label: 'Layanan Mandiri Karyawan',
+  icon: UserCircle,
+  menuKey: 'ess',
+    subItems: [
+      {
+        label: 'Kinerja',
+        subItems: [
+          { label: 'KPI Saya', path: '/my/kpi', menuKey: 'ess.kinerja.kpi' },
+          { label: 'Kompetensi Saya', path: '/my/competencies', menuKey: 'ess.kinerja.kompetensi' },
+        ]
+      },
+      {
+        label: 'Keuangan',
+        subItems: [
+          { label: 'Penggajian Saya', path: '/my/payroll', menuKey: 'ess.keuangan.payroll' },
+          { label: 'Penggantian Biaya Saya', path: '/my/reimbursements', menuKey: 'ess.keuangan.reimburse' },
+        ]
+      },
+      {
+        label: 'Absensi',
+        subItems: [
+          { label: 'Absen Masuk', path: '/attendance/check-in', menuKey: 'ess.absensi.check-in' },
+          { label: 'Absen Pulang', path: '/attendance/check-out', menuKey: 'ess.absensi.check-out' },
+          { label: 'Riwayat Absensi', path: '/attendance/history', menuKey: 'ess.absensi.riwayat' },
+        ]
+      },
+      {
+        label: 'Pengembangan',
+        subItems: [
+          { label: 'Pelatihan Saya', path: '/my/trainings', menuKey: 'ess.pengembangan.pelatihan' },
+          { label: 'Lembur Saya', path: '/my/overtime', menuKey: 'ess.pengembangan.lembur' },
+          { label: 'Promosi Saya', path: '/my/promotions', menuKey: 'ess.pengembangan.promosi' },
+        ]
+      },
+      {
+        label: 'Dokumen & Aset',
+        subItems: [
+          { label: 'Dokumen Saya', path: '/my/documents', menuKey: 'ess.dokumen-aset.dokumen' },
+          { label: 'Aset Saya', path: '/my/assets', menuKey: 'ess.dokumen-aset.aset' },
+          { label: 'Surat Tugas', path: '/my/assignment-letters', menuKey: 'ess.dokumen-aset.surat-tugas' },
+          { label: 'Tugas Saya', path: '/my/tasks', menuKey: 'ess.dokumen-aset.tugas' },
+        ]
+      },
+    ]
+  },
+  {
+    label: 'Laporan & Analitik',
+>>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
     icon: FileBarChart,
     path: '/reports/dashboard-summary',
     menuKey: 'reports',

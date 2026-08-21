@@ -38,9 +38,13 @@ interface OvertimeRecord {
     full_name: string;
     department?: { name: string };
     position?: { name: string };
+    departmentRel?: { name: string };
+    positionRel?: { name: string };
+    department_rel?: { name: string };
+    position_rel?: { name: string };
     user?: {
       name: string;
-      profile?: { avatar_url: string };
+      profile?: any;
     };
   };
 }
@@ -81,6 +85,17 @@ const toEvidenceList = (value: unknown): OvertimeEvidence[] =>
 const getApiErrorMessage = (error: unknown, fallback: string) => {
   const err = error as ApiErrorLike;
   return err.response?.data?.message || err.message || fallback;
+};
+
+const getEmployeeDepartmentName = (employee?: OvertimeRecord['employee']) =>
+  employee?.departmentRel?.name || employee?.department_rel?.name || employee?.department?.name || '';
+
+const getEmployeePositionName = (employee?: OvertimeRecord['employee']) =>
+  employee?.positionRel?.name || employee?.position_rel?.name || employee?.position?.name || '';
+
+const getEmployeeSubtitle = (employee?: OvertimeRecord['employee']) => {
+  const parts = [getEmployeeDepartmentName(employee), getEmployeePositionName(employee)].filter(Boolean);
+  return parts.join(' • ');
 };
 
 const toOvertimeRecord = (record: unknown): OvertimeRecord => {
@@ -433,26 +448,25 @@ const OvertimePage = () => {
         ))}
       </div>
 
-      <Card className="control-section-card">
-        <div className="control-section-inner">
-          <div className="elyra-tabs">
-            {(['Semua', 'Pending', 'Approved', 'Rejected'] as const).map((tab) => (
-              <button key={tab} className={`elyra-tab ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
-                {tab} {tab !== 'Semua' && <span className="tab-count">{tab === 'Pending' ? pendingCount : tab === 'Approved' ? approvedCount : rejectedCount}</span>}
-              </button>
-            ))}
-          </div>
-          <div className="control-actions">
-            <div className="search-box">
-              <div className="search-icon-inside"><Search size={18} /></div>
-              <input type="text" placeholder="Cari lembur..." value={searchText} onChange={(e) => setSearchText(e.target.value)} className="search-input-pill" />
+      <div className="table-section overtime-table-section">
+        <div className="wuw-table-area overtime-table-area">
+          <div className="table-toolbar overtime-table-toolbar">
+            <div className="control-section-inner">
+              <div className="elyra-tabs">
+                {(['Semua', 'Pending', 'Approved', 'Rejected'] as const).map((tab) => (
+                  <button key={tab} className={`elyra-tab ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
+                    {tab} {tab !== 'Semua' && <span className="tab-count">{tab === 'Pending' ? pendingCount : tab === 'Approved' ? approvedCount : rejectedCount}</span>}
+                  </button>
+                ))}
+              </div>
+              <div className="control-actions">
+                <div className="search-box">
+                  <div className="search-icon-inside"><Search size={18} /></div>
+                  <input type="text" placeholder="Cari lembur..." value={searchText} onChange={(e) => setSearchText(e.target.value)} className="search-input-pill" />
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </Card>
-
-      <div className="table-section">
-        <div className="wuw-table-area">
           {loading && <LoadingState message="Memuat lembur..." />}
           {!loading && filteredRecords.length === 0 && <EmptyState title="Belum Ada Lembur" message="Tidak ada data lembur yang ditemukan." />}
           {!loading && filteredRecords.length > 0 && (
@@ -476,13 +490,13 @@ const OvertimePage = () => {
                         <td>
                           <div className="cell-name">
                             <div className="cell-avatar">
-                              {record.employee?.user?.profile?.avatar_url ? (
-                                <img src={record.employee.user.profile.avatar_url} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
-                              ) : ( (record.employee?.user?.name || record.employee?.full_name || 'E').charAt(0).toUpperCase() )}
+                              {(record.employee?.user?.name || record.employee?.full_name || 'E').charAt(0).toUpperCase()}
                             </div>
                             <div className="cell-stacked">
                               <span className="cell-name-text">{record.employee?.user?.name || record.employee?.full_name || 'User'}</span>
-                              <span className="cell-stacked__sub">{record.employee?.department?.name || "-"} • {record.employee?.position?.name || "-"}</span>
+                              {getEmployeeSubtitle(record.employee) && (
+                                <span className="cell-stacked__sub">{getEmployeeSubtitle(record.employee)}</span>
+                              )}
                             </div>
                           </div>
                         </td>

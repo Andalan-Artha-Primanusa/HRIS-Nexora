@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, X } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import './Sidebar.css';
 
@@ -12,6 +12,8 @@ import { RBACUtils } from '@/shared/hooks/rbac';
 
 interface SidebarProps {
   collapsed: boolean;
+  isMobileOpen?: boolean;
+  onClose?: () => void;
 }
 
 const checkIsActive = (item: MenuItem, pathname: string): boolean => {
@@ -108,6 +110,7 @@ const MenuItemComponent: React.FC<{
   );
 };
 
+<<<<<<< HEAD
 const isEmployeeOnly = (user: ReturnType<typeof useAuthStore.getState>['user']): boolean => {
   if (!user) return false;
   const roleNames = user.roles?.map(r => r.name?.toLowerCase()) ?? [];
@@ -118,6 +121,9 @@ const isEmployeeOnly = (user: ReturnType<typeof useAuthStore.getState>['user']):
 };
 
 export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
+=======
+export const Sidebar: React.FC<SidebarProps> = ({ collapsed, isMobileOpen, onClose }) => {
+>>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
   const user = useAuthStore((state) => state.user);
   const [allowedKeys, setAllowedKeys] = useState<string[] | undefined>();
 
@@ -139,9 +145,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
   const baseMenuItems = employeeOnly ? essMenuItems : menuItems;
   const filteredItems = filterMenuItems(user, baseMenuItems, allowedKeys);
 
+  // When mobile drawer is open, always show full expanded sidebar regardless of collapsed state
+  const effectiveCollapsed = isMobileOpen ? false : collapsed;
+
   return (
-    <aside className={clsx('dashboard-sidebar', collapsed && 'collapsed')}>
+    <aside className={clsx('dashboard-sidebar', collapsed && 'collapsed', isMobileOpen && 'mobile-open')}>
       <div className="sidebar-logo">
+<<<<<<< HEAD
         <div className={clsx('sidebar-brand', collapsed && 'collapsed')}>
           {!collapsed ? (
             <span className="brand-text">HRIS</span>
@@ -149,6 +159,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
             <span className="brand-text-collapsed">H</span>
           )}
         </div>
+=======
+        {isMobileOpen && (
+          <button
+            className="sidebar-close-btn"
+            onClick={onClose}
+            aria-label="Close sidebar"
+            title="Close menu"
+          >
+            <X size={24} />
+          </button>
+        )}
+        <img
+          src="/logo-mahya2.png"
+          alt="MAHYA Logo"
+          className={clsx('company-logo', effectiveCollapsed && 'collapsed')}
+        />
+>>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
       </div>
 
       <div className="sidebar-menu-container">
@@ -157,7 +184,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
             <MenuItemComponent
               key={idx}
               item={item}
-              collapsed={collapsed}
+              collapsed={effectiveCollapsed}
               level={0}
             />
           ))}

@@ -623,3 +623,93 @@ input[type='checkbox'], input[type='radio'] {
 @media (min-width: 1024px) {
   body { font-size: var(--font-size-base); }
 }
+
+/* ============================================================
+   DARK MODE — GLOBAL OVERRIDES
+   ============================================================ */
+[data-theme='dark'] body {
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+}
+
+/* Inputs & Form Controls */
+[data-theme='dark'] input[type='text'],
+[data-theme='dark'] input[type='password'],
+[data-theme='dark'] input[type='email'],
+[data-theme='dark'] input[type='number'],
+[data-theme='dark'] input[type='search'],
+[data-theme='dark'] input[type='url'],
+[data-theme='dark'] input[type='tel'],
+[data-theme='dark'] input[type='date'],
+[data-theme='dark'] input[type='datetime-local'],
+[data-theme='dark'] input[type='time'],
+[data-theme='dark'] textarea,
+[data-theme='dark'] select {
+  background-color: #1f2937;
+  color: var(--color-text-primary);
+  border-color: #374151;
+}
+
+[data-theme='dark'] input::placeholder,
+[data-theme='dark'] textarea::placeholder {
+  color: #64748b;
+}
+
+[data-theme='dark'] input:disabled,
+[data-theme='dark'] textarea:disabled,
+[data-theme='dark'] select:disabled {
+  background-color: #111827;
+  color: var(--color-text-disabled);
+}
+
+/* Tables */
+[data-theme='dark'] tbody tr {
+  background-color: #1f2937;
+}
+
+[data-theme='dark'] tbody tr:hover {
+  background-color: #1e293b;
+}
+
+[data-theme='dark'] td {
+  border-bottom-color: #374151;
+}
+
+[data-theme='dark'] table {
+  border-color: #374151;
+}
+
+/* Code blocks */
+[data-theme='dark'] code {
+  background-color: #1f2937;
+  color: #f87171;
+}
+
+/* Scrollbars */
+[data-theme='dark'] ::-webkit-scrollbar-track {
+  background: #111827;
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: #374151;
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-thumb:hover {
+  background: #60a5fa;
+}
+
+/* HR */
+[data-theme='dark'] hr {
+  border-top-color: #374151;
+}
+
+/* Blockquote */
+[data-theme='dark'] blockquote {
+  border-left-color: #60a5fa;
+  color: #94a3b8;
+}
+
+/* Select arrow icon for dark mode */
+[data-theme='dark'] select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+}

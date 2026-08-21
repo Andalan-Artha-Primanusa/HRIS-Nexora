@@ -12,6 +12,24 @@ interface LeaveDetailModalProps {
   canApproveLeave?: boolean;
 }
 
+const getNestedName = (...values: any[]) =>
+  values.find((value) => typeof value === 'string' && value.trim()) || '';
+
+const getEmployeeSubtitle = (employee: any) => {
+  const departmentName = getNestedName(
+    employee?.department?.name,
+    employee?.departmentRel?.name,
+    employee?.department_rel?.name
+  );
+  const positionName = getNestedName(
+    employee?.position?.name,
+    employee?.positionRel?.name,
+    employee?.position_rel?.name
+  );
+
+  return [departmentName, positionName].filter(Boolean).join(' • ');
+};
+
 export const LeaveDetailModal: React.FC<LeaveDetailModalProps> = ({ isOpen, onClose, item, onApprove, onReject, canApproveLeave }) => {
   if (!item) return null;
 
@@ -22,6 +40,7 @@ export const LeaveDetailModal: React.FC<LeaveDetailModalProps> = ({ isOpen, onCl
 
   const status = String(item.status || 'pending').toLowerCase();
   const statusLabel = status === 'approved' ? 'DISETUJUI' : status === 'rejected' ? 'DITOLAK' : status === 'submitted' ? 'DIAJUKAN' : 'MENUNGGU';
+  const employeeSubtitle = getEmployeeSubtitle(item.employee);
 
   const footer = (
     <>
@@ -49,15 +68,11 @@ export const LeaveDetailModal: React.FC<LeaveDetailModalProps> = ({ isOpen, onCl
           <label style={{ display: 'block', fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Pemohon</label>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-              {(item.employee?.user?.profile?.avatar_url || item.user?.profile?.avatar_url) ? (
-                <img src={item.employee?.user?.profile?.avatar_url || item.user?.profile?.avatar_url} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              ) : (
                 <span style={{ fontWeight: 700 }}>{String(item.employee?.user?.name || item.user?.name || 'E').charAt(0)}</span>
-              )}
             </div>
             <div>
               <div style={{ fontWeight: 600, color: '#1e293b' }}>{item.employee?.user?.name || item.employee?.full_name || item.user?.name || 'Tidak diketahui'}</div>
-              <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{item.employee?.department?.name || "-"} • {item.employee?.position?.name || "Karyawan"}</div>
+              {employeeSubtitle && <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{employeeSubtitle}</div>}
             </div>
           </div>
         </div>
@@ -75,11 +90,7 @@ export const LeaveDetailModal: React.FC<LeaveDetailModalProps> = ({ isOpen, onCl
           <label style={{ display: 'block', fontSize: '0.70rem', color: '#0369a1', textTransform: 'uppercase', marginBottom: '0.75rem', fontWeight: 700, letterSpacing: '0.05em' }}>Penyetuju / Reviewer</label>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '1px solid #bae6fd' }}>
-              {item.approver?.profile?.avatar_url ? (
-                <img src={item.approver.profile.avatar_url} alt="Approver" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              ) : (
                 <span style={{ fontSize: '0.75rem', fontWeight: 700 }}>{String(item.approver?.name || 'A').charAt(0)}</span>
-              )}
             </div>
             <div>
               <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#0c4a6e' }}>{item.approver?.name || "Sistem / Admin"}</div>

@@ -199,42 +199,40 @@ const LeaveRequestsPage = () => {
         </div>
       </Card>
 
-      {/* Control Section */}
-      <Card className="control-section-card">
-        <div className="control-section-inner">
-          <div className="control-actions">
-            <select 
-              className="control-select"
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-            >
-              <option value="">Semua Status</option>
-              <option value="pending">Menunggu</option>
-              <option value="approved">Disetujui</option>
-              <option value="rejected">Ditolak</option>
-            </select>
-          </div>
-
-          <div className="control-actions">
-            <div className="search-box">
-              <div className="search-icon-inside">
-                <Search size={18} />
+      {/* Table Section */}
+      <div className="table-section leave-requests-table-section">
+        <div className="wuw-table-area leave-requests-table-area">
+          <div className="table-toolbar leave-requests-table-toolbar">
+            <div className="control-section-inner">
+              <div className="control-actions">
+                <select
+                  className="control-select"
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                >
+                  <option value="">Semua Status</option>
+                  <option value="pending">Menunggu</option>
+                  <option value="approved">Disetujui</option>
+                  <option value="rejected">Ditolak</option>
+                </select>
               </div>
-              <input
-                type="text"
-                placeholder="Cari nama atau ID..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="search-input-pill"
-              />
+
+              <div className="control-actions">
+                <div className="search-box">
+                  <div className="search-icon-inside">
+                    <Search size={18} />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Cari nama atau ID..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="search-input-pill"
+                  />
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </Card>
-
-      {/* Table Section */}
-      <div className="table-section">
-        <div className="table-wrap">
           {loading && items.length === 0 ? (
             <LoadingState message="Memuat data cuti..." />
           ) : filteredItems.length === 0 ? (

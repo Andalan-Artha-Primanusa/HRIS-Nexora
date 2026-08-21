@@ -9,6 +9,7 @@ import { payrollService, toSafeArray } from '@/features/payroll/api/payroll.serv
 import { parsePaginatedResponse } from '@/shared/api/pagination';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
+import '@/pages/employee/EmployeesPage.css';
 
 const formatCurrency = (value: number | string) => {
   const num = typeof value === 'string' ? parseFloat(value) : value;
@@ -211,30 +212,28 @@ const PayrollReportsPage: React.FC = () => {
         })}
       </div>
 
-      {/* Controls */}
-      <Card className="control-section-card">
-        <div className="control-section-inner">
-          <div className="elyra-tabs">
-            {["Semua", "Pending", "Approved"].map((tab) => (
-              <button key={tab} className={`elyra-tab ${activeFilterTab === tab ? "active" : ""}`}
-                onClick={() => setActiveFilterTab(tab as "Semua" | "Pending" | "Approved")}>
-                {tab}
-              </button>
-            ))}
-          </div>
-          <div className="control-actions">
-            <div className="search-box">
-              <div className="search-icon-inside"><Search size={18} /></div>
-              <input type="text" placeholder="Cari karyawan atau kode..." value={searchText}
-                onChange={(e) => setSearchText(e.target.value)} className="search-input-pill" />
+      {/* Table */}
+      <div className="table-section payroll-report-table-section">
+        <div className="wuw-table-area payroll-report-table-area">
+          <div className="table-toolbar payroll-report-table-toolbar">
+            <div className="control-section-inner">
+              <div className="elyra-tabs">
+                {["Semua", "Pending", "Approved"].map((tab) => (
+                  <button key={tab} className={`elyra-tab ${activeFilterTab === tab ? "active" : ""}`}
+                    onClick={() => setActiveFilterTab(tab as "Semua" | "Pending" | "Approved")}>
+                    {tab}
+                  </button>
+                ))}
+              </div>
+              <div className="control-actions">
+                <div className="search-box">
+                  <div className="search-icon-inside"><Search size={18} /></div>
+                  <input type="text" placeholder="Cari karyawan atau kode..." value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)} className="search-input-pill" />
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </Card>
-
-      {/* Table */}
-      <div className="table-section">
-        <div className="wuw-table-area">
           {loading && <LoadingState message="Memuat data..." />}
 
           {!loading && paginatedData.length === 0 && (

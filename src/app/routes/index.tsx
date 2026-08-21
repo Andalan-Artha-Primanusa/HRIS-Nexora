@@ -5,6 +5,7 @@ import { getRoleBasedDashboardPathFromStorage } from "@/features/auth/utils/role
 import { ProtectedRoute } from "./ProtectedRoute";
 import { MenuRouteGuard } from "./MenuRouteGuard";
 import { useAuthSession } from "./useAuthSession";
+import { LoadingState } from "@/shared/ui/DataStateDisplay";
 import LoginPage from "../../pages/auth/login/LoginPage";
 import GoogleCallbackPage from "../../pages/auth/login/GoogleCallbackPage";
 import ForgotPasswordPage from "../../pages/auth/login/ForgotPasswordPage";
@@ -78,16 +79,168 @@ const AdminEmailNotificationsPage = lazy(() => import("../../pages/admin/AdminEm
 const AdminAuditLogsPage = lazy(() => import("../../pages/admin/AdminAuditLogsPage"));
 const AdminImportPage = lazy(() => import("../../pages/admin/AdminImportPage"));
 const NotificationsPage = lazy(() => import("../../pages/notifications/NotificationsPage"));
+<<<<<<< HEAD
 const MasterDataPage = lazy(() => import("../../pages/admin/MasterDataPage.tsx"));
 const CompanySettingsPage = lazy(() => import("../../pages/admin/CompanySettingsPage.tsx"));
 const NotificationSettingsPage = lazy(() => import("../../pages/admin/NotificationSettingsPage.tsx"));
 const ProfilesPage = lazy(() => import("../../pages/profiles/ProfilesPage"));
 const ReportsDashboardPage = lazy(() => import("../../pages/reports/ReportsDashboardPage"));
+=======
+const ReportsDashboardPage = lazy(() => import("../../pages/reports/ReportsDashboardPage"));
+const ReportsAttendancePage = lazy(() => import("../../pages/reports/ReportsAttendancePage"));
+const ReportsLeavePage = lazy(() => import("../../pages/reports/ReportsLeavePage"));
+const ReportsPayrollPage = lazy(() => import("../../pages/reports/ReportsPayrollPage"));
+
+const ReportsAssetsPage = lazy(() => import("../../pages/reports/ReportsAssetsPage"));
+const ReportsEmployeePage = lazy(() => import("../../pages/reports/ReportsEmployeePage"));
+const WorkSchedulesPage = lazy(() => import("../../pages/work-schedule/WorkSchedulesPage"));
+const WorkScheduleCreatePage = lazy(() => import("../../pages/work-schedule/WorkScheduleCreatePage"));
+const WorkScheduleEditPage = lazy(() => import("../../pages/work-schedule/WorkScheduleEditPage"));
+const JobOpeningsPage = lazy(() => import("../../pages/admin/JobOpeningsPage"));
+const CandidatePipelinePage = lazy(() => import("../../pages/admin/CandidatePipelinePage"));
+const TalentPoolPage = lazy(() => import("../../pages/admin/TalentPoolPage"));
+const OkrManagementPage = lazy(() => import("../../pages/admin/OkrManagementPage"));
+const EngagementSurveysPage = lazy(() => import("../../pages/admin/EngagementSurveysPage"));
+const EngagementAnalyticsPage = lazy(() => import("../../pages/admin/EngagementAnalyticsPage"));
+const SeveranceCalculatorPage = lazy(() => import("../../pages/admin/SeveranceCalculatorPage"));
+const EmploymentLettersPage = lazy(() => import("../../pages/admin/EmploymentLettersPage"));
+const OrgChartPage = lazy(() => import("../../pages/admin/OrgChartPage"));
+const HrRequestsPage = lazy(() => import("../../pages/admin/HrRequestsPage"));
+const ComplianceDashboardPage = lazy(() => import("../../pages/admin/ComplianceDashboardPage"));
+const HolidayCalendarPage = lazy(() => import("../../pages/admin/HolidayCalendarPage"));
+const TrainingManagementPage = lazy(() => import("../../pages/admin/TrainingManagementPage"));
+const CompetencyMatrixPage = lazy(() => import("../../pages/admin/CompetencyMatrixPage"));
+const ApprovalFlowPage = lazy(() => import("../../pages/admin/ApprovalFlowPage"));
+const DocumentReviewPage = lazy(() => import("../../pages/admin/DocumentReviewPage"));
+const ProgressiveTaxPage = lazy(() => import("../../pages/admin/ProgressiveTaxPage"));
+const SuccessionMatrixPage = lazy(() => import("../../pages/admin/SuccessionMatrixPage"));
+const IdpPage = lazy(() => import("../../pages/admin/IdpPage"));
+const CalibrationPage = lazy(() => import("../../pages/admin/CalibrationPage"));
+const Review360Page = lazy(() => import("../../pages/admin/Review360Page"));
+const ShiftSwapsPage = lazy(() => import("../../pages/admin/ShiftSwapsPage"));
+const OvertimeRulesPage = lazy(() => import("../../pages/admin/OvertimeRulesPage"));
+const BiometricDevicesPage = lazy(() => import("../../pages/admin/BiometricDevicesPage"));
+const CompensationPage = lazy(() => import("../../pages/admin/CompensationPage"));
+const ComplianceSettingsPage = lazy(() => import("../../pages/admin/ComplianceSettingsPage"));
+const AssetManagementPage = lazy(() => import("../../pages/admin/AssetManagementPage"));
+const AssetFormPage = lazy(() => import("../../pages/admin/AssetFormPage"));
+const AssignmentLettersPage = lazy(() => import("../../pages/admin/AssignmentLettersPage.tsx"));
+const TaskManagementPage = lazy(() => import("../../pages/admin/TaskManagementPage.tsx"));
+const PromotionPage = lazy(() => import("../../pages/admin/PromotionPage.tsx"));
+
+const MyAssetsPage = lazy(() => import("../../pages/ess/MyAssetsPage.tsx"));
+const MyAssignmentLettersPage = lazy(() => import("../../pages/ess/MyAssignmentLettersPage.tsx"));
+const MyTasksPage = lazy(() => import("../../pages/ess/MyTasksPage.tsx"));
+const MyPromotionsPage = lazy(() => import("../../pages/ess/MyPromotionsPage.tsx"));
+// const MyDocumentsPage = lazy(() => import("../../pages/ess/MyDocumentsPage.tsx"));
+const ShiftSwapFormPage = lazy(() => import("../../pages/admin/ShiftSwapFormPage.tsx"));
+const LeavePolicyPage = lazy(() => import("../../pages/admin/LeavePolicyPage"));
+const LeavePolicyFormPage = lazy(() => import("../../pages/admin/LeavePolicyFormPage"));
+const LeaveTypePage = lazy(() => import("../../pages/admin/LeaveTypePage"));
+const LeaveTypeFormPage = lazy(() => import("../../pages/admin/LeaveTypeFormPage"));
+const BiometricDeviceFormPage = lazy(() => import("../../pages/admin/BiometricDeviceFormPage.tsx"));
+const JobOpeningFormPage = lazy(() => import("../../pages/admin/JobOpeningFormPage.tsx"));
+const OkrFormPage = lazy(() => import("../../pages/admin/OkrFormPage.tsx"));
+const SurveyFormPage = lazy(() => import("../../pages/admin/SurveyFormPage.tsx"));
+const HrRequestFormPage = lazy(() => import("../../pages/admin/HrRequestFormPage.tsx"));
+const SlaPage = lazy(() => import("../../pages/admin/SlaPage.tsx"));
+const HolidayFormPage = lazy(() => import("../../pages/admin/HolidayFormPage.tsx"));
+const TrainingFormPage = lazy(() => import("../../pages/admin/TrainingFormPage.tsx"));
+const CalibrationFormPage = lazy(() => import("../../pages/admin/CalibrationFormPage.tsx"));
+const OvertimeRuleFormPage = lazy(() => import("../../pages/admin/OvertimeRuleFormPage.tsx"));
+const BenefitManagementPage = lazy(() => import("../../pages/admin/BenefitManagementPage.tsx"));
+const BenefitFormPage = lazy(() => import("../../pages/admin/BenefitFormPage.tsx"));
+const DetailedPeopleAnalyticsPage = lazy(() => import("../../pages/admin/DetailedPeopleAnalyticsPage.tsx"));
+const NotificationRulesPage = lazy(() => import("../../pages/admin/NotificationRulesPage.tsx"));
+const CompanySettingsPage = lazy(() => import("../../pages/admin/CompanySettingsPage.tsx"));
+const NotificationSettingsPage = lazy(() => import("../../pages/admin/NotificationSettingsPage.tsx"));
+const MasterDataPage = lazy(() => import("../../pages/admin/MasterDataPage.tsx"));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const sectionRoutes = [
+  { path: "/hr-summary" },
+  { path: "/analytics" },
+  { path: "/insights/people/detailed" },
+  { path: "/organization/directory" },
+  { path: "/organization/summary" },
+  { path: "/organization/chart" },
+  { path: "/organization/team" },
+  { path: "/documents/expiring" },
+  { path: "/notifications" },
+  { path: "/attendance/timesheet" },
+  { path: "/attendance/overtime" },
+  { path: "/attendance/reports" },
+  { path: "/my/assets" },
+  { path: "/my/trainings" },
+  { path: "/my/competencies" },
+  { path: "/my/requests" },
+  { path: "/requests" },
+  { path: "/requests/assign" },
+  { path: "/requests/status" },
+  { path: "/compliance/audit-summary" },
+  { path: "/compliance/expiring-documents" },
+  { path: "/expense/categories" },
+  { path: "/expense/reports" },
+  { path: "/performance" },
+  { path: "/performance/summary" },
+  { path: "/performance/cycles" },
+  { path: "/performance/reviews" },
+  { path: "/performance/okrs" },
+  { path: "/performance/360-reviews" },
+  { path: "/performance/calibration" },
+  { path: "/career/idps" },
+  { path: "/career/succession" },
+  { path: "/engagement/surveys" },
+  { path: "/recruitment/openings" },
+
+  { path: "/reports/competency" },
+  { path: "/reports/employee-lifecycle" },
+  { path: "/reports/custom" },
+  { path: "/settings/user-role" },
+  { path: "/settings/permissions" },
+];
+>>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
 
 const RootRedirect = () => {
   const authStatus = useAuthSession();
   const dashboardPath = getRoleBasedDashboardPathFromStorage();
+<<<<<<< HEAD
   if (authStatus === "checking") return null;
+=======
+
+  if (authStatus === "checking") {
+    return (
+      <div style={{ display: 'flex', height: '100vh', width: '100vw', alignItems: 'center', justifyContent: 'center' }}>
+        <LoadingState message="Memeriksa sesi..." />
+      </div>
+    );
+  }
+
+>>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
   return authStatus === "authenticated" ? (
     <Navigate to={dashboardPath} replace />
   ) : (
@@ -98,7 +251,19 @@ const RootRedirect = () => {
 const GuestRoute = () => {
   const authStatus = useAuthSession();
   const dashboardPath = getRoleBasedDashboardPathFromStorage();
+<<<<<<< HEAD
   if (authStatus === "checking") return null;
+=======
+
+  if (authStatus === "checking") {
+    return (
+      <div style={{ display: 'flex', height: '100vh', width: '100vw', alignItems: 'center', justifyContent: 'center' }}>
+        <LoadingState message="Memeriksa sesi..." />
+      </div>
+    );
+  }
+
+>>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
   return authStatus === "authenticated" ? <Navigate to={dashboardPath} replace /> : <Outlet />;
 };
 
@@ -120,6 +285,28 @@ export const router = createBrowserRouter([
     element: <ProtectedRoute />,
     children: [
       {
+<<<<<<< HEAD
+=======
+        path: "/approval-flows",
+        element: <DashboardLayout />,
+        children: [{ index: true, element: <ApprovalFlowPage /> }],
+      },
+      {
+        path: "/documents/review",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: (
+              <MenuRouteGuard menuKey="legal-dokumen">
+                <DocumentReviewPage />
+              </MenuRouteGuard>
+            ),
+          },
+        ],
+      },
+      {
+>>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
         path: "/dashboard",
         element: <DashboardLayout />,
         children: [{ index: true, element: <OverviewPage /> }],
@@ -165,11 +352,15 @@ export const router = createBrowserRouter([
         element: <DashboardLayout />,
         children: [{ index: true, element: <AttendanceOverviewPage /> }],
       },
+<<<<<<< HEAD
       {
         path: "/attendance/check-in",
         element: <DashboardLayout />,
         children: [{ index: true, element: <AttendanceCheckInPage /> }],
       },
+=======
+
+>>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
       {
         path: "/attendance/check-out",
         element: <DashboardLayout />,

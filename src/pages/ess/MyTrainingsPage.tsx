@@ -20,6 +20,32 @@ const statusConfig: Record<string, { label: string; color: string; bg: string }>
   active: { label: 'Aktif', color: '#3b82f6', bg: '#eff6ff' },
 };
 
+const getProgressInfo = (training: any, currentTab: string) => {
+  if (currentTab === 'Tersedia') {
+    return { value: 0, label: 'Belum terdaftar', color: '#94a3b8', muted: true };
+  }
+
+  const rawScore = training.score ?? training.progress ?? training.progress_percentage;
+  const score = rawScore !== undefined && rawScore !== null && rawScore !== '' ? Number(rawScore) : 0;
+  const safeScore = Number.isFinite(score) ? Math.max(0, Math.min(score, 100)) : 0;
+  const status = String(training.status || '').toLowerCase();
+
+  if (status === 'completed') {
+    return { value: safeScore || 100, label: `${safeScore || 100}%`, color: '#10b981', muted: false };
+  }
+  if (safeScore > 0) {
+    return { value: safeScore, label: `${safeScore}%`, color: '#10b981', muted: false };
+  }
+  if (status === 'pending') {
+    return { value: 0, label: 'Menunggu approval', color: '#f59e0b', muted: true };
+  }
+  if (['enrolled', 'in_progress', 'ongoing'].includes(status)) {
+    return { value: 0, label: 'Belum dimulai', color: '#6366f1', muted: true };
+  }
+
+  return { value: 0, label: 'Belum ada progress', color: '#94a3b8', muted: true };
+};
+
 const MyTrainingsPage: React.FC = () => {
   const user = useAuthStore((s) => s.user);
   const [trainings, setTrainings] = useState<any[]>([]);
@@ -163,7 +189,9 @@ const MyTrainingsPage: React.FC = () => {
         </div>
       </div>
 
-      <Card className="control-section-card">
+      <div className="table-section integrated-table-section">
+        <div className="wuw-table-area integrated-table-area">
+      <Card className="control-section-card integrated-control-card integrated-table-toolbar">
         <div className="control-section-inner">
           <div className="elyra-tabs">
             {(['Semua', 'Tersedia', 'Berlangsung', 'Selesai'] as const).map((t) => (
@@ -182,8 +210,6 @@ const MyTrainingsPage: React.FC = () => {
         </div>
       </Card>
 
-      <div className="table-section">
-        <div className="wuw-table-area">
           {loading && <LoadingState message="Memuat pelatihan..." />}
           {!loading && errorMessage && <ErrorState message="Terjadi Kesalahan" error={errorMessage} onRetry={fetchData} />}
           {!loading && !errorMessage && paginated.length === 0 && (
@@ -210,6 +236,7 @@ const MyTrainingsPage: React.FC = () => {
                       const cfg = statusConfig[t.status] || { label: t.status, color: '#64748b', bg: '#f1f5f9' };
                       const title = t.program?.title || t.title || 'Training';
                       const category = t.category || t.program?.category || '-';
+                      const progressInfo = getProgressInfo(t, tab);
                       return (
                         <tr key={t.id}>
                           <td>
@@ -230,14 +257,14 @@ const MyTrainingsPage: React.FC = () => {
                             </span>
                           </td>
                           <td>
-                            {tab !== 'Tersedia' && t.score !== undefined && t.score !== null ? (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <div style={{ width: 64, height: 6, background: '#e2e8f0', borderRadius: 3, overflow: 'hidden' }}>
-                                  <div style={{ width: `${Math.min(t.score, 100)}%`, height: '100%', background: '#10b981', borderRadius: 3 }} />
-                                </div>
-                                <span style={{ fontSize: '0.8rem', color: '#64748b' }}>{Number(t.score)}%</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <div style={{ width: 64, height: 6, background: '#e2e8f0', borderRadius: 3, overflow: 'hidden' }}>
+                                <div style={{ width: `${progressInfo.value}%`, height: '100%', background: progressInfo.color, borderRadius: 3 }} />
                               </div>
-                            ) : <span style={{ color: '#94a3b8' }}>-</span>}
+                              <span style={{ fontSize: '0.8rem', color: progressInfo.muted ? '#94a3b8' : '#64748b', fontWeight: progressInfo.muted ? 500 : 600 }}>
+                                {progressInfo.label}
+                              </span>
+                            </div>
                           </td>
                           <td className="td-center">
                             {tab === 'Tersedia' ? (

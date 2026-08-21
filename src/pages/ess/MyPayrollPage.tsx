@@ -357,8 +357,10 @@ const MyPayrollPage = () => {
         </div>
       </Card>
 
-      {/* Control Section */}
-      <Card className="control-section-card">
+      {/* Table Section with integrated controls */}
+      <div className="table-section integrated-table-section">
+        <div className="wuw-table-area integrated-table-area">
+      <Card className="control-section-card integrated-control-card integrated-table-toolbar">
         <div className="control-section-inner">
           {/* Tabs */}
           <div className="elyra-tabs">
@@ -390,9 +392,6 @@ const MyPayrollPage = () => {
         </div>
       </Card>
 
-      {/* Table Section */}
-      <div className="table-section">
-        <div className="wuw-table-area">
           {loading && <LoadingState message="Memuat data slip gaji..." />}
           {!loading && errorMessage && <ErrorState message="Koneksi Terputus" error={errorMessage} onRetry={loadPayroll} />}
 
@@ -582,11 +581,9 @@ const MyPayrollPage = () => {
                 gap: '1.5rem',
                 boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
               }}>
-                <img 
-                  src={user?.profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedSlip.employee.name || 'U')}&color=7F9CF5&background=EBF4FF`}
-                  alt=""
-                  style={{ width: '64px', height: '64px', borderRadius: '14px', objectFit: 'cover' }}
-                />
+                <div style={{ width: '64px', height: '64px', borderRadius: '14px', background: '#EBF4FF', color: '#7F9CF5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.5rem' }}>
+                  {(selectedSlip.employee.name || 'U').charAt(0).toUpperCase()}
+                </div>
                 <div style={{ flex: 1 }}>
                   <h4 style={{ margin: '0 0 4px', fontSize: '1.25rem', color: '#1e293b', fontWeight: 700 }}>{selectedSlip.employee.name}</h4>
                   <div style={{ display: 'flex', gap: '12px', fontSize: '0.875rem', color: '#64748b', flexWrap: 'wrap' }}>

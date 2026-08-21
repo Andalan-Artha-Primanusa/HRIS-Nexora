@@ -7,7 +7,7 @@ const overtimeService = {
     return response.data;
   },
 
-  // Employee: upload evidence (file, max 10MB)
+  // Employee: upload evidence (file, max 5MB)
   uploadEvidence: async (overtimeId: string | number, file: File, additional?: Record<string, any>) => {
     const form = new FormData();
     form.append('file', file);
@@ -19,7 +19,7 @@ const overtimeService = {
     }
     const response = await api.post(`/my/overtime/${overtimeId}/evidence`, form, {
       headers: { 'Content-Type': 'multipart/form-data' },
-      maxContentLength: 10 * 1024 * 1024,
+      maxContentLength: 5 * 1024 * 1024,
     });
     return response.data;
   },

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ﻿.control-section-card {
   background: var(--color-var(--color-white)) !important;
   border-radius: 16px !important;
@@ -11,6 +12,12 @@
   transform: none !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
   border-color: var(--color-border) !important;
+=======
+.legal-table-toolbar {
+  background: #ffffff;
+  padding: 1.5rem !important;
+  border-bottom: 1px solid #e2e8f0;
+>>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
 }
 
 .control-section-inner {
@@ -129,9 +136,15 @@
 }
 
 .tab-button.active {
+<<<<<<< HEAD
   background: var(--color-var(--color-white));
   color: var(--color-text-primary);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+=======
+  background: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+>>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
 }
 
 .tab-count {
@@ -144,8 +157,13 @@
 }
 
 .tab-button.active .tab-count {
+<<<<<<< HEAD
   background: var(--color-primary);
   color: var(--color-var(--color-white));
+=======
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+>>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
 }
 
 .data-table-card {

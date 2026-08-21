@@ -4,7 +4,7 @@ import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 import { Card } from '@/shared/ui/Card';
 import { api } from '@/shared/api/httpClient';
 import { useAuthStore } from '@/app/store/auth.store';
-import { FileText } from 'lucide-react';
+import { FileText, Activity, CalendarDays, Clock, CheckCircle2, XCircle } from 'lucide-react';
 import { getMyLeaveBalance, getMyLeaves, getTodayAttendance, getAttendanceHistory } from '@/features/ess/api/ess.service';
 import "./EmployeeDashboardPage.css";
 
@@ -210,28 +210,44 @@ const EmployeeDashboardPage = () => {
       label: 'Saldo Cuti',
       value: loading ? '-' : `${leaveBalance} hari`,
       subtitle: `${leaveUsed} hari terpakai`,
+<<<<<<< HEAD
       icon: 'ðŸ“…',
+=======
+      icon: <CalendarDays size={24} />,
+>>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
       color: 'blue' as const,
     },
     {
       label: 'Cuti Pending',
       value: loading ? '-' : String(pendingLeaves.length),
       subtitle: 'Menunggu persetujuan',
+<<<<<<< HEAD
       icon: 'â°',
+=======
+      icon: <Clock size={24} />,
+>>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
       color: 'orange' as const,
     },
     {
       label: 'Status Hari Ini',
       value: loading ? '-' : (todayAttendance ? 'Hadir' : 'Belum Check-in'),
       subtitle: todayAttendance ? new Date(todayAttendance.check_in_time || '').toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : 'Silakan check-in',
+<<<<<<< HEAD
       icon: todayAttendance ? 'âœ…' : 'âŒ',
+=======
+      icon: todayAttendance ? <CheckCircle2 size={24} /> : <XCircle size={24} />,
+>>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
       color: todayAttendance ? 'green' as const : 'red' as const,
     },
     {
       label: 'Total Cuti',
       value: loading ? '-' : String(allLeaves.length),
       subtitle: 'Semua pengajuan',
+<<<<<<< HEAD
       icon: 'ðŸ“„',
+=======
+      icon: <FileText size={24} />,
+>>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
       color: 'purple' as const,
     },
   ], [loading, leaveBalance, leaveUsed, pendingLeaves.length, todayAttendance, allLeaves.length]);
@@ -275,6 +291,7 @@ const EmployeeDashboardPage = () => {
         <div className="hero-card-inner">
           <div className="hero-content">
             <div className="hero-badge">
+<<<<<<< HEAD
               <span style={{ fontSize: '16px' }}>ðŸ“ˆ</span>
               <span>Dashboard Karyawan</span>
             </div>
@@ -282,8 +299,27 @@ const EmployeeDashboardPage = () => {
             <p className="hero-subtitle">
               Here’s your work summary for today.
             </p>
+=======
+              <Activity size={16} />
+              <span>Dashboard Karyawan</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div 
+                className="cell-avatar" 
+                style={{ width: '48px', height: '48px', border: '2px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.2)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.2rem', borderRadius: '50%' }}
+              >
+                {(user?.name || 'U').charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <h1 className="hero-title">Halo, {user?.name?.split(' ')[0] || 'User'}!</h1>
+                <p className="hero-subtitle">
+                  Lihat ringkasan aktivitas dan status cuti Anda.
+                </p>
+              </div>
+            </div>
+>>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
           </div>
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          <div className="hero-actions">
             <button className="btn-primary" onClick={() => navigate('/leave/requests')}>
               Ajukan Cuti
             </button>
@@ -304,7 +340,7 @@ const EmployeeDashboardPage = () => {
                   <p className="employee-summary-label">{card.label}</p>
                   <p className="employee-summary-subtitle">{card.subtitle}</p>
                 </div>
-                <div className={`employee-summary-icon-wrapper employee-icon-${card.color}`} style={{ fontSize: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className={`employee-summary-icon-wrapper employee-icon-${card.color}`}>
                   {card.icon}
                 </div>
               </div>

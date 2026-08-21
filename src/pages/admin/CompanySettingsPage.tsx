@@ -181,7 +181,7 @@ const CompanySettingsPage: React.FC = () => {
 
   return (
     <div className="crud-page settings-page">
-      <Card className="hero-card" style={{ marginBottom: '2rem' }}>
+      <Card className="hero-card settings-hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
             <div className="hero-badge">
@@ -207,7 +207,7 @@ const CompanySettingsPage: React.FC = () => {
       </Card>
 
       {/* Logo Section */}
-      <Card className="hero-card" style={{ marginBottom: '2rem' }}>
+      <Card className="hero-card settings-logo-card">
         <div className="hero-card-inner">
           <div className="hero-content">
             <div className="hero-badge">
@@ -296,9 +296,9 @@ const CompanySettingsPage: React.FC = () => {
          </Card>
       </div>
 
-      <div className="" style={{ marginTop: '2rem' }}>
-        <div className="wuw-header">
-          <div className="wuw-header-top" style={{ marginBottom: 0 }}>
+      <Card className="settings-detail-card">
+        <div className="settings-detail-header">
+          <div className="settings-detail-heading">
             <div className="wuw-title-area">
               <h3>Konfigurasi Rinci</h3>
             </div>
@@ -536,7 +536,7 @@ const CompanySettingsPage: React.FC = () => {
             </div>
           )}
         </div>
-      </div>
+      </Card>
     </div>
   );
 };

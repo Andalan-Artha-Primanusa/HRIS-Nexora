@@ -443,14 +443,9 @@ const MyLeavesPage = () => {
                             </td>
                             <td>
                               <div className="cell-name">
-                                <img
-                                  src={leave.approver?.user?.profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(leave.approver?.user?.name || 'A')}&color=7F9CF5&background=EBF4FF`}
-                                  alt=""
-                                  className="cell-avatar"
-                                  onError={(e) => {
-                                    (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(leave.approver?.user?.name || 'A')}&color=7F9CF5&background=EBF4FF`;
-                                  }}
-                                />
+                                <div className="cell-avatar" style={{ background: '#EBF4FF', color: '#7F9CF5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                                  {(leave.approver?.user?.name || 'A').charAt(0).toUpperCase()}
+                                </div>
                                 <div className="cell-stacked">
                                   <span className="cell-name-text">{leave.approver?.user?.name || 'System'}</span>
                                   <span className="cell-stacked__sub">Approver</span>

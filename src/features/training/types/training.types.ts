@@ -58,4 +58,9 @@ export interface EmployeeCompetency extends Competency {
   employee_id: string | number;
   assigned_at: string;
   score?: number;
+  assessor?: {
+    id: number;
+    name: string;
+    email?: string;
+  };
 }

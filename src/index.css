@@ -49,26 +49,106 @@
   /* Shadows */
   --shadow-soft: 0 4px 16px rgba(15, 159, 143, 0.08);
 
-  /* Border */
-  --border-light: 1px solid var(--color-border);
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-full: 9999px;
 
-  /* Header icons - now tosca green */
-  --header-icon-color: var(--color-text-secondary);
-  --header-icon-hover-bg: var(--color-primary-lighter);
-  --header-icon-hover-color: var(--color-primary);
-  --header-notif-bg: var(--color-white);
-  --header-notif-border: var(--color-border);
-  --header-notif-hover: var(--color-primary-lighter);
-  --header-notif-unread: var(--color-primary-lighter);
-  --header-profile-border: var(--color-border);
-  --header-avatar-bg: var(--color-primary-light);
-  --header-avatar-text: var(--color-primary);
-  --header-user-name: var(--color-text-primary);
-  --header-user-role: var(--color-text-secondary);
-  --header-dropdown-bg: var(--color-white);
-  --header-dropdown-border: var(--color-border);
-  --header-dropdown-item: var(--color-text-primary);
-  --header-dropdown-item-hover: var(--color-primary-lighter);
+  --border-light: 1px solid var(--gray-200);
+
+  --sidebar-width: 278px;
+  --sidebar-collapsed-width: 78px;
+  --header-height: 72px;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  --header-icon-color: #64748b;
+  --header-icon-hover-bg: #f1f5f9;
+  --header-icon-hover-color: #0f172a;
+  --header-notif-bg: #ffffff;
+  --header-notif-border: #e2e8f0;
+  --header-notif-hover: #f8fbff;
+  --header-notif-unread: #f0f7ff;
+  --header-profile-border: #e2e8f0;
+  --header-avatar-bg: #eff6ff;
+  --header-avatar-text: #2563eb;
+  --header-user-name: #0f172a;
+  --header-user-role: #64748b;
+  --header-dropdown-bg: #ffffff;
+  --header-dropdown-border: #e2e8f0;
+  --header-dropdown-item: #334155;
+  --header-dropdown-item-hover: #f1f5f9;
+}
+
+:root[data-theme='dark'] {
+  --primary-blue: #60a5fa;
+  --primary-blue-hover: #3b82f6;
+  --primary-blue-light: #0f274b;
+  --primary-cyan: #22d3ee;
+  --primary-cyan-light: #0b2f35;
+  --blue-700: #93c5fd;
+
+  --white: #111827;
+  --background-color: #0b1220;
+  --surface-plain: rgba(17, 24, 39, 0.92);
+  --surface-muted: #111827;
+
+  --gray-50: #0f172a;
+  --gray-100: #111827;
+  --gray-200: #1f2937;
+  --gray-300: #334155;
+  --gray-400: #64748b;
+  --gray-500: #94a3b8;
+  --gray-600: #cbd5e1;
+  --gray-700: #e2e8f0;
+  --gray-800: #e5e7eb;
+  --gray-900: #f8fafc;
+
+  --color-background: #0b1220;
+  --color-surface: #111827;
+  --color-border: #1f2937;
+  --color-border-light: #1f2937;
+  --color-divider: #1f2937;
+  --color-text-primary: #e5e7eb;
+  --color-text-secondary: #94a3b8;
+  --color-text-tertiary: #64748b;
+  --color-text-disabled: #475569;
+  --color-primary: #60a5fa;
+  --color-primary-hover: #3b82f6;
+  --color-primary-light: #0f274b;
+  --color-primary-lighter: #0b1b33;
+
+  --shadow-sm: 0 3px 10px rgba(2, 6, 23, 0.35);
+  --shadow-md: 0 10px 24px rgba(2, 6, 23, 0.4);
+  --shadow-lg: 0 18px 42px rgba(2, 6, 23, 0.5);
+  --shadow-xl: 0 28px 58px rgba(2, 6, 23, 0.58);
+  --shadow-soft: 0 14px 36px rgba(30, 64, 175, 0.35);
+
+  --header-icon-color: #94a3b8;
+  --header-icon-hover-bg: #1e293b;
+  --header-icon-hover-color: #f1f5f9;
+  --header-notif-bg: #111827;
+  --header-notif-border: #334155;
+  --header-notif-hover: #1e293b;
+  --header-notif-unread: #0f274b;
+  --header-profile-border: #334155;
+  --header-avatar-bg: #1e293b;
+  --header-avatar-text: #93c5fd;
+  --header-user-name: #e2e8f0;
+  --header-user-role: #94a3b8;
+  --header-dropdown-bg: #111827;
+  --header-dropdown-border: #334155;
+  --header-dropdown-item: #e2e8f0;
+  --header-dropdown-item-hover: #1e293b;
 }
 
 * {
@@ -142,16 +222,38 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   min-height: 100vh;
   overflow: hidden;
+  position: relative;
+}
+
+/* Sidebar Overlay Backdrop (mobile) */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  z-index: var(--overlay-z-index);
+  backdrop-filter: blur(2px);
+  animation: fadeIn 0.2s ease;
+}
+
+.sidebar-overlay.visible {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .dashboard-sidebar {
   width: var(--sidebar-width);
   height: 100vh;
-  transition: width 0.25s ease;
+  transition: width 0.28s ease;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  z-index: 10;
+  z-index: var(--sidebar-z-index);
+  position: relative;
 }
 
 .dashboard-sidebar.collapsed {
@@ -165,6 +267,19 @@ h1, h2, h3, h4, h5, h6 {
   height: 100vh;
   overflow: hidden;
   position: relative;
+  min-width: 0;
+}
+
+.dashboard-header {
+  height: var(--header-height);
+  padding: 0 1.75rem;
+  background: var(--white);
+  border-bottom: 1px solid var(--gray-200);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  z-index: 5;
 }
 
 .dashboard-content {
@@ -172,6 +287,88 @@ h1, h2, h3, h4, h5, h6 {
   padding: 1.5rem 1.75rem 2rem;
   overflow-y: auto;
   background: transparent;
+}
+
+/* ============================================================
+   RESPONSIVE BREAKPOINTS
+   ============================================================ */
+
+/* Tablet: 768px - 1024px — sidebar collapses to icon-only */
+@media (max-width: 1024px) and (min-width: 768px) {
+  .dashboard-sidebar {
+    width: var(--sidebar-collapsed-width);
+  }
+
+  .dashboard-sidebar.mobile-open {
+    width: var(--sidebar-width);
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: var(--sidebar-z-index);
+    box-shadow: 4px 0 32px rgba(15, 23, 42, 0.18);
+  }
+}
+
+/* Mobile: < 768px — sidebar hidden off-screen, slides in as drawer */
+@media (max-width: 767px) {
+  :root {
+    --header-height: 60px;
+  }
+
+  .dashboard-layout {
+    overflow: hidden;
+  }
+
+  .dashboard-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: min(var(--sidebar-width), 85vw);
+    transform: translateX(-100%);
+    z-index: var(--sidebar-z-index);
+    box-shadow: none;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dashboard-sidebar.mobile-open {
+    transform: translateX(0);
+    box-shadow: 4px 0 32px rgba(15, 23, 42, 0.2);
+  }
+
+  /* Always show expanded sidebar when mobile drawer is open */
+  .dashboard-sidebar.mobile-open.collapsed {
+    width: min(var(--sidebar-width), 85vw);
+  }
+
+  .dashboard-main {
+    width: 100%;
+    height: 100vh;
+  }
+
+  .dashboard-header {
+    padding: 0 0.875rem;
+  }
+
+  .dashboard-content {
+    padding: 0.875rem 0.875rem 2rem;
+  }
+}
+
+/* Extra-small phones < 480px */
+@media (max-width: 480px) {
+  :root {
+    --header-height: 56px;
+  }
+
+  .dashboard-header {
+    padding: 0 0.75rem;
+  }
+
+  .dashboard-content {
+    padding: 0.75rem 0.75rem 1.5rem;
+  }
 }
 
 /* ========================================
@@ -354,22 +551,39 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--gray-300);
 }
 
-/* ========================================
-   RESPONSIVE
-   ======================================== */
-
-@media (max-width: 900px) {
-  .route-suspense-fallback__row {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+.action-btn-edit {
+  color: #2563eb !important;
+  background: #eff6ff !important;
+  border-color: #dbeafe !important;
 }
 
-@media (max-width: 640px) {
-  .route-suspense-fallback__row {
-    grid-template-columns: 1fr;
-  }
-  .prefetch-debug-panel {
-    position: static;
-    margin-top: 0.75rem;
-  }
+.action-btn-edit:hover {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25) !important;
 }
+
+.action-btn-success {
+  color: #16a34a !important;
+  background: #dcfce7 !important;
+  border-color: #bbf7d0 !important;
+}
+
+.action-btn-success:hover {
+  background: #16a34a !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25) !important;
+}
+
+.action-btn-delete {
+  color: #e11d48 !important;
+  background: #fff1f2 !important;
+  border-color: #fecdd3 !important;
+}
+
+.action-btn-delete:hover {
+  background: #e11d48 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.25) !important;
+}
+

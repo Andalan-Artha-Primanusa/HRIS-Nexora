@@ -317,11 +317,107 @@
 }
 
 .badge-soft--blue {
+<<<<<<< HEAD
   background: var(--color-primary-light);
   color: var(--color-primary-dark);
+=======
+  color: #0f172a;
 }
 
-/* Buttons */
+.analytics-subtitle {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .employee-summary-wrapper {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.875rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .employee-summary-card {
+    padding: 1.125rem;
+  }
+
+  .employee-summary-icon-wrapper {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+  }
+
+  .employee-summary-value {
+    font-size: 1.5rem;
+  }
+
+  .charts-grid-2 {
+    grid-template-columns: 1fr;
+    gap: 0.875rem;
+    margin-bottom: 1rem;
+  }
+
+  .chart-card {
+    padding: 1rem 1.125rem;
+  }
+
+  .table-header-bar {
+    padding: 1rem 1.125rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .employee-summary-wrapper {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .employee-summary-header {
+    margin-bottom: 0.75rem;
+  }
+
+  .data-table {
+    min-width: 480px;
+  }
+}
+
+@media (max-width: 480px) {
+  .employee-summary-wrapper {
+    gap: 0.625rem;
+    margin-bottom: 1rem;
+  }
+
+  .employee-summary-card {
+    padding: 1rem;
+  }
+
+  .employee-summary-value {
+    font-size: 1.35rem;
+  }
+
+  .btn-primary,
+  .btn-outline {
+    padding: 0.6rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* ==========================================
+   RESTORED CLASSES & HERO ACTIONS OVERRIDE
+   ========================================== */
+
+.badge-soft--blue {
+  background: #dbeafe !important;
+  color: #1d4ed8 !important;
+>>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
+}
+
 .btn-primary {
   padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-md);
@@ -364,7 +460,6 @@
   width: 100%;
 }
 
-/* Analytics Card */
 .analytics-title-card {
   padding: var(--space-4);
   border-radius: var(--radius-lg);
@@ -400,9 +495,40 @@
   color: var(--color-text-primary);
 }
 
+<<<<<<< HEAD
 .analytics-subtitle {
   margin: 0;
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
+=======
+/* Hero Actions Override */
+.hero-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  margin-top: 1rem;
+}
+
+.hero-actions .btn-outline,
+.hero-actions .btn-primary {
+  background: #ffffff !important;
+  border: none !important;
+  color: #1e40af !important;
+  font-weight: 600 !important;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hero-actions .btn-outline:hover,
+.hero-actions .btn-primary:hover {
+  background: rgba(255, 255, 255, 0.9) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2) !important;
+>>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
 }
 

@@ -1,6 +1,7 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuthSession } from "./useAuthSession";
 import { useAuthStore } from "@/app/store/auth.store";
+import { LoadingState } from "@/shared/ui/DataStateDisplay";
 
 interface ProtectedRouteProps {
   role?: string[];
@@ -17,7 +18,11 @@ export const ProtectedRoute = ({ role }: ProtectedRouteProps) => {
   const user = useAuthStore((state) => state.user);
 
   if (authStatus === "checking") {
-    return null;
+    return (
+      <div style={{ display: 'flex', height: '100vh', width: '100vw', alignItems: 'center', justifyContent: 'center' }}>
+        <LoadingState message="Memeriksa sesi..." />
+      </div>
+    );
   }
 
   if (authStatus !== "authenticated") {

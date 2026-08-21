@@ -96,11 +96,11 @@ export const AssignedEmployeesModal: React.FC<AssignedEmployeesModalProps> = ({
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
               <thead>
                 <tr style={{ borderBottom: '2px solid #e2e8f0' }}>
-                  <th style={{ textAlign: 'left', padding: '0.75rem', color: '#64748b', fontWeight: 700 }}>Karyawan</th>
-                  <th style={{ textAlign: 'left', padding: '0.75rem', color: '#64748b', fontWeight: 700 }}>Tingkat</th>
-                  <th style={{ textAlign: 'left', padding: '0.75rem', color: '#64748b', fontWeight: 700 }}>Tanggal</th>
-                  <th style={{ textAlign: 'center', padding: '0.75rem', color: '#64748b', fontWeight: 700 }}>Status</th>
-                  <th style={{ textAlign: 'center', padding: '0.75rem', color: '#64748b', fontWeight: 700 }}>Aksi</th>
+                  <th style={{ textAlign: 'left', padding: '0.75rem', color: '#ffffff', fontWeight: 700 }}>Karyawan</th>
+                  <th style={{ textAlign: 'left', padding: '0.75rem', color: '#ffffff', fontWeight: 700 }}>Tingkat</th>
+                  <th style={{ textAlign: 'left', padding: '0.75rem', color: '#ffffff', fontWeight: 700 }}>Tanggal</th>
+                  <th style={{ textAlign: 'center', padding: '0.75rem', color: '#ffffff', fontWeight: 700 }}>Status</th>
+                  <th style={{ textAlign: 'center', padding: '0.75rem', color: '#ffffff', fontWeight: 700 }}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -110,7 +110,7 @@ export const AssignedEmployeesModal: React.FC<AssignedEmployeesModalProps> = ({
                   const color = proficiencyColors[level] || '#64748b';
                   return (
                     <tr key={emp.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '0.75rem', fontWeight: 600 }}>{getEmployeeName(emp)}</td>
+                      <td style={{ padding: '0.75rem', color: '#0f172a', fontWeight: 600 }}>{getEmployeeName(emp)}</td>
                       <td style={{ padding: '0.75rem' }}>
                         {assessed ? (
                           <span style={{ padding: '2px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, background: `${color}15`, color }}>

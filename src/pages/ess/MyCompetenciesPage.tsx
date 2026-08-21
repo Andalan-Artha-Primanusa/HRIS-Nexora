@@ -8,6 +8,40 @@ import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
 import '@/pages/employee/EmployeesPage.css';
 
+const toRecord = (value: unknown): Record<string, unknown> =>
+  value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
+
+const firstText = (...values: unknown[]) => {
+  for (const value of values) {
+    if (typeof value === 'string' && value.trim()) return value.trim();
+    if (typeof value === 'number' && Number.isFinite(value)) return String(value);
+  }
+  return '';
+};
+
+const getAssessorName = (competency: any) => {
+  const assessor = toRecord(competency?.assessor);
+  const assessedBy = toRecord(competency?.assessed_by);
+  const assessedByUser = toRecord(competency?.assessedBy);
+  const user = toRecord(assessor.user);
+
+  const name = firstText(
+    competency?.assessor_name,
+    assessor.name,
+    user.name,
+    assessor.email,
+    competency?.assessed_by_name,
+    assessedBy.name,
+    assessedBy.email,
+    assessedByUser.name,
+    assessedByUser.email,
+  );
+
+  if (name) return name;
+  if (competency?.assessed_at) return 'HR / Manager';
+  return 'Belum dinilai';
+};
+
 const MyCompetenciesPage: React.FC = () => {
   const [competencies, setCompetencies] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -197,7 +231,9 @@ const MyCompetenciesPage: React.FC = () => {
         </div>
       </Card>
 
-      <Card className="control-section-card">
+      <div className="table-section integrated-table-section">
+        <div className="wuw-table-area integrated-table-area">
+      <Card className="control-section-card integrated-control-card integrated-table-toolbar">
         <div className="control-section-inner">
           <div className="elyra-tabs">
             {(['Semua', 'Sudah Dinilai', 'Belum Dinilai'] as const).map((tab) => (
@@ -227,8 +263,6 @@ const MyCompetenciesPage: React.FC = () => {
         </div>
       </Card>
 
-      <div className="table-section">
-        <div className="wuw-table-area">
           {loading && <LoadingState message="Memuat kompetensi..." />}
           {!loading && errorMessage && <ErrorState message="Koneksi Terputus" error={errorMessage} onRetry={fetchData} />}
 
@@ -293,7 +327,7 @@ const MyCompetenciesPage: React.FC = () => {
                             )}
                           </td>
                           <td>
-                            <span style={{ color: '#64748b', fontSize: '0.85rem' }}>{comp.assessor?.name || '-'}</span>
+                            <span style={{ color: '#64748b', fontSize: '0.85rem' }}>{getAssessorName(comp)}</span>
                           </td>
                           <td>
                             <span style={{ color: '#64748b', fontSize: '0.85rem' }}>{assessed ? formatDate(comp.assessed_at) : '-'}</span>

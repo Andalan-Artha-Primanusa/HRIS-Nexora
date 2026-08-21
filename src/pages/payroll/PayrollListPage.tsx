@@ -33,6 +33,24 @@ interface PayrollWithEmployeeName extends PayrollItem {
   employeeName?: string;
 }
 
+const getNestedName = (...values: any[]) =>
+  values.find((value) => typeof value === "string" && value.trim()) || "";
+
+const getEmployeeSubtitle = (employee: any) => {
+  const departmentName = getNestedName(
+    employee?.department?.name,
+    employee?.departmentRel?.name,
+    employee?.department_rel?.name
+  );
+  const positionName = getNestedName(
+    employee?.position?.name,
+    employee?.positionRel?.name,
+    employee?.position_rel?.name
+  );
+
+  return [departmentName, positionName].filter(Boolean).join(" • ");
+};
+
 const PayrollListPage = () => {
   const [items, setItems] = useState<PayrollWithEmployeeName[]>([]);
   const [employees, setEmployees] = useState<EmployeeItem[]>([]);
@@ -417,7 +435,16 @@ const PayrollListPage = () => {
             {!loading && !errorMessage && sortedItems.length > 0 && (
               <>
                 <div className="table-wrap">
-                  <table className="data-table">
+                  <table className="data-table payroll-list-table">
+                    <colgroup>
+                      <col className="payroll-col-employee" />
+                      <col className="payroll-col-period" />
+                      <col className="payroll-col-money" />
+                      <col className="payroll-col-money" />
+                      <col className="payroll-col-money" />
+                      <col className="payroll-col-status" />
+                      <col className="payroll-col-actions" />
+                    </colgroup>
                     <thead>
                       <tr>
                         <th>Karyawan</th><th>Periode</th><th className="th-right">Gaji Pokok</th><th className="th-right">Tunjangan</th><th className="th-right">THP</th><th>Status</th><th className="th-center" style={{ width: 100 }}>Aksi</th>
@@ -429,15 +456,13 @@ const PayrollListPage = () => {
                           <td className="crud-table-name">
                             <div className="cell-name">
                               <div className="cell-avatar">
-                                {item.employee?.user?.profile?.avatar_url ? (
-                                  <img src={item.employee.user.profile.avatar_url} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
-                                ) : (
-                                  (item.employee?.user?.name || item.employeeName || 'P').charAt(0).toUpperCase()
-                                )}
+                                {(item.employee?.user?.name || item.employeeName || 'P').charAt(0).toUpperCase()}
                               </div>
                               <div className="cell-stacked">
                                 <span className="cell-name-text">{item.employee?.user?.name || item.employeeName || `ID: ${item.employee_id}`}</span>
-                                <span className="cell-stacked__sub">{item.employee?.department?.name || "-"} • {item.employee?.position?.name || "-"}</span>
+                                {getEmployeeSubtitle(item.employee) && (
+                                  <span className="cell-stacked__sub">{getEmployeeSubtitle(item.employee)}</span>
+                                )}
                               </div>
                             </div>
                           </td>

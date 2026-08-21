@@ -179,46 +179,45 @@ const AttendanceReportsPage = () => {
 
       <AttendanceSummary stats={adminStats} />
 
-      <Card className="control-section-card">
-        <div className="control-section-inner">
-          <div className="control-actions">
-            <select
-              className="filter-select-premium"
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              style={{ height: '44px', minWidth: '160px' }}
-            >
-              <option value="">Semua Status</option>
-              <option value="on_time">Hadir</option>
-              <option value="late">Terlambat</option>
-              <option value="absent">Absen</option>
-            </select>
-            <input
-              type="date"
-              value={filterDate}
-              onChange={(e) => setFilterDate(e.target.value)}
-              className="filter-select-premium"
-              style={{ height: '44px', minWidth: '160px' }}
-            />
-          </div>
+      <div className="table-section attendance-report-table-section">
+        <div className="wuw-table-area attendance-report-table-area">
+          <div className="table-toolbar attendance-report-table-toolbar">
+            <div className="control-section-inner">
+              <div className="control-actions">
+                <select
+                  className="filter-select-premium"
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  style={{ height: '44px', minWidth: '160px' }}
+                >
+                  <option value="">Semua Status</option>
+                  <option value="on_time">Hadir</option>
+                  <option value="late">Terlambat</option>
+                  <option value="absent">Absen</option>
+                </select>
+                <input
+                  type="date"
+                  value={filterDate}
+                  onChange={(e) => setFilterDate(e.target.value)}
+                  className="filter-select-premium"
+                  style={{ height: '44px', minWidth: '160px' }}
+                />
+              </div>
 
-          <div className="control-actions">
-            <div className="search-box">
-              <div className="search-icon-inside"><Search size={18} /></div>
-              <input
-                type="text"
-                placeholder="Cari nama atau ID karyawan..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="search-input-pill"
-              />
+              <div className="control-actions">
+                <div className="search-box">
+                  <div className="search-icon-inside"><Search size={18} /></div>
+                  <input
+                    type="text"
+                    placeholder="Cari nama atau ID karyawan..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="search-input-pill"
+                  />
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </Card>
-
-      <div className="table-section">
-        <div className="table-wrap">
           {adminLoading && adminItems.length === 0 ? (
             <LoadingState message="Memuat data kehadiran..." />
           ) : filteredItems.length === 0 ? (

@@ -115,8 +115,35 @@
 .wuw-table-area {
   background: var(--color-white);
   border-radius: 16px;
+  border: 1px solid #e2e8f0;
   overflow: hidden;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+}
+
+.notification-table-section {
+  margin-top: 0;
+}
+
+.notification-table-area .notification-table-toolbar {
+  margin: 0 !important;
+  padding: 1.5rem !important;
+  border: 0 !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  border-radius: 0 !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
+}
+
+.notification-table-area .elyra-tab:hover {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.notification-table-area .elyra-tab.active,
+.notification-table-area .elyra-tab.active:hover {
+  background: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
 }
 
 .data-table {
@@ -207,6 +234,16 @@
   border-color: var(--color-text-tertiary);
 }
 
+.channel-pill-toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.channel-pill-toggle:disabled:hover {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
 .channel-pill-toggle.enabled {
   background: #ecfdf5;
   border-color: var(--color-success);
@@ -225,11 +262,12 @@
 /* Tabs */
 .elyra-tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   background: var(--color-surface-soft);
   padding: 0.4rem;
-  border-radius: 999px;
-  width: fit-content;
+  border-radius: 18px;
+  width: 100%;
 }
 
 .elyra-tab {
@@ -251,3 +289,155 @@
   color: var(--color-primary);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
+<<<<<<< HEAD
+=======
+
+.notification-warning-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid #fed7aa;
+  border-radius: 12px;
+  background: #fff7ed;
+  color: #9a3412;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.notification-warning-banner svg {
+  flex-shrink: 0;
+}
+
+.notification-audit-card {
+  margin-top: 1.5rem;
+}
+
+.notification-audit-card .table-card-inner,
+.notification-audit-card {
+  overflow: hidden;
+}
+
+.notification-audit-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  background: #ffffff;
+}
+
+.audit-icon {
+  background: #eef2ff;
+  color: #4f46e5;
+}
+
+.audit-summary-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 0.78rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.notification-audit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  padding: 1.5rem;
+  background: #f8fafc;
+}
+
+.notification-audit-item {
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.notification-audit-item__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.notification-audit-module {
+  display: block;
+  margin-bottom: 0.2rem;
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.notification-audit-item strong {
+  color: #0f172a;
+  font-size: 0.98rem;
+}
+
+.notification-audit-item p {
+  min-height: 44px;
+  margin: 0 0 0.85rem 0;
+  color: #475569;
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.audit-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 104px;
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.audit-status--ready {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.audit-status--missing {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.audit-backend-note {
+  display: block;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f1f5f9;
+  color: #64748b;
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+  .notification-audit-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .audit-summary-pill {
+    white-space: normal;
+  }
+
+  .elyra-tab {
+    flex: 1 1 auto;
+    justify-content: center;
+    padding-inline: 1rem;
+  }
+}
+>>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7

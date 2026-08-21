@@ -116,12 +116,24 @@
   box-shadow: var(--shadow-sm);
 }
 
+.overtime-table-area .overtime-table-toolbar,
+.attendance-report-table-area .attendance-report-table-toolbar {
+  padding: 1.5rem;
+  background: #ffffff;
+}
+
 .control-section-inner {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 1.5rem;
   flex-wrap: wrap;
+}
+
+.overtime-table-area .elyra-tab.active {
+  background: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
 }
 
 .control-actions {
@@ -178,11 +190,42 @@
   margin-top: 1.5rem;
 }
 
+.overtime-table-area,
+.attendance-report-table-area {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.overtime-table-area > .loading-state,
+.overtime-table-area > .empty-state,
+.attendance-report-table-area > .loading-state,
+.attendance-report-table-area > .empty-state {
+  border-top: 1px solid #e2e8f0;
+}
+
 .table-wrap {
   overflow-x: auto;
   background: var(--color-var(--color-white));
   border-radius: 16px;
   border: 1px solid var(--color-border);
+}
+
+.overtime-table-area .table-wrap,
+.attendance-report-table-area .table-wrap {
+  border: 0;
+  border-top: 1px solid #e2e8f0;
+  border-radius: 0;
+}
+
+.overtime-table-section {
+  margin-top: 0;
+}
+
+.attendance-report-table-section {
+  margin-top: 0 !important;
 }
 
 .data-table {

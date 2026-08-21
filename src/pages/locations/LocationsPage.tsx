@@ -197,8 +197,10 @@ const LocationsPage = () => {
         />
       </Card>
 
-      {/* Control Section */}
-      <Card className="control-section-card">
+      {/* Table Section with integrated controls */}
+      <div className="table-section integrated-table-section">
+        <div className="wuw-table-area integrated-table-area">
+      <Card className="control-section-card integrated-control-card integrated-table-toolbar">
         <div className="control-section-inner">
           <div className="control-actions">
             <div className="search-box">
@@ -245,9 +247,6 @@ const LocationsPage = () => {
         )}
       </Card>
 
-      {/* Table Section */}
-      <div className="table-section">
-        <div className="wuw-table-area">
           {loading && <LoadingState message="Memuat lokasi..." />}
 
           {!loading && errorMessage && (
