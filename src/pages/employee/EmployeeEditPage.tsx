@@ -182,7 +182,7 @@ const EmployeeEditPage = () => {
       <Card className="control-card" glass>
         <div style={{ marginBottom: '1rem' }}>
           <h3 style={{ margin: 0, color: '#1e3a8a', fontWeight: 700, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Briefcase size={18} style={{ color: '#2563eb' }} />
+            <Briefcase size={18} style={{ color: 'var(--color-primary)' }} />
             Form Data Karyawan
           </h3>
         </div>

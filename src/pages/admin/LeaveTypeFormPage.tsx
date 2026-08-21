@@ -98,7 +98,7 @@ const LeaveTypeFormPage: React.FC = () => {
   if (fetching) {
     return (
       <div className="crud-page" style={{ textAlign: 'center', padding: '5rem' }}>
-        <RefreshCw className="animate-spin" size={48} color="#2563eb" />
+        <RefreshCw className="animate-spin" size={48} color="var(--color-primary)" />
         <p>Memuat konfigurasi...</p>
       </div>
     );
@@ -134,7 +134,7 @@ const LeaveTypeFormPage: React.FC = () => {
       <form id="leave-type-form" onSubmit={handleSubmit} className="" style={{ maxWidth: '800px', margin: '0 auto' }}>
         <Card glass style={{ padding: '2rem', borderRadius: '24px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '2rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem' }}>
-                <div style={{ padding: '10px', borderRadius: '12px', background: '#eff6ff', color: '#2563eb' }}>
+                <div style={{ padding: '10px', borderRadius: '12px', background: '#eff6ff', color: 'var(--color-primary)' }}>
                   <CalendarDays size={24} />
                 </div>
                 <h3 style={{ margin: 0 }}>Informasi Dasar</h3>
@@ -222,9 +222,9 @@ const LeaveTypeFormPage: React.FC = () => {
             </Card>
 
             <div style={{ marginTop: '2rem' }}>
-              <Card glass style={{ padding: '1.5rem', borderLeft: '4px solid #2563eb' }}>
+              <Card glass style={{ padding: '1.5rem', borderLeft: '4px solid var(--color-primary)' }}>
                 <div style={{ display: 'flex', gap: '12px' }}>
-                  <Info size={20} color="#2563eb" />
+                  <Info size={20} color="var(--color-primary)" />
                   <div>
                     <h4 style={{ margin: '0 0 0.5rem 0' }}>Panduan Pengisian</h4>
                     <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', lineHeight: 1.5 }}>

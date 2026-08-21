@@ -19,7 +19,7 @@ const extractArr = (raw: unknown): Rec[] => {
 const getStr = (rec: Rec, keys: string[]) => { for (const k of keys) { const v = rec[k]; if (typeof v === 'string' && v.trim()) return v.trim(); } return ''; };
 
 const TT = { contentStyle: { backgroundColor:'#fff', border:'1px solid #dbeafe', borderRadius:'8px' }, labelStyle: { color:'#1e40af', fontWeight:'bold' as const } };
-const COLORS = ['#2563eb','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899','#f97316'];
+const COLORS = ['var(--color-primary)','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899','#f97316'];
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _MetricCard: React.FC<{label:string;sub:string;value:string;tone:string;icon:React.ElementType}> = ({label,sub,value,tone,icon:Icon}) => (
@@ -190,7 +190,7 @@ const ReportsEmployeePage: React.FC = () => {
                   <XAxis type="number" stroke="#1e40af" style={{fontSize:'12px'}}/>
                   <YAxis dataKey="name" type="category" stroke="#1e40af" style={{fontSize:'12px'}} width={100}/>
                   <Tooltip {...TT} cursor={{fill:'rgba(37,99,235,0.1)'}}/>
-                  <Bar dataKey="value" fill="#2563eb" radius={[0,8,8,0]} name="Headcount"/>
+                  <Bar dataKey="value" fill="var(--color-primary)" radius={[0,8,8,0]} name="Headcount"/>
                 </BarChart>
               </ResponsiveContainer>
             ):(<div className="reports-chart-empty">Belum ada data.</div>)}

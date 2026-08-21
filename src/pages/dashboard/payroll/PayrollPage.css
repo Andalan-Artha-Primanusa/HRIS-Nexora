@@ -1,4 +1,4 @@
-.payroll-page {
+﻿.payroll-page {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -43,7 +43,7 @@
   padding: 0.85rem 1rem;
   border-radius: 0.75rem;
   border: 1px solid var(--gray-200);
-  background: var(--white);
+  background: var(--var(--color-white));
   color: var(--gray-900);
 }
 
@@ -55,8 +55,8 @@
 }
 
 .stat-card {
-  background: rgba(37, 99, 235, 0.08);
-  border: 1px solid rgba(37, 99, 235, 0.15);
+  background: rgba(15, 159, 143, 0.08);
+  border: 1px solid rgba(15, 159, 143, 0.15);
   border-radius: 1rem;
   padding: 1rem;
 }
@@ -111,3 +111,4 @@
     grid-template-columns: 1fr;
   }
 }
+

@@ -50,7 +50,7 @@ const PayrollDashboard: React.FC = () => {
   const [totalPending, setTotalPending] = useState(0);
   const [averagePayroll, setAveragePayroll] = useState(0);
 
-  const statusColors = ["#2563eb", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
+  const statusColors = ["var(--color-primary)", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
 
   const loadPayrollData = async () => {
     setLoading(true);
@@ -268,7 +268,7 @@ const PayrollDashboard: React.FC = () => {
                 <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
                 <Tooltip {...tooltipStyle} />
                 <Legend />
-                <Line type="monotone" dataKey="totalPayroll" name="Total" stroke="#2563eb" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="totalPayroll" name="Total" stroke="var(--color-primary)" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
                 <Line type="monotone" dataKey="processed" name="Selesai" stroke="#10b981" strokeWidth={2} dot={false} />
                 <Line type="monotone" dataKey="pending" name="Menunggu" stroke="#f59e0b" strokeWidth={2} dot={false} />
               </LineChart>

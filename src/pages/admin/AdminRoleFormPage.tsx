@@ -103,7 +103,7 @@ const AdminRoleFormPage: React.FC = () => {
            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
               <Card glass style={{ padding: '2.5rem', borderRadius: '32px' }}>
                  <h3 style={{ margin: '0 0 2rem', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '1.25rem', fontWeight: 800, color: '#1e3a8a' }}>
-                    <Tag size={24} color="#2563eb" /> Informasi Peran
+                    <Tag size={24} color="var(--color-primary)" /> Informasi Peran
                  </h3>
                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>

@@ -1,9 +1,9 @@
-.payroll-detailed-page {
+﻿.payroll-detailed-page {
   display: flex;
   flex-direction: column;
   gap: 2rem;
   padding: 1.5rem;
-  background: #f8fafc;
+  background: var(--color-surface-soft);
   min-height: 100vh;
 }
 
@@ -45,13 +45,13 @@
 .detailed-hero-copy h1 {
   font-size: 2.5rem;
   font-weight: 800;
-  color: #1e3a8a;
+  color: var(--color-primary-dark);
   margin: 0.5rem 0;
   letter-spacing: -1px;
 }
 
 .detailed-hero-copy p {
-  color: #64748b;
+  color: var(--color-text-secondary);
   font-size: 1.1rem;
   max-width: 600px;
 }
@@ -105,7 +105,7 @@
 .stat-label {
   font-size: 0.8rem;
   font-weight: 700;
-  color: #94a3b8;
+  color: var(--color-text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
@@ -113,7 +113,7 @@
 .stat-value {
   font-size: 2rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--color-text-primary);
   letter-spacing: -1px;
 }
 
@@ -122,10 +122,10 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  background: white;
+  background: var(--color-white);
   padding: 0.75rem 1.25rem;
   border-radius: 16px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
 }
 
@@ -134,7 +134,7 @@
   outline: none;
   width: 100%;
   font-size: 1rem;
-  color: #1e293b;
+  color: var(--color-text-primary);
 }
 
 .action-buttons {
@@ -157,7 +157,7 @@
 .table-header h2 {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #1e3a8a;
+  color: var(--color-primary-dark);
   margin: 0;
 }
 
@@ -172,18 +172,18 @@
   padding: 1.25rem 1rem;
   font-size: 0.75rem;
   font-weight: 700;
-  color: #64748b;
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  background: #f8fafc;
-  border-bottom: 2px solid #f1f5f9;
+  background: var(--color-surface-soft);
+  border-bottom: 2px solid var(--color-surface-soft);
 }
 
 .premium-table td {
   padding: 1.75rem 1rem;
   font-size: 0.95rem;
   color: #334155;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--color-surface-soft);
   transition: background 0.2s ease;
 }
 
@@ -218,19 +218,19 @@
 
 .emp-name {
   font-weight: 700;
-  color: #1e293b;
+  color: var(--color-text-primary);
 }
 
 .emp-code {
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: var(--color-text-tertiary);
 }
 
 .font-semibold { font-weight: 600; }
 .font-bold { font-weight: 700; }
 .text-center { text-align: center; }
 .py-10 { padding-top: 2.5rem; padding-bottom: 2.5rem; }
-.text-red-600 { color: #dc2626; }
+.text-red-600 { color: var(--color-error); }
 .text-green-600 { color: #16a34a; }
 .text-orange-600 { color: #ea580c; }
 .text-lg { font-size: 1.125rem; }
@@ -241,3 +241,4 @@
   .detailed-actions-bar { flex-direction: column; }
   .search-box { width: 100%; }
 }
+

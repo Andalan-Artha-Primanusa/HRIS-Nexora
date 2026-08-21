@@ -52,26 +52,26 @@
 
 /* Icon Colors */
 .color-blue { 
-  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); 
-  color: #1d4ed8; 
+  background: var(--color-primary-light);
+  color: var(--color-primary);
 }
 .color-green { 
-  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); 
-  color: #059669; 
+  background: var(--color-success-light);
+  color: var(--color-success);
 }
 .color-orange { 
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); 
-  color: #d97706; 
+  background: var(--color-warning-light);
+  color: var(--color-warning);
 }
 .color-red { 
-  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); 
-  color: #dc2626; 
+  background: var(--color-error-light);
+  color: var(--color-error);
 }
 .color-purple { 
-  background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%); 
-  color: #7c3aed; 
+  background: rgba(139, 92, 246, 0.12);
+  color: #7c3aed;
 }
 .color-teal { 
-  background: linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%); 
-  color: #0d9488; 
+  background: var(--color-primary-light);
+  color: var(--color-primary);
 }

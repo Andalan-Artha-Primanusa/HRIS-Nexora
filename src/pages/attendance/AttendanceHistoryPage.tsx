@@ -279,7 +279,7 @@ const AttendanceHistoryPage = () => {
                         <td style={{ color: '#10b981', fontWeight: 600 }}>
                           {formatTime(record.check_in)}
                         </td>
-                        <td style={{ color: '#2563eb', fontWeight: 600 }}>
+                        <td style={{ color: 'var(--color-primary)', fontWeight: 600 }}>
                           {formatTime(record.check_out)}
                         </td>
                         <td>

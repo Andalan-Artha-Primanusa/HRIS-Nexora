@@ -71,7 +71,7 @@
 
 .ui-input {
   width: 100%;
-  height: 40px;
+  height: 44px;
   padding: 0 var(--space-3);
   font-family: 'Poppins', sans-serif;
   font-size: var(--font-size-base);
@@ -94,7 +94,7 @@
 .ui-input:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.1);
 }
 
 .ui-input:disabled {
@@ -165,7 +165,7 @@
 .ui-textarea:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.1);
 }
 
 .ui-textarea:disabled {
@@ -182,7 +182,7 @@
 .ui-select,
 .ui-select-multiple {
   width: 100%;
-  height: 40px;
+  height: 44px;
   padding: 0 var(--space-3);
   font-family: 'Poppins', sans-serif;
   font-size: var(--font-size-base);
@@ -214,7 +214,7 @@
 .ui-select-multiple:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.1);
 }
 
 .ui-select:disabled,
@@ -278,7 +278,7 @@
 
 .ui-checkbox:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.1);
 }
 
 /* ========================================
@@ -327,7 +327,7 @@
 
 .ui-radio:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.1);
 }
 
 /* ========================================
@@ -387,7 +387,7 @@
 
 .ui-input-addon:focus-within {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.1);
 }
 
 .ui-input-addon--prefix,

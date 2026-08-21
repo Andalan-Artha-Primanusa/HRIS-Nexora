@@ -28,7 +28,7 @@ export const ReimbursementStats: React.FC<ReimbursementStatsProps> = ({ stats })
 
   const getToneColors = (tone: string) => {
     switch (tone) {
-      case 'blue': return { bg: '#eff6ff', icon: '#2563eb' };
+      case 'blue': return { bg: '#eff6ff', icon: 'var(--color-primary)' };
       case 'orange': return { bg: '#fff7ed', icon: '#f59e0b' };
       case 'green': return { bg: '#f0fdf4', icon: '#10b981' };
       case 'purple': return { bg: '#faf5ff', icon: '#8b5cf6' };

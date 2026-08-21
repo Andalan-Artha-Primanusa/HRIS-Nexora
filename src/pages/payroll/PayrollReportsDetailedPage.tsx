@@ -389,7 +389,7 @@ const PayrollReportsDetailedPage: React.FC = () => {
         footer={<>
           <button className="modal-btn-cancel" onClick={() => setExportModal(false)}>Batal</button>
           <button className="modal-btn-confirm" onClick={handleExport} disabled={exportLoading}
-            style={{ background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.3)' }}>
+            style={{ background: 'linear-gradient(135deg, var(--color-primary) 0%, #1d4ed8 100%)', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.3)' }}>
             {exportLoading ? <><RefreshCw size={16} className="animate-spin" /> Memproses...</> : <><Download size={16} /> Download CSV</>}
           </button>
         </>}
@@ -397,14 +397,14 @@ const PayrollReportsDetailedPage: React.FC = () => {
         <p className="modal-completion-task" style={{ marginBottom: '1rem' }}>Pilih tipe export dan periode</p>
         <label className="modal-completion-label">Tipe Export</label>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '8px' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', borderRadius: '12px', border: exportType === 'bca' ? '2px solid #2563eb' : '2px solid #e2e8f0', background: exportType === 'bca' ? '#eff6ff' : '#fff', cursor: 'pointer' }} onClick={() => setExportType('bca')}>
-            <input type="radio" name="exportTypeReport" checked={exportType === 'bca'} onChange={() => setExportType('bca')} style={{ accentColor: '#2563eb' }} />
-            <DollarSign size={20} color="#2563eb" />
+          <label style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', borderRadius: '12px', border: exportType === 'bca' ? '2px solid var(--color-primary)' : '2px solid #e2e8f0', background: exportType === 'bca' ? '#eff6ff' : '#fff', cursor: 'pointer' }} onClick={() => setExportType('bca')}>
+            <input type="radio" name="exportTypeReport" checked={exportType === 'bca'} onChange={() => setExportType('bca')} style={{ accentColor: 'var(--color-primary)' }} />
+            <DollarSign size={20} color="var(--color-primary)" />
             <div><div style={{ fontWeight: 600, color: '#1e293b' }}>BCA KlikPay CSV</div><div style={{ fontSize: '0.8rem', color: '#64748b' }}>Format siap import ke BCA KlikPay</div></div>
           </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', borderRadius: '12px', border: exportType === 'summary' ? '2px solid #2563eb' : '2px solid #e2e8f0', background: exportType === 'summary' ? '#eff6ff' : '#fff', cursor: 'pointer' }} onClick={() => setExportType('summary')}>
-            <input type="radio" name="exportTypeReport" checked={exportType === 'summary'} onChange={() => setExportType('summary')} style={{ accentColor: '#2563eb' }} />
-            <FileText size={20} color="#2563eb" />
+          <label style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', borderRadius: '12px', border: exportType === 'summary' ? '2px solid var(--color-primary)' : '2px solid #e2e8f0', background: exportType === 'summary' ? '#eff6ff' : '#fff', cursor: 'pointer' }} onClick={() => setExportType('summary')}>
+            <input type="radio" name="exportTypeReport" checked={exportType === 'summary'} onChange={() => setExportType('summary')} style={{ accentColor: 'var(--color-primary)' }} />
+            <FileText size={20} color="var(--color-primary)" />
             <div><div style={{ fontWeight: 600, color: '#1e293b' }}>Summary Lengkap</div><div style={{ fontSize: '0.8rem', color: '#64748b' }}>Detail gaji, tunjangan, potongan, BPJS, PPh21</div></div>
           </label>
         </div>
@@ -415,7 +415,7 @@ const PayrollReportsDetailedPage: React.FC = () => {
       <Modal isOpen={!!exportError} onClose={() => setExportError(null)} title="Export Gagal" size="md"
         footer={<>
           <button className="modal-btn-cancel" onClick={() => setExportError(null)}>Tutup</button>
-          <button className="modal-btn-confirm" onClick={() => { setExportError(null); setExportModal(true); }} style={{ background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)' }}>Coba Lagi</button>
+          <button className="modal-btn-confirm" onClick={() => { setExportError(null); setExportModal(true); }} style={{ background: 'linear-gradient(135deg, var(--color-primary) 0%, #1d4ed8 100%)' }}>Coba Lagi</button>
         </>}
       >
         <p className="modal-completion-task" style={{ marginBottom: '1rem' }}>Tidak bisa mengunduh file</p>

@@ -1,11 +1,11 @@
-.training-form-page .form-group {
+﻿.training-form-page .form-group {
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
 }
 
 .training-form-page .form-group label {
-  color: #475569;
+  color: var(--color-text-secondary);
   font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -16,8 +16,8 @@
   min-height: 46px;
   border: 1px solid #dbe5f3;
   border-radius: 12px;
-  background: #ffffff;
-  color: #0f172a;
+  background: var(--color-var(--color-white));
+  color: var(--color-text-primary);
   font: inherit;
   padding: 0.75rem 0.9rem;
   outline: none;
@@ -30,12 +30,12 @@
 }
 
 .training-form-page .form-control:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(15, 159, 143, 0.1);
 }
 
 .training-form-page .form-control::placeholder {
-  color: #94a3b8;
+  color: var(--color-text-tertiary);
 }
 
 .training-form-page select.form-control {
@@ -47,3 +47,4 @@
     grid-template-columns: 1fr !important;
   }
 }
+

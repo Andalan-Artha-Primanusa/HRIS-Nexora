@@ -1,9 +1,9 @@
-.payroll-dashboard {
-  --payroll-blue: #3b82f6;
-  --payroll-green: #10b981;
-  --payroll-orange: #f59e0b;
+﻿.payroll-dashboard {
+  --payroll-blue: var(--color-primary);
+  --payroll-green: var(--color-success);
+  --payroll-orange: var(--color-warning);
   --payroll-purple: #8b5cf6;
-  --payroll-red: #ef4444;
+  --payroll-red: var(--color-error);
   --glass-bg: rgba(255, 255, 255, 0.7);
   --glass-blur: blur(12px);
   
@@ -11,21 +11,21 @@
   flex-direction: column;
   gap: 2rem;
   padding: 1.5rem;
-  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  background: linear-gradient(180deg, var(--color-surface-soft) 0%, var(--color-surface-soft) 100%);
   min-height: 100vh;
 }
 
-/* ─── Hero Header ─── */
+/* â”€â”€â”€ Hero Header â”€â”€â”€ */
 .payroll-hero-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 2rem;
-  background: linear-gradient(135deg, white 0%, #f0f7ff 100%);
+  background: linear-gradient(135deg, var(--color-white) 0%, #f0f7ff 100%);
   padding: 2.5rem;
   border-radius: 32px;
-  border: 1px solid white;
-  box-shadow: 0 10px 30px rgba(37, 99, 235, 0.05);
+  border: 1px solid var(--color-white);
+  box-shadow: 0 10px 30px rgba(15, 159, 143, 0.05);
   position: relative;
   overflow: hidden;
 }
@@ -37,14 +37,14 @@
   right: -10%;
   width: 300px;
   height: 300px;
-  background: radial-gradient(circle, rgba(37, 99, 235, 0.1) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(15, 159, 143, 0.1) 0%, transparent 70%);
   border-radius: 50%;
 }
 
 .payroll-badge {
   display: inline-flex;
   padding: 0.4rem 0.8rem;
-  background: rgba(37, 99, 235, 0.1);
+  background: rgba(15, 159, 143, 0.1);
   color: var(--payroll-blue);
   border-radius: 999px;
   font-size: 0.75rem;
@@ -57,13 +57,13 @@
 .payroll-title {
   font-size: 2.5rem;
   font-weight: 800;
-  color: #1e3a8a;
+  color: var(--color-primary-dark);
   letter-spacing: -1px;
   margin: 0 0 0.5rem 0;
 }
 
 .payroll-subtitle {
-  color: #64748b;
+  color: var(--color-text-secondary);
   font-size: 1.1rem;
   max-width: 650px;
   line-height: 1.6;
@@ -75,7 +75,7 @@
   z-index: 1;
 }
 
-/* ─── KPI Cards ─── */
+/* â”€â”€â”€ KPI Cards â”€â”€â”€ */
 .payroll-kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -106,7 +106,7 @@
 .kpi-label {
   font-size: 0.85rem;
   font-weight: 700;
-  color: #64748b;
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -114,7 +114,7 @@
 .kpi-value {
   font-size: 2.25rem;
   font-weight: 800;
-  color: #1e3a8a;
+  color: var(--color-primary-dark);
   letter-spacing: -1px;
 }
 
@@ -124,7 +124,7 @@
   border-radius: 12px;
   display: grid;
   place-items: center;
-  background: white;
+  background: var(--color-white);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
@@ -139,7 +139,7 @@
   background: rgba(255, 255, 255, 0.9);
 }
 
-/* ─── Charts ─── */
+/* â”€â”€â”€ Charts â”€â”€â”€ */
 .payroll-charts-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -151,18 +151,18 @@
   border-radius: 32px;
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
-  border: 1px solid white;
+  border: 1px solid var(--color-white);
 }
 
 .payroll-section-title {
   font-size: 1.5rem;
   font-weight: 800;
-  color: #1e3a8a;
+  color: var(--color-primary-dark);
   margin-bottom: 0.5rem;
 }
 
 .chart-subtitle {
-  color: #64748b;
+  color: var(--color-text-secondary);
   font-size: 0.95rem;
   margin-bottom: 2rem;
 }
@@ -171,7 +171,7 @@
   grid-column: 1 / -1;
 }
 
-/* ─── Quick Actions ─── */
+/* â”€â”€â”€ Quick Actions â”€â”€â”€ */
 .payroll-quick-actions {
   padding: 2rem;
   border-radius: 32px;
@@ -190,10 +190,10 @@
   gap: 1.25rem;
   padding: 1.25rem;
   border-radius: 16px;
-  background: white;
+  background: var(--color-white);
   text-decoration: none;
   transition: all 0.2s ease;
-  border: 1px solid #f1f5f9;
+  border: 1px solid var(--color-surface-soft);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
 }
 
@@ -209,10 +209,10 @@
   border-radius: 16px;
   display: grid;
   place-items: center;
-  background: rgba(37, 99, 235, 0.05);
+  background: rgba(15, 159, 143, 0.05);
 }
 
-.payroll-action-link.payroll-accent-blue .action-icon { color: var(--payroll-blue); background: rgba(59, 130, 246, 0.05); }
+.payroll-action-link.payroll-accent-blue .action-icon { color: var(--payroll-blue); background: rgba(15, 159, 143, 0.05); }
 .payroll-action-link.payroll-accent-green .action-icon { color: var(--payroll-green); background: rgba(16, 185, 129, 0.05); }
 .payroll-action-link.payroll-accent-orange .action-icon { color: var(--payroll-orange); background: rgba(245, 158, 11, 0.05); }
 .payroll-action-link.payroll-accent-purple .action-icon { color: var(--payroll-purple); background: rgba(139, 92, 246, 0.05); }
@@ -222,16 +222,16 @@
   margin: 0;
   font-size: 1.1rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--color-text-primary);
 }
 
 .action-content p {
   margin: 0.25rem 0 0;
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--color-text-secondary);
 }
 
-/* ─── Table Preview ─── */
+/* â”€â”€â”€ Table Preview â”€â”€â”€ */
 .payroll-table-preview {
   padding: 2rem;
   border-radius: 32px;
@@ -262,16 +262,16 @@
   padding: 1rem;
   font-size: 0.8rem;
   font-weight: 700;
-  color: #64748b;
+  color: var(--color-text-secondary);
   text-transform: uppercase;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--color-surface-soft);
 }
 
 .payroll-table td {
   padding: 1.25rem 1rem;
   font-size: 0.95rem;
-  color: #1e293b;
-  border-bottom: 1px solid #f8fafc;
+  color: var(--color-text-primary);
+  border-bottom: 1px solid var(--color-surface-soft);
 }
 
 .status-badge {
@@ -283,10 +283,10 @@
 
 .payroll-status-paid { background: #dcfce7; color: #15803d; }
 .payroll-status-pending { background: #fef9c3; color: #a16207; }
-.payroll-status-rejected { background: #fee2e2; color: #b91c1c; }
-.payroll-status-approved { background: #dbeafe; color: #1e40af; }
+.payroll-status-rejected { background: var(--color-error-light); color: var(--color-error); }
+.payroll-status-approved { background: var(--color-primary-light); color: var(--color-primary-dark); }
 
-/* ─── Responsive ─── */
+/* â”€â”€â”€ Responsive â”€â”€â”€ */
 @media (max-width: 1280px) {
   .payroll-kpi-grid { grid-template-columns: repeat(2, 1fr); }
   .payroll-charts-grid { grid-template-columns: 1fr; }
@@ -297,3 +297,4 @@
   .payroll-title { font-size: 1.75rem; }
   .payroll-kpi-grid { grid-template-columns: 1fr; }
 }
+

@@ -1,14 +1,14 @@
-@import url('../admin/AdminCrudPages.css');
+﻿@import url('../admin/AdminCrudPages.css');
 
 .crud-page {
-  --primary: #2563eb;
-  --primary-dark: #1d4ed8;
-  --primary-light: #dbeafe;
-  --primary-lighter: #eff6ff;
+  --primary: var(--color-primary);
+  --primary-dark: var(--color-primary-dark);
+  --primary-light: var(--color-primary-light);
+  --primary-lighter: var(--color-primary-light);
   --surface: linear-gradient(180deg, rgba(247, 250, 255, 0.94) 0%, rgba(239, 245, 255, 0.88) 100%);
-  --text: #1e3a8a;
-  --text-light: #4f8cf5;
-  --border: rgba(37, 99, 235, 0.14);
+  --text: var(--color-primary-dark);
+  --text-light: var(--color-primary);
+  --border: rgba(15, 159, 143, 0.14);
 
   display: flex;
   flex-direction: column;
@@ -19,7 +19,7 @@
 }
 
 .crud-page::before {
-  border-color: rgba(37, 99, 235, 0.12);
+  border-color: rgba(15, 159, 143, 0.12);
   border-radius: inherit;
 }
 
@@ -57,7 +57,7 @@
   right: -40px;
   width: 180px;
   height: 180px;
-  background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(15, 159, 143, 0.08) 0%, transparent 70%);
   border-radius: 50%;
   pointer-events: none;
 }
@@ -75,13 +75,13 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 600;
-  color: #64748b;
+  color: var(--color-text-secondary);
 }
 
 .payroll-payment-summary-subtitle {
   margin: 0.3rem 0 0;
   font-size: 0.86rem;
-  color: #94a3b8;
+  color: var(--color-text-tertiary);
 }
 
 .payroll-payment-summary-icon {
@@ -96,20 +96,20 @@
 }
 
 .payroll-payment-summary-icon--blue {
-  background: rgba(37, 99, 235, 0.12);
-  color: #2563eb;
-  border-color: rgba(37, 99, 235, 0.14);
+  background: rgba(15, 159, 143, 0.12);
+  color: var(--color-primary);
+  border-color: rgba(15, 159, 143, 0.14);
 }
 
 .payroll-payment-summary-icon--green {
   background: rgba(16, 185, 129, 0.12);
-  color: #10b981;
+  color: var(--color-success);
   border-color: rgba(16, 185, 129, 0.14);
 }
 
 .payroll-payment-summary-icon--orange {
   background: rgba(245, 158, 11, 0.12);
-  color: #f59e0b;
+  color: var(--color-warning);
   border-color: rgba(245, 158, 11, 0.14);
 }
 
@@ -123,7 +123,7 @@
   margin-top: 0.55rem;
   font-size: 2rem;
   font-weight: 800;
-  color: #2563eb;
+  color: var(--color-primary);
   letter-spacing: -1px;
 }
 
@@ -131,11 +131,11 @@
   margin-top: 0.5rem;
   font-size: 0.9rem;
   font-weight: 600;
-  color: #64748b;
+  color: var(--color-text-secondary);
 }
 
 .payroll-payment-message {
-  border-left: 4px solid #10b981;
+  border-left: 4px solid var(--color-success);
 }
 
 .payroll-payment-message p {
@@ -171,7 +171,7 @@
 }
 
 .payroll-payment-input-panel strong {
-  color: #64748b;
+  color: var(--color-text-secondary);
   font-size: 0.82rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -179,14 +179,14 @@
 
 .payroll-payment-quick-panel {
   background: rgba(239, 246, 255, 0.72);
-  border: 1px solid rgba(37, 99, 235, 0.14);
+  border: 1px solid rgba(15, 159, 143, 0.14);
   border-radius: 16px;
   padding: 1rem;
 }
 
 .payroll-payment-quick-title {
   margin: 0 0 0.75rem;
-  color: #1e40af;
+  color: var(--color-primary-dark);
   font-size: 0.85rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -207,7 +207,7 @@
   gap: 0.2rem;
   width: 100%;
   padding: 0.8rem 0.9rem;
-  border: 1px solid rgba(37, 99, 235, 0.12);
+  border: 1px solid rgba(15, 159, 143, 0.12);
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.95);
   cursor: pointer;
@@ -219,22 +219,22 @@
 .payroll-payment-quick-item:hover {
   transform: translateY(-1px);
   border-color: #93c5fd;
-  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.08);
+  box-shadow: 0 8px 18px rgba(15, 159, 143, 0.08);
 }
 
 .payroll-payment-quick-item.is-selected {
   background: rgba(219, 234, 254, 0.8);
-  border-color: #2563eb;
+  border-color: var(--color-primary);
 }
 
 .payroll-payment-quick-item-id {
-  color: #1e40af;
+  color: var(--color-primary-dark);
   font-weight: 700;
   font-size: 0.82rem;
 }
 
 .payroll-payment-quick-item-name {
-  color: #475569;
+  color: var(--color-text-secondary);
   font-size: 0.8rem;
 }
 
@@ -248,7 +248,7 @@
   justify-content: center;
   padding: 0.4rem 0.9rem;
   border-radius: 999px;
-  color: #fff;
+  color: var(--color-white);
   font-size: 0.8rem;
   font-weight: 700;
 }
@@ -268,7 +268,7 @@
   margin: 0 0 0.25rem;
   font-size: 0.82rem;
   font-weight: 700;
-  color: #64748b;
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -280,16 +280,16 @@
 .payroll-payment-detail-value {
   margin: 0 0 0.9rem;
   font-size: 1rem;
-  color: #1e293b;
+  color: var(--color-text-primary);
 }
 
 .payroll-payment-detail-value--success {
-  color: #10b981;
+  color: var(--color-success);
   font-weight: 700;
 }
 
 .payroll-payment-detail-value--danger {
-  color: #ef4444;
+  color: var(--color-error);
   font-weight: 700;
 }
 
@@ -305,7 +305,7 @@
 .payroll-payment-total-value {
   margin: 0;
   font-size: 1.35rem;
-  color: #059669;
+  color: var(--color-success);
   font-weight: 800;
 }
 
@@ -316,14 +316,14 @@
 }
 
 .payroll-payment-primary {
-  background: #10b981;
+  background: var(--color-success);
   border: none;
 }
 
 .payroll-payment-paid-note {
   padding: 0.95rem 1rem;
   border-radius: 14px;
-  background: #d1fae5;
+  background: var(--color-success-light);
   color: #065f46;
   font-weight: 600;
 }
@@ -369,7 +369,7 @@
 
 .crud-table.payroll-payment-table thead th {
   background: transparent;
-  color: #1e293b;
+  color: var(--color-text-primary);
   font-weight: 700;
   font-size: 0.9rem;
   text-align: left;
@@ -378,7 +378,7 @@
 }
 
 .crud-table.payroll-payment-table tbody tr {
-  background: #fff;
+  background: var(--color-white);
   box-shadow: 0 6px 12px rgba(15, 23, 42, 0.04);
   border-radius: 8px;
 }
@@ -387,7 +387,7 @@
   padding: 12px 14px;
   vertical-align: middle;
   border: none;
-  white-space: nowrap;
+  var(--color-white)-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   font-size: 1rem;
@@ -408,7 +408,7 @@
 }
 
 .crud-table.payroll-payment-table tbody tr.is-selected-row {
-  outline: 2px solid rgba(37, 99, 235, 0.12);
+  outline: 2px solid rgba(15, 159, 143, 0.12);
   background: linear-gradient(90deg, rgba(219, 234, 254, 0.6), rgba(255,255,255,0.6));
 }
 
@@ -430,3 +430,4 @@
     padding: 8px 10px;
   }
 }
+

@@ -71,8 +71,8 @@
 
 /* Paid - Blue */
 .payroll-status-badge.status-paid {
-  background-color: #dbeafe;
-  color: #1e40af;
+  background-color: #DDF5F1;
+  color: #075E54;
   border: 1px solid #93c5fd;
 }
 
@@ -119,9 +119,9 @@
   }
 
   .payroll-status-badge.status-paid {
-    background-color: #1e3a8a;
+    background-color: #075E54;
     color: #93c5fd;
-    border-color: #3b82f6;
+    border-color: #0F9F8F;
   }
 
   .payroll-status-badge.status-rejected {

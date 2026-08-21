@@ -260,7 +260,7 @@ const PayrollCrudPage = () => {
               </button>
             )}
             {view === 'list' && (
-              <button className="btn-primary" onClick={openCreateForm} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.25rem', borderRadius: '10px', border: '1px solid #cbd5e1', background: '#fff', color: '#2563eb', fontSize: '0.9rem', fontWeight: '600', fontFamily: "'Poppins', sans-serif", cursor: 'pointer' }}>
+              <button className="btn-primary" onClick={openCreateForm} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.25rem', borderRadius: '10px', border: '1px solid #cbd5e1', background: '#fff', color: 'var(--color-primary)', fontSize: '0.9rem', fontWeight: '600', fontFamily: "'Poppins', sans-serif", cursor: 'pointer' }}>
                 <Plus size={16} />
                 Tambah Payroll
               </button>
@@ -454,7 +454,7 @@ const PayrollCrudPage = () => {
           <>
             <button className="modal-btn-cancel" onClick={() => setExportModal(false)}>Batal</button>
             <button className="modal-btn-confirm" onClick={handleExport} disabled={exportLoading}
-              style={{ background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.3)' }}
+              style={{ background: 'linear-gradient(135deg, var(--color-primary) 0%, #1d4ed8 100%)', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.3)' }}
             >
               {exportLoading ? <><RefreshCw size={16} className="animate-spin" /> Memproses...</> : <><Download size={16} /> Download CSV</>}
             </button>
@@ -464,14 +464,14 @@ const PayrollCrudPage = () => {
         <p className="modal-completion-task" style={{ marginBottom: '1rem' }}>Pilih tipe export dan periode</p>
         <label className="modal-completion-label">Tipe Export</label>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '8px' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', borderRadius: '12px', border: exportType === 'bca' ? '2px solid #2563eb' : '2px solid #e2e8f0', background: exportType === 'bca' ? '#eff6ff' : '#fff', cursor: 'pointer', transition: 'all 0.2s' }} onClick={() => setExportType('bca')}>
-            <input type="radio" name="exportType" checked={exportType === 'bca'} onChange={() => setExportType('bca')} style={{ accentColor: '#2563eb' }} />
-            <Banknote size={20} color="#2563eb" />
+          <label style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', borderRadius: '12px', border: exportType === 'bca' ? '2px solid var(--color-primary)' : '2px solid #e2e8f0', background: exportType === 'bca' ? '#eff6ff' : '#fff', cursor: 'pointer', transition: 'all 0.2s' }} onClick={() => setExportType('bca')}>
+            <input type="radio" name="exportType" checked={exportType === 'bca'} onChange={() => setExportType('bca')} style={{ accentColor: 'var(--color-primary)' }} />
+            <Banknote size={20} color="var(--color-primary)" />
             <div><div style={{ fontWeight: 600, color: '#1e293b' }}>BCA KlikPay CSV</div><div style={{ fontSize: '0.8rem', color: '#64748b' }}>Format siap import ke BCA KlikPay untuk transfer massal</div></div>
           </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', borderRadius: '12px', border: exportType === 'summary' ? '2px solid #2563eb' : '2px solid #e2e8f0', background: exportType === 'summary' ? '#eff6ff' : '#fff', cursor: 'pointer', transition: 'all 0.2s' }} onClick={() => setExportType('summary')}>
-            <input type="radio" name="exportType" checked={exportType === 'summary'} onChange={() => setExportType('summary')} style={{ accentColor: '#2563eb' }} />
-            <Download size={20} color="#2563eb" />
+          <label style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', borderRadius: '12px', border: exportType === 'summary' ? '2px solid var(--color-primary)' : '2px solid #e2e8f0', background: exportType === 'summary' ? '#eff6ff' : '#fff', cursor: 'pointer', transition: 'all 0.2s' }} onClick={() => setExportType('summary')}>
+            <input type="radio" name="exportType" checked={exportType === 'summary'} onChange={() => setExportType('summary')} style={{ accentColor: 'var(--color-primary)' }} />
+            <Download size={20} color="var(--color-primary)" />
             <div><div style={{ fontWeight: 600, color: '#1e293b' }}>Summary Lengkap</div><div style={{ fontSize: '0.8rem', color: '#64748b' }}>Detail gaji, tunjangan, potongan, BPJS, PPh21 per karyawan</div></div>
           </label>
         </div>
@@ -508,7 +508,7 @@ const PayrollCrudPage = () => {
                   borderRadius: '12px', 
                   minWidth: '200px', 
                   fontWeight: '700',
-                  background: mode === 'delete' ? '#ef4444' : '#2563eb',
+                  background: mode === 'delete' ? '#ef4444' : 'var(--color-primary)',
                   color: 'white',
                   border: 'none',
                   boxShadow: mode === 'delete' ? '0 4px 12px rgba(239, 68, 68, 0.2)' : '0 4px 12px rgba(37, 99, 235, 0.2)'

@@ -159,7 +159,7 @@ const GenerateTab = () => {
               <p className="label">{c.label}</p>
               <p className="subtitle">{c.subtitle}</p>
               <div className="value-row">
-                <div className="value" style={{ color: "#2563eb" }}>{c.value}</div>
+                <div className="value" style={{ color: "var(--color-primary)" }}>{c.value}</div>
                 <div className="icon-box">
                   <Icon size={22} />
                 </div>
@@ -195,7 +195,7 @@ const GenerateTab = () => {
             <p style={{ fontSize: 12, color: "#0369a1", lineHeight: 1.6, margin: 0 }}>Kalkulasi tunjangan, bonus, dan potongan untuk <strong>semua karyawan aktif</strong> di periode {period}.</p>
           </div>
           <button onClick={() => void generateMonthly()} disabled={loading}
-            style={{ width: "100%", padding: 12, borderRadius: 12, border: "none", background: "linear-gradient(135deg, #2563eb, #1d4ed8)", color: "#fff", fontSize: 14, fontWeight: 700, fontFamily: "'Poppins', sans-serif", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+            style={{ width: "100%", padding: 12, borderRadius: 12, border: "none", background: "linear-gradient(135deg, var(--color-primary), #1d4ed8)", color: "#fff", fontSize: 14, fontWeight: 700, fontFamily: "'Poppins', sans-serif", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
             {loading ? <RefreshCw size={15} className="animate-spin" /> : <Zap size={15} />}
             {loading ? "Memproses..." : "Generate Payroll Sekarang"}
           </button>

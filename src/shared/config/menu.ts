@@ -1,7 +1,8 @@
-import { 
-  Users, CalendarDays, Receipt, Target, UserCircle, 
-  FileBarChart, LayoutDashboard, Briefcase, 
-  FileText, Clock, Banknote, ShieldCheck, Database, CheckCircle, ArrowUpRight
+import {
+  LayoutDashboard, Users, Clock, CalendarDays, Banknote, Receipt,
+  Target, Award, GraduationCap, Briefcase, ArrowUpRight,
+  ShieldCheck, FileBarChart, Database, Settings, Bell, ClipboardCheck,
+  MapPin, Building2, Workflow, FileText
 } from 'lucide-react';
 
 import type { LucideIcon } from 'lucide-react';
@@ -15,284 +16,171 @@ export type MenuItem = {
 };
 
 export const menuItems: MenuItem[] = [
-{
-  label: 'Dashboard',
-  icon: LayoutDashboard,
-  path: '/dashboard',
-  menuKey: 'dashboard',
-},
-{
-  label: 'Dashboard Saya',
-  icon: UserCircle,
-  path: '/employee-dashboard',
-  menuKey: 'employee-dashboard',
-},
   {
-  label: 'Manajemen Karyawan',
-  icon: Users,
-  path: '/employees',
-  menuKey: 'employees',
+    label: 'Dashboard',
+    icon: LayoutDashboard,
+    path: '/dashboard',
+    menuKey: 'dashboard',
   },
   {
-    label: 'Absensi & Waktu',
-    icon: Clock,
-    menuKey: 'absensi-waktu',
+    label: 'Workforce',
+    icon: Users,
+    menuKey: 'workforce',
     subItems: [
-      { label: 'Lembur', path: '/attendance/overtime', menuKey: 'absensi-waktu.overtime' },
-      { label: 'Laporan', path: '/attendance/reports', menuKey: 'absensi-waktu.reports' },
-    ]
+      { label: 'Employees', path: '/employees', menuKey: 'workforce.employees' },
+      { label: 'Attendance', path: '/attendance', menuKey: 'workforce.attendance' },
+      { label: 'Leave', path: '/leave/requests', menuKey: 'workforce.leave' },
+      { label: 'Overtime', path: '/attendance/overtime', menuKey: 'workforce.overtime' },
+    ],
   },
   {
-    label: 'Manajemen Cuti',
-    icon: CalendarDays,
-    menuKey: 'manajemen-cuti',
-    subItems: [
-      { label: 'Permohonan Cuti', path: '/leave/requests', menuKey: 'manajemen-cuti.permohonan' },
-      { label: 'Persetujuan Cuti', path: '/leave/approval', menuKey: 'manajemen-cuti.persetujuan' },
-      { label: 'Kalender Cuti', path: '/leave/calendar', menuKey: 'manajemen-cuti.kalender' },
-      { label: 'Saldo Cuti', path: '/leave/balance', menuKey: 'manajemen-cuti.saldo' },
-    ]
-  },
-  {
-    label: 'Penggajian & Slip Gaji',
+    label: 'Compensation',
     icon: Banknote,
-    menuKey: 'penggajian',
+    menuKey: 'compensation',
     subItems: [
-      { label: 'Ringkasan', path: '/payroll', menuKey: 'penggajian.ringkasan' },
-      { label: 'Daftar Penggajian', path: '/payroll/list', menuKey: 'penggajian.daftar' },
-      { label: 'Proses Penggajian', path: '/payroll/process', menuKey: 'penggajian.proses' },
-      { label: 'Komponen Gaji', path: '/payroll/component', menuKey: 'penggajian.komponen' },
-      { label: 'Laporan & Pajak', path: '/payroll/reports', menuKey: 'penggajian.laporan' },
-    ]
+      { label: 'Payroll', path: '/payroll', menuKey: 'compensation.payroll' },
+      { label: 'Reimbursement', path: '/reimbursements', menuKey: 'compensation.reimbursement' },
+    ],
   },
   {
-    label: 'Aset & Inventaris',
+    label: 'Performance & Development',
+    icon: Target,
+    menuKey: 'performance-dev',
+    subItems: [
+      { label: 'KPI', path: '/kpis', menuKey: 'performance-dev.kpi' },
+      { label: 'Calibration', path: '/performance/calibration', menuKey: 'performance-dev.calibration' },
+      { label: 'Training', path: '/training/programs', menuKey: 'performance-dev.training' },
+      { label: 'Competency', path: '/competencies', menuKey: 'performance-dev.competency' },
+    ],
+  },
+  {
+    label: 'Assets',
     icon: Briefcase,
     path: '/assets',
     menuKey: 'assets',
   },
   {
-    label: 'Manajemen Tugas',
-    icon: CheckCircle,
-    path: '/tasks',
-    menuKey: 'tasks',
+    label: 'Approval Center',
+    icon: ClipboardCheck,
+    path: '/approval-flows',
+    menuKey: 'approval-center',
   },
   {
-    label: 'Hukum & Dokumen',
-    icon: FileText,
-    menuKey: 'legal-dokumen',
-    subItems: [
-      { label: 'Surat Tugas', path: '/admin/assignment-letters', menuKey: 'legal-dokumen.surat-tugas' },
-      { label: 'Pembuat Surat', path: '/legal/letters', menuKey: 'legal-dokumen.generator' },
-      { label: 'Kalkulator Pesangon', path: '/legal/severance', menuKey: 'legal-dokumen.kalkulator' },
-      { label: 'PPh21 Progresif', path: '/legal/tax', menuKey: 'legal-dokumen.pph21' },
-    ]
-  },
-  {
-    label: 'Manajemen Penggantian Biaya',
-    icon: Receipt,
-    path: '/reimbursements',
-    menuKey: 'reimbursements',
-  },
-  {
-    label: 'Pelatihan & Kompetensi',
-    icon: Target,
-    menuKey: 'pelatihan-kompetensi',
-    subItems: [
-      { label: 'Pelatihan & Pendaftaran', path: '/training/programs', menuKey: 'pelatihan-kompetensi.pelatihan' },
-      { label: 'Kompetensi', path: '/competencies', menuKey: 'pelatihan-kompetensi.kompetensi' },
-    ]
-  },
-  {
-    label: 'Karier & Promosi',
-    icon: ArrowUpRight,
-    path: '/promotions',
-    menuKey: 'karir-promosi',
-  },
-  {
-  label: 'KPI & Kinerja',
-  icon: Target,
-  path: '/kpis',
-  menuKey: 'kpi-kinerja',
-},
-  {
-  label: 'Layanan Mandiri Karyawan',
-  icon: UserCircle,
-  menuKey: 'ess',
-    subItems: [
-      {
-        label: 'Kinerja',
-        subItems: [
-          { label: 'KPI Saya', path: '/my/kpi', menuKey: 'ess.kinerja.kpi' },
-          { label: 'Kompetensi Saya', path: '/my/competencies', menuKey: 'ess.kinerja.kompetensi' },
-        ]
-      },
-      {
-        label: 'Keuangan',
-        subItems: [
-          { label: 'Penggajian Saya', path: '/my/payroll', menuKey: 'ess.keuangan.payroll' },
-          { label: 'Penggantian Biaya Saya', path: '/my/reimbursements', menuKey: 'ess.keuangan.reimburse' },
-        ]
-      },
-      {
-        label: 'Absensi',
-        subItems: [
-          { label: 'Absen Masuk', path: '/attendance/check-in', menuKey: 'ess.absensi.check-in' },
-          { label: 'Absen Pulang', path: '/attendance/check-out', menuKey: 'ess.absensi.check-out' },
-          { label: 'Riwayat Absensi', path: '/attendance/history', menuKey: 'ess.absensi.riwayat' },
-        ]
-      },
-      {
-        label: 'Pengembangan',
-        subItems: [
-          { label: 'Pelatihan Saya', path: '/my/trainings', menuKey: 'ess.pengembangan.pelatihan' },
-          { label: 'Lembur Saya', path: '/my/overtime', menuKey: 'ess.pengembangan.lembur' },
-          { label: 'Promosi Saya', path: '/my/promotions', menuKey: 'ess.pengembangan.promosi' },
-        ]
-      },
-      {
-        label: 'Dokumen & Aset',
-        subItems: [
-          { label: 'Dokumen Saya', path: '/my/documents', menuKey: 'ess.dokumen-aset.dokumen' },
-          { label: 'Aset Saya', path: '/my/assets', menuKey: 'ess.dokumen-aset.aset' },
-          { label: 'Surat Tugas', path: '/my/assignment-letters', menuKey: 'ess.dokumen-aset.surat-tugas' },
-          { label: 'Tugas Saya', path: '/my/tasks', menuKey: 'ess.dokumen-aset.tugas' },
-        ]
-      },
-    ]
-  },
-  {
-    label: 'Laporan & Analitik',
+    label: 'Reports',
     icon: FileBarChart,
     path: '/reports/dashboard-summary',
-    menuKey: 'laporan-analitik',
+    menuKey: 'reports',
   },
   {
-    label: 'Kepatuhan & Kebijakan',
-    icon: ShieldCheck,
-    menuKey: 'kepatuhan-kebijakan',
+    label: 'Administration',
+    icon: Settings,
+    menuKey: 'admin',
     subItems: [
-      { label: 'Dashboard Kepatuhan', path: '/compliance/overview', menuKey: 'kepatuhan-kebijakan.dashboard' },
-      { label: 'Kalender Libur', path: '/workforce/holidays', menuKey: 'kepatuhan-kebijakan.kalender' },
-      { label: 'Tukar Giliran Kerja', path: '/workforce/shift-swaps', menuKey: 'kepatuhan-kebijakan.tukar-shift' },
-      { label: 'Aturan Lembur', path: '/workforce/overtime-rules', menuKey: 'kepatuhan-kebijakan.aturan-lembur' },
-    ]
-  },
-  {
-    label: 'Data Induk',
-    icon: Database,
-    menuKey: 'master-data',
-    subItems: [
-      { label: 'Departemen & Posisi', path: '/organization/master-data', menuKey: 'master-data.departemen' },
-      { label: 'Jenis Cuti', path: '/leave/type', menuKey: 'master-data.jenis-cuti' },
-      { label: 'Kebijakan Cuti', path: '/leave/policy', menuKey: 'master-data.kebijakan-cuti' },
       {
-        label: 'Pusat Impor Data Induk',
-        path: '/admin/import',
-        menuKey: 'master-data.pusat-impor',
+        label: 'Organization',
+        subItems: [
+          { label: 'Company', path: '/settings/company', menuKey: 'admin.company' },
+          { label: 'Departments', path: '/organization/master-data', menuKey: 'admin.departments' },
+          { label: 'Positions', path: '/organization/master-data', menuKey: 'admin.positions' },
+          { label: 'Locations', path: '/locations', menuKey: 'admin.locations' },
+        ],
       },
-    ]
+      {
+        label: 'Access Management',
+        subItems: [
+          { label: 'Users', path: '/admin/users', menuKey: 'admin.users' },
+          { label: 'Roles & Permissions', path: '/admin/roles', menuKey: 'admin.roles' },
+          { label: 'Permissions', path: '/admin/permissions', menuKey: 'admin.permissions' },
+        ],
+      },
+      {
+        label: 'System',
+        subItems: [
+          { label: 'Approval Workflow', path: '/approval-flows', menuKey: 'admin.approval-workflow' },
+          { label: 'Audit Logs', path: '/admin/audit-logs', menuKey: 'admin.audit-logs' },
+          { label: 'Notification Settings', path: '/settings/notifications', menuKey: 'admin.notification-settings' },
+          { label: 'Work Schedules', path: '/work-schedules', menuKey: 'admin.work-schedules' },
+        ],
+      },
+    ],
+  },
+];
+
+export const essMenuItems: MenuItem[] = [
+  {
+    label: 'Dashboard',
+    icon: LayoutDashboard,
+    path: '/employee-dashboard',
+    menuKey: 'employee-dashboard',
   },
   {
-  label: 'Alat Administrator',
-  icon: ShieldCheck,
-  menuKey: 'alat-admin',
-  subItems: [
-    {
-      label: 'Data Utama',
-      subItems: [
-        {
-          label: 'Lokasi',
-          path: '/locations',
-          menuKey: 'alat-admin.master.lokasi',
-        },
-        {
-          label: 'Jadwal Kerja',
-          path: '/work-schedules',
-          menuKey: 'alat-admin.master.jadwal-kerja',
-        },
-      ],
-    },
-    {
-      label: 'Manajemen Akses',
-      subItems: [
-        {
-          label: 'Pengguna',
-          path: '/admin/users',
-          menuKey: 'alat-admin.manajemen-akses.pengguna',
-        },
-        {
-          label: 'Peran',
-          path: '/admin/roles',
-          menuKey: 'alat-admin.manajemen-akses.peran',
-        },
-        {
-          label: 'Izin',
-          path: '/admin/permissions',
-          menuKey: 'alat-admin.manajemen-akses.izin',
-        },
-        {
-          label: 'Akses Menu',
-          path: '/admin/menu-permissions',
-          menuKey: 'alat-admin.manajemen-akses.menu',
-        },
-      ],
-    },
-    {
-      label: 'Notifikasi',
-      subItems: [
-        {
-          label: 'Notifikasi Administrator',
-          path: '/admin/notifications',
-          menuKey: 'alat-admin.notifikasi.admin',
-        },
-        {
-          label: 'Kirim Notifikasi Surel',
-          path: '/admin/notifications/email-send',
-          menuKey: 'alat-admin.notifikasi.kirim-email',
-        },
-        {
-          label: 'Catatan & Templat Surel',
-          path: '/admin/notifications/email-logs',
-          menuKey: 'alat-admin.notifikasi.log-email',
-        },
-      ],
-    },
-    {
-      label: 'Sistem',
-      subItems: [
-        {
-          label: 'Catatan Audit',
-          path: '/admin/audit-logs',
-          menuKey: 'alat-admin.sistem.log-audit',
-        },
-        {
-          label: 'Perangkat Biometrik',
-          path: '/admin/biometric-devices',
-          menuKey: 'alat-admin.sistem.biometrik',
-        },
-        {
-          label: 'Alur Persetujuan',
-          path: '/approval-flows',
-          menuKey: 'alat-admin.sistem.alur-persetujuan',
-        },
-      ],
-    },
-    {
-      label: 'Pengaturan',
-      subItems: [
-        {
-          label: 'Pengaturan Perusahaan',
-          path: '/settings/company',
-          menuKey: 'alat-admin.pengaturan.perusahaan',
-        },
-        {
-          label: 'Pengaturan Notifikasi',
-          path: '/settings/notifications',
-          menuKey: 'alat-admin.pengaturan.notifikasi',
-        },
-      ],
-    },
-  ],
-},
+    label: 'My Profile',
+    icon: Users,
+    path: '/profiles',
+    menuKey: 'ess.profile',
+  },
+  {
+    label: 'Attendance',
+    icon: Clock,
+    menuKey: 'ess.attendance',
+    subItems: [
+      { label: 'Check In', path: '/attendance/check-in', menuKey: 'ess.attendance.check-in' },
+      { label: 'Check Out', path: '/attendance/check-out', menuKey: 'ess.attendance.check-out' },
+      { label: 'History', path: '/attendance/history', menuKey: 'ess.attendance.history' },
+    ],
+  },
+  {
+    label: 'Leave',
+    icon: CalendarDays,
+    path: '/leave/my-leave',
+    menuKey: 'ess.leave',
+  },
+  {
+    label: 'Overtime',
+    icon: Clock,
+    path: '/my/overtime',
+    menuKey: 'ess.overtime',
+  },
+  {
+    label: 'Reimbursement',
+    icon: Receipt,
+    path: '/my/reimbursements',
+    menuKey: 'ess.reimbursement',
+  },
+  {
+    label: 'Payslip',
+    icon: Banknote,
+    path: '/my/payroll',
+    menuKey: 'ess.payslip',
+  },
+  {
+    label: 'My KPI',
+    icon: Target,
+    path: '/my/kpi',
+    menuKey: 'ess.kpi',
+  },
+  {
+    label: 'Training',
+    icon: GraduationCap,
+    path: '/my/trainings',
+    menuKey: 'ess.training',
+  },
+  {
+    label: 'Competency',
+    icon: Award,
+    path: '/my/competencies',
+    menuKey: 'ess.competency',
+  },
+  {
+    label: 'My Assets',
+    icon: Briefcase,
+    path: '/my/assets',
+    menuKey: 'ess.assets',
+  },
+  {
+    label: 'Notifications',
+    icon: Bell,
+    path: '/notifications',
+    menuKey: 'ess.notifications',
+  },
 ];

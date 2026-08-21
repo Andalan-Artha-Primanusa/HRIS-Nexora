@@ -68,7 +68,7 @@ const FORM_STYLES = `
 
 .asset-form-page .field-input:focus {
   outline: none;
-  border-color: #2563eb;
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
@@ -87,7 +87,7 @@ const FORM_STYLES = `
 
 .asset-form-page .field-input-icon:focus {
   outline: none;
-  border-color: #2563eb;
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
@@ -107,7 +107,7 @@ const FORM_STYLES = `
 
 .asset-form-page .field-select:focus {
   outline: none;
-  border-color: #2563eb;
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
@@ -128,7 +128,7 @@ const FORM_STYLES = `
 
 .asset-form-page .field-textarea:focus {
   outline: none;
-  border-color: #2563eb;
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
@@ -310,7 +310,7 @@ const AssetFormPage: React.FC = () => {
           <div className="form-column">
             <Card glass style={{ padding: '2.5rem', borderRadius: '32px' }}>
               <div className="section-header">
-                <div className="section-icon" style={{ background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)' }}>
+                <div className="section-icon" style={{ background: 'linear-gradient(135deg, var(--color-primary), #1d4ed8)', boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)' }}>
                   <Box size={22} />
                 </div>
                 <h3 className="section-title">Informasi Utama</h3>
@@ -480,7 +480,7 @@ const AssetFormPage: React.FC = () => {
                       onChange={(e) => setFormData({ ...formData, purchase_price: Number(e.target.value.replace(/\D/g, "")) || 0 })}
                       placeholder="25.000.000"
                       style={{ width: '100%', height: '50px', padding: '0 12px 0 40px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '1rem', color: '#0f172a', boxSizing: 'border-box' }}
-                      onFocus={(e) => { e.target.style.outline = 'none'; e.target.style.borderColor = '#2563eb'; e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)'; }}
+                      onFocus={(e) => { e.target.style.outline = 'none'; e.target.style.borderColor = 'var(--color-primary)'; e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)'; }}
                       onBlur={(e) => { e.target.style.borderColor = '#cbd5e1'; e.target.style.boxShadow = 'none'; }}
                     />
                   </div>
@@ -495,7 +495,7 @@ const AssetFormPage: React.FC = () => {
                       value={formData.purchase_date}
                       onChange={handleChange}
                       style={{ width: '100%', height: '50px', padding: '0 12px 0 40px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '1rem', color: '#0f172a', boxSizing: 'border-box' }}
-                      onFocus={(e) => { e.target.style.outline = 'none'; e.target.style.borderColor = '#2563eb'; e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)'; }}
+                      onFocus={(e) => { e.target.style.outline = 'none'; e.target.style.borderColor = 'var(--color-primary)'; e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)'; }}
                       onBlur={(e) => { e.target.style.borderColor = '#cbd5e1'; e.target.style.boxShadow = 'none'; }}
                     />
                   </div>

@@ -78,8 +78,8 @@
   padding: 8px 12px;
   font-size: 0.8rem;
   background: white;
-  color: #2563eb;
-  border: 1px solid #e2e8f0;
+  color: var(--color-primary);
+  border: 1px solid var(--color-border);
   border-radius: 10px;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
@@ -90,14 +90,14 @@
 }
 
 .payroll-table-action-btn:hover {
-  background: #eff6ff;
-  border-color: #bfdbfe;
+  background: var(--color-primary-lighter);
+  border-color: var(--color-primary-light);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+  box-shadow: 0 4px 12px rgba(15, 159, 143, 0.12);
 }
 
 .payroll-table-action-btn:active {
-  background: #dbeafe;
+  background: var(--color-primary-light);
 }
 
 /* Dark mode support */
@@ -181,7 +181,7 @@
 .payroll-filters-toggle {
   padding: 4px 8px;
   font-size: 0.85rem;
-  color: var(--color-primary, #3b82f6);
+  color: var(--color-primary, #0F9F8F);
   background: transparent;
   border: none;
   cursor: pointer;
@@ -189,7 +189,7 @@
 }
 
 .payroll-filters-toggle:hover {
-  color: var(--color-primary-hover, #2563eb);
+  color: var(--color-primary-hover, #0F9F8F);
 }
 
 .payroll-filters-basic {
@@ -225,8 +225,8 @@
 .payroll-filter-input:focus,
 .payroll-filter-select:focus {
   outline: none;
-  border-color: var(--color-primary, #3b82f6);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--color-primary, #0F9F8F);
+  box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.1);
 }
 
 .payroll-filter-input::placeholder {
@@ -256,8 +256,8 @@
 
   .payroll-filter-input:focus,
   .payroll-filter-select:focus {
-    border-color: var(--color-primary, #3b82f6);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    border-color: var(--color-primary, #0F9F8F);
+    box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.2);
   }
 }
 

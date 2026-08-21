@@ -1,8 +1,8 @@
-@import url('./AdminCrudPages.css');
+﻿@import url('./AdminCrudPages.css');
 
 .admin-roles-hero,
 .admin-roles-card {
-  border: 1px solid rgba(37, 99, 235, 0.14);
+  border: 1px solid rgba(15, 159, 143, 0.14);
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.95);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
@@ -18,8 +18,8 @@
   margin: 0 0 0.55rem;
   padding: 0.28rem 0.7rem;
   border-radius: 999px;
-  background: rgba(37, 99, 235, 0.12);
-  color: #1d4ed8;
+  background: rgba(15, 159, 143, 0.12);
+  color: var(--color-primary-dark);
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -43,8 +43,8 @@
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  background: rgba(37, 99, 235, 0.12);
-  color: #2563eb;
+  background: rgba(15, 159, 143, 0.12);
+  color: var(--color-primary);
 }
 
 .admin-roles-toolbar {
@@ -92,8 +92,8 @@
 }
 
 .admin-roles-perm-chip--active {
-  background: #dbeafe;
-  color: #1e40af;
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
 }
 
 @media (max-width: 768px) {
@@ -105,3 +105,4 @@
     width: 100%;
   }
 }
+

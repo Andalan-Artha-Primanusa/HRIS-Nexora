@@ -1,4 +1,4 @@
-import type { AxiosError } from "axios";
+﻿import type { AxiosError } from "axios";
 
 export type ApiErrorType = "validation" | "general" | "unauthorized";
 
@@ -56,10 +56,17 @@ export const parseApiError = (error: unknown): ApiError => {
     return { type: "unauthorized", message: translateMessage(message) };
   }
 
-  // 2. Validation Error
+    // 2. Validation Error
   if (status === 422) {
-    message = data?.message || "Data yang diinput tidak valid.";
-    return { type: "validation", message: translateMessage(message), errors: data?.errors || {} };
+    let detailMessage = data?.message || "Data yang diinput tidak valid.";
+    if (data?.errors && typeof data.errors === 'object') {
+       const errors = data.errors as Record<string, string[]>;
+       const errorList = Object.values(errors).flat();
+       if (errorList.length > 0) {
+          detailMessage += "\n• " + errorList.join("\n• ");
+       }
+    }
+    return { type: "validation", message: translateMessage(detailMessage), errors: data?.errors || {} };
   }
 
   if (status === 403) {
@@ -80,4 +87,5 @@ export const parseApiError = (error: unknown): ApiError => {
 export const getErrorMessage = (error: unknown): string => {
   return parseApiError(error).message;
 };
+
 

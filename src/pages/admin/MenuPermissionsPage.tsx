@@ -165,16 +165,16 @@ const MenuPermissionsPage = () => {
           <div className="hero-content">
             <div className="hero-badge">
               <Shield size={16} />
-              <span>Pengaturan Akses</span>
+              <span>Access Control</span>
             </div>
-            <h1 className="hero-title">Akses Menu</h1>
+            <h1 className="hero-title">Menu Permissions</h1>
             <p className="hero-subtitle">
-              Atur role mana saja yang bisa mengakses setiap menu dalam sistem.
+              Manage role-based access for every menu in the system.
             </p>
           </div>
           <div className="hero-actions">
             <button className="btn-outline" onClick={() => void loadData()} disabled={loading}>
-              Segarkan
+              Refresh
             </button>
           </div>
         </div>

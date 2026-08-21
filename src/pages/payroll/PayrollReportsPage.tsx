@@ -177,7 +177,7 @@ const PayrollReportsPage: React.FC = () => {
               style={{
                 flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                 padding: "12px 16px", borderRadius: 12, border: "none", cursor: "pointer",
-                background: isActive ? "linear-gradient(135deg, #2563eb, #1d4ed8)" : "transparent",
+                background: isActive ? "linear-gradient(135deg, var(--color-primary), #1d4ed8)" : "transparent",
                 color: isActive ? "#fff" : "#64748b", fontWeight: isActive ? 700 : 500, fontSize: "0.875rem",
                 fontFamily: "'Poppins', sans-serif", transition: "all 0.2s",
               }}
@@ -322,7 +322,7 @@ const PayrollReportsPage: React.FC = () => {
         footer={<>
           <button className="modal-btn-cancel" onClick={() => setExportModal(false)}>Batal</button>
           <button className="modal-btn-confirm" onClick={handleExport} disabled={exportLoading}
-            style={{ background: 'linear-gradient(135deg, #2563eb, #1d4ed8)' }}>
+            style={{ background: 'linear-gradient(135deg, var(--color-primary), #1d4ed8)' }}>
             {exportLoading ? <><RefreshCw size={16} className="animate-spin" /> Memproses...</> : <><Download size={16} /> Download CSV</>}
           </button>
         </>}
@@ -331,9 +331,9 @@ const PayrollReportsPage: React.FC = () => {
         <label className="modal-completion-label">Tipe Export</label>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 8 }}>
           {([['bca', 'BCA KlikPay CSV', 'Format siap import ke BCA KlikPay', DollarSign], ['summary', 'Summary Lengkap', 'Detail gaji, tunjangan, potongan, BPJS, PPh21', FileText]] as const).map(([key, title, desc, Icon]) => (
-            <label key={key} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderRadius: 12, border: exportType === key ? '2px solid #2563eb' : '2px solid #e2e8f0', background: exportType === key ? '#eff6ff' : '#fff', cursor: 'pointer' }} onClick={() => setExportType(key)}>
-              <input type="radio" name="exportTypeReport" checked={exportType === key} onChange={() => setExportType(key)} style={{ accentColor: '#2563eb' }} />
-              <Icon size={20} color="#2563eb" />
+            <label key={key} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderRadius: 12, border: exportType === key ? '2px solid var(--color-primary)' : '2px solid #e2e8f0', background: exportType === key ? '#eff6ff' : '#fff', cursor: 'pointer' }} onClick={() => setExportType(key)}>
+              <input type="radio" name="exportTypeReport" checked={exportType === key} onChange={() => setExportType(key)} style={{ accentColor: 'var(--color-primary)' }} />
+              <Icon size={20} color="var(--color-primary)" />
               <div><div style={{ fontWeight: 600, color: '#1e293b' }}>{title}</div><div style={{ fontSize: '0.8rem', color: '#64748b' }}>{desc}</div></div>
             </label>
           ))}
@@ -345,7 +345,7 @@ const PayrollReportsPage: React.FC = () => {
       <Modal isOpen={!!exportError} onClose={() => setExportError(null)} title="Export Gagal" size="md"
         footer={<>
           <button className="modal-btn-cancel" onClick={() => setExportError(null)}>Tutup</button>
-          <button className="modal-btn-confirm" onClick={() => { setExportError(null); setExportModal(true); }} style={{ background: 'linear-gradient(135deg, #2563eb, #1d4ed8)' }}>Coba Lagi</button>
+          <button className="modal-btn-confirm" onClick={() => { setExportError(null); setExportModal(true); }} style={{ background: 'linear-gradient(135deg, var(--color-primary), #1d4ed8)' }}>Coba Lagi</button>
         </>}
       >
         <p className="modal-completion-task" style={{ marginBottom: '1rem' }}>Tidak bisa mengunduh file</p>

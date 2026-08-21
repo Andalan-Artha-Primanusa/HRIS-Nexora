@@ -96,7 +96,7 @@ export const ReimbursementDetailModal: React.FC<ReimbursementDetailModalProps> =
         )}
         <div className="detail-item">
           <span className="detail-label">Amount</span>
-          <span className="detail-value" style={{ color: '#2563eb', fontSize: '1.1rem' }}>
+          <span className="detail-value" style={{ color: 'var(--color-primary)', fontSize: '1.1rem' }}>
             {formatCurrency(item.amount as number)}
           </span>
         </div>
@@ -129,7 +129,7 @@ export const ReimbursementDetailModal: React.FC<ReimbursementDetailModalProps> =
               <div className="no-receipt">Attachment ready to open</div>
             )}
             <a href={receiptPath} target="_blank" rel="noreferrer"
-              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#2563eb', fontSize: '0.85rem', marginTop: '0.5rem', textDecoration: 'none' }}>
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-primary)', fontSize: '0.85rem', marginTop: '0.5rem', textDecoration: 'none' }}>
               <ExternalLink size={14} /> View Full Attachment
             </a>
           </div>

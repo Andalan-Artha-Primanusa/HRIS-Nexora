@@ -445,8 +445,8 @@ const MyPayrollPage = () => {
                                 padding: '6px 12px', 
                                 borderRadius: '8px', 
                                 fontSize: '0.85rem',
-                                border: '1px solid #2563eb',
-                                color: '#2563eb',
+                                border: '1px solid var(--color-primary)',
+                                color: 'var(--color-primary)',
                                 background: 'white',
                                 cursor: 'pointer',
                                 display: 'inline-flex',
@@ -514,14 +514,14 @@ const MyPayrollPage = () => {
       >
         {detailLoading ? (
           <div style={{ padding: '3rem', textAlign: 'center' }}>
-            <div className="animate-spin" style={{ margin: '0 auto 1rem' }}><Receipt size={32} color="#2563eb" /></div>
+            <div className="animate-spin" style={{ margin: '0 auto 1rem' }}><Receipt size={32} color="var(--color-primary)" /></div>
             <p>Memuat rincian slip gaji...</p>
           </div>
         ) : selectedSlip && selectedSlip.summary && (
           <div className="digital-slip" style={{ maxWidth: '800px', margin: '0 auto' }}>
             {/* Header - Blue & White Theme */}
             <div className="digital-slip-header" style={{ 
-              background: 'linear-gradient(135deg, #1e3a8a, #2563eb)', 
+              background: 'linear-gradient(135deg, #1e3a8a, var(--color-primary))', 
               color: 'white', 
               padding: '2.5rem 2rem', 
               borderRadius: '16px 16px 0 0',
@@ -673,7 +673,7 @@ const MyPayrollPage = () => {
             </div>
 
             <div className="digital-slip-footer" style={{ 
-              background: 'linear-gradient(135deg, #2563eb, #3b82f6)', 
+              background: 'linear-gradient(135deg, var(--color-primary), #3b82f6)', 
               color: 'white',
               padding: '2rem',
               borderRadius: '0 0 16px 16px',

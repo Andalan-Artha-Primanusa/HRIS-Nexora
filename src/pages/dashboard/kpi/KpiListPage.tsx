@@ -172,7 +172,7 @@ const KpiListPage = () => {
           <p>Kelola target dan pencapaian KPI karyawan.</p>
         </div>
         <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={() => void loadData()} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
+          <Button variant="outline" size="md" onClick={() => void loadData()} disabled={loading} style={{ borderColor: "var(--color-primary)", color: "var(--color-primary)" }}>
             <RefreshCw size={16} />
             {loading ? "Memuat..." : "Segarkan"}
           </Button>

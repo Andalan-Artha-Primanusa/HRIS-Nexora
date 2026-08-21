@@ -50,7 +50,7 @@
 }
 
 .pagination-button:active:not(:disabled) {
-  background-color: #eff6ff;
+  background-color: #DDF5F1;
   border-color: var(--color-primary-hover);
 }
 
@@ -120,7 +120,7 @@
 
 .pagination-info-select:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.1);
 }
 
 /* ========================================

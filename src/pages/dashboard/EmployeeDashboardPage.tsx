@@ -49,7 +49,7 @@ const EmployeeDashboardPage = () => {
   const [recentActivities, setRecentActivities] = useState<Array<{ type: string; desc: string; time: string; status: string }>>([]);
 
   const userName = user?.name || user?.email || 'Karyawan';
-  const chartColors = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
+  const chartColors = ['var(--color-primary)', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
 
   useEffect(() => {
     const loadData = async () => {
@@ -210,28 +210,28 @@ const EmployeeDashboardPage = () => {
       label: 'Saldo Cuti',
       value: loading ? '-' : `${leaveBalance} hari`,
       subtitle: `${leaveUsed} hari terpakai`,
-      icon: '📅',
+      icon: 'ðŸ“…',
       color: 'blue' as const,
     },
     {
       label: 'Cuti Pending',
       value: loading ? '-' : String(pendingLeaves.length),
       subtitle: 'Menunggu persetujuan',
-      icon: '⏰',
+      icon: 'â°',
       color: 'orange' as const,
     },
     {
       label: 'Status Hari Ini',
       value: loading ? '-' : (todayAttendance ? 'Hadir' : 'Belum Check-in'),
       subtitle: todayAttendance ? new Date(todayAttendance.check_in_time || '').toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : 'Silakan check-in',
-      icon: todayAttendance ? '✅' : '❌',
+      icon: todayAttendance ? 'âœ…' : 'âŒ',
       color: todayAttendance ? 'green' as const : 'red' as const,
     },
     {
       label: 'Total Cuti',
       value: loading ? '-' : String(allLeaves.length),
       subtitle: 'Semua pengajuan',
-      icon: '📄',
+      icon: 'ðŸ“„',
       color: 'purple' as const,
     },
   ], [loading, leaveBalance, leaveUsed, pendingLeaves.length, todayAttendance, allLeaves.length]);
@@ -275,12 +275,12 @@ const EmployeeDashboardPage = () => {
         <div className="hero-card-inner">
           <div className="hero-content">
             <div className="hero-badge">
-              <span style={{ fontSize: '16px' }}>📈</span>
+              <span style={{ fontSize: '16px' }}>ðŸ“ˆ</span>
               <span>Dashboard Karyawan</span>
             </div>
-            <h1 className="hero-title">Selamat Datang, {userName}</h1>
+            <h1 className="hero-title">Good Morning, {userName}</h1>
             <p className="hero-subtitle">
-              Lihat ringkasan aktivitas dan status cuti Anda.
+              Here’s your work summary for today.
             </p>
           </div>
           <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
@@ -342,7 +342,7 @@ const EmployeeDashboardPage = () => {
                   dataKey="value"
                   label={({ name, value }) => `${name}: ${value}`}
                 >
-                  <Cell fill="#2563eb" />
+                  <Cell fill="var(--color-primary)" />
                   <Cell fill="#e2e8f0" />
                 </Pie>
                 <Tooltip />
@@ -516,7 +516,7 @@ const EmployeeDashboardPage = () => {
                     borderRadius: '8px',
                   }}
                 />
-                <Bar dataKey="value" fill="#2563eb" radius={[8, 8, 0, 0]} name="Jumlah" />
+                <Bar dataKey="value" fill="var(--color-primary)" radius={[8, 8, 0, 0]} name="Jumlah" />
               </BarChart>
             </ResponsiveContainer>
           ) : (
@@ -693,3 +693,4 @@ const EmployeeDashboardPage = () => {
 };
 
 export default EmployeeDashboardPage;
+

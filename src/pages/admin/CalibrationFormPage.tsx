@@ -111,7 +111,7 @@ const CalibrationFormPage: React.FC = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           <Card glass style={{ padding: '2rem' }}>
             <h3 style={{ margin: '0 0 1.5rem', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Info size={18} color="#2563eb" />
+              <Info size={18} color="var(--color-primary)" />
               Session Details
             </h3>
             <div className="crud-form-grid">
@@ -161,7 +161,7 @@ const CalibrationFormPage: React.FC = () => {
 
           <Card glass style={{ padding: '2rem' }}>
             <h3 style={{ margin: '0 0 1.5rem', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Users size={18} color="#2563eb" />
+              <Users size={18} color="var(--color-primary)" />
               Participants & Access
             </h3>
             <div className="crud-form-grid">

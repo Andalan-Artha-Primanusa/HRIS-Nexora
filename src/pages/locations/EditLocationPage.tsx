@@ -162,7 +162,7 @@ const EditLocationPage = () => {
       <Card className="control-card" glass style={{ marginBottom: '2rem' }}>
         <div style={{ marginBottom: '1.5rem' }}>
           <h3 style={{ margin: 0, color: '#1e3a8a', fontWeight: 700, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <MapPin size={18} style={{ color: '#2563eb' }} />
+            <MapPin size={18} style={{ color: 'var(--color-primary)' }} />
             Informasi Lokasi
           </h3>
         </div>
@@ -316,7 +316,7 @@ const EditLocationPage = () => {
               style={{
                 flex: 1,
                 padding: '0.75rem 1.5rem',
-                backgroundColor: '#2563eb',
+                backgroundColor: 'var(--color-primary)',
                 color: '#ffffff',
                 border: 'none',
                 borderRadius: '0.5rem',
@@ -372,7 +372,7 @@ const EditLocationPage = () => {
             target="_blank"
             rel="noopener noreferrer"
             style={{
-              color: '#2563eb',
+              color: 'var(--color-primary)',
               textDecoration: 'none',
               fontWeight: '600',
               display: 'inline-flex',

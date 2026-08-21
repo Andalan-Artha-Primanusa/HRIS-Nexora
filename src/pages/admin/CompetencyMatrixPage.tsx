@@ -173,10 +173,10 @@ const CompetencyMatrixPage: React.FC = () => {
           <div className="hero-content">
             <div className="hero-badge">
               <Target size={16} />
-              <span>Kompetensi</span>
+              <span>Competencies</span>
             </div>
-            <h1 className="hero-title">Matriks Kompetensi</h1>
-            <p className="hero-subtitle">Kelola keterampilan, keahlian teknis, dan kompetensi inti karyawan.</p>
+            <h1 className="hero-title">Competency Matrix</h1>
+            <p className="hero-subtitle">Manage employee skills, technical expertise, and core competencies.</p>
           </div>
           <div className="hero-actions">
             <button className="btn-outline" onClick={fetchData} disabled={loading}>
@@ -347,12 +347,12 @@ const CompetencyMatrixPage: React.FC = () => {
                             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: '6px' }}
                           >
                             <div className="cell-stacked">
-                              <span className="cell-stacked__main" style={{ fontSize: '0.9rem', fontWeight: 600, color: '#2563eb', textDecoration: 'underline' }}>
+                              <span className="cell-stacked__main" style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-primary)', textDecoration: 'underline' }}>
                                 {item.employee_competencies?.length || 0}
                               </span>
                               <span className="cell-stacked__sub">karyawan</span>
                             </div>
-                            <Eye size={14} color="#2563eb" />
+                            <Eye size={14} color="var(--color-primary)" />
                           </button>
                         </td>
                         <td className="td-center">

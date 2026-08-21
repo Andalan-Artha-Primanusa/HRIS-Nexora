@@ -1,4 +1,4 @@
-.work-schedule-form-container {
+﻿.work-schedule-form-container {
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem 1rem;
@@ -26,9 +26,9 @@
   width: 44px;
   height: 44px;
   border-radius: 10px;
-  background: #ffffff;
-  border: 1px solid #dbe4f1;
-  color: #1d62f0;
+  background: var(--color-var(--color-white));
+  border: 1px solid #DDE9E6;
+  color: var(--color-primary);
   cursor: pointer;
   transition: all 0.2s ease;
   flex-shrink: 0;
@@ -36,7 +36,7 @@
 
 .work-schedule-back-button:hover {
   background: #eaf1ff;
-  border-color: #1d62f0;
+  border-color: var(--color-primary);
   transform: translateX(-2px);
 }
 
@@ -51,18 +51,19 @@
 .work-schedule-header-text p {
   margin: 0.5rem 0 0;
   font-size: 0.95rem;
-  color: #64748b;
+  color: var(--color-text-secondary);
 }
 
 .work-schedule-page-badge {
   display: inline-flex;
   padding: 0.25rem 0.75rem;
   border-radius: 999px;
-  background: rgba(37, 99, 235, 0.1);
-  color: #2563eb;
+  background: rgba(15, 159, 143, 0.1);
+  color: var(--color-primary);
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 0.5rem;
 }
+

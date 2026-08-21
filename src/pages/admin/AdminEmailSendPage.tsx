@@ -165,7 +165,7 @@ const AdminEmailSendPage = () => {
           <Card glass style={{ padding: '2rem' }}>
             <div className="table-header-bar" style={{ marginBottom: '2rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '40px', height: '40px', background: '#eff6ff', color: '#2563eb', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: '40px', height: '40px', background: '#eff6ff', color: 'var(--color-primary)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Send size={20} />
                 </div>
                 <div>
@@ -235,7 +235,7 @@ const AdminEmailSendPage = () => {
                     <p style={{ margin: '0 0 8px 0', fontSize: '0.75rem', fontWeight: 700, color: '#64748b' }}>TAG DINAMIS TERSEDIA:</p>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                       {availablePlaceholders.map(ph => (
-                        <span key={ph} style={{ background: '#fff', border: '1px solid #e2e8f0', color: '#2563eb', padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 600 }}>
+                        <span key={ph} style={{ background: '#fff', border: '1px solid #e2e8f0', color: 'var(--color-primary)', padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 600 }}>
                           {`{{${ph}}}`}
                         </span>
                       ))}

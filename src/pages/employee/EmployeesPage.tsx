@@ -167,9 +167,9 @@ const EmployeesPage = () => {
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
-            <div className="hero-badge"><Briefcase size={16} /><span>Pusat Karyawan</span></div>
-            <h1 className="hero-title">Daftar Karyawan</h1>
-            <p className="hero-subtitle">Kelola seluruh data karyawan dan struktur organisasi secara terpusat.</p>
+            <div className="hero-badge"><Briefcase size={16} /><span>Employee Center</span></div>
+            <h1 className="hero-title">Employee Directory</h1>
+            <p className="hero-subtitle">Manage all employee data and organizational structure in one place.</p>
           </div>
           <div className="hero-actions">
             <button className="btn-outline" onClick={() => void loadEmployees()} disabled={loading}>

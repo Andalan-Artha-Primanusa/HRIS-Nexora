@@ -152,7 +152,7 @@ const ReimbursementApprovalPage = () => {
           <p>Review and approve/reject pending employee expense reimbursements securely.</p>
         </div>
         <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={() => void loadPending()} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
+          <Button variant="outline" size="md" onClick={() => void loadPending()} disabled={loading} style={{ borderColor: "var(--color-primary)", color: "var(--color-primary)" }}>
             <RefreshCw size={16} />
             {loading ? "Memuat..." : "Segarkan"}
           </Button>
@@ -240,7 +240,7 @@ const ReimbursementApprovalPage = () => {
                         </td>
                         <td>
                            {item.receipt_path ? (
-                             <a href={String(item.receipt_path)} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#2563eb', fontSize: '0.8rem', textDecoration: 'none', background: '#eff6ff', padding: '4px 8px', borderRadius: '4px' }}>
+                             <a href={String(item.receipt_path)} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: 'var(--color-primary)', fontSize: '0.8rem', textDecoration: 'none', background: '#eff6ff', padding: '4px 8px', borderRadius: '4px' }}>
                                <DownloadCloud size={14} /> Lihat Bukti
                              </a>
                            ) : (

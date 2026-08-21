@@ -249,7 +249,7 @@ const ReimbursementsManagementPage = () => {
           <p>Master list of all company expense reimbursements for Finance processing.</p>
         </div>
         <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={() => void loadData()} disabled={loading} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
+          <Button variant="outline" size="md" onClick={() => void loadData()} disabled={loading} style={{ borderColor: "var(--color-primary)", color: "var(--color-primary)" }}>
             <RefreshCw size={16} />
             {loading ? "Memuat..." : "Segarkan"}
           </Button>
@@ -416,7 +416,7 @@ const ReimbursementsManagementPage = () => {
                         </td>
                         <td>
                            {item.receipt_path ? (
-                             <a href={String(item.receipt_path)} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#2563eb', fontSize: '0.8rem', textDecoration: 'none' }}>
+                             <a href={String(item.receipt_path)} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: 'var(--color-primary)', fontSize: '0.8rem', textDecoration: 'none' }}>
                                <DownloadCloud size={14} /> Tinjau
                              </a>
                            ) : (
@@ -430,7 +430,7 @@ const ReimbursementsManagementPage = () => {
                                <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Menunggu transfer</div>
                              </>
                            ) : item.status === 'rejected' ? <span style={{ color: '#ef4444', background: '#fef2f2', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 600 }}>REJECTED</span> :
-                            item.status === 'paid' ? <span style={{ color: '#2563eb', background: '#eff6ff', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 600 }}>LUNAS / PAID</span> :
+                            item.status === 'paid' ? <span style={{ color: 'var(--color-primary)', background: '#eff6ff', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 600 }}>LUNAS / PAID</span> :
                             (item.status === 'pending' || item.status === 'submitted') ? <span style={{ color: '#f59e0b', background: '#fffbeb', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 600 }}>PENDING</span> :
                              <span style={{ color: '#64748b', background: '#f8fafc', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 600 }}>DRAFT</span>}
                         </td>

@@ -290,7 +290,7 @@ const LeaveTypePage: React.FC = () => {
                       <tr key={type.id}>
                         <td>
                           <div className="cell-name">
-                            <div className="cell-avatar" style={{ background: type.is_paid ? '#eff6ff' : '#fff1f2', color: type.is_paid ? '#2563eb' : '#e11d48' }}>
+                            <div className="cell-avatar" style={{ background: type.is_paid ? '#eff6ff' : '#fff1f2', color: type.is_paid ? 'var(--color-primary)' : '#e11d48' }}>
                               <Calendar size={18} />
                             </div>
                             <div className="cell-stacked">

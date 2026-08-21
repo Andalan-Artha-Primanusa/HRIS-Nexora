@@ -29,7 +29,7 @@
 
 .ui-button:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1), 0 0 0 3px var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.1), 0 0 0 3px var(--color-primary);
 }
 
 /* ========================================
@@ -296,5 +296,5 @@
 }
 
 .ui-button:active:focus-visible {
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.2);
 }

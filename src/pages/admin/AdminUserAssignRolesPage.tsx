@@ -141,7 +141,7 @@ const AdminUserAssignRolesPage = () => {
         <Card glass style={{ padding: '2rem', borderRadius: '32px', height: 'fit-content', border: '1px solid rgba(255,255,255,0.2)' }}>
           <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
             <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '12px', fontSize: '1.25rem', fontWeight: 800, color: '#1e3a8a' }}>
-              <Users size={24} color="#2563eb" /> 1. Pilih Karyawan
+              <Users size={24} color="var(--color-primary)" /> 1. Pilih Karyawan
             </h3>
             <div style={{ position: 'relative', flex: 1, maxWidth: '300px' }}>
               <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
@@ -180,7 +180,7 @@ const AdminUserAssignRolesPage = () => {
                     }}
                   >
                     <td style={{ padding: '1.25rem 1rem', borderBottom: '1px solid #f1f5f9' }}>
-                      <span style={{ fontWeight: 800, color: '#2563eb' }}>#{u.id}</span>
+                      <span style={{ fontWeight: 800, color: 'var(--color-primary)' }}>#{u.id}</span>
                     </td>
                     <td style={{ padding: '1.25rem 1rem', borderBottom: '1px solid #f1f5f9' }}>
                       <div style={{ fontWeight: 700, color: '#1e293b' }}>{u.name}</div>
@@ -205,7 +205,7 @@ const AdminUserAssignRolesPage = () => {
         <div id="assignment-section" style={{ position: 'relative' }}>
           <Card glass style={{ padding: '2rem', borderRadius: '32px', opacity: selectedUser ? 1 : 0.6, pointerEvents: selectedUser ? 'auto' : 'none', transition: 'all 0.3s ease', border: '1px solid rgba(255,255,255,0.2)' }}>
             <h3 style={{ margin: '0 0 2rem', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '1.25rem', fontWeight: 800, color: '#1e3a8a' }}>
-              <ShieldCheck size={24} color="#2563eb" /> 2. Sesuaikan Peran
+              <ShieldCheck size={24} color="var(--color-primary)" /> 2. Sesuaikan Peran
             </h3>
             
             {selectedUser && (
@@ -232,7 +232,7 @@ const AdminUserAssignRolesPage = () => {
                     >
                       <td style={{ padding: '1.25rem 1rem', textAlign: 'center', borderBottom: '1px solid #f1f5f9' }}>
                         {selectedRoleIds.includes(role.id) ? (
-                          <div style={{ width: '24px', height: '24px', background: '#2563eb', borderRadius: '6px', display: 'grid', placeItems: 'center', margin: '0 auto' }}>
+                          <div style={{ width: '24px', height: '24px', background: 'var(--color-primary)', borderRadius: '6px', display: 'grid', placeItems: 'center', margin: '0 auto' }}>
                             <CheckSquare size={16} color="white" />
                           </div>
                         ) : (

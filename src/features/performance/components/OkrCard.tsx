@@ -12,7 +12,7 @@ export const OkrCard: React.FC<OkrCardProps> = ({ okr }) => {
     <Card glass style={{ padding: '1.5rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Target size={20} color="#2563eb" />
+          <Target size={20} color="var(--color-primary)" />
           <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#1e3a8a' }}>{okr.title}</h3>
         </div>
         <span className={`status-pill status-${okr.status}`}>{okr.status}</span>
@@ -26,7 +26,7 @@ export const OkrCard: React.FC<OkrCardProps> = ({ okr }) => {
           <span style={{ fontWeight: 700, color: '#1e293b' }}>{okr.progress}%</span>
         </div>
         <div style={{ height: '8px', background: '#f1f5f9', borderRadius: '4px', overflow: 'hidden' }}>
-          <div style={{ width: `${okr.progress}%`, height: '100%', background: '#2563eb' }}></div>
+          <div style={{ width: `${okr.progress}%`, height: '100%', background: 'var(--color-primary)' }}></div>
         </div>
       </div>
 

@@ -27,7 +27,7 @@ const extractArr = (raw: unknown): Rec[] => {
 const getStr = (rec: Rec, keys: string[]): string => { for (const k of keys) { const v = rec[k]; if (typeof v === 'string' && v.trim()) return v.trim(); } return ''; };
 
 const dayOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const chartColors = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
+const chartColors = ['var(--color-primary)', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
 const tooltipStyle = {
   contentStyle: { backgroundColor: '#fff', border: '1px solid #dbeafe', borderRadius: '8px', boxShadow: '0 4px 12px rgba(37,99,235,0.1)' },
   labelStyle: { color: '#1e40af', fontWeight: 'bold' as const },
@@ -326,7 +326,7 @@ const ReportsAttendancePage: React.FC = () => {
                   <YAxis stroke="#1e40af" style={{ fontSize: '12px' }} />
                   <Tooltip {...tooltipStyle} cursor={{ fill: 'rgba(37,99,235,0.1)' }} />
                   <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                  <Bar dataKey="hadir" fill="#2563eb" radius={[6, 6, 0, 0]} name="Hadir" />
+                  <Bar dataKey="hadir" fill="var(--color-primary)" radius={[6, 6, 0, 0]} name="Hadir" />
                   <Bar dataKey="total" fill="#e2e8f0" radius={[6, 6, 0, 0]} name="Total Karyawan" />
                 </BarChart>
               </ResponsiveContainer>

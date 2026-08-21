@@ -22,7 +22,7 @@ export const OrgChartNode: React.FC<OrgChartNodeProps> = ({ node, renderChildren
           height: '48px', 
           borderRadius: '50%', 
           background: '#eff6ff', 
-          color: '#2563eb', 
+          color: 'var(--color-primary)', 
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'center',

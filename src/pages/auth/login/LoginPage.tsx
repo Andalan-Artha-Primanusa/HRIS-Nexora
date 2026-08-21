@@ -4,8 +4,6 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import { getRoleBasedDashboardPath } from "@/features/auth/utils/roleRedirect";
 import { useNavigate } from "react-router-dom";
 import AuthLayout from "../AuthLayout";
-import GoogleIcon from "../GoogleIcon";
-
 
 interface LoginFieldErrors {
   email?: string;
@@ -23,14 +21,13 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSsoSubmitting, setIsSsoSubmitting] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
-  // 🚨 Tangkap ?error= yang dikirim backend saat SSO Google gagal
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
     const ssoError = searchParams.get("error");
     if (ssoError) {
       setFormError(decodeURIComponent(ssoError));
-      // Bersihkan param dari URL tanpa reload halaman
       window.history.replaceState({}, document.title, "/login");
     }
   }, []);
@@ -40,9 +37,9 @@ const LoginPage = () => {
     const trimmedEmail = email.trim();
 
     if (!trimmedEmail) {
-      nextErrors.email = "Email address is required.";
+      nextErrors.email = "Email is required.";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
-      nextErrors.email = "Invalid email is and now invalid";
+      nextErrors.email = "Please enter a valid email address.";
     }
 
     if (!password) {
@@ -57,38 +54,30 @@ const LoginPage = () => {
     e.preventDefault();
     setFormError(null);
 
-    if (!validate()) {
-      return;
-    }
+    if (!validate()) return;
 
     setIsSubmitting(true);
 
     try {
       const result = await handleLogin({ email: email.trim(), password });
-      
-      // Check for validation errors returned by hook
+
       if (result && "success" in result && result.success === false) {
         if (result.errors) {
-          // If the backend returns specific field errors
           const firstError = Object.values(result.errors)[0];
           setFormError(String(firstError));
         }
         return;
       }
 
-      // Success path
       if (result && "user" in result) {
         navigate(getRoleBasedDashboardPath(result.user));
       }
     } catch (err: unknown) {
-      // General errors are already handled by global toast, 
-      // but we can show a fallback in the form if needed.
       const errorObj = err && typeof err === "object" ? (err as Record<string, unknown>) : {};
-      setFormError(typeof errorObj.message === "string" ? errorObj.message : "Terjadi kesalahan saat login.");
+      setFormError(typeof errorObj.message === "string" ? errorObj.message : "An error occurred during login.");
     } finally {
       setIsSubmitting(false);
     }
-
   };
 
   const handleGoogleSignIn = async () => {
@@ -99,24 +88,23 @@ const LoginPage = () => {
       const redirectUrl = await handleGoogleLogin();
       window.location.assign(redirectUrl);
     } catch (err: unknown) {
-      setFormError(typeof err === "string" ? err : "Login with Google gagal.");
+      setFormError(typeof err === "string" ? err : "Google login failed.");
       setIsSsoSubmitting(false);
     }
   };
 
   return (
     <AuthLayout
-      title="Welcome back!"
-      subtitle="Secure Login"
+      title="Welcome Back"
+      subtitle="Sign in to your account"
       footer={
         <p className="auth-footer">
-          Don't have an account?{" "}
           <button
             type="button"
             className="auth-footer-link"
-            onClick={() => navigate("/register")}
+            onClick={() => navigate("/forgot-password")}
           >
-            Register
+            Forgot Password?
           </button>
         </p>
       }
@@ -130,7 +118,7 @@ const LoginPage = () => {
             id="email"
             type="email"
             autoComplete="email"
-            placeholder="Email email@gmail.com"
+            placeholder="you@company.com"
             value={email}
             onChange={(e) => {
               setEmail(e.target.value);
@@ -141,7 +129,7 @@ const LoginPage = () => {
           />
           {fieldErrors.email && (
             <p className="auth-field-error">
-              <AlertCircle size={16} />
+              <AlertCircle size={14} />
               {fieldErrors.email}
             </p>
           )}
@@ -156,7 +144,7 @@ const LoginPage = () => {
               id="password"
               type={showPassword ? "text" : "password"}
               autoComplete="current-password"
-              placeholder="Password"
+              placeholder="Enter your password"
               value={password}
               onChange={(e) => {
                 setPassword(e.target.value);
@@ -171,24 +159,28 @@ const LoginPage = () => {
               onClick={() => setShowPassword((prev) => !prev)}
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
-              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
           {fieldErrors.password && (
             <p className="auth-field-error">
-              <AlertCircle size={16} />
+              <AlertCircle size={14} />
               {fieldErrors.password}
             </p>
           )}
         </div>
 
-        <button
-          type="button"
-          className="auth-link-button"
-          onClick={() => navigate('/forgot-password')}
-        >
-          Forgot Password?
-        </button>
+        <div className="auth-field" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0, cursor: 'pointer', fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              style={{ width: 16, height: 16, accentColor: 'var(--color-primary)' }}
+            />
+            Remember me
+          </label>
+        </div>
 
         {formError && <p className="auth-form-error">{formError}</p>}
 
@@ -198,7 +190,7 @@ const LoginPage = () => {
           disabled={isSubmitting || isSsoSubmitting}
         >
           {isSubmitting ? <Loader2 size={18} className="auth-button-spinner" /> : null}
-          Login
+          Sign In
         </button>
 
         <button
@@ -207,15 +199,12 @@ const LoginPage = () => {
           onClick={handleGoogleSignIn}
           disabled={isSubmitting || isSsoSubmitting}
         >
-          {isSsoSubmitting ? <Loader2 size={18} className="auth-button-spinner" /> : <GoogleIcon />}
-          {isSsoSubmitting ? "Redirecting to Google..." : "Login with Google (SSO)"}
+          {isSsoSubmitting ? <Loader2 size={18} className="auth-button-spinner" /> : null}
+          {isSsoSubmitting ? "Redirecting..." : "Continue with Google"}
         </button>
-
       </form>
-
     </AuthLayout>
   );
 };
 
 export default LoginPage;
-

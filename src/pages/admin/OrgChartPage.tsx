@@ -66,7 +66,7 @@ const OrgChartPage: React.FC = () => {
       <div className="" style={{ minHeight: '600px', padding: '3rem' }}> 
           {loading ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <RefreshCw size={24} className="animate-spin" color="#2563eb" />
+              <RefreshCw size={24} className="animate-spin" color="var(--color-primary)" />
               <span>Memuat...</span>
             </div>
           ) : chartData ? (

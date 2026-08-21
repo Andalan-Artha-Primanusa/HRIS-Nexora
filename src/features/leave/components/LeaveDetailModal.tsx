@@ -105,7 +105,7 @@ export const LeaveDetailModal: React.FC<LeaveDetailModalProps> = ({ isOpen, onCl
           </div>
           <div>
             <label style={{ display: 'block', fontSize: '0.75rem', color: '#64748b', marginBottom: '0.25rem' }}>Jenis Cuti</label>
-            <div style={{ fontWeight: 600, color: '#2563eb' }}>{item.leave_type?.name || item.type?.toUpperCase()}</div>
+            <div style={{ fontWeight: 600, color: 'var(--color-primary)' }}>{item.leave_type?.name || item.type?.toUpperCase()}</div>
           </div>
         </div>
       </div>

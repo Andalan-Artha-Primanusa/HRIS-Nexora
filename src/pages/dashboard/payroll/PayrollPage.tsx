@@ -75,17 +75,23 @@ const PayrollPage = () => {
 
   return (
     <div className="payroll-page">
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Payroll Management</h1>
-          <p className="page-subtitle text-gray">Kelola payroll, generate payroll bulanan, dan review payslip karyawan.</p>
+      <Card className="hero-card" style={{ marginBottom: 'var(--space-6)' }}>
+        <div className="hero-card-inner">
+          <div className="hero-content">
+            <div className="hero-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--space-2)', padding: 'var(--space-1) var(--space-3)', borderRadius: 'var(--radius-full)', fontSize: 'var(--font-size-xs)', fontWeight: 'var(--font-weight-semibold)', letterSpacing: 'var(--letter-spacing-wide)', textTransform: 'uppercase', color: 'var(--color-primary-dark)', marginBottom: 'var(--space-3)', background: 'var(--color-primary-lighter)' }}>
+              <CreditCard size={16} />
+              <span>Payroll Center</span>
+            </div>
+            <h1 className="hero-title" style={{ fontFamily: 'var(--font-family-heading)', fontSize: 'var(--font-size-2xl)', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-text-primary)', margin: '0 0 var(--space-2) 0', letterSpacing: 'var(--letter-spacing-tight)' }}>Payroll Management</h1>
+            <p className="hero-subtitle" style={{ fontSize: 'var(--font-size-md)', color: 'var(--color-text-secondary)', margin: '0', maxWidth: '50ch' }}>Manage monthly payroll, generate payslips, and review transactions.</p>
+          </div>
+          <div className="hero-actions" style={{ display: 'flex', gap: 'var(--space-3)' }}>
+            <Button variant="outline" size="md" onClick={loadPayroll} disabled={loading}>
+              Refresh Payroll
+            </Button>
+          </div>
         </div>
-        <div className="page-actions">
-          <Button variant="outline" size="md" onClick={loadPayroll} disabled={loading}>
-            Refresh Payroll
-          </Button>
-        </div>
-      </div>
+      </Card>
 
       <div className="payroll-grid">
         <Card className="payroll-card" glass>

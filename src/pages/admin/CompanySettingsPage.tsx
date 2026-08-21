@@ -320,7 +320,7 @@ const CompanySettingsPage: React.FC = () => {
         <div className="settings-content-area">
           {loading ? (
             <div className="settings-loading-state">
-              <RefreshCw size={48} className="animate-spin" color="#2563eb" />
+              <RefreshCw size={48} className="animate-spin" color="var(--color-primary)" />
               <p>Menyinkronkan data perusahaan...</p>
             </div>
           ) : (

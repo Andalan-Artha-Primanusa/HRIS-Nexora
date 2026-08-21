@@ -107,8 +107,9 @@ export const clearMenuCache = () => {
 };
 
 const filterByKeys = (items: MenuItem[], allowedKeys: Set<string>, user: AuthUser): MenuItem[] => {
+  const isSuperAdmin = RBACUtils.isSuperAdmin(user);
   return items
-    .filter((item) => (!item.menuKey || allowedKeys.has(item.menuKey)) && isAllowedByCapability(user, item))
+    .filter((item) => (isSuperAdmin || !item.menuKey || allowedKeys.has(item.menuKey)) && (isSuperAdmin || isAllowedByCapability(user, item)))
     .map((item) => ({
       ...item,
       subItems: item.subItems ? filterByKeys(item.subItems, allowedKeys, user) : undefined,

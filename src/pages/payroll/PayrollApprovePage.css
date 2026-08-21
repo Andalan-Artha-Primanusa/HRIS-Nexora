@@ -1,12 +1,12 @@
-.crud-page {
-  --primary: #2563eb;
-  --primary-dark: #1d4ed8;
-  --primary-light: #dbeafe;
-  --primary-lighter: #eff6ff;
+﻿.crud-page {
+  --primary: var(--color-primary);
+  --primary-dark: var(--color-primary-dark);
+  --primary-light: var(--color-primary-light);
+  --primary-lighter: var(--color-primary-light);
   --surface: linear-gradient(180deg, rgba(247, 250, 255, 0.94) 0%, rgba(239, 245, 255, 0.88) 100%);
-  --text: #1e3a8a;
-  --text-light: #4f8cf5;
-  --border: rgba(37, 99, 235, 0.14);
+  --text: var(--color-primary-dark);
+  --text-light: var(--color-primary);
+  --border: rgba(15, 159, 143, 0.14);
 
   display: flex;
   flex-direction: column;
@@ -17,7 +17,7 @@
 }
 
 .crud-page::before {
-  border-color: rgba(37, 99, 235, 0.12);
+  border-color: rgba(15, 159, 143, 0.12);
   border-radius: inherit;
 }
 
@@ -54,7 +54,7 @@
   right: -40px;
   width: 180px;
   height: 180px;
-  background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(15, 159, 143, 0.08) 0%, transparent 70%);
   border-radius: 50%;
   pointer-events: none;
 }
@@ -72,13 +72,13 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 600;
-  color: #64748b;
+  color: var(--color-text-secondary);
 }
 
 .payroll-approve-summary-subtitle {
   margin: 0.3rem 0 0;
   font-size: 0.86rem;
-  color: #94a3b8;
+  color: var(--color-text-tertiary);
 }
 
 .payroll-approve-summary-icon {
@@ -94,19 +94,19 @@
 
 .payroll-approve-summary-icon--orange {
   background: rgba(245, 158, 11, 0.12);
-  color: #f59e0b;
+  color: var(--color-warning);
   border-color: rgba(245, 158, 11, 0.14);
 }
 
 .payroll-approve-summary-icon--blue {
-  background: rgba(37, 99, 235, 0.12);
-  color: #2563eb;
-  border-color: rgba(37, 99, 235, 0.14);
+  background: rgba(15, 159, 143, 0.12);
+  color: var(--color-primary);
+  border-color: rgba(15, 159, 143, 0.14);
 }
 
 .payroll-approve-summary-icon--green {
   background: rgba(16, 185, 129, 0.12);
-  color: #10b981;
+  color: var(--color-success);
   border-color: rgba(16, 185, 129, 0.14);
 }
 
@@ -120,7 +120,7 @@
   margin-top: 0.55rem;
   font-size: 2rem;
   font-weight: 800;
-  color: #2563eb;
+  color: var(--color-primary);
   letter-spacing: -1px;
 }
 
@@ -128,16 +128,16 @@
   margin-top: 0.5rem;
   font-size: 0.9rem;
   font-weight: 600;
-  color: #64748b;
+  color: var(--color-text-secondary);
 }
 
 .payroll-approve-message {
-  border-left: 4px solid #2563eb;
+  border-left: 4px solid var(--color-primary);
 }
 
 .payroll-approve-message p {
   margin: 0;
-  color: #2563eb;
+  color: var(--color-primary);
   font-weight: 500;
 }
 
@@ -149,15 +149,15 @@
 
 .payroll-approve-table-wrap {
   border-radius: 16px;
-  border: 1px solid rgba(37, 99, 235, 0.1);
+  border: 1px solid rgba(15, 159, 143, 0.1);
 }
 
 .payroll-approve-table thead {
-  background: #eff6ff;
+  background: var(--color-primary-light);
 }
 
 .payroll-approve-table th {
-  color: #1e40af;
+  color: var(--color-primary-dark);
 }
 
 .payroll-approve-table tbody tr:hover {
@@ -174,10 +174,10 @@
   justify-content: center;
   padding: 0.35rem 0.75rem;
   border-radius: 999px;
-  color: #fff;
+  color: var(--color-white);
   font-size: 0.8rem;
   font-weight: 700;
-  white-space: nowrap;
+  var(--color-white)-space: nowrap;
 }
 
 .payroll-status-pill--compact {
@@ -191,12 +191,12 @@
   padding: 0.55rem 0.85rem;
   font-weight: 600;
   cursor: pointer;
-  color: #fff;
+  color: var(--color-white);
   margin-right: 0.5rem;
 }
 
 .crud-inline-button--primary {
-  background: #2563eb;
+  background: var(--color-primary);
 }
 
 .crud-inline-button--info {
@@ -205,7 +205,7 @@
 
 .payroll-approve-empty {
   margin: 0;
-  color: #64748b;
+  color: var(--color-text-secondary);
 }
 
 .payroll-approve-detail-grid {
@@ -224,7 +224,7 @@
   margin: 0 0 0.25rem;
   font-size: 0.82rem;
   font-weight: 700;
-  color: #64748b;
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -232,16 +232,16 @@
 .payroll-approve-detail-value {
   margin: 0 0 1rem;
   font-size: 1rem;
-  color: #1e293b;
+  color: var(--color-text-primary);
 }
 
 .payroll-approve-detail-value--accent {
-  color: #2563eb;
+  color: var(--color-primary);
   font-weight: 700;
 }
 
 .payroll-approve-detail-value--success {
-  color: #10b981;
+  color: var(--color-success);
   font-weight: 700;
 }
 
@@ -255,7 +255,7 @@
 }
 
 .payroll-approve-primary {
-  background: #10b981;
+  background: var(--color-success);
   border: none;
 }
 
@@ -267,7 +267,7 @@
 
 .action-btn-success:hover {
   background: #16a34a !important;
-  color: #ffffff !important;
+  color: var(--color-var(--color-white)) !important;
   border-color: #16a34a !important;
 }
 

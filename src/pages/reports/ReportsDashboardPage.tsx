@@ -29,7 +29,7 @@ const getStr = (rec: Rec, keys: string[]): string => { for (const k of keys) { c
 const getNum = (v: unknown): number => { if (typeof v === 'number' && Number.isFinite(v)) return v; if (typeof v === 'string') { const p = Number(v); if (Number.isFinite(p)) return p; } return 0; };
 
 const dayOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const chartColors = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#f97316'];
+const chartColors = ['var(--color-primary)', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#f97316'];
 
 const tooltipStyle = {
   contentStyle: { backgroundColor: '#fff', border: '1px solid #dbeafe', borderRadius: '8px' },
@@ -483,12 +483,12 @@ const ReportsDashboardPage: React.FC = () => {
             {weeklyTrend.some(d => d.hadir > 0 || d.absen > 0) ? (
               <ResponsiveContainer width="100%" height={260}>
                 <AreaChart data={weeklyTrend}>
-                  <defs><linearGradient id="gp" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#2563eb" stopOpacity={0.2}/><stop offset="95%" stopColor="#2563eb" stopOpacity={0}/></linearGradient></defs>
+                  <defs><linearGradient id="gp" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.2}/><stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0}/></linearGradient></defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                   <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
                   <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
                   <Tooltip {...tooltipStyle} />
-                  <Area type="monotone" dataKey="hadir" stroke="#2563eb" strokeWidth={2} fillOpacity={1} fill="url(#gp)" name="Hadir" />
+                  <Area type="monotone" dataKey="hadir" stroke="var(--color-primary)" strokeWidth={2} fillOpacity={1} fill="url(#gp)" name="Hadir" />
                 </AreaChart>
               </ResponsiveContainer>
             ) : <div className="reports-chart-empty">Belum ada data absensi tercatat</div>}
@@ -507,7 +507,7 @@ const ReportsDashboardPage: React.FC = () => {
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
                   <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
                   <Tooltip {...tooltipStyle} cursor={{ fill: '#f8fafc' }} />
-                  <Bar dataKey="value" fill="#2563eb" radius={[6, 6, 0, 0]} name="Karyawan" />
+                  <Bar dataKey="value" fill="var(--color-primary)" radius={[6, 6, 0, 0]} name="Karyawan" />
                 </BarChart>
               </ResponsiveContainer>
             ) : <div className="reports-chart-empty">Data departemen tidak tersedia</div>}
@@ -676,7 +676,7 @@ const ReportsDashboardPage: React.FC = () => {
                   <YAxis stroke="#1e40af" style={{ fontSize: '12px' }} />
                   <Tooltip {...tooltipStyle} cursor={{ fill: 'rgba(37,99,235,0.1)' }} />
                   <Legend />
-                  <Bar dataKey="hadir" fill="#2563eb" radius={[6, 6, 0, 0]} name="Hadir" />
+                  <Bar dataKey="hadir" fill="var(--color-primary)" radius={[6, 6, 0, 0]} name="Hadir" />
                   <Bar dataKey="total" fill="#e2e8f0" radius={[6, 6, 0, 0]} name="Total Karyawan" />
                 </BarChart>
               </ResponsiveContainer>
@@ -784,7 +784,7 @@ const ReportsDashboardPage: React.FC = () => {
                   <XAxis dataKey="name" stroke="#1e40af" style={{ fontSize: '12px' }} />
                   <YAxis stroke="#1e40af" style={{ fontSize: '12px' }} />
                   <Tooltip {...tooltipStyle} cursor={{ fill: 'rgba(37,99,235,0.1)' }} />
-                  <Bar dataKey="value" fill="#2563eb" radius={[8, 8, 0, 0]} name="Jumlah" />
+                  <Bar dataKey="value" fill="var(--color-primary)" radius={[8, 8, 0, 0]} name="Jumlah" />
                 </BarChart>
               </ResponsiveContainer>
             ) : <div className="reports-chart-empty">Belum ada data.</div>}
@@ -886,7 +886,7 @@ const ReportsDashboardPage: React.FC = () => {
                   <XAxis dataKey="month" stroke="#1e40af" style={{ fontSize: '12px' }} />
                   <YAxis stroke="#1e40af" style={{ fontSize: '12px' }} />
                   <Tooltip {...tooltipStyle} formatter={(v: any) => fmtRp(Number(v))} />
-                  <Line type="monotone" dataKey="net" stroke="#2563eb" strokeWidth={3} dot={{ r: 5, fill: '#2563eb', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 7 }} name="Net Salary" />
+                  <Line type="monotone" dataKey="net" stroke="var(--color-primary)" strokeWidth={3} dot={{ r: 5, fill: 'var(--color-primary)', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 7 }} name="Net Salary" />
                 </LineChart>
               </ResponsiveContainer>
             ) : <div className="reports-chart-empty">Belum ada data.</div>}
@@ -904,7 +904,7 @@ const ReportsDashboardPage: React.FC = () => {
                   <Tooltip {...tooltipStyle} />
                   <Legend />
                   <Pie data={payrollStatusData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} dataKey="value" label={({ name, value }) => `${name}: ${value}`}>
-                    {payrollStatusData.map((_, i) => <Cell key={i} fill={['#10b981', '#f59e0b', '#2563eb', '#ef4444', '#8b5cf6'][i % 5]} />)}
+                    {payrollStatusData.map((_, i) => <Cell key={i} fill={['#10b981', '#f59e0b', 'var(--color-primary)', '#ef4444', '#8b5cf6'][i % 5]} />)}
                   </Pie>
                 </PieChart>
               </ResponsiveContainer>
@@ -986,7 +986,7 @@ const ReportsDashboardPage: React.FC = () => {
                   <XAxis dataKey="name" stroke="#1e40af" style={{ fontSize: '12px' }} />
                   <YAxis stroke="#1e40af" style={{ fontSize: '12px' }} />
                   <Tooltip {...tooltipStyle} cursor={{ fill: 'rgba(37,99,235,0.1)' }} />
-                  <Bar dataKey="value" fill="#2563eb" radius={[8, 8, 0, 0]} name="Jumlah Aset" />
+                  <Bar dataKey="value" fill="var(--color-primary)" radius={[8, 8, 0, 0]} name="Jumlah Aset" />
                 </BarChart>
               </ResponsiveContainer>
             ) : <div className="reports-chart-empty">Belum ada data.</div>}
@@ -1105,7 +1105,7 @@ const ReportsDashboardPage: React.FC = () => {
                   <XAxis type="number" stroke="#1e40af" style={{ fontSize: '12px' }} />
                   <YAxis dataKey="name" type="category" stroke="#1e40af" style={{ fontSize: '12px' }} width={100} />
                   <Tooltip {...tooltipStyle} cursor={{ fill: 'rgba(37,99,235,0.1)' }} />
-                  <Bar dataKey="value" fill="#2563eb" radius={[0, 8, 8, 0]} name="Headcount" />
+                  <Bar dataKey="value" fill="var(--color-primary)" radius={[0, 8, 8, 0]} name="Headcount" />
                 </BarChart>
               </ResponsiveContainer>
             ) : <div className="reports-chart-empty">Belum ada data.</div>}

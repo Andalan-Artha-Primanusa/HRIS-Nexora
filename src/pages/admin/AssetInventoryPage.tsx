@@ -271,11 +271,11 @@ const AssetInventoryPage: React.FC = () => {
           <div className="hero-content">
             <div className="hero-badge">
               <Package size={16} />
-              <span>Inventaris Perusahaan</span>
+              <span>Corporate Inventory</span>
             </div>
-            <h1 className="hero-title">Aset & Properti</h1>
+            <h1 className="hero-title">Assets & Properties</h1>
             <p className="hero-subtitle">
-              Pantau distribusi, kondisi, dan status kepemilikan aset perusahaan secara terpusat.
+              Monitor asset distribution, conditions, and ownership status centrally.
             </p>
           </div>
           <div className="hero-actions">
@@ -436,7 +436,7 @@ const AssetInventoryPage: React.FC = () => {
                               {asset.status?.toLowerCase() === 'available' && (
                                 <button
                                   className="action-btn"
-                                  style={{ background: '#dbeafe', color: '#2563eb' }}
+                                  style={{ background: '#dbeafe', color: 'var(--color-primary)' }}
                                   onClick={() => openAssignModal(asset)}
                                   title="Assign ke Karyawan"
                                 >

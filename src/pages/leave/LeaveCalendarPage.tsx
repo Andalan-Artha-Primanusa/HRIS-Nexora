@@ -81,7 +81,7 @@ const LeaveCalendarPage = () => {
       case 'approved': return '#10b981';
       case 'rejected': return '#ef4444';
       case 'pending': return '#f59e0b';
-      default: return '#2563eb';
+      default: return 'var(--color-primary)';
     }
   };
 

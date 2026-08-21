@@ -154,7 +154,7 @@ const PayrollApprovePage = () => {
 
   const modalIcon =
     pendingAction === "reject" ? <XCircle size={40} color="#ef4444" /> :
-    pendingAction === "hr-approve" ? <Shield size={40} color="#2563eb" /> :
+    pendingAction === "hr-approve" ? <Shield size={40} color="var(--color-primary)" /> :
     <UserCheck size={40} color="#10b981" />;
 
   return (
@@ -173,7 +173,7 @@ const PayrollApprovePage = () => {
               <RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Segarkan
             </button>
             <button className="btn-outline" onClick={() => navigate("/payroll/payment")}
-              style={{ color: "#2563eb", borderColor: "#2563eb" }}>
+              style={{ color: "var(--color-primary)", borderColor: "var(--color-primary)" }}>
               Halaman Pembayaran
             </button>
           </div>
@@ -254,7 +254,7 @@ const PayrollApprovePage = () => {
       <Card className="data-table-card">
         <div className="data-table-header">
           <h3 className="data-table-title">
-            <Shield size={18} style={{ marginRight: 6, color: "#2563eb" }} />
+            <Shield size={18} style={{ marginRight: 6, color: "var(--color-primary)" }} />
             Step 2 — Menunggu Final Approval HR
             <span className="data-table-count">{pendingPayrolls.length} payroll</span>
           </h3>

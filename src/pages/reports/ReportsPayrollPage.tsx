@@ -198,7 +198,7 @@ const ReportsPayrollPage: React.FC = () => {
       <div className="reports-charts-section">
         <div className="reports-charts-grid">
           <Card className="reports-chart-card" glass>
-            <h2 className="reports-chart-title"><BarChart3 size={18} color="#2563eb" /> Status Payroll per Periode</h2>
+            <h2 className="reports-chart-title"><BarChart3 size={18} color="var(--color-primary)" /> Status Payroll per Periode</h2>
             <p className="reports-chart-subtitle">Perbandingan jumlah payroll Paid vs Pending</p>
             {periodTimeline.length > 0 ? (
               <ResponsiveContainer width="100%" height={280}>
@@ -214,7 +214,7 @@ const ReportsPayrollPage: React.FC = () => {
           </Card>
 
           <Card className="reports-chart-card" glass>
-            <h2 className="reports-chart-title"><Wallet size={18} color="#2563eb" /> Tren Nominal Payroll</h2>
+            <h2 className="reports-chart-title"><Wallet size={18} color="var(--color-primary)" /> Tren Nominal Payroll</h2>
             <p className="reports-chart-subtitle">Total net salary yang diproses per bulan</p>
             {netByPeriod.length > 0 ? (
               <ResponsiveContainer width="100%" height={280}>
@@ -222,21 +222,21 @@ const ReportsPayrollPage: React.FC = () => {
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(37,99,235,0.1)"/>
                   <XAxis dataKey="month" stroke="#1e40af" style={{fontSize:'12px'}}/><YAxis stroke="#1e40af" style={{fontSize:'12px'}}/>
                   <Tooltip {...TT} formatter={(v:any)=>fmtRp(Number(v))}/>
-                  <Line type="monotone" dataKey="net" stroke="#2563eb" strokeWidth={3} dot={{r:5, fill:'#2563eb', strokeWidth:2, stroke:'#fff'}} activeDot={{r:7}} name="Net Salary"/>
+                  <Line type="monotone" dataKey="net" stroke="var(--color-primary)" strokeWidth={3} dot={{r:5, fill:'var(--color-primary)', strokeWidth:2, stroke:'#fff'}} activeDot={{r:7}} name="Net Salary"/>
                 </LineChart>
               </ResponsiveContainer>
             ):(<div className="reports-chart-empty">{loading?'Memuat...':'Belum ada data.'}</div>)}
           </Card>
 
           <Card className="reports-chart-card" glass>
-            <h2 className="reports-chart-title"><PieIcon size={18} color="#2563eb" /> Proporsi Status</h2>
+            <h2 className="reports-chart-title"><PieIcon size={18} color="var(--color-primary)" /> Proporsi Status</h2>
             <p className="reports-chart-subtitle">Pembagian status payroll keseluruhan</p>
             {statusData.length > 0 ? (
               <ResponsiveContainer width="100%" height={280}>
                 <PieChart>
                   <Tooltip {...TT}/><Legend wrapperStyle={{paddingTop:'20px'}}/>
                   <Pie data={statusData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} dataKey="value" label={({name,value})=>`${name}: ${value}`}>
-                    {statusData.map((_,i)=><Cell key={i} fill={['#10b981','#f59e0b','#2563eb','#ef4444','#8b5cf6'][i%5]}/>)}
+                    {statusData.map((_,i)=><Cell key={i} fill={['#10b981','#f59e0b','var(--color-primary)','#ef4444','#8b5cf6'][i%5]}/>)}
                   </Pie>
                 </PieChart>
               </ResponsiveContainer>
@@ -244,7 +244,7 @@ const ReportsPayrollPage: React.FC = () => {
           </Card>
 
           <Card className="reports-chart-card" glass>
-            <h2 className="reports-chart-title"><Users size={18} color="#2563eb" /> Pengeluaran per Departemen</h2>
+            <h2 className="reports-chart-title"><Users size={18} color="var(--color-primary)" /> Pengeluaran per Departemen</h2>
             <p className="reports-chart-subtitle">Distribusi biaya gaji berdasarkan departemen</p>
             {deptData.length > 0 ? (
               <ResponsiveContainer width="100%" height={280}>

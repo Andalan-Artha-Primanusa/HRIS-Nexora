@@ -42,7 +42,7 @@ const WorkScheduleForm: React.FC<WorkScheduleFormProps> = ({
         }}
       >
         <h3 style={{ margin: '0 0 2rem', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '1.25rem', fontWeight: 800, color: '#1e3a8a' }}>
-           <Clock size={24} color="#2563eb" /> Konfigurasi Jadwal
+           <Clock size={24} color="var(--color-primary)" /> Konfigurasi Jadwal
         </h3>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>

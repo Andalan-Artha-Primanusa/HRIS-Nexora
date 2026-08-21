@@ -60,7 +60,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
     <>
       {/* Section 1: Akun & Personal */}
       <div className="form-section" style={{ marginBottom: "2rem" }}>
-        <h4 style={{ color: "#2563eb", marginBottom: "1rem", fontSize: "0.9rem", borderBottom: "1px solid #e2e8f0", paddingBottom: "0.5rem" }}>
+        <h4 style={{ color: "var(--color-primary)", marginBottom: "1rem", fontSize: "0.9rem", borderBottom: "1px solid #e2e8f0", paddingBottom: "0.5rem" }}>
           I. INFORMASI AKUN & PERSONAL
         </h4>
         <div className="form-grid">
@@ -116,7 +116,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
 
       {/* Section 2: Posisi & Organisasi */}
       <div className="form-section" style={{ marginBottom: "2rem" }}>
-        <h4 style={{ color: "#2563eb", marginBottom: "1rem", fontSize: "0.9rem", borderBottom: "1px solid #e2e8f0", paddingBottom: "0.5rem" }}>
+        <h4 style={{ color: "var(--color-primary)", marginBottom: "1rem", fontSize: "0.9rem", borderBottom: "1px solid #e2e8f0", paddingBottom: "0.5rem" }}>
           II. POSISI & ORGANISASI
         </h4>
         <div className="form-grid">
@@ -202,7 +202,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
 
       {/* Section 3: Status & Penggajian */}
       <div className="form-section">
-        <h4 style={{ color: "#2563eb", marginBottom: "1rem", fontSize: "0.9rem", borderBottom: "1px solid #e2e8f0", paddingBottom: "0.5rem" }}>
+        <h4 style={{ color: "var(--color-primary)", marginBottom: "1rem", fontSize: "0.9rem", borderBottom: "1px solid #e2e8f0", paddingBottom: "0.5rem" }}>
           III. STATUS & PENGGAJIAN
         </h4>
         <div className="form-grid">

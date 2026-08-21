@@ -236,9 +236,9 @@ const PayrollManagementPage = () => {
 
   return (
     <div className="crud-page">
-      <div className="crud-header" style={{ borderBottom: "2px solid #2563eb", paddingBottom: "20px" }}>
+      <div className="crud-header" style={{ borderBottom: "2px solid var(--color-primary)", paddingBottom: "20px" }}>
         <div>
-          <h1 style={{ color: "#2563eb", marginBottom: "4px", display: "inline-flex", alignItems: "center", gap: "8px" }}>
+          <h1 style={{ color: "var(--color-primary)", marginBottom: "4px", display: "inline-flex", alignItems: "center", gap: "8px" }}>
             <Settings2 size={20} />
             Kelola Payroll
           </h1>
@@ -249,21 +249,21 @@ const PayrollManagementPage = () => {
           size="md" 
           onClick={() => void loadPayroll()} 
           disabled={loading}
-          style={{ borderColor: "#2563eb", color: "#2563eb" }}
+          style={{ borderColor: "var(--color-primary)", color: "var(--color-primary)" }}
         >
           <RefreshCw size={16} />
           Segarkan Data
         </Button>
       </div>
 
-      <Card className="crud-card" glass style={{ borderTop: "4px solid #2563eb" }}>
-        <h2 style={{ color: "#2563eb", marginTop: 0, display: "inline-flex", alignItems: "center", gap: "8px" }}>
+      <Card className="crud-card" glass style={{ borderTop: "4px solid var(--color-primary)" }}>
+        <h2 style={{ color: "var(--color-primary)", marginTop: 0, display: "inline-flex", alignItems: "center", gap: "8px" }}>
           <FileText size={18} />
           Form Payroll
         </h2>
         <div className="crud-form-grid">
           <label>
-            <strong style={{ color: "#2563eb" }}>ID Payroll</strong>
+            <strong style={{ color: "var(--color-primary)" }}>ID Payroll</strong>
             <input
               className="crud-input"
               value={form.id}
@@ -272,7 +272,7 @@ const PayrollManagementPage = () => {
             />
           </label>
           <label>
-            <strong style={{ color: "#2563eb" }}>ID Karyawan</strong>
+            <strong style={{ color: "var(--color-primary)" }}>ID Karyawan</strong>
             <input
               className="crud-input"
               value={form.employee_id}
@@ -280,7 +280,7 @@ const PayrollManagementPage = () => {
             />
           </label>
           <label>
-            <strong style={{ color: "#2563eb" }}>Periode (YYYY-MM)</strong>
+            <strong style={{ color: "var(--color-primary)" }}>Periode (YYYY-MM)</strong>
             <input
               className="crud-input"
               value={form.period}
@@ -288,7 +288,7 @@ const PayrollManagementPage = () => {
             />
           </label>
           <label>
-            <strong style={{ color: "#2563eb" }}>Tunjangan</strong>
+            <strong style={{ color: "var(--color-primary)" }}>Tunjangan</strong>
             <input
               type="text"
               inputMode="numeric"
@@ -298,7 +298,7 @@ const PayrollManagementPage = () => {
             />
           </label>
           <label>
-            <strong style={{ color: "#2563eb" }}>Bonus</strong>
+            <strong style={{ color: "var(--color-primary)" }}>Bonus</strong>
             <input
               type="text"
               inputMode="numeric"
@@ -315,7 +315,7 @@ const PayrollManagementPage = () => {
             size="md" 
             onClick={() => void createPayrollItem()} 
             disabled={loading}
-            style={{ backgroundColor: "#2563eb" }}
+            style={{ backgroundColor: "var(--color-primary)" }}
           >
             <Plus size={16} />
             Buat Payroll
@@ -335,7 +335,7 @@ const PayrollManagementPage = () => {
             size="md" 
             onClick={() => void getDetail()} 
             disabled={loading}
-            style={{ borderColor: "#2563eb", color: "#2563eb" }}
+            style={{ borderColor: "var(--color-primary)", color: "var(--color-primary)" }}
           >
             <Eye size={16} />
             Lihat Detail
@@ -395,7 +395,7 @@ const PayrollManagementPage = () => {
             <div className="payroll-detail-header" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <p style={{ margin: 0, color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>ID Payroll</p>
-                <p style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600, color: '#2563eb' }}>{String(selectedDetail.id)}</p>
+                <p style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600, color: 'var(--color-primary)' }}>{String(selectedDetail.id)}</p>
               </div>
               <span className="payroll-status-pill" style={{ 
                 backgroundColor: 
@@ -439,7 +439,7 @@ const PayrollManagementPage = () => {
               </div>
             </div>
 
-            <div style={{ marginTop: '1.5rem', padding: '1rem', background: '#2563eb', borderRadius: '8px', color: 'white' }}>
+            <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'var(--color-primary)', borderRadius: '8px', color: 'white' }}>
               <p style={{ margin: 0, fontSize: '0.875rem', opacity: 0.9 }}>Total Gaji Bersih (Take Home Pay)</p>
               <p style={{ margin: '4px 0 0 0', fontSize: '1.5rem', fontWeight: 700 }}>
                 Rp {Number(selectedDetail.take_home_pay || selectedDetail.net_salary || 0).toLocaleString("id-ID")}
@@ -455,8 +455,8 @@ const PayrollManagementPage = () => {
         )}
       </Modal>
 
-      <Card className="crud-card" glass style={{ borderTop: "4px solid #2563eb" }}>
-        <h2 style={{ color: "#2563eb", marginTop: 0, display: "inline-flex", alignItems: "center", gap: "8px" }}>
+      <Card className="crud-card" glass style={{ borderTop: "4px solid var(--color-primary)" }}>
+        <h2 style={{ color: "var(--color-primary)", marginTop: 0, display: "inline-flex", alignItems: "center", gap: "8px" }}>
           <FileText size={18} />
           Daftar Payroll
         </h2>

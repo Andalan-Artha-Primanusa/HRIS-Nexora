@@ -4,23 +4,21 @@ import { ChevronRight } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import './Sidebar.css';
 
-import { menuItems } from '@/shared/config/menu';
+import { menuItems, essMenuItems } from '@/shared/config/menu';
 import type { MenuItem } from '@/shared/config/menu';
 import { useAuthStore } from '@/app/store/auth.store';
 import { filterMenuItems, fetchAllowedMenuKeys } from '@/shared/config/menuFilter';
+import { RBACUtils } from '@/shared/hooks/rbac';
 
 interface SidebarProps {
   collapsed: boolean;
 }
 
-// 🔥 cek recursive apakah ada child yg active
 const checkIsActive = (item: MenuItem, pathname: string): boolean => {
   if (item.path && pathname === item.path) return true;
-
   if (item.subItems) {
     return item.subItems.some(sub => checkIsActive(sub, pathname));
   }
-
   return false;
 };
 
@@ -34,19 +32,13 @@ const MenuItemComponent: React.FC<{
 
   const hasSubItems = item.subItems && item.subItems.length > 0;
   const Icon = item.icon;
-
-  // 🔥 ACTIVE (recursive)
   const isActive = checkIsActive(item, location.pathname);
 
-  // 🔥 AUTO EXPAND kalau ada child active
   useEffect(() => {
-    if (isActive) {
-      setIsExpanded(true);
-    }
+    if (isActive) setIsExpanded(true);
   }, [isActive]);
 
-  const paddingLeft =
-    !collapsed && level > 0 ? `${0.75 + level * 1.25}rem` : undefined;
+  const paddingLeft = !collapsed && level > 0 ? `${0.75 + level * 1.25}rem` : undefined;
 
   if (hasSubItems) {
     return (
@@ -55,7 +47,7 @@ const MenuItemComponent: React.FC<{
           className={clsx(
             'menu-item',
             'has-submenu',
-            isActive && 'active', // 🔥 parent ikut active
+            isActive && 'active',
             collapsed && 'collapsed'
           )}
           onClick={() => !collapsed && setIsExpanded(!isExpanded)}
@@ -63,30 +55,17 @@ const MenuItemComponent: React.FC<{
           style={{ paddingLeft }}
         >
           {Icon && <Icon size={20} className="menu-icon" />}
-
           {!collapsed && (
             <>
               <span className="menu-label">{item.label}</span>
-
-              <span
-                className={clsx(
-                  'menu-chevron',
-                  isExpanded && 'expanded'
-                )}
-              >
+              <span className={clsx('menu-chevron', isExpanded && 'expanded')}>
                 <ChevronRight size={16} />
               </span>
             </>
           )}
         </div>
-
         {!collapsed && (
-          <div
-            className={clsx(
-              'submenu-wrapper',
-              isExpanded && 'expanded'
-            )}
-          >
+          <div className={clsx('submenu-wrapper', isExpanded && 'expanded')}>
             <ul className="submenu-list">
               {item.subItems!.map((subItem, idx) => (
                 <MenuItemComponent
@@ -123,23 +102,31 @@ const MenuItemComponent: React.FC<{
         ) : (
           !collapsed && level > 0 && <span className="submenu-dot" />
         )}
-
         {!collapsed && <span className="menu-label">{item.label}</span>}
       </NavLink>
     </li>
   );
 };
 
+const isEmployeeOnly = (user: ReturnType<typeof useAuthStore.getState>['user']): boolean => {
+  if (!user) return false;
+  const roleNames = user.roles?.map(r => r.name?.toLowerCase()) ?? [];
+  const hasAdminAccess = roleNames.some(name =>
+    name.includes('admin') || name.includes('super') || name.includes('manager') || name.includes('hr') || name.includes('finance')
+  );
+  return !hasAdminAccess && !RBACUtils.isSuperAdmin(user);
+};
+
 export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
   const user = useAuthStore((state) => state.user);
-  const [allowedKeys, setAllowedKeys] = React.useState<string[] | undefined>();
+  const [allowedKeys, setAllowedKeys] = useState<string[] | undefined>();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!user) return;
     fetchAllowedMenuKeys(user).then(setAllowedKeys);
   }, [user]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!user) return;
     const handler = () => {
       fetchAllowedMenuKeys(user).then(setAllowedKeys);
@@ -148,23 +135,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
     return () => window.removeEventListener('menu-cache-cleared', handler);
   }, [user]);
 
-  const filteredItems = filterMenuItems(user, menuItems, allowedKeys);
-
-  // Debug logging
-  if (user) {
-    console.log("[Sidebar] User permissions:", user.permissions?.map((p) => p.name));
-    console.log("[Sidebar] User roles:", user.roles?.map((r) => r.name));
-    console.log("[Sidebar] Filtered menu items count:", filteredItems.length);
-  }
+  const employeeOnly = isEmployeeOnly(user);
+  const baseMenuItems = employeeOnly ? essMenuItems : menuItems;
+  const filteredItems = filterMenuItems(user, baseMenuItems, allowedKeys);
 
   return (
     <aside className={clsx('dashboard-sidebar', collapsed && 'collapsed')}>
       <div className="sidebar-logo">
-        <img
-          src="/logo-mahya2.png"
-          alt="MAHYA Logo"
-          className={clsx('company-logo', collapsed && 'collapsed')}
-        />
+        <div className={clsx('sidebar-brand', collapsed && 'collapsed')}>
+          {!collapsed ? (
+            <span className="brand-text">HRIS</span>
+          ) : (
+            <span className="brand-text-collapsed">H</span>
+          )}
+        </div>
       </div>
 
       <div className="sidebar-menu-container">

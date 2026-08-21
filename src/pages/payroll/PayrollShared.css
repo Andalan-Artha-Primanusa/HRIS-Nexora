@@ -1,17 +1,17 @@
-/* ========================= */
+﻿/* ========================= */
 /* Payroll Shared Styles */
 /* ========================= */
 
 .payroll-page {
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-family-heading);
 }
 
 .payroll-summary-card,
 .leave-summary-card {
-  background: #fff;
+  background: var(--color-white);
   border-radius: 16px;
   padding: 1.5rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   transition: all 0.3s ease;
 }
@@ -34,7 +34,7 @@
 .leave-summary-label {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #64748b;
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin: 0;
@@ -43,7 +43,7 @@
 .payroll-summary-subtitle,
 .leave-summary-subtitle {
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: var(--color-text-tertiary);
   margin: 0.25rem 0 0 0;
 }
 
@@ -59,36 +59,36 @@
 
 .leave-icon-blue,
 .payroll-icon-blue {
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  color: var(--color-white);
+  box-shadow: 0 4px 12px rgba(15, 159, 143, 0.35);
 }
 
 .leave-icon-green,
 .payroll-icon-green {
-  background: linear-gradient(135deg, #10b981, #059669);
-  color: #fff;
+  background: linear-gradient(135deg, var(--color-success), var(--color-success));
+  color: var(--color-white);
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
 }
 
 .leave-icon-orange,
 .payroll-icon-orange {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-  color: #fff;
+  background: linear-gradient(135deg, var(--color-warning), var(--color-warning));
+  color: var(--color-white);
   box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
 }
 
 .leave-icon-red,
 .payroll-icon-red {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
-  color: #fff;
+  background: linear-gradient(135deg, var(--color-error), var(--color-error));
+  color: var(--color-white);
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
 }
 
 .leave-icon-purple,
 .payroll-icon-purple {
   background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-  color: #fff;
+  color: var(--color-white);
   box-shadow: 0 4px 12px rgba(139, 92, 246, 0.35);
 }
 
@@ -102,22 +102,22 @@
 
 .payroll-value-blue,
 .leave-value-blue {
-  color: #2563eb;
+  color: var(--color-primary);
 }
 
 .payroll-value-green,
 .leave-value-green {
-  color: #10b981;
+  color: var(--color-success);
 }
 
 .payroll-value-orange,
 .leave-value-orange {
-  color: #f59e0b;
+  color: var(--color-warning);
 }
 
 .payroll-value-red,
 .leave-value-red {
-  color: #ef4444;
+  color: var(--color-error);
 }
 
 .payroll-value-purple,
@@ -128,7 +128,7 @@
 .payroll-summary-trend,
 .leave-summary-trend {
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: var(--color-text-tertiary);
   margin: 0;
 }
 
@@ -137,11 +137,11 @@
 /* ========================= */
 
 .filter-panel {
-  background: #f8fafc;
+  background: var(--color-surface-soft);
   border-radius: 12px;
   padding: 1.25rem;
   margin-top: 1rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
 }
 
 .filter-row {
@@ -161,7 +161,7 @@
 .filter-group label {
   font-size: 0.8rem;
   font-weight: 600;
-  color: #64748b;
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -169,23 +169,23 @@
 .filter-select {
   padding: 0.7rem 1rem;
   border-radius: 10px;
-  border: 1px solid #e2e8f0;
-  background: #fff;
-  color: #1e293b;
+  border: 1px solid var(--color-border);
+  background: var(--color-white);
+  color: var(--color-text-primary);
   font-size: 0.9rem;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-family-heading);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .filter-select:hover {
-  border-color: #2563eb;
+  border-color: var(--color-primary);
 }
 
 .filter-select:focus {
   outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.1);
 }
 
 /* ========================= */
@@ -198,7 +198,7 @@
   gap: 1rem;
   align-items: center;
   padding: 1rem;
-  background: #fff;
+  background: var(--color-white);
   border-radius: 12px;
   margin-bottom: 1rem;
 }
@@ -208,21 +208,21 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
-  background: #f8fafc;
+  background: var(--color-surface-soft);
   border-radius: 10px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   flex: 1;
   min-width: 250px;
   transition: all 0.2s ease;
 }
 
 .search-box:focus-within {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.1);
 }
 
 .search-box svg {
-  color: #94a3b8;
+  color: var(--color-text-tertiary);
   flex-shrink: 0;
 }
 
@@ -231,13 +231,13 @@
   background: transparent;
   outline: none;
   font-size: 0.9rem;
-  color: #1e293b;
+  color: var(--color-text-primary);
   width: 100%;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-family-heading);
 }
 
 .search-input::placeholder {
-  color: #94a3b8;
+  color: var(--color-text-tertiary);
 }
 
 .quick-controls {
@@ -256,26 +256,26 @@
 .sort-select {
   padding: 0.65rem 1rem;
   border-radius: 10px;
-  border: 1px solid #e2e8f0;
-  background: #fff;
-  color: #1e293b;
+  border: 1px solid var(--color-border);
+  background: var(--color-white);
+  color: var(--color-text-primary);
   font-size: 0.85rem;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-family-heading);
   cursor: pointer;
 }
 
 .sort-select:focus {
   outline: none;
-  border-color: #2563eb;
+  border-color: var(--color-primary);
 }
 
 .sort-order-btn {
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  border: 1px solid #e2e8f0;
-  background: #fff;
-  color: #64748b;
+  border: 1px solid var(--color-border);
+  background: var(--color-white);
+  color: var(--color-text-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -284,8 +284,8 @@
 }
 
 .sort-order-btn:hover {
-  border-color: #2563eb;
-  color: #2563eb;
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 .filter-btn {
@@ -294,41 +294,41 @@
   gap: 0.5rem;
   padding: 0.65rem 1rem;
   border-radius: 10px;
-  border: 1px solid #e2e8f0;
-  background: #fff;
-  color: #64748b;
+  border: 1px solid var(--color-border);
+  background: var(--color-white);
+  color: var(--color-text-secondary);
   font-size: 0.85rem;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-family-heading);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .filter-btn:hover {
-  border-color: #2563eb;
-  color: #2563eb;
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 .filter-btn.active {
-  background: #2563eb;
-  border-color: #2563eb;
-  color: #fff;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-white);
 }
 
 .btn-clear {
   padding: 0.65rem 1rem;
   border-radius: 10px;
-  border: 1px solid #ef4444;
-  background: #fff;
-  color: #ef4444;
+  border: 1px solid var(--color-error);
+  background: var(--color-white);
+  color: var(--color-error);
   font-size: 0.85rem;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-family-heading);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .btn-clear:hover {
-  background: #ef4444;
-  color: #fff;
+  background: var(--color-error);
+  color: var(--color-white);
 }
 
 /* ========================= */
@@ -337,7 +337,7 @@
 
 .payroll-table-card,
 .crud-table-card {
-  background: #fff;
+  background: var(--color-white);
   border-radius: 16px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   overflow: hidden;
@@ -352,12 +352,12 @@
 .crud-table {
   width: 100%;
   border-collapse: collapse;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-family-heading);
 }
 
 .payroll-table thead,
 .crud-table thead {
-  background: #f8fafc;
+  background: var(--color-surface-soft);
 }
 
 .payroll-table th,
@@ -365,17 +365,17 @@
   padding: 1rem;
   text-align: left;
   font-weight: 600;
-  color: #64748b;
+  color: var(--color-text-secondary);
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .payroll-table td,
 .crud-table td {
   padding: 1rem;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--color-surface-soft);
 }
 
 .payroll-table tbody tr,
@@ -385,19 +385,19 @@
 
 .payroll-table tbody tr:hover,
 .crud-table tbody tr:hover {
-  background: #f8fafc;
+  background: var(--color-surface-soft);
 }
 
 .payroll-table-id,
 .crud-table-id {
   font-weight: 600;
-  color: #1e293b;
+  color: var(--color-text-primary);
 }
 
 .payroll-table-sub,
 .crud-table-sub {
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: var(--color-text-tertiary);
   margin-top: 0.25rem;
 }
 
@@ -413,8 +413,8 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-  color: #fff;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  color: var(--color-white);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -427,8 +427,8 @@
   display: inline-block;
   padding: 0.35rem 0.75rem;
   border-radius: 999px;
-  background: #f1f5f9;
-  color: #64748b;
+  background: var(--color-surface-soft);
+  color: var(--color-text-secondary);
   font-size: 0.8rem;
   font-weight: 500;
 }
@@ -436,13 +436,13 @@
 .payroll-table-amount,
 .crud-table-amount {
   font-weight: 600;
-  color: #1e293b;
+  color: var(--color-text-primary);
   text-align: right;
 }
 
 .payroll-table-amount-green,
 .crud-table-amount-green {
-  color: #10b981;
+  color: var(--color-success);
 }
 
 /* ========================= */
@@ -454,12 +454,12 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--color-border);
 }
 
 .pagination__info {
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--color-text-secondary);
 }
 
 .pagination__controls {
@@ -473,10 +473,10 @@
 
 .payroll-hero-card,
 .hero-card {
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
   border-radius: 16px;
   padding: 2rem;
-  color: #fff;
+  color: var(--color-white);
   margin-bottom: 1.5rem;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
 }
@@ -533,10 +533,10 @@
   border-radius: 10px;
   border: 1px solid rgba(255,255,255,0.3);
   background: rgba(255,255,255,0.1);
-  color: #fff;
+  color: var(--color-white);
   font-size: 0.9rem;
   font-weight: 600;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-family-heading);
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -556,7 +556,7 @@
 /* ========================= */
 
 .analytics-title-card {
-  background: #fff;
+  background: var(--color-white);
   border-radius: 16px;
   padding: 1.5rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
@@ -573,24 +573,24 @@
   width: 48px;
   height: 48px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
-  color: #fff;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  color: var(--color-white);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 4px 12px rgba(15, 159, 143, 0.25);
 }
 
 .analytics-title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--color-text-primary);
   margin: 0;
 }
 
 .analytics-subtitle {
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--color-text-secondary);
   margin: 0.25rem 0 0 0;
 }
 

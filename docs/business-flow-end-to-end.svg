@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980" role="img" aria-labelledby="title desc">
+  <title id="title">Business Flow End-to-End HRIS</title>
+  <desc id="desc">Diagram alur bisnis HRIS dari setup sistem sampai reporting dan audit.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+    <filter id="shadow" x="-12%" y="-12%" width="124%" height="124%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#0f172a" flood-opacity="0.12"/>
+    </filter>
+    <style>
+      .bg { fill: #f8fafc; }
+      .title { font: 700 42px Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 400 20px Arial, sans-serif; fill: #475569; }
+      .section-title { font: 700 20px Arial, sans-serif; fill: #0f172a; }
+      .body { font: 400 15px Arial, sans-serif; fill: #334155; }
+      .small { font: 400 13px Arial, sans-serif; fill: #64748b; }
+      .box { stroke-width: 1.5; rx: 14; filter: url(#shadow); }
+      .flow-line { fill: none; stroke: #475569; stroke-width: 2.8; marker-end: url(#arrow); }
+      .thin-line { fill: none; stroke: #94a3b8; stroke-width: 2; marker-end: url(#arrow); }
+      .tag { font: 700 12px Arial, sans-serif; fill: #ffffff; }
+      .tag-bg { rx: 10; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1600" height="980"/>
+
+  <text x="80" y="78" class="title">Business Flow End-to-End HRIS</text>
+  <text x="82" y="116" class="subtitle">Dari setup sistem, master data, operasional employee, approval, payroll, hingga reporting dan audit.</text>
+
+  <rect x="80" y="165" width="245" height="150" class="box" fill="#ffffff" stroke="#0ea5e9"/>
+  <rect x="104" y="188" width="68" height="22" class="tag-bg" fill="#0ea5e9"/>
+  <text x="120" y="204" class="tag">STEP 1</text>
+  <text x="104" y="238" class="section-title">Setup Sistem</text>
+  <text x="104" y="268" class="body">Company settings</text>
+  <text x="104" y="292" class="body">Role, permission, menu access</text>
+
+  <rect x="405" y="165" width="245" height="150" class="box" fill="#ffffff" stroke="#22c55e"/>
+  <rect x="429" y="188" width="68" height="22" class="tag-bg" fill="#22c55e"/>
+  <text x="445" y="204" class="tag">STEP 2</text>
+  <text x="429" y="238" class="section-title">Data Induk HR</text>
+  <text x="429" y="268" class="body">Lokasi, jadwal kerja</text>
+  <text x="429" y="292" class="body">Leave policy, organisasi</text>
+
+  <rect x="730" y="165" width="245" height="150" class="box" fill="#ffffff" stroke="#f59e0b"/>
+  <rect x="754" y="188" width="68" height="22" class="tag-bg" fill="#f59e0b"/>
+  <text x="770" y="204" class="tag">STEP 3</text>
+  <text x="754" y="238" class="section-title">Rekrutmen</text>
+  <text x="754" y="268" class="body">Job opening</text>
+  <text x="754" y="292" class="body">Candidate pipeline, talent pool</text>
+
+  <rect x="1055" y="165" width="245" height="150" class="box" fill="#ffffff" stroke="#8b5cf6"/>
+  <rect x="1079" y="188" width="68" height="22" class="tag-bg" fill="#8b5cf6"/>
+  <text x="1095" y="204" class="tag">STEP 4</text>
+  <text x="1079" y="238" class="section-title">Employee Management</text>
+  <text x="1079" y="268" class="body">Create/update employee</text>
+  <text x="1079" y="292" class="body">Onboarding/offboarding</text>
+
+  <path d="M325 240 H395" class="flow-line"/>
+  <path d="M650 240 H720" class="flow-line"/>
+  <path d="M975 240 H1045" class="flow-line"/>
+
+  <rect x="1055" y="405" width="245" height="165" class="box" fill="#ffffff" stroke="#06b6d4"/>
+  <rect x="1079" y="428" width="68" height="22" class="tag-bg" fill="#06b6d4"/>
+  <text x="1095" y="444" class="tag">STEP 5</text>
+  <text x="1079" y="478" class="section-title">ESS & Operasional</text>
+  <text x="1079" y="508" class="body">Absensi, cuti, lembur</text>
+  <text x="1079" y="532" class="body">Reimbursement, asset, task</text>
+  <text x="1079" y="556" class="body">KPI, training, dokumen</text>
+
+  <rect x="730" y="405" width="245" height="165" class="box" fill="#ffffff" stroke="#ef4444"/>
+  <rect x="754" y="428" width="68" height="22" class="tag-bg" fill="#ef4444"/>
+  <text x="770" y="444" class="tag">STEP 6</text>
+  <text x="754" y="478" class="section-title">Approval</text>
+  <text x="754" y="508" class="body">Manager / HR review</text>
+  <text x="754" y="532" class="body">Approve, reject, reason</text>
+  <text x="754" y="556" class="body">Approval history</text>
+
+  <rect x="405" y="405" width="245" height="165" class="box" fill="#ffffff" stroke="#14b8a6"/>
+  <rect x="429" y="428" width="68" height="22" class="tag-bg" fill="#14b8a6"/>
+  <text x="445" y="444" class="tag">STEP 7</text>
+  <text x="429" y="478" class="section-title">Payroll & Payment</text>
+  <text x="429" y="508" class="body">Generate payroll</text>
+  <text x="429" y="532" class="body">Manager approve, HR approve</text>
+  <text x="429" y="556" class="body">Paid, slip, tax report</text>
+
+  <rect x="80" y="405" width="245" height="165" class="box" fill="#ffffff" stroke="#64748b"/>
+  <rect x="104" y="428" width="68" height="22" class="tag-bg" fill="#64748b"/>
+  <text x="120" y="444" class="tag">STEP 8</text>
+  <text x="104" y="478" class="section-title">Legal & Compliance</text>
+  <text x="104" y="508" class="body">Employment letters</text>
+  <text x="104" y="532" class="body">Assignment letters</text>
+  <text x="104" y="556" class="body">Tax, severance, policy</text>
+
+  <path d="M1177 315 V395" class="flow-line"/>
+  <path d="M1055 488 H985" class="flow-line"/>
+  <path d="M730 488 H660" class="flow-line"/>
+  <path d="M405 488 H335" class="flow-line"/>
+
+  <rect x="80" y="665" width="245" height="165" class="box" fill="#ffffff" stroke="#a855f7"/>
+  <rect x="104" y="688" width="68" height="22" class="tag-bg" fill="#a855f7"/>
+  <text x="120" y="704" class="tag">STEP 9</text>
+  <text x="104" y="738" class="section-title">Performance & Career</text>
+  <text x="104" y="768" class="body">KPI, OKR, 360 review</text>
+  <text x="104" y="792" class="body">Training, competency</text>
+  <text x="104" y="816" class="body">Promotion, succession, IDP</text>
+
+  <rect x="405" y="665" width="245" height="165" class="box" fill="#ffffff" stroke="#2563eb"/>
+  <rect x="429" y="688" width="76" height="22" class="tag-bg" fill="#2563eb"/>
+  <text x="441" y="704" class="tag">STEP 10</text>
+  <text x="429" y="738" class="section-title">Reporting</text>
+  <text x="429" y="768" class="body">Reports dashboard</text>
+  <text x="429" y="792" class="body">People analytics</text>
+  <text x="429" y="816" class="body">Attendance, payroll, compliance</text>
+
+  <rect x="730" y="665" width="245" height="165" class="box" fill="#ffffff" stroke="#0f766e"/>
+  <rect x="754" y="688" width="76" height="22" class="tag-bg" fill="#0f766e"/>
+  <text x="766" y="704" class="tag">STEP 11</text>
+  <text x="754" y="738" class="section-title">Audit & Improvement</text>
+  <text x="754" y="768" class="body">Audit log, notifications</text>
+  <text x="754" y="792" class="body">Policy update</text>
+  <text x="754" y="816" class="body">Process refinement</text>
+
+  <path d="M202 570 V655" class="flow-line"/>
+  <path d="M325 748 H395" class="flow-line"/>
+  <path d="M650 748 H720" class="flow-line"/>
+  <path d="M852 665 C852 615 1430 615 1430 240 C1430 150 1330 135 1300 180" class="thin-line"/>
+
+  <rect x="1055" y="665" width="245" height="165" class="box" fill="#fff7ed" stroke="#f97316"/>
+  <text x="1079" y="706" class="section-title">Prioritas Readiness</text>
+  <text x="1079" y="742" class="body">1. Overtime request creation</text>
+  <text x="1079" y="770" class="body">2. Employee lifecycle API</text>
+  <text x="1079" y="798" class="body">3. Role/menu guard modul sensitif</text>
+
+  <path d="M975 748 H1045" class="thin-line"/>
+
+  <rect x="80" y="890" width="1220" height="46" rx="12" fill="#e2e8f0"/>
+  <text x="104" y="919" class="small">Alur ringkas: setup sistem -> master data -> recruitment -> employee -> ESS -> approval -> payroll/dokumen -> performance -> reporting -> audit -> improvement.</text>
+</svg>

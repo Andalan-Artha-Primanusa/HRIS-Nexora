@@ -113,7 +113,7 @@
 
 .page-filters-search input:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.1);
 }
 
 .page-filters-buttons {

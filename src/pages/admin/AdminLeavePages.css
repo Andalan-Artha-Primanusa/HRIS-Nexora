@@ -1,7 +1,7 @@
-/* ─── Standardized Admin Layout ─── */
+﻿/* â”€â”€â”€ Standardized Admin Layout â”€â”€â”€ */
 .admin-leave-page {
   padding: 2.5rem;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: linear-gradient(135deg, var(--color-surface-soft) 0%, var(--color-surface-soft) 100%);
   min-height: calc(100vh - 64px);
   animation: fadeIn 0.4s ease-out;
 }
@@ -16,7 +16,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: white;
+  background: var(--color-white);
   padding: 2rem;
   border-radius: 16px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
@@ -26,18 +26,18 @@
 .admin-leave-header h1 {
   font-size: 2rem;
   font-weight: 800;
-  color: #1e293b;
+  color: var(--color-text-primary);
   letter-spacing: -0.025em;
   margin: 0 0 0.5rem 0;
 }
 
 .admin-leave-header p {
-  color: #64748b;
+  color: var(--color-text-secondary);
   font-size: 1rem;
   margin: 0;
 }
 
-/* ─── Premium Tables ─── */
+/* â”€â”€â”€ Premium Tables â”€â”€â”€ */
 .leave-type-table {
   width: 100%;
   border-collapse: separate;
@@ -45,31 +45,31 @@
 }
 
 .leave-type-table th {
-  background: #f8fafc;
+  background: var(--color-surface-soft);
   padding: 1.25rem 1.5rem;
   text-align: left;
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #94a3b8;
-  border-bottom: 1px solid #f1f5f9;
+  color: var(--color-text-tertiary);
+  border-bottom: 1px solid var(--color-surface-soft);
 }
 
 .leave-type-table td {
   padding: 1.5rem;
   vertical-align: middle;
-  border-bottom: 1px solid #f8fafc;
+  border-bottom: 1px solid var(--color-surface-soft);
   color: #334155;
   font-size: 0.95rem;
   transition: all 0.2s;
 }
 
 .leave-type-table tr:hover td {
-  background-color: #f8fbff;
+  background-color: var(--color-surface-soft);
 }
 
-/* ─── Status Badges ─── */
+/* â”€â”€â”€ Status Badges â”€â”€â”€ */
 .policy-badge {
   padding: 6px 14px;
   border-radius: 12px;
@@ -84,14 +84,14 @@
 
 .policy-badge-paid {
   background: #ecfdf5;
-  color: #059669;
-  border: 1px solid #d1fae5;
+  color: var(--color-success);
+  border: 1px solid var(--color-success-light);
 }
 
 .policy-badge-unpaid {
-  background: #fef2f2;
-  color: #dc2626;
-  border: 1px solid #fee2e2;
+  background: var(--color-error-light);
+  color: var(--color-error);
+  border: 1px solid var(--color-error-light);
 }
 
 .status-pill {
@@ -108,11 +108,11 @@
 }
 
 .status-inactive {
-  background: #f1f5f9;
-  color: #64748b;
+  background: var(--color-surface-soft);
+  color: var(--color-text-secondary);
 }
 
-/* ─── Uniform Action Buttons ─── */
+/* â”€â”€â”€ Uniform Action Buttons â”€â”€â”€ */
 .action-btn-group {
   display: flex;
   gap: 8px;
@@ -122,53 +122,54 @@
 .action-btn {
   padding: 8px;
   border-radius: 10px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  background: white;
-  color: #2563eb;
+  background: var(--color-white);
+  color: var(--color-primary);
 }
 
 .action-btn:hover {
-  background: #eff6ff;
-  border-color: #bfdbfe;
+  background: var(--color-primary-light);
+  border-color: var(--color-primary-light);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+  box-shadow: 0 4px 12px rgba(15, 159, 143, 0.12);
 }
 
 .action-btn-edit {
-  color: #2563eb;
-  background: white;
-  border-color: #e2e8f0;
+  color: var(--color-primary);
+  background: var(--color-white);
+  border-color: var(--color-border);
 }
 
 .action-btn-edit:hover {
-  background: #eff6ff;
-  border-color: #bfdbfe;
+  background: var(--color-primary-light);
+  border-color: var(--color-primary-light);
 }
 
 .action-btn-delete {
-  color: #2563eb;
-  background: white;
-  border-color: #e2e8f0;
+  color: var(--color-primary);
+  background: var(--color-white);
+  border-color: var(--color-border);
 }
 
 .action-btn-delete:hover {
-  background: #eff6ff;
-  border-color: #bfdbfe;
+  background: var(--color-primary-light);
+  border-color: var(--color-primary-light);
 }
 
 .policy-code {
-  font-family: 'Poppins', sans-serif;
-  background: #f1f5f9;
+  font-family: var(--font-family-heading);
+  background: var(--color-surface-soft);
   padding: 4px 10px;
   border-radius: 8px;
   font-size: 0.8rem;
-  color: #475569;
+  color: var(--color-text-secondary);
   font-weight: 700;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
 }
+
 

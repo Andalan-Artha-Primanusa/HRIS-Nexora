@@ -158,7 +158,7 @@ const NotificationsPage = () => {
           <p>Lihat notifikasi akun Anda, tandai satu notifikasi atau semua sekaligus sebagai sudah dibaca.</p>
         </div>
         <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={() => void loadData()} disabled={loading || processingId !== null} style={{ borderColor: "#2563eb", color: "#2563eb" }}>
+          <Button variant="outline" size="md" onClick={() => void loadData()} disabled={loading || processingId !== null} style={{ borderColor: "var(--color-primary)", color: "var(--color-primary)" }}>
             <RefreshCw size={16} />
             {loading ? "Memuat..." : "Segarkan"}
           </Button>

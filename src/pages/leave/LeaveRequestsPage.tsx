@@ -166,10 +166,10 @@ const LeaveRequestsPage = () => {
           <div className="hero-content">
             <div className="hero-badge">
               <Calendar size={16} />
-              <span>Pusat Cuti</span>
+              <span>Leave Center</span>
             </div>
-            <h1 className="hero-title">Manajemen Pengajuan Cuti</h1>
-            <p className="hero-subtitle">Kelola permohonan izin dan cuti karyawan dalam satu dasbor terpadu.</p>
+            <h1 className="hero-title">Leave Requests</h1>
+            <p className="hero-subtitle">Manage employee leave requests and approvals in one unified dashboard.</p>
           </div>
           <div className="hero-actions">
             <button className="btn-outline" onClick={() => void loadLeaves()}>

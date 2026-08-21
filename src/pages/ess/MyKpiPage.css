@@ -1,5 +1,5 @@
-.my-kpi-table-area {
-  border: 1px solid #e2e8f0;
+﻿.my-kpi-table-area {
+  border: 1px solid var(--color-border);
   border-radius: 16px;
   box-shadow: var(--shadow-sm);
   overflow: hidden;
@@ -24,3 +24,4 @@
     padding: 2rem 1rem;
   }
 }
+

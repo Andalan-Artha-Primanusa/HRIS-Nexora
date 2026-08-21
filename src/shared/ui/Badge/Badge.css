@@ -22,70 +22,61 @@
    BADGE VARIANTS (COLOR)
    ====================================== */
 
-/* Primary Blue */
+/* Primary Blue / Default Theme */
 .badge.badge-primary {
-  background-color: #dbeafe;
-  color: #0c4a6e;
+  background-color: var(--color-primary-light);
+  color: var(--color-primary-dark);
 }
 
 .badge.badge-primary-solid {
-  background-color: var(--color-primary);
-  color: var(--color-text-inverse);
+  background-color: var(--color-primary-light);
+  color: var(--color-primary-dark);
 }
 
 /* Success Green */
 .badge.badge-success {
   background-color: var(--color-success-light);
-  color: #065f46;
+  color: var(--color-success);
 }
 
 .badge.badge-success-solid {
-  background-color: var(--color-success);
-  color: var(--color-text-inverse);
+  background-color: var(--color-success-light);
+  color: var(--color-success);
 }
 
 /* Error Red */
 .badge.badge-error {
   background-color: var(--color-error-light);
-  color: #7f1d1d;
+  color: var(--color-error);
 }
 
 .badge.badge-error-solid {
-  background-color: var(--color-error);
-  color: var(--color-text-inverse);
+  background-color: var(--color-error-light);
+  color: var(--color-error);
 }
 
 /* Warning Yellow */
 .badge.badge-warning {
   background-color: var(--color-warning-light);
-  color: #78350f;
+  color: var(--color-warning);
 }
 
 .badge.badge-warning-solid {
-  background-color: var(--color-warning);
-  color: var(--color-text-inverse);
+  background-color: var(--color-warning-light);
+  color: var(--color-warning);
 }
 
-/* Info Cyan */
-.badge.badge-info {
-  background-color: #cffafe;
-  color: #164e63;
-}
-
-.badge.badge-info-solid {
-  background-color: #06b6d4;
-  color: var(--color-text-inverse);
-}
-
-/* Gray (default) */
-.badge.badge-default {
-  background-color: var(--color-border);
+/* Info / Draft / Default */
+.badge.badge-info, .badge.badge-default {
+  background-color: var(--color-background);
   color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
 }
 
-.badge.badge-default-solid {
-  background-color: #9ca3af;
-  color: var(--color-text-inverse);
+.badge.badge-info-solid, .badge.badge-default-solid {
+  background-color: var(--color-background);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
 }
 
 /* ========================================

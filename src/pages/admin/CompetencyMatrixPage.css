@@ -1,12 +1,12 @@
-.competency-page {
-  --primary-color: #2563eb;
-  --success-color: #10b981;
-  --warning-color: #f59e0b;
-  --danger-color: #ef4444;
+﻿.competency-page {
+  --primary-color: var(--color-primary);
+  --success-color: var(--color-success);
+  --warning-color: var(--color-warning);
+  --danger-color: var(--color-error);
   --purple-color: #8b5cf6;
-  --text-primary: #1e293b;
-  --text-secondary: #64748b;
-  --border-color: #e2e8f0;
+  --text-primary: var(--color-text-primary);
+  --text-secondary: var(--color-text-secondary);
+  --border-color: var(--color-border);
 }
 
 .loading-state {
@@ -35,7 +35,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f1f5f9;
+  background: var(--color-surface-soft);
   border-radius: 16px;
   color: var(--text-secondary);
 }
@@ -61,7 +61,7 @@
 .level-filter {
   padding: 8px 14px;
   border: 1px solid var(--border-color);
-  background: white;
+  background: var(--color-white);
   color: var(--text-secondary);
   border-radius: 999px;
   font-size: 0.85rem;
@@ -78,7 +78,7 @@
 .level-filter.active {
   background: var(--primary-color);
   border-color: var(--primary-color);
-  color: white;
+  color: var(--color-white);
 }
 
 .header-actions {

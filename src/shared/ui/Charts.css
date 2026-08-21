@@ -4,7 +4,7 @@
    ============================================ */
 
 :root {
-  --chart-primary: #2563eb;
+  --chart-primary: #0F9F8F;
   --chart-secondary: #10b981;
   --chart-tertiary: #f59e0b;
   --chart-danger: #ef4444;
@@ -13,9 +13,9 @@
   --chart-pink: #ec4899;
   --chart-bg: #ffffff;
   --chart-bg-light: #f8faff;
-  --chart-text: #1e40af;
-  --chart-text-light: #3b82f6;
-  --chart-border: rgba(37, 99, 235, 0.15);
+  --chart-text: #075E54;
+  --chart-text-light: #0F9F8F;
+  --chart-border: rgba(15, 159, 143, 0.15);
 }
 
 /* ============================================
@@ -34,7 +34,7 @@
   border-radius: 12px;
   background: var(--chart-bg);
   border: 1px solid var(--chart-border);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
+  box-shadow: 0 4px 12px rgba(15, 159, 143, 0.08);
   overflow: hidden;
   transition: all 0.3s ease;
   position: relative;
@@ -47,7 +47,7 @@
   right: 0;
   width: 140px;
   height: 140px;
-  background: radial-gradient(circle, rgba(37, 99, 235, 0.1) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(15, 159, 143, 0.1) 0%, transparent 70%);
   transform: translate(30%, -30%);
   pointer-events: none;
   border-radius: 50%;
@@ -55,7 +55,7 @@
 
 .chart-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 12px 24px rgba(15, 159, 143, 0.15);
   border-color: #93c5fd;
 }
 
@@ -93,7 +93,7 @@
   height: 0.5rem;
   border-radius: 50%;
   background: var(--chart-primary);
-  box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 6px rgba(15, 159, 143, 0.1);
 }
 
 .chart-subtitle {
@@ -144,11 +144,11 @@
 }
 
 .recharts-cartesian-axis line {
-  stroke: rgba(37, 99, 235, 0.1);
+  stroke: rgba(15, 159, 143, 0.1);
 }
 
 .recharts-cartesian-grid line {
-  stroke: rgba(37, 99, 235, 0.08);
+  stroke: rgba(15, 159, 143, 0.08);
   stroke-dasharray: 4px 4px;
 }
 
@@ -222,7 +222,7 @@
   border-radius: 12px;
   background: var(--chart-bg);
   border: 1px solid var(--chart-border);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
+  box-shadow: 0 4px 12px rgba(15, 159, 143, 0.08);
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -235,14 +235,14 @@
   right: -20px;
   width: 180px;
   height: 180px;
-  background: radial-gradient(circle, rgba(37, 99, 235, 0.15) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(15, 159, 143, 0.15) 0%, transparent 70%);
   border-radius: 50%;
   pointer-events: none;
 }
 
 .metric-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 12px 24px rgba(15, 159, 143, 0.15);
   border-color: #93c5fd;
 }
 

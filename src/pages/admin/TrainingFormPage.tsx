@@ -156,7 +156,7 @@ const TrainingFormPage: React.FC = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           <Card glass style={{ padding: '2rem' }}>
             <h3 style={{ margin: '0 0 1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <BookOpen size={20} color="#2563eb" /> Program Details
+              <BookOpen size={20} color="var(--color-primary)" /> Program Details
             </h3>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -192,7 +192,7 @@ const TrainingFormPage: React.FC = () => {
 
           <Card glass style={{ padding: '2rem' }}>
             <h3 style={{ margin: '0 0 1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <Calendar size={20} color="#2563eb" /> Schedule & Provider
+              <Calendar size={20} color="var(--color-primary)" /> Schedule & Provider
             </h3>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -235,7 +235,7 @@ const TrainingFormPage: React.FC = () => {
 
           <Card glass style={{ padding: '2rem' }}>
             <h3 style={{ margin: '0 0 1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <Save size={20} color="#2563eb" /> Budget & Status
+              <Save size={20} color="var(--color-primary)" /> Budget & Status
             </h3>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>

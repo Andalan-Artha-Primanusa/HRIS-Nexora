@@ -18,7 +18,7 @@
 .reimb-title-section h1 {
   font-size: 2rem;
   font-weight: 800;
-  color: #1e3a8a;
+  color: #075E54;
   margin: 0;
   letter-spacing: -0.5px;
 }
@@ -40,7 +40,7 @@
   margin-bottom: 0.5rem;
 }
 
-.reimb-badge-ess { background: rgba(37, 99, 235, 0.1); color: #2563eb; }
+.reimb-badge-ess { background: rgba(15, 159, 143, 0.1); color: #0F9F8F; }
 .reimb-badge-admin { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
 
 /* Status Badges */
@@ -55,7 +55,7 @@
 }
 
 .status-draft { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
-.status-submitted { background: #eff6ff; color: #2563eb; border: 1px solid #dbeafe; }
+.status-submitted { background: #DDF5F1; color: #0F9F8F; border: 1px solid #DDF5F1; }
 .status-approved { background: #ecfdf5; color: #10b981; border: 1px solid #d1fae5; }
 .status-rejected { background: #fef2f2; color: #ef4444; border: 1px solid #fee2e2; }
 .status-paid { background: #f5f3ff; color: #8b5cf6; border: 1px solid #ede9fe; }
@@ -66,9 +66,9 @@
   border-radius: 6px;
   font-size: 0.75rem;
   font-weight: 500;
-  background: rgba(37, 99, 235, 0.05);
+  background: rgba(15, 159, 143, 0.05);
   color: #475569;
-  border: 1px solid rgba(37, 99, 235, 0.1);
+  border: 1px solid rgba(15, 159, 143, 0.1);
 }
 
 /* Stats Grid */
@@ -82,8 +82,8 @@
   padding: 1.25rem;
   border-radius: 18px;
   background: white;
-  border: 1px solid rgba(37, 99, 235, 0.1);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.03);
+  border: 1px solid rgba(15, 159, 143, 0.1);
+  box-shadow: 0 4px 12px rgba(15, 159, 143, 0.03);
   transition: transform 0.2s;
 }
 
@@ -100,7 +100,7 @@
 .reimb-stat-value {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1e3a8a;
+  color: #075E54;
   margin: 0.5rem 0;
 }
 
@@ -156,8 +156,8 @@ textarea.form-control {
 }
 
 .form-control:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  border-color: #0F9F8F;
+  box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.1);
 }
 
 /* Details List */
@@ -181,7 +181,7 @@ textarea.form-control {
 
 .detail-value {
   font-weight: 600;
-  color: #1e3a8a;
+  color: #075E54;
   text-align: right;
 }
 
@@ -215,10 +215,10 @@ textarea.form-control {
   gap: 0.75rem;
   min-height: 64px;
   padding: 0.75rem;
-  border: 1px dashed #bfdbfe;
+  border: 1px dashed #B5EDE7;
   border-radius: 12px;
   background: #f8fbff;
-  color: #2563eb;
+  color: #0F9F8F;
   overflow: hidden;
 }
 
@@ -229,7 +229,7 @@ textarea.form-control {
 
 .receipt-upload-box strong {
   font-size: 0.9rem;
-  color: #1e3a8a;
+  color: #075E54;
 }
 
 .receipt-upload-box span {
@@ -271,7 +271,7 @@ textarea.form-control {
   transform: translateY(-1px);
 }
 
-.btn-action-edit:hover { background: #eff6ff; color: #2563eb; border-color: #dbeafe; }
+.btn-action-edit:hover { background: #DDF5F1; color: #0F9F8F; border-color: #DDF5F1; }
 .btn-action-delete:hover { background: #fef2f2; color: #ef4444; border-color: #fee2e2; }
 .btn-action-view:hover { background: #f5f3ff; color: #8b5cf6; border-color: #ede9fe; }
 

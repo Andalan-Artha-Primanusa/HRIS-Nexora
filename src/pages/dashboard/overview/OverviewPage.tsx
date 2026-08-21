@@ -206,7 +206,7 @@ const OverviewPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const chartColors = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+  const chartColors = ['var(--color-primary)', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
   const summaryCards = [
     {
@@ -398,8 +398,8 @@ const OverviewPage: React.FC = () => {
                 style={{ width: '48px', height: '48px', border: '2px solid rgba(255,255,255,0.2)' }}
               />
               <div>
-                <h1 className="hero-title">Halo, {user?.name?.split(' ')[0] || 'User'}!</h1>
-                <p className="hero-subtitle">Berikut ringkasan informasi Anda hari ini.</p>
+                <h1 className="hero-title">Good Morning, {user?.name?.split(' ')[0] || 'HR Team'}!</h1>
+                <p className="hero-subtitle">Here’s an overview of your workforce today.</p>
               </div>
             </div>
           </div>
@@ -440,7 +440,7 @@ const OverviewPage: React.FC = () => {
             </div>
             <div className="metric-value">12 Hari</div>
             <div className="metric-change">
-              <span style={{ color: '#2563eb' }}>Lihat rincian saldo</span>
+              <span style={{ color: 'var(--color-primary)' }}>Lihat rincian saldo</span>
             </div>
           </Card>
 
@@ -600,8 +600,8 @@ const OverviewPage: React.FC = () => {
                   <AreaChart data={attendanceData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorPresent" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+                        <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0} />
                       </linearGradient>
                       <linearGradient id="colorAbsent" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
@@ -621,7 +621,7 @@ const OverviewPage: React.FC = () => {
                       labelStyle={{ color: '#0f172a', fontWeight: 600 }}
                     />
                     <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                    <Area type="monotone" dataKey="present" stroke="#2563eb" strokeWidth={2} fillOpacity={1} fill="url(#colorPresent)" name="Hadir" />
+                    <Area type="monotone" dataKey="present" stroke="var(--color-primary)" strokeWidth={2} fillOpacity={1} fill="url(#colorPresent)" name="Hadir" />
                     <Area type="monotone" dataKey="absent" stroke="#ef4444" strokeWidth={2} fillOpacity={1} fill="url(#colorAbsent)" name="Tidak Hadir" />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -655,7 +655,7 @@ const OverviewPage: React.FC = () => {
                       labelStyle={{ color: '#0f172a', fontWeight: 600 }}
                       cursor={{ fill: 'rgba(37, 99, 235, 0.05)' }}
                     />
-                    <Bar dataKey="count" fill="#2563eb" radius={[8, 8, 0, 0]} name="Jumlah Karyawan" />
+                    <Bar dataKey="count" fill="var(--color-primary)" radius={[8, 8, 0, 0]} name="Jumlah Karyawan" />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
@@ -727,7 +727,7 @@ const OverviewPage: React.FC = () => {
                       labelLine={true}
                       label={({ name, value }) => `${name}: ${value}`}
                       outerRadius={90}
-                      fill="#2563eb"
+                      fill="var(--color-primary)"
                       dataKey="value"
                     >
                       {leaveTypeData.map((_, index) => (
@@ -748,3 +748,4 @@ const OverviewPage: React.FC = () => {
 };
 
 export default OverviewPage;
+

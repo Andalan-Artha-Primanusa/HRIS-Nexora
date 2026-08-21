@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Menu, Bell, Sun, Moon, LogOut, Settings, UserCircle, RotateCw } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { ChevronRight } from 'lucide-react';
 import { useAuthStore } from '@/app/store/auth.store';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useRefreshUser } from '@/features/auth/hooks/useRefreshUser';
@@ -143,6 +144,13 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
     }
   };
 
+  const location = useLocation();
+  const pathnames = location.pathname.split('/').filter((x) => x);
+
+  const getBreadcrumbLabel = (path: string) => {
+    return path.charAt(0).toUpperCase() + path.slice(1).replace(/-/g, ' ');
+  };
+
   return (
     <header className="dashboard-header">
       <div className="header-left">
@@ -151,8 +159,26 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
           onClick={toggleSidebar}
           aria-label="Toggle Sidebar"
         >
-          <Menu size={40} />
+          <Menu size={24} />
         </button>
+        <div className="header-breadcrumb">
+          <span className="breadcrumb-item" onClick={() => navigate('/')}>Home</span>
+          {pathnames.map((value, index) => {
+            const isLast = index === pathnames.length - 1;
+            const to = `/${pathnames.slice(0, index + 1).join('/')}`;
+            return (
+              <React.Fragment key={to}>
+                <ChevronRight size={16} className="breadcrumb-separator" />
+                <span 
+                  className={`breadcrumb-item ${isLast ? 'active' : ''}`}
+                  onClick={() => !isLast && navigate(to)}
+                >
+                  {getBreadcrumbLabel(value)}
+                </span>
+              </React.Fragment>
+            );
+          })}
+        </div>
       </div>
       
       <div className="header-right">
@@ -165,7 +191,7 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
             aria-label="Refresh user data"
             title="Refresh user data & roles"
           >
-            <RotateCw size={24} className={isRefreshing ? 'rotating header-action-icon' : 'header-action-icon'} />
+            <RotateCw size={24} className={isRefreshing ? 'rotating' : ''} />
           </button>
 
           <button
@@ -174,7 +200,7 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
             title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
             onClick={() => setIsDarkMode((prev) => !prev)}
           >
-            {isDarkMode ? <Moon size={24} className="header-action-icon" /> : <Sun size={24} className="header-action-icon" />}
+            {isDarkMode ? <Moon size={24} /> : <Sun size={24} />}
           </button>
           
           <div className="notification-wrapper">
@@ -183,7 +209,7 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
               aria-label="Notifications"
               onClick={() => setOpenNotifications(!openNotifications)}
             >
-              <Bell size={24} className="header-action-icon" />
+              <Bell size={24} />
               {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
             </button>
 
@@ -195,7 +221,7 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
                     {unreadCount > 0 && (
                       <button 
                         onClick={() => void markAllAsRead()}
-                        style={{ background: 'none', border: 'none', color: '#2563eb', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}
+                        style={{ background: 'none', border: 'none', color: 'var(--color-primary)', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}
                       >
                         Tandai semua dibaca
                       </button>

@@ -1,5 +1,5 @@
-.payroll-process-page {
-  font-family: 'Poppins', sans-serif;
+﻿.payroll-process-page {
+  font-family: var(--font-family-heading);
 }
 
 .payroll-tabs {
@@ -8,7 +8,7 @@
   gap: 0.75rem;
   background: rgba(255, 255, 255, 0.82);
   border-radius: 18px;
-  border: 1px solid rgba(37, 99, 235, 0.16);
+  border: 1px solid rgba(15, 159, 143, 0.16);
   padding: 0.65rem;
   margin-bottom: 1.5rem;
   box-shadow: 0 14px 34px rgba(15, 23, 42, 0.05);
@@ -27,16 +27,16 @@
   cursor: pointer;
   font-size: 0.875rem;
   font-weight: 700;
-  font-family: 'Poppins', sans-serif;
-  white-space: nowrap;
+  font-family: var(--font-family-heading);
+  var(--color-white)-space: nowrap;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .payroll-tab.active {
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
-  color: #fff;
-  border-color: rgba(37, 99, 235, 0.28);
-  box-shadow: 0 12px 26px rgba(37, 99, 235, 0.24);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  color: var(--color-white);
+  border-color: rgba(15, 159, 143, 0.28);
+  box-shadow: 0 12px 26px rgba(15, 159, 143, 0.24);
 }
 
 .payroll-tab.active::after {
@@ -52,27 +52,27 @@
 
 .payroll-tab svg {
   flex: 0 0 auto;
-  color: #64748b;
+  color: var(--color-text-secondary);
   transition: color 0.2s ease;
 }
 
 .payroll-tab.active svg {
-  color: #fff;
+  color: var(--color-white);
 }
 
 .payroll-tab:not(.active) {
   background: transparent;
-  color: #475569;
+  color: var(--color-text-secondary);
 }
 
 .payroll-tab:not(.active):hover {
-  background: rgba(37, 99, 235, 0.06);
-  border-color: rgba(37, 99, 235, 0.12);
-  color: #2563eb;
+  background: rgba(15, 159, 143, 0.06);
+  border-color: rgba(15, 159, 143, 0.12);
+  color: var(--color-primary);
 }
 
 .payroll-tab:not(.active):hover svg {
-  color: #2563eb;
+  color: var(--color-primary);
 }
 
 .payroll-summary-grid {
@@ -83,32 +83,32 @@
 }
 
 .payroll-summary-card {
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
   border-radius: 16px;
   padding: 1.5rem;
-  border-top: 3px solid #3b82f6;
+  border-top: 3px solid var(--color-primary);
   transition: box-shadow 0.2s;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-family-heading);
 }
 
 .payroll-summary-card:hover {
-  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.08);
+  box-shadow: 0 8px 24px rgba(15, 159, 143, 0.08);
 }
 
 .payroll-summary-card .label {
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--color-text-secondary);
   font-weight: 500;
   margin-bottom: 0.25rem;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-family-heading);
 }
 
 .payroll-summary-card .subtitle {
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: var(--color-text-tertiary);
   margin: 0;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-family-heading);
 }
 
 .payroll-summary-card .value-row {
@@ -122,7 +122,7 @@
   font-size: 1.75rem;
   font-weight: 700;
   line-height: 1.2;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-family-heading);
 }
 
 .payroll-summary-card .icon-box {
@@ -133,17 +133,17 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: rgba(59, 130, 246, 0.08) !important;
-  color: #2563eb !important;
+  background: rgba(15, 159, 143, 0.08) !important;
+  color: var(--color-primary) !important;
 }
 
 .payroll-summary-card .change-text {
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--color-text-secondary);
   margin: 0;
   padding-top: 1rem;
-  border-top: 1px solid #e2e8f0;
-  font-family: 'Poppins', sans-serif;
+  border-top: 1px solid var(--color-border);
+  font-family: var(--font-family-heading);
 }
 
 .payroll-config-grid {
@@ -154,22 +154,22 @@
 }
 
 .payroll-table-card {
-  background: #fff;
+  background: var(--color-white);
   border-radius: 16px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   overflow: hidden;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-family-heading);
 }
 
 .payroll-section-title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--color-text-primary);
   margin: 0 0 1.25rem;
   display: flex;
   align-items: center;
   gap: 8px;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-family-heading);
 }
 
 @media (max-width: 768px) {
@@ -183,3 +183,4 @@
     padding: 0.85rem 1rem;
   }
 }
+

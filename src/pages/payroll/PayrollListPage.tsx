@@ -303,7 +303,7 @@ const PayrollListPage = () => {
       )}
       <div className="crud-actions payroll-form-actions">
         <button className="btn-outline" onClick={() => setView("list")} disabled={loading}>Batal</button>
-        <button className="btn-primary" onClick={mode === "create" ? handleCreate : mode === "edit" ? handleUpdate : handleDelete} disabled={loading} style={{ background: mode === "delete" ? "#ef4444" : "#2563eb", color: "#fff", border: "none", padding: "0.75rem 2rem", borderRadius: 12, fontWeight: 700 }}>
+        <button className="btn-primary" onClick={mode === "create" ? handleCreate : mode === "edit" ? handleUpdate : handleDelete} disabled={loading} style={{ background: mode === "delete" ? "#ef4444" : "var(--color-primary)", color: "#fff", border: "none", padding: "0.75rem 2rem", borderRadius: 12, fontWeight: 700 }}>
           {loading ? "Memproses..." : mode === "create" ? "Buat Payroll" : mode === "edit" ? "Simpan" : "Hapus Permanen"}
         </button>
       </div>
@@ -486,7 +486,7 @@ const PayrollListPage = () => {
         footer={
           <>
             <button className="modal-btn-cancel" onClick={() => setExportModal(false)}>Batal</button>
-            <button className="modal-btn-confirm" onClick={handleExport} disabled={exportLoading} style={{ background: "linear-gradient(135deg, #2563eb, #1d4ed8)" }}>
+            <button className="modal-btn-confirm" onClick={handleExport} disabled={exportLoading} style={{ background: "linear-gradient(135deg, var(--color-primary), #1d4ed8)" }}>
               {exportLoading ? <><RefreshCw size={16} className="animate-spin" /> Memproses...</> : <><Download size={16} /> Download CSV</>}
             </button>
           </>
@@ -496,9 +496,9 @@ const PayrollListPage = () => {
         <label className="modal-completion-label">Tipe Export</label>
         <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 8 }}>
           {([["bca", "BCA KlikPay CSV", "Format siap import ke BCA KlikPay", Banknote], ["summary", "Summary Lengkap", "Detail gaji, tunjangan, potongan, BPJS, PPh21", FileText]] as const).map(([key, title, desc, Icon]) => (
-            <label key={key} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderRadius: 12, border: exportType === key ? "2px solid #2563eb" : "2px solid #e2e8f0", background: exportType === key ? "#eff6ff" : "#fff", cursor: "pointer" }} onClick={() => setExportType(key)}>
-              <input type="radio" name="exportTypeList" checked={exportType === key} onChange={() => setExportType(key)} style={{ accentColor: "#2563eb" }} />
-              <Icon size={20} color="#2563eb" />
+            <label key={key} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderRadius: 12, border: exportType === key ? "2px solid var(--color-primary)" : "2px solid #e2e8f0", background: exportType === key ? "#eff6ff" : "#fff", cursor: "pointer" }} onClick={() => setExportType(key)}>
+              <input type="radio" name="exportTypeList" checked={exportType === key} onChange={() => setExportType(key)} style={{ accentColor: "var(--color-primary)" }} />
+              <Icon size={20} color="var(--color-primary)" />
               <div><div style={{ fontWeight: 600, color: "#1e293b" }}>{title}</div><div style={{ fontSize: "0.8rem", color: "#64748b" }}>{desc}</div></div>
             </label>
           ))}

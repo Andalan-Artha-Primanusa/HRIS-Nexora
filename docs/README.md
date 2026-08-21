@@ -18,9 +18,10 @@ Jika Anda baru membuka folder ini, baca dalam urutan berikut:
 |---|---|---|
 | 1 | [`master-production-readiness-summary.md`](./master-production-readiness-summary.md) | Ringkasan paling cepat untuk melihat kondisi aplikasi secara umum, temuan utama, dan prioritas besar sebelum production. |
 | 2 | [`frontend-flow-map.md`](./frontend-flow-map.md) | Peta seluruh modul frontend: route, halaman, sub-flow, service API, dan modul yang punya approval. |
-| 3 | [`role-flow-matrix.md`](./role-flow-matrix.md) | Matriks hak akses per role: employee, manager, HR, admin, super admin. |
-| 4 | [`critical-business-flows-e2e-audit.md`](./critical-business-flows-e2e-audit.md) | Audit mendalam 5 flow bisnis paling kritis secara end-to-end berdasarkan role. |
-| 5 | [`role-test-case-matrix.md`](./role-test-case-matrix.md) | Checklist QA untuk menguji flow berdasarkan role dan akses langsung via URL. |
+| 3 | [`business-flow-end-to-end.md`](./business-flow-end-to-end.md) | Flow bisnis HRIS end-to-end dari setup sistem sampai reporting, audit, dan continuous improvement. |
+| 4 | [`role-flow-matrix.md`](./role-flow-matrix.md) | Matriks hak akses per role: employee, manager, HR, admin, super admin. |
+| 5 | [`critical-business-flows-e2e-audit.md`](./critical-business-flows-e2e-audit.md) | Audit mendalam 5 flow bisnis paling kritis secara end-to-end berdasarkan role. |
+| 6 | [`role-test-case-matrix.md`](./role-test-case-matrix.md) | Checklist QA untuk menguji flow berdasarkan role dan akses langsung via URL. |
 
 Setelah lima dokumen utama di atas dibaca, lanjutkan ke audit detail per gelombang bila dibutuhkan.
 
@@ -70,7 +71,27 @@ Dokumen ini berguna untuk:
 
 ---
 
-### 3. Matriks role dan akses
+### 3. Flow bisnis end-to-end
+
+#### [`business-flow-end-to-end.md`](./business-flow-end-to-end.md)
+
+Berisi:
+
+- gambaran besar flow HRIS dari setup sistem sampai reporting,
+- flow lintas role: employee, manager, HR/admin, super admin,
+- diagram Mermaid untuk alur utama,
+- status kesiapan flow saat ini,
+- prioritas end-to-end sebelum production.
+
+Dokumen ini berguna untuk:
+
+- menyamakan pemahaman PM, QA, frontend, backend, dan stakeholder,
+- menjelaskan flow bisnis tanpa harus membaca route satu per satu,
+- menjadi bahan awal diskusi UAT dan sign-off proses.
+
+---
+
+### 4. Matriks role dan akses
 
 #### [`role-flow-matrix.md`](./role-flow-matrix.md)
 
@@ -92,7 +113,7 @@ Dokumen ini penting untuk:
 
 ---
 
-### 4. Audit 5 flow bisnis paling kritis
+### 5. Audit 5 flow bisnis paling kritis
 
 #### [`critical-business-flows-e2e-audit.md`](./critical-business-flows-e2e-audit.md)
 
@@ -116,7 +137,7 @@ Ini adalah dokumen paling penting untuk diskusi teknis lintas FE, BE, QA, dan PM
 
 ---
 
-### 5. Matriks test case berdasarkan role
+### 6. Matriks test case berdasarkan role
 
 #### [`role-test-case-matrix.md`](./role-test-case-matrix.md)
 

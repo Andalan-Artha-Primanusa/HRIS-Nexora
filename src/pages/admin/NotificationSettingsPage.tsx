@@ -267,7 +267,7 @@ const NotificationSettingsPage: React.FC = () => {
         <div className="wuw-table-area">
           {loading ? (
             <div className="settings-loading-state" style={{ padding: '5rem 0' }}>
-              <RefreshCw size={48} className="animate-spin" color="#2563eb" />
+              <RefreshCw size={48} className="animate-spin" color="var(--color-primary)" />
               <p style={{ marginTop: '1rem', color: '#64748b' }}>Sinkronisasi preferensi...</p>
             </div>
           ) : (

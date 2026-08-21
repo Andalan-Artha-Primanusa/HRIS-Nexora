@@ -63,7 +63,7 @@ const WorkScheduleEditPage = () => {
   if (fetching) {
     return (
       <div className="work-schedule-form-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
-        <Loader2 className="animate-spin" size={48} color="#2563eb" />
+        <Loader2 className="animate-spin" size={48} color="var(--color-primary)" />
       </div>
     );
   }

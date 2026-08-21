@@ -1,8 +1,8 @@
-import axios from "axios";
+﻿import axios from "axios";
 import { parseApiError } from "./errorHandler";
 import { showToast } from "../ui/toast";
 
-// 🔒 SECURITY: API URL from environment, with fallback for development
+// ðŸ”’ SECURITY: API URL from environment, with fallback for development
 const defaultBaseUrl = "https://moccasin-crab-693879.hostingersite.com/api";
 const baseURL = import.meta.env.VITE_API_URL || defaultBaseUrl;
 
@@ -16,16 +16,16 @@ export const api = axios.create({
   headers: {
     Accept: "application/json",
     "Content-Type": "application/json",
-    // 🔒 SECURITY: Add security headers
+    // ðŸ”’ SECURITY: Add security headers
     "X-Requested-With": "XMLHttpRequest",
   },
-  // 🔒 SECURITY: Set timeout to prevent hanging requests
+  // ðŸ”’ SECURITY: Set timeout to prevent hanging requests
   timeout: parseInt(import.meta.env.VITE_API_TIMEOUT || "30000", 10),
-  // 🔒 SECURITY: Don't send credentials unless explicitly configured per endpoint
+  // ðŸ”’ SECURITY: Don't send credentials unless explicitly configured per endpoint
   withCredentials: false,
 });
 
-// 🔥 Inject token otomatis
+// ðŸ”¥ Inject token otomatis
 api.interceptors.request.use((config) => {
   const token = sessionStorage.getItem("token");
 
@@ -42,7 +42,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// 🚀 Global Response Interceptor (Error Handling Only — auth level)
+// ðŸš€ Global Response Interceptor (Error Handling Only â€” auth level)
 api.interceptors.response.use(
   (response) => {
     return response;
@@ -55,7 +55,7 @@ api.interceptors.response.use(
     if (parsedError.type === "unauthorized") {
       showToast(parsedError.message, "error");
       
-      // 🔒 SECURITY: Clear sensitive data on auth failure
+      // ðŸ”’ SECURITY: Clear sensitive data on auth failure
       sessionStorage.removeItem("token");
       sessionStorage.removeItem("user");
       
@@ -72,3 +72,4 @@ api.interceptors.response.use(
     return Promise.reject(parsedError);
   }
 );
+

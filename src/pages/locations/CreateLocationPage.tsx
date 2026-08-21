@@ -157,7 +157,7 @@ const CreateLocationPage = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             <Card glass style={{ padding: '2.5rem', borderRadius: '32px' }}>
               <h3 style={{ margin: '0 0 2rem', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '1.25rem', fontWeight: 800, color: '#1e3a8a' }}>
-                 <MapPin size={24} color="#2563eb" /> Detail Lokasi
+                 <MapPin size={24} color="var(--color-primary)" /> Detail Lokasi
               </h3>
               
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
@@ -309,7 +309,7 @@ const CreateLocationPage = () => {
                     href={`https://maps.google.com/?q=${formData.latitude},${formData.longitude}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', background: '#eff6ff', color: '#2563eb', borderRadius: '12px', fontWeight: 700, textDecoration: 'none' }}
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', background: '#eff6ff', color: 'var(--color-primary)', borderRadius: '12px', fontWeight: 700, textDecoration: 'none' }}
                   >
                     Buka di Google Maps →
                   </a>

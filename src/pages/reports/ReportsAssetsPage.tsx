@@ -20,7 +20,7 @@ const getStr = (rec: Rec, keys: string[]) => { for (const k of keys) { const v =
 const getNum = (v: unknown) => { if (typeof v === 'number' && Number.isFinite(v)) return v; if (typeof v === 'string') { const p = Number(v); if (Number.isFinite(p)) return p; } return 0; };
 
 const TT = { contentStyle: { backgroundColor:'#fff', border:'1px solid #dbeafe', borderRadius:'8px' }, labelStyle: { color:'#1e40af', fontWeight:'bold' as const } };
-const COLORS = ['#2563eb','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4'];
+const COLORS = ['var(--color-primary)','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4'];
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _MetricCard: React.FC<{label:string;sub:string;value:string;tone:string;icon:React.ElementType}> = ({label,sub,value,tone,icon:Icon}) => (
@@ -177,7 +177,7 @@ const ReportsAssetsPage: React.FC = () => {
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(37,99,235,0.1)"/>
                   <XAxis dataKey="name" stroke="#1e40af" style={{fontSize:'12px'}}/><YAxis stroke="#1e40af" style={{fontSize:'12px'}}/>
                   <Tooltip {...TT} cursor={{fill:'rgba(37,99,235,0.1)'}}/>
-                  <Bar dataKey="value" fill="#2563eb" radius={[8,8,0,0]} name="Jumlah Aset"/>
+                  <Bar dataKey="value" fill="var(--color-primary)" radius={[8,8,0,0]} name="Jumlah Aset"/>
                 </BarChart>
               </ResponsiveContainer>
             ):(<div className="reports-chart-empty">{loading?'Memuat...':'Belum ada data.'}</div>)}

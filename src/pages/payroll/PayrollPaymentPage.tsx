@@ -236,7 +236,7 @@ const PayrollPaymentPage = () => {
               Segarkan
             </button>
             <button className="btn-primary" onClick={() => navigate('/payroll/approve')}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.25rem', borderRadius: '10px', border: '1px solid #cbd5e1', background: '#fff', color: '#2563eb', fontSize: '0.9rem', fontWeight: '600', fontFamily: "'Poppins', sans-serif", cursor: 'pointer' }}>
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.25rem', borderRadius: '10px', border: '1px solid #cbd5e1', background: '#fff', color: 'var(--color-primary)', fontSize: '0.9rem', fontWeight: '600', fontFamily: "'Poppins', sans-serif", cursor: 'pointer' }}>
               Halaman Approval
             </button>
           </div>
@@ -258,7 +258,7 @@ const PayrollPaymentPage = () => {
                   <Icon size={22} />
                 </span>
               </div>
-              <div className="metric-value" style={{ color: card.tone === 'orange' ? '#f59e0b' : card.tone === 'blue' ? '#2563eb' : card.tone === 'green' ? '#10b981' : '#8b5cf6' }}>{card.value}</div>
+              <div className="metric-value" style={{ color: card.tone === 'orange' ? '#f59e0b' : card.tone === 'blue' ? 'var(--color-primary)' : card.tone === 'green' ? '#10b981' : '#8b5cf6' }}>{card.value}</div>
               <div className="summary-card-change">{card.change}</div>
             </Card>
           );

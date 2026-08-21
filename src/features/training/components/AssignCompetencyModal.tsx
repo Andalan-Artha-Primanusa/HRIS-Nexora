@@ -140,7 +140,7 @@ export const AssignCompetencyModal: React.FC<AssignCompetencyModalProps> = ({
               type="checkbox"
               checked={assessNow}
               onChange={(e) => setAssessNow(e.target.checked)}
-              style={{ width: '18px', height: '18px', accentColor: '#2563eb' }}
+              style={{ width: '18px', height: '18px', accentColor: 'var(--color-primary)' }}
             />
             <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#334155' }}>
               Langsung beri penilaian sekarang

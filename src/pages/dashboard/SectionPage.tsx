@@ -3014,7 +3014,7 @@ const SectionPage = () => {
                   <PieChart>
                     <Pie data={insightsChartData.leaveType} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={90} fill="#3b82f6" label />
                     {insightsChartData.leaveType.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'][index % 5]} />
+                      <Cell key={`cell-${index}`} fill={['var(--color-primary)', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'][index % 5]} />
                     ))}
                     <Tooltip />
                   </PieChart>
@@ -3033,7 +3033,7 @@ const SectionPage = () => {
                   <PieChart>
                     <Pie data={insightsChartData.helpdeskStatus} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={90} fill="#10b981" label />
                     {insightsChartData.helpdeskStatus.map((_, index) => (
-                      <Cell key={`cell-status-${index}`} fill={['#10b981', '#2563eb', '#f59e0b', '#ef4444', '#8b5cf6'][index % 5]} />
+                      <Cell key={`cell-status-${index}`} fill={['#10b981', 'var(--color-primary)', '#f59e0b', '#ef4444', '#8b5cf6'][index % 5]} />
                     ))}
                     <Tooltip />
                   </PieChart>

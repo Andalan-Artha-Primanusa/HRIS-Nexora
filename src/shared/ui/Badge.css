@@ -39,5 +39,5 @@
 .ui-badge--info {
   background-color: var(--primary-blue-light);
   color: var(--primary-blue);
-  border-color: rgba(29, 98, 240, 0.3);
+  border-color: rgba(15, 159, 143, 0.3);
 }

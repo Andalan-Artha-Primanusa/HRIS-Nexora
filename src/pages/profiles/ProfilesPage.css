@@ -1,7 +1,7 @@
-.profiles-page {
-  --profiles-accent: var(--primary-blue);
-  --profiles-accent-soft: rgba(29, 98, 240, 0.08);
-  --profiles-accent-border: rgba(29, 98, 240, 0.2);
+﻿.profiles-page {
+  --profiles-accent: var(--color-primary);
+  --profiles-accent-soft: rgba(15, 159, 143, 0.08);
+  --profiles-accent-border: rgba(15, 159, 143, 0.2);
 
   display: flex;
   flex-direction: column;
@@ -47,7 +47,7 @@
 .profile-card-section {
   border: 1px solid var(--gray-200);
   border-radius: 1rem;
-  background: var(--white);
+  background: var(--var(--color-white));
   box-shadow: var(--shadow-sm);
 }
 
@@ -131,11 +131,11 @@
   padding: 0.58rem 0.85rem;
   border: 1px solid var(--gray-200);
   border-radius: 0.75rem;
-  background: var(--white);
+  background: var(--var(--color-white));
   color: var(--gray-900);
   font-size: 0.92rem;
   line-height: 1.35;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-family-heading);
   vertical-align: middle;
 }
 
@@ -153,7 +153,7 @@ input[type="date"].profiles-input {
 .profiles-input:focus {
   outline: none;
   border-color: var(--profiles-accent);
-  box-shadow: 0 0 0 3px rgba(29, 98, 240, 0.12);
+  box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.12);
 }
 
 .profiles-grid {
@@ -204,8 +204,8 @@ input[type="date"].profiles-input {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 4px solid var(--white);
-  box-shadow: 0 8px 24px rgba(29, 98, 240, 0.14);
+  border: 4px solid var(--var(--color-white));
+  box-shadow: 0 8px 24px rgba(15, 159, 143, 0.14);
 }
 
 .profile-header-row {
@@ -277,7 +277,7 @@ input[type="date"].profiles-input {
 
 .profile-card-actions .ui-button--ghost:hover:not(:disabled) {
   background: var(--status-danger-bg);
-  color: #dc2626;
+  color: var(--color-error);
 }
 
 .edit-profile-btn {
@@ -296,7 +296,7 @@ input[type="date"].profiles-input {
   padding: 1.5rem;
   border-radius: 16px;
   border: 1px solid var(--gray-200);
-  background: #ffffff;
+  background: var(--color-var(--color-white));
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
 }
 
@@ -340,7 +340,7 @@ input[type="date"].profiles-input {
   width: 38px;
   height: 38px;
   border-radius: 0.65rem;
-  background: var(--white);
+  background: var(--var(--color-white));
   border: 1px solid var(--gray-200);
   color: var(--gray-600);
   display: flex;
@@ -428,7 +428,7 @@ input[type="date"].profiles-input {
 .profile-card-item {
   border: 1px solid var(--gray-200);
   border-radius: 16px;
-  background: #ffffff;
+  background: var(--color-var(--color-white));
   padding: 0.75rem;
   display: flex;
   flex-direction: column;
@@ -523,7 +523,7 @@ input[type="date"].profiles-input {
 }
 
 .error-item {
-  border: 1px solid #fecaca;
+  border: 1px solid var(--color-error-light);
   border-radius: 0.75rem;
   background: #fff5f5;
   padding: 0.75rem;
@@ -533,7 +533,7 @@ input[type="date"].profiles-input {
 }
 
 .error-field {
-  color: #dc2626;
+  color: var(--color-error);
   font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -602,9 +602,9 @@ input[type="date"].profiles-input {
 }
 
 .profiles-search-box:focus-within {
-  border-color: #2563eb;
-  background-color: var(--white);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  border-color: var(--color-primary);
+  background-color: var(--var(--color-white));
+  box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.1);
 }
 
 .profiles-search-box svg {
@@ -639,7 +639,7 @@ input[type="date"].profiles-input {
 
 .profiles-sort-select:hover,
 .profiles-sort-select:focus {
-  border-color: #2563eb;
+  border-color: var(--color-primary);
 }
 
 .profiles-sort-order-btn {
@@ -680,9 +680,9 @@ input[type="date"].profiles-input {
 }
 
 .profiles-filter-btn.active {
-  background-color: #2563eb;
-  color: white;
-  border-color: #1d4ed8;
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border-color: var(--color-primary-dark);
 }
 
 /* Filter Panel */
@@ -729,7 +729,7 @@ input[type="date"].profiles-input {
 }
 
 .profiles-filter-select:focus {
-  border-color: #2563eb;
+  border-color: var(--color-primary);
 }
 
 .profiles-results-info {
@@ -760,7 +760,7 @@ input[type="date"].profiles-input {
 .profiles-table th {
   font-size: 0.8rem;
   letter-spacing: 0.05em;
-  white-space: nowrap;
+  var(--color-white)-space: nowrap;
 }
 
 .profiles-table td {
@@ -774,7 +774,7 @@ input[type="date"].profiles-input {
 }
 
 .profiles-table tbody tr:hover {
-  background-color: #f8fbff;
+  background-color: var(--color-surface-soft);
 }
 
 .profiles-pagination {
@@ -817,13 +817,13 @@ input[type="date"].profiles-input {
 /* ============================================ */
 
 .crud-page {
-  --primary: #2563eb;
-  --primary-light: #dbeafe;
-  --primary-lighter: #eff6ff;
+  --primary: var(--color-primary);
+  --primary-light: var(--color-primary-light);
+  --primary-lighter: var(--color-primary-light);
   --surface: #f8fcff;
-  --text: #1e40af;
-  --text-light: #3b82f6;
-  --border: rgba(37, 99, 235, 0.15);
+  --text: var(--color-primary-dark);
+  --text-light: var(--color-primary);
+  --border: rgba(15, 159, 143, 0.15);
 
   padding: 1.5rem;
   background: var(--surface);
@@ -853,7 +853,7 @@ input[type="date"].profiles-input {
   padding: 0.75rem 0.85rem;
   font-size: 0.9rem;
   color: #1f2937;
-  background: white;
+  background: var(--color-white);
   transition: all 0.2s ease;
   outline: none;
 }
@@ -894,14 +894,14 @@ input[type="date"].profiles-input {
 /* ============================================ */
 
 .profiles-page {
-  --primary: #2563eb;
-  --primary-dark: #1d4ed8;
-  --primary-light: #dbeafe;
-  --primary-lighter: #eff6ff;
+  --primary: var(--color-primary);
+  --primary-dark: var(--color-primary-dark);
+  --primary-light: var(--color-primary-light);
+  --primary-lighter: var(--color-primary-light);
   --surface: linear-gradient(180deg, rgba(247, 250, 255, 0.94) 0%, rgba(239, 245, 255, 0.9) 100%);
-  --text: #1e3a8a;
-  --text-light: #4f8cf5;
-  --border: rgba(37, 99, 235, 0.14);
+  --text: var(--color-primary-dark);
+  --text-light: var(--color-primary);
+  --border: rgba(15, 159, 143, 0.14);
 
   display: flex;
   flex-direction: column;
@@ -915,7 +915,7 @@ input[type="date"].profiles-input {
 .profiles-page::before,
 .crud-page::before {
   border-radius: inherit;
-  border-color: rgba(37, 99, 235, 0.12);
+  border-color: rgba(15, 159, 143, 0.12);
 }
 
 .profiles-page-badge {
@@ -924,7 +924,7 @@ input[type="date"].profiles-input {
   width: fit-content;
   padding: 0.35rem 0.75rem;
   border-radius: 999px;
-  background: rgba(37, 99, 235, 0.12);
+  background: rgba(15, 159, 143, 0.12);
   color: var(--primary);
   font-size: 0.72rem;
   font-weight: 700;
@@ -981,8 +981,8 @@ input[type="date"].profiles-input {
 .profiles-summary-card {
   padding: 1.35rem;
   border-radius: 16px;
-  background: linear-gradient(135deg, #ffffff 0%, #f8faff 100%);
-  border: 1px solid rgba(37, 99, 235, 0.12);
+  background: linear-gradient(135deg, var(--color-var(--color-white)) 0%, #f8faff 100%);
+  border: 1px solid rgba(15, 159, 143, 0.12);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
@@ -997,14 +997,14 @@ input[type="date"].profiles-input {
   right: -40px;
   width: 200px;
   height: 200px;
-  background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(15, 159, 143, 0.08) 0%, transparent 70%);
   border-radius: 50%;
   pointer-events: none;
 }
 
 .profiles-summary-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 12px 24px rgba(15, 159, 143, 0.15);
   border-color: #93c5fd;
 }
 
@@ -1023,13 +1023,13 @@ input[type="date"].profiles-input {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--color-text-secondary);
 }
 
 .profiles-summary-subtitle {
   margin: 0.3rem 0 0;
   font-size: 0.86rem;
-  color: #94a3b8;
+  color: var(--color-text-tertiary);
 }
 
 .profiles-summary-icon {
@@ -1044,20 +1044,20 @@ input[type="date"].profiles-input {
 }
 
 .profiles-summary-icon--blue {
-  background: rgba(37, 99, 235, 0.12);
-  color: #2563eb;
-  border-color: rgba(37, 99, 235, 0.14);
+  background: rgba(15, 159, 143, 0.12);
+  color: var(--color-primary);
+  border-color: rgba(15, 159, 143, 0.14);
 }
 
 .profiles-summary-icon--green {
   background: rgba(16, 185, 129, 0.12);
-  color: #10b981;
+  color: var(--color-success);
   border-color: rgba(16, 185, 129, 0.14);
 }
 
 .profiles-summary-icon--orange {
   background: rgba(245, 158, 11, 0.12);
-  color: #f59e0b;
+  color: var(--color-warning);
   border-color: rgba(245, 158, 11, 0.14);
 }
 
@@ -1071,7 +1071,7 @@ input[type="date"].profiles-input {
   margin-top: 0.55rem;
   font-size: 2rem;
   font-weight: 800;
-  color: #2563eb;
+  color: var(--color-primary);
   letter-spacing: -1px;
   position: relative;
   z-index: 1;
@@ -1081,7 +1081,7 @@ input[type="date"].profiles-input {
   margin-top: 0.5rem;
   font-size: 0.9rem;
   font-weight: 600;
-  color: #64748b;
+  color: var(--color-text-secondary);
   position: relative;
   z-index: 1;
 }
@@ -1129,23 +1129,23 @@ input[type="date"].profiles-input {
 }
 
 .profiles-form-group span {
-  color: #64748b;
+  color: var(--color-text-secondary);
 }
 
 .profiles-input {
   min-height: 44px;
   padding: 0.68rem 0.9rem;
-  border: 1px solid rgba(37, 99, 235, 0.14);
+  border: 1px solid rgba(15, 159, 143, 0.14);
   border-radius: 14px;
-  background: #fff;
-  color: #1e293b;
+  background: var(--color-white);
+  color: var(--color-text-primary);
   font-size: 0.92rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .profiles-input:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.12);
 }
 
 .profiles-search-card {
@@ -1168,7 +1168,7 @@ input[type="date"].profiles-input {
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
-  border: 1px solid rgba(37, 99, 235, 0.14);
+  border: 1px solid rgba(15, 159, 143, 0.14);
   border-radius: 14px;
   background: rgba(239, 245, 255, 0.6);
   transition: all 0.2s ease;
@@ -1176,8 +1176,8 @@ input[type="date"].profiles-input {
 
 .profiles-search-box:focus-within {
   border-color: var(--primary);
-  background: #fff;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  background: var(--color-white);
+  box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.1);
 }
 
 .profiles-search-box svg {
@@ -1190,7 +1190,7 @@ input[type="date"].profiles-input {
   background: transparent;
   outline: none;
   font-size: 0.92rem;
-  color: #1e293b;
+  color: var(--color-text-primary);
 }
 
 .profiles-quick-controls {
@@ -1209,7 +1209,7 @@ input[type="date"].profiles-input {
 .profiles-sort-select,
 .profiles-filter-select {
   padding: 0.65rem 0.9rem;
-  border: 1px solid rgba(37, 99, 235, 0.14);
+  border: 1px solid rgba(15, 159, 143, 0.14);
   border-radius: 14px;
   background: rgba(239, 245, 255, 0.7);
   font-size: 0.9rem;
@@ -1220,7 +1220,7 @@ input[type="date"].profiles-input {
 .profiles-sort-select:focus,
 .profiles-filter-select:focus {
   border-color: var(--primary);
-  background: #fff;
+  background: var(--color-white);
 }
 
 .profiles-sort-order-btn {
@@ -1229,7 +1229,7 @@ input[type="date"].profiles-input {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(37, 99, 235, 0.14);
+  border: 1px solid rgba(15, 159, 143, 0.14);
   border-radius: 14px;
   background: rgba(239, 245, 255, 0.7);
   cursor: pointer;
@@ -1238,7 +1238,7 @@ input[type="date"].profiles-input {
 }
 
 .profiles-sort-order-btn:hover {
-  background: #fff;
+  background: var(--color-white);
   border-color: #93c5fd;
 }
 
@@ -1247,7 +1247,7 @@ input[type="date"].profiles-input {
   align-items: center;
   gap: 0.5rem;
   padding: 0.65rem 1rem;
-  border: 1px solid rgba(37, 99, 235, 0.14);
+  border: 1px solid rgba(15, 159, 143, 0.14);
   border-radius: 14px;
   background: rgba(239, 245, 255, 0.7);
   cursor: pointer;
@@ -1257,19 +1257,19 @@ input[type="date"].profiles-input {
 }
 
 .profiles-filter-btn:hover {
-  background: #fff;
+  background: var(--color-white);
 }
 
 .profiles-filter-btn.active {
   background: var(--primary);
-  color: #fff;
+  color: var(--color-white);
   border-color: var(--primary-dark);
 }
 
 .profiles-filter-panel {
   padding: 0.25rem 0 0;
   margin-top: 0.25rem;
-  border-top: 1px solid rgba(37, 99, 235, 0.12);
+  border-top: 1px solid rgba(15, 159, 143, 0.12);
   animation: profilesFadeIn 0.25s ease-out;
 }
 
@@ -1284,13 +1284,13 @@ input[type="date"].profiles-input {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #64748b;
+  color: var(--color-text-secondary);
 }
 
 .profiles-results-info {
   margin-top: 0.5rem;
   padding-top: 0.9rem;
-  border-top: 1px solid rgba(37, 99, 235, 0.12);
+  border-top: 1px solid rgba(15, 159, 143, 0.12);
 }
 
 .profiles-table-card {
@@ -1301,8 +1301,8 @@ input[type="date"].profiles-input {
   width: 100%;
   overflow-x: auto;
   border-radius: 16px;
-  border: 1px solid rgba(37, 99, 235, 0.1);
-  background: #fff;
+  border: 1px solid rgba(15, 159, 143, 0.1);
+  background: var(--color-white);
 }
 
 .profiles-table {
@@ -1311,25 +1311,25 @@ input[type="date"].profiles-input {
 }
 
 .profiles-table thead tr {
-  background: #eff6ff;
+  background: var(--color-primary-light);
 }
 
 .profiles-table th {
   padding: 12px;
   text-align: left;
-  color: #1e40af;
+  color: var(--color-primary-dark);
   font-weight: 700;
-  border-bottom: 2px solid rgba(37, 99, 235, 0.2);
+  border-bottom: 2px solid rgba(15, 159, 143, 0.2);
   font-size: 0.82rem;
   letter-spacing: 0.04em;
-  white-space: nowrap;
+  var(--color-white)-space: nowrap;
 }
 
 .profiles-table td {
   padding: 12px;
   font-size: 0.9rem;
   color: #334155;
-  border-bottom: 1px solid rgba(37, 99, 235, 0.08);
+  border-bottom: 1px solid rgba(15, 159, 143, 0.08);
 }
 
 .profiles-table tbody tr {
@@ -1347,11 +1347,11 @@ input[type="date"].profiles-input {
   gap: 1rem;
   margin-top: 1.25rem;
   padding-top: 1.25rem;
-  border-top: 1px solid rgba(37, 99, 235, 0.12);
+  border-top: 1px solid rgba(15, 159, 143, 0.12);
 }
 
 .profiles-page-info {
-  color: #1e40af;
+  color: var(--color-primary-dark);
 }
 
 .profile-view-container {
@@ -1368,7 +1368,7 @@ input[type="date"].profiles-input {
   background:
     radial-gradient(circle at 12% 8%, rgba(255, 255, 255, 0.46) 0, rgba(255, 255, 255, 0) 50%),
     linear-gradient(120deg, #f3f8ff 0%, #e8f1ff 52%, #f4f9ff 100%);
-  border-bottom: 1px solid rgba(37, 99, 235, 0.1);
+  border-bottom: 1px solid rgba(15, 159, 143, 0.1);
 }
 
 .profile-header-content {
@@ -1377,8 +1377,8 @@ input[type="date"].profiles-input {
 }
 
 .profile-avatar-large {
-  border: 4px solid #fff;
-  box-shadow: 0 8px 24px rgba(29, 98, 240, 0.14);
+  border: 4px solid var(--color-white);
+  box-shadow: 0 8px 24px rgba(15, 159, 143, 0.14);
 }
 
 .profile-header-info-new,
@@ -1401,31 +1401,31 @@ input[type="date"].profiles-input {
 .detail-item-new,
 .profile-card-item,
 .profile-collection-item {
-  border-color: rgba(37, 99, 235, 0.12);
-  background: linear-gradient(180deg, #ffffff, #f8fbff);
+  border-color: rgba(15, 159, 143, 0.12);
+  background: linear-gradient(180deg, var(--color-var(--color-white)), var(--color-surface-soft));
 }
 
 .detail-icon-wrap,
 .profile-card-section-icon {
-  background: rgba(37, 99, 235, 0.08);
+  background: rgba(15, 159, 143, 0.08);
   color: var(--primary);
-  border-color: rgba(37, 99, 235, 0.14);
+  border-color: rgba(15, 159, 143, 0.14);
 }
 
 .profile-card-label,
 .info-label {
-  color: #64748b;
+  color: var(--color-text-secondary);
 }
 
 .profile-card-value,
 .info-value,
 .detail-value-new,
 .info-meta {
-  color: #1e293b;
+  color: var(--color-text-primary);
 }
 
 .activity-placeholder {
-  border-color: rgba(37, 99, 235, 0.16);
+  border-color: rgba(15, 159, 143, 0.16);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(239, 245, 255, 0.5));
 }
 
@@ -1524,4 +1524,5 @@ input[type="date"].profiles-input {
     padding: 0.95rem;
   }
 }
+
 
