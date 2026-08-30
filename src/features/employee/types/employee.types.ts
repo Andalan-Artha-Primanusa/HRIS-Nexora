@@ -10,6 +10,7 @@ export interface EmployeeItem {
     email: string;
   };
   employee_code: string;
+  company_id?: number | null;
   position: string;
   department: string;
   hire_date: string;
@@ -37,6 +38,7 @@ export interface EmployeeWithName extends EmployeeItem {
 export interface EmployeeCreatePayload {
   user_id: string | number | null;
   employee_code: string;
+  company_id?: string | number | null;
   position: string;
   department: string;
   hire_date: string;
@@ -55,6 +57,7 @@ export interface EmployeeUpdatePayload {
   name?: string;
   user_id?: string | number | null;
   employee_code?: string;
+  company_id?: string | number | null;
   hire_date?: string;
   position?: string;
   department?: string;

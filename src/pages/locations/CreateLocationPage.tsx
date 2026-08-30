@@ -156,7 +156,7 @@ const CreateLocationPage = () => {
           {/* Left Column - Form Fields */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             <Card glass style={{ padding: '2.5rem', borderRadius: '32px' }}>
-              <h3 style={{ margin: '0 0 2rem', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '1.25rem', fontWeight: 800, color: '#1e3a8a' }}>
+              <h3 style={{ margin: '0 0 2rem', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '1.25rem', fontWeight: 800, color: 'var(--color-primary-dark)' }}>
                  <MapPin size={24} color="var(--color-primary)" /> Detail Lokasi
               </h3>
               
@@ -277,7 +277,7 @@ const CreateLocationPage = () => {
           {/* Right Column - Preview & Actions */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             <Card glass style={{ padding: '2rem', borderRadius: '28px' }}>
-              <h3 style={{ margin: '0 0 1.5rem', fontSize: '1.1rem', fontWeight: 800, color: '#1e3a8a' }}>Preview Lokasi</h3>
+              <h3 style={{ margin: '0 0 1.5rem', fontSize: '1.1rem', fontWeight: 800, color: 'var(--color-primary-dark)' }}>Preview Lokasi</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                 <div>
                   <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '4px' }}>Nama</div>
@@ -318,7 +318,7 @@ const CreateLocationPage = () => {
             </Card>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-               <Button type="submit" variant="primary" size="lg" disabled={loading} style={{ width: '100%', height: '60px', borderRadius: '20px', fontWeight: 800, fontSize: '1.1rem', boxShadow: '0 10px 20px rgba(37, 99, 235, 0.2)' }}>
+               <Button type="submit" variant="primary" size="lg" disabled={loading} style={{ width: '100%', height: '60px', borderRadius: '20px', fontWeight: 800, fontSize: '1.1rem', boxShadow: '0 10px 20px rgba(15, 159, 143, 0.2)' }}>
                   <Save size={20} style={{ marginRight: '10px' }} />
                   {loading ? 'Menyimpan...' : 'Buat Lokasi'}
                </Button>

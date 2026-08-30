@@ -27,6 +27,12 @@ export interface ResetPasswordPayload {
   password_confirmation: string;
 }
 
+export interface ChangePasswordPayload {
+  current_password: string;
+  password: string;
+  password_confirmation: string;
+}
+
 export interface GoogleAuthCallbackPayload {
   code: string;
   state?: string;
@@ -117,5 +123,10 @@ export const forgotPassword = async (payload: ForgotPasswordPayload) => {
  */
 export const resetPassword = async (payload: ResetPasswordPayload) => {
   const response = await api.post('/reset-password', payload);
+  return response.data;
+};
+
+export const changePassword = async (payload: ChangePasswordPayload) => {
+  const response = await api.post('/change-password', payload);
   return response.data;
 };

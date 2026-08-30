@@ -8,6 +8,7 @@ import { createEmployee } from "@/features/employee/api/employee.service";
 import { getAllLocations } from "@/features/location/api/location.service";
 import { getAllUsers } from "@/features/admin/api/admin.service";
 import { getAllWorkSchedules } from "@/features/work-schedule/api/work-schedule.service";
+import { companyService } from "@/features/company/api/company.service";
 import { useAuthStore } from "@/app/store/auth.store";
 import { RBACUtils } from "@/shared/hooks/rbac";
 import type { EmployeeCreatePayload } from "@/features/employee/types/employee.types";
@@ -19,6 +20,7 @@ import "../dashboard/overview/OverviewPage.css";
 const EmployeeCreatePage = () => {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
+  const selectedCompanyId = useAuthStore((state) => state.selectedCompanyId);
   const canCreateEmployee = RBACUtils.hasPermission(user, ["employee.create", "admin.access"]);
 
   const [createForm, setCreateForm] = useState<EmployeeFormState>(DEFAULT_FORM);
@@ -29,6 +31,7 @@ const EmployeeCreatePage = () => {
   const [allUsers, setAllUsers] = useState<Record<string, any>[]>([]);
   const [allSchedules, setAllSchedules] = useState<Record<string, any>[]>([]);
   const [allDepartments, setAllDepartments] = useState<string[]>([]);
+  const [allCompanies, setAllCompanies] = useState<Record<string, any>[]>([]);
 
   const loadMetadata = async () => {
     try {
@@ -40,6 +43,17 @@ const EmployeeCreatePage = () => {
 
       const schedResult = await getAllWorkSchedules();
       setAllSchedules(schedResult.items);
+
+      const companies = await companyService.list();
+      setAllCompanies(companies);
+
+      if (selectedCompanyId && selectedCompanyId !== "all") {
+        setCreateForm((current) => (
+          current.company_id
+            ? current
+            : { ...current, company_id: String(selectedCompanyId) }
+        ));
+      }
 
       const deptRes = await api.get('/organization/master-data');
       // Deeply check for departments array
@@ -80,6 +94,7 @@ const EmployeeCreatePage = () => {
     try {
       const payload: EmployeeCreatePayload = {
         user_id: createForm.user_id ? Number(createForm.user_id) : null, 
+        company_id: createForm.company_id ? Number(createForm.company_id) : null,
         manager_id: createForm.manager_id ? Number(createForm.manager_id) : null,
         employee_code: createForm.employee_code || "",
         position: createForm.position || "",
@@ -131,7 +146,7 @@ const EmployeeCreatePage = () => {
 
       <Card className="control-card" glass>
         <div style={{ marginBottom: '1rem' }}>
-          <h3 style={{ margin: 0, color: '#1e3a8a', fontWeight: 700, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <h3 style={{ margin: 0, color: 'var(--color-primary-dark)', fontWeight: 700, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Briefcase size={18} style={{ color: 'var(--color-primary)' }} />
             Form Data Karyawan
           </h3>
@@ -142,6 +157,7 @@ const EmployeeCreatePage = () => {
           setFormData={setCreateForm}
           allUsers={allUsers}
           allDepartments={allDepartments}
+          allCompanies={allCompanies}
           allLocations={allLocations}
           allSchedules={allSchedules}
           onSubmit={handleCreate}

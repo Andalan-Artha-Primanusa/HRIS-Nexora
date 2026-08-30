@@ -140,7 +140,7 @@ const AdminUserAssignRolesPage = () => {
         {/* Section 1: User Selection */}
         <Card glass style={{ padding: '2rem', borderRadius: '32px', height: 'fit-content', border: '1px solid rgba(255,255,255,0.2)' }}>
           <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-            <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '12px', fontSize: '1.25rem', fontWeight: 800, color: '#1e3a8a' }}>
+            <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '12px', fontSize: '1.25rem', fontWeight: 800, color: 'var(--color-primary-dark)' }}>
               <Users size={24} color="var(--color-primary)" /> 1. Pilih Karyawan
             </h3>
             <div style={{ position: 'relative', flex: 1, maxWidth: '300px' }}>
@@ -189,7 +189,7 @@ const AdminUserAssignRolesPage = () => {
                     <td style={{ padding: '1.25rem 1rem', borderBottom: '1px solid #f1f5f9' }}>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                         {u.role_names.length > 0 ? u.role_names.map((rn, idx) => (
-                          <span key={idx} style={{ padding: '4px 10px', borderRadius: '8px', backgroundColor: '#dbeafe', color: '#1e40af', fontSize: '0.75rem', fontWeight: 700 }}>
+                          <span key={idx} style={{ padding: '4px 10px', borderRadius: '8px', backgroundColor: 'var(--color-primary-light)', color: 'var(--color-primary-dark)', fontSize: '0.75rem', fontWeight: 700 }}>
                             {rn}
                           </span>
                         )) : <span style={{ color: '#94a3b8', fontSize: '0.8rem' }}>-</span>}
@@ -204,13 +204,13 @@ const AdminUserAssignRolesPage = () => {
 
         <div id="assignment-section" style={{ position: 'relative' }}>
           <Card glass style={{ padding: '2rem', borderRadius: '32px', opacity: selectedUser ? 1 : 0.6, pointerEvents: selectedUser ? 'auto' : 'none', transition: 'all 0.3s ease', border: '1px solid rgba(255,255,255,0.2)' }}>
-            <h3 style={{ margin: '0 0 2rem', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '1.25rem', fontWeight: 800, color: '#1e3a8a' }}>
+            <h3 style={{ margin: '0 0 2rem', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '1.25rem', fontWeight: 800, color: 'var(--color-primary-dark)' }}>
               <ShieldCheck size={24} color="var(--color-primary)" /> 2. Sesuaikan Peran
             </h3>
             
             {selectedUser && (
-              <div style={{ marginBottom: '2rem', padding: '1.25rem', borderRadius: '16px', background: '#eff6ff', border: '1px solid #dbeafe' }}>
-                <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#1e40af', textTransform: 'uppercase', marginBottom: '4px' }}>Karyawan Terpilih</div>
+              <div style={{ marginBottom: '2rem', padding: '1.25rem', borderRadius: '16px', background: '#eff6ff', border: '1px solid var(--color-primary-light)' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--color-primary-dark)', textTransform: 'uppercase', marginBottom: '4px' }}>Karyawan Terpilih</div>
                 <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1e293b' }}>{selectedUser.name} <span style={{ opacity: 0.6, fontSize: '0.9rem', fontWeight: 600 }}>(#{selectedUser.id})</span></div>
               </div>
             )}
@@ -265,7 +265,7 @@ const AdminUserAssignRolesPage = () => {
                 size="md" 
                 onClick={() => void handleAssignRoles()}
                 disabled={isAssigning || !selectedUser || selectedRoleIds.length === 0}
-                style={{ borderRadius: '14px', fontWeight: 800, padding: '0 2rem', height: '48px', boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)' }}
+                style={{ borderRadius: '14px', fontWeight: 800, padding: '0 2rem', height: '48px', boxShadow: '0 4px 12px rgba(15, 159, 143, 0.2)' }}
               >
                 {isAssigning ? "Menyimpan..." : "✓ Simpan Peran"}
               </Button>

@@ -210,44 +210,28 @@ const EmployeeDashboardPage = () => {
       label: 'Saldo Cuti',
       value: loading ? '-' : `${leaveBalance} hari`,
       subtitle: `${leaveUsed} hari terpakai`,
-<<<<<<< HEAD
-      icon: 'ðŸ“…',
-=======
       icon: <CalendarDays size={24} />,
->>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
       color: 'blue' as const,
     },
     {
       label: 'Cuti Pending',
       value: loading ? '-' : String(pendingLeaves.length),
       subtitle: 'Menunggu persetujuan',
-<<<<<<< HEAD
-      icon: 'â°',
-=======
       icon: <Clock size={24} />,
->>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
       color: 'orange' as const,
     },
     {
       label: 'Status Hari Ini',
       value: loading ? '-' : (todayAttendance ? 'Hadir' : 'Belum Check-in'),
       subtitle: todayAttendance ? new Date(todayAttendance.check_in_time || '').toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : 'Silakan check-in',
-<<<<<<< HEAD
-      icon: todayAttendance ? 'âœ…' : 'âŒ',
-=======
       icon: todayAttendance ? <CheckCircle2 size={24} /> : <XCircle size={24} />,
->>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
       color: todayAttendance ? 'green' as const : 'red' as const,
     },
     {
       label: 'Total Cuti',
       value: loading ? '-' : String(allLeaves.length),
       subtitle: 'Semua pengajuan',
-<<<<<<< HEAD
-      icon: 'ðŸ“„',
-=======
       icon: <FileText size={24} />,
->>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
       color: 'purple' as const,
     },
   ], [loading, leaveBalance, leaveUsed, pendingLeaves.length, todayAttendance, allLeaves.length]);
@@ -291,15 +275,6 @@ const EmployeeDashboardPage = () => {
         <div className="hero-card-inner">
           <div className="hero-content">
             <div className="hero-badge">
-<<<<<<< HEAD
-              <span style={{ fontSize: '16px' }}>ðŸ“ˆ</span>
-              <span>Dashboard Karyawan</span>
-            </div>
-            <h1 className="hero-title">Good Morning, {userName}</h1>
-            <p className="hero-subtitle">
-              Here’s your work summary for today.
-            </p>
-=======
               <Activity size={16} />
               <span>Dashboard Karyawan</span>
             </div>
@@ -317,7 +292,6 @@ const EmployeeDashboardPage = () => {
                 </p>
               </div>
             </div>
->>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
           </div>
           <div className="hero-actions">
             <button className="btn-primary" onClick={() => navigate('/leave/requests')}>

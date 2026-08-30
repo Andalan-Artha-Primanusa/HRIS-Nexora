@@ -197,8 +197,8 @@ const AttendanceHistoryPage = () => {
           icon={CalendarDays}
           title="Riwayat Kehadiran"
           subtitle="Kelola dan lihat semua riwayat kehadiran"
-          iconColor="#1d4ed8"
-          iconBgColor="#dbeafe"
+          iconColor="var(--color-primary-dark)"
+          iconBgColor="var(--color-primary-light)"
         />
       </Card>
 

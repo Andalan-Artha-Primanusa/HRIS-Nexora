@@ -1,4 +1,4 @@
-﻿.settings-page {
+.settings-page {
   --primary: var(--color-primary);
   --primary-hover: var(--color-primary-dark);
   --primary-light: var(--color-primary-light);
@@ -14,8 +14,8 @@
   margin: 0;
   padding: 2rem 2.25rem;
   border: 0;
-  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
-  box-shadow: 0 14px 30px rgba(37, 99, 235, 0.18);
+  background: linear-gradient(135deg, var(--hero-bg-start), var(--hero-bg-end));
+  box-shadow: 0 14px 30px rgba(15, 159, 143, 0.18);
 }
 
 .settings-page .settings-logo-card {
@@ -48,12 +48,13 @@
 }
 
 .settings-logo-card .hero-actions .btn-outline {
-  border: 1px solid var(--border);
-  color: #475569;
+  border: 1px solid var(--color-border);
+  background: var(--color-white);
+  color: var(--color-primary-dark);
 }
 
 .settings-logo-card .hero-actions .btn-outline:hover {
-  border-color: #bfdbfe;
+  border-color: var(--color-primary-light);
   background: var(--primary-light) !important;
   color: var(--primary);
   box-shadow: none;
@@ -68,13 +69,8 @@
 }
 
 /* Premium Summary Cards */
-<<<<<<< HEAD
-.summary-card {
-  background: var(--color-white) !important;
-=======
 .settings-page .summary-card {
   background: white !important;
->>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
   border: 1px solid var(--border) !important;
   border-radius: 16px !important;
   padding: 1.5rem !important;
@@ -209,15 +205,12 @@
 }
 
 .settings-nav-tab.active {
-<<<<<<< HEAD
   background: var(--color-white);
   color: var(--primary);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-=======
   background: var(--primary);
   color: #ffffff;
-  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
->>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
+  box-shadow: 0 4px 10px rgba(15, 159, 143, 0.2);
 }
 
 /* Content Area */
@@ -284,7 +277,7 @@
   height: 48px !important;
   padding-left: 52px !important;
   padding-right: 16px !important;
-  background: var(--color-var(--color-white)) !important;
+  background: var(--color-white) !important;
   border: 1.5px solid var(--border) !important;
   border-radius: 12px !important;
   font-size: 0.92rem !important;
@@ -298,7 +291,7 @@
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 4px rgba(15, 159, 143, 0.08);
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
 }
 
 .premium-input:focus + .field-icon {
@@ -402,3 +395,4 @@ select.premium-input {
     padding: 10px;
   }
 }
+

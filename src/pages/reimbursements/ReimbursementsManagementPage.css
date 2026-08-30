@@ -1,4 +1,4 @@
-﻿@import url('../admin/AdminCrudPages.css');
+@import url('../admin/AdminCrudPages.css');
 
 .crud-page {
   display: flex;
@@ -14,7 +14,7 @@
 .reimbursement-card {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
 }
 
 .reimbursement-hero { padding: 1.25rem; }
@@ -205,4 +205,5 @@
   .reimbursement-summary-grid { grid-template-columns: 1fr; }
   .crud-header-title-row h1 { font-size: 1.25rem; }
 }
+
 

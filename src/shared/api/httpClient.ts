@@ -28,6 +28,7 @@ export const api = axios.create({
 // ðŸ”¥ Inject token otomatis
 api.interceptors.request.use((config) => {
   const token = sessionStorage.getItem("token");
+  const selectedCompanyId = sessionStorage.getItem("selectedCompanyId");
 
   if (token && typeof token === "string" && token.length > 0) {
     config.headers = config.headers ?? {};
@@ -36,6 +37,16 @@ api.interceptors.request.use((config) => {
       (config.headers as any).set('Authorization', `Bearer ${token}`);
     } else {
       (config.headers as any).Authorization = `Bearer ${token}`;
+    }
+  }
+
+  if (selectedCompanyId) {
+    config.headers = config.headers ?? {};
+
+    if (typeof (config.headers as any).set === 'function') {
+      (config.headers as any).set('X-Company-Id', selectedCompanyId);
+    } else {
+      (config.headers as any)['X-Company-Id'] = selectedCompanyId;
     }
   }
 

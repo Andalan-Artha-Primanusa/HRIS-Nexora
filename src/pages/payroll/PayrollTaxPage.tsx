@@ -376,7 +376,7 @@ const PayrollTaxPage: React.FC = () => {
         footer={<>
           <button className="modal-btn-cancel" onClick={() => setExportModal(false)}>Batal</button>
           <button className="modal-btn-confirm" onClick={handleExport} disabled={exportLoading}
-            style={{ background: 'linear-gradient(135deg, var(--color-primary) 0%, #1d4ed8 100%)', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.3)' }}>
+            style={{ background: 'linear-gradient(135deg, var(--hero-bg-start) 0%, var(--hero-bg-end) 100%)', boxShadow: '0 4px 14px rgba(15, 159, 143, 0.3)' }}>
             {exportLoading ? <><RefreshCw size={16} className="animate-spin" /> Memproses...</> : <><Download size={16} /> Download CSV</>}
           </button>
         </>}
@@ -402,7 +402,7 @@ const PayrollTaxPage: React.FC = () => {
       <Modal isOpen={!!exportError} onClose={() => setExportError(null)} title="Export Gagal" size="md"
         footer={<>
           <button className="modal-btn-cancel" onClick={() => setExportError(null)}>Tutup</button>
-          <button className="modal-btn-confirm" onClick={() => { setExportError(null); setExportModal(true); }} style={{ background: 'linear-gradient(135deg, var(--color-primary) 0%, #1d4ed8 100%)' }}>Coba Lagi</button>
+          <button className="modal-btn-confirm" onClick={() => { setExportError(null); setExportModal(true); }} style={{ background: 'linear-gradient(135deg, var(--hero-bg-start) 0%, var(--hero-bg-end) 100%)' }}>Coba Lagi</button>
         </>}
       >
         <p className="modal-completion-task" style={{ marginBottom: '1rem' }}>Tidak bisa mengunduh file</p>

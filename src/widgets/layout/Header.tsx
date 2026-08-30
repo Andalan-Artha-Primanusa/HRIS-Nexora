@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Menu, Bell, Sun, Moon, LogOut, Settings, UserCircle, RotateCw } from 'lucide-react';
+import { Menu, Bell, Sun, Moon, LogOut, Settings, UserCircle, RotateCw, Building2 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import { useAuthStore } from '@/app/store/auth.store';
@@ -8,6 +8,7 @@ import { useRefreshUser } from '@/features/auth/hooks/useRefreshUser';
 import { api } from '@/shared/api/httpClient';
 import type { AuthUser } from '@/shared/types/rbac.types';
 import { RBACUtils } from '@/shared/hooks/rbac';
+import { companyService } from '@/features/company/api/company.service';
 import './Header.css';
 
 interface HeaderProps {
@@ -61,12 +62,23 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(() => document.documentElement.dataset.theme === 'dark');
   const user = useAuthStore((state) => state.user);
+  const allowedMenuKeys = useAuthStore((state) => state.allowedMenuKeys);
+  const selectedCompanyId = useAuthStore((state) => state.selectedCompanyId);
+  const companyContext = useAuthStore((state) => state.companyContext);
+  const setSelectedCompanyId = useAuthStore((state) => state.setSelectedCompanyId);
+  const setCompanyContext = useAuthStore((state) => state.setCompanyContext);
   const { handleLogout } = useAuth();
   const { refreshUserData } = useRefreshUser();
   const navigate = useNavigate();
   const displayName = getDisplayName(user);
   const displayRole = getDisplayRole(user);
   const initials = getInitials(displayName);
+  const canSwitchCompany = RBACUtils.hasPermission(user, [
+    'company.view',
+    'company.view_all',
+    'dashboard.view_all_company',
+    'admin.company.view',
+  ]);
 
   // Notification State
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
@@ -100,6 +112,41 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
       return () => clearInterval(interval);
     }
   }, [user]);
+
+  useEffect(() => {
+    if (!user || !canSwitchCompany) {
+      setCompanyContext(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadCompanyContext = async () => {
+      try {
+        const context = await companyService.context();
+        if (cancelled) return;
+
+        setCompanyContext(context);
+
+        if (selectedCompanyId === null) {
+          if (context.can_view_all) {
+            setSelectedCompanyId("all");
+          } else if (context.selected_company_id || context.default_company_id) {
+            setSelectedCompanyId(context.selected_company_id ?? context.default_company_id);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load company context:", error);
+        if (!cancelled) setCompanyContext(null);
+      }
+    };
+
+    void loadCompanyContext();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [canSwitchCompany, selectedCompanyId, setCompanyContext, setSelectedCompanyId, user]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = isDarkMode ? 'dark' : 'light';
@@ -144,11 +191,49 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
     }
   };
 
+  const navigateToSelfProfile = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    setOpenDropdown(false);
+    navigate('/my/profile');
+  };
+
+  const navigateToSettings = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    setOpenDropdown(false);
+
+    const hasMenuAccess = (menuKey: string) => allowedMenuKeys.includes(menuKey);
+
+    if (
+      hasMenuAccess('admin.company') ||
+      RBACUtils.hasPermission(user, ['company.update', 'company.view', 'admin.company.view', 'admin.company.update'])
+    ) {
+      navigate('/settings/company');
+      return;
+    }
+
+    if (
+      hasMenuAccess('admin.notification-settings') ||
+      RBACUtils.hasPermission(user, ['admin.email.manage'])
+    ) {
+      navigate('/settings/notifications');
+      return;
+    }
+
+    navigate('/dashboard/custom');
+  };
+
   const location = useLocation();
   const pathnames = location.pathname.split('/').filter((x) => x);
 
   const getBreadcrumbLabel = (path: string) => {
     return path.charAt(0).toUpperCase() + path.slice(1).replace(/-/g, ' ');
+  };
+
+  const handleCompanyChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value;
+    setSelectedCompanyId(value === "all" ? "all" : Number(value));
+    window.dispatchEvent(new Event("company-context-changed"));
+    setTimeout(() => window.location.reload(), 50);
   };
 
   return (
@@ -182,6 +267,24 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
       </div>
       
       <div className="header-right">
+        {canSwitchCompany && companyContext && companyContext.companies.length > 0 && (
+          <label className="company-switcher" title="Ganti scope company">
+            <Building2 size={18} aria-hidden="true" />
+            <select
+              aria-label="Ganti company aktif"
+              value={selectedCompanyId ?? (companyContext.can_view_all ? "all" : companyContext.selected_company_id ?? companyContext.default_company_id ?? "")}
+              onChange={handleCompanyChange}
+            >
+              {companyContext.can_view_all && <option value="all">HO / Semua Company</option>}
+              {companyContext.companies.map((company) => (
+                <option key={company.id} value={company.id}>
+                  {company.name}{company.code ? ` (${company.code})` : ""}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+
         <div className="header-actions" role="group" aria-label="Header actions">
           <button 
             type="button"
@@ -282,15 +385,15 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
           </div>
           
           <div className={`user-dropdown ${openDropdown ? 'visible' : ''}`}>
-            <button className="dropdown-item" type="button" onClick={() => navigate('//profiles')}>
+            <button className="dropdown-item" type="button" onClick={navigateToSelfProfile}>
               <UserCircle size={24} />
               <span>Profile Saya</span>
             </button>
-            <button className="dropdown-item" type="button" onClick={() => navigate('/settings/company')}>
+            <button className="dropdown-item" type="button" onClick={navigateToSettings}>
               <Settings size={24} />
               <span>Settings</span>
             </button>
-            <button className="dropdown-item logout-item" type="button" onClick={() => void onLogout()}>
+            <button className="dropdown-item logout-item" type="button" onClick={(event) => { event.stopPropagation(); void onLogout(); }}>
               <LogOut size={24} />
               <span>Logout</span>
             </button>

@@ -131,7 +131,7 @@
 
   .spinner {
     border-color: #4b5563;
-    border-top-color: #60a5fa;
+    border-top-color: var(--color-primary-light);
   }
 
   .error-state {

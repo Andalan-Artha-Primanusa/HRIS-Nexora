@@ -1,5 +1,7 @@
 import { create } from 'zustand';
-import type { AuthUser, Role, Permission } from '@/shared/types/rbac.types';
+import type { AuthUser, Role, Permission, CompanyContext } from '@/shared/types/rbac.types';
+
+export type SelectedCompanyId = number | "all" | null;
 
 interface AuthState {
   user: AuthUser | null;
@@ -7,11 +9,15 @@ interface AuthState {
   isAuthenticated: boolean;
   allowedMenuKeys: string[];
   menuKeysLoaded: boolean;
+  selectedCompanyId: SelectedCompanyId;
+  companyContext: CompanyContext | null;
   setAuth: (user: AuthUser, token: string) => void;
   logout: () => void;
   updateUser: (user: AuthUser) => void;
   setAllowedMenuKeys: (keys: string[]) => void;
   setMenuKeysLoaded: (loaded: boolean) => void;
+  setSelectedCompanyId: (companyId: SelectedCompanyId) => void;
+  setCompanyContext: (context: CompanyContext | null) => void;
 }
 
 const getStoredUser = (): AuthUser | null => {
@@ -70,12 +76,22 @@ const getStoredUser = (): AuthUser | null => {
 
 const getStoredToken = (): string | null => sessionStorage.getItem("token");
 
+const getStoredSelectedCompanyId = (): SelectedCompanyId => {
+  const raw = sessionStorage.getItem("selectedCompanyId");
+  if (!raw) return null;
+  if (raw === "all") return "all";
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+};
+
 export const useAuthStore = create<AuthState>((set) => ({
   user: getStoredUser(),
   token: getStoredToken(),
   isAuthenticated: Boolean(getStoredToken()),
   allowedMenuKeys: [],
   menuKeysLoaded: false,
+  selectedCompanyId: getStoredSelectedCompanyId(),
+  companyContext: null,
   setAuth: (user: AuthUser, token: string) => {
     const authUser: AuthUser = {
       ...user,
@@ -102,10 +118,22 @@ export const useAuthStore = create<AuthState>((set) => ({
   setMenuKeysLoaded: (loaded: boolean) => {
     set({ menuKeysLoaded: loaded });
   },
+  setSelectedCompanyId: (companyId: SelectedCompanyId) => {
+    if (companyId === null) {
+      sessionStorage.removeItem("selectedCompanyId");
+    } else {
+      sessionStorage.setItem("selectedCompanyId", String(companyId));
+    }
+    set({ selectedCompanyId: companyId });
+  },
+  setCompanyContext: (context: CompanyContext | null) => {
+    set({ companyContext: context });
+  },
   logout: () => {
     sessionStorage.removeItem("token");
     sessionStorage.removeItem("user");
     sessionStorage.removeItem("allowedMenuKeys");
-    set({ user: null, token: null, isAuthenticated: false, allowedMenuKeys: [], menuKeysLoaded: false });
+    sessionStorage.removeItem("selectedCompanyId");
+    set({ user: null, token: null, isAuthenticated: false, allowedMenuKeys: [], menuKeysLoaded: false, selectedCompanyId: null, companyContext: null });
   },
 }));

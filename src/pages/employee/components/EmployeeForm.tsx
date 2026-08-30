@@ -5,6 +5,7 @@ export type EmployeeFormState = {
   id: string;
   name: string;
   user_id: string;
+  company_id: string;
   employee_code: string;
   position: string;
   department: string;
@@ -21,6 +22,7 @@ export const DEFAULT_FORM: EmployeeFormState = {
   id: "",
   name: "",
   user_id: "",
+  company_id: "",
   employee_code: "",
   position: "",
   department: "",
@@ -38,6 +40,7 @@ export interface EmployeeFormProps {
   setFormData: React.Dispatch<React.SetStateAction<EmployeeFormState>>;
   allUsers: Record<string, any>[];
   allDepartments: any[];
+  allCompanies: Record<string, any>[];
   allLocations: Record<string, any>[];
   allSchedules: Record<string, any>[];
   onSubmit: () => void;
@@ -50,6 +53,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
   setFormData,
   allUsers,
   allDepartments,
+  allCompanies,
   allLocations,
   allSchedules,
   onSubmit,
@@ -120,6 +124,22 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
           II. POSISI & ORGANISASI
         </h4>
         <div className="form-grid">
+          <div className="form-group">
+            <span>COMPANY</span>
+            <select
+              className="form-input"
+              value={formData.company_id}
+              onChange={(e) => setFormData((prev) => ({ ...prev, company_id: e.target.value }))}
+            >
+              <option value="">Pilih Company</option>
+              {allCompanies.map((company) => (
+                <option key={company.id} value={company.id}>
+                  {company.name} {company.code ? `(${company.code})` : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="form-group">
             <span>JABATAN</span>
             <input

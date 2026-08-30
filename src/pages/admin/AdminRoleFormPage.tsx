@@ -102,7 +102,7 @@ const AdminRoleFormPage: React.FC = () => {
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
               <Card glass style={{ padding: '2.5rem', borderRadius: '32px' }}>
-                 <h3 style={{ margin: '0 0 2rem', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '1.25rem', fontWeight: 800, color: '#1e3a8a' }}>
+                 <h3 style={{ margin: '0 0 2rem', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '1.25rem', fontWeight: 800, color: 'var(--color-primary-dark)' }}>
                     <Tag size={24} color="var(--color-primary)" /> Informasi Peran
                  </h3>
                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -139,7 +139,7 @@ const AdminRoleFormPage: React.FC = () => {
 
            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
               <Card glass style={{ padding: '2rem', borderRadius: '28px' }}>
-                 <h3 style={{ margin: '0 0 1.5rem', fontSize: '1.1rem', fontWeight: 800, color: '#1e3a8a' }}>Panduan</h3>
+                 <h3 style={{ margin: '0 0 1.5rem', fontSize: '1.1rem', fontWeight: 800, color: 'var(--color-primary-dark)' }}>Panduan</h3>
                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                     <div style={{ fontSize: '0.85rem', color: '#64748b', lineHeight: 1.6 }}>
                        <strong>Peran</strong> mendefinisikan kelompok izin yang diberikan kepada pengguna. Setelah membuat peran, Anda dapat:
@@ -153,7 +153,7 @@ const AdminRoleFormPage: React.FC = () => {
               </Card>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                 <Button type="submit" variant="primary" size="lg" disabled={loading} style={{ width: '100%', height: '60px', borderRadius: '20px', fontWeight: 800, fontSize: '1.1rem', boxShadow: '0 10px 20px rgba(37, 99, 235, 0.2)' }}>
+                 <Button type="submit" variant="primary" size="lg" disabled={loading} style={{ width: '100%', height: '60px', borderRadius: '20px', fontWeight: 800, fontSize: '1.1rem', boxShadow: '0 10px 20px rgba(15, 159, 143, 0.2)' }}>
                     <Save size={20} style={{ marginRight: '10px' }} />
                     {loading ? 'Menyimpan...' : (isEdit ? 'Simpan Perubahan' : 'Buat Peran Baru')}
                  </Button>

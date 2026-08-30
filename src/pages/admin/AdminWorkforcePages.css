@@ -5,7 +5,7 @@
 
 :root {
   --wf-primary: var(--color-primary-dark);
-  --wf-primary-gradient: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%);
+  --wf-primary-gradient: linear-gradient(135deg, var(--hero-bg-start) 0%, var(--hero-bg-end) 100%);
   --wf-secondary: var(--color-text-primary);
   --wf-accent: var(--color-primary);
   --wf-bg: var(--color-surface-soft);

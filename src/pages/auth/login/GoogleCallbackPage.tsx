@@ -41,7 +41,7 @@ const GoogleCallbackPage = () => {
 
           console.log("Redirect target:", target);
 
-          navigate(target || "/dashboard", { replace: true });
+          navigate((authResult.user as any)?.must_change_password ? "/force-reset-password" : (target || "/dashboard"), { replace: true });
         }
       } catch (err: unknown) {
         console.error("[GoogleCallback] Error:", err);

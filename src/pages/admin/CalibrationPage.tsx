@@ -66,7 +66,7 @@ const CalibrationPage: React.FC = () => {
           <Card key={session.id} glass style={{ padding: '1.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
               <div>
-                <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#1e3a8a' }}>{session.title}</h3>
+                <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--color-primary-dark)' }}>{session.title}</h3>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#64748b', marginTop: '4px' }}>
                   <Calendar size={14} />
                   {new Date(session.date).toLocaleDateString()}

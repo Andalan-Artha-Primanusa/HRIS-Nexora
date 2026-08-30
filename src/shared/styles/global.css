@@ -336,6 +336,7 @@ button, .button {
   font-family: var(--font-family-base);
   border: none;
   border-radius: var(--button-border-radius);
+  color: var(--color-text-primary);
   cursor: pointer;
   transition: var(--button-transition);
   white-space: nowrap;
@@ -359,12 +360,35 @@ button, .button {
 
 .btn-secondary {
   background-color: var(--color-white);
-  color: var(--color-primary);
+  color: var(--color-primary-dark);
   border: 1px solid var(--color-primary);
 }
 
 .btn-secondary:hover {
   background-color: var(--color-primary-lighter);
+  color: var(--color-primary-dark);
+}
+
+.btn-secondary *,
+.btn-outline *,
+button[class~='bg-white'] *,
+a[class~='bg-white'] *,
+[role='button'][class~='bg-white'] * {
+  color: inherit;
+  stroke: currentColor;
+}
+
+.btn-outline,
+button[class~='bg-white'],
+a[class~='bg-white'],
+[role='button'][class~='bg-white'],
+button[style*='background: white'],
+button[style*='background:white'],
+button[style*='background: #fff'],
+button[style*='background:#fff'],
+button[style*='background: #ffffff'],
+button[style*='background:#ffffff'] {
+  color: var(--color-primary-dark) !important;
 }
 
 .btn-success {
@@ -695,7 +719,7 @@ input[type='checkbox'], input[type='radio'] {
 }
 
 [data-theme='dark'] ::-webkit-scrollbar-thumb:hover {
-  background: #60a5fa;
+  background: var(--color-primary-light);
 }
 
 /* HR */
@@ -705,7 +729,7 @@ input[type='checkbox'], input[type='radio'] {
 
 /* Blockquote */
 [data-theme='dark'] blockquote {
-  border-left-color: #60a5fa;
+  border-left-color: var(--color-primary-light);
   color: #94a3b8;
 }
 

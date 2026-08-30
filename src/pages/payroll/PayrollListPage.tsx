@@ -321,7 +321,7 @@ const PayrollListPage = () => {
       )}
       <div className="crud-actions payroll-form-actions">
         <button className="btn-outline" onClick={() => setView("list")} disabled={loading}>Batal</button>
-        <button className="btn-primary" onClick={mode === "create" ? handleCreate : mode === "edit" ? handleUpdate : handleDelete} disabled={loading} style={{ background: mode === "delete" ? "#ef4444" : "var(--color-primary)", color: "#fff", border: "none", padding: "0.75rem 2rem", borderRadius: 12, fontWeight: 700 }}>
+        <button className="btn-primary" onClick={mode === "create" ? handleCreate : mode === "edit" ? handleUpdate : handleDelete} disabled={loading} style={{ background: mode === "delete" ? "#ef4444" : "var(--hero-bg-start)", color: "#fff", border: "none", padding: "0.75rem 2rem", borderRadius: 12, fontWeight: 700 }}>
           {loading ? "Memproses..." : mode === "create" ? "Buat Payroll" : mode === "edit" ? "Simpan" : "Hapus Permanen"}
         </button>
       </div>
@@ -511,7 +511,7 @@ const PayrollListPage = () => {
         footer={
           <>
             <button className="modal-btn-cancel" onClick={() => setExportModal(false)}>Batal</button>
-            <button className="modal-btn-confirm" onClick={handleExport} disabled={exportLoading} style={{ background: "linear-gradient(135deg, var(--color-primary), #1d4ed8)" }}>
+            <button className="modal-btn-confirm" onClick={handleExport} disabled={exportLoading} style={{ background: "linear-gradient(135deg, var(--hero-bg-start), var(--hero-bg-end))" }}>
               {exportLoading ? <><RefreshCw size={16} className="animate-spin" /> Memproses...</> : <><Download size={16} /> Download CSV</>}
             </button>
           </>

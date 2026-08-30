@@ -1,4 +1,4 @@
-﻿@import url('../admin/AdminCrudPages.css');
+@import url('../admin/AdminCrudPages.css');
 
 .crud-page {
   --primary: #6366f1;
@@ -236,7 +236,7 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   border-bottom: 1px solid var(--color-border);
-  var(--color-white)-space: nowrap;
+  white-space: nowrap;
   position: sticky;
   top: 0;
   z-index: 10;
@@ -247,7 +247,7 @@
   border-bottom: 1px solid var(--color-surface-soft);
   color: var(--text-main);
   font-size: 0.85rem;
-  var(--color-white)-space: nowrap;
+  white-space: nowrap;
 }
 
 .payroll-generate-table tr:hover td {
@@ -288,4 +288,5 @@
   .crud-header-title-row h1 { font-size: 1.75rem; }
   .payroll-generate-summary-grid { grid-template-columns: 1fr; }
 }
+
 

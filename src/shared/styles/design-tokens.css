@@ -18,17 +18,27 @@
   /* Semantic Colors */
   --color-success: #16A085;
   --color-success-light: #EAF7F4;
+  --color-success-dark: #0F7A60;
   --color-error: #D9534F;
   --color-error-light: #FDE8E8;
+  --color-error-dark: #B8322E;
   --color-warning: #D89B2B;
   --color-warning-light: #FCF4E6;
+  --color-warning-dark: #A06A12;
   --color-info: #4F7F73;
   --color-info-light: #F4FBF9;
+  --color-info-dark: #3A6B5E;
+
+  /* Hero / Banner Gradient — theme-independent dark corporate teal
+     so white heading/subtitle always keeps high contrast in BOTH themes */
+  --hero-bg-start: #0F9F8F;
+  --hero-bg-end: #075E54;
 
   /* Neutral Colors */
   --color-white: #FFFFFF;
   --color-background: #F7F9F8;
   --color-surface: #FFFFFF;
+  --color-surface-soft: #EEF3F1;
   --color-border: #DDE5E2;
   --color-border-light: #EAF7F4;
   --color-divider: #DDE5E2;
@@ -66,11 +76,24 @@
   --gray-700: #3D4A47;
   --gray-800: #18201E;
 
+  /* --color-gray-* aliases (used by shared Button.css & Form.css) */
+  --color-gray-50: var(--gray-50);
+  --color-gray-100: var(--gray-100);
+  --color-gray-200: var(--gray-200);
+  --color-gray-300: var(--gray-300);
+  --color-gray-400: var(--gray-400);
+  --color-gray-500: var(--gray-500);
+  --color-gray-600: var(--gray-600);
+  --color-gray-700: var(--gray-700);
+  --color-gray-800: var(--gray-800);
+  --color-gray-900: var(--gray-800);
+
   /* ======================================
      TYPOGRAPHY SYSTEM
      ====================================== */
 
   --font-family-base: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-heading: var(--font-family-base);
   --font-family-mono: 'Poppins', monospace;
 
   /* Font Sizes */
@@ -96,7 +119,7 @@
   --line-height-relaxed: 1.75;
 
   /* Letter Spacing */
-  --letter-spacing-tight: -0.02em;
+  --letter-spacing-tight: 0;
   --letter-spacing-normal: 0;
   --letter-spacing-wide: 0.04em;
 
@@ -227,8 +250,9 @@
   --card-transition: all var(--transition-normal);
 
   /* Sidebar */
-  --sidebar-width: 240px;
-  --sidebar-width-collapsed: 72px;
+  --sidebar-width: 278px;
+  --sidebar-width-collapsed: 78px;
+  --sidebar-collapsed-width: var(--sidebar-width-collapsed);
   --sidebar-bg: var(--color-white);
   --sidebar-border: 1px solid var(--color-border);
   --sidebar-item-height: 40px;
@@ -293,8 +317,6 @@
 }
 
 /* ========================================
-<<<<<<< HEAD
-=======
    DARK MODE SUPPORT (Future)
    ======================================== */
 
@@ -311,36 +333,45 @@
    ============================================================ */
 [data-theme='dark'] {
   /* Primary Colors */
-  --color-primary: #60a5fa;
-  --color-primary-hover: #3b82f6;
-  --color-primary-dark: #3b82f6;
-  --color-primary-light: #1e3a5f;
-  --color-primary-lighter: #0f2a47;
+  --color-primary: #20c997;
+  --color-primary-hover: #16a085;
+  --color-primary-dark: #9ff0db;
+  --color-primary-light: #103d35;
+  --color-primary-lighter: #0f2924;
+
+  /* Hero gradient stays dark corporate teal even in dark mode */
+  --hero-bg-start: #08776B;
+  --hero-bg-end: #064E46;
 
   /* Semantic Colors */
   --color-success: #34d399;
   --color-success-light: #064e3b;
+  --color-success-dark: #6EE7B7;
   --color-error: #f87171;
   --color-error-light: #450a0a;
+  --color-error-dark: #FCA5A5;
   --color-warning: #fbbf24;
   --color-warning-light: #451a03;
-  --color-info: #60a5fa;
-  --color-info-light: #1e3a5f;
+  --color-warning-dark: #FCD34D;
+  --color-info: #22d3ee;
+  --color-info-light: #083344;
+  --color-info-dark: #67E8F9;
 
   /* Neutral / Surface Colors */
-  --color-white: #111827;
-  --color-background: #0b1220;
-  --color-surface: #1f2937;
-  --color-border: #374151;
-  --color-border-light: #1f2937;
-  --color-divider: #374151;
+  --color-white: #101c19;
+  --color-background: #0b1412;
+  --color-surface: #101c19;
+  --color-surface-soft: #12231f;
+  --color-border: #23352f;
+  --color-border-light: #182823;
+  --color-divider: #23352f;
 
   /* Text Colors */
-  --color-text-primary: #f1f5f9;
-  --color-text-secondary: #94a3b8;
-  --color-text-tertiary: #64748b;
-  --color-text-disabled: #475569;
-  --color-text-inverse: #0f172a;
+  --color-text-primary: #edf7f4;
+  --color-text-secondary: #b7c9c4;
+  --color-text-tertiary: #8aa09a;
+  --color-text-disabled: #667a73;
+  --color-text-inverse: #0b1412;
 
   /* Shadows — darker & more prominent */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
@@ -351,33 +382,32 @@
   --shadow-hover: var(--shadow-lg);
 
   /* Table Tokens */
-  --table-header-bg: #1e40af;
-  --table-header-color: #f1f5f9;
-  --table-row-hover-bg: #1e293b;
-  --table-border-color: #374151;
+  --table-header-bg: #103d35;
+  --table-header-color: #edf7f4;
+  --table-row-hover-bg: #12231f;
+  --table-border-color: #23352f;
 
   /* Card Tokens */
-  --card-bg: #1f2937;
-  --card-border: 1px solid #374151;
+  --card-bg: #101c19;
+  --card-border: 1px solid #23352f;
   --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   --card-hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
 
   /* Sidebar Tokens */
-  --sidebar-bg: #111827;
-  --sidebar-border: 1px solid #374151;
-  --sidebar-item-hover-bg: #1f2937;
-  --sidebar-item-active-bg: #1e3a5f;
+  --sidebar-bg: #0f1f1b;
+  --sidebar-border: 1px solid #23352f;
+  --sidebar-item-hover-bg: #12231f;
+  --sidebar-item-active-bg: #103d35;
 
   /* Input Tokens */
-  --input-focus-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+  --input-focus-shadow: 0 0 0 3px rgba(32, 201, 151, 0.22);
 
   /* Modal Tokens */
-  --modal-header-bg: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+  --modal-header-bg: linear-gradient(135deg, #0f9f8f 0%, #0b7f73 100%);
 }
 
 
 /* ========================================
->>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
    ACCESSIBILITY
    ======================================== */
 

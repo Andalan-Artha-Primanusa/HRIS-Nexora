@@ -1,4 +1,4 @@
-﻿.training-form-page .form-group {
+.training-form-page .form-group {
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
@@ -16,7 +16,7 @@
   min-height: 46px;
   border: 1px solid #dbe5f3;
   border-radius: 12px;
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   color: var(--color-text-primary);
   font: inherit;
   padding: 0.75rem 0.9rem;
@@ -47,4 +47,5 @@
     grid-template-columns: 1fr !important;
   }
 }
+
 

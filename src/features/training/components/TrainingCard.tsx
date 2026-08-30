@@ -12,7 +12,7 @@ interface TrainingCardProps {
 export const TrainingCard: React.FC<TrainingCardProps> = ({ program, onViewDetails }) => {
   return (
     <Card glass style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ height: '160px', background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)', position: 'relative' }}>
+      <div style={{ height: '160px', background: 'linear-gradient(135deg, var(--hero-bg-start) 0%, var(--hero-bg-end) 100%)', position: 'relative' }}>
          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
            <BookOpen size={64} color="white" style={{ opacity: 0.2 }} />
          </div>
@@ -33,7 +33,7 @@ export const TrainingCard: React.FC<TrainingCardProps> = ({ program, onViewDetai
       </div>
       
       <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <h3 style={{ margin: '0 0 0.5rem', fontSize: '1.1rem', color: '#1e3a8a' }}>{(program as any).title || (program as any).nama}</h3>
+        <h3 style={{ margin: '0 0 0.5rem', fontSize: '1.1rem', color: 'var(--color-primary-dark)' }}>{(program as any).title || (program as any).nama}</h3>
         <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '1.25rem', flex: 1 }}>
           {((program as any).description || (program as any).deskripsi)?.length > 100 ? ((program as any).description || (program as any).deskripsi).substring(0, 100) + '...' : ((program as any).description || (program as any).deskripsi)}
         </p>

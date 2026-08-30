@@ -1,4 +1,4 @@
-﻿@import url('../admin/AdminCrudPages.css');
+@import url('../admin/AdminCrudPages.css');
 
 .approval-page-wrapper,
 .crud-page {
@@ -260,7 +260,7 @@
   letter-spacing: 0.04em;
   text-align: left;
   border-bottom: 1px solid var(--color-border);
-  var(--color-white)-space: nowrap;
+  white-space: nowrap;
 }
 
 .payroll-details-table td {
@@ -780,8 +780,6 @@
   }
 }
 
-<<<<<<< HEAD
-=======
 /* ============================================ */
 /* DARK MODE OVERRIDES                          */
 /* ============================================ */
@@ -829,8 +827,8 @@
 }
 
 [data-theme='dark'] .payroll-summary-icon.blue {
-  background: rgba(37, 99, 235, 0.1) !important;
-  color: #60a5fa !important;
+  background: rgba(15, 159, 143, 0.1) !important;
+  color: var(--color-primary-light) !important;
 }
 
 [data-theme='dark'] .payroll-summary-icon.green {
@@ -857,7 +855,7 @@
 
 [data-theme='dark'] .payroll-search-control:focus-within {
   background: #1e293b !important;
-  border-color: #3b82f6 !important;
+  border-color: var(--color-primary) !important;
 }
 
 [data-theme='dark'] .payroll-search-control input {
@@ -911,7 +909,7 @@
 
 [data-theme='dark'] .payroll-pagination-btn.active {
   background: rgba(59, 130, 246, 0.15) !important;
-  border-color: #3b82f6 !important;
-  color: #60a5fa !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-primary-light) !important;
 }
->>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
+

@@ -21,7 +21,7 @@ const hasEmployeeManagementCapability = (user: AuthUser): boolean =>
   ]);
 
 const isAllowedByCapability = (user: AuthUser, item: MenuItem): boolean => {
-  if (item.menuKey?.startsWith("employees")) {
+  if (item.menuKey?.startsWith("employees") || item.menuKey?.startsWith("workforce.employees")) {
     return hasEmployeeManagementCapability(user);
   }
 

@@ -67,7 +67,7 @@ export const AssignedEmployeesModal: React.FC<AssignedEmployeesModalProps> = ({
   const proficiencyColors: Record<number, string> = {
     1: '#f59e0b',
     2: '#10b981',
-    3: '#3b82f6',
+    3: 'var(--color-primary)',
     4: '#8b5cf6',
     5: '#ec4899',
   };
@@ -95,7 +95,7 @@ export const AssignedEmployeesModal: React.FC<AssignedEmployeesModalProps> = ({
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
               <thead>
-                <tr style={{ borderBottom: '2px solid #e2e8f0' }}>
+                <tr style={{ background: 'var(--hero-bg-start)', color: '#ffffff' }}>
                   <th style={{ textAlign: 'left', padding: '0.75rem', color: '#ffffff', fontWeight: 700 }}>Karyawan</th>
                   <th style={{ textAlign: 'left', padding: '0.75rem', color: '#ffffff', fontWeight: 700 }}>Tingkat</th>
                   <th style={{ textAlign: 'left', padding: '0.75rem', color: '#ffffff', fontWeight: 700 }}>Tanggal</th>

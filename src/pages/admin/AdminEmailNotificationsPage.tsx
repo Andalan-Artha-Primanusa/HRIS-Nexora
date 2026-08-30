@@ -347,7 +347,7 @@ const AdminEmailNotificationsPage = () => {
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                 {newTemplate.placeholders.map(ph => (
-                  <span key={ph} style={{ background: '#eff6ff', color: '#1d4ed8', padding: '4px 12px', borderRadius: '100px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600 }}>
+                  <span key={ph} style={{ background: '#eff6ff', color: 'var(--color-primary-dark)', padding: '4px 12px', borderRadius: '100px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600 }}>
                     {`{{${ph}}}`}
                     <button type="button" style={{ border: 'none', background: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '1rem' }} onClick={() => setNewTemplate({...newTemplate, placeholders: newTemplate.placeholders.filter(p => p !== ph)})}>×</button>
                   </span>

@@ -30,19 +30,54 @@
 .header-actions {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: 8px;
   flex-wrap: nowrap;
   flex-shrink: 0;
+}
+
+.company-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  max-width: 280px;
+  padding: 0 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-white);
+  color: var(--color-primary-dark);
+  box-shadow: 0 6px 18px rgba(15, 118, 110, 0.08);
+}
+
+.company-switcher svg {
+  width: 18px !important;
+  height: 18px !important;
+  flex: 0 0 auto;
+  color: var(--color-primary);
+}
+
+.company-switcher select {
+  width: 100%;
+  min-width: 170px;
+  max-width: 230px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--color-text-primary);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .icon-button {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  min-width: 40px;
-  min-height: 40px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   flex-shrink: 0;
   border-radius: var(--radius-full);
   border: none;
@@ -53,8 +88,9 @@
 }
 
 .icon-button svg {
-  width: 26px !important;
-  height: 26px !important;
+  width: 28px !important;
+  height: 28px !important;
+  stroke-width: 2.25;
 }
 
 /* Breadcrumb */
@@ -88,10 +124,10 @@
 
 /* Hamburger / sidebar toggle - slightly bigger */
 .sidebar-toggle-btn {
-  width: 50px;
-  height: 50px;
-  min-width: 50px;
-  min-height: 50px;
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  min-height: 52px;
   border-radius: 12px;
   color: var(--gray-700);
 }
@@ -377,11 +413,10 @@
   animation: rotate 1s linear infinite;
 }
 
-<<<<<<< HEAD
 /* Header action icon */
 .header-action-icon {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
 }
 
 /* Responsive */
@@ -407,7 +442,9 @@
     height: 40px;
     min-width: 40px;
     min-height: 40px;
-=======
+  }
+}
+
 /* ============================================================
    HEADER RESPONSIVE STYLES
    ============================================================ */
@@ -429,6 +466,15 @@
 
   .header-actions {
     gap: 0.25rem;
+  }
+
+  .company-switcher {
+    max-width: 220px;
+  }
+
+  .company-switcher select {
+    min-width: 140px;
+    max-width: 170px;
   }
 
   .header-btn-desktop {
@@ -465,6 +511,10 @@
 
   .header-actions {
     gap: 0.15rem;
+  }
+
+  .company-switcher {
+    display: none;
   }
 
   .header-btn-desktop {
@@ -554,6 +604,5 @@
     width: 34px;
     height: 34px;
     font-size: 0.75rem;
->>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
   }
 }

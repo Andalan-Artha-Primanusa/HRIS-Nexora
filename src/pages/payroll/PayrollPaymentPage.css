@@ -1,4 +1,4 @@
-﻿@import url('../admin/AdminCrudPages.css');
+@import url('../admin/AdminCrudPages.css');
 
 .crud-page {
   --primary: var(--color-primary);
@@ -218,7 +218,7 @@
 
 .payroll-payment-quick-item:hover {
   transform: translateY(-1px);
-  border-color: #93c5fd;
+  border-color: var(--color-primary-light);
   box-shadow: 0 8px 18px rgba(15, 159, 143, 0.08);
 }
 
@@ -387,7 +387,7 @@
   padding: 12px 14px;
   vertical-align: middle;
   border: none;
-  var(--color-white)-space: nowrap;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   font-size: 1rem;
@@ -430,4 +430,5 @@
     padding: 8px 10px;
   }
 }
+
 

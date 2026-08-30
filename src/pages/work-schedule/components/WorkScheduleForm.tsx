@@ -41,7 +41,7 @@ const WorkScheduleForm: React.FC<WorkScheduleFormProps> = ({
           onSubmit();
         }}
       >
-        <h3 style={{ margin: '0 0 2rem', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '1.25rem', fontWeight: 800, color: '#1e3a8a' }}>
+        <h3 style={{ margin: '0 0 2rem', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '1.25rem', fontWeight: 800, color: 'var(--color-primary-dark)' }}>
            <Clock size={24} color="var(--color-primary)" /> Konfigurasi Jadwal
         </h3>
 
@@ -128,7 +128,7 @@ const WorkScheduleForm: React.FC<WorkScheduleFormProps> = ({
               variant="primary"
               size="lg"
               disabled={loading}
-              style={{ flex: 1, height: '60px', borderRadius: '20px', fontWeight: 800, fontSize: '1.1rem', boxShadow: '0 10px 20px rgba(37, 99, 235, 0.2)' }}
+              style={{ flex: 1, height: '60px', borderRadius: '20px', fontWeight: 800, fontSize: '1.1rem', boxShadow: '0 10px 20px rgba(15, 159, 143, 0.2)' }}
             >
               {loading ? "Menyimpan..." : isUpdate ? "Simpan Perubahan" : "Buat Jadwal"}
             </Button>

@@ -18,7 +18,7 @@ const extractArr = (raw: unknown): Rec[] => {
 };
 const getStr = (rec: Rec, keys: string[]) => { for (const k of keys) { const v = rec[k]; if (typeof v === 'string' && v.trim()) return v.trim(); } return ''; };
 
-const TT = { contentStyle: { backgroundColor:'#fff', border:'1px solid #dbeafe', borderRadius:'8px' }, labelStyle: { color:'#1e40af', fontWeight:'bold' as const } };
+const TT = { contentStyle: { backgroundColor:'#fff', border:'1px solid var(--color-primary-light)', borderRadius:'8px' }, labelStyle: { color:'var(--color-primary-dark)', fontWeight:'bold' as const } };
 const COLORS = ['var(--color-primary)','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899','#f97316'];
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -186,10 +186,10 @@ const ReportsEmployeePage: React.FC = () => {
             {deptData.length > 0 ? (
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={deptData} layout="vertical" margin={{top:10,right:30,left:40,bottom:0}}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(37,99,235,0.1)" horizontal={false}/>
-                  <XAxis type="number" stroke="#1e40af" style={{fontSize:'12px'}}/>
-                  <YAxis dataKey="name" type="category" stroke="#1e40af" style={{fontSize:'12px'}} width={100}/>
-                  <Tooltip {...TT} cursor={{fill:'rgba(37,99,235,0.1)'}}/>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(15,159,143,0.1)" horizontal={false}/>
+                  <XAxis type="number" stroke="var(--color-primary-dark)" style={{fontSize:'12px'}}/>
+                  <YAxis dataKey="name" type="category" stroke="var(--color-primary-dark)" style={{fontSize:'12px'}} width={100}/>
+                  <Tooltip {...TT} cursor={{fill:'rgba(15,159,143,0.1)'}}/>
                   <Bar dataKey="value" fill="var(--color-primary)" radius={[0,8,8,0]} name="Headcount"/>
                 </BarChart>
               </ResponsiveContainer>
@@ -219,9 +219,9 @@ const ReportsEmployeePage: React.FC = () => {
             {statusData.length > 0 ? (
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={statusData} margin={{top:10,right:30,left:0,bottom:0}}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(37,99,235,0.1)"/>
-                  <XAxis dataKey="name" stroke="#1e40af" style={{fontSize:'12px'}}/><YAxis stroke="#1e40af" style={{fontSize:'12px'}}/>
-                  <Tooltip {...TT} cursor={{fill:'rgba(37,99,235,0.1)'}}/>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(15,159,143,0.1)"/>
+                  <XAxis dataKey="name" stroke="var(--color-primary-dark)" style={{fontSize:'12px'}}/><YAxis stroke="var(--color-primary-dark)" style={{fontSize:'12px'}}/>
+                  <Tooltip {...TT} cursor={{fill:'rgba(15,159,143,0.1)'}}/>
                   <Bar dataKey="value" fill="#10b981" radius={[8,8,0,0]} name="Jumlah"/>
                 </BarChart>
               </ResponsiveContainer>
@@ -235,8 +235,8 @@ const ReportsEmployeePage: React.FC = () => {
             {growthData.length > 0 ? (
               <ResponsiveContainer width="100%" height={280}>
                 <AreaChart data={growthData} margin={{top:10,right:30,left:0,bottom:0}}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(37,99,235,0.1)"/>
-                  <XAxis dataKey="name" stroke="#1e40af" style={{fontSize:'12px'}}/><YAxis stroke="#1e40af" style={{fontSize:'12px'}}/>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(15,159,143,0.1)"/>
+                  <XAxis dataKey="name" stroke="var(--color-primary-dark)" style={{fontSize:'12px'}}/><YAxis stroke="var(--color-primary-dark)" style={{fontSize:'12px'}}/>
                   <Tooltip {...TT}/>
                   <Area type="monotone" dataKey="value" stroke="#8b5cf6" fill="rgba(139,92,246,0.2)" strokeWidth={3} name="Karyawan Baru"/>
                 </AreaChart>

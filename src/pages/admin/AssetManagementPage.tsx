@@ -381,7 +381,7 @@ const AssetManagementPage: React.FC = () => {
                           <td className="td-center">
                             <div className="action-btn-group">
                               {asset.status?.toLowerCase() === 'available' && (
-                                <button className="action-btn" style={{ background: '#dbeafe', color: 'var(--color-primary)' }} onClick={() => openAssignModal(asset)} title="Assign ke Karyawan">
+                                <button className="action-btn" style={{ background: 'var(--color-primary-light)', color: 'var(--color-primary)' }} onClick={() => openAssignModal(asset)} title="Assign ke Karyawan">
                                   <ArrowDownToLine size={16} />
                                 </button>
                               )}

@@ -29,7 +29,6 @@ import {
   Download
 } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
-import "@/pages/dashboard/overview/OverviewPage.css";
 import "./EmployeesPage.css";
 
 const formatDateTime = (input: string) => {
@@ -166,19 +165,19 @@ const EmployeesPage = () => {
   return (
     <div className="crud-page">
       {/* Header */}
-      <Card className="hero-card">
-        <div className="hero-card-inner">
-          <div className="hero-content">
-            <div className="hero-badge"><Briefcase size={16} /><span>Employee Center</span></div>
-            <h1 className="hero-title">Employee Directory</h1>
-            <p className="hero-subtitle">Manage all employee data and organizational structure in one place.</p>
+      <Card className="employees-hero-card">
+        <div className="employees-hero-inner">
+          <div className="employees-hero-content">
+            <div className="employees-hero-badge"><Briefcase size={16} /><span>Employee Center</span></div>
+            <h1 className="employees-hero-title">Employee Directory</h1>
+            <p className="employees-hero-subtitle">Manage all employee data and organizational structure in one place.</p>
           </div>
-          <div className="hero-actions">
-            <button className="btn-outline" onClick={() => void loadEmployees()} disabled={loading}>
+          <div className="employees-hero-actions">
+            <button className="employees-hero-button employees-hero-button--secondary" onClick={() => void loadEmployees()} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} /> Segarkan
             </button>
             {canCreateEmployee && (
-              <button className="btn-primary" onClick={() => navigate("/employees/add")}>
+              <button className="employees-hero-button employees-hero-button--primary" onClick={() => navigate("/employees/add")}>
                 <Plus size={16} /> Tambah Karyawan
               </button>
             )}

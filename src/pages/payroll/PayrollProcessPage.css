@@ -1,4 +1,4 @@
-﻿.payroll-process-page {
+.payroll-process-page {
   font-family: var(--font-family-heading);
 }
 
@@ -28,12 +28,12 @@
   font-size: 0.875rem;
   font-weight: 700;
   font-family: var(--font-family-heading);
-  var(--color-white)-space: nowrap;
+  white-space: nowrap;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .payroll-tab.active {
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  background: linear-gradient(135deg, var(--hero-bg-start), var(--hero-bg-end));
   color: var(--color-white);
   border-color: rgba(15, 159, 143, 0.28);
   box-shadow: 0 12px 26px rgba(15, 159, 143, 0.24);
@@ -188,8 +188,6 @@
   }
 }
 
-<<<<<<< HEAD
-=======
 /* ============================================ */
 /* DARK MODE OVERRIDES                          */
 /* ============================================ */
@@ -218,7 +216,7 @@
 }
 
 [data-theme='dark'] .payroll-tab.active::after {
-  background: #60a5fa !important;
+  background: var(--color-primary-light) !important;
 }
 
 /* Summary Cards */
@@ -228,7 +226,7 @@
 }
 
 [data-theme='dark'] .payroll-summary-card:hover {
-  border-color: #3b82f6 !important;
+  border-color: var(--color-primary) !important;
 }
 
 [data-theme='dark'] .payroll-summary-card .label {
@@ -245,7 +243,7 @@
 
 [data-theme='dark'] .payroll-summary-card .icon-box {
   background: rgba(59, 130, 246, 0.15) !important;
-  color: #60a5fa !important;
+  color: var(--color-primary-light) !important;
 }
 
 [data-theme='dark'] .payroll-summary-card .change-text {
@@ -277,7 +275,7 @@
 [data-theme='dark'] .payroll-table-card div[style*="background: #eef2ff"] {
   background-color: #0f172a !important;
   border-color: #334155 !important;
-  color: #60a5fa !important;
+  color: var(--color-primary-light) !important;
 }
 
 [data-theme='dark'] .payroll-table-card div[style*="background: #f0f9ff"] {
@@ -309,8 +307,8 @@
 
 [data-theme='dark'] .crud-table-card button[style*="background: #eef2ff"] {
   background: rgba(59, 130, 246, 0.15) !important;
-  border-color: #3b82f6 !important;
-  color: #60a5fa !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-primary-light) !important;
 }
 
 [data-theme='dark'] .crud-table-card button[style*="background: #fff"] {
@@ -454,7 +452,7 @@
 [data-theme='dark'] .period-box {
   background: #0f172a !important;
   border-color: #334155 !important;
-  color: #60a5fa !important;
+  color: var(--color-primary-light) !important;
 }
 
 [data-theme='dark'] .info-box {
@@ -484,8 +482,8 @@
 
 [data-theme='dark'] .filter-btn.active {
   background: rgba(59, 130, 246, 0.15) !important;
-  border-color: #3b82f6 !important;
-  color: #60a5fa !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-primary-light) !important;
 }
 
 /* Fix missing select arrows in Dark Mode */
@@ -497,4 +495,4 @@
   background-position: right 10px center !important;
 }
 
->>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
+

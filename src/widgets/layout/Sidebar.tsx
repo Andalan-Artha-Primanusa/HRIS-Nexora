@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
-import { ChevronRight, X } from 'lucide-react';
+import { Building2, ChevronRight, UserCircle, X } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import './Sidebar.css';
 
@@ -9,6 +9,7 @@ import type { MenuItem } from '@/shared/config/menu';
 import { useAuthStore } from '@/app/store/auth.store';
 import { filterMenuItems, fetchAllowedMenuKeys } from '@/shared/config/menuFilter';
 import { RBACUtils } from '@/shared/hooks/rbac';
+import { companyService } from '@/features/company/api/company.service';
 
 interface SidebarProps {
   collapsed: boolean;
@@ -110,27 +111,59 @@ const MenuItemComponent: React.FC<{
   );
 };
 
-<<<<<<< HEAD
 const isEmployeeOnly = (user: ReturnType<typeof useAuthStore.getState>['user']): boolean => {
   if (!user) return false;
   const roleNames = user.roles?.map(r => r.name?.toLowerCase()) ?? [];
   const hasAdminAccess = roleNames.some(name =>
-    name.includes('admin') || name.includes('super') || name.includes('manager') || name.includes('hr') || name.includes('finance')
+    name.includes('admin') || name.includes('super') || name.includes('manager') || name.includes('hr') || name.includes('finance') || name === 'ho'
   );
   return !hasAdminAccess && !RBACUtils.isSuperAdmin(user);
 };
 
-export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
-=======
 export const Sidebar: React.FC<SidebarProps> = ({ collapsed, isMobileOpen, onClose }) => {
->>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
   const user = useAuthStore((state) => state.user);
+  const selectedCompanyId = useAuthStore((state) => state.selectedCompanyId);
+  const companyContext = useAuthStore((state) => state.companyContext);
+  const setSelectedCompanyId = useAuthStore((state) => state.setSelectedCompanyId);
+  const setCompanyContext = useAuthStore((state) => state.setCompanyContext);
   const [allowedKeys, setAllowedKeys] = useState<string[] | undefined>();
+  const canSwitchCompany = RBACUtils.hasPermission(user, [
+    'company.view',
+    'company.view_all',
+    'dashboard.view_all_company',
+    'admin.company.view',
+  ]);
 
   useEffect(() => {
     if (!user) return;
     fetchAllowedMenuKeys(user).then(setAllowedKeys);
   }, [user]);
+
+  useEffect(() => {
+    if (!user || !canSwitchCompany || companyContext) return;
+
+    let cancelled = false;
+
+    const loadCompanyContext = async () => {
+      try {
+        const context = await companyService.context();
+        if (cancelled) return;
+        setCompanyContext(context);
+
+        if (selectedCompanyId === null) {
+          setSelectedCompanyId(context.can_view_all ? "all" : context.selected_company_id ?? context.default_company_id);
+        }
+      } catch (error) {
+        console.error("Failed to load sidebar company context:", error);
+      }
+    };
+
+    void loadCompanyContext();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [canSwitchCompany, companyContext, selectedCompanyId, setCompanyContext, setSelectedCompanyId, user]);
 
   useEffect(() => {
     if (!user) return;
@@ -142,24 +175,26 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, isMobileOpen, onClo
   }, [user]);
 
   const employeeOnly = isEmployeeOnly(user);
-  const baseMenuItems = employeeOnly ? essMenuItems : menuItems;
+  const selfServiceMenu: MenuItem = {
+    label: 'Employee Self Service',
+    icon: UserCircle,
+    subItems: essMenuItems,
+  };
+  const baseMenuItems = employeeOnly ? essMenuItems : [...menuItems, selfServiceMenu];
   const filteredItems = filterMenuItems(user, baseMenuItems, allowedKeys);
 
   // When mobile drawer is open, always show full expanded sidebar regardless of collapsed state
   const effectiveCollapsed = isMobileOpen ? false : collapsed;
+  const handleCompanyChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value;
+    setSelectedCompanyId(value === "all" ? "all" : Number(value));
+    window.dispatchEvent(new Event("company-context-changed"));
+    setTimeout(() => window.location.reload(), 50);
+  };
 
   return (
     <aside className={clsx('dashboard-sidebar', collapsed && 'collapsed', isMobileOpen && 'mobile-open')}>
       <div className="sidebar-logo">
-<<<<<<< HEAD
-        <div className={clsx('sidebar-brand', collapsed && 'collapsed')}>
-          {!collapsed ? (
-            <span className="brand-text">HRIS</span>
-          ) : (
-            <span className="brand-text-collapsed">H</span>
-          )}
-        </div>
-=======
         {isMobileOpen && (
           <button
             className="sidebar-close-btn"
@@ -175,8 +210,28 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, isMobileOpen, onClo
           alt="MAHYA Logo"
           className={clsx('company-logo', effectiveCollapsed && 'collapsed')}
         />
->>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
       </div>
+
+      {canSwitchCompany && companyContext && companyContext.companies.length > 0 && !effectiveCollapsed && (
+        <label className="sidebar-company-switcher" title="Ganti scope company">
+          <span className="sidebar-company-caption">Company aktif</span>
+          <span className="sidebar-company-control">
+            <Building2 size={17} aria-hidden="true" />
+            <select
+              aria-label="Ganti company aktif"
+              value={selectedCompanyId ?? (companyContext.can_view_all ? "all" : companyContext.selected_company_id ?? companyContext.default_company_id ?? "")}
+              onChange={handleCompanyChange}
+            >
+              {companyContext.can_view_all && <option value="all">HO / Semua Company</option>}
+              {companyContext.companies.map((company) => (
+                <option key={company.id} value={company.id}>
+                  {company.name}{company.code ? ` (${company.code})` : ""}
+                </option>
+              ))}
+            </select>
+          </span>
+        </label>
+      )}
 
       <div className="sidebar-menu-container">
         <ul className="menu-list">

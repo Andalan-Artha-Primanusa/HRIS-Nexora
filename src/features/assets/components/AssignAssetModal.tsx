@@ -84,7 +84,7 @@ const STYLES = `
 .assign-date-input:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.1);
 }
 
 .assign-textarea {
@@ -105,7 +105,7 @@ const STYLES = `
 .assign-textarea:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.1);
 }
 
 .assign-modal-footer {

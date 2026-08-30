@@ -436,7 +436,7 @@ const AssetInventoryPage: React.FC = () => {
                               {asset.status?.toLowerCase() === 'available' && (
                                 <button
                                   className="action-btn"
-                                  style={{ background: '#dbeafe', color: 'var(--color-primary)' }}
+                                  style={{ background: 'var(--color-primary-light)', color: 'var(--color-primary)' }}
                                   onClick={() => openAssignModal(asset)}
                                   title="Assign ke Karyawan"
                                 >

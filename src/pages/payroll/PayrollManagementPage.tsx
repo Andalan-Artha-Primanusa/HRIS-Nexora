@@ -400,7 +400,7 @@ const PayrollManagementPage = () => {
               <span className="payroll-status-pill" style={{ 
                 backgroundColor: 
                   selectedDetail.status === 'paid' ? '#10b981' : 
-                  selectedDetail.status === 'approved' ? '#3b82f6' : 
+                  selectedDetail.status === 'approved' ? 'var(--hero-bg-start)' : 
                   selectedDetail.status === 'pending' ? '#f59e0b' : '#999',
                 color: 'white',
                 padding: '4px 12px',
@@ -439,7 +439,7 @@ const PayrollManagementPage = () => {
               </div>
             </div>
 
-            <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'var(--color-primary)', borderRadius: '8px', color: 'white' }}>
+            <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'var(--hero-bg-start)', borderRadius: '8px', color: 'white' }}>
               <p style={{ margin: 0, fontSize: '0.875rem', opacity: 0.9 }}>Total Gaji Bersih (Take Home Pay)</p>
               <p style={{ margin: '4px 0 0 0', fontSize: '1.5rem', fontWeight: 700 }}>
                 Rp {Number(selectedDetail.take_home_pay || selectedDetail.net_salary || 0).toLocaleString("id-ID")}

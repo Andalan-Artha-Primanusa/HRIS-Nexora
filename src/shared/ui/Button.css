@@ -22,6 +22,12 @@
   overflow: hidden;
 }
 
+.ui-button *,
+.ui-button svg {
+  color: inherit;
+  stroke: currentColor;
+}
+
 .ui-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -49,7 +55,7 @@
 }
 
 .ui-button--primary:active:not(:disabled) {
-  background-color: var(--color-primary-darker);
+  background-color: var(--color-primary-dark);
 }
 
 /* ========================================
@@ -81,13 +87,14 @@
 
 .ui-button--outline {
   background-color: transparent;
-  color: var(--color-primary);
+  color: var(--color-primary-dark);
   border-color: var(--color-primary);
 }
 
 .ui-button--outline:hover:not(:disabled) {
   background-color: var(--color-primary-light);
   border-color: var(--color-primary-dark);
+  color: var(--color-primary-dark);
 }
 
 .ui-button--outline:active:not(:disabled) {

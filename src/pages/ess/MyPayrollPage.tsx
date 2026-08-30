@@ -520,7 +520,7 @@ const MyPayrollPage = () => {
           <div className="digital-slip" style={{ maxWidth: '800px', margin: '0 auto' }}>
             {/* Header - Blue & White Theme */}
             <div className="digital-slip-header" style={{ 
-              background: 'linear-gradient(135deg, #1e3a8a, var(--color-primary))', 
+              background: 'linear-gradient(135deg, var(--hero-bg-start), var(--hero-bg-end))', 
               color: 'white', 
               padding: '2.5rem 2rem', 
               borderRadius: '16px 16px 0 0',
@@ -536,7 +536,7 @@ const MyPayrollPage = () => {
               <div className="digital-slip-brand" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', position: 'relative', zIndex: 1 }}>
                 <div className="slip-logo" style={{ 
                   background: 'white', 
-                  color: '#1e3a8a',
+                  color: 'var(--color-primary-dark)',
                   width: '64px',
                   height: '64px',
                   borderRadius: '16px',
@@ -602,22 +602,22 @@ const MyPayrollPage = () => {
                 background: '#eff6ff', 
                 padding: '1.5rem', 
                 borderRadius: '12px',
-                border: '1px solid #bfdbfe'
+                border: '1px solid var(--color-primary-light)'
               }}>
-                <h4 style={{ margin: '0 0 1rem', color: '#1e40af', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>PENERIMAAN</h4>
+                <h4 style={{ margin: '0 0 1rem', color: 'var(--color-primary-dark)', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>PENERIMAAN</h4>
                 <div className="slip-row" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <span style={{ color: '#1e40af' }}>Gaji Pokok</span>
+                  <span style={{ color: 'var(--color-primary-dark)' }}>Gaji Pokok</span>
                   <span style={{ fontWeight: 600 }}>{formatCurrency(selectedSlip.summary.basic_salary)}</span>
                 </div>
                 {selectedSlip.summary.allowance > 0 && (
                   <div className="slip-row" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ color: '#1e40af' }}>Tunjangan</span>
+                    <span style={{ color: 'var(--color-primary-dark)' }}>Tunjangan</span>
                     <span style={{ fontWeight: 600 }}>{formatCurrency(selectedSlip.summary.allowance)}</span>
                   </div>
                 )}
                 {selectedSlip.summary.bonus > 0 && (
                   <div className="slip-row" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ color: '#1e40af' }}>Bonus</span>
+                    <span style={{ color: 'var(--color-primary-dark)' }}>Bonus</span>
                     <span style={{ fontWeight: 600 }}>{formatCurrency(selectedSlip.summary.bonus)}</span>
                   </div>
                 )}
@@ -626,9 +626,9 @@ const MyPayrollPage = () => {
                   justifyContent: 'space-between', 
                   marginTop: '12px', 
                   paddingTop: '12px', 
-                  borderTop: '2px solid #3b82f6',
+                  borderTop: '2px solid var(--color-primary)',
                   fontWeight: 'bold',
-                  color: '#1e40af'
+                  color: 'var(--color-primary-dark)'
                 }}>
                   <span>Total Pendapatan Kotor (Gross)</span>
                   <span>{formatCurrency(selectedSlip.summary.gross_pay)}</span>
@@ -670,7 +670,7 @@ const MyPayrollPage = () => {
             </div>
 
             <div className="digital-slip-footer" style={{ 
-              background: 'linear-gradient(135deg, var(--color-primary), #3b82f6)', 
+              background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary))', 
               color: 'white',
               padding: '2rem',
               borderRadius: '0 0 16px 16px',

@@ -199,10 +199,17 @@ const AdminUsersPage = () => {
               {loading ? "Memuat..." : "Segarkan"}
             </button>
             <button
+              className="btn-outline"
+              onClick={() => navigate("/admin/users/create")}
+            >
+              <UserPlus size={16} />
+              Buat Akun
+            </button>
+            <button
               className="btn-primary"
               onClick={() => navigate("/admin/users/assign-roles")}
             >
-              <UserPlus size={16} />
+              <Shield size={16} />
               Tetapkan Peran
             </button>
           </div>

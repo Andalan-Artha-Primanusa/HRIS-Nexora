@@ -43,6 +43,23 @@ export const getUserById = async (id: string | number) => {
   };
 };
 
+export interface CreateUserPayload {
+  name: string;
+  email: string;
+  password?: string;
+  generate_password?: boolean;
+  must_change_password?: boolean;
+  role_ids?: number[];
+}
+
+export const createUser = async (payload: CreateUserPayload) => {
+  const response = await api.post("/admin/users", payload);
+  return {
+    data: extractPayload(response.data),
+    raw: response.data,
+  };
+};
+
 /**
  * Assign roles to a user
  */

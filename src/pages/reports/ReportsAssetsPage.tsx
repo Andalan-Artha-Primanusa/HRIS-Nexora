@@ -19,7 +19,7 @@ const extractArr = (raw: unknown): Rec[] => {
 const getStr = (rec: Rec, keys: string[]) => { for (const k of keys) { const v = rec[k]; if (typeof v === 'string' && v.trim()) return v.trim(); } return ''; };
 const getNum = (v: unknown) => { if (typeof v === 'number' && Number.isFinite(v)) return v; if (typeof v === 'string') { const p = Number(v); if (Number.isFinite(p)) return p; } return 0; };
 
-const TT = { contentStyle: { backgroundColor:'#fff', border:'1px solid #dbeafe', borderRadius:'8px' }, labelStyle: { color:'#1e40af', fontWeight:'bold' as const } };
+const TT = { contentStyle: { backgroundColor:'#fff', border:'1px solid var(--color-primary-light)', borderRadius:'8px' }, labelStyle: { color:'var(--color-primary-dark)', fontWeight:'bold' as const } };
 const COLORS = ['var(--color-primary)','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4'];
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -174,9 +174,9 @@ const ReportsAssetsPage: React.FC = () => {
             {categoryData.length > 0 ? (
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={categoryData} margin={{top:10,right:30,left:0,bottom:0}}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(37,99,235,0.1)"/>
-                  <XAxis dataKey="name" stroke="#1e40af" style={{fontSize:'12px'}}/><YAxis stroke="#1e40af" style={{fontSize:'12px'}}/>
-                  <Tooltip {...TT} cursor={{fill:'rgba(37,99,235,0.1)'}}/>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(15,159,143,0.1)"/>
+                  <XAxis dataKey="name" stroke="var(--color-primary-dark)" style={{fontSize:'12px'}}/><YAxis stroke="var(--color-primary-dark)" style={{fontSize:'12px'}}/>
+                  <Tooltip {...TT} cursor={{fill:'rgba(15,159,143,0.1)'}}/>
                   <Bar dataKey="value" fill="var(--color-primary)" radius={[8,8,0,0]} name="Jumlah Aset"/>
                 </BarChart>
               </ResponsiveContainer>
@@ -204,9 +204,9 @@ const ReportsAssetsPage: React.FC = () => {
             {valueByCategory.length > 0 ? (
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={valueByCategory} margin={{top:10,right:30,left:0,bottom:0}}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(37,99,235,0.1)"/>
-                  <XAxis dataKey="name" stroke="#1e40af" style={{fontSize:'12px'}}/><YAxis stroke="#1e40af" style={{fontSize:'12px'}} tickFormatter={(v:number)=>Intl.NumberFormat('id-ID',{notation:'compact'}).format(v)}/>
-                  <Tooltip {...TT} formatter={(v:any)=>fmtRp(Number(v))} cursor={{fill:'rgba(37,99,235,0.1)'}}/>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(15,159,143,0.1)"/>
+                  <XAxis dataKey="name" stroke="var(--color-primary-dark)" style={{fontSize:'12px'}}/><YAxis stroke="var(--color-primary-dark)" style={{fontSize:'12px'}} tickFormatter={(v:number)=>Intl.NumberFormat('id-ID',{notation:'compact'}).format(v)}/>
+                  <Tooltip {...TT} formatter={(v:any)=>fmtRp(Number(v))} cursor={{fill:'rgba(15,159,143,0.1)'}}/>
                   <Bar dataKey="value" fill="#8b5cf6" radius={[8,8,0,0]} name="Nilai (Rp)"/>
                 </BarChart>
               </ResponsiveContainer>
@@ -219,9 +219,9 @@ const ReportsAssetsPage: React.FC = () => {
             {assignmentByDept.length > 0 ? (
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={assignmentByDept} margin={{top:10,right:30,left:0,bottom:0}}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(37,99,235,0.1)"/>
-                  <XAxis dataKey="name" stroke="#1e40af" style={{fontSize:'12px'}}/><YAxis stroke="#1e40af" style={{fontSize:'12px'}}/>
-                  <Tooltip {...TT} cursor={{fill:'rgba(37,99,235,0.1)'}}/>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(15,159,143,0.1)"/>
+                  <XAxis dataKey="name" stroke="var(--color-primary-dark)" style={{fontSize:'12px'}}/><YAxis stroke="var(--color-primary-dark)" style={{fontSize:'12px'}}/>
+                  <Tooltip {...TT} cursor={{fill:'rgba(15,159,143,0.1)'}}/>
                   <Bar dataKey="value" fill="#06b6d4" radius={[8,8,0,0]} name="Jumlah Penugasan"/>
                 </BarChart>
               </ResponsiveContainer>

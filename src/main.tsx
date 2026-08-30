@@ -5,6 +5,7 @@ import { router } from "@/app/routes";
 import { ToastProvider } from "@/app/layouts/ToastProvider";
 import "./index.css";
 import "./shared/styles/submenu-table.css";
+import "./shared/styles/visibility-fixes.css";
 
 const storedTheme = localStorage.getItem('theme');
 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -13,6 +14,32 @@ const initialTheme = storedTheme === 'dark' || storedTheme === 'light'
   : (prefersDark ? 'dark' : 'light');
 
 document.documentElement.dataset.theme = initialTheme;
+
+const isInjectedPerformanceNoise = (error: ErrorEvent | PromiseRejectionEvent) => {
+  const message = error instanceof ErrorEvent
+    ? error.message
+    : String(error.reason?.message ?? error.reason ?? "");
+  const stack = error instanceof ErrorEvent
+    ? String(error.error?.stack ?? "")
+    : String(error.reason?.stack ?? "");
+
+  return (
+    message.includes("Cannot read properties of undefined (reading 'startTime')") &&
+    (stack.includes("reportAllChanges") || stack.includes("<anonymous>"))
+  );
+};
+
+window.addEventListener("error", (event) => {
+  if (isInjectedPerformanceNoise(event)) {
+    event.preventDefault();
+  }
+}, true);
+
+window.addEventListener("unhandledrejection", (event) => {
+  if (isInjectedPerformanceNoise(event)) {
+    event.preventDefault();
+  }
+});
 
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode },

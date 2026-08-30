@@ -14,7 +14,7 @@ export const OrgChartNode: React.FC<OrgChartNodeProps> = ({ node, renderChildren
         padding: '1rem', 
         width: '240px', 
         textAlign: 'center', 
-        border: '1px solid #dbeafe',
+        border: '1px solid var(--color-primary-light)',
         boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
       }}>
         <div style={{ 
@@ -30,7 +30,7 @@ export const OrgChartNode: React.FC<OrgChartNodeProps> = ({ node, renderChildren
         }}>
           <User size={24} />
         </div>
-        <div style={{ fontWeight: 700, color: '#1e3a8a', marginBottom: '0.25rem' }}>{node.full_name || node.name}</div>
+        <div style={{ fontWeight: 700, color: 'var(--color-primary-dark)', marginBottom: '0.25rem' }}>{node.full_name || node.name}</div>
         <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>{node.designation || node.position}</div>
         <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '0.25rem' }}>{node.department}</div>
       </Card>

@@ -1,4 +1,4 @@
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuthSession } from "./useAuthSession";
 import { useAuthStore } from "@/app/store/auth.store";
 import { LoadingState } from "@/shared/ui/DataStateDisplay";
@@ -16,6 +16,7 @@ interface ProtectedRouteProps {
 export const ProtectedRoute = ({ role }: ProtectedRouteProps) => {
   const authStatus = useAuthSession();
   const user = useAuthStore((state) => state.user);
+  const location = useLocation();
 
   if (authStatus === "checking") {
     return (
@@ -27,6 +28,10 @@ export const ProtectedRoute = ({ role }: ProtectedRouteProps) => {
 
   if (authStatus !== "authenticated") {
     return <Navigate to="/login" replace />;
+  }
+
+  if (user?.must_change_password && location.pathname !== "/force-reset-password") {
+    return <Navigate to="/force-reset-password" replace />;
   }
 
   // Role check if provided

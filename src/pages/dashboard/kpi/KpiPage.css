@@ -1,4 +1,4 @@
-﻿.kpi-page {
+.kpi-page {
   --kpi-primary: var(--color-primary);
   --kpi-primary-dark: var(--color-primary-dark);
   --kpi-text: var(--color-primary-dark);
@@ -229,7 +229,7 @@
   padding: 0.85rem 1rem;
   border-radius: 0.75rem;
   border: 1px solid var(--gray-200);
-  background: var(--var(--color-white));
+  background: var(--color-white);
   color: var(--gray-900);
 }
 
@@ -354,4 +354,5 @@
     align-items: flex-start;
   }
 }
+
 

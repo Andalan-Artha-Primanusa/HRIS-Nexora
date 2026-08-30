@@ -68,7 +68,7 @@ export const ReimbursementTable: React.FC<ReimbursementTableProps> = ({
                 {canApproveLeave && (
                   <td>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span style={{ fontWeight: 600, color: '#1e3a8a' }}>
+                      <span style={{ fontWeight: 600, color: 'var(--color-primary-dark)' }}>
                         {item.employee?.full_name || item.employee?.name || item.employee?.user?.name || item.user?.name || item.employee_name || 'N/A'}
                       </span>
                       <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{item.employee?.employee_id || item.employee_id || ''}</span>
@@ -84,7 +84,7 @@ export const ReimbursementTable: React.FC<ReimbursementTableProps> = ({
                 <td>
                   <span className="category-tag">{item.category}</span>
                 </td>
-                <td style={{ fontWeight: 700, color: '#1e3a8a' }}>
+                <td style={{ fontWeight: 700, color: 'var(--color-primary-dark)' }}>
                   {formatCurrency(item.amount)}
                 </td>
                 <td>{formatDate(item.expense_date)}</td>

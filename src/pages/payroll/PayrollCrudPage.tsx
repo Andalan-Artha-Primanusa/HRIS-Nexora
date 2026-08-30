@@ -454,7 +454,7 @@ const PayrollCrudPage = () => {
           <>
             <button className="modal-btn-cancel" onClick={() => setExportModal(false)}>Batal</button>
             <button className="modal-btn-confirm" onClick={handleExport} disabled={exportLoading}
-              style={{ background: 'linear-gradient(135deg, var(--color-primary) 0%, #1d4ed8 100%)', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.3)' }}
+              style={{ background: 'linear-gradient(135deg, var(--hero-bg-start) 0%, var(--hero-bg-end) 100%)', boxShadow: '0 4px 14px rgba(15, 159, 143, 0.3)' }}
             >
               {exportLoading ? <><RefreshCw size={16} className="animate-spin" /> Memproses...</> : <><Download size={16} /> Download CSV</>}
             </button>
@@ -508,10 +508,10 @@ const PayrollCrudPage = () => {
                   borderRadius: '12px', 
                   minWidth: '200px', 
                   fontWeight: '700',
-                  background: mode === 'delete' ? '#ef4444' : 'var(--color-primary)',
+                  background: mode === 'delete' ? '#ef4444' : 'var(--hero-bg-start)',
                   color: 'white',
                   border: 'none',
-                  boxShadow: mode === 'delete' ? '0 4px 12px rgba(239, 68, 68, 0.2)' : '0 4px 12px rgba(37, 99, 235, 0.2)'
+                  boxShadow: mode === 'delete' ? '0 4px 12px rgba(239, 68, 68, 0.2)' : '0 4px 12px rgba(15, 159, 143, 0.2)'
                 }}
               >
                 {loading ? "Memproses..." : mode === "create" ? "Buat Payroll" : mode === "edit" ? "Simpan Perubahan" : "Hapus Permanen"}

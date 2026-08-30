@@ -56,7 +56,7 @@
 .chart-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 24px rgba(15, 159, 143, 0.15);
-  border-color: #93c5fd;
+  border-color: var(--color-primary-light);
 }
 
 .chart-card.full-width {
@@ -243,7 +243,7 @@
 .metric-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 24px rgba(15, 159, 143, 0.15);
-  border-color: #93c5fd;
+  border-color: var(--color-primary-light);
 }
 
 .metric-header {

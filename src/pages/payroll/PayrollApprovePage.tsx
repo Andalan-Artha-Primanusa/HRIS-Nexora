@@ -415,7 +415,7 @@ const PayrollApprovePage = () => {
 
             {/* Description */}
             {pendingAction !== "reject" && (
-              <div style={{ background: pendingAction === "hr-approve" ? "#eff6ff" : "#f0fdf4", border: `1px solid ${pendingAction === "hr-approve" ? "#bfdbfe" : "#bbf7d0"}`, borderRadius: 8, padding: "0.875rem 1rem", marginBottom: "1.25rem", fontSize: "0.875rem", color: "#1e293b" }}>
+              <div style={{ background: pendingAction === "hr-approve" ? "#eff6ff" : "#f0fdf4", border: `1px solid ${pendingAction === "hr-approve" ? "var(--color-primary-light)" : "#bbf7d0"}`, borderRadius: 8, padding: "0.875rem 1rem", marginBottom: "1.25rem", fontSize: "0.875rem", color: "#1e293b" }}>
                 {pendingAction === "manager-approve"
                   ? "Anda akan menyetujui payroll ini sebagai Manager. Status akan berubah ke pending_hr dan diteruskan ke HR untuk final approval."
                   : "Anda akan memberikan final approval sebagai HR. Status akan berubah ke approved dan siap untuk proses pembayaran."}

@@ -1,6 +1,5 @@
 import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
-import { lazy } from "react";
-const NotFoundPage = lazy(() => import("../../pages/error/NotFoundPage"));
+import { lazy, type ReactNode } from "react";
 import { getRoleBasedDashboardPathFromStorage } from "@/features/auth/utils/roleRedirect";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { MenuRouteGuard } from "./MenuRouteGuard";
@@ -10,26 +9,34 @@ import LoginPage from "../../pages/auth/login/LoginPage";
 import GoogleCallbackPage from "../../pages/auth/login/GoogleCallbackPage";
 import ForgotPasswordPage from "../../pages/auth/login/ForgotPasswordPage";
 import ResetPasswordPage from "../../pages/auth/login/ResetPasswordPage";
+import RegisterPage from "../../pages/auth/register/RegisterPage";
 import DashboardLayout from "../layouts/DashboardLayout";
 
+const NotFoundPage = lazy(() => import("../../pages/error/NotFoundPage"));
 const OverviewPage = lazy(() => import("../../pages/dashboard/overview/OverviewPage"));
+const CustomDashboardPage = lazy(() => import("../../pages/dashboard/custom/CustomDashboardPage"));
 const EmployeeDashboardPage = lazy(() => import("../../pages/dashboard/EmployeeDashboardPage"));
 const EmployeesPage = lazy(() => import("../../pages/employee/EmployeesPage"));
 const EmployeeCreatePage = lazy(() => import("../../pages/employee/EmployeeCreatePage"));
 const EmployeeEditPage = lazy(() => import("../../pages/employee/EmployeeEditPage"));
+const ProfilesPage = lazy(() => import("../../pages/profiles/ProfilesPage"));
 const AttendanceOverviewPage = lazy(() => import("../../pages/attendance/AttendanceOverviewPage"));
 const AttendanceCheckInPage = lazy(() => import("../../pages/attendance/AttendanceCheckInPage"));
 const AttendanceCheckOutPage = lazy(() => import("../../pages/attendance/AttendanceCheckOutPage"));
 const AttendanceHistoryPage = lazy(() => import("../../pages/attendance/AttendanceHistoryPage"));
 const AttendanceTodayPage = lazy(() => import("../../pages/attendance/AttendanceTodayPage"));
+const AttendanceQrGeneratorPage = lazy(() => import("../../pages/attendance/AttendanceQrGeneratorPage"));
 const OvertimePage = lazy(() => import("../../pages/attendance/OvertimePage"));
 const AttendanceReportsPage = lazy(() => import("../../pages/attendance/AttendanceReportsPage"));
+const SecurityPatrolScanPage = lazy(() => import("../../pages/patrol/SecurityPatrolScanPage"));
+const SecurityPatrolMonitorPage = lazy(() => import("../../pages/patrol/SecurityPatrolMonitorPage"));
 const LeaveRequestsPage = lazy(() => import("../../pages/leave/LeaveRequestsPage"));
 const CreateLeavePage = lazy(() => import("../../pages/leave/CreateLeavePage"));
 const UpdateLeavePage = lazy(() => import("../../pages/leave/UpdateLeavePage"));
 const LeaveBalancePage = lazy(() => import("../../pages/leave/LeaveBalancePage"));
 const LeaveCalendarPage = lazy(() => import("../../pages/leave/LeaveCalendarPage"));
 const LeaveApprovalPage = lazy(() => import("../../pages/leave/LeaveApprovalPage"));
+const MyLeavesPage = lazy(() => import("../../pages/ess/MyLeavesPage"));
 const LeavePolicyPage = lazy(() => import("../../pages/admin/LeavePolicyPage"));
 const LeavePolicyFormPage = lazy(() => import("../../pages/admin/LeavePolicyFormPage"));
 const LeaveTypePage = lazy(() => import("../../pages/admin/LeaveTypePage"));
@@ -40,24 +47,23 @@ const PayrollListPage = lazy(() => import("../../pages/payroll/PayrollListPage")
 const PayrollProcessPage = lazy(() => import("../../pages/payroll/PayrollProcessPage"));
 const PayrollDetailsPage = lazy(() => import("../../pages/payroll/PayrollDetailsPage"));
 const PayrollReportsPage = lazy(() => import("../../pages/payroll/PayrollReportsPage"));
+const MyPayrollPage = lazy(() => import("../../pages/ess/MyPayrollPage"));
 const AdminReimbursementsPage = lazy(() => import("../../pages/admin/AdminReimbursementsPage"));
 const MyReimbursementsPage = lazy(() => import("../../pages/ess/MyReimbursementsPage"));
-const MyPayrollPage = lazy(() => import("../../pages/ess/MyPayrollPage"));
-const MyLeavesPage = lazy(() => import("../../pages/ess/MyLeavesPage"));
-const MyKpiPage = lazy(() => import("../../pages/ess/MyKpiPage"));
-const MyTrainingsPage = lazy(() => import("../../pages/ess/MyTrainingsPage"));
-const MyCompetenciesPage = lazy(() => import("../../pages/ess/MyCompetenciesPage"));
-const MyDocumentsPage = lazy(() => import("../../pages/ess/MyDocumentsPage"));
-const MyAssetsPage = lazy(() => import("../../pages/ess/MyAssetsPage.tsx"));
 const KpiListPage = lazy(() => import("../../pages/admin/AdminKpiPage"));
 const KpiFormPage = lazy(() => import("../../pages/admin/KpiFormPage"));
+const MyKpiPage = lazy(() => import("../../pages/ess/MyKpiPage"));
 const CalibrationPage = lazy(() => import("../../pages/admin/CalibrationPage"));
 const CalibrationFormPage = lazy(() => import("../../pages/admin/CalibrationFormPage"));
 const TrainingManagementPage = lazy(() => import("../../pages/admin/TrainingManagementPage"));
-const TrainingFormPage = lazy(() => import("../../pages/admin/TrainingFormPage.tsx"));
+const TrainingFormPage = lazy(() => import("../../pages/admin/TrainingFormPage"));
+const MyTrainingsPage = lazy(() => import("../../pages/ess/MyTrainingsPage"));
 const CompetencyMatrixPage = lazy(() => import("../../pages/admin/CompetencyMatrixPage"));
+const MyCompetenciesPage = lazy(() => import("../../pages/ess/MyCompetenciesPage"));
 const AssetManagementPage = lazy(() => import("../../pages/admin/AssetManagementPage"));
 const AssetFormPage = lazy(() => import("../../pages/admin/AssetFormPage"));
+const MyAssetsPage = lazy(() => import("../../pages/ess/MyAssetsPage"));
+const MyDocumentsPage = lazy(() => import("../../pages/ess/MyDocumentsPage"));
 const ApprovalFlowPage = lazy(() => import("../../pages/admin/ApprovalFlowPage"));
 const OrgChartPage = lazy(() => import("../../pages/admin/OrgChartPage"));
 const LocationsPage = lazy(() => import("../../pages/locations/LocationsPage"));
@@ -66,7 +72,10 @@ const EditLocationPage = lazy(() => import("../../pages/locations/EditLocationPa
 const WorkSchedulesPage = lazy(() => import("../../pages/work-schedule/WorkSchedulesPage"));
 const WorkScheduleCreatePage = lazy(() => import("../../pages/work-schedule/WorkScheduleCreatePage"));
 const WorkScheduleEditPage = lazy(() => import("../../pages/work-schedule/WorkScheduleEditPage"));
+const NotificationsPage = lazy(() => import("../../pages/notifications/NotificationsPage"));
+const ReportsDashboardPage = lazy(() => import("../../pages/reports/ReportsDashboardPage"));
 const AdminUsersPage = lazy(() => import("../../pages/admin/AdminUsersPage"));
+const AdminUserCreatePage = lazy(() => import("../../pages/admin/AdminUserCreatePage"));
 const AdminRolesPage = lazy(() => import("../../pages/admin/AdminRolesPage"));
 const AdminPermissionsPage = lazy(() => import("../../pages/admin/AdminPermissionsPage"));
 const MenuPermissionsPage = lazy(() => import("../../pages/admin/MenuPermissionsPage"));
@@ -78,205 +87,49 @@ const AdminEmailSendPage = lazy(() => import("../../pages/admin/AdminEmailSendPa
 const AdminEmailNotificationsPage = lazy(() => import("../../pages/admin/AdminEmailNotificationsPage"));
 const AdminAuditLogsPage = lazy(() => import("../../pages/admin/AdminAuditLogsPage"));
 const AdminImportPage = lazy(() => import("../../pages/admin/AdminImportPage"));
-const NotificationsPage = lazy(() => import("../../pages/notifications/NotificationsPage"));
-<<<<<<< HEAD
-const MasterDataPage = lazy(() => import("../../pages/admin/MasterDataPage.tsx"));
-const CompanySettingsPage = lazy(() => import("../../pages/admin/CompanySettingsPage.tsx"));
-const NotificationSettingsPage = lazy(() => import("../../pages/admin/NotificationSettingsPage.tsx"));
-const ProfilesPage = lazy(() => import("../../pages/profiles/ProfilesPage"));
-const ReportsDashboardPage = lazy(() => import("../../pages/reports/ReportsDashboardPage"));
-=======
-const ReportsDashboardPage = lazy(() => import("../../pages/reports/ReportsDashboardPage"));
-const ReportsAttendancePage = lazy(() => import("../../pages/reports/ReportsAttendancePage"));
-const ReportsLeavePage = lazy(() => import("../../pages/reports/ReportsLeavePage"));
-const ReportsPayrollPage = lazy(() => import("../../pages/reports/ReportsPayrollPage"));
+const MasterDataPage = lazy(() => import("../../pages/admin/MasterDataPage"));
+const CompanySettingsPage = lazy(() => import("../../pages/admin/CompanySettingsPage"));
+const CompanyManagementPage = lazy(() => import("../../pages/admin/CompanyManagementPage"));
+const NotificationSettingsPage = lazy(() => import("../../pages/admin/NotificationSettingsPage"));
+const MyProfilePage = lazy(() => import("../../pages/profiles/MyProfilePage"));
+const ForceResetPasswordPage = lazy(() => import("../../pages/auth/login/ForceResetPasswordPage"));
 
-const ReportsAssetsPage = lazy(() => import("../../pages/reports/ReportsAssetsPage"));
-const ReportsEmployeePage = lazy(() => import("../../pages/reports/ReportsEmployeePage"));
-const WorkSchedulesPage = lazy(() => import("../../pages/work-schedule/WorkSchedulesPage"));
-const WorkScheduleCreatePage = lazy(() => import("../../pages/work-schedule/WorkScheduleCreatePage"));
-const WorkScheduleEditPage = lazy(() => import("../../pages/work-schedule/WorkScheduleEditPage"));
-const JobOpeningsPage = lazy(() => import("../../pages/admin/JobOpeningsPage"));
-const CandidatePipelinePage = lazy(() => import("../../pages/admin/CandidatePipelinePage"));
-const TalentPoolPage = lazy(() => import("../../pages/admin/TalentPoolPage"));
-const OkrManagementPage = lazy(() => import("../../pages/admin/OkrManagementPage"));
-const EngagementSurveysPage = lazy(() => import("../../pages/admin/EngagementSurveysPage"));
-const EngagementAnalyticsPage = lazy(() => import("../../pages/admin/EngagementAnalyticsPage"));
-const SeveranceCalculatorPage = lazy(() => import("../../pages/admin/SeveranceCalculatorPage"));
-const EmploymentLettersPage = lazy(() => import("../../pages/admin/EmploymentLettersPage"));
-const OrgChartPage = lazy(() => import("../../pages/admin/OrgChartPage"));
-const HrRequestsPage = lazy(() => import("../../pages/admin/HrRequestsPage"));
-const ComplianceDashboardPage = lazy(() => import("../../pages/admin/ComplianceDashboardPage"));
-const HolidayCalendarPage = lazy(() => import("../../pages/admin/HolidayCalendarPage"));
-const TrainingManagementPage = lazy(() => import("../../pages/admin/TrainingManagementPage"));
-const CompetencyMatrixPage = lazy(() => import("../../pages/admin/CompetencyMatrixPage"));
-const ApprovalFlowPage = lazy(() => import("../../pages/admin/ApprovalFlowPage"));
-const DocumentReviewPage = lazy(() => import("../../pages/admin/DocumentReviewPage"));
-const ProgressiveTaxPage = lazy(() => import("../../pages/admin/ProgressiveTaxPage"));
-const SuccessionMatrixPage = lazy(() => import("../../pages/admin/SuccessionMatrixPage"));
-const IdpPage = lazy(() => import("../../pages/admin/IdpPage"));
-const CalibrationPage = lazy(() => import("../../pages/admin/CalibrationPage"));
-const Review360Page = lazy(() => import("../../pages/admin/Review360Page"));
-const ShiftSwapsPage = lazy(() => import("../../pages/admin/ShiftSwapsPage"));
-const OvertimeRulesPage = lazy(() => import("../../pages/admin/OvertimeRulesPage"));
-const BiometricDevicesPage = lazy(() => import("../../pages/admin/BiometricDevicesPage"));
-const CompensationPage = lazy(() => import("../../pages/admin/CompensationPage"));
-const ComplianceSettingsPage = lazy(() => import("../../pages/admin/ComplianceSettingsPage"));
-const AssetManagementPage = lazy(() => import("../../pages/admin/AssetManagementPage"));
-const AssetFormPage = lazy(() => import("../../pages/admin/AssetFormPage"));
-const AssignmentLettersPage = lazy(() => import("../../pages/admin/AssignmentLettersPage.tsx"));
-const TaskManagementPage = lazy(() => import("../../pages/admin/TaskManagementPage.tsx"));
-const PromotionPage = lazy(() => import("../../pages/admin/PromotionPage.tsx"));
-
-const MyAssetsPage = lazy(() => import("../../pages/ess/MyAssetsPage.tsx"));
-const MyAssignmentLettersPage = lazy(() => import("../../pages/ess/MyAssignmentLettersPage.tsx"));
-const MyTasksPage = lazy(() => import("../../pages/ess/MyTasksPage.tsx"));
-const MyPromotionsPage = lazy(() => import("../../pages/ess/MyPromotionsPage.tsx"));
-// const MyDocumentsPage = lazy(() => import("../../pages/ess/MyDocumentsPage.tsx"));
-const ShiftSwapFormPage = lazy(() => import("../../pages/admin/ShiftSwapFormPage.tsx"));
-const LeavePolicyPage = lazy(() => import("../../pages/admin/LeavePolicyPage"));
-const LeavePolicyFormPage = lazy(() => import("../../pages/admin/LeavePolicyFormPage"));
-const LeaveTypePage = lazy(() => import("../../pages/admin/LeaveTypePage"));
-const LeaveTypeFormPage = lazy(() => import("../../pages/admin/LeaveTypeFormPage"));
-const BiometricDeviceFormPage = lazy(() => import("../../pages/admin/BiometricDeviceFormPage.tsx"));
-const JobOpeningFormPage = lazy(() => import("../../pages/admin/JobOpeningFormPage.tsx"));
-const OkrFormPage = lazy(() => import("../../pages/admin/OkrFormPage.tsx"));
-const SurveyFormPage = lazy(() => import("../../pages/admin/SurveyFormPage.tsx"));
-const HrRequestFormPage = lazy(() => import("../../pages/admin/HrRequestFormPage.tsx"));
-const SlaPage = lazy(() => import("../../pages/admin/SlaPage.tsx"));
-const HolidayFormPage = lazy(() => import("../../pages/admin/HolidayFormPage.tsx"));
-const TrainingFormPage = lazy(() => import("../../pages/admin/TrainingFormPage.tsx"));
-const CalibrationFormPage = lazy(() => import("../../pages/admin/CalibrationFormPage.tsx"));
-const OvertimeRuleFormPage = lazy(() => import("../../pages/admin/OvertimeRuleFormPage.tsx"));
-const BenefitManagementPage = lazy(() => import("../../pages/admin/BenefitManagementPage.tsx"));
-const BenefitFormPage = lazy(() => import("../../pages/admin/BenefitFormPage.tsx"));
-const DetailedPeopleAnalyticsPage = lazy(() => import("../../pages/admin/DetailedPeopleAnalyticsPage.tsx"));
-const NotificationRulesPage = lazy(() => import("../../pages/admin/NotificationRulesPage.tsx"));
-const CompanySettingsPage = lazy(() => import("../../pages/admin/CompanySettingsPage.tsx"));
-const NotificationSettingsPage = lazy(() => import("../../pages/admin/NotificationSettingsPage.tsx"));
-const MasterDataPage = lazy(() => import("../../pages/admin/MasterDataPage.tsx"));
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-const sectionRoutes = [
-  { path: "/hr-summary" },
-  { path: "/analytics" },
-  { path: "/insights/people/detailed" },
-  { path: "/organization/directory" },
-  { path: "/organization/summary" },
-  { path: "/organization/chart" },
-  { path: "/organization/team" },
-  { path: "/documents/expiring" },
-  { path: "/notifications" },
-  { path: "/attendance/timesheet" },
-  { path: "/attendance/overtime" },
-  { path: "/attendance/reports" },
-  { path: "/my/assets" },
-  { path: "/my/trainings" },
-  { path: "/my/competencies" },
-  { path: "/my/requests" },
-  { path: "/requests" },
-  { path: "/requests/assign" },
-  { path: "/requests/status" },
-  { path: "/compliance/audit-summary" },
-  { path: "/compliance/expiring-documents" },
-  { path: "/expense/categories" },
-  { path: "/expense/reports" },
-  { path: "/performance" },
-  { path: "/performance/summary" },
-  { path: "/performance/cycles" },
-  { path: "/performance/reviews" },
-  { path: "/performance/okrs" },
-  { path: "/performance/360-reviews" },
-  { path: "/performance/calibration" },
-  { path: "/career/idps" },
-  { path: "/career/succession" },
-  { path: "/engagement/surveys" },
-  { path: "/recruitment/openings" },
-
-  { path: "/reports/competency" },
-  { path: "/reports/employee-lifecycle" },
-  { path: "/reports/custom" },
-  { path: "/settings/user-role" },
-  { path: "/settings/permissions" },
-];
->>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
+const FullPageLoader = () => (
+  <div style={{ display: "flex", height: "100vh", width: "100vw", alignItems: "center", justifyContent: "center" }}>
+    <LoadingState message="Memeriksa sesi..." />
+  </div>
+);
 
 const RootRedirect = () => {
   const authStatus = useAuthSession();
   const dashboardPath = getRoleBasedDashboardPathFromStorage();
-<<<<<<< HEAD
-  if (authStatus === "checking") return null;
-=======
 
-  if (authStatus === "checking") {
-    return (
-      <div style={{ display: 'flex', height: '100vh', width: '100vw', alignItems: 'center', justifyContent: 'center' }}>
-        <LoadingState message="Memeriksa sesi..." />
-      </div>
-    );
-  }
-
->>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
-  return authStatus === "authenticated" ? (
-    <Navigate to={dashboardPath} replace />
-  ) : (
-    <Navigate to="/login" replace />
-  );
+  if (authStatus === "checking") return <FullPageLoader />;
+  return authStatus === "authenticated" ? <Navigate to={dashboardPath} replace /> : <Navigate to="/login" replace />;
 };
 
 const GuestRoute = () => {
   const authStatus = useAuthSession();
   const dashboardPath = getRoleBasedDashboardPathFromStorage();
-<<<<<<< HEAD
-  if (authStatus === "checking") return null;
-=======
 
-  if (authStatus === "checking") {
-    return (
-      <div style={{ display: 'flex', height: '100vh', width: '100vw', alignItems: 'center', justifyContent: 'center' }}>
-        <LoadingState message="Memeriksa sesi..." />
-      </div>
-    );
-  }
-
->>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
+  if (authStatus === "checking") return <FullPageLoader />;
   return authStatus === "authenticated" ? <Navigate to={dashboardPath} replace /> : <Outlet />;
 };
 
+const layoutRoute = (path: string, element: ReactNode) => ({
+  path,
+  element: <DashboardLayout />,
+  children: [{ index: true, element }],
+});
+
 export const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <RootRedirect />,
-  },
+  { path: "/", element: <RootRedirect /> },
   {
     element: <GuestRoute />,
     children: [
       { path: "/login", element: <LoginPage /> },
       { path: "/auth/google/callback", element: <GoogleCallbackPage /> },
+      { path: "/register", element: <RegisterPage /> },
       { path: "/forgot-password", element: <ForgotPasswordPage /> },
       { path: "/reset-password", element: <ResetPasswordPage /> },
     ],
@@ -284,163 +137,37 @@ export const router = createBrowserRouter([
   {
     element: <ProtectedRoute />,
     children: [
-      {
-<<<<<<< HEAD
-=======
-        path: "/approval-flows",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <ApprovalFlowPage /> }],
-      },
-      {
-        path: "/documents/review",
-        element: <DashboardLayout />,
-        children: [
-          {
-            index: true,
-            element: (
-              <MenuRouteGuard menuKey="legal-dokumen">
-                <DocumentReviewPage />
-              </MenuRouteGuard>
-            ),
-          },
-        ],
-      },
-      {
->>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
-        path: "/dashboard",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <OverviewPage /> }],
-      },
-      {
-        path: "/employee-dashboard",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <EmployeeDashboardPage /> }],
-      },
-      {
-        path: "/employees",
-        element: <DashboardLayout />,
-        children: [
-          { index: true, element: <MenuRouteGuard menuKey="employees"><EmployeesPage /></MenuRouteGuard> },
-        ],
-      },
-      {
-        path: "/employees/add",
-        element: <DashboardLayout />,
-        children: [
-          { index: true, element: <MenuRouteGuard menuKey="employees"><EmployeeCreatePage /></MenuRouteGuard> },
-        ],
-      },
-      {
-        path: "/employees/update/:id",
-        element: <DashboardLayout />,
-        children: [
-          { index: true, element: <MenuRouteGuard menuKey="employees"><EmployeeEditPage /></MenuRouteGuard> },
-        ],
-      },
-      {
-        path: "/profiles",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <ProfilesPage /> }],
-      },
-      {
-        path: "/profiles/view/:id",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <ProfilesPage /> }],
-      },
-      {
-        path: "/attendance",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <AttendanceOverviewPage /> }],
-      },
-<<<<<<< HEAD
-      {
-        path: "/attendance/check-in",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <AttendanceCheckInPage /> }],
-      },
-=======
-
->>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
-      {
-        path: "/attendance/check-out",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <AttendanceCheckOutPage /> }],
-      },
-      {
-        path: "/attendance/history",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <AttendanceHistoryPage /> }],
-      },
-      {
-        path: "/attendance/today",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <AttendanceTodayPage /> }],
-      },
-      {
-        path: "/attendance/overtime",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <OvertimePage /> }],
-      },
-      {
-        path: "/attendance/reports",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <AttendanceReportsPage /> }],
-      },
-      {
-        path: "/my/overtime",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <OvertimePage /> }],
-      },
-      {
-        path: "/leave/requests",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <LeaveRequestsPage /> }],
-      },
-      {
-        path: "/leave/requests/create",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <CreateLeavePage /> }],
-      },
-      {
-        path: "/leave/request",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <CreateLeavePage /> }],
-      },
-      {
-        path: "/leave/requests/edit/:id",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <UpdateLeavePage /> }],
-      },
-      {
-        path: "/leave/requests/view/:id",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <UpdateLeavePage /> }],
-      },
-      {
-        path: "/leave/request/:id",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <UpdateLeavePage /> }],
-      },
-      {
-        path: "/leave/approval",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <LeaveApprovalPage /> }],
-      },
-      {
-        path: "/leave/calendar",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <LeaveCalendarPage /> }],
-      },
-      {
-        path: "/leave/balance",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <LeaveBalancePage /> }],
-      },
-      {
-        path: "/leave/my-leave",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <MyLeavesPage /> }],
-      },
+      { path: "/force-reset-password", element: <ForceResetPasswordPage /> },
+      layoutRoute("/dashboard", <OverviewPage />),
+      layoutRoute("/dashboard/custom", <CustomDashboardPage />),
+      layoutRoute("/employee-dashboard", <MenuRouteGuard menuKey="employee-dashboard"><EmployeeDashboardPage /></MenuRouteGuard>),
+      layoutRoute("/employees", <MenuRouteGuard menuKey="workforce.employees"><EmployeesPage /></MenuRouteGuard>),
+      layoutRoute("/employees/add", <MenuRouteGuard menuKey="workforce.employees"><EmployeeCreatePage /></MenuRouteGuard>),
+      layoutRoute("/employees/update/:id", <MenuRouteGuard menuKey="workforce.employees"><EmployeeEditPage /></MenuRouteGuard>),
+      layoutRoute("/profiles", <ProfilesPage />),
+      layoutRoute("/profiles/view/:id", <ProfilesPage />),
+      layoutRoute("/my/profile", <MenuRouteGuard menuKey="ess.profile"><MyProfilePage /></MenuRouteGuard>),
+      layoutRoute("/attendance", <AttendanceOverviewPage />),
+      layoutRoute("/attendance/check-in", <MenuRouteGuard menuKey="ess.attendance.check-in"><AttendanceCheckInPage /></MenuRouteGuard>),
+      layoutRoute("/attendance/check-out", <MenuRouteGuard menuKey="ess.attendance.check-out"><AttendanceCheckOutPage /></MenuRouteGuard>),
+      layoutRoute("/attendance/history", <MenuRouteGuard menuKey="ess.attendance.history"><AttendanceHistoryPage /></MenuRouteGuard>),
+      layoutRoute("/attendance/today", <AttendanceTodayPage />),
+      layoutRoute("/attendance/qr-generator", <MenuRouteGuard menuKey="workforce.attendance.qr-generator"><AttendanceQrGeneratorPage /></MenuRouteGuard>),
+      layoutRoute("/attendance/overtime", <OvertimePage />),
+      layoutRoute("/attendance/reports", <AttendanceReportsPage />),
+      layoutRoute("/patrol/scan", <MenuRouteGuard menuKey="ess.attendance.patrol"><SecurityPatrolScanPage /></MenuRouteGuard>),
+      layoutRoute("/patrol/monitor", <MenuRouteGuard menuKey="workforce.patrol.monitor"><SecurityPatrolMonitorPage /></MenuRouteGuard>),
+      layoutRoute("/my/overtime", <MenuRouteGuard menuKey="ess.overtime"><OvertimePage /></MenuRouteGuard>),
+      layoutRoute("/leave/requests", <LeaveRequestsPage />),
+      layoutRoute("/leave/requests/create", <CreateLeavePage />),
+      layoutRoute("/leave/request", <CreateLeavePage />),
+      layoutRoute("/leave/requests/edit/:id", <UpdateLeavePage />),
+      layoutRoute("/leave/requests/view/:id", <UpdateLeavePage />),
+      layoutRoute("/leave/request/:id", <UpdateLeavePage />),
+      layoutRoute("/leave/approval", <LeaveApprovalPage />),
+      layoutRoute("/leave/calendar", <LeaveCalendarPage />),
+      layoutRoute("/leave/balance", <LeaveBalancePage />),
+      layoutRoute("/leave/my-leave", <MenuRouteGuard menuKey="ess.leave"><MyLeavesPage /></MenuRouteGuard>),
       {
         path: "/leave/policy",
         element: <DashboardLayout />,
@@ -459,51 +186,20 @@ export const router = createBrowserRouter([
           { path: "edit/:id", element: <LeaveTypeFormPage /> },
         ],
       },
-      {
-        path: "/payroll",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <PayrollDashboard /> }],
-      },
-      {
-        path: "/payroll/list",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <PayrollListPage /> }],
-      },
-      {
-        path: "/payroll/process",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <PayrollProcessPage /> }],
-      },
-      {
-        path: "/payroll/run",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <PayrollManagementPage /> }],
-      },
-      {
-        path: "/payroll/component",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <PayrollDetailsPage /> }],
-      },
-      {
-        path: "/payroll/reports",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <PayrollReportsPage /> }],
-      },
-      {
-        path: "/my/payroll",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <MyPayrollPage /> }],
-      },
-      {
-        path: "/reimbursements",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <AdminReimbursementsPage /> }],
-      },
-      {
-        path: "/my/reimbursements",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <MyReimbursementsPage /> }],
-      },
+      layoutRoute("/payroll", <MenuRouteGuard menuKey="compensation.payroll"><PayrollDashboard /></MenuRouteGuard>),
+      layoutRoute("/payroll/list", <MenuRouteGuard menuKey="compensation.payroll"><PayrollListPage /></MenuRouteGuard>),
+      layoutRoute("/payroll/process", <Navigate to="/payroll/process/generate" replace />),
+      layoutRoute("/payroll/process/generate", <MenuRouteGuard menuKey="compensation.payroll"><PayrollProcessPage mode="generate" showTabs={false} /></MenuRouteGuard>),
+      layoutRoute("/payroll/process/approval", <MenuRouteGuard menuKey="compensation.payroll"><PayrollProcessPage mode="approve" showTabs={false} /></MenuRouteGuard>),
+      layoutRoute("/payroll/process/payment", <MenuRouteGuard menuKey="compensation.payroll"><PayrollProcessPage mode="payment" showTabs={false} /></MenuRouteGuard>),
+      layoutRoute("/payroll/run", <MenuRouteGuard menuKey="compensation.payroll"><PayrollManagementPage /></MenuRouteGuard>),
+      layoutRoute("/payroll/component", <Navigate to="/payroll/component/allowance" replace />),
+      layoutRoute("/payroll/component/allowance", <MenuRouteGuard menuKey="compensation.payroll"><PayrollDetailsPage componentMode="allowance" showTabs={false} /></MenuRouteGuard>),
+      layoutRoute("/payroll/component/deduction", <MenuRouteGuard menuKey="compensation.payroll"><PayrollDetailsPage componentMode="deduction" showTabs={false} /></MenuRouteGuard>),
+      layoutRoute("/payroll/reports", <MenuRouteGuard menuKey="compensation.payroll"><PayrollReportsPage /></MenuRouteGuard>),
+      layoutRoute("/my/payroll", <MenuRouteGuard menuKey="ess.payslip"><MyPayrollPage /></MenuRouteGuard>),
+      layoutRoute("/reimbursements", <AdminReimbursementsPage />),
+      layoutRoute("/my/reimbursements", <MenuRouteGuard menuKey="ess.reimbursement"><MyReimbursementsPage /></MenuRouteGuard>),
       {
         path: "/kpis",
         element: <DashboardLayout />,
@@ -513,11 +209,7 @@ export const router = createBrowserRouter([
           { path: "edit/:id", element: <KpiFormPage /> },
         ],
       },
-      {
-        path: "/my/kpi",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <MyKpiPage /> }],
-      },
+      layoutRoute("/my/kpi", <MenuRouteGuard menuKey="ess.kpi"><MyKpiPage /></MenuRouteGuard>),
       {
         path: "/performance/calibration",
         element: <DashboardLayout />,
@@ -527,261 +219,51 @@ export const router = createBrowserRouter([
           { path: "edit/:id", element: <CalibrationFormPage /> },
         ],
       },
-      {
-        path: "/training",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <Navigate to="/training/programs" replace /> }],
-      },
-      {
-        path: "/training/programs",
-        element: <DashboardLayout />,
-        children: [
-          { index: true, element: <MenuRouteGuard menuKey="pelatihan-kompetensi.pelatihan"><TrainingManagementPage /></MenuRouteGuard> },
-        ],
-      },
-      {
-        path: "/training/programs/create",
-        element: <DashboardLayout />,
-        children: [
-          { index: true, element: <MenuRouteGuard menuKey="pelatihan-kompetensi.pelatihan"><TrainingFormPage /></MenuRouteGuard> },
-        ],
-      },
-      {
-        path: "/training/programs/edit/:id",
-        element: <DashboardLayout />,
-        children: [
-          { index: true, element: <MenuRouteGuard menuKey="pelatihan-kompetensi.pelatihan"><TrainingFormPage /></MenuRouteGuard> },
-        ],
-      },
-      {
-        path: "/my/trainings",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <MyTrainingsPage /> }],
-      },
-      {
-        path: "/competencies",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <CompetencyMatrixPage /> }],
-      },
-      {
-        path: "/my/competencies",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <MyCompetenciesPage /> }],
-      },
-      {
-        path: "/assets",
-        element: <DashboardLayout />,
-        children: [
-          { index: true, element: <MenuRouteGuard menuKey="assets"><AssetManagementPage /></MenuRouteGuard> },
-        ],
-      },
-      {
-        path: "/assets/create",
-        element: <DashboardLayout />,
-        children: [
-          { index: true, element: <MenuRouteGuard menuKey="assets"><AssetFormPage /></MenuRouteGuard> },
-        ],
-      },
-      {
-        path: "/assets/edit/:id",
-        element: <DashboardLayout />,
-        children: [
-          { index: true, element: <MenuRouteGuard menuKey="assets"><AssetFormPage /></MenuRouteGuard> },
-        ],
-      },
-      {
-        path: "/my/assets",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <MyAssetsPage /> }],
-      },
-      {
-        path: "/my/documents",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <MyDocumentsPage /> }],
-      },
-      {
-        path: "/approval-flows",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <ApprovalFlowPage /> }],
-      },
-      {
-        path: "/organization/chart",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <OrgChartPage /> }],
-      },
-      {
-        path: "/locations",
-        element: <DashboardLayout />,
-        children: [
-          { index: true, element: <MenuRouteGuard menuKey="alat-admin.master.lokasi"><LocationsPage /></MenuRouteGuard> },
-        ],
-      },
-      {
-        path: "/locations/create",
-        element: <DashboardLayout />,
-        children: [
-          { index: true, element: <MenuRouteGuard menuKey="alat-admin.master.lokasi"><CreateLocationPage /></MenuRouteGuard> },
-        ],
-      },
-      {
-        path: "/locations/edit/:id",
-        element: <DashboardLayout />,
-        children: [
-          { index: true, element: <MenuRouteGuard menuKey="alat-admin.master.lokasi"><EditLocationPage /></MenuRouteGuard> },
-        ],
-      },
-      {
-        path: "/work-schedules",
-        element: <DashboardLayout />,
-        children: [
-          { index: true, element: <MenuRouteGuard menuKey="alat-admin.master.jadwal-kerja"><WorkSchedulesPage /></MenuRouteGuard> },
-        ],
-      },
-      {
-        path: "/work-schedules/add",
-        element: <DashboardLayout />,
-        children: [
-          { index: true, element: <MenuRouteGuard menuKey="alat-admin.master.jadwal-kerja"><WorkScheduleCreatePage /></MenuRouteGuard> },
-        ],
-      },
-      {
-        path: "/work-schedules/edit/:id",
-        element: <DashboardLayout />,
-        children: [
-          { index: true, element: <MenuRouteGuard menuKey="alat-admin.master.jadwal-kerja"><WorkScheduleEditPage /></MenuRouteGuard> },
-        ],
-      },
-      {
-        path: "/notifications",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <NotificationsPage /> }],
-      },
-      {
-        path: "/reports",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <Navigate to="/reports/dashboard-summary" replace /> }],
-      },
-      {
-        path: "/reports/dashboard-summary",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <ReportsDashboardPage /> }],
-      },
-      {
-        path: "/admin/users",
-        element: <DashboardLayout />,
-        children: [
-          { index: true, element: <MenuRouteGuard menuKey="alat-admin.manajemen-akses.pengguna"><AdminUsersPage /></MenuRouteGuard> },
-        ],
-      },
-      {
-        path: "/admin/users/assign-roles",
-        element: <DashboardLayout />,
-        children: [
-          { index: true, element: <MenuRouteGuard menuKey="alat-admin.manajemen-akses.pengguna"><AdminUserAssignRolesPage /></MenuRouteGuard> },
-        ],
-      },
-      {
-        path: "/admin/roles",
-        element: <DashboardLayout />,
-        children: [
-          { index: true, element: <MenuRouteGuard menuKey="alat-admin.manajemen-akses.peran"><AdminRolesPage /></MenuRouteGuard> },
-        ],
-      },
-      {
-        path: "/admin/roles/create",
-        element: <DashboardLayout />,
-        children: [
-          { index: true, element: <MenuRouteGuard menuKey="alat-admin.manajemen-akses.peran"><AdminRoleFormPage /></MenuRouteGuard> },
-        ],
-      },
-      {
-        path: "/admin/roles/edit/:id",
-        element: <DashboardLayout />,
-        children: [
-          { index: true, element: <MenuRouteGuard menuKey="alat-admin.manajemen-akses.peran"><AdminRoleFormPage /></MenuRouteGuard> },
-        ],
-      },
-      {
-        path: "/admin/roles/assign-permissions",
-        element: <DashboardLayout />,
-        children: [
-          { index: true, element: <MenuRouteGuard menuKey="alat-admin.manajemen-akses.peran"><AdminRoleAssignPermissionsPage /></MenuRouteGuard> },
-        ],
-      },
-      {
-        path: "/admin/permissions",
-        element: <DashboardLayout />,
-        children: [
-          { index: true, element: <MenuRouteGuard menuKey="alat-admin.manajemen-akses.izin"><AdminPermissionsPage /></MenuRouteGuard> },
-        ],
-      },
-      {
-        path: "/admin/menu-permissions",
-        element: <DashboardLayout />,
-        children: [
-          { index: true, element: <MenuRouteGuard menuKey="alat-admin.manajemen-akses.menu"><MenuPermissionsPage /></MenuRouteGuard> },
-        ],
-      },
-      {
-        path: "/admin/notifications",
-        element: <DashboardLayout />,
-        children: [
-          { index: true, element: <MenuRouteGuard menuKey="alat-admin.notifikasi.admin"><AdminNotificationsPage /></MenuRouteGuard> },
-        ],
-      },
-      {
-        path: "/admin/notifications/email-send",
-        element: <DashboardLayout />,
-        children: [
-          { index: true, element: <MenuRouteGuard menuKey="alat-admin.notifikasi.kirim-email"><AdminEmailSendPage /></MenuRouteGuard> },
-        ],
-      },
-      {
-        path: "/admin/notifications/email-logs",
-        element: <DashboardLayout />,
-        children: [
-          { index: true, element: <MenuRouteGuard menuKey="alat-admin.notifikasi.log-email"><AdminEmailNotificationsPage /></MenuRouteGuard> },
-        ],
-      },
-      {
-        path: "/admin/audit-logs",
-        element: <DashboardLayout />,
-        children: [
-          { index: true, element: <MenuRouteGuard menuKey="alat-admin.sistem.log-audit"><AdminAuditLogsPage /></MenuRouteGuard> },
-        ],
-      },
-      {
-        path: "/admin/import",
-        element: <DashboardLayout />,
-        children: [
-          { index: true, element: <MenuRouteGuard menuKey="master-data.pusat-impor"><AdminImportPage /></MenuRouteGuard> },
-        ],
-      },
-      {
-        path: "/organization/master-data",
-        element: <DashboardLayout />,
-        children: [
-          { index: true, element: <MenuRouteGuard menuKey="master-data"><MasterDataPage /></MenuRouteGuard> },
-        ],
-      },
-      {
-        path: "/settings/company",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <CompanySettingsPage /> }],
-      },
-      {
-        path: "/settings/notifications",
-        element: <DashboardLayout />,
-        children: [{ index: true, element: <NotificationSettingsPage /> }],
-      },
-      {
-        path: "/settings/master-data/leave-type",
-        element: <Navigate to="/leave/type" replace />,
-      },
+      layoutRoute("/training", <Navigate to="/training/programs" replace />),
+      layoutRoute("/training/programs", <MenuRouteGuard menuKey="performance-dev.training"><TrainingManagementPage /></MenuRouteGuard>),
+      layoutRoute("/training/programs/create", <MenuRouteGuard menuKey="performance-dev.training"><TrainingFormPage /></MenuRouteGuard>),
+      layoutRoute("/training/programs/edit/:id", <MenuRouteGuard menuKey="performance-dev.training"><TrainingFormPage /></MenuRouteGuard>),
+      layoutRoute("/my/trainings", <MenuRouteGuard menuKey="ess.training"><MyTrainingsPage /></MenuRouteGuard>),
+      layoutRoute("/competencies", <CompetencyMatrixPage />),
+      layoutRoute("/my/competencies", <MenuRouteGuard menuKey="ess.competency"><MyCompetenciesPage /></MenuRouteGuard>),
+      layoutRoute("/assets", <MenuRouteGuard menuKey="assets"><AssetManagementPage /></MenuRouteGuard>),
+      layoutRoute("/assets/create", <MenuRouteGuard menuKey="assets"><AssetFormPage /></MenuRouteGuard>),
+      layoutRoute("/assets/edit/:id", <MenuRouteGuard menuKey="assets"><AssetFormPage /></MenuRouteGuard>),
+      layoutRoute("/my/assets", <MenuRouteGuard menuKey="ess.assets"><MyAssetsPage /></MenuRouteGuard>),
+      layoutRoute("/my/documents", <MenuRouteGuard menuKey="ess.documents"><MyDocumentsPage /></MenuRouteGuard>),
+      layoutRoute("/approval-flows", <ApprovalFlowPage />),
+      layoutRoute("/organization/chart", <OrgChartPage />),
+      layoutRoute("/locations", <MenuRouteGuard menuKey="admin.locations"><LocationsPage /></MenuRouteGuard>),
+      layoutRoute("/locations/create", <MenuRouteGuard menuKey="admin.locations"><CreateLocationPage /></MenuRouteGuard>),
+      layoutRoute("/locations/edit/:id", <MenuRouteGuard menuKey="admin.locations"><EditLocationPage /></MenuRouteGuard>),
+      layoutRoute("/work-schedules", <MenuRouteGuard menuKey="admin.work-schedules"><WorkSchedulesPage /></MenuRouteGuard>),
+      layoutRoute("/work-schedules/add", <MenuRouteGuard menuKey="admin.work-schedules"><WorkScheduleCreatePage /></MenuRouteGuard>),
+      layoutRoute("/work-schedules/edit/:id", <MenuRouteGuard menuKey="admin.work-schedules"><WorkScheduleEditPage /></MenuRouteGuard>),
+      layoutRoute("/notifications", <MenuRouteGuard menuKey="ess.notifications"><NotificationsPage /></MenuRouteGuard>),
+      layoutRoute("/reports", <Navigate to="/reports/dashboard-summary" replace />),
+      layoutRoute("/reports/dashboard-summary", <ReportsDashboardPage />),
+      layoutRoute("/admin/users", <MenuRouteGuard menuKey="admin.users"><AdminUsersPage /></MenuRouteGuard>),
+      layoutRoute("/admin/users/create", <MenuRouteGuard menuKey="admin.users"><AdminUserCreatePage /></MenuRouteGuard>),
+      layoutRoute("/admin/users/assign-roles", <MenuRouteGuard menuKey="admin.users"><AdminUserAssignRolesPage /></MenuRouteGuard>),
+      layoutRoute("/admin/roles", <MenuRouteGuard menuKey="admin.roles"><AdminRolesPage /></MenuRouteGuard>),
+      layoutRoute("/admin/roles/create", <MenuRouteGuard menuKey="admin.roles"><AdminRoleFormPage /></MenuRouteGuard>),
+      layoutRoute("/admin/roles/edit/:id", <MenuRouteGuard menuKey="admin.roles"><AdminRoleFormPage /></MenuRouteGuard>),
+      layoutRoute("/admin/roles/assign-permissions", <MenuRouteGuard menuKey="admin.roles"><AdminRoleAssignPermissionsPage /></MenuRouteGuard>),
+      layoutRoute("/admin/permissions", <MenuRouteGuard menuKey="admin.permissions"><AdminPermissionsPage /></MenuRouteGuard>),
+      layoutRoute("/admin/menu-permissions", <MenuRouteGuard menuKey="admin.menu-permissions"><MenuPermissionsPage /></MenuRouteGuard>),
+      layoutRoute("/admin/notifications", <MenuRouteGuard menuKey="admin.notifications"><AdminNotificationsPage /></MenuRouteGuard>),
+      layoutRoute("/admin/notifications/email-send", <MenuRouteGuard menuKey="admin.email-send"><AdminEmailSendPage /></MenuRouteGuard>),
+      layoutRoute("/admin/notifications/email-logs", <MenuRouteGuard menuKey="admin.email-logs"><AdminEmailNotificationsPage /></MenuRouteGuard>),
+      layoutRoute("/admin/audit-logs", <MenuRouteGuard menuKey="admin.audit-logs"><AdminAuditLogsPage /></MenuRouteGuard>),
+      layoutRoute("/admin/import", <MenuRouteGuard menuKey="admin.import"><AdminImportPage /></MenuRouteGuard>),
+      layoutRoute("/organization/master-data", <Navigate to="/organization/master-data/departments" replace />),
+      layoutRoute("/organization/master-data/departments", <MenuRouteGuard menuKey="admin.departments"><MasterDataPage /></MenuRouteGuard>),
+      layoutRoute("/organization/master-data/positions", <MenuRouteGuard menuKey="admin.positions"><MasterDataPage /></MenuRouteGuard>),
+      layoutRoute("/settings/company", <MenuRouteGuard menuKey="admin.company"><CompanySettingsPage /></MenuRouteGuard>),
+      layoutRoute("/companies", <MenuRouteGuard menuKey="admin.companies"><CompanyManagementPage /></MenuRouteGuard>),
+      layoutRoute("/settings/notifications", <MenuRouteGuard menuKey="admin.notification-settings"><NotificationSettingsPage /></MenuRouteGuard>),
+      { path: "/settings/master-data/leave-type", element: <Navigate to="/leave/type" replace /> },
     ],
   },
-  {
-    path: "*",
-    element: <NotFoundPage />,
-  },
+  { path: "*", element: <NotFoundPage /> },
 ]);

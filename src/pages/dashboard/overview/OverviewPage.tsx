@@ -653,7 +653,7 @@ const OverviewPage: React.FC = () => {
                         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
                       }}
                       labelStyle={{ color: '#0f172a', fontWeight: 600 }}
-                      cursor={{ fill: 'rgba(37, 99, 235, 0.05)' }}
+                      cursor={{ fill: 'rgba(15, 159, 143, 0.05)' }}
                     />
                     <Bar dataKey="count" fill="var(--color-primary)" radius={[8, 8, 0, 0]} name="Jumlah Karyawan" />
                   </BarChart>
@@ -686,7 +686,7 @@ const OverviewPage: React.FC = () => {
                         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
                       }}
                       labelStyle={{ color: '#0f172a', fontWeight: 600 }}
-                      cursor={{ fill: 'rgba(37, 99, 235, 0.05)' }}
+                      cursor={{ fill: 'rgba(15, 159, 143, 0.05)' }}
                     />
                     <Legend wrapperStyle={{ paddingTop: '20px' }} />
                     <Bar dataKey="processed" stackId="a" fill="#10b981" radius={[8, 8, 0, 0]} name="Selesai" />

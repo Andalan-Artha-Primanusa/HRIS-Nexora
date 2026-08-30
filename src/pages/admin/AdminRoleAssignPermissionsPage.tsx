@@ -193,7 +193,7 @@ const AdminRoleAssignPermissionsPage = () => {
                     onClick={() => handleSelectRole(r)}
                     style={{ 
                       cursor: 'pointer',
-                      backgroundColor: selectedRole?.id === r.id ? 'rgba(37, 99, 235, 0.1)' : 'transparent',
+                      backgroundColor: selectedRole?.id === r.id ? 'rgba(15, 159, 143, 0.1)' : 'transparent',
                       borderLeft: selectedRole?.id === r.id ? '4px solid var(--primary)' : 'none'
                     }}
                   >
@@ -266,7 +266,7 @@ const AdminRoleAssignPermissionsPage = () => {
                           gap: '10px', 
                           padding: '0.8rem', 
                           borderRadius: '8px', 
-                          backgroundColor: selectedPermissionIds.includes(perm.id) ? 'rgba(37, 99, 235, 0.08)' : 'rgba(248, 250, 252, 0.8)',
+                          backgroundColor: selectedPermissionIds.includes(perm.id) ? 'rgba(15, 159, 143, 0.08)' : 'rgba(248, 250, 252, 0.8)',
                           border: '1px solid',
                           borderColor: selectedPermissionIds.includes(perm.id) ? 'var(--primary-light)' : 'rgba(226, 232, 240, 0.8)',
                           cursor: 'pointer',

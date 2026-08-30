@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { BarChart3, CalendarDays, CheckCircle2, RefreshCw, Zap, Clock, Wallet, LayoutDashboard, ChevronLeft, ChevronRight, AlertCircle, ShieldCheck, CreditCard, Eye, FileCheck, DollarSign, FileText, Search } from "lucide-react";
 import { Card } from "@/shared/ui/Card";
 import { Modal } from "@/shared/ui/Modal";
@@ -12,6 +11,7 @@ import { getAllEmployees } from "@/features/employee/api/employee.service";
 import type { PayrollItem } from "@/features/payroll/types/payroll.types";
 import type { EmployeeItem } from "@/features/employee/types/employee.types";
 import { parsePaginatedResponse } from "@/shared/api/pagination";
+import { PayrollWorkflowGuide } from "./PayrollWorkflowGuide";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "./PayrollListPage.css";
@@ -36,43 +36,74 @@ const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = Array.from({ length: 5 }, (_, i) => CURRENT_YEAR - i);
 
 const TABS = [
-  { key: "generate", label: "Generate Payroll", icon: Zap },
-  { key: "approve", label: "Persetujuan", icon: ShieldCheck },
-  { key: "payment", label: "Pembayaran", icon: CreditCard },
+  {
+    key: "generate",
+    label: "Generate Payroll",
+    icon: Zap,
+    title: "Generate Payroll",
+    subtitle: "Buat batch payroll bulanan untuk karyawan aktif pada periode yang dipilih.",
+  },
+  {
+    key: "approve",
+    label: "Persetujuan",
+    icon: ShieldCheck,
+    title: "Persetujuan Payroll",
+    subtitle: "Review payroll draft, lanjutkan approval manager dan HR, atau tolak dengan catatan.",
+  },
+  {
+    key: "payment",
+    label: "Pembayaran",
+    icon: CreditCard,
+    title: "Pembayaran Payroll",
+    subtitle: "Proses payroll yang sudah approved menjadi paid, termasuk pembayaran massal per periode.",
+  },
 ];
 
 type TabKey = "generate" | "approve" | "payment";
 
-const PayrollProcessPage = () => {
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<TabKey>("generate");
+type PayrollProcessPageProps = {
+  mode?: TabKey;
+  showTabs?: boolean;
+};
+
+const PayrollProcessPage = ({ mode, showTabs = true }: PayrollProcessPageProps) => {
+  const [activeTab, setActiveTab] = useState<TabKey>(mode ?? "generate");
+  const activeMeta = TABS.find((tab) => tab.key === activeTab) ?? TABS[0];
+
+  useEffect(() => {
+    if (mode) setActiveTab(mode);
+  }, [mode]);
 
   return (
     <div className="crud-page payroll-process-page">
       <Card className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-content">
-            <div className="hero-badge"><Zap size={16} /><span>Operasi Penggajian</span></div>
-            <h1 className="hero-title">Proses Payroll</h1>
-            <p className="hero-subtitle">Generate, setujui, dan tandai pembayaran payroll dalam satu tampilan terpadu.</p>
+            <div className="hero-badge"><activeMeta.icon size={16} /><span>Operasi Penggajian</span></div>
+            <h1 className="hero-title">{mode ? activeMeta.title : "Proses Payroll"}</h1>
+            <p className="hero-subtitle">{mode ? activeMeta.subtitle : "Mulai dari generate payroll bulanan, approval manager dan HR, sampai pembayaran final."}</p>
           </div>
         </div>
       </Card>
 
-      <div className="payroll-tabs">
-        {TABS.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.key;
-          return (
-            <button key={tab.key} onClick={() => setActiveTab(tab.key as TabKey)}
-              className={`payroll-tab ${isActive ? 'active' : ''}`}
-            >
-              <Icon size={18} />
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
+      <PayrollWorkflowGuide compact />
+
+      {showTabs && (
+        <div className="payroll-tabs">
+          {TABS.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.key;
+            return (
+              <button key={tab.key} onClick={() => setActiveTab(tab.key as TabKey)}
+                className={`payroll-tab ${isActive ? 'active' : ''}`}
+              >
+                <Icon size={18} />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {activeTab === "generate" && <GenerateTab />}
       {activeTab === "approve" && <ApproveTab />}
@@ -155,7 +186,7 @@ const GenerateTab = () => {
         {summaryCards.map((c) => {
           const Icon = c.icon;
           return (
-            <div key={c.label} className="payroll-summary-card" style={{ borderTopColor: "#3b82f6" }}>
+            <div key={c.label} className="payroll-summary-card" style={{ borderTopColor: "var(--color-primary)" }}>
               <p className="label">{c.label}</p>
               <p className="subtitle">{c.subtitle}</p>
               <div className="value-row">
@@ -195,7 +226,7 @@ const GenerateTab = () => {
             <p className="info-text" style={{ fontSize: 12, lineHeight: 1.6, margin: 0 }}>Kalkulasi tunjangan, bonus, dan potongan untuk <strong>semua karyawan aktif</strong> di periode {period}.</p>
           </div>
           <button onClick={() => void generateMonthly()} disabled={loading}
-            style={{ width: "100%", padding: 12, borderRadius: 12, border: "none", background: "linear-gradient(135deg, var(--color-primary), #1d4ed8)", color: "#fff", fontSize: 14, fontWeight: 700, fontFamily: "'Poppins', sans-serif", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+            style={{ width: "100%", padding: 12, borderRadius: 12, border: "none", background: "linear-gradient(135deg, var(--hero-bg-start), var(--hero-bg-end))", color: "#fff", fontSize: 14, fontWeight: 700, fontFamily: "'Poppins', sans-serif", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
             {loading ? <RefreshCw size={15} className="animate-spin" /> : <Zap size={15} />}
             {loading ? "Memproses..." : "Generate Payroll Sekarang"}
           </button>
@@ -847,4 +878,5 @@ const PaymentTab = () => {
   );
 };
 
+export type { TabKey as PayrollProcessMode };
 export default PayrollProcessPage;

@@ -1,4 +1,4 @@
-﻿@import url('./../../shared/ui/Table.css');
+@import url('./../../shared/ui/Table.css');
 
 .crud-page {
   display: flex;
@@ -47,7 +47,7 @@
 .crud-card {
   padding: 1.5rem;
   border-radius: var(--radius-lg);
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border: 1px solid var(--color-border);
   position: relative;
   z-index: 1;
@@ -117,7 +117,7 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-primary);
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   font-family: var(--font-family-base);
   transition: all var(--transition-fast);
 }
@@ -142,7 +142,7 @@
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.12);
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
 }
 
 .crud-form-full {
@@ -191,7 +191,7 @@
   overflow-x: auto;
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
 }
 
 .crud-table {
@@ -235,7 +235,7 @@
 }
 
 .crud-table tbody tr {
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   transition: background var(--transition-fast);
 }
 
@@ -321,7 +321,7 @@
   padding: 0.75rem;
   font-size: var(--font-size-sm);
   color: var(--color-text-primary);
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   font-family: var(--font-family-base);
   transition: all var(--transition-fast);
   height: 42px;
@@ -331,7 +331,7 @@
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.12);
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
 }
 
 .form-group select:disabled {
@@ -374,7 +374,7 @@
 .import-template-card,
 .import-form-card {
   padding: 1.5rem;
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
 }
@@ -439,7 +439,7 @@
 }
 
 .template-btn-blue:hover {
-  background: var(--color-primary) !important;
+  background: var(--hero-bg-start) !important;
   color: var(--color-white) !important;
 }
 
@@ -460,7 +460,7 @@
   padding: 2rem;
   text-align: center;
   transition: all var(--transition-fast);
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
 }
 
 .file-upload-area:hover,
@@ -524,4 +524,5 @@
 @media (max-width: 768px) {
   .import-grid { grid-template-columns: 1fr; }
 }
+
 

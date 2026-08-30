@@ -29,8 +29,8 @@ const getStr = (rec: Rec, keys: string[]): string => { for (const k of keys) { c
 const dayOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const chartColors = ['var(--color-primary)', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
 const tooltipStyle = {
-  contentStyle: { backgroundColor: '#fff', border: '1px solid #dbeafe', borderRadius: '8px', boxShadow: '0 4px 12px rgba(37,99,235,0.1)' },
-  labelStyle: { color: '#1e40af', fontWeight: 'bold' as const },
+  contentStyle: { backgroundColor: '#fff', border: '1px solid var(--color-primary-light)', borderRadius: '8px', boxShadow: '0 4px 12px rgba(15,159,143,0.1)' },
+  labelStyle: { color: 'var(--color-primary-dark)', fontWeight: 'bold' as const },
 };
 
 const ReportsAttendancePage: React.FC = () => {
@@ -268,9 +268,9 @@ const ReportsAttendancePage: React.FC = () => {
                     <linearGradient id="gAbsen" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} /><stop offset="95%" stopColor="#ef4444" stopOpacity={0} /></linearGradient>
                     <linearGradient id="gLate" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3} /><stop offset="95%" stopColor="#f59e0b" stopOpacity={0} /></linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(37,99,235,0.1)" />
-                  <XAxis dataKey="day" stroke="#1e40af" style={{ fontSize: '12px' }} />
-                  <YAxis stroke="#1e40af" style={{ fontSize: '12px' }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(15,159,143,0.1)" />
+                  <XAxis dataKey="day" stroke="var(--color-primary-dark)" style={{ fontSize: '12px' }} />
+                  <YAxis stroke="var(--color-primary-dark)" style={{ fontSize: '12px' }} />
                   <Tooltip {...tooltipStyle} />
                   <Legend wrapperStyle={{ paddingTop: '20px' }} />
                   <Area type="monotone" dataKey="hadir" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#gHadir)" name="Hadir" />
@@ -287,9 +287,9 @@ const ReportsAttendancePage: React.FC = () => {
             {monthlyTrend.length > 0 ? (
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={monthlyTrend} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(37,99,235,0.1)" />
-                  <XAxis dataKey="month" stroke="#1e40af" style={{ fontSize: '12px' }} />
-                  <YAxis stroke="#1e40af" style={{ fontSize: '12px' }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(15,159,143,0.1)" />
+                  <XAxis dataKey="month" stroke="var(--color-primary-dark)" style={{ fontSize: '12px' }} />
+                  <YAxis stroke="var(--color-primary-dark)" style={{ fontSize: '12px' }} />
                   <Tooltip {...tooltipStyle} />
                   <Legend wrapperStyle={{ paddingTop: '20px' }} />
                   <Bar dataKey="hadir" fill="#10b981" radius={[6, 6, 0, 0]} name="Hadir" />
@@ -321,10 +321,10 @@ const ReportsAttendancePage: React.FC = () => {
             {deptAttendance.length > 0 ? (
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={deptAttendance} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(37,99,235,0.1)" />
-                  <XAxis dataKey="name" stroke="#1e40af" style={{ fontSize: '12px' }} />
-                  <YAxis stroke="#1e40af" style={{ fontSize: '12px' }} />
-                  <Tooltip {...tooltipStyle} cursor={{ fill: 'rgba(37,99,235,0.1)' }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(15,159,143,0.1)" />
+                  <XAxis dataKey="name" stroke="var(--color-primary-dark)" style={{ fontSize: '12px' }} />
+                  <YAxis stroke="var(--color-primary-dark)" style={{ fontSize: '12px' }} />
+                  <Tooltip {...tooltipStyle} cursor={{ fill: 'rgba(15,159,143,0.1)' }} />
                   <Legend wrapperStyle={{ paddingTop: '20px' }} />
                   <Bar dataKey="hadir" fill="var(--color-primary)" radius={[6, 6, 0, 0]} name="Hadir" />
                   <Bar dataKey="total" fill="#e2e8f0" radius={[6, 6, 0, 0]} name="Total Karyawan" />

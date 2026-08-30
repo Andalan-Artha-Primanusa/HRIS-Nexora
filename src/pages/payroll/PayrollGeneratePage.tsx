@@ -61,7 +61,7 @@ const PER_PAGE_OPTIONS = [5, 10, 25, 50];
    Inline style helpers
 ───────────────────────────────────────────────────────────── */
 const TONE_COLORS: Record<string, string> = {
-  blue: "#3b82f6",
+  blue: "var(--color-primary)",
   orange: "#f97316",
   green: "#22c55e",
   purple: "#8b5cf6",
@@ -102,7 +102,7 @@ const S = {
     gap: "6px",
     padding: "4px 12px",
     borderRadius: "16px",
-    background: "rgba(37,99,235,0.08)",
+    background: "rgba(15,159,143,0.08)",
     color: "var(--color-primary)",
     fontSize: "12px",
     fontWeight: 600,
@@ -234,7 +234,7 @@ const S = {
     padding: "12px",
     borderRadius: "12px",
     border: "none",
-    background: "linear-gradient(135deg, var(--color-primary), #1d4ed8)",
+    background: "linear-gradient(135deg, var(--hero-bg-start), var(--hero-bg-end))",
     color: "#fff",
     fontSize: "14px",
     fontWeight: 700,

@@ -1,4 +1,4 @@
-﻿/* ============================================ */
+/* ============================================ */
 /* AttendanceAdminPage - Same style as Dashboard  */
 /* ============================================ */
 
@@ -13,7 +13,7 @@
 .attendance-summary-card {
   padding: 1.5rem;
   border-radius: 16px;
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
   transition: all 0.2s ease;
@@ -101,7 +101,7 @@
 
 /* Control Section - Same style as Dashboard */
 .control-section-card {
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border-radius: 16px;
   border: 1px solid var(--color-border);
   padding: 1.5rem;
@@ -160,7 +160,7 @@
 }
 
 .control-actions .search-input-pill:focus {
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.1);
   outline: none;
@@ -190,7 +190,7 @@
 
 .control-actions .filter-btn-rounded.active {
   background: var(--color-primary);
-  color: var(--color-var(--color-white));
+  color: var(--color-white);
   border-color: var(--color-primary);
 }
 
@@ -206,7 +206,7 @@
   padding: 0 1rem;
   border-radius: 12px;
   border: 1px solid var(--color-border);
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   font-size: 0.9rem;
   color: var(--color-text-primary);
   transition: all 0.2s ease;
@@ -252,7 +252,7 @@
   padding: 0 1rem;
   border-radius: 12px;
   border: 1px solid var(--color-border);
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   font-size: 0.9rem;
   color: var(--color-text-primary);
   transition: all 0.2s ease;
@@ -272,7 +272,7 @@
 
 .table-wrap {
   overflow-x: auto;
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border-radius: 16px;
   border: 1px solid var(--color-border);
 }
@@ -360,7 +360,7 @@
 
 .action-btn-edit:hover {
   background: var(--color-primary);
-  color: var(--color-var(--color-white));
+  color: var(--color-white);
 }
 
 .action-btn-delete {
@@ -370,7 +370,7 @@
 
 .action-btn-delete:hover {
   background: var(--color-error);
-  color: var(--color-var(--color-white));
+  color: var(--color-white);
 }
 
 /* Pagination */
@@ -398,7 +398,7 @@
   height: 36px;
   border-radius: 10px;
   border: 1px solid var(--color-border);
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   color: var(--color-text-secondary);
   display: flex;
   align-items: center;
@@ -409,7 +409,7 @@
 
 .pagination-btn:hover:not(:disabled) {
   background: var(--color-primary);
-  color: var(--color-var(--color-white));
+  color: var(--color-white);
   border-color: var(--color-primary);
 }
 
@@ -420,7 +420,7 @@
 
 .pagination-btn.active {
   background: var(--color-primary);
-  color: var(--color-var(--color-white));
+  color: var(--color-white);
   border-color: var(--color-primary);
 }
 
@@ -472,3 +472,4 @@
     padding: 0.75rem;
   }
 }
+

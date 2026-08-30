@@ -192,7 +192,7 @@ const CalibrationFormPage: React.FC = () => {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           <Card glass style={{ padding: '1.5rem', background: '#eff6ff' }}>
-            <h3 style={{ margin: '0 0 1rem', fontSize: '1rem', color: '#1e40af' }}>Calibration Status</h3>
+            <h3 style={{ margin: '0 0 1rem', fontSize: '1rem', color: 'var(--color-primary-dark)' }}>Calibration Status</h3>
             <select 
               className="crud-input"
               value={formData.status}
@@ -208,7 +208,7 @@ const CalibrationFormPage: React.FC = () => {
               <div style={{ padding: '8px', background: 'white', borderRadius: '8px' }}>
                 <ShieldCheck size={18} color="#10b981" />
               </div>
-              <p style={{ fontSize: '0.8rem', color: '#1e3a8a', margin: 0 }}>
+              <p style={{ fontSize: '0.8rem', color: 'var(--color-primary-dark)', margin: 0 }}>
                 Calibration ensures objective evaluation across different departments.
               </p>
             </div>

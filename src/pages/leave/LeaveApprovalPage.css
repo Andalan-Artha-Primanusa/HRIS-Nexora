@@ -1,4 +1,4 @@
-﻿/* ============================================
+/* ============================================
    LEAVE APPROVAL PAGE
    ============================================ */
 
@@ -71,7 +71,7 @@
 .summary-card {
   padding: 1.25rem;
   border-radius: var(--radius-lg);
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border: 1px solid var(--color-border);
   overflow: hidden;
   position: relative;
@@ -165,7 +165,7 @@
   padding: 0 !important;
   border-radius: var(--radius-lg) !important;
   border: 1px solid var(--color-border) !important;
-  background: var(--color-var(--color-white)) !important;
+  background: var(--color-white) !important;
   overflow: hidden;
 }
 
@@ -176,7 +176,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1.5rem;
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -207,7 +207,7 @@
 }
 
 .data-table thead th {
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   padding: 1rem 2rem;
   font-size: 11px;
   font-weight: var(--font-weight-bold);
@@ -331,7 +331,7 @@
   height: 34px;
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   color: var(--color-primary);
   display: flex;
   align-items: center;
@@ -402,7 +402,7 @@
   height: 34px;
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
@@ -461,20 +461,15 @@
 
 .search-input-pill:focus {
   outline: none;
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.1);
 }
 
 .search-input-pill::placeholder {
-<<<<<<< HEAD
   color: var(--color-text-tertiary);
 }
 
-=======
-  color: #94a3b8;
-  font-weight: 500;
-}
 .leave-approval-table-section {
   margin-top: 0 !important;
 }
@@ -485,12 +480,12 @@
 }
 
 .leave-approval-table-area .elyra-tab.active {
-  background: #2563eb;
+  background: var(--hero-bg-start);
   color: #ffffff;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 4px 12px rgba(15, 159, 143, 0.25);
 }
 
 .leave-approval-table-area .table-wrap {
   border-top: 1px solid #e2e8f0;
 }
->>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
+

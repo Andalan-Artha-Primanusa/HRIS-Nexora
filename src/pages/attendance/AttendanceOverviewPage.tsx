@@ -140,12 +140,12 @@ const AttendanceOverviewPage = () => {
       <Card className="hero-card" style={{ marginBottom: 'var(--space-6)' }}>
         <div className="hero-card-inner" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--space-6)' }}>
           <div className="hero-content">
-            <div className="hero-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--space-2)', padding: 'var(--space-1) var(--space-3)', borderRadius: 'var(--radius-full)', fontSize: 'var(--font-size-xs)', fontWeight: 'var(--font-weight-semibold)', letterSpacing: 'var(--letter-spacing-wide)', textTransform: 'uppercase', color: 'var(--color-primary-dark)', marginBottom: 'var(--space-3)', background: 'var(--color-primary-lighter)' }}>
+            <div className="hero-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--space-2)', padding: 'var(--space-1) var(--space-3)', borderRadius: 'var(--radius-full)', fontSize: 'var(--font-size-xs)', fontWeight: 'var(--font-weight-semibold)', letterSpacing: 'var(--letter-spacing-wide)', textTransform: 'uppercase', color: 'var(--color-white)', marginBottom: 'var(--space-3)', background: 'rgba(255, 255, 255, 0.14)' }}>
               <Calendar size={16} />
               <span>Attendance Center</span>
             </div>
-            <h1 className="hero-title" style={{ fontFamily: 'var(--font-family-heading)', fontSize: 'var(--font-size-2xl)', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-text-primary)', margin: '0 0 var(--space-2) 0', letterSpacing: 'var(--letter-spacing-tight)' }}>Attendance Dashboard</h1>
-            <p className="hero-subtitle" style={{ fontSize: 'var(--font-size-md)', color: 'var(--color-text-secondary)', margin: '0', maxWidth: '50ch' }}>Overview of attendance statistics and daily logs.</p>
+            <h1 className="hero-title" style={{ fontFamily: 'var(--font-family-heading)', fontSize: 'var(--font-size-2xl)', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-white)', margin: '0 0 var(--space-2) 0', letterSpacing: 'var(--letter-spacing-tight)' }}>Attendance Dashboard</h1>
+            <p className="hero-subtitle" style={{ fontSize: 'var(--font-size-md)', color: 'rgba(255, 255, 255, 0.88)', margin: '0', maxWidth: '50ch' }}>Overview of attendance statistics and daily logs.</p>
           </div>
           <div className="hero-actions" style={{ display: 'flex', gap: 'var(--space-3)' }}>
             <Button variant="outline" size="md" onClick={() => void loadAttendanceOverview()} disabled={loading} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>

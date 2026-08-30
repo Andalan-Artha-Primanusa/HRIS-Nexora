@@ -69,7 +69,12 @@ const LoginPage = () => {
         return;
       }
 
-      if (result && "user" in result) {
+      if (result && "user" in result && result.user) {
+        if ((result.user as { must_change_password?: boolean }).must_change_password) {
+          navigate("/force-reset-password", { replace: true });
+          return;
+        }
+
         navigate(getRoleBasedDashboardPath(result.user));
       }
     } catch (err: unknown) {

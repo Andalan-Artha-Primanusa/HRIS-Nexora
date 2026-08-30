@@ -546,7 +546,7 @@ const EnrollmentsTab: React.FC = () => {
                             {(enrollment.status === 'enrolled' || enrollment.status === 'in_progress') && (
                               <button className="action-btn" style={{ color: '#8b5cf6', background: '#f5f3ff' }} onClick={() => openCompleteModal(enrollment)} title="Update Progress"><Award size={16} /></button>
                             )}
-                            <button className="action-btn" style={{ color: '#3b82f6', background: '#eff6ff' }} onClick={() => openProgressHistory(enrollment.id)} title="Riwayat Progress"><TrendingUp size={16} /></button>
+                            <button className="action-btn" style={{ color: 'var(--color-primary)', background: '#eff6ff' }} onClick={() => openProgressHistory(enrollment.id)} title="Riwayat Progress"><TrendingUp size={16} /></button>
                             {enrollment.approval_flow_id && (
                               <button className="action-btn" style={{ color: '#8b5cf6', background: '#f5f3ff' }} onClick={() => setHistoryModal({ module: 'training', id: enrollment.id })} title="Riwayat Approval"><History size={16} /></button>
                             )}
@@ -587,7 +587,7 @@ const EnrollmentsTab: React.FC = () => {
             <textarea placeholder="Catatan tambahan..." value={completeData.notes} onChange={e => setCompleteData({ ...completeData, notes: e.target.value })} className="form-control" rows={3} />
           </div>
           <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
-            <button type="button" className="btn-primary" style={{ flex: 1, padding: '0.75rem', borderRadius: '10px', fontWeight: 600, background: '#3b82f6' }} onClick={handleUpdateProgress} disabled={completing}>
+            <button type="button" className="btn-primary" style={{ flex: 1, padding: '0.75rem', borderRadius: '10px', fontWeight: 600, background: 'var(--color-primary)' }} onClick={handleUpdateProgress} disabled={completing}>
               {completing ? <><Loader2 size={16} className="animate-spin" /> Menyimpan...</> : <><Save size={16} /> Simpan Progress</>}
             </button>
             <button type="button" className="btn-primary" style={{ flex: 1, padding: '0.75rem', borderRadius: '10px', fontWeight: 600 }} onClick={handleComplete} disabled={completing}>

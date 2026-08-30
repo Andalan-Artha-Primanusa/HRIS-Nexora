@@ -95,7 +95,7 @@ const MyCompetenciesPage: React.FC = () => {
   const proficiencyColors: Record<number, string> = {
     1: '#f59e0b',
     2: '#10b981',
-    3: '#3b82f6',
+    3: 'var(--color-primary)',
     4: '#8b5cf6',
     5: '#ec4899',
   };

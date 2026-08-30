@@ -1,4 +1,4 @@
-﻿/* ============================================ */
+/* ============================================ */
 /* Shared Attendance Pages - Same style as Dashboard */
 /* ============================================ */
 
@@ -15,7 +15,7 @@
 .attendance-summary-card {
   padding: 1.5rem;
   border-radius: 16px;
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
   transition: all 0.2s ease;
@@ -108,7 +108,7 @@
 
 /* Control Section */
 .control-section-card {
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border-radius: 16px;
   border: 1px solid var(--color-border);
   padding: 1.5rem;
@@ -131,9 +131,9 @@
 }
 
 .overtime-table-area .elyra-tab.active {
-  background: #2563eb;
+  background: var(--hero-bg-start);
   color: #ffffff;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 4px 12px rgba(15, 159, 143, 0.25);
 }
 
 .control-actions {
@@ -179,7 +179,7 @@
 }
 
 .control-actions .search-input-pill:focus {
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.1);
   outline: none;
@@ -208,7 +208,7 @@
 
 .table-wrap {
   overflow-x: auto;
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border-radius: 16px;
   border: 1px solid var(--color-border);
 }
@@ -322,7 +322,7 @@
 
 .action-btn-view:hover {
   background: var(--color-primary);
-  color: var(--color-var(--color-white));
+  color: var(--color-white);
 }
 
 .action-btn-delete {
@@ -332,7 +332,7 @@
 
 .action-btn-delete:hover {
   background: var(--color-error);
-  color: var(--color-var(--color-white));
+  color: var(--color-white);
 }
 
 /* Chart Section */
@@ -341,7 +341,7 @@
 }
 
 .chart-card {
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border-radius: 16px;
   border: 1px solid var(--color-border);
   padding: 1.5rem;
@@ -407,7 +407,7 @@
   height: 36px;
   border-radius: 10px;
   border: 1px solid var(--color-border);
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   color: var(--color-text-secondary);
   display: flex;
   align-items: center;
@@ -418,7 +418,7 @@
 
 .pagination-btn:hover:not(:disabled) {
   background: var(--color-primary);
-  color: var(--color-var(--color-white));
+  color: var(--color-white);
   border-color: var(--color-primary);
 }
 
@@ -429,7 +429,7 @@
 
 .pagination-btn.active {
   background: var(--color-primary);
-  color: var(--color-var(--color-white));
+  color: var(--color-white);
   border-color: var(--color-primary);
 }
 
@@ -531,7 +531,7 @@
 }
 
 .overtime-reason-modal__textarea:focus {
-  border-color: #60a5fa;
+  border-color: var(--color-primary-light);
   box-shadow: 0 0 0 4px rgba(15, 159, 143, 0.12);
 }
 
@@ -564,3 +564,4 @@
     padding: 0.75rem;
   }
 }
+

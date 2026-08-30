@@ -58,8 +58,8 @@
 
 .document-review-search input:focus {
   background: #ffffff;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.1);
 }
 
 .document-review-tabs {
@@ -87,9 +87,9 @@
 }
 
 .document-review-tabs button.active {
-  background: #2563eb;
+  background: var(--hero-bg-start);
   color: #ffffff;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 4px 12px rgba(15, 159, 143, 0.25);
 }
 
 .document-review-tabs span {
@@ -152,7 +152,7 @@
   height: 38px;
   border-radius: 10px;
   background: #e5efff;
-  color: #2563eb;
+  color: var(--color-primary);
   flex-shrink: 0;
 }
 
@@ -243,16 +243,16 @@
 
 .document-review-action--download,
 .document-review-action--view {
-  color: #2563eb;
-  border-color: #bfdbfe;
+  color: var(--color-primary);
+  border-color: var(--color-primary-light);
   background: #eff6ff;
 }
 
 .document-review-action--download:hover,
 .document-review-action--view:hover {
   color: #ffffff;
-  border-color: #2563eb;
-  background: #2563eb;
+  border-color: var(--hero-bg-start);
+  background: var(--hero-bg-start);
 }
 
 .document-review-action--history {
@@ -354,8 +354,8 @@
 }
 
 .document-review-decision textarea:focus {
-  border-color: #2563eb;
-  outline: 3px solid rgba(37, 99, 235, 0.1);
+  border-color: var(--color-primary);
+  outline: 3px solid rgba(15, 159, 143, 0.1);
 }
 
 @media (max-width: 720px) {

@@ -20,7 +20,7 @@ const extractArr = (raw: unknown): Rec[] => {
 const getStr = (rec: Rec, keys: string[]) => { for (const k of keys) { const v = rec[k]; if (typeof v === 'string' && v.trim()) return v.trim(); } return ''; };
 const getNum = (v: unknown) => { if (typeof v === 'number' && Number.isFinite(v)) return v; if (typeof v === 'string') { const p = Number(v); if (Number.isFinite(p)) return p; } return 0; };
 
-const TT = { contentStyle: { backgroundColor:'#fff', border:'1px solid #dbeafe', borderRadius:'8px' }, labelStyle: { color:'#1e40af', fontWeight:'bold' as const } };
+const TT = { contentStyle: { backgroundColor:'#fff', border:'1px solid var(--color-primary-light)', borderRadius:'8px' }, labelStyle: { color:'var(--color-primary-dark)', fontWeight:'bold' as const } };
 const fmtMonth = (period: string) => { if (!period) return period; const [y,m] = period.split('-'); const d = new Date(Number(y),Number(m)-1,1); return Number.isNaN(d.getTime()) ? period : d.toLocaleDateString('id-ID',{month:'short',year:'numeric'}); };
 const fmtRp = (n: number) => `Rp ${(n || 0).toLocaleString("id-ID")}`;
 
@@ -203,8 +203,8 @@ const ReportsPayrollPage: React.FC = () => {
             {periodTimeline.length > 0 ? (
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={periodTimeline} margin={{top:10,right:30,left:0,bottom:0}}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(37,99,235,0.1)"/>
-                  <XAxis dataKey="month" stroke="#1e40af" style={{fontSize:'12px'}}/><YAxis stroke="#1e40af" style={{fontSize:'12px'}}/>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(15,159,143,0.1)"/>
+                  <XAxis dataKey="month" stroke="var(--color-primary-dark)" style={{fontSize:'12px'}}/><YAxis stroke="var(--color-primary-dark)" style={{fontSize:'12px'}}/>
                   <Tooltip {...TT}/><Legend wrapperStyle={{paddingTop:'20px'}}/>
                   <Bar dataKey="paid" stackId="a" fill="#10b981" radius={[4,4,0,0]} name="Dibayar"/>
                   <Bar dataKey="pending" stackId="a" fill="#f59e0b" radius={[0,0,0,0]} name="Pending"/>
@@ -219,8 +219,8 @@ const ReportsPayrollPage: React.FC = () => {
             {netByPeriod.length > 0 ? (
               <ResponsiveContainer width="100%" height={280}>
                 <LineChart data={netByPeriod} margin={{top:10,right:30,left:0,bottom:0}}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(37,99,235,0.1)"/>
-                  <XAxis dataKey="month" stroke="#1e40af" style={{fontSize:'12px'}}/><YAxis stroke="#1e40af" style={{fontSize:'12px'}}/>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(15,159,143,0.1)"/>
+                  <XAxis dataKey="month" stroke="var(--color-primary-dark)" style={{fontSize:'12px'}}/><YAxis stroke="var(--color-primary-dark)" style={{fontSize:'12px'}}/>
                   <Tooltip {...TT} formatter={(v:any)=>fmtRp(Number(v))}/>
                   <Line type="monotone" dataKey="net" stroke="var(--color-primary)" strokeWidth={3} dot={{r:5, fill:'var(--color-primary)', strokeWidth:2, stroke:'#fff'}} activeDot={{r:7}} name="Net Salary"/>
                 </LineChart>
@@ -249,9 +249,9 @@ const ReportsPayrollPage: React.FC = () => {
             {deptData.length > 0 ? (
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={deptData} margin={{top:10,right:30,left:0,bottom:0}}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(37,99,235,0.1)"/>
-                  <XAxis dataKey="name" stroke="#1e40af" style={{fontSize:'12px'}}/><YAxis stroke="#1e40af" style={{fontSize:'12px'}} tickFormatter={(v:number)=>Intl.NumberFormat('id-ID',{notation:'compact'}).format(v)}/>
-                  <Tooltip {...TT} formatter={(v:any)=>fmtRp(Number(v))} cursor={{fill:'rgba(37,99,235,0.1)'}}/>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(15,159,143,0.1)"/>
+                  <XAxis dataKey="name" stroke="var(--color-primary-dark)" style={{fontSize:'12px'}}/><YAxis stroke="var(--color-primary-dark)" style={{fontSize:'12px'}} tickFormatter={(v:number)=>Intl.NumberFormat('id-ID',{notation:'compact'}).format(v)}/>
+                  <Tooltip {...TT} formatter={(v:any)=>fmtRp(Number(v))} cursor={{fill:'rgba(15,159,143,0.1)'}}/>
                   <Bar dataKey="value" fill="#8b5cf6" radius={[6,6,0,0]} name="Total Salary"/>
                 </BarChart>
               </ResponsiveContainer>

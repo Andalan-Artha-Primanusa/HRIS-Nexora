@@ -1,4 +1,4 @@
-﻿.approval-filter-bar {
+.approval-filter-bar {
   background: var(--color-white);
   border-radius: 16px;
   padding: 1rem 1.5rem;
@@ -50,7 +50,7 @@
 
 .approval-flow-card:hover {
   box-shadow: 0 8px 30px rgba(15, 159, 143, 0.1);
-  border-color: #93c5fd;
+  border-color: var(--color-primary-light);
 }
 
 .approval-flow-header {
@@ -96,7 +96,7 @@
   width: fit-content;
   text-transform: capitalize;
   letter-spacing: 0.02em;
-  border: 1px solid #93c5fd;
+  border: 1px solid var(--color-primary-light);
   font-family: var(--font-family-heading);
 }
 
@@ -105,7 +105,7 @@
   font-weight: 700;
   padding: 4px 14px;
   border-radius: 999px;
-  var(--color-white)-space: nowrap;
+  white-space: nowrap;
   letter-spacing: 0.02em;
   flex-shrink: 0;
   font-family: var(--font-family-heading);
@@ -186,7 +186,7 @@
 }
 
 .approval-step-content:hover {
-  border-color: #93c5fd;
+  border-color: var(--color-primary-light);
   box-shadow: 0 2px 8px rgba(15, 159, 143, 0.06);
 }
 
@@ -234,7 +234,7 @@
 
 .approval-flow-actions .btn-outline:hover {
   background: var(--color-surface-soft);
-  border-color: #93c5fd;
+  border-color: var(--color-primary-light);
   color: var(--color-primary-dark);
   transform: translateY(-1px);
 }
@@ -268,4 +268,5 @@
   margin-bottom: 0.75rem;
   font-family: var(--font-family-heading);
 }
+
 

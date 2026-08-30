@@ -1,4 +1,4 @@
-﻿/* ============================================ */
+/* ============================================ */
 /* AdminPermissionsPage - Premium UI Overrides   */
 /* ============================================ */
 
@@ -13,7 +13,7 @@
 .employee-summary-card {
   padding: 1.5rem;
   border-radius: 16px;
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border: 1px solid var(--color-border);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
   transition: all 0.2s ease;
@@ -106,7 +106,7 @@
 
 /* Analytics Title Card */
 .analytics-title-card {
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border-radius: 16px;
   border: 1px solid var(--color-border);
   padding: 1.5rem 2rem;
@@ -148,7 +148,7 @@
 
 /* Control Section */
 .control-section-card {
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border-radius: 16px;
   border: 1px solid var(--color-border);
   padding: 1.5rem;
@@ -203,7 +203,7 @@
 }
 
 .search-input-pill:focus {
-  background: var(--color-var(--color-white)) !important;
+  background: var(--color-white) !important;
   box-shadow: 0 0 0 4px rgba(15, 159, 143, 0.08), 0 8px 20px rgba(0, 0, 0, 0.04) !important;
 }
 
@@ -232,7 +232,7 @@
 
 .filter-btn-rounded.active {
   background: var(--color-primary);
-  color: var(--color-var(--color-white));
+  color: var(--color-white);
   border-color: var(--color-primary);
 }
 
@@ -278,7 +278,7 @@
   padding: 0 1rem;
   border-radius: 12px;
   border: 1px solid var(--color-border);
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   font-size: 0.9rem;
   color: var(--color-text-primary);
   transition: all 0.2s ease;
@@ -302,7 +302,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: var(--font-family-heading);
-  var(--color-white)-space: nowrap;
+  white-space: nowrap;
 }
 
 .btn-clear-filter:hover {
@@ -315,7 +315,7 @@
 }
 
 .wuw-table-area {
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border-radius: 16px;
   border: 1px solid var(--color-border);
   overflow: hidden;
@@ -450,7 +450,7 @@
 
 .action-btn-edit:hover {
   background: var(--color-primary);
-  color: var(--color-var(--color-white));
+  color: var(--color-white);
 }
 
 .td-center {
@@ -482,7 +482,7 @@
   height: 36px;
   border-radius: 10px;
   border: 1px solid var(--color-border);
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   color: var(--color-text-secondary);
   display: flex;
   align-items: center;
@@ -494,7 +494,7 @@
 
 .pagination-btn:hover:not(:disabled) {
   background: var(--color-primary);
-  color: var(--color-var(--color-white));
+  color: var(--color-white);
   border-color: var(--color-primary);
 }
 
@@ -505,7 +505,7 @@
 
 .pagination-btn.active {
   background: var(--color-primary);
-  color: var(--color-var(--color-white));
+  color: var(--color-white);
   border-color: var(--color-primary);
 }
 
@@ -556,7 +556,7 @@
   width: 46px;
   height: 46px;
   border-radius: 12px;
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   color: var(--color-primary);
   display: flex;
   align-items: center;
@@ -608,7 +608,7 @@
   padding: 0.95rem;
   border: 1px solid var(--color-border);
   border-radius: 12px;
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
 }
 
 .permission-detail__item span,
@@ -653,7 +653,7 @@
 }
 
 .permission-detail__extra-row code {
-  var(--color-white)-space: pre-wrap;
+  white-space: pre-wrap;
   word-break: break-word;
   color: var(--color-text-primary);
   font-family: var(--font-family-heading);
@@ -697,4 +697,5 @@
     grid-template-columns: 1fr;
   }
 }
+
 

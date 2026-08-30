@@ -1,4 +1,4 @@
-﻿.work-schedule-form-container {
+.work-schedule-form-container {
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem 1rem;
@@ -26,7 +26,7 @@
   width: 44px;
   height: 44px;
   border-radius: 10px;
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border: 1px solid #DDE9E6;
   color: var(--color-primary);
   cursor: pointer;
@@ -66,4 +66,5 @@
   letter-spacing: 0.05em;
   margin-bottom: 0.5rem;
 }
+
 

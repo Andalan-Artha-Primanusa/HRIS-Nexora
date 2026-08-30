@@ -178,7 +178,7 @@ const PayrollReportsPage: React.FC = () => {
               style={{
                 flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                 padding: "12px 16px", borderRadius: 12, border: "none", cursor: "pointer",
-                background: isActive ? "linear-gradient(135deg, var(--color-primary), #1d4ed8)" : "transparent",
+                background: isActive ? "linear-gradient(135deg, var(--hero-bg-start), var(--hero-bg-end))" : "transparent",
                 color: isActive ? "#fff" : "#64748b", fontWeight: isActive ? 700 : 500, fontSize: "0.875rem",
                 fontFamily: "'Poppins', sans-serif", transition: "all 0.2s",
               }}
@@ -321,7 +321,7 @@ const PayrollReportsPage: React.FC = () => {
         footer={<>
           <button className="modal-btn-cancel" onClick={() => setExportModal(false)}>Batal</button>
           <button className="modal-btn-confirm" onClick={handleExport} disabled={exportLoading}
-            style={{ background: 'linear-gradient(135deg, var(--color-primary), #1d4ed8)' }}>
+            style={{ background: 'linear-gradient(135deg, var(--hero-bg-start), var(--hero-bg-end))' }}>
             {exportLoading ? <><RefreshCw size={16} className="animate-spin" /> Memproses...</> : <><Download size={16} /> Download CSV</>}
           </button>
         </>}
@@ -344,7 +344,7 @@ const PayrollReportsPage: React.FC = () => {
       <Modal isOpen={!!exportError} onClose={() => setExportError(null)} title="Export Gagal" size="md"
         footer={<>
           <button className="modal-btn-cancel" onClick={() => setExportError(null)}>Tutup</button>
-          <button className="modal-btn-confirm" onClick={() => { setExportError(null); setExportModal(true); }} style={{ background: 'linear-gradient(135deg, var(--color-primary), #1d4ed8)' }}>Coba Lagi</button>
+          <button className="modal-btn-confirm" onClick={() => { setExportError(null); setExportModal(true); }} style={{ background: 'linear-gradient(135deg, var(--hero-bg-start), var(--hero-bg-end))' }}>Coba Lagi</button>
         </>}
       >
         <p className="modal-completion-task" style={{ marginBottom: '1rem' }}>Tidak bisa mengunduh file</p>

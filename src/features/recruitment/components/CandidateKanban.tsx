@@ -10,7 +10,7 @@ interface CandidateKanbanProps {
 
 const STAGES = [
   { id: 'applied', label: 'Applied', color: '#64748b' },
-  { id: 'screening', label: 'Screening', color: '#3b82f6' },
+  { id: 'screening', label: 'Screening', color: 'var(--color-primary)' },
   { id: 'interview', label: 'Interview', color: '#8b5cf6' },
   { id: 'offer', label: 'Offer', color: '#10b981' },
   { id: 'hired', label: 'Hired', color: '#14b8a6' },

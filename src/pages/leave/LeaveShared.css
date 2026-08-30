@@ -1,4 +1,4 @@
-﻿/* ============================================ */
+/* ============================================ */
 /* Shared Leave Pages - Same style as Dashboard  */
 /* ============================================ */
 
@@ -14,7 +14,7 @@
 .leave-summary-card {
   padding: 1.5rem;
   border-radius: 16px;
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border: 1px solid var(--color-border);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
   transition: all 0.2s ease;
@@ -112,7 +112,7 @@
 
 /* Control Section */
 .control-section-card {
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border-radius: 16px;
   border: 1px solid var(--color-border);
   padding: 1.5rem;
@@ -176,7 +176,7 @@
 }
 
 .control-actions .search-input-pill:focus {
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.1);
   outline: none;
@@ -187,7 +187,7 @@
   padding: 0 1rem;
   border-radius: 12px;
   border: 1px solid var(--color-border);
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   font-size: 0.9rem;
   color: var(--color-text-primary);
   transition: all 0.2s ease;
@@ -220,7 +220,7 @@
 
 .table-wrap {
   overflow-x: auto;
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border-radius: 16px;
   border: 1px solid var(--color-border);
 }
@@ -349,7 +349,7 @@
   height: 36px;
   border-radius: 10px;
   border: 1px solid var(--color-border);
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   color: var(--color-primary);
   display: flex;
   align-items: center;
@@ -373,7 +373,7 @@
 
 .action-btn-success:hover {
   background: var(--color-success);
-  color: var(--color-var(--color-white));
+  color: var(--color-white);
 }
 
 .action-btn-approve {
@@ -383,7 +383,7 @@
 
 .action-btn-approve:hover {
   background: var(--color-success);
-  color: var(--color-var(--color-white));
+  color: var(--color-white);
 }
 
 .action-btn-reject {
@@ -393,7 +393,7 @@
 
 .action-btn-reject:hover {
   background: var(--color-error);
-  color: var(--color-var(--color-white));
+  color: var(--color-white);
 }
 
 .action-btn-delete {
@@ -403,12 +403,12 @@
 
 .action-btn-delete:hover {
   background: var(--color-error);
-  color: var(--color-var(--color-white));
+  color: var(--color-white);
 }
 
 .action-btn-view,
 .action-btn-edit {
-  background: var(--color-var(--color-white)) !important;
+  background: var(--color-white) !important;
   color: var(--color-primary) !important;
   border: 1px solid var(--color-border) !important;
 }
@@ -496,7 +496,7 @@
 .balance-card {
   padding: 1.5rem;
   border-radius: 16px;
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border: 1px solid var(--color-border);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
@@ -569,7 +569,7 @@
 .policy-details-card {
   padding: 2rem;
   border-radius: 16px;
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border: 1px solid var(--color-border);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
@@ -630,3 +630,4 @@
     font-size: 1.25rem;
   }
 }
+

@@ -1,4 +1,4 @@
-﻿.profiles-page {
+.profiles-page {
   --profiles-accent: var(--color-primary);
   --profiles-accent-soft: rgba(15, 159, 143, 0.08);
   --profiles-accent-border: rgba(15, 159, 143, 0.2);
@@ -47,7 +47,7 @@
 .profile-card-section {
   border: 1px solid var(--gray-200);
   border-radius: 1rem;
-  background: var(--var(--color-white));
+  background: var(--color-white);
   box-shadow: var(--shadow-sm);
 }
 
@@ -131,7 +131,7 @@
   padding: 0.58rem 0.85rem;
   border: 1px solid var(--gray-200);
   border-radius: 0.75rem;
-  background: var(--var(--color-white));
+  background: var(--color-white);
   color: var(--gray-900);
   font-size: 0.92rem;
   line-height: 1.35;
@@ -204,7 +204,7 @@ input[type="date"].profiles-input {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 4px solid var(--var(--color-white));
+  border: 4px solid var(--color-white);
   box-shadow: 0 8px 24px rgba(15, 159, 143, 0.14);
 }
 
@@ -296,7 +296,7 @@ input[type="date"].profiles-input {
   padding: 1.5rem;
   border-radius: 16px;
   border: 1px solid var(--gray-200);
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
 }
 
@@ -340,7 +340,7 @@ input[type="date"].profiles-input {
   width: 38px;
   height: 38px;
   border-radius: 0.65rem;
-  background: var(--var(--color-white));
+  background: var(--color-white);
   border: 1px solid var(--gray-200);
   color: var(--gray-600);
   display: flex;
@@ -428,7 +428,7 @@ input[type="date"].profiles-input {
 .profile-card-item {
   border: 1px solid var(--gray-200);
   border-radius: 16px;
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   padding: 0.75rem;
   display: flex;
   flex-direction: column;
@@ -603,7 +603,7 @@ input[type="date"].profiles-input {
 
 .profiles-search-box:focus-within {
   border-color: var(--color-primary);
-  background-color: var(--var(--color-white));
+  background-color: var(--color-white);
   box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.1);
 }
 
@@ -760,7 +760,7 @@ input[type="date"].profiles-input {
 .profiles-table th {
   font-size: 0.8rem;
   letter-spacing: 0.05em;
-  var(--color-white)-space: nowrap;
+  white-space: nowrap;
 }
 
 .profiles-table td {
@@ -981,7 +981,7 @@ input[type="date"].profiles-input {
 .profiles-summary-card {
   padding: 1.35rem;
   border-radius: 16px;
-  background: linear-gradient(135deg, var(--color-var(--color-white)) 0%, #f8faff 100%);
+  background: linear-gradient(135deg, var(--color-white) 0%, #f8faff 100%);
   border: 1px solid rgba(15, 159, 143, 0.12);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
   overflow: hidden;
@@ -1005,7 +1005,7 @@ input[type="date"].profiles-input {
 .profiles-summary-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 24px rgba(15, 159, 143, 0.15);
-  border-color: #93c5fd;
+  border-color: var(--color-primary-light);
 }
 
 .profiles-summary-header {
@@ -1239,7 +1239,7 @@ input[type="date"].profiles-input {
 
 .profiles-sort-order-btn:hover {
   background: var(--color-white);
-  border-color: #93c5fd;
+  border-color: var(--color-primary-light);
 }
 
 .profiles-filter-btn {
@@ -1322,7 +1322,7 @@ input[type="date"].profiles-input {
   border-bottom: 2px solid rgba(15, 159, 143, 0.2);
   font-size: 0.82rem;
   letter-spacing: 0.04em;
-  var(--color-white)-space: nowrap;
+  white-space: nowrap;
 }
 
 .profiles-table td {
@@ -1402,7 +1402,7 @@ input[type="date"].profiles-input {
 .profile-card-item,
 .profile-collection-item {
   border-color: rgba(15, 159, 143, 0.12);
-  background: linear-gradient(180deg, var(--color-var(--color-white)), var(--color-surface-soft));
+  background: linear-gradient(180deg, var(--color-white), var(--color-surface-soft));
 }
 
 .detail-icon-wrap,
@@ -1524,5 +1524,6 @@ input[type="date"].profiles-input {
     padding: 0.95rem;
   }
 }
+
 
 

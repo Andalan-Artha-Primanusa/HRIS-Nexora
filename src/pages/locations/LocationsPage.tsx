@@ -192,8 +192,8 @@ const LocationsPage = () => {
           icon={MapPinned}
           title="Daftar Lokasi"
           subtitle="Kelola dan lihat semua lokasi"
-          iconColor="#1d4ed8"
-          iconBgColor="#dbeafe"
+          iconColor="var(--color-primary-dark)"
+          iconBgColor="var(--color-primary-light)"
         />
       </Card>
 

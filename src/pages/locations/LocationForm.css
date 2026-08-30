@@ -1,4 +1,4 @@
-﻿/* Location Form Styling - Professional & Senior-level Design */
+/* Location Form Styling - Professional & Senior-level Design */
 
 .location-form-container {
   max-width: 900px;
@@ -35,7 +35,7 @@
   width: 44px;
   height: 44px;
   border-radius: 10px;
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border: 1px solid #DDE9E6;
   color: var(--color-primary);
   cursor: pointer;
@@ -195,7 +195,7 @@
   padding: 0.875rem 1rem;
   border: 1px solid #DDE9E6;
   border-radius: 8px;
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   color: #1a202c;
   font-size: 0.95rem;
   font-family: var(--font-family-heading);
@@ -213,7 +213,7 @@
 
 .location-input:focus {
   outline: none;
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px #eaf1ff;
 }
@@ -234,7 +234,7 @@
   border-radius: 6px;
   font-size: 0.8rem;
   font-weight: 600;
-  var(--color-white)-space: nowrap;
+  white-space: nowrap;
   flex-shrink: 0;
 }
 
@@ -362,4 +362,5 @@
     transition: none !important;
   }
 }
+
 

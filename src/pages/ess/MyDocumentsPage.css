@@ -19,7 +19,7 @@
 
 .my-documents-page .document-upload-form .upload-dropzone:hover,
 .my-documents-page .document-upload-form .upload-dropzone--active {
-  border-color: #2563eb;
+  border-color: var(--color-primary);
   background: #eff6ff;
 }
 
@@ -62,7 +62,7 @@
 }
 
 .my-documents-page .document-upload-form .upload-file-icon {
-  color: #2563eb;
+  color: var(--color-primary);
 }
 
 .my-documents-page .document-upload-form .upload-file-info {
@@ -138,8 +138,8 @@
 }
 
 .my-documents-page .document-upload-form .form-input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.12);
 }
 
 .my-documents-page .document-upload-form .form-input::placeholder {

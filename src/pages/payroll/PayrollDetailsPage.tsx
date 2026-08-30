@@ -14,13 +14,20 @@ import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "./PayrollDetailsPage.css";
 
-const PayrollDetailsPage = () => {
-  const [componentType, setComponentType] = useState<"allowance" | "deduction">("allowance");
+type PayrollComponentType = "allowance" | "deduction";
+
+type PayrollDetailsPageProps = {
+  componentMode?: PayrollComponentType;
+  showTabs?: boolean;
+};
+
+const PayrollDetailsPage = ({ componentMode, showTabs = true }: PayrollDetailsPageProps) => {
+  const [componentType, setComponentType] = useState<PayrollComponentType>(componentMode ?? "allowance");
   const [items, setItems] = useState<PayrollDetail[]>([]);
   const [payrollId, setPayrollId] = useState("");
   const [selectedEmployeeId, setSelectedEmployeeId] = useState("");
   const [detailId, setDetailId] = useState("");
-  const [detailType, setDetailType] = useState<"allowance" | "deduction">("allowance");
+  const [detailType, setDetailType] = useState<PayrollComponentType>(componentMode ?? "allowance");
   const [detailName, setDetailName] = useState("");
   const [detailAmount, setDetailAmount] = useState("");
   const [allPayrolls, setAllPayrolls] = useState<PayrollItem[]>([]);
@@ -34,6 +41,11 @@ const PayrollDetailsPage = () => {
   const [viewDetail, setViewDetail] = useState<PayrollDetail | null>(null);
 
   const pageSizeOverview = 10;
+  const isLockedMode = Boolean(componentMode);
+  const pageTitle = componentType === "deduction" ? "Potongan Payroll" : "Tunjangan Payroll";
+  const pageSubtitle = componentType === "deduction"
+    ? "Kelola seluruh komponen potongan payroll karyawan dari satu halaman khusus."
+    : "Kelola seluruh komponen tunjangan payroll karyawan dari satu halaman khusus.";
 
   const availablePayrolls = useMemo(
     () => allPayrolls.filter((payroll) => !selectedEmployeeId || String(payroll.employee_id) === selectedEmployeeId),
@@ -232,6 +244,10 @@ const PayrollDetailsPage = () => {
   }, [componentType]);
 
   useEffect(() => {
+    if (componentMode) setComponentType(componentMode);
+  }, [componentMode]);
+
+  useEffect(() => {
     void fetchMetadata();
   }, []);
 
@@ -260,8 +276,8 @@ const PayrollDetailsPage = () => {
               <Wallet size={16} />
               <span>Pusat Payroll</span>
             </div>
-            <h1 className="hero-title">Komponen Payroll</h1>
-            <p className="hero-subtitle">Kelola komponen tunjangan dan potongan payroll karyawan.</p>
+            <h1 className="hero-title">{componentMode ? pageTitle : "Komponen Payroll"}</h1>
+            <p className="hero-subtitle">{componentMode ? pageSubtitle : "Kelola komponen tunjangan dan potongan payroll karyawan."}</p>
           </div>
           <div className="hero-actions">
             <button className="btn-outline" onClick={() => void loadPayrollDetails()} disabled={loading || !payrollId}>
@@ -272,20 +288,22 @@ const PayrollDetailsPage = () => {
         </div>
       </Card>
 
-      <div className="payroll-component-tabs">
-        <button
-          className={`payroll-component-tab ${componentType === "allowance" ? "is-active" : ""}`}
-          onClick={() => setComponentType("allowance")}
-        >
-          <Gift size={16} /> Tunjangan
-        </button>
-        <button
-          className={`payroll-component-tab ${componentType === "deduction" ? "is-active" : ""}`}
-          onClick={() => setComponentType("deduction")}
-        >
-          <MinusCircle size={16} /> Potongan
-        </button>
-      </div>
+      {showTabs && (
+        <div className="payroll-component-tabs">
+          <button
+            className={`payroll-component-tab ${componentType === "allowance" ? "is-active" : ""}`}
+            onClick={() => setComponentType("allowance")}
+          >
+            <Gift size={16} /> Tunjangan
+          </button>
+          <button
+            className={`payroll-component-tab ${componentType === "deduction" ? "is-active" : ""}`}
+            onClick={() => setComponentType("deduction")}
+          >
+            <MinusCircle size={16} /> Potongan
+          </button>
+        </div>
+      )}
 
       <div className="payroll-details-summary-grid">
         {componentSummaryCards.map((card) => {
@@ -446,7 +464,7 @@ const PayrollDetailsPage = () => {
           </label>
           <label>
             Tipe Komponen
-            <select className="crud-input" value={detailType} onChange={(event) => setDetailType(event.target.value as "allowance" | "deduction")}>
+            <select className="crud-input" value={detailType} onChange={(event) => setDetailType(event.target.value as PayrollComponentType)} disabled={isLockedMode}>
               <option value="allowance">Tunjangan</option>
               <option value="deduction">Potongan</option>
             </select>
@@ -486,4 +504,5 @@ const PayrollDetailsPage = () => {
   );
 };
 
+export type { PayrollComponentType };
 export default PayrollDetailsPage;

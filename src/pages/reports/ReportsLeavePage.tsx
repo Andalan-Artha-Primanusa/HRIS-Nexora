@@ -19,7 +19,7 @@ const extractArr = (raw: unknown): Rec[] => {
 const getStr = (rec: Rec, keys: string[]) => { for (const k of keys) { const v = rec[k]; if (typeof v === 'string' && v.trim()) return v.trim(); } return ''; };
 const getNum = (v: unknown) => { if (typeof v === 'number' && Number.isFinite(v)) return v; if (typeof v === 'string') { const p = Number(v); if (Number.isFinite(p)) return p; } return 0; };
 
-const TT = { contentStyle: { backgroundColor:'#fff', border:'1px solid #dbeafe', borderRadius:'8px' }, labelStyle: { color:'#1e40af', fontWeight:'bold' as const } };
+const TT = { contentStyle: { backgroundColor:'#fff', border:'1px solid var(--color-primary-light)', borderRadius:'8px' }, labelStyle: { color:'var(--color-primary-dark)', fontWeight:'bold' as const } };
 // const COLORS = ['var(--color-primary)','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4'];
 
 const mkMonth = (raw: string) => { const d = new Date(raw); if (Number.isNaN(d.getTime())) return null; return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; };
@@ -156,8 +156,8 @@ const ReportsLeavePage: React.FC = () => {
                     <linearGradient id="gP" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3}/><stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/></linearGradient>
                     <linearGradient id="gR" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/><stop offset="95%" stopColor="#ef4444" stopOpacity={0}/></linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(37,99,235,0.1)"/>
-                  <XAxis dataKey="month" stroke="#1e40af" style={{fontSize:'12px'}}/><YAxis stroke="#1e40af" style={{fontSize:'12px'}}/>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(15,159,143,0.1)"/>
+                  <XAxis dataKey="month" stroke="var(--color-primary-dark)" style={{fontSize:'12px'}}/><YAxis stroke="var(--color-primary-dark)" style={{fontSize:'12px'}}/>
                   <Tooltip {...TT}/><Legend wrapperStyle={{paddingTop:'20px'}}/>
                   <Area type="monotone" dataKey="approved" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#gA)" name="Approved"/>
                   <Area type="monotone" dataKey="pending" stroke="#f59e0b" strokeWidth={2} fillOpacity={1} fill="url(#gP)" name="Pending"/>
@@ -188,9 +188,9 @@ const ReportsLeavePage: React.FC = () => {
             {leaveTypeData.length > 0 ? (
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={leaveTypeData} margin={{top:10,right:30,left:0,bottom:0}}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(37,99,235,0.1)"/>
-                  <XAxis dataKey="name" stroke="#1e40af" style={{fontSize:'12px'}}/><YAxis stroke="#1e40af" style={{fontSize:'12px'}}/>
-                  <Tooltip {...TT} cursor={{fill:'rgba(37,99,235,0.1)'}}/>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(15,159,143,0.1)"/>
+                  <XAxis dataKey="name" stroke="var(--color-primary-dark)" style={{fontSize:'12px'}}/><YAxis stroke="var(--color-primary-dark)" style={{fontSize:'12px'}}/>
+                  <Tooltip {...TT} cursor={{fill:'rgba(15,159,143,0.1)'}}/>
                   <Bar dataKey="value" fill="var(--color-primary)" radius={[8,8,0,0]} name="Jumlah"/>
                 </BarChart>
               </ResponsiveContainer>
@@ -203,9 +203,9 @@ const ReportsLeavePage: React.FC = () => {
             {daysByType.length > 0 ? (
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={daysByType} margin={{top:10,right:30,left:0,bottom:0}}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(37,99,235,0.1)"/>
-                  <XAxis dataKey="name" stroke="#1e40af" style={{fontSize:'12px'}}/><YAxis stroke="#1e40af" style={{fontSize:'12px'}}/>
-                  <Tooltip {...TT} cursor={{fill:'rgba(37,99,235,0.1)'}}/>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(15,159,143,0.1)"/>
+                  <XAxis dataKey="name" stroke="var(--color-primary-dark)" style={{fontSize:'12px'}}/><YAxis stroke="var(--color-primary-dark)" style={{fontSize:'12px'}}/>
+                  <Tooltip {...TT} cursor={{fill:'rgba(15,159,143,0.1)'}}/>
                   <Bar dataKey="value" fill="#8b5cf6" radius={[8,8,0,0]} name="Hari"/>
                 </BarChart>
               </ResponsiveContainer>

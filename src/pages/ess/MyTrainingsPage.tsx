@@ -17,7 +17,7 @@ const statusConfig: Record<string, { label: string; color: string; bg: string }>
   ongoing: { label: 'Berlangsung', color: '#f59e0b', bg: '#fffbeb' },
   enrolled: { label: 'Terdaftar', color: '#6366f1', bg: '#eef2ff' },
   pending: { label: 'Menunggu', color: '#f59e0b', bg: '#fffbeb' },
-  active: { label: 'Aktif', color: '#3b82f6', bg: '#eff6ff' },
+  active: { label: 'Aktif', color: 'var(--color-primary)', bg: '#eff6ff' },
 };
 
 const getProgressInfo = (training: any, currentTab: string) => {
@@ -334,7 +334,7 @@ const MyTrainingsPage: React.FC = () => {
               <div style={{ background: '#f8fafc', borderRadius: 12, padding: '1.25rem' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   <div style={{ display: 'flex', gap: '0.75rem' }}>
-                    <div style={{ background: '#eff6ff', borderRadius: 8, padding: '0.5rem' }}><BookOpen size={16} color="#3b82f6" /></div>
+                    <div style={{ background: '#eff6ff', borderRadius: 8, padding: '0.5rem' }}><BookOpen size={16} color="var(--color-primary)" /></div>
                     <div><div style={{ fontSize: '0.75rem', color: '#64748b' }}>Program</div><div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#1e293b' }}>{resultModal.program?.title || resultModal.title || '-'}</div></div>
                   </div>
                   <div style={{ display: 'flex', gap: '0.75rem' }}>

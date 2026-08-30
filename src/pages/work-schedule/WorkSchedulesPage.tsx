@@ -232,8 +232,8 @@ const WorkSchedulesPage = () => {
           icon={CalendarDays}
           title="Daftar Shift & Jadwal"
           subtitle="Pantau konfigurasi jam kerja yang digunakan karyawan."
-          iconColor="#1d4ed8"
-          iconBgColor="#dbeafe"
+          iconColor="var(--color-primary-dark)"
+          iconBgColor="var(--color-primary-light)"
         />
       </Card>
 

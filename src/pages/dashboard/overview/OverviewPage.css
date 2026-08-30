@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 .crud-page {
   padding: var(--space-4);
   background: var(--color-background);
@@ -9,9 +8,10 @@
 }
 
 .hero-card {
-  background: var(--color-white);
+  background: linear-gradient(135deg, var(--hero-bg-start), var(--hero-bg-end));
   border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: var(--color-white);
   padding: var(--space-6);
 }
 
@@ -36,23 +36,23 @@
   font-weight: var(--font-weight-semibold);
   letter-spacing: var(--letter-spacing-wide);
   text-transform: uppercase;
-  color: var(--color-primary-dark);
+  color: var(--color-white);
   margin-bottom: var(--space-3);
-  background: var(--color-primary-lighter);
+  background: rgba(255, 255, 255, 0.14);
 }
 
 .hero-title {
   font-family: var(--font-family-heading);
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
+  color: var(--color-white);
   margin: 0 0 var(--space-2) 0;
   letter-spacing: var(--letter-spacing-tight);
 }
 
 .hero-subtitle {
   font-size: var(--font-size-md);
-  color: var(--color-text-secondary);
+  color: rgba(255, 255, 255, 0.88);
   margin: 0;
   max-width: 50ch;
 }
@@ -65,7 +65,7 @@
 
 .hero-actions .btn-outline,
 .hero-actions .btn-primary {
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border: none;
   color: var(--color-primary-dark);
   font-weight: var(--font-weight-semibold);
@@ -76,6 +76,14 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
+}
+
+.hero-actions .btn-outline *,
+.hero-actions .btn-primary *,
+.hero-actions .btn-outline svg,
+.hero-actions .btn-primary svg {
+  color: inherit !important;
+  stroke: currentColor !important;
 }
 
 .hero-actions .btn-outline:hover,
@@ -143,7 +151,7 @@
 }
 
 .metric-card {
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border-radius: var(--radius-lg);
   padding: var(--space-4);
   transition: all var(--transition-normal);
@@ -228,7 +236,7 @@
 }
 
 .chart-card {
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border-radius: var(--radius-lg);
   padding: var(--space-4);
   border: 1px solid var(--color-border);
@@ -323,7 +331,6 @@
   }
 }
 
-=======
 .crud-page {
   padding: 0;
   background: transparent;
@@ -334,8 +341,10 @@
 }
 
 .hero-card {
-  background: #1e40af;
+  background: linear-gradient(135deg, var(--hero-bg-start), var(--hero-bg-end));
   border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: var(--color-white);
   padding: 2.5rem;
 }
 
@@ -389,7 +398,7 @@
 .hero-actions .btn-primary {
   background: #ffffff;
   border: none;
-  color: #1e40af;
+  color: var(--hero-bg-end);
   font-weight: 600;
   padding: 0.75rem 1.5rem;
   border-radius: 12px;
@@ -398,6 +407,14 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.hero-actions .btn-outline *,
+.hero-actions .btn-primary *,
+.hero-actions .btn-outline svg,
+.hero-actions .btn-primary svg {
+  color: inherit !important;
+  stroke: currentColor !important;
 }
 
 .hero-actions .btn-outline:hover,
@@ -421,10 +438,10 @@
 }
 
 .analytics-title-card {
-  background: #1e40af;
+  background: linear-gradient(135deg, var(--hero-bg-start), var(--hero-bg-end));
   border-radius: 16px;
   padding: 1.5rem 2rem;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 14px 30px rgba(15, 159, 143, 0.18);
 }
 
 .analytics-title-inner {
@@ -478,7 +495,7 @@
 .metric-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
-  border-color: #1e40af;
+  border-color: var(--color-primary-dark);
 }
 
 .metric-header {
@@ -516,8 +533,8 @@
 }
 
 .metric-icon--blue {
-  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-  color: #1d4ed8;
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary-light) 100%);
+  color: var(--color-primary-dark);
 }
 
 .metric-icon--green {
@@ -563,7 +580,7 @@
 }
 
 .chart-card:hover {
-  border-color: #1e40af;
+  border-color: var(--color-primary-dark);
   box-shadow: 0 4px 16px rgba(59, 130, 246, 0.1);
 }
 
@@ -706,4 +723,4 @@
 }
 
 
->>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
+

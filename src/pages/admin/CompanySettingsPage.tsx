@@ -198,7 +198,7 @@ const CompanySettingsPage: React.FC = () => {
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               {loading ? 'Memuat...' : 'Segarkan'}
             </button>
-            <button className="btn-primary" onClick={handleSave} disabled={saving} style={{ boxShadow: '0 10px 20px rgba(37, 99, 235, 0.2)' }}>
+            <button className="btn-primary" onClick={handleSave} disabled={saving} style={{ boxShadow: '0 10px 20px rgba(15, 159, 143, 0.2)' }}>
               <Save size={16} />
               {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
             </button>
@@ -207,7 +207,7 @@ const CompanySettingsPage: React.FC = () => {
       </Card>
 
       {/* Logo Section */}
-      <Card className="hero-card settings-logo-card">
+      <Card className="settings-logo-card">
         <div className="hero-card-inner">
           <div className="hero-content">
             <div className="hero-badge">

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Plus, RefreshCw, Edit, Trash2, Search, Building2, Briefcase, Database, CheckCircle } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
@@ -34,6 +35,15 @@ interface PositionItem {
 
 type ActiveTab = 'department' | 'position';
 
+const tabRoutes: Record<ActiveTab, string> = {
+  department: '/organization/master-data/departments',
+  position: '/organization/master-data/positions',
+};
+
+const getTabFromPath = (pathname: string): ActiveTab => (
+  pathname.endsWith('/positions') ? 'position' : 'department'
+);
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 /**
@@ -61,12 +71,14 @@ function normalizePositions(raw: unknown[]): PositionItem[] {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 const MasterDataPage: React.FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [departments, setDepartments] = useState<DepartmentItem[]>([]);
   const [positions, setPositions] = useState<PositionItem[]>([]);
 
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<ActiveTab>('department');
+  const [activeTab, setActiveTab] = useState<ActiveTab>(() => getTabFromPath(location.pathname));
 
   // Search & Pagination
   const [searchText, setSearchText] = useState('');
@@ -114,6 +126,10 @@ const MasterDataPage: React.FC = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    setActiveTab(getTabFromPath(location.pathname));
+  }, [location.pathname]);
 
   // ── Derived data ───────────────────────────────────────────────────────────
 
@@ -283,6 +299,11 @@ const MasterDataPage: React.FC = () => {
   const tabLabel = (tab: ActiveTab) =>
     tab === 'department' ? 'Departemen' : 'Posisi';
 
+  const openTab = (tab: ActiveTab) => {
+    setActiveTab(tab);
+    navigate(tabRoutes[tab]);
+  };
+
   return (
     <div className="crud-page">
 
@@ -353,7 +374,7 @@ const MasterDataPage: React.FC = () => {
               <button
                 key={tab.key}
                 className={`elyra-tab ${activeTab === tab.key ? 'active' : ''}`}
-                onClick={() => setActiveTab(tab.key)}
+                onClick={() => openTab(tab.key)}
               >
                 <tab.icon size={16} />
                 <span>{tab.label}</span>

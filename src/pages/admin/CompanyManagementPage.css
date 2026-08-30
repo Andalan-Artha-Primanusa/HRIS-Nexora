@@ -1,0 +1,127 @@
+.company-management-page .company-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.8fr) minmax(420px, 1.2fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.company-list-card,
+.company-form-card {
+  padding: 18px;
+}
+
+.company-list-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.company-list-header h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.company-list-header span {
+  color: var(--text-muted, #64748b);
+  font-size: 13px;
+}
+
+.company-list {
+  display: grid;
+  gap: 8px;
+}
+
+.company-row {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.company-row.active {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(15, 159, 143, 0.12);
+}
+
+.company-row strong,
+.company-row small {
+  display: block;
+}
+
+.company-row small {
+  color: #64748b;
+  margin-top: 3px;
+}
+
+.company-row em {
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 12px;
+  font-style: normal;
+  padding: 4px 8px;
+}
+
+.company-empty {
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  color: #64748b;
+  padding: 18px;
+  text-align: center;
+}
+
+.company-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.company-form-grid label {
+  color: #334155;
+  display: grid;
+  font-size: 13px;
+  font-weight: 600;
+  gap: 6px;
+}
+
+.company-form-grid input,
+.company-form-grid select,
+.company-form-grid textarea {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  color: #0f172a;
+  font: inherit;
+  padding: 10px 12px;
+}
+
+.company-address {
+  grid-column: 1 / -1;
+}
+
+.company-form-grid textarea {
+  min-height: 84px;
+  resize: vertical;
+}
+
+.company-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+@media (max-width: 960px) {
+  .company-management-page .company-grid,
+  .company-form-grid {
+    grid-template-columns: 1fr;
+  }
+}

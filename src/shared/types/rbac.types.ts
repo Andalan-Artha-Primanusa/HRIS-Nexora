@@ -23,6 +23,22 @@ export const PERMISSIONS = {
   ATTENDANCE_CHECK_IN: 'attendance.check_in',
   ATTENDANCE_CHECK_OUT: 'attendance.check_out',
   ATTENDANCE_VIEW_OWN: 'attendance.view_own',
+  ATTENDANCE_QR_GENERATE: 'attendance.qr.generate',
+  ATTENDANCE_QR_SCAN: 'attendance.qr.scan',
+  ATTENDANCE_MANUAL_ADJUST: 'attendance.manual_adjust',
+  PATROL_SCAN: 'patrol.scan',
+  PATROL_VIEW: 'patrol.view',
+  PATROL_MANAGE: 'patrol.manage',
+  PATROL_REPORT: 'patrol.report',
+  DASHBOARD_CUSTOMIZE_SELF: 'dashboard.customize_self',
+  DASHBOARD_MANAGE_DEFAULT: 'dashboard.manage_default',
+  DASHBOARD_VIEW_ALL_COMPANY: 'dashboard.view_all_company',
+  COMPANY_VIEW: 'company.view',
+  COMPANY_CREATE: 'company.create',
+  COMPANY_UPDATE: 'company.update',
+  COMPANY_DEACTIVATE: 'company.deactivate',
+  COMPANY_VIEW_ALL: 'company.view_all',
+  COMPANY_ASSIGN_USER: 'company.assign_user',
   LOCATION_VIEW: 'location.view',
   LOCATION_CREATE: 'location.create',
   LOCATION_UPDATE: 'location.update',
@@ -70,6 +86,8 @@ export interface User {
   id: number;
   name: string;
   email: string;
+  must_change_password?: boolean;
+  password_changed_at?: string | null;
   employee?: unknown;
   roles?: Role[];
   permissions?: Permission[];
@@ -79,9 +97,34 @@ export interface User {
   [key: string]: unknown;
 }
 
+export type CompanyRef = {
+  id: number;
+  code?: string | null;
+  name: string;
+  status?: string | null;
+};
+
+export type UserCompanyAccess = {
+  id?: number;
+  user_id?: number;
+  company_id: number;
+  is_default?: boolean;
+  company?: CompanyRef | null;
+};
+
+export type CompanyContext = {
+  mode: "all" | "company";
+  can_view_all: boolean;
+  selected_company_id: number | null;
+  default_company_id: number | null;
+  companies: CompanyRef[];
+};
+
 export interface AuthUser extends User {
   roles: Role[];
   permissions: Permission[];
+  companies?: CompanyRef[];
+  company_accesses?: UserCompanyAccess[];
 }
 
 export interface RBACContext {

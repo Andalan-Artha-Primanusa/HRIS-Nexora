@@ -1,4 +1,4 @@
-﻿.work-schedule-form {
+.work-schedule-form {
   display: flex;
   flex-direction: column;
   gap: 1.75rem;
@@ -55,7 +55,7 @@
   padding: 0.875rem 1rem;
   border: 1px solid #DDE9E6;
   border-radius: 8px;
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   color: #1a202c;
   font-size: 0.95rem;
   transition: all 0.2s ease;
@@ -97,4 +97,5 @@
     grid-template-columns: 1fr;
   }
 }
+
 

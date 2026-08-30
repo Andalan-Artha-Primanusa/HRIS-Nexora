@@ -121,7 +121,7 @@ const PayrollPaymentPage = () => {
     const colors: Record<string, string> = {
       draft: "#999",
       pending: "#f59e0b",
-      approved: "#3b82f6",
+      approved: "var(--color-primary)",
       paid: "#10b981",
       rejected: "#ef4444",
     };

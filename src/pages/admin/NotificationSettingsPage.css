@@ -1,4 +1,4 @@
-﻿.notification-page {
+.notification-page {
   --primary-color: var(--color-primary);
   --success-color: var(--color-success);
   --warning-color: var(--color-warning);
@@ -67,7 +67,7 @@
 }
 
 .training-icon-blue {
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  background: linear-gradient(135deg, var(--hero-bg-start), var(--hero-bg-end));
   color: var(--color-white);
   box-shadow: 0 4px 12px rgba(15, 159, 143, 0.35);
 }
@@ -136,14 +136,14 @@
 
 .notification-table-area .elyra-tab:hover {
   background: #eff6ff;
-  color: #2563eb;
+  color: var(--color-primary);
 }
 
 .notification-table-area .elyra-tab.active,
 .notification-table-area .elyra-tab.active:hover {
-  background: #2563eb;
+  background: var(--hero-bg-start);
   color: #ffffff;
-  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 4px 10px rgba(15, 159, 143, 0.2);
 }
 
 .data-table {
@@ -285,12 +285,10 @@
 }
 
 .elyra-tab.active {
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   color: var(--color-primary);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
-<<<<<<< HEAD
-=======
 
 .notification-warning-banner {
   display: flex;
@@ -342,7 +340,7 @@
   padding: 0.45rem 0.85rem;
   border-radius: 999px;
   background: #eff6ff;
-  color: #1d4ed8;
+  color: var(--color-primary-dark);
   font-size: 0.78rem;
   font-weight: 800;
   white-space: nowrap;
@@ -440,4 +438,4 @@
     padding-inline: 1rem;
   }
 }
->>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
+

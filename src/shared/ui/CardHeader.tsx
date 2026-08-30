@@ -15,8 +15,8 @@ export const CardHeader: React.FC<CardHeaderProps> = ({
   icon: Icon,
   title,
   subtitle,
-  iconColor = '#1d4ed8',
-  iconBgColor = '#dbeafe',
+  iconColor = 'var(--color-primary-dark)',
+  iconBgColor = 'var(--color-primary-light)',
   className = '',
 }) => {
   return (

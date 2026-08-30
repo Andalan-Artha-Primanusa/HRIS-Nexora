@@ -1,8 +1,8 @@
-﻿.section-page {
+.section-page {
   --section-accent: var(--color-primary);
   --section-soft: #e0e7ff;
   --section-border: #c7d2fe;
-  --glass-bg: var(--color-var(--color-white));
+  --glass-bg: var(--color-white);
   --glass-blur: none;
 
   display: flex;
@@ -25,11 +25,111 @@
   justify-content: space-between;
   align-items: center;
   gap: 2rem;
-  background: var(--var(--color-white));
+  background: var(--color-white);
   padding: 2.5rem;
   border-radius: 16px;
   border: 1px solid var(--gray-200);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+}
+
+/* ===== Section Console Hero (reference: Scan QR Ronda Satpam) ===== */
+.section-page .section-hero-card {
+  background: linear-gradient(135deg, var(--hero-bg-start), var(--hero-bg-end));
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 20px;
+  box-shadow: 0 14px 34px rgba(15, 159, 143, 0.16);
+  color: var(--color-white);
+  padding: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.section-page .section-hero-card .section-hero-copy {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.section-page .section-hero-card .section-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.16);
+  color: var(--color-white);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.9rem;
+}
+
+.section-page .section-hero-card .section-title {
+  color: var(--color-white);
+  margin: 0 0 0.6rem 0;
+}
+
+.section-page .section-hero-card .section-subtitle {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.section-page .section-hero-card .section-hero-icon-wrapper {
+  position: relative;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 24px;
+  width: 112px;
+  height: 112px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.section-page .section-hero-card .section-hero-actions {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+.section-page .section-hero-card .section-hero-actions .ui-button,
+.section-page .section-hero-card .section-hero-actions button {
+  background: var(--color-white);
+  border-color: var(--color-white);
+  color: var(--color-primary-dark);
+  font-weight: 700;
+}
+
+.section-page .section-hero-card .section-hero-actions .ui-button *,
+.section-page .section-hero-card .section-hero-actions button *,
+.section-page .section-hero-card .section-hero-actions .ui-button svg,
+.section-page .section-hero-card .section-hero-actions button svg {
+  color: inherit !important;
+  stroke: currentColor !important;
+}
+
+.section-page .section-hero-card .section-hero-actions .ui-button:hover:not(:disabled),
+.section-page .section-hero-card .section-hero-actions button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(255, 255, 255, 0.92);
+  color: var(--hero-bg-end);
+}
+
+@media (max-width: 768px) {
+  .section-page .section-hero-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .section-page .section-hero-card .section-hero-icon-wrapper {
+    display: none;
+  }
 }
 
 .section-header-left {
@@ -112,7 +212,7 @@
 .section-action-card {
   padding: 2rem;
   border-radius: 16px;
-  background: var(--var(--color-white));
+  background: var(--color-white);
   border: 1px solid var(--gray-200);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
 }
@@ -231,7 +331,7 @@
 /* â”€â”€â”€ Specific styling for long text â”€â”€â”€ */
 .long-text {
   max-width: 250px;
-  var(--color-white)-space: nowrap;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   position: relative;
@@ -239,7 +339,7 @@
 }
 
 .long-text:hover {
-  var(--color-white)-space: normal;
+  white-space: normal;
   overflow: visible;
   z-index: 10;
   background: var(--color-white) !important;
@@ -532,3 +632,4 @@
   font-weight: 700;
   color: var(--color-text-primary);
 }
+

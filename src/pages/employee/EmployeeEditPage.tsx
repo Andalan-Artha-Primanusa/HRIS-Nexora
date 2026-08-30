@@ -8,6 +8,7 @@ import { getEmployeeDetail, updateEmployee } from "@/features/employee/api/emplo
 import { getAllLocations } from "@/features/location/api/location.service";
 import { getAllUsers } from "@/features/admin/api/admin.service";
 import { getAllWorkSchedules } from "@/features/work-schedule/api/work-schedule.service";
+import { companyService } from "@/features/company/api/company.service";
 import { useAuthStore } from "@/app/store/auth.store";
 import { RBACUtils } from "@/shared/hooks/rbac";
 import type { EmployeeUpdatePayload } from "@/features/employee/types/employee.types";
@@ -30,6 +31,7 @@ const EmployeeEditPage = () => {
   const [allUsers, setAllUsers] = useState<Record<string, any>[]>([]);
   const [allSchedules, setAllSchedules] = useState<Record<string, any>[]>([]);
   const [allDepartments, setAllDepartments] = useState<string[]>([]);
+  const [allCompanies, setAllCompanies] = useState<Record<string, any>[]>([]);
 
   const loadMetadata = async () => {
     try {
@@ -41,6 +43,9 @@ const EmployeeEditPage = () => {
 
       const schedResult = await getAllWorkSchedules();
       setAllSchedules(schedResult.items);
+
+      const companies = await companyService.list();
+      setAllCompanies(companies);
 
       const deptRes = await api.get('/organization/master-data');
       // Deeply check for departments array
@@ -85,6 +90,7 @@ const EmployeeEditPage = () => {
           id: String(result?.id ?? routeEmployeeId),
           name: String(result?.user?.name ?? ""),
           user_id: formatId(result?.user_id),
+          company_id: formatId(result?.company_id),
           employee_code: String(result?.employee_code ?? ""),
           position: String(result?.position ?? ""),
           department: String(result?.department ?? ""),
@@ -127,6 +133,7 @@ const EmployeeEditPage = () => {
       const payload: EmployeeUpdatePayload = {
         name: updateForm.name,
         user_id: updateForm.user_id ? Number(updateForm.user_id) : undefined,
+        company_id: updateForm.company_id ? Number(updateForm.company_id) : undefined,
         employee_code: updateForm.employee_code || undefined,
         hire_date: updateForm.hire_date || undefined,
         position: updateForm.position || undefined,
@@ -181,7 +188,7 @@ const EmployeeEditPage = () => {
 
       <Card className="control-card" glass>
         <div style={{ marginBottom: '1rem' }}>
-          <h3 style={{ margin: 0, color: '#1e3a8a', fontWeight: 700, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <h3 style={{ margin: 0, color: 'var(--color-primary-dark)', fontWeight: 700, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Briefcase size={18} style={{ color: 'var(--color-primary)' }} />
             Form Data Karyawan
           </h3>
@@ -192,6 +199,7 @@ const EmployeeEditPage = () => {
           setFormData={setUpdateForm}
           allUsers={allUsers}
           allDepartments={allDepartments}
+          allCompanies={allCompanies}
           allLocations={allLocations}
           allSchedules={allSchedules}
           onSubmit={handleUpdate}

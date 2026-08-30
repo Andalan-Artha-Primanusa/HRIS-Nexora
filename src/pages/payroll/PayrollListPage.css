@@ -1,4 +1,4 @@
-﻿/* ============================================ */
+/* ============================================ */
 /* PayrollListPage - Premium UI Overrides   */
 /* ============================================ */
 
@@ -13,7 +13,7 @@
 .payroll-summary-card {
   padding: 1.5rem;
   border-radius: 16px;
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border: 1px solid var(--color-border);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
   transition: all 0.2s ease;
@@ -142,7 +142,7 @@
 
 .tab-button.active {
   background: var(--color-primary);
-  color: var(--color-var(--color-white));
+  color: var(--color-white);
   box-shadow: 0 4px 12px rgba(15, 159, 143, 0.25);
 }
 
@@ -161,12 +161,12 @@
   gap: 1.5rem;
   flex-wrap: wrap;
   padding: 1rem 1.5rem;
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border-radius: 16px 16px 0 0;
 }
 
 .table-toolbar-shell {
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -185,12 +185,11 @@
 
 .control-bar .search-box:focus-within {
   background: #ffffff !important;
-  border-color: #2563eb !important;
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08), 0 8px 20px rgba(0, 0, 0, 0.04) !important;
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 4px rgba(15, 159, 143, 0.08), 0 8px 20px rgba(0, 0, 0, 0.04) !important;
 }
 
 .control-bar .search-icon-inside {
-<<<<<<< HEAD
   position: absolute;
   left: 1.25rem;
   top: 50%;
@@ -220,10 +219,9 @@
 }
 
 .control-bar .search-input:focus {
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   box-shadow: 0 0 0 4px rgba(15, 159, 143, 0.08), 0 8px 20px rgba(0, 0, 0, 0.04);
   outline: none;
-=======
   position: static !important;
   transform: none !important;
   color: #94a3b8 !important;
@@ -255,7 +253,6 @@
   background: transparent !important;
   box-shadow: none !important;
   outline: none !important;
->>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
 }
 
 .quick-controls {
@@ -274,7 +271,7 @@
   height: 44px;
   border-radius: 12px;
   border: 1px solid var(--color-border);
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   padding: 0 1rem;
   font-family: var(--font-family-heading);
   font-weight: 500;
@@ -331,7 +328,7 @@
 
 .filter-btn.active {
   background: var(--color-primary);
-  color: var(--color-var(--color-white));
+  color: var(--color-white);
   border-color: var(--color-primary);
 }
 
@@ -360,7 +357,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: var(--font-family-heading);
-  var(--color-white)-space: nowrap;
+  white-space: nowrap;
 }
 
 .btn-clear:hover {
@@ -370,7 +367,7 @@
 .btn-clear.subtle {
   border-color: var(--color-text-tertiary);
   color: var(--color-text-secondary);
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
 }
 
 .btn-clear.subtle:hover {
@@ -384,7 +381,7 @@
   align-items: center;
   gap: 1rem;
   padding: 0 1.5rem 1rem;
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
 }
 
 .active-filter-summary {
@@ -481,7 +478,7 @@
   padding: 0 1rem;
   border-radius: 12px;
   border: 1px solid var(--color-border);
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   font-size: 0.9rem;
   color: var(--color-text-primary);
   transition: all 0.2s ease;
@@ -506,7 +503,7 @@
   padding: 1.4rem 1.4rem 1.2rem;
   border: 1px solid #dbe5f2;
   border-radius: 16px;
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   box-shadow: 0 18px 45px rgba(15, 23, 42, 0.06);
 }
 
@@ -572,7 +569,7 @@
   padding: 0 0.95rem;
   border: 1px solid #d8e0eb;
   border-radius: 12px;
-  background-color: var(--color-var(--color-white));
+  background-color: var(--color-white);
   color: var(--color-text-primary);
   font-family: var(--font-family-heading);
   font-size: 0.9rem;
@@ -632,7 +629,7 @@
   padding: 1rem 1.2rem !important;
   border: 1px solid #d7e4f5 !important;
   border-radius: 14px !important;
-  background: linear-gradient(180deg, var(--color-var(--color-white)) 0%, #fbfdff 100%) !important;
+  background: linear-gradient(180deg, var(--color-white) 0%, #fbfdff 100%) !important;
   box-shadow: 0 12px 26px rgba(15, 23, 42, 0.04) !important;
 }
 
@@ -666,7 +663,7 @@
 }
 
 .payroll-form-actions .btn-outline {
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border: 1px solid #d8e0eb;
   color: var(--color-text-secondary);
 }
@@ -686,12 +683,12 @@
 }
 
 .payroll-export-period-input:focus {
-  background-color: var(--color-var(--color-white));
+  background-color: var(--color-white);
 }
 
 .data-table-header {
   padding: 1.5rem;
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -799,10 +796,8 @@
   border-radius: 999px;
   font-size: 0.75rem;
   font-weight: 600;
-<<<<<<< HEAD
   background: var(--color-surface-soft);
   color: var(--color-text-secondary);
-=======
   background: #f1f5f9;
   color: #475569;
   line-height: 1.2;
@@ -860,7 +855,6 @@
 
 .payroll-list-table td:nth-child(6) {
   text-align: left;
->>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
 }
 
 /* Status Badge Overrides */
@@ -916,7 +910,7 @@
   padding: 0.5rem 1rem;
   border-radius: 10px;
   border: 1px solid var(--color-border);
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   color: var(--color-text-secondary);
   font-weight: 600;
   cursor: pointer;
@@ -925,7 +919,7 @@
 
 .pagination__controls .btn-outline:hover:not(:disabled) {
   background: var(--color-primary);
-  color: var(--color-var(--color-white));
+  color: var(--color-white);
   border-color: var(--color-primary);
 }
 
@@ -999,8 +993,6 @@
   }
 }
 
-<<<<<<< HEAD
-=======
 /* ============================================ */
 /* DARK MODE OVERRIDES                          */
 /* ============================================ */
@@ -1013,7 +1005,7 @@
 }
 
 [data-theme='dark'] .payroll-summary-card:hover {
-  border-color: #3b82f6 !important;
+  border-color: var(--color-primary) !important;
   box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15) !important;
 }
 
@@ -1073,7 +1065,7 @@
 
 [data-theme='dark'] .control-bar .search-box:focus-within {
   background: rgba(15, 23, 42, 0.5) !important;
-  border-color: #3b82f6 !important;
+  border-color: var(--color-primary) !important;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
 }
 
@@ -1105,7 +1097,7 @@
 }
 
 [data-theme='dark'] .sort-select:focus {
-  border-color: #3b82f6 !important;
+  border-color: var(--color-primary) !important;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
 }
 
@@ -1133,9 +1125,9 @@
 }
 
 [data-theme='dark'] .filter-btn.active {
-  background: #3b82f6 !important;
+  background: var(--hero-bg-start) !important;
   color: #ffffff !important;
-  border-color: #3b82f6 !important;
+  border-color: var(--hero-bg-start) !important;
 }
 
 /* Active Filter Chips */
@@ -1145,8 +1137,8 @@
 
 [data-theme='dark'] .active-filter-chip {
   background: #1e3a5f !important;
-  border-color: #1e40af !important;
-  color: #93c5fd !important;
+  border-color: var(--color-primary-dark) !important;
+  color: var(--color-primary-light) !important;
 }
 
 [data-theme='dark'] .active-filter-chip.search-chip {
@@ -1205,7 +1197,7 @@
 }
 
 [data-theme='dark'] .filter-select:focus {
-  border-color: #3b82f6 !important;
+  border-color: var(--color-primary) !important;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
 }
 
@@ -1245,7 +1237,7 @@
 }
 
 [data-theme='dark'] .crud-table-id {
-  color: #60a5fa !important;
+  color: var(--color-primary-light) !important;
 }
 
 [data-theme='dark'] .crud-table-sub {
@@ -1253,8 +1245,8 @@
 }
 
 [data-theme='dark'] .crud-table-avatar {
-  background: linear-gradient(135deg, #1e3a5f 0%, #1e40af 100%) !important;
-  color: #93c5fd !important;
+  background: linear-gradient(135deg, #1e3a5f 0%, var(--color-primary-dark) 100%) !important;
+  color: var(--color-primary-light) !important;
 }
 
 [data-theme='dark'] .crud-table-amount {
@@ -1309,8 +1301,8 @@
 }
 
 [data-theme='dark'] .pagination__controls .btn-outline:hover:not(:disabled) {
-  background: #3b82f6 !important;
+  background: var(--hero-bg-start) !important;
   color: #ffffff !important;
-  border-color: #3b82f6 !important;
+  border-color: var(--hero-bg-start) !important;
 }
->>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
+

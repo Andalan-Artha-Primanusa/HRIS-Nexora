@@ -26,6 +26,7 @@ import {
   RefreshCw,
   Wallet,
 } from "lucide-react";
+import { PayrollWorkflowGuide } from "./PayrollWorkflowGuide";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "./PayrollListPage.css";
@@ -153,11 +154,11 @@ const PayrollDashboard: React.FC = () => {
   const tooltipStyle = {
     contentStyle: {
       backgroundColor: "#fff",
-      border: "1px solid #dbeafe",
+      border: "1px solid var(--color-primary-light)",
       borderRadius: "12px",
-      boxShadow: "0 10px 25px rgba(37, 99, 235, 0.1)",
+      boxShadow: "0 10px 25px rgba(15, 159, 143, 0.1)",
     },
-    labelStyle: { color: "#1e3a8a", fontWeight: "bold" as const },
+    labelStyle: { color: "var(--color-primary-dark)", fontWeight: "bold" as const },
   };
 
   return (
@@ -244,6 +245,8 @@ const PayrollDashboard: React.FC = () => {
         </div>
       </div>
 
+      <PayrollWorkflowGuide />
+
       <Card className="analytics-title-card">
         <div className="analytics-title-inner">
           <div className="analytics-icon">
@@ -264,9 +267,9 @@ const PayrollDashboard: React.FC = () => {
           {monthlyTrendData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={monthlyTrendData} margin={{ top: 8, right: 16, left: 4, bottom: 8 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
-                <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--color-text-secondary)" }} />
+                <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--color-text-secondary)" }} />
                 <Tooltip {...tooltipStyle} />
                 <Legend />
                 <Line type="monotone" dataKey="totalPayroll" name="Total" stroke="var(--color-primary)" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
@@ -314,11 +317,11 @@ const PayrollDashboard: React.FC = () => {
           {departmentPayrollData.length > 0 ? (
             <ResponsiveContainer width="100%" height={320}>
               <BarChart data={departmentPayrollData} margin={{ top: 10, right: 30, left: 20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#64748b" }} tickFormatter={(v) => `Rp ${v/1000000}jt`} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--color-text-secondary)" }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--color-text-secondary)" }} tickFormatter={(v) => `Rp ${v/1000000}jt`} />
                 <Tooltip {...tooltipStyle} formatter={(v: any) => formatCurrency(Number(v))} />
-                <Bar dataKey="amount" fill="#3b82f6" radius={[8, 8, 0, 0]} name="Total Payroll" />
+                <Bar dataKey="amount" fill="var(--color-primary)" radius={[8, 8, 0, 0]} name="Total Payroll" />
               </BarChart>
             </ResponsiveContainer>
           ) : (

@@ -456,7 +456,7 @@ const TrainingEnrollmentsPage: React.FC = () => {
                             )}
                             <button
                                 className="action-btn"
-                                style={{ color: '#3b82f6', background: '#eff6ff' }}
+                                style={{ color: 'var(--color-primary)', background: '#eff6ff' }}
                                 onClick={() => openProgressHistory(enrollment.id)}
                                 title="Riwayat Progress"
                             >
@@ -565,7 +565,7 @@ const TrainingEnrollmentsPage: React.FC = () => {
             <button
               type="button"
               className="btn-primary"
-              style={{ flex: 1, padding: '0.75rem', borderRadius: '10px', fontWeight: 600, background: '#3b82f6' }}
+              style={{ flex: 1, padding: '0.75rem', borderRadius: '10px', fontWeight: 600, background: 'var(--color-primary)' }}
               onClick={handleUpdateProgress}
               disabled={completing}
             >

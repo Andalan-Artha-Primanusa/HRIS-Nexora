@@ -1,6 +1,5 @@
-<<<<<<< HEAD
-﻿.control-section-card {
-  background: var(--color-var(--color-white)) !important;
+.control-section-card {
+  background: var(--color-white) !important;
   border-radius: 16px !important;
   border: 1px solid var(--color-border) !important;
   padding: 1.5rem !important;
@@ -12,12 +11,12 @@
   transform: none !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
   border-color: var(--color-border) !important;
-=======
+}
+
 .legal-table-toolbar {
   background: #ffffff;
   padding: 1.5rem !important;
   border-bottom: 1px solid #e2e8f0;
->>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
 }
 
 .control-section-inner {
@@ -74,7 +73,7 @@
 
 .search-input-wrapper .search-input:focus {
   outline: none;
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.1);
 }
@@ -124,7 +123,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: var(--font-family-heading);
-  var(--color-white)-space: nowrap;
+  white-space: nowrap;
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -136,15 +135,12 @@
 }
 
 .tab-button.active {
-<<<<<<< HEAD
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   color: var(--color-text-primary);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-=======
-  background: #2563eb;
+  background: var(--hero-bg-start);
   color: #ffffff;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
->>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
+  box-shadow: 0 4px 12px rgba(15, 159, 143, 0.25);
 }
 
 .tab-count {
@@ -157,17 +153,14 @@
 }
 
 .tab-button.active .tab-count {
-<<<<<<< HEAD
   background: var(--color-primary);
-  color: var(--color-var(--color-white));
-=======
+  color: var(--color-white);
   background: rgba(255, 255, 255, 0.2);
   color: #ffffff;
->>>>>>> de1fc177551de4885a1f8e57cc2c0344d3769ac7
 }
 
 .data-table-card {
-  background: var(--color-var(--color-white)) !important;
+  background: var(--color-white) !important;
   border-radius: 16px !important;
   border: 1px solid var(--color-border) !important;
   overflow: hidden !important;
@@ -220,7 +213,7 @@
   letter-spacing: 0.05em;
   color: var(--color-text-tertiary);
   border-bottom: 1px solid var(--color-surface-soft);
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
 }
 
 .data-table-card .data-table td {
@@ -243,7 +236,7 @@
 }
 
 .employee-summary-card {
-  background: var(--color-var(--color-white));
+  background: var(--color-white);
   border-radius: 16px;
   padding: 1.5rem;
   border: 1px solid var(--color-border);
@@ -310,4 +303,5 @@
   padding-top: 0.75rem;
   border-top: 1px solid var(--color-surface-soft);
 }
+
 

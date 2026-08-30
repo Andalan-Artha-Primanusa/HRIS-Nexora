@@ -110,7 +110,7 @@ export const AccessDenied: React.FC<AccessDeniedProps> = ({
             display: 'inline-block',
             marginTop: '20px',
             padding: '10px 20px',
-            backgroundColor: '#3b82f6',
+            backgroundColor: 'var(--hero-bg-start)',
             color: 'white',
             textDecoration: 'none',
             borderRadius: '4px',

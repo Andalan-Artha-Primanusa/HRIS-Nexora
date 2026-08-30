@@ -1,4 +1,4 @@
-﻿.crud-page {
+.crud-page {
   --primary: var(--color-primary);
   --primary-dark: var(--color-primary-dark);
   --primary-light: var(--color-primary-light);
@@ -177,7 +177,7 @@
   color: var(--color-white);
   font-size: 0.8rem;
   font-weight: 700;
-  var(--color-white)-space: nowrap;
+  white-space: nowrap;
 }
 
 .payroll-status-pill--compact {
@@ -267,7 +267,7 @@
 
 .action-btn-success:hover {
   background: #16a34a !important;
-  color: var(--color-var(--color-white)) !important;
+  color: var(--color-white) !important;
   border-color: #16a34a !important;
 }
 
@@ -296,3 +296,4 @@
     width: 100%;
   }
 }
+
