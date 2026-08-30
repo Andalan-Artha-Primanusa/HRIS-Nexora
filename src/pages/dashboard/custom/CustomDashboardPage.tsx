@@ -151,7 +151,7 @@ const CustomDashboardPage = () => {
         api.get("payroll", { params: { per_page: 100 } }),
         api.get("reimbursements/pending"),
         api.get("kpis", { params: { per_page: 100 } }),
-        api.get("training/programs", { params: { per_page: 100 } }).catch(() => api.get("trainings", { params: { per_page: 100 } })),
+        api.get("training/programs", { params: { per_page: 100 } }),
       ]);
 
       const employeeTotal = employees.status === "fulfilled" ? countPayload(employees.value.data) : 0;
