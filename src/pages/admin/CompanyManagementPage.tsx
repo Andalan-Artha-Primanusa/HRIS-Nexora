@@ -213,27 +213,25 @@ const CompanyManagementPage = () => {
 
   return (
     <div className="crud-page company-management-page">
-      <Card className="hero-card" style={{ marginBottom: 24 }}>
-        <div className="hero-card-inner">
-          <div className="hero-content">
-            <div className="hero-badge"><Building2 size={16} /><span>Multi Company</span></div>
-            <h1 className="hero-title">Company Management</h1>
-            <p className="hero-subtitle">Kelola company, legal entity, akses user, dan status operasional.</p>
-          </div>
-          <div className="hero-actions">
-            <Button variant="outline" size="md" onClick={loadCompanies} disabled={loading}>
-              <RefreshCw size={16} />
-              Refresh
-            </Button>
-            {canManage && (
-              <Button variant="primary" size="md" onClick={() => navigate("/companies/create")}>
-                <Plus size={16} />
-                Create Company
-              </Button>
-            )}
-          </div>
+      <div className="page-header" style={{ marginBottom: 24 }}>
+        <div className="page-header-title">
+          <div className="page-badge"><Building2 size={14} style={{ marginRight: 6 }} /><span>Multi Company</span></div>
+          <h1>Company Management</h1>
+          <p>Kelola company, legal entity, akses user, dan status operasional.</p>
         </div>
-      </Card>
+        <div className="page-header-actions">
+          <Button variant="secondary" onClick={loadCompanies} disabled={loading}>
+            <RefreshCw size={16} />
+            Refresh
+          </Button>
+          {canManage && (
+            <Button variant="primary" onClick={() => navigate("/companies/create")}>
+              <Plus size={16} />
+              Create Company
+            </Button>
+          )}
+        </div>
+      </div>
 
       {loadError && (
         <Card className="company-error-card">

@@ -4,7 +4,6 @@
   opacity: 1;
   visibility: visible;
   color: inherit;
-  -webkit-text-fill-color: currentColor;
   stroke: currentColor;
 }
 
@@ -21,13 +20,13 @@
   .leave-hero-card,
   .employees-hero-card,
   .reports-hero-card,
-  .detailed-hero-card
-) :where(.hero-actions, .section-hero-actions, .qr-generator-hero__actions)
+  .detailed-hero-card,
+  .page-header
+) :where(.hero-actions, .section-hero-actions, .qr-generator-hero__actions, .page-header-actions)
   :where(button, a, .button, .ui-button, .btn-primary, .btn-outline):not(:disabled) {
   background: #ffffff !important;
   border-color: #ffffff !important;
-  color: var(--hero-bg-end) !important;
-  -webkit-text-fill-color: var(--hero-bg-end) !important;
+  color: #075E54 !important;
   opacity: 1 !important;
 }
 
@@ -40,25 +39,16 @@
   .leave-hero-card,
   .employees-hero-card,
   .reports-hero-card,
-  .detailed-hero-card
-) :where(.hero-actions, .section-hero-actions, .qr-generator-hero__actions)
+  .detailed-hero-card,
+  .page-header
+) :where(.hero-actions, .section-hero-actions, .qr-generator-hero__actions, .page-header-actions)
   :where(button, a, .button, .ui-button, .btn-primary, .btn-outline):not(:disabled)
   :where(span, strong, small, b, i, em, svg) {
-  color: inherit !important;
-  -webkit-text-fill-color: currentColor !important;
-  stroke: currentColor !important;
+  color: #075E54 !important;
+  stroke: #075E54 !important;
+  fill: #075E54 !important;
   opacity: 1 !important;
   visibility: visible !important;
-}
-
-:where(button, a, [role='button'], .button, .ui-button):where(
-  .bg-white,
-  .btn-secondary,
-  .btn-outline,
-  .employees-hero-button--secondary
-):not(:disabled):not(.btn-loading):not(.ui-button--loading) {
-  color: var(--color-primary-dark) !important;
-  -webkit-text-fill-color: var(--color-primary-dark) !important;
 }
 
 .hero-actions :is(button, a, .button, .ui-button, .btn-primary, .btn-outline, .btn-secondary),
@@ -68,11 +58,11 @@
 .employees-hero-actions :is(button, a, .button, .ui-button, .btn-primary, .btn-outline, .btn-secondary),
 .reports-hero-actions :is(button, a, .button, .ui-button, .btn-primary, .btn-outline, .btn-secondary),
 [class*='hero-actions'] :is(button, a, .button, .ui-button, .btn-primary, .btn-outline, .btn-secondary),
-[class*='hero__actions'] :is(button, a, .button, .ui-button, .btn-primary, .btn-outline, .btn-secondary) {
+[class*='hero__actions'] :is(button, a, .button, .ui-button, .btn-primary, .btn-outline, .btn-secondary),
+.page-header-actions :is(button, a, .button, .ui-button, .btn-primary, .btn-outline, .btn-secondary) {
   background: #ffffff !important;
   border-color: #ffffff !important;
-  color: var(--color-primary-dark) !important;
-  -webkit-text-fill-color: var(--color-primary-dark) !important;
+  color: #075E54 !important;
   opacity: 1 !important;
   visibility: visible !important;
 }
@@ -84,10 +74,11 @@
 .employees-hero-actions :is(button, a, .button, .ui-button, .btn-primary, .btn-outline, .btn-secondary) *,
 .reports-hero-actions :is(button, a, .button, .ui-button, .btn-primary, .btn-outline, .btn-secondary) *,
 [class*='hero-actions'] :is(button, a, .button, .ui-button, .btn-primary, .btn-outline, .btn-secondary) *,
-[class*='hero__actions'] :is(button, a, .button, .ui-button, .btn-primary, .btn-outline, .btn-secondary) * {
-  color: inherit !important;
-  -webkit-text-fill-color: currentColor !important;
-  stroke: currentColor !important;
+[class*='hero__actions'] :is(button, a, .button, .ui-button, .btn-primary, .btn-outline, .btn-secondary) *,
+.page-header-actions :is(button, a, .button, .ui-button, .btn-primary, .btn-outline, .btn-secondary) * {
+  color: #075E54 !important;
+  stroke: #075E54 !important;
+  fill: #075E54 !important;
   opacity: 1 !important;
   visibility: visible !important;
 }
@@ -95,72 +86,8 @@
 .hero-actions :is(button, a, .button, .ui-button, .btn-primary, .btn-outline, .btn-secondary):disabled,
 .section-hero-actions :is(button, a, .button, .ui-button, .btn-primary, .btn-outline, .btn-secondary):disabled,
 [class*='hero-actions'] :is(button, a, .button, .ui-button, .btn-primary, .btn-outline, .btn-secondary):disabled,
-[class*='hero__actions'] :is(button, a, .button, .ui-button, .btn-primary, .btn-outline, .btn-secondary):disabled {
-  color: var(--color-primary-dark) !important;
-  -webkit-text-fill-color: var(--color-primary-dark) !important;
-  opacity: 0.76 !important;
-}
-
-:where(button, a, [role='button'], .button, .ui-button)[style*='background: white'],
-:where(button, a, [role='button'], .button, .ui-button)[style*='background:white'],
-:where(button, a, [role='button'], .button, .ui-button)[style*='background: #fff'],
-:where(button, a, [role='button'], .button, .ui-button)[style*='background:#fff'],
-:where(button, a, [role='button'], .button, .ui-button)[style*='background: #ffffff'],
-:where(button, a, [role='button'], .button, .ui-button)[style*='background:#ffffff'],
-:where(button, a, [role='button'], .button, .ui-button)[style*='background-color: white'],
-:where(button, a, [role='button'], .button, .ui-button)[style*='background-color:white'],
-:where(button, a, [role='button'], .button, .ui-button)[style*='background-color: #fff'],
-:where(button, a, [role='button'], .button, .ui-button)[style*='background-color:#fff'],
-:where(button, a, [role='button'], .button, .ui-button)[style*='background-color: #ffffff'],
-:where(button, a, [role='button'], .button, .ui-button)[style*='background-color:#ffffff'] {
-  color: var(--color-primary-dark) !important;
-  -webkit-text-fill-color: var(--color-primary-dark) !important;
-}
-
-:where(button, a, [role='button'], .button, .ui-button)[style*='background: white']
-  :where(span, strong, small, b, i, em, svg),
-:where(button, a, [role='button'], .button, .ui-button)[style*='background:white']
-  :where(span, strong, small, b, i, em, svg),
-:where(button, a, [role='button'], .button, .ui-button)[style*='background: #fff']
-  :where(span, strong, small, b, i, em, svg),
-:where(button, a, [role='button'], .button, .ui-button)[style*='background:#fff']
-  :where(span, strong, small, b, i, em, svg),
-:where(button, a, [role='button'], .button, .ui-button)[style*='background: #ffffff']
-  :where(span, strong, small, b, i, em, svg),
-:where(button, a, [role='button'], .button, .ui-button)[style*='background:#ffffff']
-  :where(span, strong, small, b, i, em, svg) {
-  color: inherit !important;
-  -webkit-text-fill-color: currentColor !important;
-  stroke: currentColor !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-}
-
-:where(button, a, [role='button'], .button, .ui-button)[style*='background-color: #fff']
-  :where(span, strong, small, b, i, em, svg),
-:where(button, a, [role='button'], .button, .ui-button)[style*='background-color:#fff']
-  :where(span, strong, small, b, i, em, svg),
-:where(button, a, [role='button'], .button, .ui-button)[style*='background-color: #ffffff']
-  :where(span, strong, small, b, i, em, svg),
-:where(button, a, [role='button'], .button, .ui-button)[style*='background-color:#ffffff']
-  :where(span, strong, small, b, i, em, svg),
-:where(button, a, [role='button'], .button, .ui-button)[style*='background-color: white']
-  :where(span, strong, small, b, i, em, svg),
-:where(button, a, [role='button'], .button, .ui-button)[style*='background-color:white']
-  :where(span, strong, small, b, i, em, svg),
-:where(button, a, [role='button'], .button, .ui-button)[style*='background: rgb(255, 255, 255)']
-  :where(span, strong, small, b, i, em, svg),
-:where(button, a, [role='button'], .button, .ui-button)[style*='background-color: rgb(255, 255, 255)']
-  :where(span, strong, small, b, i, em, svg) {
-  color: inherit !important;
-  -webkit-text-fill-color: currentColor !important;
-  stroke: currentColor !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-}
-
-:where(button, a, [role='button'], .button, .ui-button)[style*='background: rgb(255, 255, 255)'],
-:where(button, a, [role='button'], .button, .ui-button)[style*='background-color: rgb(255, 255, 255)'] {
-  color: var(--color-primary-dark) !important;
-  -webkit-text-fill-color: var(--color-primary-dark) !important;
+[class*='hero__actions'] :is(button, a, .button, .ui-button, .btn-primary, .btn-outline, .btn-secondary):disabled,
+.page-header-actions :is(button, a, .button, .ui-button, .btn-primary, .btn-outline, .btn-secondary):disabled {
+  color: #075E54 !important;
+  opacity: 0.5 !important;
 }
