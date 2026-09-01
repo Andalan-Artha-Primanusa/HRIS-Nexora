@@ -2757,7 +2757,7 @@ const SectionPage = () => {
 
   return (
     <div className={`section-page section-variant-${sectionKey}`}>
-      <Card className="section-hero-card glass-shimmer" glass>
+      <Card className="section-page-header glass-shimmer" glass>
         <div className="section-hero-copy">
           <span className="section-badge">Management Console</span>
           <h1 className="section-title">{section.title}</h1>
@@ -2766,7 +2766,7 @@ const SectionPage = () => {
         <div className="section-hero-icon-wrapper">
           <Icon size={80} strokeWidth={1.5} color={section.color} />
         </div>
-        <div className="section-hero-actions">
+        <div className="section-page-header-actions">
           <Button variant="primary" size="md" onClick={handleRefresh} disabled={loading || !canRefresh}>
             <Search size={18} style={{ marginRight: '8px' }} />
             Segarkan Data

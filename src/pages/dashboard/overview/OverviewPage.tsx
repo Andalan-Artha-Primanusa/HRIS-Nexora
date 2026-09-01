@@ -385,8 +385,8 @@ const OverviewPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <Activity size={16} />
@@ -407,7 +407,7 @@ const OverviewPage: React.FC = () => {
             </div>
           </div>
           {canViewAdminOverview && (
-            <div className="hero-actions">
+            <div className="page-header-actions">
               <button className="btn-outline" onClick={() => navigate('/admin/analytics/people')}>
                 Lihat Analitik
               </button>

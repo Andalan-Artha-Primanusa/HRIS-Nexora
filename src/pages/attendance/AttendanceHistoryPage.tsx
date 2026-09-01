@@ -140,8 +140,8 @@ const AttendanceHistoryPage = () => {
   return (
     <div className="crud-page">
       {/* Header */}
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <CalendarDays size={16} />
@@ -153,7 +153,7 @@ const AttendanceHistoryPage = () => {
             </p>
             <CompanyScopeBadge />
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={() => void loadHistory()} disabled={loading}>
               <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
               Segarkan

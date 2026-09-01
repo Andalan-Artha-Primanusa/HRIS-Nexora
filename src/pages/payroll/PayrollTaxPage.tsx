@@ -164,8 +164,8 @@ const PayrollTaxPage: React.FC = () => {
   return (
     <div className="crud-page">
       {/* Header */}
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <ShieldCheck size={16} />
@@ -176,7 +176,7 @@ const PayrollTaxPage: React.FC = () => {
               Ringkasan potongan PPh21 dan iuran BPJS karyawan per periode penggajian.
             </p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={() => void loadData()} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan

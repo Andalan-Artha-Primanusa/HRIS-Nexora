@@ -168,8 +168,8 @@ const CompetencyMatrixPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <Target size={16} />
@@ -178,7 +178,7 @@ const CompetencyMatrixPage: React.FC = () => {
             <h1 className="hero-title">Competency Matrix</h1>
             <p className="hero-subtitle">Manage employee skills, technical expertise, and core competencies.</p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={fetchData} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan

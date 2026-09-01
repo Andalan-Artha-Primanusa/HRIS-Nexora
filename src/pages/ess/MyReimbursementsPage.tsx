@@ -263,8 +263,8 @@ const MyReimbursementsPage: React.FC = () => {
   return (
     <div className="crud-page">
       {/* Header */}
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <Wallet size={16} />
@@ -275,7 +275,7 @@ const MyReimbursementsPage: React.FC = () => {
               Lacak dan kelola klaim pengeluaran Anda.
             </p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={fetchData} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan

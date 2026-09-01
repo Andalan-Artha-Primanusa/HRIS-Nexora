@@ -10,9 +10,7 @@ type Props = {
   mode: "check-in" | "check-out";
 };
 
-type BarcodeDetectorLike = {
-  detect: (source: HTMLVideoElement) => Promise<Array<{ rawValue: string }>>;
-};
+import jsQR from "jsqr";
 
 const parseQrToken = (value: string) => {
   const trimmed = value.trim();
@@ -96,13 +94,6 @@ const QrAttendanceScanner = ({ mode }: Props) => {
   };
 
   const startCamera = async () => {
-    const Detector = (window as any).BarcodeDetector;
-    if (!Detector) {
-      setScannerSupported(false);
-      showToast("Browser belum mendukung QR scanner native. Gunakan input token manual.", "info");
-      return;
-    }
-
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "environment" },
@@ -117,24 +108,37 @@ const QrAttendanceScanner = ({ mode }: Props) => {
       setStatus("Kamera aktif. Arahkan ke QR attendance.");
       scanningRef.current = true;
 
-      const detector = new Detector({ formats: ["qr_code"] }) as BarcodeDetectorLike;
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
       const scan = async () => {
-        if (!scanningRef.current || !videoRef.current) return;
+        if (!scanningRef.current || !videoRef.current || !ctx) return;
+        
         try {
-          const barcodes = await detector.detect(videoRef.current);
-          const rawValue = barcodes[0]?.rawValue;
-          if (rawValue) {
-            await submitToken(rawValue);
-            return;
+          if (videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA) {
+            canvas.width = videoRef.current.videoWidth;
+            canvas.height = videoRef.current.videoHeight;
+            ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            
+            const code = jsQR(imageData.data, imageData.width, imageData.height, {
+              inversionAttempts: "dontInvert",
+            });
+            
+            if (code && code.data) {
+              await submitToken(code.data);
+              return;
+            }
           }
         } catch {
           setScannerSupported(false);
-          setStatus("Scanner QR tidak tersedia di browser ini. Gunakan input token manual.");
+          setStatus("Scanner QR bermasalah. Gunakan input token manual.");
           stopCamera();
           return;
         }
-        window.setTimeout(scan, 600);
+        window.setTimeout(scan, 500);
       };
+      
       void scan();
     } catch {
       showToast("Kamera tidak bisa diakses. Izinkan akses kamera dari browser.", "error");

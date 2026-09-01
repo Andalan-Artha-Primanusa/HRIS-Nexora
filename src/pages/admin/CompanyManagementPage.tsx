@@ -196,8 +196,8 @@ const CompanyManagementPage = () => {
   if (!canView) {
     return (
       <div className="crud-page">
-        <Card className="hero-card">
-          <div className="hero-card-inner">
+        <Card className="page-header">
+          <div className="page-header-inner">
             <div className="hero-content">
               <div className="hero-badge"><ShieldCheck size={16} /><span>Company</span></div>
               <h1 className="hero-title">Akses Ditolak</h1>

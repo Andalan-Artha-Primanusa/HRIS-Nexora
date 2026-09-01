@@ -145,8 +145,8 @@ const UpdateLeavePage = () => {
   if (loading && !formData.start_date) {
     return (
       <div className="leave-page">
-        <Card className="hero-card" style={{ marginBottom: '2rem' }}>
-          <div className="hero-card-inner">
+        <Card className="page-header" style={{ marginBottom: '2rem' }}>
+          <div className="page-header-inner">
             <div className="hero-content">
               <div className="hero-badge">
                 <Calendar size={16} />
@@ -155,7 +155,7 @@ const UpdateLeavePage = () => {
               <h1 className="hero-title">{isViewMode ? 'Lihat' : 'Edit'} Pengajuan Cuti</h1>
               <p className="hero-subtitle">Memuat data cuti...</p>
             </div>
-            <div className="hero-actions">
+            <div className="page-header-actions">
               <button className="btn-outline" onClick={handleCancel} aria-label="Kembali">
                 <ChevronLeft size={18} />
                 Kembali
@@ -170,8 +170,8 @@ const UpdateLeavePage = () => {
   return (
     <div className="leave-page">
       {/* Header */}
-      <Card className="hero-card" style={{ marginBottom: '2rem' }}>
-        <div className="hero-card-inner">
+      <Card className="page-header" style={{ marginBottom: '2rem' }}>
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <Calendar size={16} />
@@ -180,7 +180,7 @@ const UpdateLeavePage = () => {
             <h1 className="hero-title">{isViewMode ? 'Lihat' : 'Edit'} Pengajuan Cuti</h1>
             <p className="hero-subtitle">{isViewMode ? 'Informasi detail pengajuan cuti Anda' : 'Perbarui informasi pengajuan cuti Anda'}</p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={handleCancel} aria-label="Kembali">
               <ChevronLeft size={18} />
               Kembali

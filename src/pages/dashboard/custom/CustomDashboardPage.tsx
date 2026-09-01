@@ -357,15 +357,15 @@ const CustomDashboardPage = () => {
 
   return (
     <div className="crud-page custom-dashboard-page">
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge"><LayoutDashboard size={16} /><span>Custom Dashboard</span></div>
             <h1 className="hero-title">Dashboard Builder</h1>
             <p className="hero-subtitle">Pilih widget, scope company, dan filter default sesuai role.</p>
             <CompanyScopeBadge />
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <Button variant="primary" size="md" onClick={save} disabled={saving}>
               <Save size={16} />
               {saving ? "Menyimpan..." : "Simpan Dashboard"}

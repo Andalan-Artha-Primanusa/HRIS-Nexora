@@ -248,8 +248,8 @@ const DocumentReviewPage = () => {
 
   return (
     <div className="crud-page document-review-page">
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <FileCheck2 size={16} />
@@ -260,7 +260,7 @@ const DocumentReviewPage = () => {
               Proses dokumen karyawan mengikuti tahap dan role pada konfigurasi Alur Persetujuan.
             </p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={() => navigate('/approval-flows')}>
               <Settings2 size={16} />
               Alur Persetujuan

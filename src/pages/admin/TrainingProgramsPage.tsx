@@ -205,8 +205,8 @@ const TrainingProgramsPage: React.FC = () => {
   return (
     <div className="crud-page training-page">
       {/* Header */}
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <GraduationCap size={16} />
@@ -217,7 +217,7 @@ const TrainingProgramsPage: React.FC = () => {
               Kelola program pelatihan karyawan, sertifikasi, dan pengembangan keterampilan.
             </p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={fetchData} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan

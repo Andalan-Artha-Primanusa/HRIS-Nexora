@@ -173,8 +173,8 @@ const WorkSchedulesPage = () => {
 
   return (
     <div className="crud-page work-schedules-page">
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <Activity size={16} />
@@ -185,7 +185,7 @@ const WorkSchedulesPage = () => {
               Kelola shift, jam masuk, jam pulang, dan toleransi keterlambatan karyawan dalam satu tampilan.
             </p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button
               className="btn-outline"
               onClick={() => void loadSchedules()}

@@ -627,8 +627,8 @@ const PayrollGeneratePage = () => {
   return (
     <div className="crud-page payroll-page" style={S.page}>
       {/* ── Hero ── */}
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <Zap size={13} />
@@ -640,7 +640,7 @@ const PayrollGeneratePage = () => {
               dengan akurasi data real-time.
             </p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button
               className="btn-outline"
               onClick={() => void loadPayroll()}

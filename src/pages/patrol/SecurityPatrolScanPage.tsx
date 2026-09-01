@@ -6,9 +6,7 @@ import { showToast } from "@/shared/ui/toast";
 import { patrolService } from "@/features/patrol/api/patrol.service";
 import "./SecurityPatrolPage.css";
 
-type BarcodeDetectorLike = {
-  detect: (source: HTMLVideoElement) => Promise<Array<{ rawValue: string }>>;
-};
+import jsQR from "jsqr";
 
 const parseQrCode = (value: string) => {
   const trimmed = value.trim();
@@ -84,12 +82,6 @@ const SecurityPatrolScanPage = () => {
   };
 
   const startCamera = async () => {
-    const Detector = (window as any).BarcodeDetector;
-    if (!Detector) {
-      showToast("Browser belum mendukung QR scanner native. Gunakan input manual.", "info");
-      return;
-    }
-
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "environment" },
@@ -104,22 +96,36 @@ const SecurityPatrolScanPage = () => {
       setStatus("Kamera aktif. Arahkan ke QR checkpoint ruangan.");
       scanningRef.current = true;
 
-      const detector = new Detector({ formats: ["qr_code"] }) as BarcodeDetectorLike;
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
       const scanLoop = async () => {
-        if (!scanningRef.current || !videoRef.current) return;
+        if (!scanningRef.current || !videoRef.current || !ctx) return;
+        
         try {
-          const barcodes = await detector.detect(videoRef.current);
-          if (barcodes[0]?.rawValue) {
-            await submitScan(barcodes[0].rawValue);
-            return;
+          if (videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA) {
+            canvas.width = videoRef.current.videoWidth;
+            canvas.height = videoRef.current.videoHeight;
+            ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            
+            const code = jsQR(imageData.data, imageData.width, imageData.height, {
+              inversionAttempts: "dontInvert",
+            });
+            
+            if (code && code.data) {
+              await submitScan(code.data);
+              return;
+            }
           }
         } catch {
           stopCamera();
-          showToast("Scanner QR tidak tersedia. Gunakan input manual.", "error");
+          showToast("Kamera bermasalah atau terputus.", "error");
           return;
         }
-        window.setTimeout(scanLoop, 650);
+        window.setTimeout(scanLoop, 500);
       };
+      
       void scanLoop();
     } catch {
       setStatus("Kamera tidak bisa diakses.");
@@ -129,8 +135,8 @@ const SecurityPatrolScanPage = () => {
 
   return (
     <div className="patrol-page">
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <ShieldCheck size={16} />
@@ -139,7 +145,7 @@ const SecurityPatrolScanPage = () => {
             <h1 className="hero-title">Scan QR Ronda Satpam</h1>
             <p className="hero-subtitle">Dipakai setelah jam 20:00 untuk bukti satpam sudah keliling dan scan checkpoint ruangan.</p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <Button variant="outline" size="md" onClick={cameraActive ? stopCamera : startCamera} disabled={loading}>
               {cameraActive ? <CameraOff size={16} /> : <Camera size={16} />}
               {cameraActive ? "Matikan Kamera" : "Aktifkan Kamera"}

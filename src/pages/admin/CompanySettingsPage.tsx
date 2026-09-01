@@ -202,14 +202,14 @@ const CompanySettingsPage: React.FC = () => {
 
   if (!canAccess) {
     return (
-      <div className="crud-page"><Card className="hero-card"><div className="hero-card-inner"><div className="hero-content"><div className="hero-badge"><ShieldCheck size={16} /><span>Admin Center</span></div><h1 className="hero-title">Akses Ditolak</h1><p className="hero-subtitle">Anda tidak memiliki izin untuk mengakses halaman ini.</p></div></div></Card></div>
+      <div className="crud-page"><Card className="page-header"><div className="page-header-inner"><div className="hero-content"><div className="hero-badge"><ShieldCheck size={16} /><span>Admin Center</span></div><h1 className="hero-title">Akses Ditolak</h1><p className="hero-subtitle">Anda tidak memiliki izin untuk mengakses halaman ini.</p></div></div></Card></div>
     );
   }
 
   return (
     <div className="crud-page settings-page">
-      <Card className="hero-card settings-hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header settings-hero-card">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <Settings size={16} />
@@ -220,7 +220,7 @@ const CompanySettingsPage: React.FC = () => {
               Kelola identitas inti organisasi, informasi kontak, dan parameter bisnis.
             </p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={fetchData} disabled={loading} style={{ background: 'white' }}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               {loading ? 'Memuat...' : 'Segarkan'}
@@ -237,7 +237,7 @@ const CompanySettingsPage: React.FC = () => {
 
       {/* Logo Section */}
       <Card className="settings-logo-card">
-        <div className="hero-card-inner">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <Upload size={16} />
@@ -248,7 +248,7 @@ const CompanySettingsPage: React.FC = () => {
               Unggah logo perusahaan untuk dokumen dan laporan.
             </p>
           </div>
-          <div className="hero-actions" style={{ flexDirection: 'column', gap: '1rem' }}>
+          <div className="page-header-actions" style={{ flexDirection: 'column', gap: '1rem' }}>
             {(company.logo || logoPreview) && (
               <div style={{ textAlign: 'center' }}>
                 <img

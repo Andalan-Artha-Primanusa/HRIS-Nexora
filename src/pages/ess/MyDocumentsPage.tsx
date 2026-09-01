@@ -583,8 +583,8 @@ const MyDocumentsPage: React.FC = () => {
   return (
     <div className="crud-page my-documents-page">
       {/* Header */}
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <FileText size={16} />
@@ -595,7 +595,7 @@ const MyDocumentsPage: React.FC = () => {
               Akses dokumen resmi, sertifikat, dan catatan pekerjaan Anda.
             </p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={fetchDocuments} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan

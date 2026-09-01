@@ -135,8 +135,8 @@ const EditLocationPage = () => {
   return (
     <div className="crud-page">
       {/* Header Card */}
-      <Card className="hero-card" style={{ marginBottom: '2rem' }}>
-        <div className="hero-card-inner">
+      <Card className="page-header" style={{ marginBottom: '2rem' }}>
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <MapPinned size={16} />
@@ -145,7 +145,7 @@ const EditLocationPage = () => {
             <h1 className="hero-title">Edit Lokasi</h1>
             <p className="hero-subtitle">Perbarui informasi lokasi absensi dan parameter check-in.</p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={handleCancel} disabled={loading}>
               <ArrowLeft size={16} />
               Kembali

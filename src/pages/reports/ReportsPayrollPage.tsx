@@ -97,8 +97,8 @@ const ReportsPayrollPage: React.FC = () => {
 
   return (
     <div className="reports-dashboard">
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <Wallet size={16} />
@@ -110,7 +110,7 @@ const ReportsPayrollPage: React.FC = () => {
               Lacak tren nominal gaji, status pembayaran per periode, dan distribusi pengeluaran.
             </p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={() => void load()} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan

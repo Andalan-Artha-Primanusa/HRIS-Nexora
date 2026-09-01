@@ -705,8 +705,8 @@ const TrainingManagementPage: React.FC = () => {
 
   return (
     <div className="crud-page training-page">
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <GraduationCap size={16} />
@@ -718,7 +718,7 @@ const TrainingManagementPage: React.FC = () => {
             </p>
             <CompanyScopeBadge />
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <RefreshCw size={16} />
           </div>
         </div>

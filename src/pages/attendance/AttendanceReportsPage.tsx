@@ -155,8 +155,8 @@ const AttendanceReportsPage = () => {
 
   return (
     <div className="crud-page">
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <FileText size={16} />
@@ -166,7 +166,7 @@ const AttendanceReportsPage = () => {
             <p className="hero-subtitle">Analitik dan laporan kehadiran karyawan.</p>
             <CompanyScopeBadge />
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={exportCSV}>
               <Download size={16} />
               Ekspor Data Karyawan

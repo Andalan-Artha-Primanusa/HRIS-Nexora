@@ -167,7 +167,7 @@ const EmployeesPage = () => {
   return (
     <div className="crud-page">
       {/* Header */}
-      <Card className="employees-hero-card">
+      <Card className="employees-page-header">
         <div className="employees-hero-inner">
           <div className="employees-hero-content">
             <div className="employees-hero-badge"><Briefcase size={16} /><span>Employee Center</span></div>
@@ -175,7 +175,7 @@ const EmployeesPage = () => {
             <p className="employees-hero-subtitle">Manage all employee data and organizational structure in one place.</p>
             <CompanyScopeBadge />
           </div>
-          <div className="employees-hero-actions">
+          <div className="employees-page-header-actions">
             <button className="employees-hero-button employees-hero-button--secondary" onClick={() => void loadEmployees()} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} /> Segarkan
             </button>

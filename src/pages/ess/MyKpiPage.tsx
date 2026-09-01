@@ -294,14 +294,14 @@ const MyKpiPage = () => {
 
   return (
     <div className="crud-page">
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge"><Target size={16} /><span>KPI Periode</span></div>
             <h1 className="hero-title">Performa Saya (KPI Periode)</h1>
             <p className="hero-subtitle">KPI yang di-assign admin tampil sebagai periode. Alurnya draft, lalu submitted, lalu approved.</p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={loadData} disabled={loading}>
               <RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Segarkan
             </button>

@@ -167,8 +167,8 @@ const MenuPermissionsPage = () => {
   return (
     <div className="crud-page">
       {/* Hero Card */}
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <Shield size={16} />
@@ -179,7 +179,7 @@ const MenuPermissionsPage = () => {
               Manage role-based access for every menu in the system.
             </p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={() => void loadData()} disabled={loading}>
               Refresh
             </button>

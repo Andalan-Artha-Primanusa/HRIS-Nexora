@@ -37,8 +37,8 @@ const WorkScheduleCreatePage = () => {
 
   return (
     <div className="crud-page">
-      <Card className="hero-card" style={{ marginBottom: '2rem' }}>
-        <div className="hero-card-inner">
+      <Card className="page-header" style={{ marginBottom: '2rem' }}>
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <Tag size={16} />
@@ -49,7 +49,7 @@ const WorkScheduleCreatePage = () => {
               Tambahkan shift kerja baru ke dalam sistem.
             </p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button type="button" className="btn-outline" onClick={() => navigate("/work-schedules")} disabled={loading}>
               <ChevronLeft size={16} style={{ marginRight: '8px' }} />
               Kembali

@@ -138,8 +138,8 @@ const SecurityPatrolMonitorPage = () => {
 
   return (
     <div className="patrol-page">
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <ShieldCheck size={16} />
@@ -148,7 +148,7 @@ const SecurityPatrolMonitorPage = () => {
             <h1 className="hero-title">Monitoring Ronda Satpam</h1>
             <p className="hero-subtitle">Kelola QR checkpoint ruangan dan pantau bukti scan setelah jam 20:00.</p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <Button variant="outline" size="md" onClick={loadData} disabled={loading}>
               <RefreshCw size={16} />
               Segarkan

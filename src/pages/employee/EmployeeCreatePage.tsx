@@ -126,8 +126,8 @@ const EmployeeCreatePage = () => {
 
   return (
     <div className="crud-page">
-      <Card className="hero-card" style={{ marginBottom: '2rem' }}>
-        <div className="hero-card-inner">
+      <Card className="page-header" style={{ marginBottom: '2rem' }}>
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <Users size={16} />
@@ -136,7 +136,7 @@ const EmployeeCreatePage = () => {
             <h1 className="hero-title">Tambah Karyawan</h1>
             <p className="hero-subtitle">Input data jabatan dan penempatan karyawan baru</p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={() => navigate("/employees")} disabled={loading}>
               <ChevronLeft size={18} />
               Kembali ke Daftar

@@ -69,8 +69,8 @@ const LeaveBalancePage = () => {
   return (
     <div className="crud-page">
       {/* Header - Same style as Leave Requests */}
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <Calendar size={16} />
@@ -79,7 +79,7 @@ const LeaveBalancePage = () => {
             <h1 className="hero-title">Saldo Cuti Saya</h1>
             <p className="hero-subtitle">Lihat rincian kuota dan kebijakan cuti Anda.</p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={() => void loadBalance()}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan

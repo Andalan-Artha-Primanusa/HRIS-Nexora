@@ -106,8 +106,8 @@ const LeaveTypeFormPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <CalendarDays size={16} />
@@ -118,7 +118,7 @@ const LeaveTypeFormPage: React.FC = () => {
               Konfigurasi kategori cuti dan aturan dasarnya.
             </p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={() => navigate('/leave/type')}>
               <ArrowLeft size={16} />
               Kembali

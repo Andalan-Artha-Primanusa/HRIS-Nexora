@@ -158,8 +158,8 @@ const MyAssetsPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <Package size={16} />
@@ -168,7 +168,7 @@ const MyAssetsPage: React.FC = () => {
             <h1 className="hero-title">Aset Saya</h1>
             <p className="hero-subtitle">Daftar properti perusahaan yang saat ini atau pernah ditugaskan kepada Anda.</p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={fetchData} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan

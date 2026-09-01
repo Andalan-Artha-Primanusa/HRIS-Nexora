@@ -274,8 +274,8 @@ const AdminKpiPage = () => {
 
   return (
     <div className="crud-page kpi-page">
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <Target size={16} />
@@ -286,7 +286,7 @@ const AdminKpiPage = () => {
               Kelola periode KPI dengan indikator kinerja multi-item per karyawan.
             </p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={loadData} disabled={loading}>
               <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
               Segarkan

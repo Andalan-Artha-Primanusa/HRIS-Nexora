@@ -76,8 +76,8 @@ const AdminEmailSendPage = () => {
   if (!canAccess) {
     return (
       <div className="crud-page">
-        <Card className="hero-card">
-          <div className="hero-card-inner">
+        <Card className="page-header">
+          <div className="page-header-inner">
             <div className="hero-content">
               <div className="hero-badge">
                 <Shield size={16} />
@@ -144,8 +144,8 @@ const AdminEmailSendPage = () => {
 
   return (
     <div className="crud-page">
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <Mail size={16} />

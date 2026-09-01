@@ -277,8 +277,8 @@ const AssetManagementPage: React.FC = () => {
 
   return (
     <div className="crud-page asset-page">
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <Package size={16} />
@@ -290,7 +290,7 @@ const AssetManagementPage: React.FC = () => {
             </p>
             <CompanyScopeBadge />
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             {canCreate && (
             <button className="btn-primary" onClick={() => navigate('/inventory/assets/create')}>
               <Plus size={16} />

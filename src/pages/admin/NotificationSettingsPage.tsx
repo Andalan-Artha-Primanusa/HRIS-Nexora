@@ -200,7 +200,7 @@ const NotificationSettingsPage: React.FC = () => {
 
   if (!canAccess) {
     return (
-      <div className="crud-page"><Card className="hero-card"><div className="hero-card-inner"><div className="hero-content"><div className="hero-badge"><ShieldCheck size={16} /><span>Admin Center</span></div><h1 className="hero-title">Akses Ditolak</h1><p className="hero-subtitle">Anda tidak memiliki izin untuk mengakses halaman ini.</p></div></div></Card></div>
+      <div className="crud-page"><Card className="page-header"><div className="page-header-inner"><div className="hero-content"><div className="hero-badge"><ShieldCheck size={16} /><span>Admin Center</span></div><h1 className="hero-title">Akses Ditolak</h1><p className="hero-subtitle">Anda tidak memiliki izin untuk mengakses halaman ini.</p></div></div></Card></div>
     );
   }
 
@@ -300,8 +300,8 @@ const NotificationSettingsPage: React.FC = () => {
   return (
     <div className="crud-page training-page notification-page">
       {/* Header */}
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <ShieldCheck size={16} />
@@ -312,7 +312,7 @@ const NotificationSettingsPage: React.FC = () => {
               Konfigurasikan bagaimana sistem mengirimkan pemberitahuan untuk setiap aktivitas bisnis di HRIS.
             </p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={fetchData} disabled={loading} style={{ background: 'white' }}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               {loading ? 'Memuat...' : 'Segarkan'}

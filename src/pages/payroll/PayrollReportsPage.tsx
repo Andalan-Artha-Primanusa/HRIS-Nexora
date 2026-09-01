@@ -146,15 +146,15 @@ const PayrollReportsPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge"><FileText size={16} /><span>Pusat Payroll</span></div>
             <h1 className="hero-title">Laporan Pajak & Payroll</h1>
             <p className="hero-subtitle">Laporan komprehensif pajak, BPJS, dan detail payroll karyawan.</p>
             <CompanyScopeBadge />
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={() => void loadData()} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} /> Segarkan
             </button>

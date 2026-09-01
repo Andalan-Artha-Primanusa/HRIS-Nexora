@@ -25,8 +25,8 @@ const AdminImportPage = () => {
   if (!canAccess) {
     return (
       <div className="crud-page">
-        <Card className="hero-card">
-          <div className="hero-card-inner">
+        <Card className="page-header">
+          <div className="page-header-inner">
             <div className="hero-content">
               <div className="hero-badge">
                 <ShieldAlert size={16} />
@@ -161,8 +161,8 @@ const AdminImportPage = () => {
   return (
     <div className="crud-page">
       {/* Header */}
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <UploadCloud size={16} />
@@ -173,7 +173,7 @@ const AdminImportPage = () => {
               Unduh template, unggah file users maupun employees, dan tinjau hasil proses import langsung dari halaman admin.
             </p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={() => {
               setUserFile(null);
               setEmployeeFile(null);

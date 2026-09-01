@@ -418,15 +418,15 @@ const OvertimePage = () => {
 
   return (
     <div className="crud-page">
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge"><Timer size={16} /><span>Layanan Mandiri</span></div>
             <h1 className="hero-title">{canViewAllOvertime ? 'Manajemen Lembur' : 'Lembur Saya'}</h1>
             <p className="hero-subtitle">Kelola pengajuan lembur dan bukti pendukung secara efisien.</p>
             <CompanyScopeBadge />
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={() => void loadRecords()} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} /> Segarkan
             </button>

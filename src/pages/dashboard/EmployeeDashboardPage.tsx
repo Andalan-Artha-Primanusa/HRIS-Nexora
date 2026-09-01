@@ -271,8 +271,8 @@ const EmployeeDashboardPage = () => {
   return (
     <div className="crud-page">
       {/* Header */}
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <Activity size={16} />
@@ -293,7 +293,7 @@ const EmployeeDashboardPage = () => {
               </div>
             </div>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-primary" onClick={() => navigate('/leave/requests')}>
               Ajukan Cuti
             </button>

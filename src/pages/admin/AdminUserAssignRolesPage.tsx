@@ -114,8 +114,8 @@ const AdminUserAssignRolesPage = () => {
 
   return (
     <div className="crud-page">
-      <Card className="hero-card" style={{ marginBottom: '2rem' }}>
-        <div className="hero-card-inner">
+      <Card className="page-header" style={{ marginBottom: '2rem' }}>
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <Shield size={16} />
@@ -126,7 +126,7 @@ const AdminUserAssignRolesPage = () => {
               Pilih karyawan berdasarkan ID atau Nama untuk menyesuaikan hak akses mereka.
             </p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button type="button" className="btn-outline" onClick={() => navigate("/admin/users")}>
               <ChevronLeft size={16} style={{ marginRight: '8px' }} />
               Kembali

@@ -108,8 +108,8 @@ const CompanyFormPage = () => {
   if (!canManage) {
     return (
       <div className="crud-page">
-        <Card className="hero-card">
-          <div className="hero-card-inner">
+        <Card className="page-header">
+          <div className="page-header-inner">
             <h1 className="hero-title">Akses Ditolak</h1>
             <p className="hero-subtitle">Anda tidak memiliki izin untuk mengelola company.</p>
             <Button variant="outline" onClick={() => navigate("/companies")}>Kembali</Button>

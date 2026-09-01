@@ -153,8 +153,8 @@ const AdminEmailNotificationsPage = () => {
   if (!canAccess) {
     return (
       <div className="crud-page">
-        <Card className="hero-card">
-          <div className="hero-card-inner">
+        <Card className="page-header">
+          <div className="page-header-inner">
             <div className="hero-content">
               <div className="hero-badge">
                 <Shield size={16} />
@@ -273,8 +273,8 @@ const AdminEmailNotificationsPage = () => {
 
   return (
     <div className="crud-page">
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <BellRing size={16} />
@@ -285,7 +285,7 @@ const AdminEmailNotificationsPage = () => {
               Pantau riwayat pengiriman email dan kelola template sistem.
             </p>
           </div>
-          <div className="hero-actions" style={{ display: 'flex', gap: '12px' }}>
+          <div className="page-header-actions" style={{ display: 'flex', gap: '12px' }}>
             <button className="btn-primary" onClick={() => setShowModal(true)}>
               <RefreshCw size={16} style={{ transform: 'rotate(45deg)' }} />
               Buat Template Baru

@@ -358,15 +358,15 @@ const PayrollListPage = () => {
 
   return (
     <div className="crud-page" style={{ fontFamily: "'Poppins', sans-serif" }}>
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge"><Briefcase size={16} /><span>Manajemen Payroll</span></div>
             <h1 className="hero-title">Daftar Payroll</h1>
             <p className="hero-subtitle">Lihat, tambah, edit, dan hapus seluruh data payroll karyawan.</p>
             <CompanyScopeBadge />
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={() => void loadData()} disabled={loading}><RefreshCw size={16} className={loading ? 'animate-spin' : ''} /> Sync</button>
             {view === "list" && <>{canExport && <button className="btn-outline" onClick={() => setExportModal(true)} style={{ color: "#059669" }}><Download size={16} /> Export</button>}{canCreate && <button className="btn-primary" onClick={() => { setMode("create"); setForm(DEFAULT_FORM); setView("form"); }}><Plus size={16} /> Tambah Payroll</button>}</>}
           </div>

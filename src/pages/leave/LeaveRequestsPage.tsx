@@ -162,8 +162,8 @@ const LeaveRequestsPage = () => {
   return (
     <div className="crud-page">
       {/* Header - Same style as Dashboard */}
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <Calendar size={16} />
@@ -173,7 +173,7 @@ const LeaveRequestsPage = () => {
             <p className="hero-subtitle">Manage employee leave requests and approvals in one unified dashboard.</p>
             <CompanyScopeBadge />
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={() => void loadLeaves()}>
               <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
               Segarkan

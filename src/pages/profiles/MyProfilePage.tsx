@@ -17,8 +17,8 @@ const MyProfilePage = () => {
 
   return (
     <div className="crud-page profiles-page">
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <UserCircle size={16} />

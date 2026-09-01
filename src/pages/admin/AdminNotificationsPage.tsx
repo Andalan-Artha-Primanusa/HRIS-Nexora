@@ -162,8 +162,8 @@ const AdminNotificationsPage = () => {
 
   return (
     <div className="crud-page admin-notifications-page">
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <Bell size={16} />
@@ -174,7 +174,7 @@ const AdminNotificationsPage = () => {
               Kelola notifikasi admin, kirim pesan individual, dan broadcast pengumuman ke pengguna.
             </p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={() => void loadSummary()} disabled={loading}>
               <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
               {loading ? "Memuat..." : "Segarkan"}

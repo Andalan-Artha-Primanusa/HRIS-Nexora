@@ -752,8 +752,8 @@ const ProfilesPage = () => {
     const profile = selectedProfile;
     return (
       <div className="crud-page">
-        <Card className="hero-card">
-          <div className="hero-card-inner">
+        <Card className="page-header">
+          <div className="page-header-inner">
             <div className="hero-content">
               <div className="hero-badge">
                 <User size={16} />
@@ -764,7 +764,7 @@ const ProfilesPage = () => {
                 Lihat informasi lengkap profil karyawan.
               </p>
             </div>
-            <div className="hero-actions">
+            <div className="page-header-actions">
               <button className="btn-outline" onClick={() => navigate("/profiles")}>
                 Kembali
               </button>
@@ -820,8 +820,8 @@ const ProfilesPage = () => {
   if (isUpdatePage) {
     return (
       <div className="crud-page">
-        <Card className="hero-card">
-          <div className="hero-card-inner">
+        <Card className="page-header">
+          <div className="page-header-inner">
             <div className="hero-content">
               <div className="hero-badge">
                 <User size={16} />
@@ -832,7 +832,7 @@ const ProfilesPage = () => {
                 Ubah informasi profil karyawan.
               </p>
             </div>
-            <div className="hero-actions">
+            <div className="page-header-actions">
               <button className="btn-outline" onClick={() => navigate("/profiles")} disabled={loading}>
                 Batal
               </button>
@@ -1009,8 +1009,8 @@ const ProfilesPage = () => {
   if (isAddPage) {
     return (
       <div className="crud-page">
-        <Card className="hero-card">
-          <div className="hero-card-inner">
+        <Card className="page-header">
+          <div className="page-header-inner">
             <div className="hero-content">
               <div className="hero-badge">
                 <User size={16} />
@@ -1021,7 +1021,7 @@ const ProfilesPage = () => {
                 Lengkapi informasi profil karyawan.
               </p>
             </div>
-            <div className="hero-actions">
+            <div className="page-header-actions">
               <button className="btn-outline" onClick={() => navigate("/profiles")} disabled={loading}>
                 Kembali
               </button>
@@ -1101,8 +1101,8 @@ const ProfilesPage = () => {
   // Main List Page
   return (
     <div className="crud-page">
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <User size={16} />
@@ -1113,7 +1113,7 @@ const ProfilesPage = () => {
               Kelola profil dan data karyawan perusahaan.
             </p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={() => void loadProfiles()}>
               <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
             </button>

@@ -145,8 +145,8 @@ const MyTrainingsPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge"><GraduationCap size={16} /><span>Pengembangan Diri</span></div>
             <h1 className="hero-title">Pelatihan Saya</h1>
@@ -154,7 +154,7 @@ const MyTrainingsPage: React.FC = () => {
               {isSelfService ? 'Ikuti pelatihan dan lacak kemajuan belajar Anda.' : 'Lihat program pelatihan dan enrollment.'}
             </p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={fetchData} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} /> Segarkan
             </button>

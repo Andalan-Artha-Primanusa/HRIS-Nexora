@@ -141,8 +141,8 @@ const LocationsPage = () => {
   return (
     <div className="crud-page">
       {/* Header */}
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <MapPinned size={16} />
@@ -151,7 +151,7 @@ const LocationsPage = () => {
             <h1 className="hero-title">Daftar Lokasi</h1>
             <p className="hero-subtitle">Kelola lokasi absensi dan radius untuk setiap tempat kerja.</p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={() => void loadLocations()} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               {loading ? 'Memuat...' : 'Segarkan'}

@@ -278,8 +278,8 @@ const AssetFormPage: React.FC = () => {
     <div className="crud-page asset-form-page">
       <style>{FORM_STYLES}</style>
 
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <Package size={16} />
@@ -290,7 +290,7 @@ const AssetFormPage: React.FC = () => {
               {isEdit ? 'Perbarui informasi detail aset perusahaan.' : 'Daftarkan aset baru ke dalam sistem inventaris.'}
             </p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button type="button" className="btn-outline" onClick={() => navigate('/inventory/assets')}>
               <ArrowLeft size={16} />
               Kembali

@@ -1189,8 +1189,8 @@ const ReportsDashboardPage: React.FC = () => {
   if (loading) {
     return (
       <div className="reports-dashboard">
-        <Card className="hero-card">
-          <div className="hero-card-inner">
+        <Card className="page-header">
+          <div className="page-header-inner">
             <div className="hero-content">
               <div className="hero-badge"><BarChart3 size={16} /><span>Pusat Laporan</span></div>
               <h1 className="hero-title">Laporan & Analitik</h1>
@@ -1205,8 +1205,8 @@ const ReportsDashboardPage: React.FC = () => {
 
   return (
     <div className="reports-dashboard">
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <BarChart3 size={16} />
@@ -1218,7 +1218,7 @@ const ReportsDashboardPage: React.FC = () => {
             </p>
             <CompanyScopeBadge />
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={() => void loadData()} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan

@@ -163,8 +163,8 @@ const PayrollDashboard: React.FC = () => {
   return (
     <div className="crud-page">
       {/* Header - Same style as Dashboard */}
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <Wallet size={16} />
@@ -176,7 +176,7 @@ const PayrollDashboard: React.FC = () => {
               dan kelola slip gaji karyawan secara efisien dalam satu dasbor terpadu.
             </p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={() => void loadPayrollData()} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan

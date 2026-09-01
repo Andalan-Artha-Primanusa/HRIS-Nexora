@@ -129,8 +129,8 @@ const CreateLocationPage = () => {
 
   return (
     <div className="crud-page">
-      <Card className="hero-card" style={{ marginBottom: '2rem' }}>
-        <div className="hero-card-inner">
+      <Card className="page-header" style={{ marginBottom: '2rem' }}>
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <MapPinned size={16} />
@@ -141,7 +141,7 @@ const CreateLocationPage = () => {
               Tambahkan lokasi absensi dengan koordinat GPS dan radius.
             </p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button type="button" className="btn-outline" onClick={handleCancel} disabled={loading}>
               <ArrowLeft size={16} style={{ marginRight: '8px' }} />
               Kembali

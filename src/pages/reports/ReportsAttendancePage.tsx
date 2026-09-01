@@ -175,8 +175,8 @@ const ReportsAttendancePage: React.FC = () => {
 
   return (
     <div className="reports-dashboard">
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <CalendarDays size={16} />
@@ -187,7 +187,7 @@ const ReportsAttendancePage: React.FC = () => {
               Analisis kehadiran, ketidakhadiran, dan keterlambatan karyawan secara visual.
             </p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={() => void load()} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan

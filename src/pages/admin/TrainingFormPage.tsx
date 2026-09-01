@@ -133,8 +133,8 @@ const TrainingFormPage: React.FC = () => {
 
   return (
     <div className="crud-page training-form-page">
-      <Card className="hero-card" style={{ marginBottom: '2rem' }}>
-        <div className="hero-card-inner">
+      <Card className="page-header" style={{ marginBottom: '2rem' }}>
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <BookOpen size={16} />
@@ -143,7 +143,7 @@ const TrainingFormPage: React.FC = () => {
             <h1 className="hero-title">{isEdit ? 'Edit Training Program' : 'Develop New Program'}</h1>
             <p className="hero-subtitle">Design curricula, set schedules, and manage enrollments.</p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button type="button" className="btn-outline" onClick={() => navigate('/training/programs')} disabled={loading}>
               <ChevronLeft size={18} />
               Back

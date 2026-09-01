@@ -139,8 +139,8 @@ const AdminUserCreatePage = () => {
 
   return (
     <div className="crud-page">
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <UserPlus size={16} />
@@ -152,7 +152,7 @@ const AdminUserCreatePage = () => {
             </p>
             <CompanyScopeBadge />
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button type="button" className="btn-outline" onClick={() => navigate("/admin/users")}>
               <ArrowLeft size={16} />
               Kembali

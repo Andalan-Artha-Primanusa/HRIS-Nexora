@@ -79,8 +79,8 @@ const PayrollProcessPage = ({ mode, showTabs = true }: PayrollProcessPageProps) 
 
   return (
     <div className="crud-page payroll-process-page">
-      <Card className="hero-card">
-        <div className="hero-card-inner">
+      <Card className="page-header">
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge"><activeMeta.icon size={16} /><span>Operasi Penggajian</span></div>
             <h1 className="hero-title">{mode ? activeMeta.title : "Proses Payroll"}</h1>

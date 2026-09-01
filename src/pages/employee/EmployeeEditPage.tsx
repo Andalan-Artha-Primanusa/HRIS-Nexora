@@ -168,8 +168,8 @@ const EmployeeEditPage = () => {
 
   return (
     <div className="crud-page">
-      <Card className="hero-card" style={{ marginBottom: '2rem' }}>
-        <div className="hero-card-inner">
+      <Card className="page-header" style={{ marginBottom: '2rem' }}>
+        <div className="page-header-inner">
           <div className="hero-content">
             <div className="hero-badge">
               <Users size={16} />
@@ -178,7 +178,7 @@ const EmployeeEditPage = () => {
             <h1 className="hero-title">Update Data Karyawan</h1>
             <p className="hero-subtitle">Perbarui informasi karyawan: ID {updateForm.id || routeEmployeeId}</p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={() => navigate("/employees")} disabled={loading}>
               <ChevronLeft size={18} />
               Kembali ke Daftar
