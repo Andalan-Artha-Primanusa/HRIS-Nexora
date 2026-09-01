@@ -2,7 +2,7 @@
   border-right: 1px solid var(--color-border);
   background: var(--sidebar-bg, var(--color-white));
   color: var(--color-text-primary);
-  z-index: 20;
+  z-index: var(--z-fixed);
 }
 
 .sidebar-logo {
