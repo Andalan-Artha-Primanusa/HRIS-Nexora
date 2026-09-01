@@ -180,7 +180,7 @@ const AdminUsersPage = () => {
   return (
     <div className="crud-page">
       {/* Header */}
-      <Card className="hero-card">
+      <Card className="page-header">
         <div className="hero-card-inner">
           <div className="hero-content">
             <div className="hero-badge">
@@ -193,7 +193,7 @@ const AdminUsersPage = () => {
             </p>
             <CompanyScopeBadge />
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button
               className="btn-outline"
               onClick={() => void loadUsers()}
@@ -206,7 +206,6 @@ const AdminUsersPage = () => {
               className="btn-outline"
               onClick={() => navigate("/admin/users/create")}
               disabled={!canCreateUsers}
-              title={!canCreateUsers ? "Anda tidak memiliki izin membuat pengguna" : undefined}
             >
               <UserPlus size={16} />
               Buat Akun
@@ -215,7 +214,6 @@ const AdminUsersPage = () => {
               className="btn-primary"
               onClick={() => navigate("/admin/users/assign-roles")}
               disabled={!canAssignRoles}
-              title={!canAssignRoles ? "Anda tidak memiliki izin menetapkan peran" : undefined}
             >
               <Shield size={16} />
               Tetapkan Peran

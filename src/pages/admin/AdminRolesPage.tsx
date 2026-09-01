@@ -170,7 +170,7 @@ const AdminRolesPage = () => {
   return (
     <div className="crud-page">
       {/* Header */}
-      <Card className="hero-card">
+      <Card className="page-header">
         <div className="hero-card-inner">
           <div className="hero-content">
             <div className="hero-badge">
@@ -180,7 +180,7 @@ const AdminRolesPage = () => {
             <h1 className="hero-title">Kelola Peran</h1>
             <p className="hero-subtitle">Manajemen role dan permission pengguna sistem.</p>
           </div>
-          <div className="hero-actions">
+          <div className="page-header-actions">
             <button className="btn-outline" onClick={() => void loadRoles()} disabled={loading}>
               <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
               {loading ? "Memuat..." : "Segarkan"}
@@ -190,7 +190,6 @@ const AdminRolesPage = () => {
               className="btn-primary"
               onClick={() => navigate("/admin/roles/create")}
               disabled={!canCreateRoles}
-              title={!canCreateRoles ? "Anda tidak memiliki izin membuat peran" : undefined}
             >
               <Plus size={16} />
               Tambah Peran
