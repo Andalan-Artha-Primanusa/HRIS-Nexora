@@ -88,6 +88,7 @@ const AdminImportPage = lazy(() => import("../../pages/admin/AdminImportPage"));
 const MasterDataPage = lazy(() => import("../../pages/admin/MasterDataPage"));
 const CompanySettingsPage = lazy(() => import("../../pages/admin/CompanySettingsPage"));
 const CompanyManagementPage = lazy(() => import("../../pages/admin/CompanyManagementPage"));
+const CompanyFormPage = lazy(() => import("../../pages/admin/CompanyFormPage"));
 const NotificationSettingsPage = lazy(() => import("../../pages/admin/NotificationSettingsPage"));
 const MyProfilePage = lazy(() => import("../../pages/profiles/MyProfilePage"));
 const ForceResetPasswordPage = lazy(() => import("../../pages/auth/login/ForceResetPasswordPage"));
@@ -250,6 +251,8 @@ export const router = createBrowserRouter([
       layoutRoute("/organization/master-data/positions", <MenuRouteGuard menuKey="admin.positions"><MasterDataPage /></MenuRouteGuard>),
       layoutRoute("/settings/company", <MenuRouteGuard menuKey="admin.company"><CompanySettingsPage /></MenuRouteGuard>),
       layoutRoute("/companies", <MenuRouteGuard menuKey="admin.companies"><CompanyManagementPage /></MenuRouteGuard>),
+      layoutRoute("/companies/create", <MenuRouteGuard menuKey="admin.companies"><CompanyFormPage /></MenuRouteGuard>),
+      layoutRoute("/companies/:id/edit", <MenuRouteGuard menuKey="admin.companies"><CompanyFormPage /></MenuRouteGuard>),
       layoutRoute("/settings/notifications", <MenuRouteGuard menuKey="admin.notification-settings"><NotificationSettingsPage /></MenuRouteGuard>),
       { path: "/settings/master-data/leave-type", element: <Navigate to="/leave/type" replace /> },
     ],
