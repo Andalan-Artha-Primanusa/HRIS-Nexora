@@ -448,7 +448,6 @@ const getSectionTableKey = (pathname: string) => {
   if (pathname === '/my/assets' || pathname.startsWith('/assets/')) return 'assets';
   if (pathname === '/my/trainings' || pathname.startsWith('/training/')) return 'training';
   if (pathname === '/my/competencies' || pathname.startsWith('/competencies')) return 'competencies';
-  if (pathname === '/my/requests' || pathname.startsWith('/requests/')) return 'requests';
   if (pathname.startsWith('/notifications')) return 'notifications';
   if (pathname.startsWith('/insights/')) return 'insights';
   if (pathname.startsWith('/admin/')) return 'admin';
@@ -464,7 +463,6 @@ const getSectionTableKey = (pathname: string) => {
   if (pathname.startsWith('/career/')) return 'career';
   if (pathname.startsWith('/engagement/')) return 'engagement';
   if (pathname.startsWith('/workforce/')) return 'workforce';
-  if (pathname.startsWith('/recruitment/')) return 'recruitment';
   if (pathname.startsWith('/compliance/')) return 'compliance';
   if (pathname.startsWith('/approval-flows')) return 'approval_flows';
   if (pathname.startsWith('/ess/')) return 'ess';
@@ -498,7 +496,6 @@ const getSectionData = (pathname: string) => {
     assets: ['Asset', 'Category', 'Assigned To', 'Status', 'Updated'],
     training: ['Program', 'Category', 'Start Date', 'Capacity', 'Status'],
     competencies: ['Competency', 'Category', 'Level', 'Mandatory', 'Status'],
-    requests: ['Request', 'Type', 'Priority', 'Assigned To', 'Status'],
     notifications: ['Type', 'Title', 'Created At', 'Read', 'Status'],
     insights: ['Metric', 'Value', 'Window', 'Status'],
     ess: ['Feature', 'Status', 'Last Updated'],
@@ -507,7 +504,6 @@ const getSectionData = (pathname: string) => {
     career: ['Plan', 'Employee', 'Target Date', 'Status', 'Updated'],
     engagement: ['Survey', 'Type', 'Start', 'End', 'Status'],
     workforce: ['Policy', 'Department', 'Schedule', 'Status', 'Updated'],
-    recruitment: ['Opening', 'Department', 'Type', 'Status', 'Updated'],
     compliance: ['Metric', 'Value', 'Window', 'Status', 'Updated'],
     approval_flows: ['Flow', 'Module', 'Steps', 'Status', 'Updated'],
     profiles: ['Name', 'Email', 'Phone', 'City', 'Status', 'Actions'],
@@ -567,10 +563,6 @@ const supportsList = (pathname: string) => {
       '/my/documents',
       '/documents/review',
       '/documents/expiring',
-      '/my/requests',
-      '/requests',
-      '/requests/assign',
-      '/requests/status',
       '/training/programs',
       '/training/enrollments',
       '/my/trainings',
@@ -594,13 +586,9 @@ const supportsList = (pathname: string) => {
       '/performance/summary',
       '/performance/cycles',
       '/performance/reviews',
-      '/performance/okrs',
-      '/performance/360-reviews',
-      '/performance/calibration',
       '/career/idps',
       '/career/succession',
       '/engagement/surveys',
-      '/recruitment/openings',
       '/workforce/holidays',
       '/workforce/shift-swaps',
       '/workforce/overtime-rules',
@@ -663,14 +651,6 @@ const getDefaultFormState = (pathname: string) => {
       return { document_type: '', document_number: '', issue_date: '', expiry_date: '', issuing_authority: '', file: '' };
     case '/documents/review':
       return { id: '', status: '', remarks: '' };
-    case '/my/requests':
-      return { id: '', request_type: '', description: '', priority: '', status: '', per_page: '15', comment_text: '' };
-    case '/requests':
-      return { id: '', status: 'open', per_page: '15', comment_text: '' };
-    case '/requests/assign':
-      return { id: '', assigned_to_user_id: '' };
-    case '/requests/status':
-      return { id: '', status: '', completion_notes: '' };
     case '/training/programs':
       return { title: '', description: '', provider: '', mode: 'online', start_date: '', end_date: '', budget: '', status: 'draft' };
     case '/training/enrollments':
@@ -715,12 +695,6 @@ const getDefaultFormState = (pathname: string) => {
       return { name: '', period_type: 'quarterly', year: '', quarter: '', start_date: '', end_date: '', status: 'open', description: '' };
     case '/performance/reviews':
       return { review_cycle_id: '', employee_id: '', reviewer_user_id: '', kpi_id: '', score: '', strengths: '', improvements: '', feedback: '', reviewer_comment: '' };
-    case '/performance/okrs':
-      return { employee_id: '', period_id: '', objective: '', description: '', weight: '', target_value: '', unit: '', start_date: '', end_date: '' };
-    case '/performance/360-reviews':
-      return { cycle_id: '', employee_id: '', manager_id: '', feeders_required: '', start_date: '', end_date: '' };
-    case '/performance/calibration':
-      return { cycle_id: '', name: '', description: '', scheduled_at: '' };
     case '/career/idps':
       return { employee_id: '', review_cycle_id: '', goal_title: '', goal_description: '', status: 'draft', target_date: '', mentor_user_id: '' };
     case '/career/succession':
@@ -859,10 +833,6 @@ const routeActionMatrix: Record<string, string[]> = {
   '/assets/assignments': ['assignAsset', 'returnAsset'],
   '/my/documents': ['uploadMyDocument'],
   '/documents/review': ['reviewDocument'],
-  '/my/requests': ['createMyRequest', 'viewRequestDetail', 'addRequestComment'],
-  '/requests': ['viewRequestDetail'],
-  '/requests/assign': ['assignRequest'],
-  '/requests/status': ['updateRequestStatus'],
   '/training/programs': ['createTrainingProgram'],
   '/training/enrollments': ['enrollTrainingProgram', 'completeTrainingEnrollment'],
   '/competencies': ['createCompetency', 'assignCompetency'],
@@ -870,9 +840,6 @@ const routeActionMatrix: Record<string, string[]> = {
   '/approval-flows': ['createApprovalFlow'],
   '/performance/cycles': ['createPerformanceCycle'],
   '/performance/reviews': ['createPerformanceReview'],
-  '/performance/okrs': ['createPerformanceOkr'],
-  '/performance/360-reviews': ['createPerformance360Review'],
-  '/performance/calibration': ['createPerformanceCalibration'],
   '/career/idps': ['createCareerIdp'],
   '/career/succession': ['createCareerSuccession'],
   '/engagement/surveys': ['createEngagementSurvey'],
@@ -943,10 +910,6 @@ const actionRequiredFields: Record<string, string[]> = {
   assignAsset: ['id', 'employee_id'],
   returnAsset: ['assignment_id'],
   reviewDocument: ['id', 'status'],
-  addRequestComment: ['id', 'comment_text'],
-  viewRequestDetail: ['id'],
-  assignRequest: ['id', 'assigned_to_user_id'],
-  updateRequestStatus: ['id', 'status'],
   enrollTrainingProgram: ['id', 'employee_ids'],
   completeTrainingEnrollment: ['id'],
   assignCompetency: ['id', 'employee_ids'],
@@ -1441,24 +1404,6 @@ const SectionPage = () => {
             params: { days: formState.days || 30 },
           });
           break;
-        case '/my/requests':
-          result = await api.get('/my/requests', {
-            params: {
-              status: formState.status || undefined,
-              per_page: formState.per_page ? Number(formState.per_page) : undefined,
-            },
-          });
-          break;
-        case '/requests':
-        case '/requests/assign':
-        case '/requests/status':
-          result = await api.get('/requests', {
-            params: {
-              status: formState.status || 'open',
-              per_page: formState.per_page ? Number(formState.per_page) : 15,
-            },
-          });
-          break;
         case '/training/programs':
           result = await api.get('/training/programs');
           if (result && result.data && result.data.data) {
@@ -1601,48 +1546,6 @@ const SectionPage = () => {
             return;
           }
           break;
-        case '/performance/okrs':
-          result = await api.get('/performance/okrs');
-          if (result && result.data && result.data.data) {
-            const paged = result.data.data;
-            const rows = Array.isArray(paged.data) ? paged.data : [];
-            formatResponse(paged);
-            const parsed = parsePayloadToTable(rows);
-            setTableColumns(parsed.columns);
-            setTableRows(parsed.rows as string[][]);
-            setStatusMessage(rows.length === 0 ? 'Belum ada OKR.' : 'Data OKR berhasil dimuat.');
-            setLoading(false);
-            return;
-          }
-          break;
-        case '/performance/360-reviews':
-          result = await api.get('/performance/360-reviews');
-          if (result && result.data && result.data.data) {
-            const paged = result.data.data;
-            const rows = Array.isArray(paged.data) ? paged.data : [];
-            formatResponse(paged);
-            const parsed = parsePayloadToTable(rows);
-            setTableColumns(parsed.columns);
-            setTableRows(parsed.rows as string[][]);
-            setStatusMessage(rows.length === 0 ? 'Belum ada 360 review.' : 'Data 360 review berhasil dimuat.');
-            setLoading(false);
-            return;
-          }
-          break;
-        case '/performance/calibration':
-          result = await api.get('/performance/calibration');
-          if (result && result.data && result.data.data) {
-            const paged = result.data.data;
-            const rows = Array.isArray(paged.data) ? paged.data : [];
-            formatResponse(paged);
-            const parsed = parsePayloadToTable(rows);
-            setTableColumns(parsed.columns);
-            setTableRows(parsed.rows as string[][]);
-            setStatusMessage(rows.length === 0 ? 'Belum ada kalibrasi performa.' : 'Data kalibrasi performa berhasil dimuat.');
-            setLoading(false);
-            return;
-          }
-          break;
         case '/career/idps':
           result = await api.get('/career/idps');
           if (result && result.data && result.data.data) {
@@ -1681,20 +1584,6 @@ const SectionPage = () => {
             setTableColumns(parsed.columns);
             setTableRows(parsed.rows as string[][]);
             setStatusMessage(rows.length === 0 ? 'Belum ada survei engagement.' : 'Data survei engagement berhasil dimuat.');
-            setLoading(false);
-            return;
-          }
-          break;
-        case '/recruitment/openings':
-          result = await api.get('/recruitment/openings');
-          if (result && result.data && result.data.data) {
-            const paged = result.data.data;
-            const rows = Array.isArray(paged.data) ? paged.data : [];
-            formatResponse(paged);
-            const parsed = parsePayloadToTable(rows);
-            setTableColumns(parsed.columns);
-            setTableRows(parsed.rows as string[][]);
-            setStatusMessage(rows.length === 0 ? 'Belum ada lowongan.' : 'Data lowongan berhasil dimuat.');
             setLoading(false);
             return;
           }
@@ -2267,56 +2156,6 @@ const SectionPage = () => {
             </Button>
           </>
         );
-      case '/my/requests':
-        return (
-          <>
-            <Button variant="primary" size="md" onClick={() => void performAction('createMyRequest')} disabled={loading}>
-              Create Request
-            </Button>
-            <Button variant="outline" size="md" onClick={() => void performAction('viewRequestDetail')} disabled={loading}>
-              View Request Detail
-            </Button>
-            <Button variant="outline" size="md" onClick={() => void performAction('addRequestComment')} disabled={loading}>
-              Tambah Komentar
-            </Button>
-            <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Muat Ulang Permintaan
-            </Button>
-          </>
-        );
-      case '/requests/assign':
-        return (
-          <>
-            <Button variant="primary" size="md" onClick={() => void performAction('assignRequest')} disabled={loading}>
-              Tugaskan Permintaan
-            </Button>
-            <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Muat Ulang Antrian
-            </Button>
-          </>
-        );
-      case '/requests':
-        return (
-          <>
-            <Button variant="outline" size="md" onClick={() => void performAction('viewRequestDetail')} disabled={loading}>
-              Lihat Detail Permintaan
-            </Button>
-            <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Refresh Queue
-            </Button>
-          </>
-        );
-      case '/requests/status':
-        return (
-          <>
-            <Button variant="primary" size="md" onClick={() => void performAction('updateRequestStatus')} disabled={loading}>
-              Perbarui Status Permintaan
-            </Button>
-            <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Refresh Queue
-            </Button>
-          </>
-        );
       case '/training/programs':
         return (
           <>
@@ -2386,39 +2225,6 @@ const SectionPage = () => {
             </Button>
             <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
               Muat Ulang Review
-            </Button>
-          </>
-        );
-      case '/performance/okrs':
-        return (
-          <>
-            <Button variant="primary" size="md" onClick={() => void performAction('createPerformanceOkr')} disabled={loading}>
-              Buat OKR
-            </Button>
-            <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Muat Ulang OKR
-            </Button>
-          </>
-        );
-      case '/performance/360-reviews':
-        return (
-          <>
-            <Button variant="primary" size="md" onClick={() => void performAction('createPerformance360Review')} disabled={loading}>
-              Buat 360 Review
-            </Button>
-            <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Muat Ulang 360 Review
-            </Button>
-          </>
-        );
-      case '/performance/calibration':
-        return (
-          <>
-            <Button variant="primary" size="md" onClick={() => void performAction('createPerformanceCalibration')} disabled={loading}>
-              Buat Sesi Kalibrasi
-            </Button>
-            <Button variant="secondary" size="md" onClick={() => void loadList()} disabled={loading}>
-              Muat Ulang Kalibrasi
             </Button>
           </>
         );
@@ -2518,7 +2324,6 @@ const SectionPage = () => {
       case '/compliance/audit-summary':
       case '/compliance/expiring-documents':
       case '/performance/summary':
-      case '/recruitment/openings':
       case '/documents/expiring':
       case '/my/profile':
       case '/my/assets':

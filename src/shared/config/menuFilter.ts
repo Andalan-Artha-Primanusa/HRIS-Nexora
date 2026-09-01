@@ -1,31 +1,15 @@
 import type { AuthUser } from "@/shared/types/rbac.types";
-import type { MenuItem } from "./menu";
+import type { ApiMenuNode, MenuItem } from "./menu";
+import { mapApiMenuTree } from "./menu";
 import { api } from "@/shared/api/httpClient";
 import { useAuthStore } from "@/app/store/auth.store";
 import { RBACUtils } from "@/shared/hooks/rbac";
 
 let cachePromise: Promise<string[]> | null = null;
+let treeCachePromise: Promise<MenuItem[]> | null = null;
 
 const stripAdminKeys = (keys: string[]): string[] => {
   return keys;
-};
-
-const hasEmployeeManagementCapability = (user: AuthUser): boolean =>
-  RBACUtils.hasPermission(user, [
-    "employee.create",
-    "employee.update",
-    "employee.delete",
-    "employee.onboard",
-    "employee.offboard",
-    "admin.access",
-  ]);
-
-const isAllowedByCapability = (user: AuthUser, item: MenuItem): boolean => {
-  if (item.menuKey?.startsWith("employees") || item.menuKey?.startsWith("workforce.employees")) {
-    return hasEmployeeManagementCapability(user);
-  }
-
-  return true;
 };
 
 const computeFromAssignments = (
@@ -58,39 +42,41 @@ export const fetchAllowedMenuKeys = async (user: AuthUser | null = null): Promis
       return [];
     }
 
-    // Verifikasi menu assignment dari backend; fallback ke /user/menus bila endpoint admin tidak tersedia.
+    // Sumber kebenaran = backend. /user/menus mengembalikan menu yang
+    // sudah difilter permission (MenuController::userMenus → canAccessMenuKey),
+    // sehingga sidebar tidak menampilkan menu yang user tidak boleh akses.
+    // /admin/menus dipakai sebagai batasan tambahan (role assignment gate).
+    let permissionKeys: string[] = [];
+    try {
+      const res = await api.get<{ data?: string[] }>("/user/menus");
+      permissionKeys = stripAdminKeys(Array.isArray(res.data?.data) ? res.data!.data : []);
+    } catch {
+      permissionKeys = [];
+    }
+
+    // Batasan tambahan: hanya menu yang di-assign ke role user.
+    let assignmentKeys: string[] | null = null;
     try {
       const adminRes = await api.get<{ data?: { items?: { key: string; assigned_role_ids: number[] }[] } }>(
         "/admin/menus",
         { validateStatus: () => true }
       );
       if (adminRes.status === 200) {
-        const items = adminRes.data?.data?.items ?? [];
-        const computed = computeFromAssignments(items, user);
-        if (computed) {
-          const finalKeys = stripAdminKeys(computed);
-          useAuthStore.getState().setAllowedMenuKeys(finalKeys);
-          useAuthStore.getState().setMenuKeysLoaded(true);
-          return finalKeys;
-        }
+        assignmentKeys = computeFromAssignments(adminRes.data?.data?.items ?? [], user);
       }
     } catch {
-      // Abaikan dan lanjutkan ke fallback
+      assignmentKeys = null;
     }
 
-    // Fallback utama
-    try {
-      const res = await api.get<{ data?: string[] }>("/user/menus");
-      const data = res.data?.data ?? [];
-      const finalKeys = stripAdminKeys(Array.isArray(data) ? data : []);
-      useAuthStore.getState().setAllowedMenuKeys(finalKeys);
-      useAuthStore.getState().setMenuKeysLoaded(true);
-      return finalKeys;
-    } catch {
-      useAuthStore.getState().setAllowedMenuKeys([]);
-      useAuthStore.getState().setMenuKeysLoaded(true);
-      return [];
-    }
+    // intersection: menu harus lolos permission filter (backend) DAN role assignment (bila ada).
+    const effectiveKeys =
+      assignmentKeys === null
+        ? permissionKeys
+        : permissionKeys.filter((key) => assignmentKeys!.includes(key));
+
+    useAuthStore.getState().setAllowedMenuKeys(effectiveKeys);
+    useAuthStore.getState().setMenuKeysLoaded(true);
+    return effectiveKeys;
   })();
 
   try {
@@ -102,14 +88,31 @@ export const fetchAllowedMenuKeys = async (user: AuthUser | null = null): Promis
 
 export const clearMenuCache = () => {
   cachePromise = null;
+  treeCachePromise = null;
   useAuthStore.getState().setAllowedMenuKeys([]);
   useAuthStore.getState().setMenuKeysLoaded(false);
+};
+
+export const fetchUserMenuTree = async (user: AuthUser | null = null): Promise<MenuItem[]> => {
+  if (!user?.roles?.length) return [];
+  if (treeCachePromise) return treeCachePromise;
+
+  treeCachePromise = (async () => {
+    const res = await api.get<{ data?: ApiMenuNode[] }>("/user/menu-tree");
+    return mapApiMenuTree(Array.isArray(res.data?.data) ? res.data.data : []);
+  })();
+
+  try {
+    return await treeCachePromise;
+  } finally {
+    treeCachePromise = null;
+  }
 };
 
 const filterByKeys = (items: MenuItem[], allowedKeys: Set<string>, user: AuthUser): MenuItem[] => {
   const isSuperAdmin = RBACUtils.isSuperAdmin(user);
   return items
-    .filter((item) => (isSuperAdmin || !item.menuKey || allowedKeys.has(item.menuKey)) && (isSuperAdmin || isAllowedByCapability(user, item)))
+    .filter((item) => isSuperAdmin || !item.menuKey || allowedKeys.has(item.menuKey))
     .map((item) => ({
       ...item,
       subItems: item.subItems ? filterByKeys(item.subItems, allowedKeys, user) : undefined,

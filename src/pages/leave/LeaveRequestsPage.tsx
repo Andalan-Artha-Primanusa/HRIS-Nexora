@@ -21,6 +21,7 @@ import { RBACUtils } from "@/shared/hooks/rbac";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "./LeaveShared.css";
+import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 
 const LeaveRequestsPage = () => {
   const navigate = useNavigate();
@@ -170,6 +171,7 @@ const LeaveRequestsPage = () => {
             </div>
             <h1 className="hero-title">Leave Requests</h1>
             <p className="hero-subtitle">Manage employee leave requests and approvals in one unified dashboard.</p>
+            <CompanyScopeBadge />
           </div>
           <div className="hero-actions">
             <button className="btn-outline" onClick={() => void loadLeaves()}>

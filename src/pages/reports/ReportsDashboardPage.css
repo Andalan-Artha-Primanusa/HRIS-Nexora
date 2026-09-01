@@ -14,7 +14,6 @@
   min-height: 100vh;
 }
 
-/* â”€â”€â”€ Hero Header â”€â”€â”€ */
 .reports-hero-card {
   display: flex;
   justify-content: space-between;
@@ -68,7 +67,6 @@
   line-height: 1.6;
 }
 
-/* â”€â”€â”€ Metrics Grid â”€â”€â”€ */
 .reports-metrics-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -135,7 +133,6 @@
 .report-metric-icon--red { color: var(--reports-red); background: var(--color-error-light); }
 .report-metric-icon--cyan { color: var(--reports-cyan); background: #ecfeff; }
 
-/* â”€â”€â”€ Charts â”€â”€â”€ */
 .reports-charts-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -177,7 +174,6 @@
   border: 1px dashed var(--color-border);
 }
 
-/* â”€â”€â”€ Filter Bar â”€â”€â”€ */
 .reports-filter-bar {
   display: flex;
   align-items: center;
@@ -207,7 +203,6 @@
   min-width: 200px;
 }
 
-/* â”€â”€â”€ Drag and Drop â”€â”€â”€ */
 .reports-chart-card--sortable {
   position: relative;
   transition: box-shadow 0.2s ease;
@@ -249,7 +244,6 @@
   cursor: grabbing;
 }
 
-/* â”€â”€â”€ Responsive â”€â”€â”€ */
 @media (max-width: 1280px) {
   .reports-charts-grid { grid-template-columns: 1fr; }
 }
@@ -259,4 +253,3 @@
   .reports-title { font-size: 1.75rem; }
   .reports-filter-bar { flex-direction: column; align-items: flex-start; gap: 1rem; }
 }
-

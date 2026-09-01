@@ -19,7 +19,6 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* â”€â”€â”€ Hero Header â”€â”€â”€ */
 .section-header {
   display: flex;
   justify-content: space-between;
@@ -167,7 +166,6 @@
   margin: 0;
 }
 
-/* â”€â”€â”€ Summary Grid â”€â”€â”€ */
 .section-summary-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -208,7 +206,6 @@
   letter-spacing: -1px;
 }
 
-/* â”€â”€â”€ Action Panel â”€â”€â”€ */
 .section-action-card {
   padding: 2rem;
   border-radius: 16px;
@@ -280,7 +277,6 @@
   border-top: 1px dashed var(--color-border);
 }
 
-/* â”€â”€â”€ Table Card â”€â”€â”€ */
 .section-table-card {
   padding: 2rem;
   border-radius: 16px;
@@ -328,7 +324,6 @@
   background: var(--color-surface-soft);
 }
 
-/* â”€â”€â”€ Specific styling for long text â”€â”€â”€ */
 .long-text {
   max-width: 250px;
   white-space: nowrap;
@@ -351,7 +346,6 @@
   max-width: 400px;
 }
 
-/* â”€â”€â”€ Pagination â”€â”€â”€ */
 .table-pagination {
   display: flex;
   justify-content: space-between;
@@ -373,11 +367,9 @@
   gap: 0.5rem;
 }
 
-/* â”€â”€â”€ Variants â”€â”€â”€ */
 .section-variant-payroll { --section-accent: #7c3aed; --section-soft: rgba(124, 58, 237, 0.1); }
 .section-variant-attendance { --section-accent: var(--color-success); --section-soft: rgba(16, 185, 129, 0.1); }
 .section-variant-leave { --section-accent: #ea580c; --section-soft: rgba(234, 88, 12, 0.1); }
-.section-variant-recruitment { --section-accent: #9333ea; --section-soft: rgba(147, 51, 234, 0.1); }
 .section-variant-performance { --section-accent: var(--color-error); --section-soft: rgba(220, 38, 38, 0.1); }
 .section-variant-training { --section-accent: #0891b2; --section-soft: rgba(8, 145, 178, 0.1); }
 .section-variant-admin { --section-accent: #ca8a04; --section-soft: rgba(202, 138, 4, 0.1); }
@@ -456,7 +448,6 @@
   font-weight: 500;
 }
 
-/* â”€â”€â”€ Responsive Adjustments â”€â”€â”€ */
 @media (max-width: 1280px) {
   .section-summary-grid { grid-template-columns: repeat(2, 1fr); }
 }
@@ -632,4 +623,3 @@
   font-weight: 700;
   color: var(--color-text-primary);
 }
-

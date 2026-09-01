@@ -6,10 +6,12 @@ import { Modal } from '@/shared/ui/Modal';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { PayrollStatusBadge } from '@/shared/ui/PayrollStatusBadge';
 import { payrollService, toSafeArray } from '@/features/payroll/api/payroll.service';
+import { getApiBaseUrl } from '@/shared/api/httpClient';
 import { parsePaginatedResponse } from '@/shared/api/pagination';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/employee/EmployeesPage.css';
+import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 
 const formatCurrency = (value: number | string) => {
   const num = typeof value === 'string' ? parseFloat(value) : value;
@@ -62,9 +64,9 @@ const PayrollReportsPage: React.FC = () => {
     setExportLoading(true);
     try {
       const token = sessionStorage.getItem("token") || "";
-      const baseUrl = import.meta.env.VITE_API_URL || "https://moccasin-crab-693879.hostingersite.com/api";
+      const baseUrl = getApiBaseUrl();
       const endpoint = exportType === "bca" ? `/payroll/export/bca-klikpay?period=${exportPeriod}` : `/payroll/export/summary?period=${exportPeriod}`;
-      const response = await fetch(`${baseUrl}${endpoint}`, { headers: { Authorization: `Bearer ${token}` } });
+      const response = await fetch(`${baseUrl}${endpoint}`, { headers: { Authorization: `Bearer ${token}`, "X-Company-Id": sessionStorage.getItem("selectedCompanyId") || "" } });
       if (!response.ok) throw new Error("Gagal mengunduh file export");
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -150,6 +152,7 @@ const PayrollReportsPage: React.FC = () => {
             <div className="hero-badge"><FileText size={16} /><span>Pusat Payroll</span></div>
             <h1 className="hero-title">Laporan Pajak & Payroll</h1>
             <p className="hero-subtitle">Laporan komprehensif pajak, BPJS, dan detail payroll karyawan.</p>
+            <CompanyScopeBadge />
           </div>
           <div className="hero-actions">
             <button className="btn-outline" onClick={() => void loadData()} disabled={loading}>

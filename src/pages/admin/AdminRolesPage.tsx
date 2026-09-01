@@ -26,6 +26,9 @@ const AdminRolesPage = () => {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const canViewRoles = RBACUtils.canViewRoles(user);
+  const canCreateRoles = RBACUtils.canCreateRoles(user);
+  const canUpdateRoles = RBACUtils.canUpdateRoles(user);
+  const canDeleteRoles = RBACUtils.canDeleteRoles(user);
 
   const [roles, setRoles] = useState<Role[]>([]);
   const [searchText, setSearchText] = useState("");
@@ -182,7 +185,13 @@ const AdminRolesPage = () => {
               <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
               {loading ? "Memuat..." : "Segarkan"}
             </button>
-            <button type="button" className="btn-primary" onClick={() => navigate("/admin/roles/create")}>
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={() => navigate("/admin/roles/create")}
+              disabled={!canCreateRoles}
+              title={!canCreateRoles ? "Anda tidak memiliki izin membuat peran" : undefined}
+            >
               <Plus size={16} />
               Tambah Peran
             </button>
@@ -328,6 +337,7 @@ const AdminRolesPage = () => {
                         </td>
                         <td className="td-center">
                           <div className="action-btn-group">
+                            {canUpdateRoles && (
                             <button
                               className="action-btn action-btn-edit"
                               onClick={() => navigate(`/admin/roles/edit/${role.id}`)}
@@ -335,6 +345,8 @@ const AdminRolesPage = () => {
                             >
                               <Edit size={16} />
                             </button>
+                            )}
+                            {canDeleteRoles && (
                             <button
                               className="action-btn action-btn-delete"
                               onClick={() => requestDelete(role)}
@@ -343,6 +355,7 @@ const AdminRolesPage = () => {
                             >
                               <Trash2 size={16} />
                             </button>
+                            )}
                           </div>
                         </td>
                       </tr>

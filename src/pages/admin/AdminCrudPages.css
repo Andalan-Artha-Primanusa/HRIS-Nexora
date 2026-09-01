@@ -524,5 +524,3 @@
 @media (max-width: 768px) {
   .import-grid { grid-template-columns: 1fr; }
 }
-
-

@@ -16,7 +16,11 @@ import type { ReimbursementItem, ReimbursementCreatePayload, ReimbursementUpdate
 import { BarChart3, Clock3, CircleCheckBig, RefreshCw, DollarSign, Trash2, Edit, Receipt, DownloadCloud, Check, X } from "lucide-react";
 import { showToast } from "@/shared/ui/toast";
 import { RejectReasonModal } from "@/shared/components/RejectReasonModal";
+import { useAuthStore } from "@/app/store/auth.store";
+import { RBACUtils } from "@/shared/hooks/rbac";
+import { PERMISSIONS } from "@/shared/types/rbac.types";
 import "@/shared/styles/CrudPage.css";
+import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 
 const formatDate = (dateString: string | undefined) => {
   if (!dateString) return "-";
@@ -54,6 +58,11 @@ const DEFAULT_FORM = {
 };
 
 const ReimbursementsManagementPage = () => {
+  const user = useAuthStore((state) => state.user);
+  const canApprove = RBACUtils.hasPermission(user, PERMISSIONS.REIMBURSEMENT_APPROVE);
+  const canPay = RBACUtils.hasPermission(user, PERMISSIONS.REIMBURSEMENT_PAY);
+  const canCreate = RBACUtils.hasPermission(user, "reimbursement.create");
+  const canDelete = RBACUtils.hasPermission(user, "reimbursement.delete");
   const [items, setItems] = useState<ReimbursementItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -240,6 +249,7 @@ const ReimbursementsManagementPage = () => {
 
   return (
     <div className="crud-page">
+      <div style={{ marginBottom: 16 }}><CompanyScopeBadge /></div>
       {/* Header */}
       <div className="page-header">
         <div className="page-header-title">
@@ -252,9 +262,11 @@ const ReimbursementsManagementPage = () => {
             <RefreshCw size={16} />
             {loading ? "Memuat..." : "Segarkan"}
           </Button>
+          {canCreate && (
           <Button variant="primary" size="md" onClick={() => { setForm(DEFAULT_FORM); setIsFormOpen(!isFormOpen); }}>
             Buat Data Baru
           </Button>
+          )}
         </div>
       </div>
 
@@ -324,7 +336,9 @@ const ReimbursementsManagementPage = () => {
              </div>
              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem', gap: '0.75rem' }}>
                  <Button variant="ghost" onClick={() => setIsFormOpen(false)}>Batal</Button>
+                 {canCreate && (
                  <Button variant="primary" onClick={() => void handleCreateOrUpdate()} disabled={actionLoading === "form"}>Simpan Data Ledger</Button>
+                 )}
               </div>
            </div>
         </Card>
@@ -431,7 +445,7 @@ const ReimbursementsManagementPage = () => {
                         </td>
 <td>
                             <div className="action-btn-group">
-                              {(item.status === 'pending' || item.status === 'submitted') && item.can_act !== false && (
+                              {canApprove && (item.status === 'pending' || item.status === 'submitted') && item.can_act !== false && (
                                 <>
                                   <button
                                     className="action-btn action-btn-success"
@@ -451,7 +465,7 @@ const ReimbursementsManagementPage = () => {
                                   </button>
                                 </>
                               )}
-                              {item.status === 'approved' && (
+                              {canPay && item.status === 'approved' && (
                                 <button
                                   className="action-btn action-btn-edit"
                                   onClick={() => void handleAction(String(item.id)+'_paid', () => markReimbursementAsPaid(String(item.id)), "Status diubah menjadi PAID")}
@@ -461,6 +475,7 @@ const ReimbursementsManagementPage = () => {
                                   <DollarSign size={16} />
                                 </button>
                               )}
+                              {canCreate && (
                               <button
                                   className="action-btn action-btn-edit"
                                   onClick={() => handleEdit(item)}
@@ -468,6 +483,8 @@ const ReimbursementsManagementPage = () => {
                               >
                                 <Edit size={16} />
                              </button>
+                              )}
+                             {canDelete && (
                              <button
                                   className="action-btn action-btn-delete"
                                   onClick={() => setDeleteTarget(item)}
@@ -476,6 +493,7 @@ const ReimbursementsManagementPage = () => {
                               >
                                  <Trash2 size={16} />
                              </button>
+                             )}
                             </div>
                          </td>
                       </tr>
@@ -508,7 +526,7 @@ const ReimbursementsManagementPage = () => {
       </Card>
 
       <ConfirmDialog
-        isOpen={!!deleteTarget}
+        isOpen={canDelete && !!deleteTarget}
         title="Hapus Ledger Reimbursement"
         message={`Ledger "${String(deleteTarget?.title || "ini")}" akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.`}
         confirmLabel="Hapus"

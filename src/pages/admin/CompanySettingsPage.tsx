@@ -5,6 +5,7 @@ import { showToast } from '@/shared/ui/toast';
 import { api } from '@/shared/api/httpClient';
 import { useAuthStore } from '@/app/store/auth.store';
 import { RBACUtils } from '@/shared/hooks/rbac';
+import { PERMISSIONS } from '@/shared/types/rbac.types';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
@@ -12,12 +13,16 @@ import './CompanySettingsPage.css';
 
 const CompanySettingsPage: React.FC = () => {
   const user = useAuthStore((state) => state.user);
-  const canAccess = RBACUtils.hasPermission(user, 'admin.email.manage');
-  if (!canAccess) {
-    return (
-      <div className="crud-page"><Card className="hero-card"><div className="hero-card-inner"><div className="hero-content"><div className="hero-badge"><ShieldCheck size={16} /><span>Admin Center</span></div><h1 className="hero-title">Akses Ditolak</h1><p className="hero-subtitle">Anda tidak memiliki izin untuk mengakses halaman ini.</p></div></div></Card></div>
-    );
-  }
+  const canAccess = RBACUtils.hasPermission(user, [
+    PERMISSIONS.COMPANY_VIEW,
+    PERMISSIONS.COMPANY_UPDATE,
+    PERMISSIONS.ADMIN_COMPANY_VIEW,
+    PERMISSIONS.ADMIN_COMPANY_UPDATE,
+  ]);
+  const canUpdate = RBACUtils.hasPermission(user, [
+    PERMISSIONS.COMPANY_UPDATE,
+    PERMISSIONS.ADMIN_COMPANY_UPDATE,
+  ]);
   const [company, setCompany] = useState({
     name: '',
     legal_name: '',
@@ -81,10 +86,18 @@ const CompanySettingsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (canAccess) {
+      fetchData();
+    } else {
+      setLoading(false);
+    }
+  }, [canAccess]);
 
   const handleSave = async () => {
+    if (!canUpdate) {
+      showToast('Anda tidak memiliki izin mengubah pengaturan perusahaan', 'error');
+      return;
+    }
     if (!company.name) {
       showToast('Nama perusahaan wajib diisi', 'error');
       return;
@@ -95,7 +108,7 @@ const CompanySettingsPage: React.FC = () => {
       const dataToSend = Object.fromEntries(
         Object.entries(company).filter(([_, v]) => v !== '')
       );
-      
+
       if (companyId) {
         await api.put(`/company/${companyId}`, dataToSend);
       } else {
@@ -116,9 +129,13 @@ const CompanySettingsPage: React.FC = () => {
   };
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!canUpdate) {
+      showToast('Anda tidak memiliki izin mengubah logo perusahaan', 'error');
+      return;
+    }
     const file = e.target.files?.[0];
     if (!file) return;
-    
+
     if (!companyId) {
       showToast('Simpan data perusahaan terlebih dahulu sebelum mengunggah logo', 'error');
       return;
@@ -147,6 +164,10 @@ const CompanySettingsPage: React.FC = () => {
   };
 
   const handleDeleteLogo = async () => {
+    if (!canUpdate) {
+      showToast('Anda tidak memiliki izin menghapus logo perusahaan', 'error');
+      return;
+    }
     if (!companyId) return;
 
     try {
@@ -179,6 +200,12 @@ const CompanySettingsPage: React.FC = () => {
     { key: 'business', label: 'Bisnis & Legal', icon: Landmark },
   ];
 
+  if (!canAccess) {
+    return (
+      <div className="crud-page"><Card className="hero-card"><div className="hero-card-inner"><div className="hero-content"><div className="hero-badge"><ShieldCheck size={16} /><span>Admin Center</span></div><h1 className="hero-title">Akses Ditolak</h1><p className="hero-subtitle">Anda tidak memiliki izin untuk mengakses halaman ini.</p></div></div></Card></div>
+    );
+  }
+
   return (
     <div className="crud-page settings-page">
       <Card className="hero-card settings-hero-card">
@@ -198,10 +225,12 @@ const CompanySettingsPage: React.FC = () => {
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               {loading ? 'Memuat...' : 'Segarkan'}
             </button>
+            {canUpdate && (
             <button className="btn-primary" onClick={handleSave} disabled={saving} style={{ boxShadow: '0 10px 20px rgba(15, 159, 143, 0.2)' }}>
               <Save size={16} />
               {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
             </button>
+            )}
           </div>
         </div>
       </Card>
@@ -222,20 +251,21 @@ const CompanySettingsPage: React.FC = () => {
           <div className="hero-actions" style={{ flexDirection: 'column', gap: '1rem' }}>
             {(company.logo || logoPreview) && (
               <div style={{ textAlign: 'center' }}>
-                <img 
-                  src={logoPreview || `${api.defaults.baseURL?.replace('/api', '')}/${company.logo}`} 
+                <img
+                  src={logoPreview || `${api.defaults.baseURL?.replace('/api', '')}/${company.logo}`}
                   alt="Logo Perusahaan"
                   style={{ maxHeight: '100px', maxWidth: '200px', objectFit: 'contain' }}
                 />
               </div>
             )}
+            {canUpdate && (
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <label className="btn-outline" style={{ cursor: 'pointer', background: 'white' }}>
                 <Upload size={16} />
                 {uploadingLogo ? 'Mengunggah...' : 'Unggah Logo'}
-                <input 
-                  type="file" 
-                  accept="image/*" 
+                <input
+                  type="file"
+                  accept="image/*"
                   onChange={(e) => { handleLogoPreview(e); handleLogoUpload(e); }}
                   style={{ display: 'none' }}
                   disabled={uploadingLogo}
@@ -248,6 +278,7 @@ const CompanySettingsPage: React.FC = () => {
                 </button>
               )}
             </div>
+            )}
           </div>
         </div>
       </Card>
@@ -337,6 +368,7 @@ const CompanySettingsPage: React.FC = () => {
                         onChange={(e) => handleChange('name', e.target.value)}
                         placeholder="Masukkan nama resmi perusahaan"
                         className="premium-input"
+                        disabled={!canUpdate}
                       />
                     </div>
                   </div>
@@ -350,6 +382,7 @@ const CompanySettingsPage: React.FC = () => {
                         onChange={(e) => handleChange('legal_name', e.target.value)}
                         placeholder="PT Nama Perusahaan Anda"
                         className="premium-input"
+                        disabled={!canUpdate}
                       />
                     </div>
                   </div>
@@ -363,6 +396,7 @@ const CompanySettingsPage: React.FC = () => {
                         onChange={(e) => handleChange('tax_number', e.target.value)}
                         placeholder="00.000.000.0-000.000"
                         className="premium-input"
+                        disabled={!canUpdate}
                       />
                     </div>
                   </div>
@@ -376,6 +410,7 @@ const CompanySettingsPage: React.FC = () => {
                         onChange={(e) => handleChange('website', e.target.value)}
                         placeholder="https://www.company.com"
                         className="premium-input"
+                        disabled={!canUpdate}
                       />
                     </div>
                   </div>
@@ -394,6 +429,7 @@ const CompanySettingsPage: React.FC = () => {
                         onChange={(e) => handleChange('email', e.target.value)}
                         placeholder="hello@company.com"
                         className="premium-input"
+                        disabled={!canUpdate}
                       />
                     </div>
                   </div>
@@ -407,6 +443,7 @@ const CompanySettingsPage: React.FC = () => {
                         onChange={(e) => handleChange('phone', e.target.value)}
                         placeholder="+62 xxx"
                         className="premium-input"
+                        disabled={!canUpdate}
                       />
                     </div>
                   </div>
@@ -420,6 +457,7 @@ const CompanySettingsPage: React.FC = () => {
                         onChange={(e) => handleChange('address', e.target.value)}
                         placeholder="Nama jalan, gedung, lantai..."
                         className="premium-input"
+                        disabled={!canUpdate}
                       />
                     </div>
                   </div>
@@ -433,6 +471,7 @@ const CompanySettingsPage: React.FC = () => {
                         onChange={(e) => handleChange('city', e.target.value)}
                         placeholder="Contoh: Jakarta"
                         className="premium-input"
+                        disabled={!canUpdate}
                       />
                     </div>
                   </div>
@@ -446,6 +485,7 @@ const CompanySettingsPage: React.FC = () => {
                         onChange={(e) => handleChange('state', e.target.value)}
                         placeholder="Contoh: DKI Jakarta"
                         className="premium-input"
+                        disabled={!canUpdate}
                       />
                     </div>
                   </div>
@@ -459,6 +499,7 @@ const CompanySettingsPage: React.FC = () => {
                         onChange={(e) => handleChange('postal_code', e.target.value)}
                         placeholder="12345"
                         className="premium-input"
+                        disabled={!canUpdate}
                       />
                     </div>
                   </div>
@@ -472,6 +513,7 @@ const CompanySettingsPage: React.FC = () => {
                         onChange={(e) => handleChange('country', e.target.value)}
                         placeholder="Contoh: Indonesia"
                         className="premium-input"
+                        disabled={!canUpdate}
                       />
                     </div>
                   </div>
@@ -485,6 +527,7 @@ const CompanySettingsPage: React.FC = () => {
                         onChange={(e) => handleChange('website', e.target.value)}
                         placeholder="https://www.company.com"
                         className="premium-input"
+                        disabled={!canUpdate}
                       />
                     </div>
                   </div>
@@ -506,10 +549,11 @@ const CompanySettingsPage: React.FC = () => {
                     <label>Badan Hukum Bisnis</label>
                     <div className="input-icon-wrapper">
                       <Landmark size={18} className="field-icon" />
-                      <select 
-                        value={company.industry} 
+                      <select
+                        value={company.industry}
                         onChange={(e) => handleChange('industry', e.target.value)}
                         className="premium-input"
+                        disabled={!canUpdate}
                       >
                         <option value="">Pilih jenis</option>
                         <option value="pt">PT (Perseroan Terbatas)</option>
@@ -523,7 +567,7 @@ const CompanySettingsPage: React.FC = () => {
                     <label>Awal Siklus Tahun Fiskal</label>
                     <div className="input-icon-wrapper">
                       <Clock size={18} className="field-icon" />
-                      <select className="premium-input">
+                      <select className="premium-input" disabled={!canUpdate}>
                         <option value="1">Januari</option>
                         <option value="4">April</option>
                         <option value="7">Juli</option>

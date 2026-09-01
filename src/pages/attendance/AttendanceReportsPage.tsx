@@ -20,6 +20,7 @@ import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import './AttendanceShared.css';
 import './AttendanceAdminPage.css';
+import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 
 
 const AttendanceReportsPage = () => {
@@ -163,6 +164,7 @@ const AttendanceReportsPage = () => {
             </div>
             <h1 className="hero-title">Laporan Kehadiran</h1>
             <p className="hero-subtitle">Analitik dan laporan kehadiran karyawan.</p>
+            <CompanyScopeBadge />
           </div>
           <div className="hero-actions">
             <button className="btn-outline" onClick={exportCSV}>

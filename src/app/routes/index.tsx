@@ -53,8 +53,6 @@ const MyReimbursementsPage = lazy(() => import("../../pages/ess/MyReimbursements
 const KpiListPage = lazy(() => import("../../pages/admin/AdminKpiPage"));
 const KpiFormPage = lazy(() => import("../../pages/admin/KpiFormPage"));
 const MyKpiPage = lazy(() => import("../../pages/ess/MyKpiPage"));
-const CalibrationPage = lazy(() => import("../../pages/admin/CalibrationPage"));
-const CalibrationFormPage = lazy(() => import("../../pages/admin/CalibrationFormPage"));
 const TrainingManagementPage = lazy(() => import("../../pages/admin/TrainingManagementPage"));
 const TrainingFormPage = lazy(() => import("../../pages/admin/TrainingFormPage"));
 const MyTrainingsPage = lazy(() => import("../../pages/ess/MyTrainingsPage"));
@@ -164,7 +162,7 @@ export const router = createBrowserRouter([
       layoutRoute("/leave/requests/edit/:id", <UpdateLeavePage />),
       layoutRoute("/leave/requests/view/:id", <UpdateLeavePage />),
       layoutRoute("/leave/request/:id", <UpdateLeavePage />),
-      layoutRoute("/leave/approval", <LeaveApprovalPage />),
+      layoutRoute("/leave/approval", <MenuRouteGuard menuKey="leave.approve"><LeaveApprovalPage /></MenuRouteGuard>),
       layoutRoute("/leave/calendar", <LeaveCalendarPage />),
       layoutRoute("/leave/balance", <LeaveBalancePage />),
       layoutRoute("/leave/my-leave", <MenuRouteGuard menuKey="ess.leave"><MyLeavesPage /></MenuRouteGuard>),
@@ -172,7 +170,7 @@ export const router = createBrowserRouter([
         path: "/leave/policy",
         element: <DashboardLayout />,
         children: [
-          { index: true, element: <LeavePolicyPage /> },
+          { index: true, element: <MenuRouteGuard menuKey="leave.policy"><LeavePolicyPage /></MenuRouteGuard> },
           { path: "create", element: <LeavePolicyFormPage /> },
           { path: "edit/:id", element: <LeavePolicyFormPage /> },
         ],
@@ -181,7 +179,7 @@ export const router = createBrowserRouter([
         path: "/leave/type",
         element: <DashboardLayout />,
         children: [
-          { index: true, element: <LeaveTypePage /> },
+          { index: true, element: <MenuRouteGuard menuKey="leave.policy"><LeaveTypePage /></MenuRouteGuard> },
           { path: "create", element: <LeaveTypeFormPage /> },
           { path: "edit/:id", element: <LeaveTypeFormPage /> },
         ],
@@ -198,40 +196,31 @@ export const router = createBrowserRouter([
       layoutRoute("/payroll/component/deduction", <MenuRouteGuard menuKey="compensation.payroll"><PayrollDetailsPage componentMode="deduction" showTabs={false} /></MenuRouteGuard>),
       layoutRoute("/payroll/reports", <MenuRouteGuard menuKey="compensation.payroll"><PayrollReportsPage /></MenuRouteGuard>),
       layoutRoute("/my/payroll", <MenuRouteGuard menuKey="ess.payslip"><MyPayrollPage /></MenuRouteGuard>),
-      layoutRoute("/reimbursements", <AdminReimbursementsPage />),
+      layoutRoute("/reimbursements", <MenuRouteGuard menuKey="compensation.reimbursement"><AdminReimbursementsPage /></MenuRouteGuard>),
       layoutRoute("/my/reimbursements", <MenuRouteGuard menuKey="ess.reimbursement"><MyReimbursementsPage /></MenuRouteGuard>),
       {
         path: "/kpis",
         element: <DashboardLayout />,
         children: [
-          { index: true, element: <KpiListPage /> },
-          { path: "create", element: <KpiFormPage /> },
-          { path: "edit/:id", element: <KpiFormPage /> },
+          { index: true, element: <MenuRouteGuard menuKey="performance-dev.kpi"><KpiListPage /></MenuRouteGuard> },
+          { path: "create", element: <MenuRouteGuard menuKey="performance-dev.kpi"><KpiFormPage /></MenuRouteGuard> },
+          { path: "edit/:id", element: <MenuRouteGuard menuKey="performance-dev.kpi"><KpiFormPage /></MenuRouteGuard> },
         ],
       },
       layoutRoute("/my/kpi", <MenuRouteGuard menuKey="ess.kpi"><MyKpiPage /></MenuRouteGuard>),
-      {
-        path: "/performance/calibration",
-        element: <DashboardLayout />,
-        children: [
-          { index: true, element: <CalibrationPage /> },
-          { path: "create", element: <CalibrationFormPage /> },
-          { path: "edit/:id", element: <CalibrationFormPage /> },
-        ],
-      },
       layoutRoute("/training", <Navigate to="/training/programs" replace />),
       layoutRoute("/training/programs", <MenuRouteGuard menuKey="performance-dev.training"><TrainingManagementPage /></MenuRouteGuard>),
       layoutRoute("/training/programs/create", <MenuRouteGuard menuKey="performance-dev.training"><TrainingFormPage /></MenuRouteGuard>),
       layoutRoute("/training/programs/edit/:id", <MenuRouteGuard menuKey="performance-dev.training"><TrainingFormPage /></MenuRouteGuard>),
       layoutRoute("/my/trainings", <MenuRouteGuard menuKey="ess.training"><MyTrainingsPage /></MenuRouteGuard>),
-      layoutRoute("/competencies", <CompetencyMatrixPage />),
+      layoutRoute("/competencies", <MenuRouteGuard menuKey="performance-dev.competency"><CompetencyMatrixPage /></MenuRouteGuard>),
       layoutRoute("/my/competencies", <MenuRouteGuard menuKey="ess.competency"><MyCompetenciesPage /></MenuRouteGuard>),
       layoutRoute("/assets", <MenuRouteGuard menuKey="assets"><AssetManagementPage /></MenuRouteGuard>),
       layoutRoute("/assets/create", <MenuRouteGuard menuKey="assets"><AssetFormPage /></MenuRouteGuard>),
       layoutRoute("/assets/edit/:id", <MenuRouteGuard menuKey="assets"><AssetFormPage /></MenuRouteGuard>),
       layoutRoute("/my/assets", <MenuRouteGuard menuKey="ess.assets"><MyAssetsPage /></MenuRouteGuard>),
       layoutRoute("/my/documents", <MenuRouteGuard menuKey="ess.documents"><MyDocumentsPage /></MenuRouteGuard>),
-      layoutRoute("/approval-flows", <ApprovalFlowPage />),
+      layoutRoute("/approval-flows", <MenuRouteGuard menuKey="approval-center"><ApprovalFlowPage /></MenuRouteGuard>),
       layoutRoute("/organization/chart", <OrgChartPage />),
       layoutRoute("/locations", <MenuRouteGuard menuKey="admin.locations"><LocationsPage /></MenuRouteGuard>),
       layoutRoute("/locations/create", <MenuRouteGuard menuKey="admin.locations"><CreateLocationPage /></MenuRouteGuard>),

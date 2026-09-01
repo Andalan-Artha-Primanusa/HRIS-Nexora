@@ -11,6 +11,7 @@ import { getAllWorkSchedules } from "@/features/work-schedule/api/work-schedule.
 import { companyService } from "@/features/company/api/company.service";
 import { useAuthStore } from "@/app/store/auth.store";
 import { RBACUtils } from "@/shared/hooks/rbac";
+import { PERMISSIONS } from "@/shared/types/rbac.types";
 import type { EmployeeCreatePayload } from "@/features/employee/types/employee.types";
 import EmployeeForm, { DEFAULT_FORM } from "./components/EmployeeForm";
 import type { EmployeeFormState } from "./components/EmployeeForm";
@@ -21,7 +22,7 @@ const EmployeeCreatePage = () => {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const selectedCompanyId = useAuthStore((state) => state.selectedCompanyId);
-  const canCreateEmployee = RBACUtils.hasPermission(user, ["employee.create", "admin.access"]);
+  const canCreateEmployee = RBACUtils.hasPermission(user, [PERMISSIONS.EMPLOYEE_CREATE, PERMISSIONS.ADMIN_ACCESS]);
 
   const [createForm, setCreateForm] = useState<EmployeeFormState>(DEFAULT_FORM);
   const [loading, setLoading] = useState(false);

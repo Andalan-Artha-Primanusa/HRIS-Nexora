@@ -13,6 +13,7 @@ import type { LocationItem } from "@/features/location/types/location.types";
 import type { EmployeeItem } from "@/features/employee/types/employee.types";
 import { useAuthStore } from "@/app/store/auth.store";
 import { RBACUtils } from "@/shared/hooks/rbac";
+import { PERMISSIONS } from "@/shared/types/rbac.types";
 import EmployeeLifecycleModals from "./components/EmployeeLifecycleModals";
 import {
   Search,
@@ -30,6 +31,7 @@ import {
 } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
 import "./EmployeesPage.css";
+import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 
 const formatDateTime = (input: string) => {
   if (!input) return "-";
@@ -48,11 +50,11 @@ const EmployeesPage = () => {
   const user = useAuthStore((state) => state.user);
   const allowedMenuKeys = useAuthStore((state) => state.allowedMenuKeys);
   
-  const canCreateEmployee = RBACUtils.hasPermission(user, ["employee.create", "admin.access"]);
-  const canUpdateEmployee = RBACUtils.hasPermission(user, ["employee.update", "admin.access"]);
-  const canDeleteEmployee = RBACUtils.hasPermission(user, ["employee.delete", "admin.access"]);
+  const canCreateEmployee = RBACUtils.hasPermission(user, [PERMISSIONS.EMPLOYEE_CREATE, PERMISSIONS.ADMIN_ACCESS]);
+  const canUpdateEmployee = RBACUtils.hasPermission(user, [PERMISSIONS.EMPLOYEE_UPDATE, PERMISSIONS.ADMIN_ACCESS]);
+  const canDeleteEmployee = RBACUtils.hasPermission(user, [PERMISSIONS.EMPLOYEE_DELETE, PERMISSIONS.ADMIN_ACCESS]);
   const canManageEmployees = canCreateEmployee || canUpdateEmployee || canDeleteEmployee;
-  const canViewAdminMetadata = RBACUtils.hasPermission(user, ["admin.access"]);
+  const canViewAdminMetadata = RBACUtils.hasPermission(user, [PERMISSIONS.ADMIN_ACCESS]);
 
   const [activeActionModal, setActiveActionModal] = useState<"onboarding_start" | "onboarding_complete" | "offboarding_start" | "offboarding_complete" | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<EmployeeItem | null>(null);
@@ -171,6 +173,7 @@ const EmployeesPage = () => {
             <div className="employees-hero-badge"><Briefcase size={16} /><span>Employee Center</span></div>
             <h1 className="employees-hero-title">Employee Directory</h1>
             <p className="employees-hero-subtitle">Manage all employee data and organizational structure in one place.</p>
+            <CompanyScopeBadge />
           </div>
           <div className="employees-hero-actions">
             <button className="employees-hero-button employees-hero-button--secondary" onClick={() => void loadEmployees()} disabled={loading}>

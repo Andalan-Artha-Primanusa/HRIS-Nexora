@@ -8,7 +8,7 @@
   --primary-dark: var(--color-primary-dark);
   --primary-light: var(--color-primary-light);
   --primary-lighter: var(--color-primary-light);
-  --surface: linear-gradient(180deg, rgba(247, 250, 255, 0.94) 0%, rgba(239, 245, 255, 0.9) 100%);
+  --surface: linear-gradient(180deg, rgba(234, 247, 244, 0.94) 0%, rgba(222, 240, 236, 0.9) 100%);
   --text: var(--color-primary-dark);
   --text-light: var(--color-primary);
   --border: rgba(15, 159, 143, 0.14);
@@ -22,24 +22,6 @@
   content: "";
   position: absolute;
   inset:0;
-  pointer-events: none;
-  border-radius: inherit;
-  border: 1px solid rgba(15, 159, 143, 0.12);
-}
-
-.leave-hero-card,
-.leave-card {
-  padding: 1.35rem;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
-}
-
-.leave-page::before {
-  content: "";
-  position: absolute;
-  inset: 0;
   pointer-events: none;
   border-radius: inherit;
   border: 1px solid rgba(15, 159, 143, 0.12);
@@ -568,7 +550,7 @@
 }
 
 .leave-status-cancelled::before {
-  content: "â—¦";
+  content: "•";
   margin-right: 0.35rem;
 }
 
@@ -1057,5 +1039,3 @@
     grid-template-columns: 1fr;
   }
 }
-
-

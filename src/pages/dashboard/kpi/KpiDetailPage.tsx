@@ -5,6 +5,9 @@ import { Button } from '@/shared/ui/Button';
 import { FileText, ArrowLeft, Trash2 } from 'lucide-react';
 import { getKpiDetail, deleteKpi } from '@/features/dashboard/api/kpi.service';
 import { showToast } from '@/shared/ui/toast';
+import { useAuthStore } from '@/app/store/auth.store';
+import { RBACUtils } from '@/shared/hooks/rbac';
+import { PERMISSIONS } from '@/shared/types/rbac.types';
 import './KpiPage.css';
 
 type KpiStatus = 'draft' | 'submitted' | 'approved';
@@ -29,6 +32,10 @@ type KpiRecord = {
 const KpiDetailPage = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const user = useAuthStore((state) => state.user);
+  const canUpdate = RBACUtils.hasPermission(user, PERMISSIONS.KPI_UPDATE);
+  const canDelete = RBACUtils.hasPermission(user, PERMISSIONS.KPI_DELETE);
+  const canApprove = RBACUtils.hasPermission(user, PERMISSIONS.KPI_APPROVE);
   const [kpi, setKpi] = useState<KpiRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
@@ -54,6 +61,10 @@ const KpiDetailPage = () => {
   };
 
   const handleDelete = async () => {
+    if (!canDelete) {
+      showToast('Anda tidak memiliki izin menghapus KPI.', 'error');
+      return;
+    }
     setDeleting(true);
 
     try {
@@ -202,7 +213,7 @@ const KpiDetailPage = () => {
             </div>
 
             <div className="kpi-action-buttons" style={{ marginTop: '20px' }}>
-              {kpi.status === 'draft' && (
+              {canUpdate && kpi.status === 'draft' && (
                 <Button 
                   variant="secondary" 
                   size="md" 
@@ -212,7 +223,7 @@ const KpiDetailPage = () => {
                   Edit KPI
                 </Button>
               )}
-              {kpi.status === 'submitted' && (
+              {canApprove && kpi.status === 'submitted' && (
                 <Button 
                   variant="secondary" 
                   size="md" 
@@ -222,6 +233,7 @@ const KpiDetailPage = () => {
                   Approve KPI
                 </Button>
               )}
+              {canDelete && (
               <Button 
                 variant="ghost" 
                 size="md" 
@@ -231,6 +243,7 @@ const KpiDetailPage = () => {
                 <Trash2 size={16} />
                 Delete
               </Button>
+              )}
             </div>
           </Card>
         </>

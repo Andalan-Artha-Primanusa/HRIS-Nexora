@@ -6,7 +6,7 @@ import { Button } from "@/shared/ui/Button";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { showToast } from '@/shared/ui/toast';
 import { RBACUtils } from "@/shared/hooks/rbac";
-import type { AuthUser } from "@/shared/types/rbac.types";
+import { PERMISSIONS, type AuthUser } from "@/shared/types/rbac.types";
 import { Mail, Send, Shield, Users, FileText } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
 import "./AdminCrudPages.css";
@@ -37,7 +37,7 @@ type EmployeeRecipient = {
 
 const AdminEmailSendPage = () => {
   const user = useAuthStore((state) => state.user);
-  const canAccess = RBACUtils.hasPermission(user, "admin.email.manage");
+  const canAccess = RBACUtils.hasPermission(user, PERMISSIONS.ADMIN_EMAIL_MANAGE);
 
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [employees, setEmployees] = useState<EmployeeRecipient[]>([]);

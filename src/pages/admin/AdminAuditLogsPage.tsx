@@ -4,6 +4,7 @@ import { Card } from "@/shared/ui/Card";
 import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { RBACUtils } from "@/shared/hooks/rbac";
+import { PERMISSIONS } from "@/shared/types/rbac.types";
 import { ClipboardList, RefreshCw, Search, Shield, ShieldCheck, UserCog } from "lucide-react";
 import {
   getAuditLogs,
@@ -18,7 +19,7 @@ const getInitial = (value?: string | null) => (value?.trim().charAt(0) || "U").t
 
 const AdminAuditLogsPage = () => {
   const user = useAuthStore((state) => state.user);
-  const canAccess = RBACUtils.hasPermission(user, ["audit.logs.view", "admin.audit.view"]);
+  const canAccess = RBACUtils.hasPermission(user, [PERMISSIONS.AUDIT_LOGS_VIEW, PERMISSIONS.ADMIN_AUDIT_VIEW]);
   const [logs, setLogs] = useState<AuditLogItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);

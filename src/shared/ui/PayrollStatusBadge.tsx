@@ -61,4 +61,3 @@ export const PayrollStatusBadge: React.FC<PayrollStatusBadgeProps> = ({ status, 
 };
 
 export default PayrollStatusBadge;
-

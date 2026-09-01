@@ -10,6 +10,9 @@ import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
 import { showToast } from "@/shared/ui/toast";
 import { PayrollStatusBadge } from "@/shared/ui/PayrollStatusBadge";
+import { useAuthStore } from "@/app/store/auth.store";
+import { RBACUtils } from "@/shared/hooks/rbac";
+import { PERMISSIONS } from "@/shared/types/rbac.types";
 import { payrollService, toSafeArray } from "@/features/payroll/api/payroll.service";
 import { getAllEmployees } from "@/features/employee/api/employee.service";
 import type { PayrollItem } from "@/features/payroll/types/payroll.types";
@@ -24,6 +27,8 @@ type ApproveAction = "manager-approve" | "hr-approve" | "reject" | null;
 
 const PayrollApprovePage = () => {
   const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
+  const canApprove = RBACUtils.hasPermission(user, PERMISSIONS.PAYROLL_APPROVE);
   const [payrolls, setPayrolls] = useState<PayrollItem[]>([]);
   const [employees, setEmployees] = useState<EmployeeItem[]>([]);
 
@@ -135,8 +140,10 @@ const PayrollApprovePage = () => {
   // ── Shared table row renderer ─────────────────────────────
   const renderRow = (p: PayrollItem, actions: React.ReactNode) => (
     <tr key={p.id}>
+      <td>
         <div className="crud-table-avatar">{getEmployeeName(p.employee_id).charAt(0).toUpperCase()}</div>
         <span>{getEmployeeName(p.employee_id)}</span>
+      </td>
       <td><span className="crud-table-tag">{p.period}</span></td>
       <td className="crud-table-amount">{fmt(p.basic_salary)}</td>
       <td className="crud-table-amount crud-table-amount-green">{fmt(p.take_home_pay || p.net_salary)}</td>
@@ -225,14 +232,18 @@ const PayrollApprovePage = () => {
               {paginatedDraft.length > 0 ? paginatedDraft.map((p) => renderRow(p,
                 <>
                   <button className="action-btn" title="Lihat" onClick={() => navigate(`/payroll/${p.id}`)}><Eye size={14} /></button>
+                  {canApprove && (
                   <button className="action-btn action-btn-success" title="Manager Approve"
                     onClick={() => openAction(p, "manager-approve")} disabled={loading}>
                     <UserCheck size={14} />
                   </button>
+                  )}
+                  {canApprove && (
                   <button className="action-btn action-btn-danger" title="Tolak"
                     onClick={() => openAction(p, "reject")} disabled={loading}>
                     <XCircle size={14} />
                   </button>
+                  )}
                 </>
               )) : (
                 <tr><td colSpan={6} style={{ textAlign: "center", padding: "2rem", color: "#94a3b8" }}>
@@ -276,14 +287,18 @@ const PayrollApprovePage = () => {
               {paginatedPending.length > 0 ? paginatedPending.map((p) => renderRow(p,
                 <>
                   <button className="action-btn" title="Lihat" onClick={() => navigate(`/payroll/${p.id}`)}><Eye size={14} /></button>
+                  {canApprove && (
                   <button className="action-btn action-btn-success" title="HR Final Approve"
                     onClick={() => openAction(p, "hr-approve")} disabled={loading}>
                     <Shield size={14} />
                   </button>
+                  )}
+                  {canApprove && (
                   <button className="action-btn action-btn-danger" title="Tolak"
                     onClick={() => openAction(p, "reject")} disabled={loading}>
                     <XCircle size={14} />
                   </button>
+                  )}
                 </>
               )) : (
                 <tr><td colSpan={6} style={{ textAlign: "center", padding: "2rem", color: "#94a3b8" }}>
@@ -448,6 +463,8 @@ const PayrollApprovePage = () => {
             {/* Actions */}
             <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
               <Button variant="outline" size="md" onClick={closeModal} disabled={loading}>Batal</Button>
+              {canApprove && (
+              <>
               {pendingAction === "reject" ? (
                 <Button variant="danger" size="md" onClick={() => void handleConfirm()} disabled={loading || !rejectReason.trim()}>
                   <XCircle size={16} style={{ marginRight: 6 }} /> Tolak Payroll
@@ -457,6 +474,8 @@ const PayrollApprovePage = () => {
                   <CheckCircle size={16} style={{ marginRight: 6 }} />
                   {pendingAction === "manager-approve" ? "Manager Approve" : "HR Final Approve"}
                 </Button>
+              )}
+              </>
               )}
             </div>
           </div>

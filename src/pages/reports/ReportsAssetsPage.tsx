@@ -180,7 +180,7 @@ const ReportsAssetsPage: React.FC = () => {
                   <Bar dataKey="value" fill="var(--color-primary)" radius={[8,8,0,0]} name="Jumlah Aset"/>
                 </BarChart>
               </ResponsiveContainer>
-            ):(<div className="reports-chart-empty">{loading?'Memuat...':'Belum ada data.'}</div>)}
+            ):(<div className="reports-chart-empty">{loading?'Memuat...':'Belum ada data untuk company aktif ini.'}</div>)}
           </Card>
 
           <Card className="reports-chart-card" glass>
@@ -195,7 +195,7 @@ const ReportsAssetsPage: React.FC = () => {
                   </Pie>
                 </PieChart>
               </ResponsiveContainer>
-            ):(<div className="reports-chart-empty">{loading?'Memuat...':'Belum ada data.'}</div>)}
+            ):(<div className="reports-chart-empty">{loading?'Memuat...':'Belum ada data untuk company aktif ini.'}</div>)}
           </Card>
 
           <Card className="reports-chart-card" glass>
@@ -210,7 +210,7 @@ const ReportsAssetsPage: React.FC = () => {
                   <Bar dataKey="value" fill="#8b5cf6" radius={[8,8,0,0]} name="Nilai (Rp)"/>
                 </BarChart>
               </ResponsiveContainer>
-            ):(<div className="reports-chart-empty">{loading?'Memuat...':'Belum ada data.'}</div>)}
+            ):(<div className="reports-chart-empty">{loading?'Memuat...':'Belum ada data untuk company aktif ini.'}</div>)}
           </Card>
 
           <Card className="reports-chart-card" glass>
@@ -225,7 +225,7 @@ const ReportsAssetsPage: React.FC = () => {
                   <Bar dataKey="value" fill="#06b6d4" radius={[8,8,0,0]} name="Jumlah Penugasan"/>
                 </BarChart>
               </ResponsiveContainer>
-            ):(<div className="reports-chart-empty">{loading?'Memuat...':'Belum ada data.'}</div>)}
+            ):(<div className="reports-chart-empty">{loading?'Memuat...':'Belum ada data untuk company aktif ini.'}</div>)}
           </Card>
         </div>
       </div>

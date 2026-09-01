@@ -5,7 +5,9 @@ import { api } from "@/shared/api/httpClient";
 import { showToast } from "@/shared/ui/toast";
 import { clearMenuCache } from "@/shared/config/menuFilter";
 import { Shield, Search, Loader2, CheckSquare, Users, LayoutDashboard, Info } from "lucide-react";
-import { ROLES } from "@/shared/types/rbac.types";
+import { ROLES, PERMISSIONS } from "@/shared/types/rbac.types";
+import { RBACUtils } from "@/shared/hooks/rbac";
+import { useAuthStore } from "@/app/store/auth.store";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "@/pages/employee/EmployeesPage.css";
@@ -24,6 +26,7 @@ type MenuDef = {
 };
 
 const MenuPermissionsPage = () => {
+  const user = useAuthStore((s) => s.user);
   const [menuItems, setMenuItems] = useState<MenuDef[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,6 +55,10 @@ const MenuPermissionsPage = () => {
   };
 
   const toggleRole = async (menuKey: string, roleId: number, currentlyAssigned: boolean) => {
+    if (!RBACUtils.hasPermission(user, PERMISSIONS.ROLE_ASSIGN_PERMISSION)) {
+      showToast("Anda tidak memiliki izin untuk mengubah akses menu", "error");
+      return;
+    }
     setSaving(menuKey);
     try {
       if (currentlyAssigned) {

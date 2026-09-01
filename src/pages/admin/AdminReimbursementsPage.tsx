@@ -16,6 +16,9 @@ import '@/pages/dashboard/overview/OverviewPage.css';
 import './AdminReimbursementsPage.css';
 import { showToast } from '@/shared/ui/toast';
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
+import { useAuthStore } from "@/app/store/auth.store";
+import { RBACUtils } from "@/shared/hooks/rbac";
+import { PERMISSIONS } from "@/shared/types/rbac.types";
 import type { HistoryItem } from "@/shared/components/ApprovalHistoryModal";
 
 const formatDateTime = (input?: string) => {
@@ -126,6 +129,9 @@ const buildFallbackApprovalHistory = (item: ReimbursementItem): { history: Histo
 };
 
 const AdminReimbursementsPage: React.FC = () => {
+  const user = useAuthStore((state) => state.user);
+  const canApprove = RBACUtils.hasPermission(user, PERMISSIONS.REIMBURSEMENT_APPROVE);
+  const canDelete = RBACUtils.hasPermission(user, "reimbursement.delete");
   const [items, setItems] = useState<ReimbursementItem[]>([]);
   const [stats, setStats] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
@@ -250,12 +256,20 @@ const AdminReimbursementsPage: React.FC = () => {
   };
 
   const handleApprove = (item: ReimbursementItem) => {
+    if (!canApprove || item.can_act === false) {
+      showToast("Anda tidak memiliki giliran atau izin menyetujui klaim ini.", "error");
+      return;
+    }
     setSelectedItem(item);
     setActionNote('');
     setShowApproveModal(true);
   };
 
   const handleReject = (item: ReimbursementItem) => {
+    if (!canApprove || item.can_act === false) {
+      showToast("Anda tidak memiliki giliran atau izin menolak klaim ini.", "error");
+      return;
+    }
     setSelectedItem(item);
     setActionNote('');
     setShowRejectModal(true);
@@ -263,6 +277,10 @@ const AdminReimbursementsPage: React.FC = () => {
 
   const confirmApprove = async () => {
     if (!selectedItem) return;
+    if (!canApprove || selectedItem.can_act === false) {
+      showToast("Anda tidak memiliki giliran atau izin menyetujui klaim ini.", "error");
+      return;
+    }
     try {
       await approveReimbursement(String(selectedItem.id), { note: actionNote });
       setShowApproveModal(false);
@@ -276,6 +294,10 @@ const AdminReimbursementsPage: React.FC = () => {
 
   const confirmReject = async () => {
     if (!selectedItem || !actionNote.trim()) return;
+    if (!canApprove || selectedItem.can_act === false) {
+      showToast("Anda tidak memiliki giliran atau izin menolak klaim ini.", "error");
+      return;
+    }
     try {
       await rejectReimbursement(String(selectedItem.id), { note: actionNote });
       setShowRejectModal(false);
@@ -504,7 +526,7 @@ const AdminReimbursementsPage: React.FC = () => {
                               <Eye size={16} />
                             </button>
                             <button className="action-btn" style={{ color: '#8b5cf6', background: '#f5f3ff' }} onClick={() => setHistoryModal({ module: 'reimbursement', id: item.id, item })} title="Riwayat Approval"><History size={16} /></button>
-                            {item.status === 'submitted' && (
+                            {canApprove && item.can_act !== false && item.status === 'submitted' && (
                               <>
                                 <button
                                   className="action-btn action-btn-approve"
@@ -522,6 +544,7 @@ const AdminReimbursementsPage: React.FC = () => {
                                 </button>
                               </>
                             )}
+                            {canDelete && (
                             <button
                               className="action-btn action-btn-delete"
                               onClick={() => setDeleteTarget(item)}
@@ -529,6 +552,7 @@ const AdminReimbursementsPage: React.FC = () => {
                             >
                               <Trash2 size={16} />
                             </button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -614,14 +638,14 @@ const AdminReimbursementsPage: React.FC = () => {
         </div>
       </Modal>
 
-      <Modal isOpen={showApproveModal && !!selectedItem} onClose={() => setShowApproveModal(false)} title="Setujui Klaim" size="sm"
-        footer={<>
+      <Modal isOpen={canApprove && showApproveModal && !!selectedItem} onClose={() => setShowApproveModal(false)} title="Setujui Klaim" size="sm"
+        footer={canApprove ? <>
           <button className="btn-outline" onClick={() => setShowApproveModal(false)}>Batal</button>
           <button className="btn-primary" onClick={confirmApprove}>
             <CheckCircle size={16} style={{ marginRight: '8px' }} />
             Setujui
           </button>
-        </>}
+        </> : undefined}
       >
         <p>Apakah Anda yakin ingin menyetujui klaim <strong>"{selectedItem ? getTitle(selectedItem) : '-'}"</strong>?</p>
         <div className="form-group" style={{ marginTop: '1rem' }}>
@@ -630,14 +654,14 @@ const AdminReimbursementsPage: React.FC = () => {
         </div>
       </Modal>
 
-      <Modal isOpen={showRejectModal && !!selectedItem} onClose={() => setShowRejectModal(false)} title="Tolak Klaim" size="sm"
-        footer={<>
+      <Modal isOpen={canApprove && showRejectModal && !!selectedItem} onClose={() => setShowRejectModal(false)} title="Tolak Klaim" size="sm"
+        footer={canApprove ? <>
           <button className="btn-outline" onClick={() => setShowRejectModal(false)}>Batal</button>
           <button className="btn-danger" onClick={confirmReject} disabled={!actionNote.trim()}>
             <XCircle size={16} style={{ marginRight: '8px' }} />
             Tolak
           </button>
-        </>}
+        </> : undefined}
       >
         <p>Apakah Anda yakin ingin menolak klaim <strong>"{selectedItem ? getTitle(selectedItem) : '-'}"</strong>?</p>
         <div className="form-group" style={{ marginTop: '1rem' }}>
@@ -658,7 +682,7 @@ const AdminReimbursementsPage: React.FC = () => {
       )}
 
       <ConfirmDialog
-        isOpen={!!deleteTarget}
+        isOpen={canDelete && !!deleteTarget}
         title="Hapus Klaim Reimbursement"
         message={`Klaim "${deleteTarget ? getTitle(deleteTarget) : "ini"}" akan dihapus. Tindakan ini tidak dapat dibatalkan.`}
         confirmLabel="Hapus"

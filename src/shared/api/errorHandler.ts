@@ -87,5 +87,3 @@ export const parseApiError = (error: unknown): ApiError => {
 export const getErrorMessage = (error: unknown): string => {
   return parseApiError(error).message;
 };
-
-

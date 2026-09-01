@@ -6,17 +6,13 @@ import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDispl
 import { workforceService } from '@/features/workforce/api/workforce.service';
 import { useAuthStore } from '@/app/store/auth.store';
 import { RBACUtils } from '@/shared/hooks/rbac';
+import { PERMISSIONS } from '@/shared/types/rbac.types';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 
 const ComplianceDashboardPage: React.FC = () => {
   const user = useAuthStore((state) => state.user);
-  const canAccess = RBACUtils.hasPermission(user, ['employee.view', 'admin.access']);
-  if (!canAccess) {
-    return (
-      <div className="crud-page"><Card className="hero-card"><div className="hero-card-inner"><div className="hero-content"><div className="hero-badge"><Shield size={16} /><span>Admin Center</span></div><h1 className="hero-title">Akses Ditolak</h1><p className="hero-subtitle">Anda tidak memiliki izin untuk mengakses halaman ini.</p></div></div></Card></div>
-    );
-  }
+  const canAccess = RBACUtils.hasPermission(user, [PERMISSIONS.EMPLOYEE_VIEW, PERMISSIONS.ADMIN_ACCESS]);
   const navigate = useNavigate();
   const [stats, setStats] = useState<any[]>([]);
   const [documents, setDocuments] = useState<any[]>([]);
@@ -52,8 +48,12 @@ const ComplianceDashboardPage: React.FC = () => {
   };
 
   useEffect(() => {
+    if (!canAccess) {
+      setLoading(false);
+      return;
+    }
     fetchData();
-  }, []);
+  }, [canAccess]);
 
   const summaryStats = useMemo(() => {
     if (!stats || stats.length === 0) return [];
@@ -93,6 +93,12 @@ const ComplianceDashboardPage: React.FC = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchText, activeTab]);
+
+  if (!canAccess) {
+    return (
+      <div className="crud-page"><Card className="hero-card"><div className="hero-card-inner"><div className="hero-content"><div className="hero-badge"><Shield size={16} /><span>Admin Center</span></div><h1 className="hero-title">Akses Ditolak</h1><p className="hero-subtitle">Anda tidak memiliki izin untuk mengakses halaman ini.</p></div></div></Card></div>
+    );
+  }
 
   return (
     <div className="crud-page">

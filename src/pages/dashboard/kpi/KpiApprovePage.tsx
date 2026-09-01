@@ -5,6 +5,9 @@ import { Button } from '@/shared/ui/Button';
 import { showToast } from '@/shared/ui/toast';
 import { ArrowLeft, CheckCircle } from 'lucide-react';
 import { getKpiDetail, approveKpi } from '@/features/dashboard/api/kpi.service';
+import { useAuthStore } from '@/app/store/auth.store';
+import { RBACUtils } from '@/shared/hooks/rbac';
+import { PERMISSIONS } from '@/shared/types/rbac.types';
 import './KpiPage.css';
 
 type KpiStatus = 'draft' | 'submitted' | 'approved';
@@ -29,6 +32,8 @@ type KpiRecord = {
 const KpiApprovePage = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const user = useAuthStore((state) => state.user);
+  const canApprove = RBACUtils.hasPermission(user, PERMISSIONS.KPI_APPROVE);
   const [kpi, setKpi] = useState<KpiRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [approving, setApproving] = useState(false);
@@ -53,6 +58,10 @@ const KpiApprovePage = () => {
   };
 
   const handleApprove = async () => {
+    if (!canApprove) {
+      showToast('Anda tidak memiliki izin menyetujui KPI.', 'error');
+      return;
+    }
     setApproving(true);
 
     try {
@@ -208,6 +217,7 @@ const KpiApprovePage = () => {
             </div>
 
             <div className="kpi-action-buttons" style={{ marginTop: '20px' }}>
+              {canApprove && (
               <Button 
                 variant="primary" 
                 size="md" 
@@ -217,6 +227,7 @@ const KpiApprovePage = () => {
                 <CheckCircle size={16} />
                 {approving ? 'Approving...' : 'Approve KPI'}
               </Button>
+              )}
               <Button 
                 variant="ghost" 
                 size="md" 

@@ -1,10 +1,11 @@
 import { useEffect, useState, useMemo } from "react";
 import { Card } from "@/shared/ui";
 import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
-import { approveLeave, getPendingLeaves, rejectLeave } from "@/features/leave/api/leave.service";
+import { approveLeave, getPendingLeaves, rejectLeave, returnLeave } from "@/features/leave/api/leave.service";
 import { RejectLeaveModal } from "@/features/leave/components/RejectLeaveModal";
+import { ReturnLeaveModal } from "@/features/leave/components/ReturnLeaveModal";
 import type { LeaveItem } from "@/features/leave/types/leave.types";
-import { RefreshCw, Check, X, Clock3, CheckCircle2, XCircle, Search, History } from "lucide-react";
+import { RefreshCw, Check, X, Clock3, CheckCircle2, XCircle, Search, History, Undo2 } from "lucide-react";
 import { showToast } from "@/shared/ui/toast";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
@@ -13,6 +14,7 @@ import "@/pages/admin/AdminPermissionsPage.css";
 import { useAuthStore } from "@/app/store/auth.store";
 import { RBACUtils } from "@/shared/hooks/rbac";
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
+import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 
 const formatDate = (dateString: unknown) => {
   if (typeof dateString !== "string" || !dateString) return "-";
@@ -84,6 +86,7 @@ const LeaveApprovalPage = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [historyModal, setHistoryModal] = useState<{ module: string; id: number | string } | null>(null);
   const [rejectModal, setRejectModal] = useState<{ id: string | number; name: string } | null>(null);
+  const [returnModal, setReturnModal] = useState<{ id: string | number; name: string } | null>(null);
 
   const loadData = async () => {
     setLoading(true);
@@ -173,6 +176,27 @@ const LeaveApprovalPage = () => {
     }
   };
 
+  const handleConfirmReturn = async (reason: string) => {
+    if (!returnModal) return;
+    const leaveId = returnModal.id;
+    setActionLoading(String(leaveId));
+    try {
+      await returnLeave(String(leaveId), { note: reason });
+      await loadData();
+      showToast("Pengajuan dikembalikan untuk revisi", "success");
+      setReturnModal(null);
+    } catch (error: unknown) {
+      console.error("Failed to return leave:", error);
+      const errObj = error && typeof error === "object" ? (error as Record<string, unknown>) : {};
+      const responseObj = errObj.response && typeof errObj.response === "object" ? (errObj.response as Record<string, unknown>) : {};
+      const dataObj = responseObj.data && typeof responseObj.data === "object" ? (responseObj.data as Record<string, unknown>) : {};
+      const msg = typeof dataObj.message === "string" ? dataObj.message : "Gagal mengembalikan cuti";
+      showToast(msg, "error");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   useEffect(() => {
     setCurrentPage(1);
   }, [searchText, activeTab]);
@@ -182,6 +206,7 @@ const LeaveApprovalPage = () => {
     if (normalized === "approved") return "status-badge status-badge--approved";
     if (normalized === "submitted" || normalized === "pending") return "status-badge status-badge--pending";
     if (normalized === "rejected") return "status-badge status-badge--draft";
+    if (normalized === "returned") return "status-badge status-badge--returned";
     return "status-badge status-badge--draft";
   };
 
@@ -199,6 +224,7 @@ const LeaveApprovalPage = () => {
             <p className="hero-subtitle">
               Review and approve/reject pending employee leave requests securely.
             </p>
+            <CompanyScopeBadge />
           </div>
           <div className="hero-actions">
             <button className="btn-outline" onClick={() => void loadData()} disabled={loading}>
@@ -369,7 +395,9 @@ const LeaveApprovalPage = () => {
                                 ? "Approved"
                                 : item.status === "submitted" || item.status === "pending"
                                   ? "Pending"
-                                  : "Rejected"}
+                                  : item.status === "returned"
+                                    ? "Dikembalikan"
+                                    : "Rejected"}
                             </span>
                           </td>
                           {canApproveLeave && (
@@ -401,6 +429,23 @@ const LeaveApprovalPage = () => {
                                       <X size={16} />
                                     </button>
                                   </>
+                                ) : null}
+                                {(item.status === "pending" || item.status === "submitted") &&
+                                item.can_act !== false ? (
+                                  <button
+                                    className="action-btn"
+                                    style={{ color: "#d97706", background: "#fffbeb" }}
+                                    onClick={() =>
+                                      setReturnModal({
+                                        id: String(itemId),
+                                        name: getEmployeeName(item),
+                                      })
+                                    }
+                                    disabled={actionLoading === String(itemId)}
+                                    title="Kembalikan untuk Revisi"
+                                  >
+                                    <Undo2 size={16} />
+                                  </button>
                                 ) : null}
                                 <button
                                   className="action-btn"
@@ -470,6 +515,14 @@ const LeaveApprovalPage = () => {
         onClose={() => setRejectModal(null)}
         onConfirm={handleConfirmReject}
         employeeName={rejectModal?.name}
+        loading={!!actionLoading}
+      />
+
+      <ReturnLeaveModal
+        isOpen={!!returnModal}
+        onClose={() => setReturnModal(null)}
+        onConfirm={handleConfirmReturn}
+        employeeName={returnModal?.name}
         loading={!!actionLoading}
       />
     </div>

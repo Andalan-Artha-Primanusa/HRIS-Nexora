@@ -61,4 +61,30 @@ export const companyService = {
     const response = await api.post(`/companies/${id}/deactivate`);
     return unwrap<Company>(response);
   },
+
+  async listUsers(id: number) {
+    const response = await api.get(`/companies/${id}/users`);
+    const payload = response.data as { data: { company: Company; accesses: CompanyUserAccess[] } };
+    return payload.data ?? { company: null, accesses: [] };
+  },
+
+  async assignUser(id: number, data: { user_id: number; scope_role?: string; is_default?: boolean }) {
+    const response = await api.post(`/companies/${id}/users`, data);
+    return unwrap<CompanyUserAccess>(response);
+  },
+
+  async removeUser(id: number, userId: number) {
+    const response = await api.delete(`/companies/${id}/users/${userId}`);
+    return unwrap<unknown>(response);
+  },
+};
+
+export type CompanyUserAccess = {
+  id: number;
+  user_id: number;
+  company_id: number;
+  scope_role?: string | null;
+  is_default?: boolean;
+  user?: { id: number; name: string; email: string } | null;
+  company?: Company | null;
 };

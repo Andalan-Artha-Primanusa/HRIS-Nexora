@@ -1,5 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import {
   AlertTriangle,
   BarChart3,
   CalendarCheck,
@@ -21,8 +33,10 @@ import { dashboardConfigService, type DashboardConfig, type DashboardWidget } fr
 import { api } from "@/shared/api/httpClient";
 import { useAuthStore } from "@/app/store/auth.store";
 import { RBACUtils } from "@/shared/hooks/rbac";
+import { PERMISSIONS } from "@/shared/types/rbac.types";
 import "../overview/OverviewPage.css";
 import "./CustomDashboardPage.css";
+import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 
 const defaultConfig: DashboardConfig = {
   name: "Dashboard Saya",
@@ -44,15 +58,21 @@ type MetricItem = {
   trend: string;
 };
 
+type ChartPoint = {
+  name: string;
+  value: number;
+  secondary?: number;
+};
+
 const fallbackWidgets: DashboardWidget[] = [
-  { key: "headcount", label: "Headcount", required_permission: "employee.view" },
-  { key: "attendance_today", label: "Attendance Today", required_permission: "reporting.attendance" },
-  { key: "pending_leave", label: "Pending Leave", required_permission: "leave.approve" },
-  { key: "payroll_cost", label: "Payroll Cost", required_permission: "reporting.payroll" },
-  { key: "reimbursement_cost", label: "Reimbursement Cost", required_permission: "reimbursement.view" },
-  { key: "kpi_summary", label: "KPI Summary", required_permission: "kpi.view" },
-  { key: "training_summary", label: "Training Summary", required_permission: "training.view" },
-  { key: "compliance_risk", label: "Compliance Risk", required_permission: "compliance.view" },
+  { key: "headcount", label: "Headcount", required_permission: PERMISSIONS.EMPLOYEE_VIEW },
+  { key: "attendance_today", label: "Attendance Today", required_permission: PERMISSIONS.REPORTING_ATTENDANCE },
+  { key: "pending_leave", label: "Pending Leave", required_permission: PERMISSIONS.LEAVE_APPROVE },
+  { key: "payroll_cost", label: "Payroll Cost", required_permission: PERMISSIONS.REPORTING_PAYROLL },
+  { key: "reimbursement_cost", label: "Reimbursement Cost", required_permission: PERMISSIONS.REIMBURSEMENT_VIEW },
+  { key: "kpi_summary", label: "KPI Summary", required_permission: PERMISSIONS.KPI_VIEW },
+  { key: "training_summary", label: "Training Summary", required_permission: PERMISSIONS.TRAINING_VIEW },
+  { key: "compliance_risk", label: "Compliance Risk", required_permission: PERMISSIONS.COMPLIANCE_VIEW },
 ];
 
 const metricMeta = {
@@ -90,6 +110,29 @@ const countPayload = (raw: any) => {
 
 const formatCurrency = (value: number) => `Rp ${value.toLocaleString("id-ID")}`;
 
+const getMonthLabel = (raw: any) => {
+  const value = raw?.hire_date ?? raw?.join_date ?? raw?.created_at ?? raw?.period ?? raw?.date;
+  if (!value) return "Tanpa tanggal";
+  const date = new Date(String(value));
+  if (Number.isNaN(date.getTime())) return String(value).slice(0, 7) || "Tanpa tanggal";
+  return date.toLocaleDateString("id-ID", { month: "short", year: "2-digit" });
+};
+
+const getStatusLabel = (raw: any) => {
+  const value = String(raw?.status ?? raw?.request_status ?? "draft").trim().toLowerCase();
+  if (!value) return "Draft";
+  return value.charAt(0).toUpperCase() + value.slice(1);
+};
+
+const toCountSeries = (rows: any[], getKey: (row: any) => string, limit = 6): ChartPoint[] => {
+  const map = new Map<string, number>();
+  rows.forEach((row) => {
+    const key = getKey(row);
+    map.set(key, (map.get(key) ?? 0) + 1);
+  });
+  return Array.from(map, ([name, value]) => ({ name, value })).slice(-limit);
+};
+
 const CustomDashboardPage = () => {
   const user = useAuthStore((state) => state.user);
   const canAllCompany = RBACUtils.hasPermission(user, "dashboard.view_all_company");
@@ -98,6 +141,7 @@ const CustomDashboardPage = () => {
   const [configs, setConfigs] = useState<DashboardConfig[]>([]);
   const [config, setConfig] = useState<DashboardConfig>(defaultConfig);
   const [metrics, setMetrics] = useState<Record<string, MetricItem>>({});
+  const [chartData, setChartData] = useState<Record<string, ChartPoint[]>>({});
   const [metricsLoading, setMetricsLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -144,7 +188,7 @@ const CustomDashboardPage = () => {
         kpis,
         trainings,
       ] = await Promise.allSettled([
-        api.get("employees", { params: { per_page: 1 } }),
+        api.get("employees", { params: { per_page: 100 } }),
         api.get("attendance/today"),
         api.get("attendance/all", { params: { per_page: 100 } }),
         api.get("leaves/pending"),
@@ -155,6 +199,7 @@ const CustomDashboardPage = () => {
       ]);
 
       const employeeTotal = employees.status === "fulfilled" ? countPayload(employees.value.data) : 0;
+      const employeeRows = employees.status === "fulfilled" ? toSafeArray(employees.value.data) : [];
       const attendancePayload = attendanceToday.status === "fulfilled" ? attendanceToday.value.data?.data ?? attendanceToday.value.data : null;
       const attendanceRows = attendanceAll.status === "fulfilled" ? toSafeArray(attendanceAll.value.data) : [];
       const presentToday = attendanceRows.filter((item) => Boolean(item.check_in || item.check_in_time || item.clock_in)).length;
@@ -165,6 +210,16 @@ const CustomDashboardPage = () => {
       const trainingRows = trainings.status === "fulfilled" ? toSafeArray(trainings.value.data) : [];
       const payrollCost = payrollRows.reduce((sum, item) => sum + Number(item.take_home_pay ?? item.net_salary ?? item.amount ?? 0), 0);
       const reimbursementCost = reimbursementRows.reduce((sum, item) => sum + Number(item.amount ?? item.total_amount ?? 0), 0);
+      const approvalQueue = [
+        { name: "Cuti", value: leaveRows.length },
+        { name: "Reimburse", value: reimbursementRows.length },
+      ].filter((item) => item.value > 0);
+
+      setChartData({
+        hiring: toCountSeries(employeeRows, getMonthLabel, 8),
+        payrollStatus: toCountSeries(payrollRows, getStatusLabel, 6),
+        approvalQueue,
+      });
 
       setMetrics({
         headcount: {
@@ -214,6 +269,66 @@ const CustomDashboardPage = () => {
     void loadMetrics();
   }, []);
 
+  const chartCards = [
+    {
+      key: "hiring",
+      title: "Tren Karyawan Baru",
+      subtitle: "Jumlah karyawan bergabung per bulan",
+      type: "bar",
+      data: chartData.hiring ?? [],
+    },
+    {
+      key: "payrollStatus",
+      title: "Status Payroll",
+      subtitle: "Distribusi status payroll di company aktif",
+      type: "pie",
+      data: chartData.payrollStatus ?? [],
+    },
+    {
+      key: "approvalQueue",
+      title: "Antrean Approval",
+      subtitle: "Item yang masih perlu diproses",
+      type: "bar",
+      data: chartData.approvalQueue ?? [],
+    },
+  ];
+
+  const renderChart = (card: (typeof chartCards)[number]) => {
+    if (metricsLoading) {
+      return <div className="dashboard-chart-empty">Memuat grafik...</div>;
+    }
+
+    if (!card.data.length) {
+      return <div className="dashboard-chart-empty">Belum ada data grafik untuk company aktif ini.</div>;
+    }
+
+    if (card.type === "pie") {
+      const colors = ["var(--color-primary)", "#10b981", "#f59e0b", "#0ea5e9", "#ef4444", "#64748b"];
+      return (
+        <ResponsiveContainer width="100%" height={230}>
+          <PieChart>
+            <Pie data={card.data} dataKey="value" nameKey="name" innerRadius={56} outerRadius={86} paddingAngle={3}>
+              {card.data.map((_, index) => <Cell key={index} fill={colors[index % colors.length]} />)}
+            </Pie>
+            <Tooltip />
+          </PieChart>
+        </ResponsiveContainer>
+      );
+    }
+
+    return (
+      <ResponsiveContainer width="100%" height={230}>
+        <BarChart data={card.data} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(15,159,143,0.14)" vertical={false} />
+          <XAxis dataKey="name" tickLine={false} axisLine={false} fontSize={11} />
+          <YAxis tickLine={false} axisLine={false} fontSize={11} allowDecimals={false} />
+          <Tooltip />
+          <Bar dataKey="value" fill="var(--color-primary)" radius={[8, 8, 0, 0]} />
+        </BarChart>
+      </ResponsiveContainer>
+    );
+  };
+
   const toggleWidget = (widget: DashboardWidget) => {
     setConfig((current) => {
       const layout = current.layout_json ?? [];
@@ -248,6 +363,7 @@ const CustomDashboardPage = () => {
             <div className="hero-badge"><LayoutDashboard size={16} /><span>Custom Dashboard</span></div>
             <h1 className="hero-title">Dashboard Builder</h1>
             <p className="hero-subtitle">Pilih widget, scope company, dan filter default sesuai role.</p>
+            <CompanyScopeBadge />
           </div>
           <div className="hero-actions">
             <Button variant="primary" size="md" onClick={save} disabled={saving}>
@@ -341,6 +457,21 @@ const CustomDashboardPage = () => {
         {(config.layout_json ?? []).length === 0 && (
           <Card className="dashboard-empty-preview">Pilih widget untuk membentuk dashboard.</Card>
         )}
+      </section>
+
+      <section className="dashboard-chart-grid">
+        {chartCards.map((card) => (
+          <Card key={card.key} className="dashboard-chart-card">
+            <div className="dashboard-chart-card__header">
+              <div>
+                <h2>{card.title}</h2>
+                <p>{card.subtitle}</p>
+              </div>
+              <BarChart3 size={18} />
+            </div>
+            {renderChart(card)}
+          </Card>
+        ))}
       </section>
     </div>
   );

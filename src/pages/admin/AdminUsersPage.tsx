@@ -7,6 +7,7 @@ import { getAllUsers } from "@/features/admin/api/admin.service";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { RBACUtils } from "@/shared/hooks/rbac";
 import { ROLES } from "@/shared/types/rbac.types";
+import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 import { RefreshCw, Search, UserPlus, Users, Shield, Filter } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
@@ -30,6 +31,8 @@ const AdminUsersPage = () => {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const canViewUsers = RBACUtils.canViewUsers(user);
+  const canCreateUsers = RBACUtils.canCreateUsers(user);
+  const canAssignRoles = RBACUtils.canAssignRoles(user);
 
   const roleToneClass = (role: UserRoleInfo) => {
     if (role.name === ROLES.SUPER_ADMIN) return "badge-soft badge-soft--red";
@@ -188,6 +191,7 @@ const AdminUsersPage = () => {
             <p className="hero-subtitle">
               Kelola dan tampilkan daftar pengguna beserta role mereka.
             </p>
+            <CompanyScopeBadge />
           </div>
           <div className="hero-actions">
             <button
@@ -201,6 +205,8 @@ const AdminUsersPage = () => {
             <button
               className="btn-outline"
               onClick={() => navigate("/admin/users/create")}
+              disabled={!canCreateUsers}
+              title={!canCreateUsers ? "Anda tidak memiliki izin membuat pengguna" : undefined}
             >
               <UserPlus size={16} />
               Buat Akun
@@ -208,6 +214,8 @@ const AdminUsersPage = () => {
             <button
               className="btn-primary"
               onClick={() => navigate("/admin/users/assign-roles")}
+              disabled={!canAssignRoles}
+              title={!canAssignRoles ? "Anda tidak memiliki izin menetapkan peran" : undefined}
             >
               <Shield size={16} />
               Tetapkan Peran
@@ -372,6 +380,7 @@ const AdminUsersPage = () => {
                         </td>
                         <td className="td-center">
                           <div className="action-btn-group">
+                            {canAssignRoles && (
                             <button
                               className="action-btn action-btn-edit"
                               onClick={() => navigate("/admin/users/assign-roles")}
@@ -379,6 +388,7 @@ const AdminUsersPage = () => {
                             >
                               <Shield size={16} />
                             </button>
+                            )}
                           </div>
                         </td>
                       </tr>

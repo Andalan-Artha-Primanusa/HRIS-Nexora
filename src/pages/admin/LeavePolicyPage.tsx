@@ -12,6 +12,7 @@ import {
 import { Card } from '@/shared/ui/Card';
 import { useAuthStore } from '@/app/store/auth.store';
 import { RBACUtils } from '@/shared/hooks/rbac';
+import { PERMISSIONS } from '@/shared/types/rbac.types';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
 import { showToast } from '@/shared/ui/toast';
@@ -33,12 +34,7 @@ interface LeavePolicy {
 
 const LeavePolicyPage = () => {
   const user = useAuthStore((state) => state.user);
-  const canAccess = RBACUtils.hasPermission(user, 'leave.view');
-  if (!canAccess) {
-    return (
-      <div className="crud-page"><Card className="hero-card"><div className="hero-card-inner"><div className="hero-content"><div className="hero-badge"><ShieldCheck size={16} /><span>Admin Center</span></div><h1 className="hero-title">Akses Ditolak</h1><p className="hero-subtitle">Anda tidak memiliki izin untuk mengakses halaman ini.</p></div></div></Card></div>
-    );
-  }
+  const canAccess = RBACUtils.hasPermission(user, PERMISSIONS.LEAVE_VIEW);
   const [policies, setPolicies] = useState<LeavePolicy[]>([]);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -121,12 +117,19 @@ const LeavePolicyPage = () => {
   };
 
   useEffect(() => {
+    if (!canAccess) return;
     fetchPolicies();
-  }, []);
+  }, [canAccess]);
 
   useEffect(() => {
     setCurrentPage(1);
   }, []);
+
+  if (!canAccess) {
+    return (
+      <div className="crud-page"><Card className="hero-card"><div className="hero-card-inner"><div className="hero-content"><div className="hero-badge"><ShieldCheck size={16} /><span>Admin Center</span></div><h1 className="hero-title">Akses Ditolak</h1><p className="hero-subtitle">Anda tidak memiliki izin untuk mengakses halaman ini.</p></div></div></Card></div>
+    );
+  }
 
   const handleDelete = async (id: number) => {
     try {

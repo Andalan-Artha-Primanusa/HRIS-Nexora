@@ -37,11 +37,11 @@
   /* Shadows */
   --shadow-soft: 0 4px 16px rgba(15, 159, 143, 0.08);
 
-  --radius-xs: 4px;
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 18px;
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
   --radius-full: 9999px;
 
   --border-light: 1px solid var(--gray-200);
@@ -161,7 +161,8 @@ body {
   color: var(--color-text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  line-height: 1.6;
 }
 
 a {
@@ -465,14 +466,16 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   outline: none;
 }
 
-.action-btn:hover {
+.action-btn:hover:not(:disabled) {
   background: var(--hero-bg-start);
   color: #fff;
   border-color: var(--hero-bg-start);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-soft);
 }
 
 .action-btn:disabled {
@@ -520,8 +523,10 @@ h1, h2, h3, h4, h5, h6 {
   border-color: transparent;
 }
 
-.action-btn-secondary:hover {
+.action-btn-secondary:hover:not(:disabled) {
   background: var(--gray-200);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-soft);
 }
 
 .action-btn-success {
@@ -563,10 +568,11 @@ h1, h2, h3, h4, h5, h6 {
   border-color: var(--color-primary-light) !important;
 }
 
-.action-btn-edit:hover {
+.action-btn-edit:hover:not(:disabled) {
   background: var(--hero-bg-start) !important;
   color: #ffffff !important;
-  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.25) !important;
+  box-shadow: 0 6px 16px rgba(32, 201, 151, 0.3) !important;
+  transform: translateY(-2px);
 }
 
 .action-btn-success {
@@ -575,10 +581,11 @@ h1, h2, h3, h4, h5, h6 {
   border-color: #bbf7d0 !important;
 }
 
-.action-btn-success:hover {
+.action-btn-success:hover:not(:disabled) {
   background: #148F5B !important;
   color: #ffffff !important;
-  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25) !important;
+  box-shadow: 0 6px 16px rgba(22, 163, 74, 0.3) !important;
+  transform: translateY(-2px);
 }
 
 .action-btn-delete {
@@ -587,9 +594,9 @@ h1, h2, h3, h4, h5, h6 {
   border-color: #fecdd3 !important;
 }
 
-.action-btn-delete:hover {
+.action-btn-delete:hover:not(:disabled) {
   background: #C03B3B !important;
   color: #ffffff !important;
-  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.25) !important;
+  box-shadow: 0 6px 16px rgba(225, 29, 72, 0.3) !important;
+  transform: translateY(-2px);
 }
-

@@ -208,3 +208,14 @@
   color: var(--color-text-secondary);
 }
 
+@media (max-width: 700px) {
+  .assignment-grid {
+    grid-template-columns: 1fr;
+  }
+  .assignment-info-grid {
+    grid-template-columns: 1fr;
+  }
+  .assignment-card-header {
+    flex-direction: column;
+  }
+}

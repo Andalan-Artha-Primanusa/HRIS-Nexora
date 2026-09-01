@@ -3,9 +3,10 @@ import { useLocation, useOutlet } from 'react-router-dom';
 import { Sidebar } from '@/widgets/layout/Sidebar';
 import { Header } from '@/widgets/layout/Header';
 import { useAuthStore } from '@/app/store/auth.store';
+import { consumeCompanyScopeToast } from '@/shared/utils/companyScope';
+import { showToast } from '@/shared/ui/toast';
 import type { MenuItem } from '@/shared/config/menu';
-import { fetchAllowedMenuKeys, clearMenuCache, filterMenuItems } from '@/shared/config/menuFilter';
-import { essMenuItems, menuItems } from '@/shared/config/menu';
+import { fetchAllowedMenuKeys, clearMenuCache, fetchUserMenuTree } from '@/shared/config/menuFilter';
 import { RouteSuspenseFallback } from '@/shared/ui';
 import NotFoundPage from '@/pages/error/NotFoundPage';
 
@@ -97,12 +98,23 @@ export default function DashboardLayout() {
 
   React.useEffect(() => {
     if (!user) return;
+    const pending = consumeCompanyScopeToast();
+    if (pending) showToast(pending, "success");
+  }, [user]);
+
+  React.useEffect(() => {
+    if (!user) return;
     const load = async () => {
-      const allMenus = [...menuItems, ...essMenuItems];
-      setAllMenuPaths(Array.from(new Set(flattenPaths(allMenus))));
-      const keys = allowedKeys || await fetchAllowedMenuKeys(user);
-      const visible = filterMenuItems(user, allMenus, keys);
-      setAvailablePaths(Array.from(new Set(flattenPaths(visible))));
+      try {
+        const apiMenus = await fetchUserMenuTree(user);
+        setAllMenuPaths(Array.from(new Set(flattenPaths(apiMenus))));
+        const keys = allowedKeys || await fetchAllowedMenuKeys(user);
+        setAvailablePaths(keys.length ? Array.from(new Set(flattenPaths(apiMenus))) : []);
+      } catch (error) {
+        console.error("Failed to load route menu tree:", error);
+        setAllMenuPaths([]);
+        setAvailablePaths([]);
+      }
     };
     load();
   }, [user, allowedKeys]);

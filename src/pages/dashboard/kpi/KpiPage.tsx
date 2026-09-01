@@ -12,6 +12,9 @@ import {
 } from '@/features/dashboard/api/kpi.service';
 import { Target, Users, RefreshCw, Trash2, Edit, Check, FileText } from 'lucide-react';
 import { showToast } from '@/shared/ui/toast';
+import { useAuthStore } from '@/app/store/auth.store';
+import { RBACUtils } from '@/shared/hooks/rbac';
+import { PERMISSIONS } from '@/shared/types/rbac.types';
 import '@/shared/styles/CrudPage.css';
 
 type KpiStatus = 'draft' | 'submitted' | 'approved';
@@ -45,6 +48,11 @@ const DEFAULT_FORM = {
 };
 
 const KpiPage = () => {
+  const user = useAuthStore((state) => state.user);
+  const canCreate = RBACUtils.hasPermission(user, PERMISSIONS.KPI_CREATE);
+  const canUpdate = RBACUtils.hasPermission(user, PERMISSIONS.KPI_UPDATE);
+  const canDelete = RBACUtils.hasPermission(user, PERMISSIONS.KPI_DELETE);
+  const canApprove = RBACUtils.hasPermission(user, PERMISSIONS.KPI_APPROVE);
   const [items, setItems] = useState<KpiRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -125,6 +133,14 @@ const KpiPage = () => {
   };
 
   const handleCreateOrUpdate = async () => {
+    if (form.id && !canUpdate) {
+      showToast("Anda tidak memiliki izin mengubah KPI.", "error");
+      return;
+    }
+    if (!form.id && !canCreate) {
+      showToast("Anda tidak memiliki izin membuat KPI.", "error");
+      return;
+    }
     if (!form.employee_id || !form.title || !form.target || !form.period) return;
     setActionLoading("form");
     try {
@@ -172,6 +188,10 @@ const KpiPage = () => {
   };
 
   const handleDelete = async (id: string) => {
+    if (!canDelete) {
+      showToast("Anda tidak memiliki izin menghapus KPI.", "error");
+      return;
+    }
     setActionLoading(id + '_del');
     try {
       await deleteKpi(id);
@@ -185,6 +205,10 @@ const KpiPage = () => {
   };
 
   const handleEdit = (item: KpiRecord) => {
+    if (!canUpdate) {
+      showToast("Anda tidak memiliki izin mengubah KPI.", "error");
+      return;
+    }
     setForm({
       id: String(item.id),
       employee_id: String(item.employee_id),
@@ -198,6 +222,10 @@ const KpiPage = () => {
   };
 
   const handleApprove = async (id: string) => {
+    if (!canApprove) {
+      showToast("Anda tidak memiliki izin menyetujui KPI.", "error");
+      return;
+    }
     await handleAction(id + '_app', () => approveKpi(id), "KPI berhasil diapprove");
   };
 
@@ -252,9 +280,11 @@ const KpiPage = () => {
             <RefreshCw size={16} />
             {loading ? "Memuat..." : "Segarkan"}
           </Button>
+          {canCreate && (
           <Button variant="primary" size="md" onClick={() => { setForm(DEFAULT_FORM); setIsFormOpen(!isFormOpen); }}>
             Buat KPI Baru
           </Button>
+          )}
         </div>
       </div>
 
@@ -281,7 +311,7 @@ const KpiPage = () => {
       </div>
 
       {/* Form Overlay */}
-      {isFormOpen && (
+      {isFormOpen && (canCreate || canUpdate) && (
         <Card className="table-card" glass style={{ marginBottom: "1.5rem" }}>
            <div className="table-header-bar">
              <h3>{form.id ? "Ubah KPI" : "Buat KPI Baru"}</h3>
@@ -414,7 +444,7 @@ const KpiPage = () => {
                                   <FileText size={16} />
                                 </button>
                               )}
-                              {item.status === 'submitted' && (
+                              {canApprove && item.status === 'submitted' && (
                                 <button
                                   className="action-btn action-btn-success"
                                   onClick={() => void handleApprove(String(item.id))}
@@ -424,6 +454,7 @@ const KpiPage = () => {
                                   <Check size={16} />
                                 </button>
                               )}
+                              {canUpdate && (
                               <button
                                   className="action-btn action-btn-edit"
                                   onClick={() => handleEdit(item)}
@@ -431,6 +462,8 @@ const KpiPage = () => {
                               >
                                 <Edit size={16} />
                              </button>
+                              )}
+                             {canDelete && (
                              <button
                                   className="action-btn action-btn-delete"
                                   onClick={() => void handleDelete(String(item.id))}
@@ -439,6 +472,7 @@ const KpiPage = () => {
                              >
                                 <Trash2 size={16} />
                              </button>
+                             )}
                             </div>
                          </td>
                       </tr>

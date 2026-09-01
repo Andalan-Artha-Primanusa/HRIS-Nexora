@@ -703,4 +703,3 @@ const EmployeeDashboardPage = () => {
 };
 
 export default EmployeeDashboardPage;
-

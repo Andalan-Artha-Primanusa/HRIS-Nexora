@@ -6,6 +6,8 @@ import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDispl
 import { Calendar, RefreshCw, Clock3, CircleCheckBig, CircleX, Wallet, Search, Filter, Plus, Clock, History } from "lucide-react";
 
 import { getMyLeaveBalance, getMyLeaves } from "@/features/ess/api/ess.service";
+import { resubmitLeave } from "@/features/leave/api/leave.service";
+import { showToast } from "@/shared/ui/toast";
 import type { GenericApiItem } from "@/features/ess/types/ess.types";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
@@ -232,6 +234,17 @@ const MyLeavesPage = () => {
     void loadLeaves();
   };
 
+  const handleResubmit = async (id: string | number) => {
+    try {
+      await resubmitLeave(String(id));
+      await loadLeaves();
+      showToast("Pengajuan berhasil diajukan ulang", "success");
+    } catch (error: unknown) {
+      console.error("Failed to resubmit leave:", error);
+      showToast("Gagal mengajukan ulang cuti", "error");
+    }
+  };
+
   // Reset page on filter changes
   useEffect(() => {
     setCurrentPage(1);
@@ -455,10 +468,18 @@ const MyLeavesPage = () => {
                             <td className="td-center">
                               <span
                                 className={`badge-soft badge-soft--${
-                                  status === "approved" ? "green" : status === "pending" ? "orange" : "red"
+                                  status === "approved"
+                                    ? "green"
+                                    : status === "pending"
+                                    ? "orange"
+                                    : status === "returned"
+                                    ? "purple"
+                                    : "red"
                                 }`}
                               >
-                                {status.charAt(0).toUpperCase() + status.slice(1)}
+                                {status === "returned"
+                                  ? "Dikembalikan"
+                                  : status.charAt(0).toUpperCase() + status.slice(1)}
                               </span>
                             </td>
                             <td className="td-center">
@@ -470,6 +491,16 @@ const MyLeavesPage = () => {
                                 >
                                   <Calendar size={16} />
                                 </button>
+                                {status === "returned" && (
+                                  <button
+                                    className="action-btn"
+                                    style={{ color: "#d97706", background: "#fffbeb" }}
+                                    onClick={() => handleResubmit(leave.id)}
+                                    title="Ajukan Ulang"
+                                  >
+                                    <RefreshCw size={16} />
+                                  </button>
+                                )}
                                 <button className="action-btn" style={{ color: '#8b5cf6', background: '#f5f3ff' }} onClick={() => setHistoryModal({ module: 'leave', id: leave.id })} title="Riwayat Approval"><History size={16} /></button>
                               </div>
                             </td>

@@ -4,6 +4,7 @@ import { Users, UserCheck, CalendarOff, Clock,TrendingDown, Target } from 'lucid
 import { api } from '@/shared/api/httpClient';
 import { useAuthStore } from '@/app/store/auth.store';
 import { RBACUtils } from '@/shared/hooks/rbac';
+import { PERMISSIONS } from '@/shared/types/rbac.types';
 import './KpiCards.css';
 
 type KpiCardItem = {
@@ -100,12 +101,12 @@ export const KpiCards: React.FC = () => {
 
   const user = useAuthStore((state) => state.user);
   const canViewDashboardMetrics = RBACUtils.hasPermission(user, [
-    'reporting.dashboard',
-    'employee.view',
-    'attendance.view_all',
-    'leave.approve',
-    'reimbursement.view',
-    'kpi.view',
+    PERMISSIONS.REPORTING_DASHBOARD,
+    PERMISSIONS.EMPLOYEE_VIEW,
+    PERMISSIONS.ATTENDANCE_VIEW_ALL,
+    PERMISSIONS.LEAVE_APPROVE,
+    PERMISSIONS.REIMBURSEMENT_VIEW,
+    PERMISSIONS.KPI_VIEW,
   ]);
 
   useEffect(() => {

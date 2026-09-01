@@ -5,6 +5,7 @@ import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
 import { showToast } from "@/shared/ui/toast";
 import { payrollService, toSafeArray } from "@/features/payroll/api/payroll.service";
+import { getApiBaseUrl } from "@/shared/api/httpClient";
 import { PayrollStatusBadge } from '@/shared/ui/PayrollStatusBadge';
 import { getAllEmployees } from "@/features/employee/api/employee.service";
 import type { PayrollCreatePayload, PayrollUpdatePayload, PayrollItem } from "@/features/payroll/types/payroll.types";
@@ -169,7 +170,7 @@ const PayrollCrudPage = () => {
     setExportLoading(true);
     try {
       const token = sessionStorage.getItem("token") || "";
-      const baseUrl = import.meta.env.VITE_API_URL || "https://moccasin-crab-693879.hostingersite.com/api";
+      const baseUrl = getApiBaseUrl();
 
       const endpoint = exportType === "bca"
         ? `/payroll/export/bca-klikpay?period=${exportPeriod}`
@@ -180,6 +181,7 @@ const PayrollCrudPage = () => {
       const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${token}`,
+          "X-Company-Id": sessionStorage.getItem("selectedCompanyId") || "",
         },
       });
 

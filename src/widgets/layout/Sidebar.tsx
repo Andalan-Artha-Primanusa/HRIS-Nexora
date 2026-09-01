@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
-import { Building2, ChevronRight, UserCircle, X } from 'lucide-react';
+import { Building2, ChevronRight, X } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import './Sidebar.css';
 
-import { menuItems, essMenuItems } from '@/shared/config/menu';
 import type { MenuItem } from '@/shared/config/menu';
 import { useAuthStore } from '@/app/store/auth.store';
-import { filterMenuItems, fetchAllowedMenuKeys } from '@/shared/config/menuFilter';
-import { RBACUtils } from '@/shared/hooks/rbac';
+import { fetchAllowedMenuKeys, fetchUserMenuTree } from '@/shared/config/menuFilter';
 import { companyService } from '@/features/company/api/company.service';
+import { queueCompanyScopeToast } from '@/shared/utils/companyScope';
 
 interface SidebarProps {
   collapsed: boolean;
@@ -111,15 +110,6 @@ const MenuItemComponent: React.FC<{
   );
 };
 
-const isEmployeeOnly = (user: ReturnType<typeof useAuthStore.getState>['user']): boolean => {
-  if (!user) return false;
-  const roleNames = user.roles?.map(r => r.name?.toLowerCase()) ?? [];
-  const hasAdminAccess = roleNames.some(name =>
-    name.includes('admin') || name.includes('super') || name.includes('manager') || name.includes('hr') || name.includes('finance') || name === 'ho'
-  );
-  return !hasAdminAccess && !RBACUtils.isSuperAdmin(user);
-};
-
 export const Sidebar: React.FC<SidebarProps> = ({ collapsed, isMobileOpen, onClose }) => {
   const user = useAuthStore((state) => state.user);
   const selectedCompanyId = useAuthStore((state) => state.selectedCompanyId);
@@ -127,20 +117,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, isMobileOpen, onClo
   const setSelectedCompanyId = useAuthStore((state) => state.setSelectedCompanyId);
   const setCompanyContext = useAuthStore((state) => state.setCompanyContext);
   const [allowedKeys, setAllowedKeys] = useState<string[] | undefined>();
-  const canSwitchCompany = RBACUtils.hasPermission(user, [
-    'company.view',
-    'company.view_all',
-    'dashboard.view_all_company',
-    'admin.company.view',
-  ]);
+  const [menuTree, setMenuTree] = useState<MenuItem[]>([]);
 
   useEffect(() => {
     if (!user) return;
     fetchAllowedMenuKeys(user).then(setAllowedKeys);
+    fetchUserMenuTree(user).then(setMenuTree).catch((error) => {
+      console.error("Failed to load sidebar menu tree:", error);
+      setMenuTree([]);
+    });
   }, [user]);
 
   useEffect(() => {
-    if (!user || !canSwitchCompany || companyContext) return;
+    if (!user) {
+      setCompanyContext(null);
+      return;
+    }
+    if (companyContext) return;
 
     let cancelled = false;
 
@@ -155,6 +148,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, isMobileOpen, onClo
         }
       } catch (error) {
         console.error("Failed to load sidebar company context:", error);
+        if (!cancelled) setCompanyContext(null);
       }
     };
 
@@ -163,31 +157,32 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, isMobileOpen, onClo
     return () => {
       cancelled = true;
     };
-  }, [canSwitchCompany, companyContext, selectedCompanyId, setCompanyContext, setSelectedCompanyId, user]);
+  }, [companyContext, selectedCompanyId, setCompanyContext, setSelectedCompanyId, user]);
 
   useEffect(() => {
     if (!user) return;
     const handler = () => {
       fetchAllowedMenuKeys(user).then(setAllowedKeys);
+      fetchUserMenuTree(user).then(setMenuTree).catch(() => setMenuTree([]));
     };
     window.addEventListener('menu-cache-cleared', handler);
     return () => window.removeEventListener('menu-cache-cleared', handler);
   }, [user]);
 
-  const employeeOnly = isEmployeeOnly(user);
-  const selfServiceMenu: MenuItem = {
-    label: 'Employee Self Service',
-    icon: UserCircle,
-    subItems: essMenuItems,
-  };
-  const baseMenuItems = employeeOnly ? essMenuItems : [...menuItems, selfServiceMenu];
-  const filteredItems = filterMenuItems(user, baseMenuItems, allowedKeys);
+  const filteredItems = allowedKeys === undefined ? [] : menuTree;
 
   // When mobile drawer is open, always show full expanded sidebar regardless of collapsed state
   const effectiveCollapsed = isMobileOpen ? false : collapsed;
-  const handleCompanyChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+const handleCompanyChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
-    setSelectedCompanyId(value === "all" ? "all" : Number(value));
+    const isAll = value === "all";
+    const companyLabel = isAll
+      ? "HO / Semua Company"
+      : companyContext?.companies.find((company) => company.id === Number(value))?.name
+        ? `${companyContext.companies.find((company) => company.id === Number(value))?.name}`
+        : `company #${value}`;
+    setSelectedCompanyId(isAll ? "all" : Number(value));
+    queueCompanyScopeToast(companyLabel || "");
     window.dispatchEvent(new Event("company-context-changed"));
     setTimeout(() => window.location.reload(), 50);
   };
@@ -206,13 +201,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, isMobileOpen, onClo
           </button>
         )}
         <img
-          src="/logo-mahya2.png"
-          alt="MAHYA Logo"
+          src="/app-logo.png"
+          alt="HRIS Logo"
           className={clsx('company-logo', effectiveCollapsed && 'collapsed')}
         />
       </div>
 
-      {canSwitchCompany && companyContext && companyContext.companies.length > 0 && !effectiveCollapsed && (
+      {companyContext && companyContext.companies.length > 0 && !effectiveCollapsed && (
         <label className="sidebar-company-switcher" title="Ganti scope company">
           <span className="sidebar-company-caption">Company aktif</span>
           <span className="sidebar-company-control">

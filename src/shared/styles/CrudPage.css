@@ -152,24 +152,33 @@
   z-index: 1;
 }
 
-/* Solid white action buttons on the teal hero (matches reference design) */
-.page-header-actions .ui-button {
+/* Solid white action buttons on the teal hero (matches reference design).
+   Scoped to primary/secondary variants so danger/warning actions keep their colors. */
+.page-header-actions .ui-button--primary,
+.page-header-actions .ui-button--secondary,
+.page-header-actions button[type='submit'] {
   background: var(--color-white);
   border-color: transparent;
   color: #075E54;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
-.page-header-actions .ui-button svg {
+.page-header-actions .ui-button--primary svg,
+.page-header-actions .ui-button--secondary svg,
+.page-header-actions button[type='submit'] svg {
   color: #075E54;
 }
 
-.page-header-actions .ui-button:hover:not(:disabled) {
+.page-header-actions .ui-button--primary:hover:not(:disabled),
+.page-header-actions .ui-button--secondary:hover:not(:disabled),
+.page-header-actions button[type='submit']:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.92);
   color: #075E54;
 }
 
-.page-header-actions .ui-button:disabled {
+.page-header-actions .ui-button--primary:disabled,
+.page-header-actions .ui-button--secondary:disabled,
+.page-header-actions button[type='submit']:disabled {
   background: rgba(255, 255, 255, 0.5);
   color: #075E54;
 }
@@ -248,13 +257,13 @@
 .summary-card__icon--green  { background: rgba(16, 185, 129, 0.14); color: #10b981; border-color: rgba(16, 185, 129, 0.18); }
 .summary-card__icon--orange { background: rgba(245, 158, 11, 0.14); color: #d97706; border-color: rgba(245, 158, 11, 0.18); }
 .summary-card__icon--red    { background: rgba(239, 68, 68, 0.14); color: #dc2626; border-color: rgba(239, 68, 68, 0.18); }
-.summary-card__icon--purple { background: rgba(139, 92, 246, 0.14); color: #7c3aed; border-color: rgba(139, 92, 246, 0.18); }
+.summary-card__icon--purple { background: rgba(15, 159, 143, 0.14); color: var(--color-primary-dark); border-color: rgba(15, 159, 143, 0.18); }
 
 .summary-card__value {
   margin-top: 0.55rem;
   font-size: 2rem;
   font-weight: 800;
-  color: var(--color-primary);
+  color: var(--color-primary-dark);
   letter-spacing: -1px;
   position: relative;
   z-index: 1;
@@ -264,7 +273,7 @@
 .summary-card__value--green  { color: #10b981; }
 .summary-card__value--orange { color: #d97706; }
 .summary-card__value--red    { color: #dc2626; }
-.summary-card__value--purple { color: #7c3aed; }
+.summary-card__value--purple { color: var(--color-primary-dark); }
 
 .summary-card__change {
   margin-top: 0.5rem;
@@ -1000,6 +1009,7 @@
 .status-badge--rejected { background: #fee2e2; color: #991b1b; }
 .status-badge--paid     { background: var(--color-primary-light); color: var(--color-primary-dark); }
 .status-badge--draft    { background: #f3f4f6; color: #6b7280; }
+.status-badge--returned { background: #f3e8ff; color: #7c3aed; }
 
 /* ============================================ */
 /* Alert                                        */
@@ -1075,19 +1085,19 @@
 
 .form-input:disabled,
 .form-input[readonly] {
-  background: #ffffff !important; 
+  background: #ffffff !important;
   color: #000000 !important; /* Identical color to active inputs */
   cursor: not-allowed;
-  opacity: 1 !important; 
-  border-color: var(--color-border) !important; 
+  opacity: 1 !important;
+  border-color: var(--color-border) !important;
   box-shadow: none !important;
   font-weight: 600 !important;
 }
 
 /* Reset Autofill Styles to prevent dimming on left-side fields */
 .form-input:-webkit-autofill,
-.form-input:-webkit-autofill:hover, 
-.form-input:-webkit-autofill:focus, 
+.form-input:-webkit-autofill:hover,
+.form-input:-webkit-autofill:focus,
 .form-input:-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0 50px white inset !important;
   -webkit-text-fill-color: #000000 !important;
@@ -1220,7 +1230,8 @@ select.form-input {
     padding: 0.95rem !important;
   }
 }
- 
+
+ 
  /* ============================================ */
 /* Upload Modal specific                        */
 /* ============================================ */
@@ -1418,8 +1429,8 @@ select.form-input {
 }
 
 .form-grid {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1rem;
 }
 
@@ -1803,4 +1814,3 @@ select.form-input {
   border-color: var(--hero-bg-start);
   color: #ffffff;
 }
-

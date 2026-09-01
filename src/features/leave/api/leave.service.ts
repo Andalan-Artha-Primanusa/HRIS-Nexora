@@ -89,6 +89,16 @@ export const rejectLeave = async (id: string, payload: LeaveDecisionPayload) => 
   return { raw: response.data };
 };
 
+export const returnLeave = async (id: string, payload: LeaveDecisionPayload) => {
+  const response = await api.put(`leaves/${id}/return`, payload);
+  return { raw: response.data };
+};
+
+export const resubmitLeave = async (id: string, payload?: LeaveDecisionPayload) => {
+  const response = await api.put(`leaves/${id}/resubmit`, payload ?? {});
+  return { raw: response.data };
+};
+
 export const getLeaveBalance = async () => {
   const response = await api.get("leaves/balance");
   return {

@@ -8,6 +8,7 @@ import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "./LeaveShared.css";
 import "./LeavePages.css";
+import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 
 interface CalendarEvent {
   id: number;
@@ -140,6 +141,7 @@ const LeaveCalendarPage = () => {
             </div>
             <h1 className="hero-title">Kalender Cuti</h1>
             <p className="hero-subtitle">Visual kalender pengajuan cuti dengan analitik yang konsisten.</p>
+            <CompanyScopeBadge />
           </div>
           <div className="hero-actions">
             <button className="btn-outline" onClick={() => void loadCalendar()}>

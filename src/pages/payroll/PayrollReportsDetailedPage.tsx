@@ -5,6 +5,7 @@ import { Badge } from '@/shared/ui/Badge';
 import { Modal } from '@/shared/ui/Modal';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { payrollService, toSafeArray } from '@/features/payroll/api/payroll.service';
+import { getApiBaseUrl } from '@/shared/api/httpClient';
 import { parsePaginatedResponse } from '@/shared/api/pagination';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
@@ -59,7 +60,7 @@ const PayrollReportsDetailedPage: React.FC = () => {
     setExportLoading(true);
     try {
       const token = sessionStorage.getItem("token") || "";
-      const baseUrl = import.meta.env.VITE_API_URL || "https://moccasin-crab-693879.hostingersite.com/api";
+      const baseUrl = getApiBaseUrl();
 
       const endpoint = exportType === "bca"
         ? `/payroll/export/bca-klikpay?period=${exportPeriod}`
@@ -70,6 +71,7 @@ const PayrollReportsDetailedPage: React.FC = () => {
       const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${token}`,
+          "X-Company-Id": sessionStorage.getItem("selectedCompanyId") || "",
         },
       });
 

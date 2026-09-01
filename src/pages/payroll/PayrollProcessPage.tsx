@@ -5,18 +5,21 @@ import { Modal } from "@/shared/ui/Modal";
 import { showToast } from "@/shared/ui/toast";
 
 import { Button } from "@/shared/ui/Button";
+import { useAuthStore } from "@/app/store/auth.store";
+import { RBACUtils } from "@/shared/hooks/rbac";
+import { PERMISSIONS } from "@/shared/types/rbac.types";
 import { PayrollStatusBadge } from "@/shared/ui/PayrollStatusBadge";
 import { payrollService, toSafeArray } from "@/features/payroll/api/payroll.service";
 import { getAllEmployees } from "@/features/employee/api/employee.service";
 import type { PayrollItem } from "@/features/payroll/types/payroll.types";
 import type { EmployeeItem } from "@/features/employee/types/employee.types";
 import { parsePaginatedResponse } from "@/shared/api/pagination";
-import { PayrollWorkflowGuide } from "./PayrollWorkflowGuide";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "./PayrollListPage.css";
 import "./PayrollApprovePage.css";
 import "./PayrollProcessPage.css";
+import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 
 const formatCurrency = (v: unknown) => {
   const num = typeof v === "string" ? parseFloat(v) : Number(v);
@@ -82,11 +85,10 @@ const PayrollProcessPage = ({ mode, showTabs = true }: PayrollProcessPageProps) 
             <div className="hero-badge"><activeMeta.icon size={16} /><span>Operasi Penggajian</span></div>
             <h1 className="hero-title">{mode ? activeMeta.title : "Proses Payroll"}</h1>
             <p className="hero-subtitle">{mode ? activeMeta.subtitle : "Mulai dari generate payroll bulanan, approval manager dan HR, sampai pembayaran final."}</p>
+            <CompanyScopeBadge />
           </div>
         </div>
       </Card>
-
-      <PayrollWorkflowGuide compact />
 
       {showTabs && (
         <div className="payroll-tabs">
@@ -114,6 +116,8 @@ const PayrollProcessPage = ({ mode, showTabs = true }: PayrollProcessPageProps) 
 
 /* ═══════════════════════════════ GENERATE TAB ═══════════════════════════ */
 const GenerateTab = () => {
+  const user = useAuthStore((state) => state.user);
+  const canGenerate = RBACUtils.hasPermission(user, PERMISSIONS.PAYROLL_GENERATE);
   const now = new Date();
   const [items, setItems] = useState<PayrollItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -225,11 +229,13 @@ const GenerateTab = () => {
             <AlertCircle size={15} className="info-icon" style={{ flexShrink: 0, marginTop: 1 }} />
             <p className="info-text" style={{ fontSize: 12, lineHeight: 1.6, margin: 0 }}>Kalkulasi tunjangan, bonus, dan potongan untuk <strong>semua karyawan aktif</strong> di periode {period}.</p>
           </div>
+          {canGenerate && (
           <button onClick={() => void generateMonthly()} disabled={loading}
             style={{ width: "100%", padding: 12, borderRadius: 12, border: "none", background: "linear-gradient(135deg, var(--hero-bg-start), var(--hero-bg-end))", color: "#fff", fontSize: 14, fontWeight: 700, fontFamily: "'Poppins', sans-serif", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
             {loading ? <RefreshCw size={15} className="animate-spin" /> : <Zap size={15} />}
             {loading ? "Memproses..." : "Generate Payroll Sekarang"}
           </button>
+          )}
         </Card>
 
         <Card className="crud-table-card">
@@ -316,6 +322,8 @@ const GenerateTab = () => {
 
 /* ═══════════════════════════════ APPROVE TAB ═══════════════════════════ */
 const ApproveTab = () => {
+  const user = useAuthStore((state) => state.user);
+  const canApprove = RBACUtils.hasPermission(user, PERMISSIONS.PAYROLL_APPROVE);
   const [payrolls, setPayrolls] = useState<PayrollItem[]>([]);
   const [employees, setEmployees] = useState<EmployeeItem[]>([]);
   const [currentPagePending, setCurrentPagePending] = useState(1);
@@ -343,6 +351,10 @@ const ApproveTab = () => {
   };
 
   const handleApprove = async () => {
+    if (!canApprove) {
+      showToast("Anda tidak memiliki izin menyetujui payroll", "error");
+      return;
+    }
     if (!selectedPayroll) { showToast("Pilih payroll terlebih dahulu", "error"); return; }
     if (selectedPayroll.status === "approved" || selectedPayroll.status === "paid") {
       showToast(`Status saat ini: ${selectedPayroll.status}`, "error"); return;
@@ -367,6 +379,10 @@ const ApproveTab = () => {
   };
 
   const handleReject = () => {
+    if (!canApprove) {
+      showToast("Anda tidak memiliki izin menolak payroll", "error");
+      return;
+    }
     if (!selectedPayroll) { showToast("Pilih payroll", "error"); return; }
     setRejectReason("");
     setRejectModalOpen(true);
@@ -374,6 +390,10 @@ const ApproveTab = () => {
 
   const confirmReject = async () => {
     if (!selectedPayroll) return;
+    if (!canApprove) {
+      showToast("Anda tidak memiliki izin menolak payroll", "error");
+      return;
+    }
     if (!rejectReason.trim()) { showToast("Alasan penolakan wajib diisi", "error"); return; }
     setLoading(true);
     try {
@@ -458,7 +478,9 @@ const ApproveTab = () => {
                   <td className="text-center">
                     <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
                       <button onClick={() => setSelectedPayroll(p)} className="action-btn action-btn-edit" title="Lihat"><Eye size={14} /></button>
+                      {canApprove && (
                       <button onClick={() => setSelectedPayroll(p)} className="action-btn action-btn-success" title="Approve"><FileCheck size={14} /></button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -533,9 +555,11 @@ const ApproveTab = () => {
             />
             <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: "1.25rem" }}>
               <Button variant="outline" size="md" onClick={() => setRejectModalOpen(false)} disabled={loading}>Batal</Button>
+              {canApprove && (
               <Button variant="danger" size="md" onClick={() => void confirmReject()} disabled={loading || !rejectReason.trim()}>
                 Tolak Payroll
               </Button>
+              )}
             </div>
           </div>
         )}
@@ -562,10 +586,14 @@ const ApproveTab = () => {
             </div>
             <div style={{ marginTop: "2rem", display: "flex", gap: 12, justifyContent: "flex-end" }}>
               <Button variant="outline" size="md" onClick={() => setSelectedPayroll(null)} disabled={loading}>Batal</Button>
+              {canApprove && (
               <Button variant="danger" size="md" onClick={() => handleReject()} disabled={loading}>Tolak</Button>
+              )}
+              {canApprove && (
               <Button variant="success" size="md" onClick={() => void handleApprove()} disabled={loading || (String(selectedPayroll.status) !== "draft" && String(selectedPayroll.status) !== "pending_hr" && String(selectedPayroll.status) !== "pending")}>
                 {String(selectedPayroll.status) === "draft" ? "Manager Approve" : String(selectedPayroll.status) === "pending_hr" ? "HR Final Approve" : "Setujui Payroll"}
               </Button>
+              )}
             </div>
           </div>
         )}
@@ -576,6 +604,8 @@ const ApproveTab = () => {
 
 /* ═══════════════════════════════ PAYMENT TAB ═══════════════════════════ */
 const PaymentTab = () => {
+  const user = useAuthStore((state) => state.user);
+  const canPay = RBACUtils.hasPermission(user, PERMISSIONS.PAYROLL_PAY);
   const [payrollId, setPayrollId] = useState("");
   const [selectedPayroll, setSelectedPayroll] = useState<PayrollItem | null>(null);
   const [employees, setEmployees] = useState<EmployeeItem[]>([]);
@@ -601,6 +631,10 @@ const PaymentTab = () => {
   }, []);
 
   const handleMarkAsPaid = async () => {
+    if (!canPay) {
+      showToast("Anda tidak memiliki izin melakukan pembayaran payroll", "error");
+      return;
+    }
     if (!selectedPayroll) { showToast("Pilih payroll", "error"); return; }
     if (selectedPayroll.status === "paid") { showToast("Payroll ini sudah dibayar.", "error"); return; }
     if (selectedPayroll.status !== "approved") {
@@ -618,6 +652,10 @@ const PaymentTab = () => {
   };
 
   const handleBulkPay = async () => {
+    if (!canPay) {
+      showToast("Anda tidak memiliki izin melakukan pembayaran payroll", "error");
+      return;
+    }
     if (!bulkPeriod) { showToast("Pilih periode terlebih dahulu", "error"); return; }
     setBulkPayLoading(true);
     try {
@@ -705,6 +743,7 @@ const PaymentTab = () => {
               <p style={{ margin: 0, fontSize: '0.82rem', color: '#9ca3af' }}>Pilih periode untuk melihat detail</p>
             )}
           </div>
+          {canPay && (
           <button
             onClick={() => { if (!bulkPeriod) { showToast("Pilih periode dulu", "error"); return; } setBulkPayModal(true); }}
             disabled={loading || !bulkPeriod || approvedForBulk.length === 0}
@@ -722,6 +761,7 @@ const PaymentTab = () => {
             <Zap size={16} />
             {approvedForBulk.length > 0 ? `Bayar ${approvedForBulk.length} Payroll` : 'Bayar Semua'}
           </button>
+          )}
         </div>
       </Card>
 
@@ -742,10 +782,12 @@ const PaymentTab = () => {
           </div>
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
             <Button variant="outline" size="md" onClick={() => setBulkPayModal(false)} disabled={bulkPayLoading}>Batal</Button>
+            {canPay && (
             <Button variant="primary" size="md" onClick={() => void handleBulkPay()} disabled={bulkPayLoading}>
               <Zap size={16} style={{ marginRight: 6 }} />
               {bulkPayLoading ? 'Memproses...' : `Ya, Bayar ${approvedForBulk.length} Payroll`}
             </Button>
+            )}
           </div>
         </div>
       </Modal>
@@ -802,7 +844,7 @@ const PaymentTab = () => {
                   <td style={{ textAlign: "right" }}>
                     <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
                       <Button variant="outline" size="sm" onClick={() => { setPayrollId(String(payroll.id)); setSelectedPayroll(payroll); }}>Lihat</Button>
-                      {String(payroll.status).toLowerCase() !== 'paid' && (
+                      {canPay && String(payroll.status).toLowerCase() !== 'paid' && (
                         <Button variant="primary" size="sm" onClick={() => { setPayrollId(String(payroll.id)); setSelectedPayroll(payroll); }}>Tandai Dibayar</Button>
                       )}
                     </div>
@@ -868,7 +910,9 @@ const PaymentTab = () => {
               {selectedPayroll.status === "paid" ? (
                 <div style={{ color: "#10b981", fontWeight: 500 }}>Payroll ini sudah dibayar</div>
               ) : (
+                canPay && (
                 <Button variant="primary" size="md" onClick={() => void handleMarkAsPaid()} disabled={loading}>Tandai Sebagai Dibayar</Button>
+                )
               )}
             </div>
           </div>

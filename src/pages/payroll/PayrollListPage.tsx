@@ -6,9 +6,13 @@ import { showToast } from "@/shared/ui/toast";
 import { ArrowDown, ArrowUp, Briefcase, Filter, RefreshCw, Search, ChevronDown, Plus, Pencil, Trash2, ArrowLeft, AlertCircle, Download, Banknote, FileText, Info, X } from "lucide-react";
 
 import { payrollService, toSafeArray } from "@/features/payroll/api/payroll.service";
+import { getApiBaseUrl } from "@/shared/api/httpClient";
 import { getAllEmployees } from "@/features/employee/api/employee.service";
 import { PayrollStatusBadge } from "@/shared/ui/PayrollStatusBadge";
 import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
+import { useAuthStore } from "@/app/store/auth.store";
+import { RBACUtils } from "@/shared/hooks/rbac";
+import { PERMISSIONS } from "@/shared/types/rbac.types";
 import type { PayrollCreatePayload, PayrollUpdatePayload, PayrollItem } from "@/features/payroll/types/payroll.types";
 import type { EmployeeItem } from "@/features/employee/types/employee.types";
 import { parsePaginatedResponse } from "@/shared/api/pagination";
@@ -16,6 +20,7 @@ import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "./PayrollListPage.css";
 import "./PayrollShared.css";
+import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 
 type PayrollFormState = {
   id: string;
@@ -52,6 +57,11 @@ const getEmployeeSubtitle = (employee: any) => {
 };
 
 const PayrollListPage = () => {
+  const user = useAuthStore((state) => state.user);
+  const canCreate = RBACUtils.hasPermission(user, PERMISSIONS.PAYROLL_CREATE);
+  const canUpdate = RBACUtils.hasPermission(user, PERMISSIONS.PAYROLL_UPDATE);
+  const canDelete = RBACUtils.hasPermission(user, PERMISSIONS.PAYROLL_DELETE);
+  const canExport = RBACUtils.hasPermission(user, PERMISSIONS.PAYROLL_EXPORT);
   const [items, setItems] = useState<PayrollWithEmployeeName[]>([]);
   const [employees, setEmployees] = useState<EmployeeItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -222,6 +232,10 @@ const PayrollListPage = () => {
   };
 
   const handleCreate = async () => {
+    if (!canCreate) {
+      showToast("Anda tidak memiliki izin membuat payroll", "error");
+      return;
+    }
     if (!form.employee_id) { showToast("Pilih karyawan", "error"); return; }
     if (!form.period) { showToast("Masukkan periode", "error"); return; }
     setLoading(true);
@@ -235,6 +249,10 @@ const PayrollListPage = () => {
   };
 
   const handleUpdate = async () => {
+    if (!canUpdate) {
+      showToast("Anda tidak memiliki izin mengubah payroll", "error");
+      return;
+    }
     setLoading(true);
     try {
       await payrollService.updatePayroll(form.id, { allowance: Number(form.allowance)||0, bonus: Number(form.bonus)||0 });
@@ -247,6 +265,10 @@ const PayrollListPage = () => {
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
+    if (!canDelete) {
+      showToast("Anda tidak memiliki izin menghapus payroll", "error");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -260,13 +282,17 @@ const PayrollListPage = () => {
   };
 
   const handleExport = async () => {
+    if (!canExport) {
+      showToast("Anda tidak memiliki izin export payroll", "error");
+      return;
+    }
     if (!exportPeriod) { showToast("Pilih periode", "error"); return; }
     setExportLoading(true);
     try {
       const token = sessionStorage.getItem("token") || "";
-      const baseUrl = import.meta.env.VITE_API_URL || "";
+      const baseUrl = getApiBaseUrl();
       const endpoint = exportType === "bca" ? `/payroll/export/bca-klikpay?period=${exportPeriod}` : `/payroll/export/summary?period=${exportPeriod}`;
-      const res = await fetch(`${baseUrl}${endpoint}`, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(`${baseUrl}${endpoint}`, { headers: { Authorization: `Bearer ${token}`, "X-Company-Id": sessionStorage.getItem("selectedCompanyId") || "" } });
       if (!res.ok) throw new Error("Gagal mengekspor");
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
@@ -321,9 +347,11 @@ const PayrollListPage = () => {
       )}
       <div className="crud-actions payroll-form-actions">
         <button className="btn-outline" onClick={() => setView("list")} disabled={loading}>Batal</button>
+        {((mode === "create" && canCreate) || (mode === "edit" && canUpdate) || (mode === "delete" && canDelete)) && (
         <button className="btn-primary" onClick={mode === "create" ? handleCreate : mode === "edit" ? handleUpdate : handleDelete} disabled={loading} style={{ background: mode === "delete" ? "#ef4444" : "var(--hero-bg-start)", color: "#fff", border: "none", padding: "0.75rem 2rem", borderRadius: 12, fontWeight: 700 }}>
           {loading ? "Memproses..." : mode === "create" ? "Buat Payroll" : mode === "edit" ? "Simpan" : "Hapus Permanen"}
         </button>
+        )}
       </div>
     </Card>
   );
@@ -336,10 +364,11 @@ const PayrollListPage = () => {
             <div className="hero-badge"><Briefcase size={16} /><span>Manajemen Payroll</span></div>
             <h1 className="hero-title">Daftar Payroll</h1>
             <p className="hero-subtitle">Lihat, tambah, edit, dan hapus seluruh data payroll karyawan.</p>
+            <CompanyScopeBadge />
           </div>
           <div className="hero-actions">
             <button className="btn-outline" onClick={() => void loadData()} disabled={loading}><RefreshCw size={16} className={loading ? 'animate-spin' : ''} /> Sync</button>
-            {view === "list" && <><button className="btn-outline" onClick={() => setExportModal(true)} style={{ color: "#059669" }}><Download size={16} /> Export</button><button className="btn-primary" onClick={() => { setMode("create"); setForm(DEFAULT_FORM); setView("form"); }}><Plus size={16} /> Tambah Payroll</button></>}
+            {view === "list" && <>{canExport && <button className="btn-outline" onClick={() => setExportModal(true)} style={{ color: "#059669" }}><Download size={16} /> Export</button>}{canCreate && <button className="btn-primary" onClick={() => { setMode("create"); setForm(DEFAULT_FORM); setView("form"); }}><Plus size={16} /> Tambah Payroll</button>}</>}
           </div>
         </div>
       </Card>
@@ -473,8 +502,8 @@ const PayrollListPage = () => {
                           <td><PayrollStatusBadge status={item.status} size="md" /></td>
                           <td className="td-center">
                             <div className="action-btn-group" style={{ justifyContent: "center" }}>
-                              <button className="action-btn action-btn-edit" title="Edit" onClick={() => { setForm({ id: String(item.id), employee_id: String(item.employee_id), period: item.period, allowance: String(item.allowance||""), bonus: String(item.bonus||"") }); setMode("edit"); setView("form"); }}><Pencil size={16} /></button>
-                              <button className="action-btn action-btn-delete" title="Hapus" onClick={() => setDeleteTarget(item)}><Trash2 size={16} /></button>
+                              {canUpdate && <button className="action-btn action-btn-edit" title="Edit" onClick={() => { setForm({ id: String(item.id), employee_id: String(item.employee_id), period: item.period, allowance: String(item.allowance||""), bonus: String(item.bonus||"") }); setMode("edit"); setView("form"); }}><Pencil size={16} /></button>}
+                              {canDelete && <button className="action-btn action-btn-delete" title="Hapus" onClick={() => setDeleteTarget(item)}><Trash2 size={16} /></button>}
                             </div>
                           </td>
                         </tr>
@@ -511,9 +540,11 @@ const PayrollListPage = () => {
         footer={
           <>
             <button className="modal-btn-cancel" onClick={() => setExportModal(false)}>Batal</button>
+            {canExport && (
             <button className="modal-btn-confirm" onClick={handleExport} disabled={exportLoading} style={{ background: "linear-gradient(135deg, var(--hero-bg-start), var(--hero-bg-end))" }}>
               {exportLoading ? <><RefreshCw size={16} className="animate-spin" /> Memproses...</> : <><Download size={16} /> Download CSV</>}
             </button>
+            )}
           </>
         }
       >
@@ -533,7 +564,7 @@ const PayrollListPage = () => {
       </Modal>
 
       <ConfirmDialog
-        isOpen={!!deleteTarget}
+        isOpen={canDelete && !!deleteTarget}
         title="Hapus Payroll"
         message={`Payroll untuk "${deleteTarget?.employeeName || `ID: ${deleteTarget?.employee_id || "-"}`}" periode "${deleteTarget?.period || "-"}" akan dihapus permanen.`}
         confirmLabel="Hapus"

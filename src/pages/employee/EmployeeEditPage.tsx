@@ -11,6 +11,7 @@ import { getAllWorkSchedules } from "@/features/work-schedule/api/work-schedule.
 import { companyService } from "@/features/company/api/company.service";
 import { useAuthStore } from "@/app/store/auth.store";
 import { RBACUtils } from "@/shared/hooks/rbac";
+import { PERMISSIONS } from "@/shared/types/rbac.types";
 import type { EmployeeUpdatePayload } from "@/features/employee/types/employee.types";
 import EmployeeForm, { DEFAULT_FORM } from "./components/EmployeeForm";
 import type { EmployeeFormState } from "./components/EmployeeForm";
@@ -21,7 +22,7 @@ const EmployeeEditPage = () => {
   const navigate = useNavigate();
   const { id: routeEmployeeId } = useParams<{ id: string }>();
   const user = useAuthStore((state) => state.user);
-  const canUpdateEmployee = RBACUtils.hasPermission(user, ["employee.update", "admin.access"]);
+  const canUpdateEmployee = RBACUtils.hasPermission(user, [PERMISSIONS.EMPLOYEE_UPDATE, PERMISSIONS.ADMIN_ACCESS]);
 
   const [updateForm, setUpdateForm] = useState<EmployeeFormState>(DEFAULT_FORM);
   const [loading, setLoading] = useState(false);

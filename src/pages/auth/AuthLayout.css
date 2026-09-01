@@ -201,8 +201,8 @@
 }
 
 .auth-password-wrap:focus-within {
-  border-color: #1385ff;
-  box-shadow: 0 0 0 3px rgba(19, 133, 255, 0.2);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.15);
 }
 
 .auth-password-wrap:has(.auth-input-error) {
@@ -265,10 +265,6 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.auth-password-toggle:hover {
-  color: #1f2937;
-}
-
 .auth-password-toggle:focus-visible {
   outline: 2px solid rgba(15, 159, 143, 0.35);
   outline-offset: -2px;
@@ -279,7 +275,7 @@
   align-self: flex-end;
   border: none;
   background: transparent;
-  color: #1f6db8;
+  color: var(--color-primary-dark);
   font-size: 0.98rem;
   margin: -0.05rem 0 1rem;
   cursor: pointer;
@@ -472,4 +468,3 @@
     font-size: 0.98rem;
   }
 }
-

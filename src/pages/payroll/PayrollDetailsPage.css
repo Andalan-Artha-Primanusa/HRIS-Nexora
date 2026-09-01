@@ -17,7 +17,6 @@
   min-height: 100%;
 }
 
-/* â”€â”€ Component Type Tabs â”€â”€ */
 .payroll-component-tabs {
   display: flex;
   gap: 0;
@@ -54,7 +53,6 @@
   color: #334155;
 }
 
-/* â”€â”€ Hero / Cards â”€â”€ */
 .payroll-details-card {
   border: 1px solid var(--border);
   border-radius: 16px;
@@ -63,7 +61,6 @@
   padding: 1.5rem;
 }
 
-/* â”€â”€ Summary Grid â”€â”€ */
 .payroll-details-summary-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -158,7 +155,6 @@
   color: #8b5cf6;
 }
 
-/* â”€â”€ Tabs (Overview / Add / Manage) â”€â”€ */
 .payroll-details-tabs {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -210,7 +206,6 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* â”€â”€ Overview Filters â”€â”€ */
 .payroll-filter-row {
   display: flex;
   gap: 0.75rem;
@@ -235,7 +230,6 @@
   box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.1);
 }
 
-/* â”€â”€ Table â”€â”€ */
 .payroll-details-table-wrap {
   overflow-x: auto;
   border: 1px solid var(--color-border);
@@ -285,7 +279,6 @@
   font-size: 0.85rem;
 }
 
-/* â”€â”€ Pagination â”€â”€ */
 .payroll-details-overview-header {
   display: flex;
   justify-content: space-between;
@@ -549,7 +542,6 @@
   cursor: default;
 }
 
-/* â”€â”€ Form Section â”€â”€ */
 .payroll-details-form-section {
   margin-top: 1.5rem;
 }
@@ -640,7 +632,6 @@
   background: var(--color-primary-light);
 }
 
-/* â”€â”€ Sub-tabs â”€â”€ */
 .payroll-details-subtabs {
   display: flex;
   gap: 0.25rem;
@@ -673,7 +664,6 @@
   color: #334155;
 }
 
-/* â”€â”€ Manage Section â”€â”€ */
 .payroll-manage-header {
   display: flex;
   justify-content: space-between;
@@ -697,7 +687,6 @@
   flex-wrap: wrap;
 }
 
-/* â”€â”€ Status Badge â”€â”€ */
 .status-badge {
   padding: 3px 10px;
   border-radius: 6px;
@@ -716,8 +705,6 @@
   color: var(--color-error);
 }
 
-/* â”€â”€ Modal â”€â”€ */
-/* â”€â”€ Responsive â”€â”€ */
 @media (max-width: 768px) {
   .payroll-details-tabs {
     grid-template-columns: 1fr;
@@ -912,4 +899,3 @@
   border-color: var(--color-primary) !important;
   color: var(--color-primary-light) !important;
 }
-

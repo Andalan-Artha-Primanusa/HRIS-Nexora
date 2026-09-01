@@ -81,6 +81,26 @@ export class RBACUtils {
     return RBACUtils.hasPermission(user, PERMISSIONS.USER_VIEW);
   }
 
+  static canCreateUsers(user: AuthUser | null): boolean {
+    return RBACUtils.hasPermission(user, [PERMISSIONS.USER_CREATE, 'admin.user.create']);
+  }
+
+  static canAssignRoles(user: AuthUser | null): boolean {
+    return RBACUtils.hasPermission(user, PERMISSIONS.USER_ASSIGN_ROLE);
+  }
+
+  static canCreateRoles(user: AuthUser | null): boolean {
+    return RBACUtils.hasPermission(user, PERMISSIONS.ROLE_CREATE);
+  }
+
+  static canUpdateRoles(user: AuthUser | null): boolean {
+    return RBACUtils.hasPermission(user, [PERMISSIONS.ROLE_UPDATE, PERMISSIONS.ROLE_ASSIGN_PERMISSION]);
+  }
+
+  static canDeleteRoles(user: AuthUser | null): boolean {
+    return RBACUtils.hasPermission(user, PERMISSIONS.ROLE_DELETE);
+  }
+
   /**
    * Dynamic formatter for roles created directly from database
    */
@@ -154,5 +174,10 @@ export const useRBAC = (user: AuthUser | null) => {
     canViewPermissions: () => RBACUtils.canViewPermissions(user),
     canViewRoles: () => RBACUtils.canViewRoles(user),
     canViewUsers: () => RBACUtils.canViewUsers(user),
+    canCreateUsers: () => RBACUtils.canCreateUsers(user),
+    canAssignRoles: () => RBACUtils.canAssignRoles(user),
+    canCreateRoles: () => RBACUtils.canCreateRoles(user),
+    canUpdateRoles: () => RBACUtils.canUpdateRoles(user),
+    canDeleteRoles: () => RBACUtils.canDeleteRoles(user),
   };
 };

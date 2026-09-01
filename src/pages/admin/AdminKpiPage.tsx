@@ -10,7 +10,7 @@ import { showToast } from '@/shared/ui/toast';
 import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { RBACUtils } from "@/shared/hooks/rbac";
-import type { AuthUser } from "@/shared/types/rbac.types";
+import { PERMISSIONS } from "@/shared/types/rbac.types";
 
 import {
   Plus,
@@ -121,7 +121,11 @@ const getInitial = (value?: string | null) => (value?.trim().charAt(0) || "K").t
 
 const AdminKpiPage = () => {
   const user = useAuthStore((state) => state.user);
-  const canAccess = RBACUtils.hasPermission(user, "kpi.view");
+  const canAccess = RBACUtils.hasPermission(user, PERMISSIONS.KPI_VIEW);
+  const canCreate = RBACUtils.hasPermission(user, PERMISSIONS.KPI_CREATE);
+  const canUpdate = RBACUtils.hasPermission(user, PERMISSIONS.KPI_UPDATE);
+  const canDelete = RBACUtils.hasPermission(user, PERMISSIONS.KPI_DELETE);
+  const canApprove = RBACUtils.hasPermission(user, PERMISSIONS.KPI_APPROVE);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -199,15 +203,31 @@ const AdminKpiPage = () => {
     });
   };
 
-  const handleOpenCreate = () => navigate("/kpis/create");
+  const handleOpenCreate = () => {
+    if (!canCreate) {
+      showToast("Anda tidak memiliki izin membuat KPI.", "error");
+      return;
+    }
+    navigate("/kpis/create");
+  };
   const handleViewDetail = (p: KpiPeriod) => {
     setSelectedPeriod(p);
     setShowDetail(true);
   };
-  const handleEdit = (p: KpiPeriod) => navigate(`/kpis/edit/${p.id}`);
+  const handleEdit = (p: KpiPeriod) => {
+    if (!canUpdate) {
+      showToast("Anda tidak memiliki izin mengubah KPI.", "error");
+      return;
+    }
+    navigate(`/kpis/edit/${p.id}`);
+  };
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
+    if (!canDelete) {
+      showToast("Anda tidak memiliki izin menghapus KPI.", "error");
+      return;
+    }
 
     setDeleting(true);
     try {
@@ -223,6 +243,11 @@ const AdminKpiPage = () => {
   };
 
   const handleApprove = async (id: number, itemId?: number) => {
+    if (!canApprove) {
+      showToast("Anda tidak memiliki izin menyetujui KPI.", "error");
+      return;
+    }
+
     try {
       await approveKpiPeriod(id, itemId);
       showToast("Periode KPI berhasil disetujui", "success");
@@ -266,10 +291,12 @@ const AdminKpiPage = () => {
               <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
               Segarkan
             </button>
+            {canCreate && (
             <button className="btn-primary" onClick={handleOpenCreate}>
               <Plus size={16} />
               Buat Periode KPI
             </button>
+            )}
           </div>
         </div>
       </Card>
@@ -327,8 +354,8 @@ const AdminKpiPage = () => {
                     ? "Tidak ada periode KPI yang sesuai kriteria."
                     : "Buat periode KPI pertama untuk memulai."
                 }
-                actionLabel="Buat Periode KPI"
-                onAction={handleOpenCreate}
+                actionLabel={canCreate ? "Buat Periode KPI" : undefined}
+                onAction={canCreate ? handleOpenCreate : undefined}
               />
             </div>
           )}
@@ -429,6 +456,7 @@ const AdminKpiPage = () => {
                               >
                                 <Eye size={16} />
                               </button>
+                              {canUpdate && (
                               <button
                                 className="action-btn action-btn-edit"
                                 onClick={() => handleEdit(period)}
@@ -436,6 +464,8 @@ const AdminKpiPage = () => {
                               >
                                 <Pencil size={16} />
                               </button>
+                              )}
+                              {canDelete && (
                               <button
                                 className="action-btn action-btn-delete"
                                 onClick={() => setDeleteTarget(period)}
@@ -443,6 +473,7 @@ const AdminKpiPage = () => {
                               >
                                 <Trash2 size={16} />
                               </button>
+                              )}
                             </div>
                           </td>
                         </tr>
@@ -554,9 +585,11 @@ const AdminKpiPage = () => {
         size="lg"
         footer={
           <div style={{ display: "flex", gap: 12 }}>
+            {canUpdate && (
             <Button variant="outline" style={{ flex: 1 }} onClick={() => { setShowDetail(false); handleEdit(selectedPeriod!); }}>
               <Pencil size={16} /> Edit
             </Button>
+            )}
           </div>
         }
       >
@@ -780,7 +813,7 @@ const AdminKpiPage = () => {
                         </div>
                         <div style={{ display: "flex", flexDirection: "column", gap: 6, alignItems: "flex-start" }}>
                           <span className={getStatusClass(item.status)}>{isApproved ? "Disetujui" : isSubmitted ? "Diajukan" : "Draft"}</span>
-                          {isSubmitted && !isApproved && (
+                          {canApprove && isSubmitted && !isApproved && (
                             <Button
                               variant="primary"
                               size="sm"
@@ -808,6 +841,7 @@ const AdminKpiPage = () => {
               )}
 
               <div style={{ display: "flex", gap: 12 }}>
+                {canUpdate && (
                 <Button
                   variant="outline"
                   style={{ flex: 1 }}
@@ -818,12 +852,13 @@ const AdminKpiPage = () => {
                 >
                   <Pencil size={16} /> Edit
                 </Button>
+                )}
               </div>
             </>)}
       </Modal>
 
       <ConfirmDialog
-        isOpen={!!deleteTarget}
+        isOpen={canDelete && !!deleteTarget}
         title="Hapus Periode KPI"
         message={`Periode KPI "${deleteTarget?.period_label || "ini"}" akan dihapus. Tindakan ini tidak dapat dibatalkan.`}
         confirmLabel="Hapus"

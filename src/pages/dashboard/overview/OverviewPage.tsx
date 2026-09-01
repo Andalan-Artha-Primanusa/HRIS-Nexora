@@ -8,7 +8,9 @@ import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
 import { useAuthStore } from '@/app/store/auth.store';
 import { RBACUtils } from '@/shared/hooks/rbac';
+import { PERMISSIONS } from '@/shared/types/rbac.types';
 import "./OverviewPage.css";
+import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 
 type DashboardRecord = Record<string, unknown>;
 
@@ -255,7 +257,7 @@ const OverviewPage: React.FC = () => {
 
       try {
         const canViewPayroll = allowedMenuKeys.some((k) => k.startsWith("penggajian"));
-        const canViewLeaves = RBACUtils.hasPermission(user, 'leave.view');
+        const canViewLeaves = RBACUtils.hasPermission(user, PERMISSIONS.LEAVE_VIEW);
 
         const promises = [
           api.get('/employees'),
@@ -400,6 +402,7 @@ const OverviewPage: React.FC = () => {
               <div>
                 <h1 className="hero-title">Good Morning, {user?.name?.split(' ')[0] || 'HR Team'}!</h1>
                 <p className="hero-subtitle">Here’s an overview of your workforce today.</p>
+            <CompanyScopeBadge />
               </div>
             </div>
           </div>
@@ -461,23 +464,6 @@ const OverviewPage: React.FC = () => {
             </div>
           </Card>
 
-          {/* My Tasks */}
-          <Card className="metric-card" onClick={() => navigate('/tasks')} style={{ cursor: 'pointer' }}>
-            <div className="metric-header">
-              <div>
-                <span className="metric-label">Tugas Saya</span>
-                <p className="metric-subtitle">Deadline terdekat</p>
-              </div>
-              <span className="metric-icon metric-icon--purple">
-                <ClipboardList size={24} />
-              </span>
-            </div>
-            <div className="metric-value">3</div>
-            <div className="metric-change">
-              <span style={{ color: '#8b5cf6' }}>Segera selesaikan</span>
-            </div>
-          </Card>
-
           {/* Presence Today */}
           <Card className="metric-card">
             <div className="metric-header">
@@ -498,7 +484,7 @@ const OverviewPage: React.FC = () => {
       )}
 
       {/* Team Insight for Managers (If applicable) */}
-      {!canViewAdminOverview && RBACUtils.hasPermission(user, ['team.view']) && (
+      {!canViewAdminOverview && RBACUtils.hasPermission(user, [PERMISSIONS.TEAM_VIEW]) && (
         <>
           <Card className="analytics-title-card" style={{ marginTop: '2rem' }}>
             <div className="analytics-title-inner">
@@ -748,4 +734,3 @@ const OverviewPage: React.FC = () => {
 };
 
 export default OverviewPage;
-

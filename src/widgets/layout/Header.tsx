@@ -9,6 +9,7 @@ import { api } from '@/shared/api/httpClient';
 import type { AuthUser } from '@/shared/types/rbac.types';
 import { RBACUtils } from '@/shared/hooks/rbac';
 import { companyService } from '@/features/company/api/company.service';
+import { queueCompanyScopeToast } from '@/shared/utils/companyScope';
 import './Header.css';
 
 interface HeaderProps {
@@ -73,12 +74,6 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
   const displayName = getDisplayName(user);
   const displayRole = getDisplayRole(user);
   const initials = getInitials(displayName);
-  const canSwitchCompany = RBACUtils.hasPermission(user, [
-    'company.view',
-    'company.view_all',
-    'dashboard.view_all_company',
-    'admin.company.view',
-  ]);
 
   // Notification State
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
@@ -114,10 +109,11 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
   }, [user]);
 
   useEffect(() => {
-    if (!user || !canSwitchCompany) {
+    if (!user) {
       setCompanyContext(null);
       return;
     }
+    if (companyContext) return;
 
     let cancelled = false;
 
@@ -146,7 +142,7 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
     return () => {
       cancelled = true;
     };
-  }, [canSwitchCompany, selectedCompanyId, setCompanyContext, setSelectedCompanyId, user]);
+  }, [companyContext, selectedCompanyId, setCompanyContext, setSelectedCompanyId, user]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = isDarkMode ? 'dark' : 'light';
@@ -203,18 +199,12 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
 
     const hasMenuAccess = (menuKey: string) => allowedMenuKeys.includes(menuKey);
 
-    if (
-      hasMenuAccess('admin.company') ||
-      RBACUtils.hasPermission(user, ['company.update', 'company.view', 'admin.company.view', 'admin.company.update'])
-    ) {
+    if (hasMenuAccess('admin.company')) {
       navigate('/settings/company');
       return;
     }
 
-    if (
-      hasMenuAccess('admin.notification-settings') ||
-      RBACUtils.hasPermission(user, ['admin.email.manage'])
-    ) {
+    if (hasMenuAccess('admin.notification-settings')) {
       navigate('/settings/notifications');
       return;
     }
@@ -229,9 +219,12 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
     return path.charAt(0).toUpperCase() + path.slice(1).replace(/-/g, ' ');
   };
 
-  const handleCompanyChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+const handleCompanyChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
-    setSelectedCompanyId(value === "all" ? "all" : Number(value));
+    const isAll = value === "all";
+    const matched = companyContext?.companies.find((company) => company.id === Number(value));
+    setSelectedCompanyId(isAll ? "all" : Number(value));
+    queueCompanyScopeToast(isAll ? "HO / Semua Company" : matched?.name || `company #${value}`);
     window.dispatchEvent(new Event("company-context-changed"));
     setTimeout(() => window.location.reload(), 50);
   };
@@ -267,7 +260,7 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
       </div>
       
       <div className="header-right">
-        {canSwitchCompany && companyContext && companyContext.companies.length > 0 && (
+        {companyContext && companyContext.companies.length > 0 && (
           <label className="company-switcher" title="Ganti scope company">
             <Building2 size={18} aria-hidden="true" />
             <select

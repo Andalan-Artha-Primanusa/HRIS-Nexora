@@ -1,5 +1,5 @@
 import { RBACUtils } from "@/shared/hooks/rbac";
-import type { AuthUser } from "@/shared/types/rbac.types";
+import { PERMISSIONS, type AuthUser } from "@/shared/types/rbac.types";
 
 const getAuthUser = (user: unknown): AuthUser | null => {
   if (!user || typeof user !== "object") return null;
@@ -17,17 +17,14 @@ export const getRoleBasedDashboardPath = (user: unknown): string => {
   if (
     RBACUtils.canManageUsers(authUser) ||
     RBACUtils.canViewRoles(authUser) ||
-    RBACUtils.hasPermission(authUser, "admin.audit.view")
+    RBACUtils.hasPermission(authUser, PERMISSIONS.ADMIN_AUDIT_VIEW)
   ) {
     return "/dashboard";
   }
 
-  if (RBACUtils.hasPermission(authUser, "payroll.view")) return "/payroll";
+  if (RBACUtils.hasPermission(authUser, PERMISSIONS.PAYROLL_VIEW)) return "/payroll";
 
-  if (
-    RBACUtils.hasPermission(authUser, "employee.create") ||
-    RBACUtils.hasPermission(authUser, "recruitment.candidate.view")
-  ) {
+  if (RBACUtils.hasPermission(authUser, PERMISSIONS.EMPLOYEE_CREATE)) {
     return "/employees";
   }
 

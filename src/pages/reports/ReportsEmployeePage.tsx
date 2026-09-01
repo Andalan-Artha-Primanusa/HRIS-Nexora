@@ -193,7 +193,7 @@ const ReportsEmployeePage: React.FC = () => {
                   <Bar dataKey="value" fill="var(--color-primary)" radius={[0,8,8,0]} name="Headcount"/>
                 </BarChart>
               </ResponsiveContainer>
-            ):(<div className="reports-chart-empty">Belum ada data.</div>)}
+            ):(<div className="reports-chart-empty">Belum ada data untuk company aktif ini.</div>)}
           </Card>
 
           {/* Gender Distribution */}
@@ -209,7 +209,7 @@ const ReportsEmployeePage: React.FC = () => {
                   </Pie>
                 </PieChart>
               </ResponsiveContainer>
-            ):(<div className="reports-chart-empty">Belum ada data.</div>)}
+            ):(<div className="reports-chart-empty">Belum ada data untuk company aktif ini.</div>)}
           </Card>
 
           {/* Employment Status */}
@@ -225,7 +225,7 @@ const ReportsEmployeePage: React.FC = () => {
                   <Bar dataKey="value" fill="#10b981" radius={[8,8,0,0]} name="Jumlah"/>
                 </BarChart>
               </ResponsiveContainer>
-            ):(<div className="reports-chart-empty">Belum ada data.</div>)}
+            ):(<div className="reports-chart-empty">Belum ada data untuk company aktif ini.</div>)}
           </Card>
 
           {/* Hire Trends */}
@@ -241,7 +241,7 @@ const ReportsEmployeePage: React.FC = () => {
                   <Area type="monotone" dataKey="value" stroke="#8b5cf6" fill="rgba(139,92,246,0.2)" strokeWidth={3} name="Karyawan Baru"/>
                 </AreaChart>
               </ResponsiveContainer>
-            ):(<div className="reports-chart-empty">Belum ada data.</div>)}
+            ):(<div className="reports-chart-empty">Belum ada data untuk company aktif ini.</div>)}
           </Card>
         </div>
       </div>

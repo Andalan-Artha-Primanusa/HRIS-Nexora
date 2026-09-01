@@ -2,30 +2,27 @@
 import { parseApiError } from "./errorHandler";
 import { showToast } from "../ui/toast";
 
-// ðŸ”’ SECURITY: API URL from environment, with fallback for development
-const defaultBaseUrl = "https://moccasin-crab-693879.hostingersite.com/api";
-const baseURL = import.meta.env.VITE_API_URL || defaultBaseUrl;
+const configuredBaseUrl = import.meta.env.VITE_API_URL;
 
-// Log warning jika using default URL (tidak ideal untuk production)
-if (!import.meta.env.VITE_API_URL && import.meta.env.PROD) {
-  console.warn("[SECURITY] VITE_API_URL environment variable not set. Using default URL. This should not happen in production!");
-}
+export const getApiBaseUrl = () => {
+  if (!configuredBaseUrl) {
+    throw new Error("VITE_API_URL wajib di-set. Tidak ada fallback production URL di frontend.");
+  }
+
+  return configuredBaseUrl.replace(/\/$/, "");
+};
 
 export const api = axios.create({
-  baseURL,
+  baseURL: getApiBaseUrl(),
   headers: {
     Accept: "application/json",
     "Content-Type": "application/json",
-    // ðŸ”’ SECURITY: Add security headers
     "X-Requested-With": "XMLHttpRequest",
   },
-  // ðŸ”’ SECURITY: Set timeout to prevent hanging requests
   timeout: parseInt(import.meta.env.VITE_API_TIMEOUT || "30000", 10),
-  // ðŸ”’ SECURITY: Don't send credentials unless explicitly configured per endpoint
   withCredentials: false,
 });
 
-// ðŸ”¥ Inject token otomatis
 api.interceptors.request.use((config) => {
   const token = sessionStorage.getItem("token");
   const selectedCompanyId = sessionStorage.getItem("selectedCompanyId");
@@ -53,7 +50,6 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// ðŸš€ Global Response Interceptor (Error Handling Only â€” auth level)
 api.interceptors.response.use(
   (response) => {
     return response;
@@ -66,7 +62,6 @@ api.interceptors.response.use(
     if (parsedError.type === "unauthorized") {
       showToast(parsedError.message, "error");
       
-      // ðŸ”’ SECURITY: Clear sensitive data on auth failure
       sessionStorage.removeItem("token");
       sessionStorage.removeItem("user");
       
@@ -83,4 +78,3 @@ api.interceptors.response.use(
     return Promise.reject(parsedError);
   }
 );
-

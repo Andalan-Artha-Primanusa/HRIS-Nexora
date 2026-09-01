@@ -7,11 +7,13 @@ import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
 import { useAuthStore } from '@/app/store/auth.store';
 import { RBACUtils } from '@/shared/hooks/rbac';
+import { PERMISSIONS } from '@/shared/types/rbac.types';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import { showToast } from '@/shared/ui/toast';
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 import { RejectReasonModal } from "@/shared/components/RejectReasonModal";
+import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 
 interface OvertimeRequest {
   id: number;
@@ -48,7 +50,7 @@ const OvertimeApprovalPage: React.FC = () => {
   const user = useAuthStore((state) => state.user);
 
   const canAccess = useMemo(() => {
-    return RBACUtils.hasPermission(user, 'overtime.approve');
+    return RBACUtils.hasPermission(user, PERMISSIONS.OVERTIME_APPROVE);
   }, [user]);
 
   const fetchData = async () => {
@@ -78,6 +80,10 @@ const OvertimeApprovalPage: React.FC = () => {
   }, [searchText, activeTab]);
 
   const handleApprove = async (id: number) => {
+    if (!canAccess) {
+      showToast('Anda tidak memiliki izin menyetujui lembur', 'error');
+      return;
+    }
     try {
       setLoading(true);
       await api.put(`/overtime/requests/${id}/approve`);
@@ -91,11 +97,19 @@ const OvertimeApprovalPage: React.FC = () => {
   };
 
   const handleReject = async (id: number) => {
+    if (!canAccess) {
+      showToast('Anda tidak memiliki izin menolak lembur', 'error');
+      return;
+    }
     setRejectTarget(id);
   };
 
   const confirmReject = async (reason: string) => {
     if (rejectTarget === null) return;
+    if (!canAccess) {
+      showToast('Anda tidak memiliki izin menolak lembur', 'error');
+      return;
+    }
     try {
       setLoading(true);
       await api.put(`/overtime/requests/${rejectTarget}/reject`, { reject_reason: reason || undefined });
@@ -208,6 +222,7 @@ const OvertimeApprovalPage: React.FC = () => {
               </div>
               <h1 className="hero-title">Persetujuan Lembur</h1>
               <p className="hero-subtitle">Kelola dan proses pengajuan lembur karyawan.</p>
+              <CompanyScopeBadge />
             </div>
           </div>
         </Card>
@@ -236,6 +251,7 @@ const OvertimeApprovalPage: React.FC = () => {
             <p className="hero-subtitle">
               Kelola dan proses pengajuan lembur karyawan.
             </p>
+            <CompanyScopeBadge />
           </div>
           <div className="hero-actions">
             <button className="btn-outline" onClick={fetchData} disabled={loading}>
@@ -378,7 +394,7 @@ const OvertimeApprovalPage: React.FC = () => {
                         </td>
                         <td className="td-center">
                           <div className="action-btn-group">
-                            {req.status === 'pending' && req.can_act !== false && (
+                            {canAccess && req.status === 'pending' && req.can_act !== false && (
                               <>
                                 <button
                                   className="action-btn"
@@ -474,7 +490,7 @@ const OvertimeApprovalPage: React.FC = () => {
       )}
 
       <RejectReasonModal
-        isOpen={rejectTarget !== null}
+        isOpen={canAccess && rejectTarget !== null}
         onClose={() => setRejectTarget(null)}
         onConfirm={confirmReject}
       />
@@ -526,7 +542,7 @@ const OvertimeApprovalPage: React.FC = () => {
                   >
                     <Eye size={16} />
                   </button>
-                  {ev.status !== 'approved' && (
+                  {canAccess && ev.status !== 'approved' && (
                     <>
                       <button
                         className="action-btn"

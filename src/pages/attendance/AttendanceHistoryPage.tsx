@@ -6,6 +6,7 @@ import { attendanceService } from '@/features/attendance/api/attendance.service'
 import { CalendarDays, CheckCircle2, Clock, RefreshCw, XCircle, Search } from 'lucide-react';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
+import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 
 interface AttendanceRecord {
   date?: string;
@@ -150,6 +151,7 @@ const AttendanceHistoryPage = () => {
             <p className="hero-subtitle">
               Riwayat kehadiran Anda, termasuk check-in dan check-out setiap hari.
             </p>
+            <CompanyScopeBadge />
           </div>
           <div className="hero-actions">
             <button className="btn-outline" onClick={() => void loadHistory()} disabled={loading}>

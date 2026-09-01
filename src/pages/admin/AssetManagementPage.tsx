@@ -12,6 +12,10 @@ import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/employee/EmployeesPage.css';
 import './AssetInventoryPage.css';
 import { showToast } from '@/shared/ui/toast';
+import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
+import { useAuthStore } from "@/app/store/auth.store";
+import { RBACUtils } from "@/shared/hooks/rbac";
+import { PERMISSIONS } from "@/shared/types/rbac.types";
 
 const getAssetIcon = (category: string) => {
   const c = category?.toLowerCase() || '';
@@ -23,6 +27,11 @@ const getAssetIcon = (category: string) => {
 
 const AssetManagementPage: React.FC = () => {
   const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
+  const canCreate = RBACUtils.hasPermission(user, PERMISSIONS.ASSET_CREATE);
+  const canUpdate = RBACUtils.hasPermission(user, PERMISSIONS.ASSET_UPDATE);
+  const canDelete = RBACUtils.hasPermission(user, PERMISSIONS.ASSET_DELETE);
+  const canAssign = RBACUtils.hasPermission(user, PERMISSIONS.ASSET_ASSIGN);
   const [assets, setAssets] = useState<any[]>([]);
   const [assignments, setAssignments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -102,6 +111,10 @@ const AssetManagementPage: React.FC = () => {
   }, []);
 
   const openAssignModal = (asset: any) => {
+    if (!canAssign) {
+      showToast('Anda tidak memiliki izin menugaskan aset', 'error');
+      return;
+    }
     setSelectedAsset(asset);
     setSelectedEmployee('');
     setAssignmentNote('');
@@ -116,6 +129,10 @@ const AssetManagementPage: React.FC = () => {
   };
 
   const handleAssign = async () => {
+    if (!canAssign) {
+      showToast('Anda tidak memiliki izin menugaskan aset', 'error');
+      return;
+    }
     if (!selectedAsset || !selectedEmployee) return;
     setAssigningLoading(true);
     try {
@@ -135,6 +152,10 @@ const AssetManagementPage: React.FC = () => {
   };
 
   const openReturnModal = (asset: any) => {
+    if (!canAssign) {
+      showToast('Anda tidak memiliki izin mengembalikan aset', 'error');
+      return;
+    }
     const currentAssignment = asset.assignments?.find((a: any) => a.status === 'assigned');
     setSelectedAssignment(currentAssignment);
     setReturnNote('');
@@ -148,6 +169,10 @@ const AssetManagementPage: React.FC = () => {
   };
 
   const handleReturn = async () => {
+    if (!canAssign) {
+      showToast('Anda tidak memiliki izin mengembalikan aset', 'error');
+      return;
+    }
     if (!selectedAssignment) return;
     setReturningLoading(true);
     try {
@@ -212,6 +237,10 @@ const AssetManagementPage: React.FC = () => {
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
+    if (!canDelete) {
+      showToast('Anda tidak memiliki izin menghapus aset', 'error');
+      return;
+    }
     setDeleting(true);
     try {
       await assetService.deleteAsset(deleteTarget.id);
@@ -259,12 +288,15 @@ const AssetManagementPage: React.FC = () => {
             <p className="hero-subtitle">
               Pantau distribusi, kondisi, dan status kepemilikan aset perusahaan secara terpusat.
             </p>
+            <CompanyScopeBadge />
           </div>
           <div className="hero-actions">
+            {canCreate && (
             <button className="btn-primary" onClick={() => navigate('/inventory/assets/create')}>
               <Plus size={16} />
               Buat Aset Baru
             </button>
+            )}
             <button className="btn-outline" onClick={() => { fetchAssets(); }} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan
@@ -380,22 +412,22 @@ const AssetManagementPage: React.FC = () => {
                           <td className="td-center">{getStatusBadge(asset.status)}</td>
                           <td className="td-center">
                             <div className="action-btn-group">
-                              {asset.status?.toLowerCase() === 'available' && (
+                              {canAssign && asset.status?.toLowerCase() === 'available' && (
                                 <button className="action-btn" style={{ background: 'var(--color-primary-light)', color: 'var(--color-primary)' }} onClick={() => openAssignModal(asset)} title="Assign ke Karyawan">
                                   <ArrowDownToLine size={16} />
                                 </button>
                               )}
-                              {asset.status?.toLowerCase() === 'assigned' && (
+                              {canAssign && asset.status?.toLowerCase() === 'assigned' && (
                                 <button className="action-btn" style={{ background: '#fef3c7', color: '#d97706' }} onClick={() => openReturnModal(asset)} title="Kembalikan Aset">
                                   <ArrowUpFromLine size={16} />
                                 </button>
                               )}
-                              <button className="action-btn action-btn-edit" onClick={() => navigate(`/inventory/assets/edit/${asset.id}`)} title="Edit">
+                              {canUpdate && <button className="action-btn action-btn-edit" onClick={() => navigate(`/inventory/assets/edit/${asset.id}`)} title="Edit">
                                 <Pencil size={16} />
-                              </button>
-                              <button className="action-btn action-btn-delete" onClick={() => setDeleteTarget(asset)} title="Hapus">
+                              </button>}
+                              {canDelete && <button className="action-btn action-btn-delete" onClick={() => setDeleteTarget(asset)} title="Hapus">
                                 <Trash2 size={16} />
-                              </button>
+                              </button>}
                             </div>
                           </td>
                         </tr>
@@ -419,13 +451,13 @@ const AssetManagementPage: React.FC = () => {
         </div>
       </div>
 
-      <Modal isOpen={assignModal && !!selectedAsset} onClose={closeAssignModal} title="Tugaskan Aset" size="md"
-        footer={<>
+      <Modal isOpen={canAssign && assignModal && !!selectedAsset} onClose={closeAssignModal} title="Tugaskan Aset" size="md"
+        footer={canAssign ? <>
           <button className="modal-btn-cancel" onClick={closeAssignModal}>Batal</button>
           <button className="modal-btn-confirm" onClick={handleAssign} disabled={assigningLoading || !selectedEmployee}>
             {assigningLoading ? <><RefreshCw size={16} className="animate-spin" /> Menyimpan...</> : <><ArrowDownToLine size={16} /> Tugaskan</>}
           </button>
-        </>}
+        </> : undefined}
       >
         <p className="modal-completion-task" style={{ marginBottom: '1rem' }}>{selectedAsset?.name} ({selectedAsset?.code})</p>
         <label className="modal-completion-label">Pilih Karyawan</label>
@@ -439,13 +471,13 @@ const AssetManagementPage: React.FC = () => {
         <textarea className="modal-completion-textarea" placeholder="Catatan tambahan (opsional)..." value={assignmentNote} onChange={(e) => setAssignmentNote(e.target.value)} rows={3} />
       </Modal>
 
-      <Modal isOpen={returnModal && !!selectedAssignment} onClose={closeReturnModal} title="Kembalikan Aset" size="md"
-        footer={<>
+      <Modal isOpen={canAssign && returnModal && !!selectedAssignment} onClose={closeReturnModal} title="Kembalikan Aset" size="md"
+        footer={canAssign ? <>
           <button className="modal-btn-cancel" onClick={closeReturnModal}>Batal</button>
           <button className="modal-btn-confirm" onClick={handleReturn} disabled={returningLoading} style={{ background: 'linear-gradient(135deg, #d97706 0%, #b45309 100%)', boxShadow: '0 4px 14px rgba(217, 119, 6, 0.3)' }}>
             {returningLoading ? <><RefreshCw size={16} className="animate-spin" /> Memproses...</> : <><ArrowUpFromLine size={16} /> Kembalikan</>}
           </button>
-        </>}
+        </> : undefined}
       >
         <p className="modal-completion-task" style={{ marginBottom: '1rem' }}>Dari: {selectedAssignment?.employee?.user?.name || selectedAssignment?.employee?.full_name || '-'}</p>
         <label className="modal-completion-label">Catatan Pengembalian</label>
@@ -453,7 +485,7 @@ const AssetManagementPage: React.FC = () => {
         <p className="modal-completion-hint">Opsional. Kosongkan jika tidak ada catatan.</p>
       </Modal>
       <ConfirmDialog
-        isOpen={!!deleteTarget}
+        isOpen={canDelete && !!deleteTarget}
         title="Hapus Aset"
         message={`Aset "${String(deleteTarget?.name || 'ini')}" akan dihapus. Tindakan ini tidak dapat dibatalkan.`}
         confirmLabel="Hapus"

@@ -8,7 +8,7 @@ import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDispl
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { showToast } from "@/shared/ui/toast";
 import { RBACUtils } from "@/shared/hooks/rbac";
-import type { AuthUser } from "@/shared/types/rbac.types";
+import { PERMISSIONS, type AuthUser } from "@/shared/types/rbac.types";
 import { BellRing, RefreshCw, Search, Send, Shield, Layout, History, Trash2 } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
@@ -54,7 +54,7 @@ const extractList = <T,>(payload: ApiListPayload<T>): T[] =>
 
 const AdminEmailNotificationsPage = () => {
   const user = useAuthStore((state) => state.user);
-  const canAccess = RBACUtils.hasPermission(user, "admin.email.manage");
+  const canAccess = RBACUtils.hasPermission(user, PERMISSIONS.ADMIN_EMAIL_MANAGE);
 
   const [items, setItems] = useState<EmailTemplateItem[]>([]);
   const [logs, setLogs] = useState<EmailLogItem[]>([]);

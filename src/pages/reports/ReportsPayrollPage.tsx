@@ -210,7 +210,7 @@ const ReportsPayrollPage: React.FC = () => {
                   <Bar dataKey="pending" stackId="a" fill="#f59e0b" radius={[0,0,0,0]} name="Pending"/>
                 </BarChart>
               </ResponsiveContainer>
-            ):(<div className="reports-chart-empty">{loading?'Memuat...':'Belum ada data.'}</div>)}
+            ):(<div className="reports-chart-empty">{loading?'Memuat...':'Belum ada data untuk company aktif ini.'}</div>)}
           </Card>
 
           <Card className="reports-chart-card" glass>
@@ -225,7 +225,7 @@ const ReportsPayrollPage: React.FC = () => {
                   <Line type="monotone" dataKey="net" stroke="var(--color-primary)" strokeWidth={3} dot={{r:5, fill:'var(--color-primary)', strokeWidth:2, stroke:'#fff'}} activeDot={{r:7}} name="Net Salary"/>
                 </LineChart>
               </ResponsiveContainer>
-            ):(<div className="reports-chart-empty">{loading?'Memuat...':'Belum ada data.'}</div>)}
+            ):(<div className="reports-chart-empty">{loading?'Memuat...':'Belum ada data untuk company aktif ini.'}</div>)}
           </Card>
 
           <Card className="reports-chart-card" glass>
@@ -240,7 +240,7 @@ const ReportsPayrollPage: React.FC = () => {
                   </Pie>
                 </PieChart>
               </ResponsiveContainer>
-            ):(<div className="reports-chart-empty">{loading?'Memuat...':'Belum ada data.'}</div>)}
+            ):(<div className="reports-chart-empty">{loading?'Memuat...':'Belum ada data untuk company aktif ini.'}</div>)}
           </Card>
 
           <Card className="reports-chart-card" glass>
@@ -255,7 +255,7 @@ const ReportsPayrollPage: React.FC = () => {
                   <Bar dataKey="value" fill="#8b5cf6" radius={[6,6,0,0]} name="Total Salary"/>
                 </BarChart>
               </ResponsiveContainer>
-            ):(<div className="reports-chart-empty">{loading?'Memuat...':'Belum ada data.'}</div>)}
+            ):(<div className="reports-chart-empty">{loading?'Memuat...':'Belum ada data untuk company aktif ini.'}</div>)}
           </Card>
         </div>
       </div>

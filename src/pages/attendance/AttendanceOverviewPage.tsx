@@ -4,6 +4,7 @@ import { Button } from '@/shared/ui/Button';
 import { TrendingUp, Calendar, Clock, AlertCircle, RefreshCw } from 'lucide-react';
 import { getAttendanceHistory, getTodayAttendance } from '@/features/ess/api/ess.service';
 import '@/shared/styles/CrudPage.css';
+import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 
 const AttendanceOverviewPage = () => {
   const [attendanceStats, setAttendanceStats] = useState({
@@ -146,6 +147,7 @@ const AttendanceOverviewPage = () => {
             </div>
             <h1 className="hero-title" style={{ fontFamily: 'var(--font-family-heading)', fontSize: 'var(--font-size-2xl)', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-white)', margin: '0 0 var(--space-2) 0', letterSpacing: 'var(--letter-spacing-tight)' }}>Attendance Dashboard</h1>
             <p className="hero-subtitle" style={{ fontSize: 'var(--font-size-md)', color: 'rgba(255, 255, 255, 0.88)', margin: '0', maxWidth: '50ch' }}>Overview of attendance statistics and daily logs.</p>
+            <CompanyScopeBadge />
           </div>
           <div className="hero-actions" style={{ display: 'flex', gap: 'var(--space-3)' }}>
             <Button variant="outline" size="md" onClick={() => void loadAttendanceOverview()} disabled={loading} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>

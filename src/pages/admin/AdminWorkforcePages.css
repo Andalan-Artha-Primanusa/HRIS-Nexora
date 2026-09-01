@@ -29,7 +29,6 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* â”€â”€â”€ ELITE HEADER â”€â”€â”€ */
 .workforce-header {
   display: flex;
   justify-content: space-between;
@@ -72,7 +71,6 @@
   line-height: 1.6;
 }
 
-/* â”€â”€â”€ STANDALONE CREATE BUTTON â”€â”€â”€ */
 .wf-create-btn {
   background: var(--wf-primary-gradient);
   color: var(--color-white);
@@ -98,7 +96,6 @@
   box-shadow: 0 20px 40px rgba(15, 159, 143, 0.5);
 }
 
-/* â”€â”€â”€ PREMIUM TABLE CARD â”€â”€â”€ */
 .workforce-table-card {
   background: var(--color-white);
   border-radius: 40px;
@@ -155,7 +152,6 @@
   background: var(--color-surface-soft);
 }
 
-/* â”€â”€â”€ ACTION BUTTONS â”€â”€â”€ */
 .wf-btn-group {
   display: flex;
   gap: 1rem;
@@ -188,7 +184,6 @@
   box-shadow: 0 10px 20px rgba(239, 68, 68, 0.2);
 }
 
-/* â”€â”€â”€ STATUS PILLS â”€â”€â”€ */
 .status-pill {
   padding: 0.75rem 1.5rem;
   border-radius: 14px;
@@ -204,7 +199,6 @@
 .status-pending { background: #fef9c3; color: #854d0e; }
 .status-critical { background: var(--color-error-light); color: #991b1b; }
 
-/* â”€â”€â”€ STATS GRID â”€â”€â”€ */
 .workforce-stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -241,4 +235,3 @@
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
-

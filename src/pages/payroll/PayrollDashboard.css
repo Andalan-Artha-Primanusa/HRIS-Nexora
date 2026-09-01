@@ -15,7 +15,6 @@
   min-height: 100vh;
 }
 
-/* â”€â”€â”€ Hero Header â”€â”€â”€ */
 .payroll-hero-card {
   display: flex;
   justify-content: space-between;
@@ -75,7 +74,6 @@
   z-index: 1;
 }
 
-/* â”€â”€â”€ KPI Cards â”€â”€â”€ */
 .payroll-kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -139,7 +137,6 @@
   background: rgba(255, 255, 255, 0.9);
 }
 
-/* â”€â”€â”€ Charts â”€â”€â”€ */
 .payroll-charts-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -171,7 +168,6 @@
   grid-column: 1 / -1;
 }
 
-/* â”€â”€â”€ Quick Actions â”€â”€â”€ */
 .payroll-quick-actions {
   padding: 2rem;
   border-radius: 32px;
@@ -231,7 +227,6 @@
   color: var(--color-text-secondary);
 }
 
-/* â”€â”€â”€ Table Preview â”€â”€â”€ */
 .payroll-table-preview {
   padding: 2rem;
   border-radius: 32px;
@@ -286,7 +281,6 @@
 .payroll-status-rejected { background: var(--color-error-light); color: var(--color-error); }
 .payroll-status-approved { background: var(--color-primary-light); color: var(--color-primary-dark); }
 
-/* â”€â”€â”€ Responsive â”€â”€â”€ */
 @media (max-width: 1280px) {
   .payroll-kpi-grid { grid-template-columns: repeat(2, 1fr); }
   .payroll-charts-grid { grid-template-columns: 1fr; }
@@ -297,4 +291,3 @@
   .payroll-title { font-size: 1.75rem; }
   .payroll-kpi-grid { grid-template-columns: 1fr; }
 }
-

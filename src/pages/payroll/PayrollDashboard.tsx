@@ -26,7 +26,6 @@ import {
   RefreshCw,
   Wallet,
 } from "lucide-react";
-import { PayrollWorkflowGuide } from "./PayrollWorkflowGuide";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "./PayrollListPage.css";
@@ -244,8 +243,6 @@ const PayrollDashboard: React.FC = () => {
           <p className="payroll-summary-trend">Estimasi Volume</p>
         </div>
       </div>
-
-      <PayrollWorkflowGuide />
 
       <Card className="analytics-title-card">
         <div className="analytics-title-inner">

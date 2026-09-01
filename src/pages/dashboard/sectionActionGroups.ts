@@ -61,7 +61,6 @@ const getCreateActions = (ctx: SectionActionContext) => ({
   createReimbursement: () =>
     api.post('/my/reimbursements', ctx.buildPayloadByKeys(['title', 'description', 'amount', 'category', 'expense_date', 'receipt_path'])),
   createAsset: () => api.post('/assets', ctx.buildPayloadByKeys(['asset_code', 'name', 'category', 'cost', 'purchase_date', 'location_id'])),
-  createMyRequest: () => api.post('/my/requests', ctx.buildPayloadByKeys(['request_type', 'description', 'priority'])),
   createTrainingProgram: () => {
     const payload = ctx.buildPayloadByKeys(['name', 'title', 'code', 'category', 'description', 'provider', 'mode', 'duration_hours', 'start_date', 'end_date', 'budget', 'status']);
     return api.post('/training/programs', {
@@ -87,12 +86,6 @@ const getCreateActions = (ctx: SectionActionContext) => ({
     api.post('/performance/cycles', ctx.buildPayloadByKeys(['name', 'period_type', 'year', 'quarter', 'start_date', 'end_date', 'status', 'description'])),
   createPerformanceReview: () =>
     api.post('/performance/reviews', ctx.buildPayloadByKeys(['review_cycle_id', 'employee_id', 'reviewer_user_id', 'kpi_id', 'score', 'strengths', 'improvements', 'feedback', 'reviewer_comment'])),
-  createPerformanceOkr: () =>
-    api.post('/performance/okrs', ctx.buildPayloadByKeys(['employee_id', 'period_id', 'objective', 'description', 'weight', 'target_value', 'unit', 'start_date', 'end_date'])),
-  createPerformance360Review: () =>
-    api.post('/performance/360-reviews', ctx.buildPayloadByKeys(['cycle_id', 'employee_id', 'manager_id', 'feeders_required', 'start_date', 'end_date'])),
-  createPerformanceCalibration: () =>
-    api.post('/performance/calibration', ctx.buildPayloadByKeys(['cycle_id', 'name', 'description', 'scheduled_at'])),
   createCareerIdp: () =>
     api.post('/career/idps', ctx.buildPayloadByKeys(['employee_id', 'review_cycle_id', 'goal_title', 'goal_description', 'status', 'target_date', 'mentor_user_id'])),
   createCareerSuccession: () =>
@@ -138,13 +131,6 @@ const getUpdateActions = (ctx: SectionActionContext) => ({
     const { id: _id, ...payload } = ctx.formState;
     return api.put(`/leave-types/${id}`, payload);
   },
-  updateRequestStatus: () => {
-    const id = ctx.getRequiredId('Request ID');
-    return api.put(`/requests/${id}/status`, {
-      status: ctx.formState.status,
-      completion_notes: ctx.formState.completion_notes,
-    });
-  },
   updateWorkforceShiftSwap: () => {
     const id = ctx.getRequiredId('Shift Swap ID');
     return api.put(`/workforce/shift-swaps/${id}`, {
@@ -189,11 +175,6 @@ const getReadActions = (ctx: SectionActionContext) => ({
   exportMyPayrollPdf: () => {
     const id = ctx.getRequiredId('Payroll ID');
     return api.get(`/my/payroll/${id}/export-pdf`);
-  },
-  viewRequestDetail: () => {
-    const id = ctx.getRequiredId('Request ID');
-    const detailEndpoint = ctx.path === '/requests' ? `/requests/${id}` : `/my/requests/${id}`;
-    return api.get(detailEndpoint);
   },
   getNotificationUnreadCount: () => api.get('/notifications/unread-count'),
 });
@@ -279,14 +260,6 @@ const getWorkflowActions = (ctx: SectionActionContext) => ({
       status: ctx.formState.status,
       remarks: ctx.formState.remarks,
     });
-  },
-  addRequestComment: () => {
-    const id = ctx.getRequiredId('Request ID');
-    return api.post(`/my/requests/${id}/comments`, { comment_text: ctx.formState.comment_text });
-  },
-  assignRequest: () => {
-    const id = ctx.getRequiredId('Request ID');
-    return api.put(`/requests/${id}/assign`, { assigned_to_user_id: ctx.formState.assigned_to_user_id });
   },
   enrollTrainingProgram: () => {
     const id = ctx.getRequiredId('Training Program ID');

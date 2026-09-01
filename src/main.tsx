@@ -6,6 +6,7 @@ import { ToastProvider } from "@/app/layouts/ToastProvider";
 import "./index.css";
 import "./shared/styles/submenu-table.css";
 import "./shared/styles/visibility-fixes.css";
+import "./shared/styles/ui-accent-fixes.css";
 
 const storedTheme = localStorage.getItem('theme');
 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;

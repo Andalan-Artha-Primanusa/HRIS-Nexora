@@ -5,6 +5,7 @@ import { Card } from "@/shared/ui";
 import { createUser, getAllRoles } from "@/features/admin/api/admin.service";
 import { showToast } from "@/shared/ui/toast";
 import { getErrorMessage } from "@/shared/api/errorHandler";
+import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/auth/AuthLayout.css";
 import "@/pages/dashboard/custom/CustomDashboardPage.css";
@@ -149,6 +150,7 @@ const AdminUserCreatePage = () => {
             <p className="hero-subtitle">
               Buat akun login baru, tetapkan role, dan berikan password sementara untuk reset saat login pertama.
             </p>
+            <CompanyScopeBadge />
           </div>
           <div className="hero-actions">
             <button type="button" className="btn-outline" onClick={() => navigate("/admin/users")}>

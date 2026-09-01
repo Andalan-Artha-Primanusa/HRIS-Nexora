@@ -7,12 +7,17 @@ import { Modal } from '@/shared/ui/Modal';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { ApprovalHistoryModal } from '@/shared/components/ApprovalHistoryModal';
 import { trainingService } from '@/features/training/api/training.service';
+import { useAuthStore } from '@/app/store/auth.store';
+import { RBACUtils } from '@/shared/hooks/rbac';
+import { PERMISSIONS } from '@/shared/types/rbac.types';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/leave/LeaveShared.css';
 
 const TrainingEnrollmentsPage: React.FC = () => {
   const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
+  const canEnroll = RBACUtils.hasPermission(user, PERMISSIONS.TRAINING_ENROLL);
   const [enrollments, setEnrollments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -59,6 +64,10 @@ const TrainingEnrollmentsPage: React.FC = () => {
   }, []);
 
   const handleApprove = async (id: number) => {
+    if (!canEnroll) {
+      showToast('Anda tidak memiliki izin menyetujui pendaftaran training', 'error');
+      return;
+    }
     try {
       setLoading(true);
       await trainingService.approveEnrollment(id);
@@ -72,6 +81,10 @@ const TrainingEnrollmentsPage: React.FC = () => {
   };
 
   const handleReject = async (id: number) => {
+    if (!canEnroll) {
+      showToast('Anda tidak memiliki izin menolak pendaftaran training', 'error');
+      return;
+    }
     try {
       setLoading(true);
       await trainingService.rejectEnrollment(id);
@@ -85,6 +98,10 @@ const TrainingEnrollmentsPage: React.FC = () => {
   };
 
   const openCompleteModal = (enrollment: any) => {
+    if (!canEnroll) {
+      showToast('Anda tidak memiliki izin mengubah progress training', 'error');
+      return;
+    }
     setCompletingEnrollmentId(enrollment.id);
     setCompletingEnrollmentName(enrollment.program?.title || 'Training');
     setCompleteData({ score: '', notes: '', certificate_path: '' });
@@ -100,6 +117,10 @@ const TrainingEnrollmentsPage: React.FC = () => {
 
   const handleComplete = async () => {
     if (!completingEnrollmentId) return;
+    if (!canEnroll) {
+      showToast('Anda tidak memiliki izin mengubah progress training', 'error');
+      return;
+    }
     setCompleting(true);
     try {
       const payload: any = {
@@ -121,6 +142,10 @@ const TrainingEnrollmentsPage: React.FC = () => {
 
   const handleUpdateProgress = async () => {
     if (!completingEnrollmentId) return;
+    if (!canEnroll) {
+      showToast('Anda tidak memiliki izin mengubah progress training', 'error');
+      return;
+    }
     const scoreVal = Number(completeData.score);
     if (completeData.score === '' || Number.isNaN(scoreVal) || scoreVal < 0 || scoreVal > 100) {
       showToast('Nilai progress harus bernilai antara 0 sampai 100', 'error');
@@ -424,7 +449,7 @@ const TrainingEnrollmentsPage: React.FC = () => {
                         </td>
                         <td className="td-center">
                           <div className="action-btn-group">
-                            {enrollment.status === 'pending' && enrollment.can_act !== false && (
+                            {canEnroll && enrollment.status === 'pending' && enrollment.can_act !== false && (
                               <>
                                 <button
                                   className="action-btn"
@@ -444,7 +469,7 @@ const TrainingEnrollmentsPage: React.FC = () => {
                                 </button>
                               </>
                             )}
-                            {(enrollment.status === 'enrolled' || enrollment.status === 'in_progress') && (
+                            {canEnroll && (enrollment.status === 'enrolled' || enrollment.status === 'in_progress') && (
                               <button
                                 className="action-btn"
                                 style={{ color: '#8b5cf6', background: '#f5f3ff' }}
@@ -524,7 +549,7 @@ const TrainingEnrollmentsPage: React.FC = () => {
 
       {/* Complete Modal */}
       <Modal
-        isOpen={completeModalOpen}
+        isOpen={canEnroll && completeModalOpen}
         onClose={closeCompleteModal}
         title={`Update Progress / Selesai — ${completingEnrollmentName}`}
       >

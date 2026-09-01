@@ -62,4 +62,3 @@ export interface BiometricDeviceItem extends Record<string, unknown> {
   is_online?: boolean | number | string;
   status?: string;
 }
-

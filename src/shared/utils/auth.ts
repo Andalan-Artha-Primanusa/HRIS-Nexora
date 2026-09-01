@@ -8,7 +8,7 @@ export const forceLogout = (message: string = "Logout Berhasil") => {
   // Reset tema ke light mode agar halaman login/register selalu terang
   localStorage.setItem('theme', 'light');
   document.documentElement.dataset.theme = 'light';
-  
+
   // Berikan jeda agar toast terlihat sebelum halaman direfresh/diarahkan
   setTimeout(() => {
     window.location.href = "/login";

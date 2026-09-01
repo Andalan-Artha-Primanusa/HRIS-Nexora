@@ -120,7 +120,7 @@
 
   .payroll-status-badge.status-paid {
     background-color: #075E54;
-    color: var(--color-primary-light);
+    color: #5eead4;
     border-color: #0F9F8F;
   }
 

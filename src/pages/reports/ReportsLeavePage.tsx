@@ -164,7 +164,7 @@ const ReportsLeavePage: React.FC = () => {
                   <Area type="monotone" dataKey="rejected" stroke="#ef4444" strokeWidth={2} fillOpacity={1} fill="url(#gR)" name="Rejected"/>
                 </AreaChart>
               </ResponsiveContainer>
-            ):(<div className="reports-chart-empty">{loading?'Memuat...':'Belum ada data.'}</div>)}
+            ):(<div className="reports-chart-empty">{loading?'Memuat...':'Belum ada data untuk company aktif ini.'}</div>)}
           </Card>
 
           <Card className="reports-chart-card" glass>
@@ -179,7 +179,7 @@ const ReportsLeavePage: React.FC = () => {
                   </Pie>
                 </PieChart>
               </ResponsiveContainer>
-            ):(<div className="reports-chart-empty">{loading?'Memuat...':'Belum ada data.'}</div>)}
+            ):(<div className="reports-chart-empty">{loading?'Memuat...':'Belum ada data untuk company aktif ini.'}</div>)}
           </Card>
 
           <Card className="reports-chart-card" glass>
@@ -194,7 +194,7 @@ const ReportsLeavePage: React.FC = () => {
                   <Bar dataKey="value" fill="var(--color-primary)" radius={[8,8,0,0]} name="Jumlah"/>
                 </BarChart>
               </ResponsiveContainer>
-            ):(<div className="reports-chart-empty">{loading?'Memuat...':'Belum ada data.'}</div>)}
+            ):(<div className="reports-chart-empty">{loading?'Memuat...':'Belum ada data untuk company aktif ini.'}</div>)}
           </Card>
 
           <Card className="reports-chart-card" glass>
@@ -209,7 +209,7 @@ const ReportsLeavePage: React.FC = () => {
                   <Bar dataKey="value" fill="#8b5cf6" radius={[8,8,0,0]} name="Hari"/>
                 </BarChart>
               </ResponsiveContainer>
-            ):(<div className="reports-chart-empty">{loading?'Memuat...':'Belum ada data.'}</div>)}
+            ):(<div className="reports-chart-empty">{loading?'Memuat...':'Belum ada data untuk company aktif ini.'}</div>)}
           </Card>
         </div>
       </div>

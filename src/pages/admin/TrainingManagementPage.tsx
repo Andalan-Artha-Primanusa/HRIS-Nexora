@@ -14,6 +14,10 @@ import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/leave/LeaveShared.css';
 import './TrainingProgramsPage.css';
+import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
+import { useAuthStore } from "@/app/store/auth.store";
+import { RBACUtils } from "@/shared/hooks/rbac";
+import { PERMISSIONS } from "@/shared/types/rbac.types";
 
 const TABS = ['Program Pelatihan', 'Pendaftaran Pelatihan'] as const;
 type Tab = (typeof TABS)[number];
@@ -26,6 +30,11 @@ const formatDate = (input: string) => {
 
 const ProgramsTab: React.FC = () => {
   const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
+  const canCreate = RBACUtils.hasPermission(user, PERMISSIONS.TRAINING_CREATE);
+  const canUpdate = RBACUtils.hasPermission(user, PERMISSIONS.TRAINING_UPDATE);
+  const canDelete = RBACUtils.hasPermission(user, PERMISSIONS.TRAINING_DELETE);
+  const canEnroll = RBACUtils.hasPermission(user, PERMISSIONS.TRAINING_ENROLL);
   const [programs, setPrograms] = useState<TrainingProgram[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -87,6 +96,10 @@ const ProgramsTab: React.FC = () => {
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
+    if (!canDelete) {
+      showToast('Anda tidak memiliki izin menghapus program training', 'error');
+      return;
+    }
 
     setDeleting(true);
     try {
@@ -103,6 +116,10 @@ const ProgramsTab: React.FC = () => {
   };
 
   const openEnrollModal = (programId: number, programName: string) => {
+    if (!canEnroll) {
+      showToast('Anda tidak memiliki izin mendaftarkan karyawan ke training', 'error');
+      return;
+    }
     setSelectedProgramId(programId); setSelectedProgramName(programName);
     setEnrollModalOpen(true); setSelectedEmployeeId(null); setEmployeeSearch('');
   };
@@ -110,6 +127,10 @@ const ProgramsTab: React.FC = () => {
   const loadEmployees = async () => { try { setEmployees(await employeeService.getEmployees()); } catch (err) { console.error(err); } };
 
   const handleEnroll = async () => {
+    if (!canEnroll) {
+      showToast('Anda tidak memiliki izin mendaftarkan karyawan ke training', 'error');
+      return;
+    }
     if (!selectedProgramId || !selectedEmployeeId) return;
     setEnrolling(true);
     try {
@@ -167,7 +188,7 @@ const ProgramsTab: React.FC = () => {
               <input type="text" placeholder="Cari program..." value={searchQuery} onChange={e => { setSearchQuery(e.target.value); setCurrentPage(1); }} className="search-input-pill" />
             </div>
             <button className={`filter-btn-rounded ${showFilters ? 'active' : ''}`} onClick={() => setShowFilters(!showFilters)}><Filter size={18} /><span>Filter</span></button>
-            <button className="btn-primary" onClick={() => navigate('/training/programs/create')}><Plus size={16} /> Tambah Program</button>
+            {canCreate && <button className="btn-primary" onClick={() => navigate('/training/programs/create')}><Plus size={16} /> Tambah Program</button>}
           </div>
         </div>
         {showFilters && <div className="filter-dropdown"><div className="filter-row">{(searchQuery || activeTab !== 'Semua') && <button className="btn-clear-filter" onClick={clearFilters}>Hapus Filter</button>}</div></div>}
@@ -215,11 +236,13 @@ const ProgramsTab: React.FC = () => {
                         </td>
                         <td className="td-center">
                           <div className="action-btn-group">
+                            {canEnroll && (
                             <button className="action-btn" style={{ color: '#6366f1', background: '#eef2ff' }} onClick={() => openEnrollModal(typeof program.id === 'string' ? parseInt(program.id, 10) : program.id, program.title || program.nama || '')} title="Daftarkan Karyawan">
                               <UserPlus size={16} />
                             </button>
-                            <button className="action-btn action-btn-edit" onClick={() => navigate(`/training/programs/edit/${program.id}`)} title="Edit"><Edit size={16} /></button>
-                            <button className="action-btn action-btn-delete" onClick={() => setDeleteTarget(program)} title="Hapus"><Trash2 size={16} /></button>
+                            )}
+                            {canUpdate && <button className="action-btn action-btn-edit" onClick={() => navigate(`/training/programs/edit/${program.id}`)} title="Edit"><Edit size={16} /></button>}
+                            {canDelete && <button className="action-btn action-btn-delete" onClick={() => setDeleteTarget(program)} title="Hapus"><Trash2 size={16} /></button>}
                           </div>
                         </td>
                       </tr>
@@ -242,7 +265,7 @@ const ProgramsTab: React.FC = () => {
         </div>
       </div>
 
-      <Modal isOpen={enrollModalOpen} onClose={closeEnrollModal} title={`Daftarkan Karyawan — ${selectedProgramName}`}>
+      <Modal isOpen={canEnroll && enrollModalOpen} onClose={closeEnrollModal} title={`Daftarkan Karyawan — ${selectedProgramName}`}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div style={{ position: 'relative' }}>
             <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
@@ -268,9 +291,11 @@ const ProgramsTab: React.FC = () => {
             )}
           </div>
           <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+            {canEnroll && (
             <button type="button" className="btn-primary" style={{ flex: 1, padding: '0.75rem', borderRadius: '10px', fontWeight: 600 }} onClick={handleEnroll} disabled={!selectedEmployeeId || enrolling}>
               {enrolling ? <><Loader2 size={16} className="animate-spin" /> Mendaftar...</> : <><UserPlus size={16} /> Daftarkan</>}
             </button>
+            )}
             <button type="button" className="btn-outline" style={{ flex: 1, padding: '0.75rem', borderRadius: '10px', fontWeight: 600 }} onClick={closeEnrollModal} disabled={enrolling}>
               <X size={16} /> Batal
             </button>
@@ -278,7 +303,7 @@ const ProgramsTab: React.FC = () => {
         </div>
       </Modal>
       <ConfirmDialog
-        isOpen={!!deleteTarget}
+        isOpen={canDelete && !!deleteTarget}
         title="Hapus Program Pelatihan"
         message={`Program "${String((deleteTarget as any)?.title || (deleteTarget as any)?.nama || 'ini')}" akan dihapus. Tindakan ini tidak dapat dibatalkan.`}
         confirmLabel="Hapus"
@@ -292,6 +317,8 @@ const ProgramsTab: React.FC = () => {
 };
 
 const EnrollmentsTab: React.FC = () => {
+  const user = useAuthStore((state) => state.user);
+  const canEnroll = RBACUtils.hasPermission(user, PERMISSIONS.TRAINING_ENROLL);
   const [enrollments, setEnrollments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState('');
@@ -328,14 +355,26 @@ const EnrollmentsTab: React.FC = () => {
   useEffect(() => { fetchData(); }, []);
 
   const handleApprove = async (id: number) => {
+    if (!canEnroll) {
+      showToast('Anda tidak memiliki izin menyetujui pendaftaran training', 'error');
+      return;
+    }
     try { setLoading(true); await trainingService.approveEnrollment(id); fetchData(); showToast('Pendaftaran berhasil disetujui', 'success'); } catch (error: any) { console.error(error); showToast(error?.response?.data?.message || error?.message || 'Gagal menyetujui pendaftaran', 'error'); setLoading(false); }
   };
 
   const handleReject = async (id: number) => {
+    if (!canEnroll) {
+      showToast('Anda tidak memiliki izin menolak pendaftaran training', 'error');
+      return;
+    }
     try { setLoading(true); await trainingService.rejectEnrollment(id); fetchData(); showToast('Pendaftaran berhasil ditolak', 'success'); } catch (error: any) { console.error(error); showToast(error?.response?.data?.message || error?.message || 'Gagal menolak pendaftaran', 'error'); setLoading(false); }
   };
 
   const openCompleteModal = (enrollment: any) => {
+    if (!canEnroll) {
+      showToast('Anda tidak memiliki izin mengubah progress training', 'error');
+      return;
+    }
     setCompletingEnrollmentId(enrollment.id); setCompletingEnrollmentName(enrollment.program?.title || 'Training');
     setCompleteData({ score: '', notes: '', certificate_path: '' }); setCompleteModalOpen(true);
   };
@@ -343,6 +382,10 @@ const EnrollmentsTab: React.FC = () => {
 
   const handleComplete = async () => {
     if (!completingEnrollmentId) return;
+    if (!canEnroll) {
+      showToast('Anda tidak memiliki izin mengubah progress training', 'error');
+      return;
+    }
     setCompleting(true);
     try {
       const payload: any = {
@@ -360,6 +403,10 @@ const EnrollmentsTab: React.FC = () => {
 
   const handleUpdateProgress = async () => {
     if (!completingEnrollmentId) return;
+    if (!canEnroll) {
+      showToast('Anda tidak memiliki izin mengubah progress training', 'error');
+      return;
+    }
     const scoreVal = Number(completeData.score);
     if (completeData.score === '' || Number.isNaN(scoreVal) || scoreVal < 0 || scoreVal > 100) {
       showToast('Nilai progress harus bernilai antara 0 sampai 100', 'error');
@@ -537,13 +584,13 @@ const EnrollmentsTab: React.FC = () => {
                         </td>
                         <td className="td-center">
                           <div className="action-btn-group">
-                            {enrollment.status === 'pending' && enrollment.can_act !== false && (
+                            {canEnroll && enrollment.status === 'pending' && enrollment.can_act !== false && (
                               <>
                                 <button className="action-btn" style={{ color: '#10b981', background: '#ecfdf5' }} onClick={() => handleApprove(enrollment.id)} title="Approve"><CheckCircle size={16} /></button>
                                 <button className="action-btn" style={{ color: '#ef4444', background: '#fef2f2' }} onClick={() => handleReject(enrollment.id)} title="Reject"><XCircle size={16} /></button>
                               </>
                             )}
-                            {(enrollment.status === 'enrolled' || enrollment.status === 'in_progress') && (
+                            {canEnroll && (enrollment.status === 'enrolled' || enrollment.status === 'in_progress') && (
                               <button className="action-btn" style={{ color: '#8b5cf6', background: '#f5f3ff' }} onClick={() => openCompleteModal(enrollment)} title="Update Progress"><Award size={16} /></button>
                             )}
                             <button className="action-btn" style={{ color: 'var(--color-primary)', background: '#eff6ff' }} onClick={() => openProgressHistory(enrollment.id)} title="Riwayat Progress"><TrendingUp size={16} /></button>
@@ -572,7 +619,7 @@ const EnrollmentsTab: React.FC = () => {
         </div>
       </div>
 
-      <Modal isOpen={completeModalOpen} onClose={closeCompleteModal} title={`Update Progress / Selesai — ${completingEnrollmentName}`}>
+      <Modal isOpen={canEnroll && completeModalOpen} onClose={closeCompleteModal} title={`Update Progress / Selesai — ${completingEnrollmentName}`}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div className="form-group">
             <label>Nilai (0-100)</label>
@@ -587,12 +634,16 @@ const EnrollmentsTab: React.FC = () => {
             <textarea placeholder="Catatan tambahan..." value={completeData.notes} onChange={e => setCompleteData({ ...completeData, notes: e.target.value })} className="form-control" rows={3} />
           </div>
           <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+            {canEnroll && (
             <button type="button" className="btn-primary" style={{ flex: 1, padding: '0.75rem', borderRadius: '10px', fontWeight: 600, background: 'var(--color-primary)' }} onClick={handleUpdateProgress} disabled={completing}>
               {completing ? <><Loader2 size={16} className="animate-spin" /> Menyimpan...</> : <><Save size={16} /> Simpan Progress</>}
             </button>
+            )}
+            {canEnroll && (
             <button type="button" className="btn-primary" style={{ flex: 1, padding: '0.75rem', borderRadius: '10px', fontWeight: 600 }} onClick={handleComplete} disabled={completing}>
               {completing ? <><Loader2 size={16} className="animate-spin" /> Menyimpan...</> : <><Award size={16} /> Tandai Selesai</>}
             </button>
+            )}
             <button type="button" className="btn-outline" style={{ flex: 1, padding: '0.75rem', borderRadius: '10px', fontWeight: 600 }} onClick={closeCompleteModal} disabled={completing}>
               <X size={16} /> Batal
             </button>
@@ -665,6 +716,7 @@ const TrainingManagementPage: React.FC = () => {
             <p className="hero-subtitle">
               Kelola program pelatihan, pendaftaran, dan pengembangan keterampilan karyawan.
             </p>
+            <CompanyScopeBadge />
           </div>
           <div className="hero-actions">
             <RefreshCw size={16} />

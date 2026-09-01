@@ -9,6 +9,7 @@ import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
 import { useAuthStore } from '@/app/store/auth.store';
 import { RBACUtils } from '@/shared/hooks/rbac';
+import { PERMISSIONS } from '@/shared/types/rbac.types';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
 import './ReportsDashboardPage.css';
@@ -42,7 +43,7 @@ const ReportsAttendancePage: React.FC = () => {
   const allowedMenuKeys = useAuthStore((state) => state.allowedMenuKeys);
 
   const canViewAttendanceReports = useMemo(() => {
-    const hasPerm = RBACUtils.hasPermission(user, ["reporting.attendance", "attendance.view_all"]);
+    const hasPerm = RBACUtils.hasPermission(user, [PERMISSIONS.REPORTING_ATTENDANCE, PERMISSIONS.ATTENDANCE_VIEW_ALL]);
     const hasMenuAccess = allowedMenuKeys.includes("laporan.absensi") || allowedMenuKeys.includes("attendance.reports");
     return Boolean(hasPerm || hasMenuAccess);
   }, [user, allowedMenuKeys]);
@@ -278,7 +279,7 @@ const ReportsAttendancePage: React.FC = () => {
                   <Area type="monotone" dataKey="terlambat" stroke="#f59e0b" strokeWidth={2} fillOpacity={1} fill="url(#gLate)" name="Terlambat" />
                 </AreaChart>
               </ResponsiveContainer>
-            ) : (<div className="reports-chart-empty">{loading ? 'Memuat...' : 'Belum ada data.'}</div>)}
+            ) : (<div className="reports-chart-empty">{loading ? 'Memuat...' : 'Belum ada data untuk company aktif ini.'}</div>)}
           </Card>
 
           <Card className="reports-chart-card" glass>
@@ -296,7 +297,7 @@ const ReportsAttendancePage: React.FC = () => {
                   <Bar dataKey="absen" fill="#ef4444" radius={[6, 6, 0, 0]} name="Absen" />
                 </BarChart>
               </ResponsiveContainer>
-            ) : (<div className="reports-chart-empty">{loading ? 'Memuat...' : 'Belum ada data.'}</div>)}
+            ) : (<div className="reports-chart-empty">{loading ? 'Memuat...' : 'Belum ada data untuk company aktif ini.'}</div>)}
           </Card>
 
           <Card className="reports-chart-card" glass>
@@ -312,7 +313,7 @@ const ReportsAttendancePage: React.FC = () => {
                   </Pie>
                 </PieChart>
               </ResponsiveContainer>
-            ) : (<div className="reports-chart-empty">{loading ? 'Memuat...' : 'Belum ada data.'}</div>)}
+            ) : (<div className="reports-chart-empty">{loading ? 'Memuat...' : 'Belum ada data untuk company aktif ini.'}</div>)}
           </Card>
 
           <Card className="reports-chart-card" glass>
@@ -330,7 +331,7 @@ const ReportsAttendancePage: React.FC = () => {
                   <Bar dataKey="total" fill="#e2e8f0" radius={[6, 6, 0, 0]} name="Total Karyawan" />
                 </BarChart>
               </ResponsiveContainer>
-            ) : (<div className="reports-chart-empty">{loading ? 'Memuat...' : 'Belum ada data.'}</div>)}
+            ) : (<div className="reports-chart-empty">{loading ? 'Memuat...' : 'Belum ada data untuk company aktif ini.'}</div>)}
           </Card>
         </div>
       </div>

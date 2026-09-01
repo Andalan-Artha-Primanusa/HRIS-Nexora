@@ -13,6 +13,10 @@ import { showToast } from "@/shared/ui/toast";
 import { RejectReasonModal } from "@/shared/components/RejectReasonModal";
 import "@/shared/styles/CrudPage.css";
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
+import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
+import { useAuthStore } from "@/app/store/auth.store";
+import { RBACUtils } from "@/shared/hooks/rbac";
+import { PERMISSIONS } from "@/shared/types/rbac.types";
 
 const formatDate = (dateString: string | undefined) => {
   if (!dateString) return "-";
@@ -37,6 +41,8 @@ const getEmployeeName = (item: any) => {
 };
 
 const ReimbursementApprovalPage = () => {
+  const user = useAuthStore((state) => state.user);
+  const canApprove = RBACUtils.hasPermission(user, PERMISSIONS.REIMBURSEMENT_APPROVE);
   const [items, setItems] = useState<ReimbursementItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -108,6 +114,10 @@ const ReimbursementApprovalPage = () => {
   };
 
   const handleApprove = async (id: string | number) => {
+    if (!canApprove) {
+      showToast("Anda tidak memiliki izin menyetujui reimbursement.", "error");
+      return;
+    }
     setActionLoading(String(id));
     try {
       await approveReimbursement(String(id), { note: "Approved by manager" });
@@ -121,11 +131,19 @@ const ReimbursementApprovalPage = () => {
   };
 
   const handleReject = async (id: string | number) => {
+    if (!canApprove) {
+      showToast("Anda tidak memiliki izin menolak reimbursement.", "error");
+      return;
+    }
     setRejectTarget(id);
   };
 
   const confirmReject = async (reason: string) => {
     if (rejectTarget === null) return;
+    if (!canApprove) {
+      showToast("Anda tidak memiliki izin menolak reimbursement.", "error");
+      return;
+    }
     setActionLoading(String(rejectTarget));
     try {
       await rejectReimbursement(String(rejectTarget), { note: reason || "Ditolak tanpa alasan" });
@@ -144,6 +162,7 @@ const ReimbursementApprovalPage = () => {
 
   return (
     <div className="crud-page">
+      <div style={{ marginBottom: 16 }}><CompanyScopeBadge /></div>
       {/* Header */}
       <div className="page-header">
         <div className="page-header-title">
@@ -254,7 +273,7 @@ const ReimbursementApprovalPage = () => {
                         </td>
                         <td>
                           <div className="action-btn-group">
-                            {item.can_act !== false && (
+                            {canApprove && item.can_act !== false && (
                               <>
                                 <button
                                   className="action-btn action-btn-success"
@@ -316,7 +335,7 @@ const ReimbursementApprovalPage = () => {
       )}
 
       <RejectReasonModal
-        isOpen={rejectTarget !== null}
+        isOpen={canApprove && rejectTarget !== null}
         onClose={() => setRejectTarget(null)}
         onConfirm={confirmReject}
         title="Alasan Penolakan"

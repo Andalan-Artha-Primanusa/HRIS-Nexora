@@ -12,6 +12,7 @@ import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
 import './MasterDataPage.css';
+import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -317,6 +318,7 @@ const MasterDataPage: React.FC = () => {
             </div>
             <h1 className="hero-title">Master Data</h1>
             <p className="hero-subtitle">Kelola data inti organisasi: departemen dan posisi.</p>
+            <CompanyScopeBadge />
           </div>
           <div className="hero-actions">
             <button className="btn-outline" onClick={fetchData} disabled={loading}>

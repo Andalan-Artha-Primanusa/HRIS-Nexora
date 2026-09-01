@@ -15,6 +15,7 @@ import { api } from '@/shared/api/httpClient';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
 import './ReportsDashboardPage.css';
+import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 
 type Rec = Record<string, unknown>;
 const toRec = (v: unknown): Rec => (v && typeof v === 'object' ? (v as Rec) : {});
@@ -417,8 +418,8 @@ const ReportsDashboardPage: React.FC = () => {
     return Array.from(map, ([name, value]) => ({ name, value }));
   }, [employees]);
 
-  // Recruitment trend
-  const recruitmentTrend = useMemo(() => {
+  // New employee trend
+  const hiringTrend = useMemo(() => {
     const map = new Map<string, number>();
     employees.forEach(e => {
       const d = getStr(e, ['hire_date', 'join_date']);
@@ -491,7 +492,7 @@ const ReportsDashboardPage: React.FC = () => {
                   <Area type="monotone" dataKey="hadir" stroke="var(--color-primary)" strokeWidth={2} fillOpacity={1} fill="url(#gp)" name="Hadir" />
                 </AreaChart>
               </ResponsiveContainer>
-            ) : <div className="reports-chart-empty">Belum ada data absensi tercatat</div>}
+            ) : <div className="reports-chart-empty">Belum ada data absensi untuk company aktif ini</div>}
           </>
         );
 
@@ -510,7 +511,7 @@ const ReportsDashboardPage: React.FC = () => {
                   <Bar dataKey="value" fill="var(--color-primary)" radius={[6, 6, 0, 0]} name="Karyawan" />
                 </BarChart>
               </ResponsiveContainer>
-            ) : <div className="reports-chart-empty">Data departemen tidak tersedia</div>}
+            ) : <div className="reports-chart-empty">Belum ada data departemen untuk company aktif ini.</div>}
           </>
         );
 
@@ -529,7 +530,7 @@ const ReportsDashboardPage: React.FC = () => {
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
-            ) : <div className="reports-chart-empty">Belum ada data cuti</div>}
+            ) : <div className="reports-chart-empty">Belum ada data cuti untuk company aktif ini</div>}
           </>
         );
 
@@ -550,7 +551,7 @@ const ReportsDashboardPage: React.FC = () => {
                   <Bar dataKey="pending" stackId="a" fill="#f59e0b" name="Menunggu" />
                 </BarChart>
               </ResponsiveContainer>
-            ) : <div className="reports-chart-empty">Data payroll tidak ditemukan</div>}
+            ) : <div className="reports-chart-empty">Belum ada data payroll untuk company aktif ini.</div>}
           </>
         );
 
@@ -619,7 +620,7 @@ const ReportsDashboardPage: React.FC = () => {
                   <Area type="monotone" dataKey="terlambat" stroke="#f59e0b" strokeWidth={2} fillOpacity={1} fill="none" name="Terlambat" />
                 </AreaChart>
               </ResponsiveContainer>
-            ) : <div className="reports-chart-empty">Belum ada data.</div>}
+            ) : <div className="reports-chart-empty">Belum ada data untuk company aktif ini.</div>}
           </>
         );
 
@@ -640,7 +641,7 @@ const ReportsDashboardPage: React.FC = () => {
                   <Bar dataKey="absen" fill="#ef4444" radius={[6, 6, 0, 0]} name="Absen" />
                 </BarChart>
               </ResponsiveContainer>
-            ) : <div className="reports-chart-empty">Belum ada data.</div>}
+            ) : <div className="reports-chart-empty">Belum ada data untuk company aktif ini.</div>}
           </>
         );
 
@@ -659,7 +660,7 @@ const ReportsDashboardPage: React.FC = () => {
                   </Pie>
                 </PieChart>
               </ResponsiveContainer>
-            ) : <div className="reports-chart-empty">Belum ada data.</div>}
+            ) : <div className="reports-chart-empty">Belum ada data untuk company aktif ini.</div>}
           </>
         );
 
@@ -680,7 +681,7 @@ const ReportsDashboardPage: React.FC = () => {
                   <Bar dataKey="total" fill="#e2e8f0" radius={[6, 6, 0, 0]} name="Total Karyawan" />
                 </BarChart>
               </ResponsiveContainer>
-            ) : <div className="reports-chart-empty">Belum ada data.</div>}
+            ) : <div className="reports-chart-empty">Belum ada data untuk company aktif ini.</div>}
           </>
         );
 
@@ -749,7 +750,7 @@ const ReportsDashboardPage: React.FC = () => {
                   <Area type="monotone" dataKey="rejected" stroke="#ef4444" strokeWidth={2} fillOpacity={1} fill="none" name="Rejected" />
                 </AreaChart>
               </ResponsiveContainer>
-            ) : <div className="reports-chart-empty">Belum ada data.</div>}
+            ) : <div className="reports-chart-empty">Belum ada data untuk company aktif ini.</div>}
           </>
         );
 
@@ -768,7 +769,7 @@ const ReportsDashboardPage: React.FC = () => {
                   </Pie>
                 </PieChart>
               </ResponsiveContainer>
-            ) : <div className="reports-chart-empty">Belum ada data.</div>}
+            ) : <div className="reports-chart-empty">Belum ada data untuk company aktif ini.</div>}
           </>
         );
 
@@ -787,7 +788,7 @@ const ReportsDashboardPage: React.FC = () => {
                   <Bar dataKey="value" fill="var(--color-primary)" radius={[8, 8, 0, 0]} name="Jumlah" />
                 </BarChart>
               </ResponsiveContainer>
-            ) : <div className="reports-chart-empty">Belum ada data.</div>}
+            ) : <div className="reports-chart-empty">Belum ada data untuk company aktif ini.</div>}
           </>
         );
 
@@ -806,7 +807,7 @@ const ReportsDashboardPage: React.FC = () => {
                   <Bar dataKey="value" fill="#8b5cf6" radius={[8, 8, 0, 0]} name="Hari" />
                 </BarChart>
               </ResponsiveContainer>
-            ) : <div className="reports-chart-empty">Belum ada data.</div>}
+            ) : <div className="reports-chart-empty">Belum ada data untuk company aktif ini.</div>}
           </>
         );
 
@@ -870,7 +871,7 @@ const ReportsDashboardPage: React.FC = () => {
                   <Bar dataKey="pending" stackId="a" fill="#f59e0b" name="Pending" />
                 </BarChart>
               </ResponsiveContainer>
-            ) : <div className="reports-chart-empty">Belum ada data.</div>}
+            ) : <div className="reports-chart-empty">Belum ada data untuk company aktif ini.</div>}
           </>
         );
 
@@ -889,7 +890,7 @@ const ReportsDashboardPage: React.FC = () => {
                   <Line type="monotone" dataKey="net" stroke="var(--color-primary)" strokeWidth={3} dot={{ r: 5, fill: 'var(--color-primary)', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 7 }} name="Net Salary" />
                 </LineChart>
               </ResponsiveContainer>
-            ) : <div className="reports-chart-empty">Belum ada data.</div>}
+            ) : <div className="reports-chart-empty">Belum ada data untuk company aktif ini.</div>}
           </>
         );
 
@@ -908,7 +909,7 @@ const ReportsDashboardPage: React.FC = () => {
                   </Pie>
                 </PieChart>
               </ResponsiveContainer>
-            ) : <div className="reports-chart-empty">Belum ada data.</div>}
+            ) : <div className="reports-chart-empty">Belum ada data untuk company aktif ini.</div>}
           </>
         );
 
@@ -927,7 +928,7 @@ const ReportsDashboardPage: React.FC = () => {
                   <Bar dataKey="value" fill="#8b5cf6" radius={[6, 6, 0, 0]} name="Total Salary" />
                 </BarChart>
               </ResponsiveContainer>
-            ) : <div className="reports-chart-empty">Belum ada data.</div>}
+            ) : <div className="reports-chart-empty">Belum ada data untuk company aktif ini.</div>}
           </>
         );
 
@@ -989,7 +990,7 @@ const ReportsDashboardPage: React.FC = () => {
                   <Bar dataKey="value" fill="var(--color-primary)" radius={[8, 8, 0, 0]} name="Jumlah Aset" />
                 </BarChart>
               </ResponsiveContainer>
-            ) : <div className="reports-chart-empty">Belum ada data.</div>}
+            ) : <div className="reports-chart-empty">Belum ada data untuk company aktif ini.</div>}
           </>
         );
 
@@ -1008,7 +1009,7 @@ const ReportsDashboardPage: React.FC = () => {
                   </Pie>
                 </PieChart>
               </ResponsiveContainer>
-            ) : <div className="reports-chart-empty">Belum ada data.</div>}
+            ) : <div className="reports-chart-empty">Belum ada data untuk company aktif ini.</div>}
           </>
         );
 
@@ -1027,7 +1028,7 @@ const ReportsDashboardPage: React.FC = () => {
                   <Bar dataKey="value" fill="#8b5cf6" radius={[8, 8, 0, 0]} name="Nilai (Rp)" />
                 </BarChart>
               </ResponsiveContainer>
-            ) : <div className="reports-chart-empty">Belum ada data.</div>}
+            ) : <div className="reports-chart-empty">Belum ada data untuk company aktif ini.</div>}
           </>
         );
 
@@ -1046,7 +1047,7 @@ const ReportsDashboardPage: React.FC = () => {
                   <Bar dataKey="value" fill="#06b6d4" radius={[8, 8, 0, 0]} name="Jumlah Penugasan" />
                 </BarChart>
               </ResponsiveContainer>
-            ) : <div className="reports-chart-empty">Belum ada data.</div>}
+            ) : <div className="reports-chart-empty">Belum ada data untuk company aktif ini.</div>}
           </>
         );
 
@@ -1108,7 +1109,7 @@ const ReportsDashboardPage: React.FC = () => {
                   <Bar dataKey="value" fill="var(--color-primary)" radius={[0, 8, 8, 0]} name="Headcount" />
                 </BarChart>
               </ResponsiveContainer>
-            ) : <div className="reports-chart-empty">Belum ada data.</div>}
+            ) : <div className="reports-chart-empty">Belum ada data untuk company aktif ini.</div>}
           </>
         );
 
@@ -1127,7 +1128,7 @@ const ReportsDashboardPage: React.FC = () => {
                   </Pie>
                 </PieChart>
               </ResponsiveContainer>
-            ) : <div className="reports-chart-empty">Belum ada data.</div>}
+            ) : <div className="reports-chart-empty">Belum ada data untuk company aktif ini.</div>}
           </>
         );
 
@@ -1146,18 +1147,18 @@ const ReportsDashboardPage: React.FC = () => {
                   <Bar dataKey="value" fill="#10b981" radius={[8, 8, 0, 0]} name="Jumlah" />
                 </BarChart>
               </ResponsiveContainer>
-            ) : <div className="reports-chart-empty">Belum ada data.</div>}
+            ) : <div className="reports-chart-empty">Belum ada data untuk company aktif ini.</div>}
           </>
         );
 
       case 'employee_recruitment_trend':
         return (
           <>
-            <h2 className="reports-chart-title"><TrendingUp size={16} /> Tren Rekrutmen</h2>
+            <h2 className="reports-chart-title"><TrendingUp size={16} /> Tren Karyawan Baru</h2>
             <p className="reports-chart-subtitle">Jumlah karyawan bergabung per bulan</p>
-            {recruitmentTrend.length > 0 ? (
+            {hiringTrend.length > 0 ? (
               <ResponsiveContainer width="100%" height={260}>
-                <AreaChart data={recruitmentTrend}>
+                <AreaChart data={hiringTrend}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(15,159,143,0.1)" />
                   <XAxis dataKey="name" stroke="var(--color-primary-dark)" style={{ fontSize: '12px' }} />
                   <YAxis stroke="var(--color-primary-dark)" style={{ fontSize: '12px' }} />
@@ -1165,7 +1166,7 @@ const ReportsDashboardPage: React.FC = () => {
                   <Area type="monotone" dataKey="value" stroke="#8b5cf6" fill="rgba(139,92,246,0.2)" strokeWidth={3} name="Karyawan Baru" />
                 </AreaChart>
               </ResponsiveContainer>
-            ) : <div className="reports-chart-empty">Belum ada data.</div>}
+            ) : <div className="reports-chart-empty">Belum ada data untuk company aktif ini.</div>}
           </>
         );
 
@@ -1178,7 +1179,7 @@ const ReportsDashboardPage: React.FC = () => {
     pendingLeaves, approvedLeaves, rejectedLeaves, leaveMonthlyTrend, leaveDaysByType,
     paid, payrollStatusData, payrollDeptData,
     assetCategoryData, assetStatusData, assetValueData, assignDeptData,
-    genderData, empStatusData, recruitmentTrend,
+    genderData, empStatusData, hiringTrend,
     totalEmployees, activeEmployees, probationEmployees, inactiveEmployees,
     present, absent, late,
     assets, activeAssets, assignedAssets, maintenanceAssets,
@@ -1194,6 +1195,7 @@ const ReportsDashboardPage: React.FC = () => {
               <div className="hero-badge"><BarChart3 size={16} /><span>Pusat Laporan</span></div>
               <h1 className="hero-title">Laporan & Analitik</h1>
               <p className="hero-subtitle">Memuat data dari seluruh modul...</p>
+              <CompanyScopeBadge />
             </div>
           </div>
         </Card>
@@ -1214,6 +1216,7 @@ const ReportsDashboardPage: React.FC = () => {
             <p className="hero-subtitle">
               Dashboard terpusat laporan HR. Seret dan urutkan widget sesuai preferensi Anda.
             </p>
+            <CompanyScopeBadge />
           </div>
           <div className="hero-actions">
             <button className="btn-outline" onClick={() => void loadData()} disabled={loading}>

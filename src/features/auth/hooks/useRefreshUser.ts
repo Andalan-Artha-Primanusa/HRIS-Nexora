@@ -93,10 +93,24 @@ export const useRefreshUser = () => {
           incomingRoles.push(fallbackRole);
         }
         const incomingPermissions = normalizePermissions(userRecord.permissions);
-
-        // Keep previous auth fields when refresh endpoint returns partial profile data.
         const fallbackRoles = Array.isArray(user?.roles) ? user.roles : [];
         const fallbackPermissions = Array.isArray(user?.permissions) ? user.permissions : [];
+
+        // Sumber kebenaran permission = `effective_permissions` dari backend
+        // (flat array nama permission hasil resolveEffectivePermissions).
+        // Dipakai sebagai basis `user.permissions` agar RBACUtils.hasPermission
+        // akurat segera setelah refresh (tanpa menunggu aggregate dari roles).
+        const effectivePermissions: Permission[] = Array.isArray(userRecord.effective_permissions)
+          ? (userRecord.effective_permissions as unknown[])
+              .filter((p): p is string => typeof p === "string" && p.length > 0)
+              .map((name) => ({ id: 0, name, display_name: name }))
+          : [];
+
+        const mergedPermissions = effectivePermissions.length > 0
+          ? effectivePermissions
+          : incomingPermissions.length > 0
+            ? incomingPermissions
+            : fallbackPermissions;
 
         const updatedUser: AuthUser = {
           ...(user || {}),
@@ -105,7 +119,7 @@ export const useRefreshUser = () => {
           name: typeof userRecord.name === "string" ? userRecord.name : user?.name ?? "",
           email: typeof userRecord.email === "string" ? userRecord.email : user?.email ?? "",
           roles: incomingRoles.length > 0 ? incomingRoles : fallbackRoles,
-          permissions: incomingPermissions.length > 0 ? incomingPermissions : fallbackPermissions,
+          permissions: mergedPermissions,
         };
         
         // Update stored user dengan data terbaru

@@ -5,6 +5,7 @@ import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
 import { useAuthStore } from '@/app/store/auth.store';
 import { RBACUtils } from '@/shared/hooks/rbac';
+import { PERMISSIONS } from '@/shared/types/rbac.types';
 import { attendanceService } from '@/features/attendance/api/attendance.service';
 import overtimeService from '@/features/attendance/api/overtime.service';
 import { parsePaginatedResponse } from '@/shared/api/pagination';
@@ -14,6 +15,7 @@ import { Clock, RefreshCw, Calendar, Timer, AlertCircle, CheckCircle, XCircle, S
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import './AttendanceShared.css';
+import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 
 interface OvertimeRecord {
   id: number;
@@ -149,7 +151,7 @@ const OvertimePage = () => {
   const user = useAuthStore((state) => state.user);
 
   const canViewAllOvertime = useMemo(() => {
-    return RBACUtils.hasPermission(user, ['overtime.view', 'attendance.view_all']);
+    return RBACUtils.hasPermission(user, [PERMISSIONS.OVERTIME_VIEW, PERMISSIONS.ATTENDANCE_VIEW_ALL]);
   }, [user]);
 
   const loadRecords = async () => {
@@ -422,6 +424,7 @@ const OvertimePage = () => {
             <div className="hero-badge"><Timer size={16} /><span>Layanan Mandiri</span></div>
             <h1 className="hero-title">{canViewAllOvertime ? 'Manajemen Lembur' : 'Lembur Saya'}</h1>
             <p className="hero-subtitle">Kelola pengajuan lembur dan bukti pendukung secara efisien.</p>
+            <CompanyScopeBadge />
           </div>
           <div className="hero-actions">
             <button className="btn-outline" onClick={() => void loadRecords()} disabled={loading}>

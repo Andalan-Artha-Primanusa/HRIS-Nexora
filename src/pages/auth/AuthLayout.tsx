@@ -1,5 +1,4 @@
 import { useEffect, type ReactNode } from "react";
-import { Shield } from "lucide-react";
 import "./AuthLayout.css";
 
 interface AuthLayoutProps {
@@ -39,23 +38,18 @@ const AuthLayout = ({ title, subtitle, children, footer, visualContent }: AuthLa
         {visualContent ?? (
           <div className="auth-visual-content" style={{ position: 'relative', zIndex: 10 }}>
             <div className="auth-visual-brand" style={{ background: '#0F9F8F', color: 'white', boxShadow: '0 8px 32px rgba(15, 159, 143, 0.3)' }}>
-              <Shield size={32} strokeWidth={2} />
+              <img src="/app-logo.png" alt="" style={{ width: 44, height: 44, objectFit: 'contain' }} />
             </div>
             <h1 className="auth-visual-headline" style={{ color: '#111827' }}>Simplify People.<br />Empower Performance.</h1>
           </div>
         )}
-        
-        <div style={{ position: 'absolute', bottom: 'clamp(1.5rem, 3vw, 2.5rem)', left: 'clamp(2rem, 4vw, 4rem)', zIndex: 10, display: 'flex', alignItems: 'center', gap: '0.3rem', color: '#111827' }}>
-          <span style={{ fontSize: '0.875rem', fontWeight: 500, color: '#374151' }}>Powered by</span>
-          <span style={{ fontSize: '1.1rem', fontWeight: 800, letterSpacing: '-0.02em', color: '#075E54' }}>Nexora</span>
-        </div>
       </section>
 
       <section className="auth-form-panel">
         <div className="auth-card">
           <header className="auth-card-header">
             <div className="auth-card-logo">
-              <Shield size={28} strokeWidth={2} />
+              <img src="/app-logo.png" alt="" style={{ width: 32, height: 32, objectFit: 'contain' }} />
               <span className="auth-card-logo-text">HRIS</span>
             </div>
             <h1 className="auth-title">{title}</h1>
@@ -73,4 +67,3 @@ const AuthLayout = ({ title, subtitle, children, footer, visualContent }: AuthLa
 };
 
 export default AuthLayout;
-
