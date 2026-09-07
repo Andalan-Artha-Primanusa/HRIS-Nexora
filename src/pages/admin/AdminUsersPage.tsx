@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/app/store/auth.store";
 import { Card, CardHeader } from "@/shared/ui";
 import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
+import { PageHeader } from "@/shared/ui";
 import { getAllUsers } from "@/features/admin/api/admin.service";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { RBACUtils } from "@/shared/hooks/rbac";
@@ -42,20 +43,11 @@ const AdminUsersPage = () => {
   if (!canViewUsers) {
     return (
       <div className="crud-page">
-        <Card className="page-header">
-          <div className="page-header-inner">
-            <div className="hero-content">
-              <div className="hero-badge">
-                <Shield size={16} />
-                <span>Admin Center</span>
-              </div>
-              <h1 className="hero-title">Akses Ditolak</h1>
-              <p className="hero-subtitle">
-                Anda tidak memiliki izin untuk mengakses halaman ini.
-              </p>
-            </div>
-          </div>
-        </Card>
+        <PageHeader
+          title="Akses Ditolak"
+          subtitle="Anda tidak memiliki izin untuk mengakses halaman ini."
+          badge={{ icon: Shield, label: "Admin Center" }}
+        />
         <div className="">
           <Card glass style={{ padding: '2rem', textAlign: 'center' }}>
             <p>Silakan hubungi Administrator untuk mendapatkan akses.</p>
@@ -180,20 +172,13 @@ const AdminUsersPage = () => {
   return (
     <div className="crud-page">
       {/* Header */}
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Shield size={16} />
-              <span>Admin Center</span>
-            </div>
-            <h1 className="hero-title">Daftar Pengguna</h1>
-            <p className="hero-subtitle">
-              Kelola dan tampilkan daftar pengguna beserta role mereka.
-            </p>
-            <CompanyScopeBadge />
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title="Daftar Pengguna"
+        subtitle="Kelola dan tampilkan daftar pengguna beserta role mereka."
+        badge={{ icon: Shield, label: "Admin Center" }}
+        scope
+        actions={
+          <>
             <button
               className="btn-outline"
               onClick={() => void loadUsers()}
@@ -218,9 +203,9 @@ const AdminUsersPage = () => {
               <Shield size={16} />
               Tetapkan Peran
             </button>
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="employee-summary-wrapper">
@@ -398,7 +383,9 @@ const AdminUsersPage = () => {
               {/* Pagination */}
               <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan <strong>{paginatedUsers.length}</strong> dari <strong>{filteredUsers.length}</strong> pengguna
+                  {filteredUsers.length === 0
+                    ? 'Menampilkan 0 data'
+                    : `Menampilkan ${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, filteredUsers.length)} dari ${filteredUsers.length} data`}
                 </div>
                 <div className="pagination-controls">
                   <button

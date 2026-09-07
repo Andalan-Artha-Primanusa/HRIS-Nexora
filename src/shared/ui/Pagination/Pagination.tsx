@@ -15,8 +15,14 @@ interface PaginationProps {
   onItemsPerPageChange?: (itemsPerPage: number) => void;
   showInfo?: boolean;
   alignment?: 'start' | 'center' | 'end';
+  variant?: 'default' | 'table';
+  locale?: 'id' | 'en';
+  showPageSize?: boolean;
+  pageSizeOptions?: number[];
   className?: string;
 }
+
+const STANDARD_PAGE_SIZES = [10, 25, 50, 100];
 
 export const Pagination: React.FC<PaginationProps> = ({
   currentPage,
@@ -27,8 +33,40 @@ export const Pagination: React.FC<PaginationProps> = ({
   onItemsPerPageChange,
   showInfo = true,
   alignment = 'center',
+  variant = 'default',
+  locale = 'en',
+  showPageSize = false,
+  pageSizeOptions = STANDARD_PAGE_SIZES,
   className = '',
 }) => {
+  const isTableVariant = variant === 'table';
+
+  const startIndex = totalItems
+    ? (currentPage - 1) * Math.max(itemsPerPage || 10, 1) + 1
+    : 0;
+  const endIndex = totalItems
+    ? Math.min(currentPage * Math.max(itemsPerPage || 10, 1), totalItems)
+    : 0;
+  const isSingleItem =
+    totalItems !== undefined && totalItems > 0 && startIndex === endIndex;
+
+  const infoText = (() => {
+    if (totalItems === undefined) return '';
+    if (totalItems === 0) {
+      return locale === 'id'
+        ? 'Menampilkan 0 data'
+        : 'Showing 0 items';
+    }
+    if (isSingleItem && totalItems === 1) {
+      return locale === 'id'
+        ? 'Menampilkan 1 dari 1 data'
+        : 'Showing 1 of 1 item';
+    }
+    if (locale === 'id') {
+      return `Menampilkan ${startIndex}-${endIndex} dari ${totalItems} data`;
+    }
+    return `Showing ${startIndex}-${endIndex} of ${totalItems} items`;
+  })();
   // Generate page numbers with ellipsis
   const getPageNumbers = () => {
     const pages: (number | string)[] = [];
@@ -81,100 +119,148 @@ export const Pagination: React.FC<PaginationProps> = ({
   };
 
   return (
-    <div className={`pagination pagination-${alignment} ${className}`}>
-      {/* Previous Button */}
-      <button
-        className="pagination-button prev"
-        onClick={handlePreviousClick}
-        disabled={!canGoPrevious}
-        type="button"
-        aria-label="Previous page"
-      >
-        <ChevronLeft size={18} />
-      </button>
-
-      {/* Page Numbers */}
-      {pageNumbers.map((page, index) => {
-        if (page === '...') {
-          return (
-            <button
-              key={`ellipsis-${index}`}
-              className="pagination-button ellipsis"
-              disabled
-              type="button"
-            >
-              {page}
-            </button>
-          );
-        }
-
-        const pageNum = page as number;
-        const isActive = currentPage === pageNum;
-
-        return (
-          <button
-            key={pageNum}
-            className={`pagination-button page ${isActive ? 'active' : ''}`}
-            onClick={() => onPageChange(pageNum)}
-            disabled={isActive}
-            type="button"
-            aria-label={`Go to page ${pageNum}`}
-            aria-current={isActive ? 'page' : undefined}
-          >
-            {pageNum}
-          </button>
-        );
-      })}
-
-      {/* Next Button */}
-      <button
-        className="pagination-button next"
-        onClick={handleNextClick}
-        disabled={!canGoNext}
-        type="button"
-        aria-label="Next page"
-      >
-        <ChevronRight size={18} />
-      </button>
-
+    <div
+      className={`${isTableVariant ? 'table-pagination' : 'pagination'} ${
+        isTableVariant ? '' : `pagination-${alignment}`
+      } ${className}`}
+    >
       {/* Info Section */}
-      {showInfo && (totalItems !== undefined || itemsPerPage !== undefined) && (
-        <div className="pagination-info">
-          {totalItems !== undefined && (
-            <span className="pagination-info-text">
-              Total: <strong>{totalItems}</strong> items
-            </span>
-          )}
-
-          {itemsPerPage !== undefined && onItemsPerPageChange && (
-            <div>
-              <label htmlFor="items-per-page" style={{ marginRight: '4px', fontSize: 'var(--font-size-xs)' }}>
-                Per page:
-              </label>
-              <select
-                id="items-per-page"
-                className="pagination-info-select"
-                value={itemsPerPage}
-                onChange={(e) => {
-                  const newItemsPerPage = parseInt(e.target.value, 10);
-                  onItemsPerPageChange(newItemsPerPage);
-                  // Reset to first page when items per page changes
-                  onPageChange(1);
-                }}
-              >
-                <option value="10">10</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-              </select>
-            </div>
-          )}
-
-          <span className="pagination-info-text">
-            Page <strong>{currentPage}</strong> of <strong>{totalPages}</strong>
-          </span>
+      {isTableVariant && showInfo && totalItems !== undefined && (
+        <div className="pagination-info" title="pagination-info">
+          {infoText}
         </div>
       )}
+
+      {/* Controls */}
+      <div
+        className={`${isTableVariant ? 'pagination-controls' : ''}`}
+        style={
+          isTableVariant || (showPageSize && onItemsPerPageChange)
+            ? { marginLeft: isTableVariant ? 'auto' : undefined }
+            : undefined
+        }
+      >
+        {/* Page-size selector */}
+        {showPageSize && itemsPerPage !== undefined && onItemsPerPageChange && (
+          <div className="page-size-selector">
+            <span>{locale === 'id' ? 'Baris / halaman' : 'Rows / page'}</span>
+            <select
+              aria-label="Items per page"
+              value={itemsPerPage}
+              onChange={(e) => {
+                const newItemsPerPage = parseInt(e.target.value, 10);
+                onItemsPerPageChange(newItemsPerPage);
+                onPageChange(1);
+              }}
+            >
+              {pageSizeOptions.map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* Previous Button */}
+        <button
+          className="pagination-button prev"
+          onClick={handlePreviousClick}
+          disabled={!canGoPrevious}
+          type="button"
+          aria-label="Previous page"
+        >
+          <ChevronLeft size={18} />
+        </button>
+
+        {/* Page Numbers */}
+        {pageNumbers.map((page, index) => {
+          if (page === '...') {
+            return (
+              <button
+                key={`ellipsis-${index}`}
+                className="pagination-button ellipsis"
+                disabled
+                type="button"
+              >
+                {page}
+              </button>
+            );
+          }
+
+          const pageNum = page as number;
+          const isActive = currentPage === pageNum;
+
+          return (
+            <button
+              key={pageNum}
+              className={`pagination-button page ${isActive ? 'active' : ''}`}
+              onClick={() => onPageChange(pageNum)}
+              disabled={isActive}
+              type="button"
+              aria-label={`Go to page ${pageNum}`}
+              aria-current={isActive ? 'page' : undefined}
+            >
+              {pageNum}
+            </button>
+          );
+        })}
+
+        {/* Next Button */}
+        <button
+          className="pagination-button next"
+          onClick={handleNextClick}
+          disabled={!canGoNext}
+          type="button"
+          aria-label="Next page"
+        >
+          <ChevronRight size={18} />
+        </button>
+
+        {/* Non-table info */}
+        {!isTableVariant && showInfo && (totalItems !== undefined || itemsPerPage !== undefined) && (
+          <div className="pagination-info">
+            {totalItems !== undefined && (
+              <span className="pagination-info-text">
+                {locale === 'id' ? 'Total' : 'Total'}: <strong>{totalItems}</strong>{' '}
+                {locale === 'id' ? 'data' : 'items'}
+              </span>
+            )}
+
+            {itemsPerPage !== undefined && onItemsPerPageChange && (
+              <div className="pagination-info-select-wrap">
+                <label
+                  htmlFor="items-per-page"
+                  style={{ marginRight: '4px', fontSize: 'var(--font-size-xs)' }}
+                >
+                  {locale === 'id' ? 'Per halaman' : 'Per page'}:
+                </label>
+                <select
+                  id="items-per-page"
+                  className="pagination-info-select"
+                  value={itemsPerPage}
+                  onChange={(e) => {
+                    const newItemsPerPage = parseInt(e.target.value, 10);
+                    onItemsPerPageChange(newItemsPerPage);
+                    onPageChange(1);
+                  }}
+                >
+                  {pageSizeOptions.map((size) => (
+                    <option key={size} value={size}>
+                      {size}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <span className="pagination-info-text">
+              {locale === 'id' ? 'Halaman' : 'Page'} <strong>{currentPage}</strong>{' '}
+              {locale === 'id' ? 'dari' : 'of'} <strong>{totalPages}</strong>
+            </span>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

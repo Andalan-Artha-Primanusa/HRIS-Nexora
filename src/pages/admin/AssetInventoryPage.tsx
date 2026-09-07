@@ -5,6 +5,7 @@ import { Card } from '@/shared/ui/Card';
 import { Modal } from '@/shared/ui/Modal';
 import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
+import { PageHeader } from '@/shared/ui';
 import { assetService } from '@/features/assets/api/asset.service';
 import { api } from '@/shared/api/httpClient';
 import { showToast } from '@/shared/ui/toast';
@@ -266,19 +267,12 @@ const AssetInventoryPage: React.FC = () => {
 
   return (
     <div className="crud-page asset-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Package size={16} />
-              <span>Corporate Inventory</span>
-            </div>
-            <h1 className="hero-title">Assets & Properties</h1>
-            <p className="hero-subtitle">
-              Monitor asset distribution, conditions, and ownership status centrally.
-            </p>
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title="Assets & Properties"
+        subtitle="Monitor asset distribution, conditions, and ownership status centrally."
+        badge={{ icon: Package, label: "Corporate Inventory" }}
+        actions={
+          <>
             <button className="btn-outline" onClick={() => fetchData()} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan
@@ -287,9 +281,9 @@ const AssetInventoryPage: React.FC = () => {
               <Plus size={16} />
               Tambah Aset
             </button>
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       <div className="employee-summary-wrapper">
         {summaryCards.map((card) => {
@@ -478,7 +472,9 @@ const AssetInventoryPage: React.FC = () => {
 
               <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan <strong>{paginatedAssets.length}</strong> dari <strong>{sortedAssets.length}</strong> aset
+                  {sortedAssets.length === 0
+                    ? 'Menampilkan 0 data'
+                    : `Menampilkan ${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, sortedAssets.length)} dari ${sortedAssets.length} data`}
                 </div>
                 <div className="pagination-controls">
                   <button

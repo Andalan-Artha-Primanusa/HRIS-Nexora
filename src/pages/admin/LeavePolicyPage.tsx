@@ -10,6 +10,7 @@ import {
   Search,
 } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
+import { PageHeader } from '@/shared/ui';
 import { useAuthStore } from '@/app/store/auth.store';
 import { RBACUtils } from '@/shared/hooks/rbac';
 import { PERMISSIONS } from '@/shared/types/rbac.types';
@@ -127,7 +128,11 @@ const LeavePolicyPage = () => {
 
   if (!canAccess) {
     return (
-      <div className="crud-page"><Card className="page-header"><div className="page-header-inner"><div className="hero-content"><div className="hero-badge"><ShieldCheck size={16} /><span>Admin Center</span></div><h1 className="hero-title">Akses Ditolak</h1><p className="hero-subtitle">Anda tidak memiliki izin untuk mengakses halaman ini.</p></div></div></Card></div>
+      <div className="crud-page"><PageHeader
+        title="Akses Ditolak"
+        subtitle="Anda tidak memiliki izin untuk mengakses halaman ini."
+        badge={{ icon: ShieldCheck, label: "Admin Center" }}
+      /></div>
     );
   }
 
@@ -143,17 +148,12 @@ const LeavePolicyPage = () => {
 
   return (
     <div className="crud-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <CalendarDays size={16} />
-              <span>Governance</span>
-            </div>
-            <h1 className="hero-title">Leave Policies & Rules</h1>
-            <p className="hero-subtitle">Tentukan kerangka regulasi dan aturan hak cuti untuk semua kategori.</p>
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title="Leave Policies & Rules"
+        subtitle="Tentukan kerangka regulasi dan aturan hak cuti untuk semua kategori."
+        badge={{ icon: CalendarDays, label: "Governance" }}
+        actions={
+          <>
             <button className="btn-outline" onClick={fetchPolicies} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan
@@ -162,9 +162,9 @@ const LeavePolicyPage = () => {
               <Plus size={16} />
               Konfigurasi Policy
             </button>
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       <div className="employee-summary-wrapper">
         {summaryCards.map((card) => {
@@ -291,7 +291,9 @@ const LeavePolicyPage = () => {
 
               <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan <strong>{paginatedPolicies.length}</strong> dari <strong>{sortedPolicies.length}</strong> kebijakan
+                  {sortedPolicies.length === 0
+                    ? 'Menampilkan 0 data'
+                    : `Menampilkan ${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, sortedPolicies.length)} dari ${sortedPolicies.length} data`}
                 </div>
                 <div className="pagination-controls">
                   <button className="pagination-btn" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1}>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Network, Search, RefreshCw, Share2 } from 'lucide-react';
-import { Card } from '@/shared/ui/Card';
+import { PageHeader } from '@/shared/ui';
 import { OrgChartNode } from '@/features/organization/components/OrgChartNode';
 import { organizationService } from '@/features/organization/api/organization.service';
 import '@/shared/styles/CrudPage.css';
@@ -39,19 +39,12 @@ const OrgChartPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Share2 size={16} />
-              <span>Organization</span>
-            </div>
-            <h1 className="hero-title">Struktur Organisasi</h1>
-            <p className="hero-subtitle">
-              Visualisasi hirarki departemen dan manajemen perusahaan secara real-time.
-            </p>
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title="Struktur Organisasi"
+        subtitle="Visualisasi hirarki departemen dan manajemen perusahaan secara real-time."
+        badge={{ icon: Share2, label: "Organization" }}
+        actions={
+          <>
             <button className="btn-outline">
               <Search size={16} />
               Cari
@@ -59,9 +52,9 @@ const OrgChartPage: React.FC = () => {
             <button className="btn-primary">
               Export PDF
             </button>
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       <div className="" style={{ minHeight: '600px', padding: '3rem' }}> 
           {loading ? (

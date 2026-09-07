@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
+import { PageHeader } from "@/shared/ui";
 import { showToast } from '@/shared/ui/toast';
 import { Briefcase, Users, ChevronLeft } from "lucide-react";
 import { api } from "@/shared/api/httpClient";
@@ -168,24 +169,18 @@ const EmployeeEditPage = () => {
 
   return (
     <div className="crud-page">
-      <Card className="page-header" style={{ marginBottom: '2rem' }}>
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Users size={16} />
-              <span>People Center</span>
-            </div>
-            <h1 className="hero-title">Update Data Karyawan</h1>
-            <p className="hero-subtitle">Perbarui informasi karyawan: ID {updateForm.id || routeEmployeeId}</p>
-          </div>
-          <div className="page-header-actions">
-            <button className="btn-outline" onClick={() => navigate("/employees")} disabled={loading}>
-              <ChevronLeft size={18} />
-              Kembali ke Daftar
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Update Data Karyawan"
+        subtitle={`Perbarui informasi karyawan: ID ${updateForm.id || routeEmployeeId}`}
+        badge={{ icon: Users, label: "People Center" }}
+        actions={
+          <button className="btn-outline" onClick={() => navigate("/employees")} disabled={loading}>
+            <ChevronLeft size={18} />
+            Kembali ke Daftar
+          </button>
+        }
+        style={{ marginBottom: '2rem' }}
+      />
 
       <Card className="control-card" glass>
         <div style={{ marginBottom: '1rem' }}>

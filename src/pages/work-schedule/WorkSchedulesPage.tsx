@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardHeader } from "@/shared/ui";
+import { Card, CardHeader, PageHeader } from "@/shared/ui";
 import { Button } from "@/shared/ui/Button";
 import { showToast } from '@/shared/ui/toast';
 import { getAllWorkSchedules, deleteWorkSchedule } from "@/features/work-schedule/api/work-schedule.service";
@@ -173,19 +173,12 @@ const WorkSchedulesPage = () => {
 
   return (
     <div className="crud-page work-schedules-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Activity size={16} />
-              <span>Workforce Center</span>
-            </div>
-            <h1 className="hero-title">Manajemen Jadwal Kerja</h1>
-            <p className="hero-subtitle">
-              Kelola shift, jam masuk, jam pulang, dan toleransi keterlambatan karyawan dalam satu tampilan.
-            </p>
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title="Manajemen Jadwal Kerja"
+        subtitle="Kelola shift, jam masuk, jam pulang, dan toleransi keterlambatan karyawan dalam satu tampilan."
+        badge={{ icon: Activity, label: "Workforce Center" }}
+        actions={
+          <>
             <button
               className="btn-outline"
               onClick={() => void loadSchedules()}
@@ -202,9 +195,9 @@ const WorkSchedulesPage = () => {
               <Plus size={16} />
               Buat Jadwal Baru
             </button>
-          </div>
-</div>
-      </Card>
+          </>
+        }
+      />
 
       <div className="leave-requests-wrapper">
         {summaryCards.map((card) => {

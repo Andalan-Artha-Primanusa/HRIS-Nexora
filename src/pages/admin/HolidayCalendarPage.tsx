@@ -4,6 +4,7 @@ import { Plus, Calendar, RefreshCw, Edit, Trash2, CalendarDays, Search } from 'l
 import { Card } from '@/shared/ui/Card';
 import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
+import { PageHeader } from '@/shared/ui';
 import { workforceService } from '@/features/workforce/api/workforce.service';
 import { showToast } from '@/shared/ui/toast';
 import '@/shared/styles/CrudPage.css';
@@ -106,20 +107,12 @@ const HolidayCalendarPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      {/* Header */}
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <CalendarDays size={16} />
-              <span>Workforce</span>
-            </div>
-            <h1 className="hero-title">Kalender Libur</h1>
-            <p className="hero-subtitle">
-              Kelola hari libur nasional dan kebijakan libur perusahaan.
-            </p>
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title="Kalender Libur"
+        subtitle="Kelola hari libur nasional dan kebijakan libur perusahaan."
+        badge={{ icon: CalendarDays, label: "Workforce" }}
+        actions={
+          <>
             <button className="btn-outline" onClick={fetchData} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan
@@ -128,9 +121,9 @@ const HolidayCalendarPage: React.FC = () => {
               <Plus size={16} />
               Tambah Libur
             </button>
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="employee-summary-wrapper">
@@ -292,7 +285,9 @@ const HolidayCalendarPage: React.FC = () => {
               {/* Pagination */}
               <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan <strong>{paginatedHolidays.length}</strong> dari <strong>{filteredHolidays.length}</strong> hari libur
+                  {filteredHolidays.length === 0
+                    ? 'Menampilkan 0 data'
+                    : `Menampilkan ${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, filteredHolidays.length)} dari ${filteredHolidays.length} data`}
                 </div>
                 <div className="pagination-controls">
                   <button

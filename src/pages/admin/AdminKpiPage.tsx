@@ -8,6 +8,7 @@ import { ConfirmDialog } from "@/shared/ui/ConfirmDialog";
 import { Alert } from "@/shared/ui/Alert";
 import { showToast } from '@/shared/ui/toast';
 import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
+import { PageHeader } from "@/shared/ui";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { RBACUtils } from "@/shared/hooks/rbac";
 import { PERMISSIONS } from "@/shared/types/rbac.types";
@@ -274,19 +275,12 @@ const AdminKpiPage = () => {
 
   return (
     <div className="crud-page kpi-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Target size={16} />
-              <span>Kinerja</span>
-            </div>
-            <h1 className="hero-title">Pengelolaan Periode KPI</h1>
-            <p className="hero-subtitle">
-              Kelola periode KPI dengan indikator kinerja multi-item per karyawan.
-            </p>
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title="Pengelolaan Periode KPI"
+        subtitle="Kelola periode KPI dengan indikator kinerja multi-item per karyawan."
+        badge={{ icon: Target, label: "Kinerja" }}
+        actions={
+          <>
             <button className="btn-outline" onClick={loadData} disabled={loading}>
               <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
               Segarkan
@@ -297,9 +291,9 @@ const AdminKpiPage = () => {
               Buat Periode KPI
             </button>
             )}
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       <div className="table-section integrated-table-section">
         <div className="wuw-table-area integrated-table-area">
@@ -545,7 +539,9 @@ const AdminKpiPage = () => {
 
               <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan <strong>{paginatedPeriods.length}</strong> dari <strong>{filteredPeriods.length}</strong> periode
+                  {filteredPeriods.length === 0
+                    ? 'Menampilkan 0 data'
+                    : `Menampilkan ${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, filteredPeriods.length)} dari ${filteredPeriods.length} data`}
                 </div>
                 <div className="pagination-controls">
                   <button

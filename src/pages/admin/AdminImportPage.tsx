@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
+import { PageHeader } from "@/shared/ui";
 import { showToast } from '@/shared/ui/toast';
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { RBACUtils } from "@/shared/hooks/rbac";
@@ -25,20 +26,11 @@ const AdminImportPage = () => {
   if (!canAccess) {
     return (
       <div className="crud-page">
-        <Card className="page-header">
-          <div className="page-header-inner">
-            <div className="hero-content">
-              <div className="hero-badge">
-                <ShieldAlert size={16} />
-                <span>Admin Center</span>
-              </div>
-              <h1 className="hero-title">Akses Ditolak</h1>
-              <p className="hero-subtitle">
-                Anda tidak memiliki izin untuk mengakses halaman ini.
-              </p>
-            </div>
-          </div>
-        </Card>
+        <PageHeader
+          title="Akses Ditolak"
+          subtitle="Anda tidak memiliki izin untuk mengakses halaman ini."
+          badge={{ icon: ShieldAlert, label: "Admin Center" }}
+        />
         <div className="">
           <Card glass style={{ padding: '2rem', textAlign: 'center' }}>
             <p style={{ color: '#64748b' }}>Silakan hubungi Administrator untuk mendapatkan akses.</p>
@@ -161,31 +153,22 @@ const AdminImportPage = () => {
   return (
     <div className="crud-page">
       {/* Header */}
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <UploadCloud size={16} />
-              <span>Admin Center</span>
-            </div>
-            <h1 className="hero-title">Import Data</h1>
-            <p className="hero-subtitle">
-              Unduh template, unggah file users maupun employees, dan tinjau hasil proses import langsung dari halaman admin.
-            </p>
-          </div>
-          <div className="page-header-actions">
-            <button className="btn-outline" onClick={() => {
-              setUserFile(null);
-              setEmployeeFile(null);
-              setUserImportResult(null);
-              setEmployeeImportResult(null);
-            }}>
-              <RefreshCw size={16} />
-              Reset
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Import Data"
+        subtitle="Unduh template, unggah file users maupun employees, dan tinjau hasil proses import langsung dari halaman admin."
+        badge={{ icon: UploadCloud, label: "Admin Center" }}
+        actions={
+          <button className="btn-outline" onClick={() => {
+            setUserFile(null);
+            setEmployeeFile(null);
+            setUserImportResult(null);
+            setEmployeeImportResult(null);
+          }}>
+            <RefreshCw size={16} />
+            Reset
+          </button>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="employee-summary-wrapper">

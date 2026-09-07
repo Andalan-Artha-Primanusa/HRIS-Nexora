@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
+import { PageHeader } from "@/shared/ui";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { showToast } from "@/shared/ui/toast";
 import { Bell, Megaphone, RefreshCw, Send, Users } from "lucide-react";
@@ -162,26 +163,17 @@ const AdminNotificationsPage = () => {
 
   return (
     <div className="crud-page admin-notifications-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Bell size={16} />
-              <span>Admin Center</span>
-            </div>
-            <h1 className="hero-title">Notification Center</h1>
-            <p className="hero-subtitle">
-              Kelola notifikasi admin, kirim pesan individual, dan broadcast pengumuman ke pengguna.
-            </p>
-          </div>
-          <div className="page-header-actions">
-            <button className="btn-outline" onClick={() => void loadSummary()} disabled={loading}>
-              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-              {loading ? "Memuat..." : "Segarkan"}
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Notification Center"
+        subtitle="Kelola notifikasi admin, kirim pesan individual, dan broadcast pengumuman ke pengguna."
+        badge={{ icon: Bell, label: "Admin Center" }}
+        actions={
+          <button className="btn-outline" onClick={() => void loadSummary()} disabled={loading}>
+            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+            {loading ? "Memuat..." : "Segarkan"}
+          </button>
+        }
+      />
 
       <div className="employee-summary-wrapper">
         {summaryCards.map((card) => {

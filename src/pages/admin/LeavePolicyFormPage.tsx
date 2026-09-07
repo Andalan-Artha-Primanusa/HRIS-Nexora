@@ -4,6 +4,7 @@ import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
 import { showToast } from '@/shared/ui/toast';
+import { PageHeader } from '@/shared/ui';
 import { 
   Save, 
   ArrowLeft, 
@@ -175,19 +176,12 @@ const LeavePolicyFormPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <ShieldCheck size={16} />
-              <span>Governance</span>
-            </div>
-            <h1 className="hero-title">{isEdit ? 'Edit Kebijakan Cuti' : 'Buat Kebijakan Cuti Baru'}</h1>
-            <p className="hero-subtitle">
-              Tentukan aturan jatah, akumulasi, dan batasan carry-forward.
-            </p>
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title={isEdit ? 'Edit Kebijakan Cuti' : 'Buat Kebijakan Cuti Baru'}
+        subtitle="Tentukan aturan jatah, akumulasi, dan batasan carry-forward."
+        badge={{ icon: ShieldCheck, label: "Governance" }}
+        actions={
+          <>
             <button className="btn-outline" onClick={() => navigate('/leave/policy')}>
               <ArrowLeft size={16} />
               Kembali
@@ -196,9 +190,9 @@ const LeavePolicyFormPage: React.FC = () => {
               {loading ? <RefreshCw size={16} className="animate-spin" /> : <Save size={16} />}
               {loading ? 'Menyimpan...' : (isEdit ? 'Simpan Perubahan' : 'Buat Kebijakan')}
             </button>
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       <form id="leave-policy-form" onSubmit={handleSubmit} style={{ maxWidth: '900px', margin: '0 auto' }}>
         <div>

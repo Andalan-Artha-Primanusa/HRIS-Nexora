@@ -15,6 +15,7 @@ import { parsePaginatedResponse } from "@/shared/api/pagination";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "@/pages/payroll/PayrollShared.css";
+import { PageHeader } from "@/shared/ui";
 
 type PayrollFormState = {
   id: string;
@@ -234,19 +235,12 @@ const PayrollCrudPage = () => {
 
   return (
     <div className="crud-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <LayoutDashboard size={16} />
-              <span>Operasi Penggajian</span>
-            </div>
-            <h1 className="hero-title">Kelola Payroll</h1>
-            <p className="hero-subtitle">
-              Administer employee payroll records with precision. Create, update, or remove entries with a streamlined workflow.
-            </p>
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title="Kelola Payroll"
+        subtitle="Administer employee payroll records with precision. Create, update, or remove entries with a streamlined workflow."
+        badge={{ icon: LayoutDashboard, label: "Operasi Penggajian" }}
+        actions={
+          <>
             <button className="btn-outline" onClick={() => void loadData()} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Sync
@@ -267,9 +261,9 @@ const PayrollCrudPage = () => {
                 Tambah Payroll
               </button>
             )}
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       {view === "list" && (
         <>

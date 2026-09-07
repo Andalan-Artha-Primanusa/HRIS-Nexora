@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Briefcase, CheckCircle, Clock, Users, TrendingUp, RefreshCw, BarChart3, PieChart as PieIcon, Package } from 'lucide-react';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card } from '@/shared/ui/Card';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import { api } from '@/shared/api/httpClient';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
@@ -85,26 +86,17 @@ const ReportsAssetsPage: React.FC = () => {
 
   return (
     <div className="reports-dashboard">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Package size={16} />
-              <span>Laporan & Analitik</span>
-            </div>
-            <h1 className="hero-title">Laporan Aset</h1>
-            <p className="hero-subtitle">
-              Analisis inventaris aset perusahaan, status, kategori, dan penugasan ke karyawan.
-            </p>
-          </div>
-          <div className="page-header-actions">
-            <button className="btn-outline" onClick={() => void load()} disabled={loading}>
-              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-              Segarkan
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Laporan Aset"
+        subtitle="Analisis inventaris aset perusahaan, status, kategori, dan penugasan ke karyawan."
+        badge={{ icon: Package, label: "Laporan & Analitik" }}
+        actions={
+          <button className="btn-outline" onClick={() => void load()} disabled={loading}>
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            Segarkan
+          </button>
+        }
+      />
 
       {error && <p className="reports-error">{error}</p>}
 

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Card } from '@/shared/ui/Card';
 import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
+import { PageHeader } from '@/shared/ui';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
 import {
@@ -20,7 +21,6 @@ import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import './AttendanceShared.css';
 import './AttendanceAdminPage.css';
-import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 
 
 const AttendanceReportsPage = () => {
@@ -155,18 +155,13 @@ const AttendanceReportsPage = () => {
 
   return (
     <div className="crud-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <FileText size={16} />
-              <span>Pusat Laporan</span>
-            </div>
-            <h1 className="hero-title">Laporan Kehadiran</h1>
-            <p className="hero-subtitle">Analitik dan laporan kehadiran karyawan.</p>
-            <CompanyScopeBadge />
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title="Laporan Kehadiran"
+        subtitle="Analitik dan laporan kehadiran karyawan."
+        badge={{ icon: FileText, label: 'Pusat Laporan' }}
+        scope
+        actions={
+          <>
             <button className="btn-outline" onClick={exportCSV}>
               <Download size={16} />
               Ekspor Data Karyawan
@@ -175,9 +170,9 @@ const AttendanceReportsPage = () => {
               <RefreshCw size={16} className={adminLoading ? 'animate-spin' : ''} />
               Segarkan
             </button>
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       <AttendanceSummary stats={adminStats} />
 

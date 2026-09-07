@@ -125,63 +125,6 @@
   background: #ffffff;
 }
 
-.control-section-inner {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-}
-
-.control-actions {
-  display: flex;
-  gap: 0.75rem;
-  align-items: center;
-}
-
-.control-actions .search-box {
-  position: relative;
-  display: flex;
-  align-items: center;
-  min-width: 280px;
-}
-
-.control-actions .search-icon-inside {
-  position: absolute;
-  left: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--color-text-tertiary);
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.control-actions .search-input-pill {
-  width: 100%;
-  padding: 0.75rem 1rem 0.75rem 3rem;
-  border-radius: 999px;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-soft);
-  font-size: 0.9rem;
-  color: var(--color-text-primary);
-  transition: all 0.25s ease;
-  font-family: var(--font-family-heading);
-}
-
-.control-actions .search-input-pill::placeholder {
-  color: var(--color-text-tertiary);
-  font-weight: 500;
-}
-
-.control-actions .search-input-pill:focus {
-  background: var(--color-white);
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.1);
-  outline: none;
-}
-
 .control-select {
   height: 44px;
   padding: 0 1rem;
@@ -201,10 +144,6 @@
 }
 
 /* Table Section */
-.table-section {
-  margin-top: 1.5rem;
-}
-
 .leave-requests-table-area {
   background: #ffffff;
   border-radius: 16px;
@@ -218,13 +157,6 @@
   border-top: 1px solid #e2e8f0;
 }
 
-.table-wrap {
-  overflow-x: auto;
-  background: var(--color-white);
-  border-radius: 16px;
-  border: 1px solid var(--color-border);
-}
-
 .leave-requests-table-area .table-wrap {
   border: 0;
   border-top: 1px solid #e2e8f0;
@@ -235,249 +167,12 @@
   margin-top: 0;
 }
 
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-family: var(--font-family-heading);
-}
-
-.data-table th {
-  padding: 1rem 1.25rem;
-  text-align: left;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--color-text-secondary);
-  background: var(--color-surface-soft);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.data-table td {
-  padding: 1rem 1.25rem;
-  font-size: 0.9rem;
-  color: var(--color-text-primary);
-  border-bottom: 1px solid var(--color-surface-soft);
-}
-
-.data-table tr:hover td {
-  background: #f8faff;
-}
-
-.data-table tr:last-child td {
-  border-bottom: none;
-}
-
 /* Badge Soft Overrides to match EmployeesPage */
-.badge-soft {
-  display: inline-flex;
-  padding: 0.35rem 0.75rem;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.badge-soft--blue {
-  background: var(--color-primary-light);
-  color: var(--color-primary-dark);
-}
-
-.badge-soft--green {
-  background: var(--color-success-light);
-  color: var(--color-success);
-}
-
-.badge-soft--orange {
-  background: var(--color-warning-light);
-  color: var(--color-warning);
-}
-
-.badge-soft--red {
-  background: var(--color-error-light);
-  color: var(--color-error);
-}
-
-/* Status Badges */
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.35rem 0.75rem;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.status-badge--approved,
-.status-badge--green {
-  background: var(--color-success-light);
-  color: var(--color-success);
-}
-
-.status-badge--pending,
-.status-badge--orange {
-  background: var(--color-warning-light);
-  color: var(--color-warning);
-}
-
-.status-badge--rejected,
-.status-badge--red {
-  background: var(--color-error-light);
-  color: var(--color-error);
-}
-
-.status-badge--draft,
-.status-badge--blue {
-  background: var(--color-primary-light);
-  color: var(--color-primary-dark);
-}
-
-.td-center {
-  text-align: center;
-}
-
-/* Action Buttons */
-.action-btn-group {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: center;
-  align-items: center;
-}
-
-.action-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  border: 1px solid var(--color-border);
-  background: var(--color-white);
-  color: var(--color-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.action-btn:hover {
-  background: var(--color-primary-light);
-  border-color: var(--color-primary-light);
-  color: var(--color-primary);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(15, 159, 143, 0.12);
-}
-
-.action-btn-success {
-  background: var(--color-success-light);
-  color: var(--color-success);
-}
-
-.action-btn-success:hover {
-  background: var(--color-success);
-  color: var(--color-white);
-}
-
-.action-btn-approve {
-  background: var(--color-success-light);
-  color: var(--color-success);
-}
-
-.action-btn-approve:hover {
-  background: var(--color-success);
-  color: var(--color-white);
-}
-
-.action-btn-reject {
-  background: var(--color-error-light);
-  color: var(--color-error);
-}
-
-.action-btn-reject:hover {
-  background: var(--color-error);
-  color: var(--color-white);
-}
-
-.action-btn-delete {
-  background: var(--color-error-light);
-  color: var(--color-error);
-}
-
-.action-btn-delete:hover {
-  background: var(--color-error);
-  color: var(--color-white);
-}
-
-.action-btn-view,
-.action-btn-edit {
-  background: var(--color-white) !important;
-  color: var(--color-primary) !important;
-  border: 1px solid var(--color-border) !important;
-}
-
-.action-btn-view:hover,
-.action-btn-edit:hover {
-  background: var(--color-primary-light) !important;
-  color: var(--color-primary) !important;
-  border-color: var(--color-primary-light) !important;
-}
-
-/* Empty State */
-.empty-state {
-  padding: 4rem 2rem;
-  text-align: center;
-}
-
-.empty-state h3 {
-  font-size: 1.25rem;
-  color: var(--color-text-primary);
-  margin: 1rem 0 0.5rem;
-}
-
-.empty-state p {
-  color: var(--color-text-secondary);
-}
-
-/* Responsive */
-@media (max-width: 900px) {
-  .control-section-inner {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .control-actions {
-    flex-wrap: wrap;
-  }
-
-  .control-actions .search-box {
-    min-width: 100%;
-  }
-
-  .data-table {
-    font-size: 0.8rem;
-  }
-
-  .data-table th,
-  .data-table td {
-    padding: 0.75rem;
-  }
-}
-
-/* ============================================ */
 /* Leave Balance Page Styles */
 /* ============================================ */
 
 .leave-balance-page {
   padding: 1.5rem;
-}
-
-.page-header {
-  margin-bottom: 2rem;
-}
-
-.page-header h1 {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  margin: 0 0 0.25rem 0;
 }
 
 .page-subtitle {

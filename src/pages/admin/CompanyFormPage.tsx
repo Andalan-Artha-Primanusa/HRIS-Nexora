@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Save, Building2 } from "lucide-react";
+import { ArrowLeft, Save, Building2, ShieldCheck } from "lucide-react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
+import { PageHeader } from "@/shared/ui";
 import { showToast } from "@/shared/ui/toast";
 import { companyService } from "@/features/company/api/company.service";
 import { useAuthStore } from "@/app/store/auth.store";
@@ -108,37 +109,33 @@ const CompanyFormPage = () => {
   if (!canManage) {
     return (
       <div className="crud-page">
-        <Card className="page-header">
-          <div className="page-header-inner">
-            <h1 className="hero-title">Akses Ditolak</h1>
-            <p className="hero-subtitle">Anda tidak memiliki izin untuk mengelola company.</p>
+        <PageHeader
+          title="Akses Ditolak"
+          subtitle="Anda tidak memiliki izin untuk mengelola company."
+          badge={{ icon: ShieldCheck, label: "Admin Center" }}
+          actions={
             <Button variant="outline" onClick={() => navigate("/companies")}>Kembali</Button>
-          </div>
-        </Card>
+          }
+        />
       </div>
     );
   }
 
   return (
     <div className="crud-page company-form-page">
-      <div style={{ marginBottom: 16 }}>
-        <Button variant="ghost" onClick={() => navigate("/companies")}>
-          <ArrowLeft size={16} style={{ marginRight: 6 }} />
-          Kembali ke Daftar Company
-        </Button>
-      </div>
-      
+      <PageHeader
+        title={id ? "Edit Company" : "Create Company"}
+        subtitle={id ? `ID ${id}` : undefined}
+        badge={{ icon: Building2, label: "Company" }}
+        actions={
+          <Button variant="ghost" onClick={() => navigate("/companies")}>
+            <ArrowLeft size={16} style={{ marginRight: 6 }} />
+            Kembali ke Daftar Company
+          </Button>
+        }
+      />
+
       <Card className="company-form-card" style={{ maxWidth: 800, margin: '0 auto', display: 'block', gridColumn: 'unset' }}>
-        <div className="company-list-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div className="hero-badge" style={{ margin: 0, padding: 8, background: 'var(--color-primary-light)', color: 'var(--color-primary)' }}><Building2 size={20} /></div>
-            <div>
-              <h2 style={{ fontSize: 20, margin: 0, color: 'var(--color-text)' }}>{id ? "Edit Company" : "Create Company"}</h2>
-              {id && <span style={{ color: 'var(--color-text-light)', fontSize: 13 }}>ID {id}</span>}
-            </div>
-          </div>
-        </div>
-        
         {loading ? (
           <div style={{ padding: 40, textAlign: 'center', color: 'var(--color-text-light)' }}>Memuat data...</div>
         ) : (

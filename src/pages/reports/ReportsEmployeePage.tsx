@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Users, UserCheck, UserMinus, UserPlus, Briefcase, RefreshCw, BarChart3, PieChart as PieIcon, TrendingUp, UserCircle } from 'lucide-react';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { Card } from '@/shared/ui/Card';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import { api } from '@/shared/api/httpClient';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
@@ -96,26 +97,17 @@ const ReportsEmployeePage: React.FC = () => {
 
   return (
     <div className="reports-dashboard">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <UserCircle size={16} />
-              <span>Laporan & Analitik</span>
-            </div>
-            <h1 className="hero-title">Laporan SDM (Human Capital)</h1>
-            <p className="hero-subtitle">
-              Analisis demografi karyawan, distribusi departemen, pertumbuhan headcount, dan status kepegawaian.
-            </p>
-          </div>
-          <div className="page-header-actions">
-            <button className="btn-outline" onClick={() => void load()} disabled={loading}>
-              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-              Segarkan
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Laporan SDM (Human Capital)"
+        subtitle="Analisis demografi karyawan, distribusi departemen, pertumbuhan headcount, dan status kepegawaian."
+        badge={{ icon: UserCircle, label: "Laporan & Analitik" }}
+        actions={
+          <button className="btn-outline" onClick={() => void load()} disabled={loading}>
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            Segarkan
+          </button>
+        }
+      />
 
       {error && <p className="reports-error">{error}</p>}
 

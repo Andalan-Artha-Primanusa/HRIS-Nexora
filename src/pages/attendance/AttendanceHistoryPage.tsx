@@ -1,12 +1,11 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Card, CardHeader } from '@/shared/ui';
+import { Card, CardHeader, PageHeader } from '@/shared/ui';
 import { Button } from '@/shared/ui/Button';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { attendanceService } from '@/features/attendance/api/attendance.service';
 import { CalendarDays, CheckCircle2, Clock, RefreshCw, XCircle, Search } from 'lucide-react';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
-import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 
 interface AttendanceRecord {
   date?: string;
@@ -140,27 +139,18 @@ const AttendanceHistoryPage = () => {
   return (
     <div className="crud-page">
       {/* Header */}
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <CalendarDays size={16} />
-              <span>Kehadiran</span>
-            </div>
-            <h1 className="hero-title">Riwayat Kehadiran</h1>
-            <p className="hero-subtitle">
-              Riwayat kehadiran Anda, termasuk check-in dan check-out setiap hari.
-            </p>
-            <CompanyScopeBadge />
-          </div>
-          <div className="page-header-actions">
-            <button className="btn-outline" onClick={() => void loadHistory()} disabled={loading}>
-              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-              Segarkan
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Riwayat Kehadiran"
+        subtitle="Riwayat kehadiran Anda, termasuk check-in dan check-out setiap hari."
+        badge={{ icon: CalendarDays, label: 'Kehadiran' }}
+        scope
+        actions={
+          <button className="btn-outline" onClick={() => void loadHistory()} disabled={loading}>
+            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+            Segarkan
+          </button>
+        }
+      />
 
       {errorMessage && (
         <div style={{ background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: '0.5rem', padding: '1rem', marginBottom: '1rem', color: '#b91c1c' }}>
@@ -298,7 +288,9 @@ const AttendanceHistoryPage = () => {
               {/* Pagination */}
               <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan <strong>{paginatedHistory.length}</strong> dari <strong>{sortedHistory.length}</strong> riwayat
+                  {sortedHistory.length === 0
+                    ? 'Menampilkan 0 data'
+                    : `Menampilkan ${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, sortedHistory.length)} dari ${sortedHistory.length} data`}
                 </div>
                 <div className="pagination-controls">
                   <button

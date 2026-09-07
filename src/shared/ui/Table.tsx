@@ -73,7 +73,7 @@ export const Table: React.FC<TableProps> = ({ columns, data, searchable, onSearc
       {pagination && (
         <div className="ui-table-pagination">
           <span className="pagination-info">
-            Showing Page {pagination.currentPage} of {pagination.totalPages}
+            Menampilkan halaman {pagination.currentPage} dari {pagination.totalPages}
           </span>
           <div className="pagination-controls">
             <button 

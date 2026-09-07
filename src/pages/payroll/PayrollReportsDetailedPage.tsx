@@ -9,6 +9,7 @@ import { getApiBaseUrl } from '@/shared/api/httpClient';
 import { parsePaginatedResponse } from '@/shared/api/pagination';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
+import { PageHeader } from '@/shared/ui';
 
 const formatCurrency = (value: number | string) => {
   const num = typeof value === 'string' ? parseFloat(value) : value;
@@ -164,19 +165,12 @@ const PayrollReportsDetailedPage: React.FC = () => {
   return (
     <div className="crud-page">
       {/* Header */}
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Receipt size={16} />
-              <span>Pusat Payroll</span>
-            </div>
-            <h1 className="hero-title">Laporan Detail Payroll</h1>
-            <p className="hero-subtitle">
-              Laporan komprehensif seluruh komponen penghasilan dan potongan karyawan.
-            </p>
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title="Laporan Detail Payroll"
+        subtitle="Laporan komprehensif seluruh komponen penghasilan dan potongan karyawan."
+        badge={{ icon: Receipt, label: "Pusat Payroll" }}
+        actions={
+          <>
             <button className="btn-outline" onClick={() => void loadData()} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan
@@ -189,9 +183,9 @@ const PayrollReportsDetailedPage: React.FC = () => {
               <Download size={16} />
               Export Payroll
             </button>
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       {/* Error Message */}
       {error && (
@@ -354,7 +348,9 @@ const PayrollReportsDetailedPage: React.FC = () => {
               {/* Pagination */}
               <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan <strong>{paginatedData.length}</strong> dari <strong>{filteredData.length}</strong> data
+                  {filteredData.length === 0
+                    ? 'Menampilkan 0 data'
+                    : `Menampilkan ${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, filteredData.length)} dari ${filteredData.length} data`}
                 </div>
                 <div className="pagination-controls">
                   <button

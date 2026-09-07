@@ -242,75 +242,6 @@
   transform: translateY(-1px);
 }
 
-.filter-btn-rounded {
-  height: 42px;
-  border-radius: var(--radius-full);
-  border: 1px solid var(--color-border);
-  background: var(--color-white);
-  color: var(--color-text-secondary);
-  padding: 0 1.25rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-sm);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.filter-btn-rounded:hover {
-  background: var(--gray-100);
-  border-color: var(--gray-300);
-}
-
-.filter-btn-rounded.active {
-  background: var(--color-primary);
-  color: var(--color-white);
-  border-color: var(--color-primary);
-}
-
-/* Search */
-.search-box {
-  position: relative !important;
-  display: flex !important;
-  align-items: center !important;
-  min-width: 300px;
-}
-
-.search-icon-inside {
-  position: absolute !important;
-  left: 1rem !important;
-  top: 50% !important;
-  transform: translateY(-50%) !important;
-  color: var(--color-text-tertiary) !important;
-  pointer-events: none !important;
-  z-index: 10 !important;
-  display: flex !important;
-  align-items: center;
-}
-
-.search-input-pill {
-  width: 100% !important;
-  padding: 0.75rem 1rem 0.75rem 3rem !important;
-  border-radius: var(--radius-full) !important;
-  border: 1px solid var(--color-border) !important;
-  background: var(--gray-50) !important;
-  font-size: var(--font-size-sm) !important;
-  color: var(--color-text-primary) !important;
-  transition: all var(--transition-fast) !important;
-  font-family: var(--font-family-base);
-}
-
-.search-input-pill::placeholder {
-  color: var(--color-text-tertiary) !important;
-}
-
-.search-input-pill:focus {
-  background: var(--color-white) !important;
-  border-color: var(--color-primary) !important;
-  box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.1) !important;
-}
-
 /* Control Section */
 .control-section-card {
   background: var(--color-white);
@@ -318,142 +249,6 @@
   border: 1px solid var(--color-border);
   padding: 1.25rem;
   margin-bottom: 1.5rem;
-}
-
-/* ============================================ */
-/* Table Toolbar                                 */
-/* ============================================ */
-
-.table-toolbar {
-  padding: 1.5rem;
-  background: #ffffff;
-}
-
-.control-section-inner {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-/* Tabs */
-.elyra-tabs {
-  display: flex;
-  gap: 0.375rem;
-  background: var(--gray-100);
-  padding: 3px;
-  border-radius: var(--radius-full);
-}
-
-.elyra-tab {
-  padding: 0.5rem 1.125rem;
-  border: none;
-  background: transparent;
-  color: var(--color-text-secondary);
-  font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-sm);
-  border-radius: var(--radius-full);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  font-family: var(--font-family-base);
-}
-
-.elyra-tab:hover {
-  background: var(--color-primary-lighter);
-  color: var(--color-primary);
-}
-
-.elyra-tab.active {
-  background: var(--color-primary);
-  color: var(--color-white);
-}
-
-/* Control Actions */
-.control-actions {
-  display: flex;
-  gap: 0.75rem;
-  align-items: center;
-}
-
-.control-actions .search-box {
-  min-width: 280px;
-}
-
-.control-actions .filter-btn-rounded {
-  height: 42px;
-}
-
-.control-actions .filter-btn-rounded.active {
-  background: var(--color-primary);
-  color: var(--color-white);
-  border-color: var(--color-primary);
-}
-
-/* Filter Dropdown */
-.filter-dropdown {
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--color-border);
-}
-
-.filter-row {
-  display: flex;
-  gap: 1rem;
-  align-items: flex-end;
-  flex-wrap: wrap;
-}
-
-.filter-group {
-  min-width: 200px;
-  flex: 1;
-}
-
-.filter-group label {
-  display: block;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 0.5rem;
-}
-
-.filter-group .filter-select-premium {
-  width: 100%;
-  height: 42px;
-  padding: 0 1rem;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
-  background: var(--color-white);
-  font-size: var(--font-size-sm);
-  color: var(--color-text-primary);
-  transition: all var(--transition-fast);
-  font-family: var(--font-family-base);
-}
-
-.filter-group .filter-select-premium:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.1);
-  outline: none;
-}
-
-.filter-select-premium {
-  background: var(--color-white);
-  border-radius: var(--radius-md);
-  height: 42px;
-  border: 1px solid var(--color-border);
-  padding: 0 1rem;
-  font-family: var(--font-family-base);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
-  outline: none;
-  transition: all var(--transition-fast);
-}
-
-.filter-select-premium:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.1);
 }
 
 .btn-reset {
@@ -481,33 +276,16 @@
 }
 
 /* Table Area */
-.wuw-table-area {
-  background: var(--color-white);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
-  overflow: hidden;
-}
-
-.table-wrap { overflow-x: auto; }
-.data-table { width: 100%; }
 .employee-table-area,
 .task-table-area,
 .payroll-report-table-area {
   box-shadow: var(--shadow-sm);
 }
 
-.table-wrap {
-  overflow-x: auto;
-}
-
 .employee-table-area .table-wrap,
 .task-table-area .table-wrap,
 .payroll-report-table-area .table-wrap {
   border-top: 1px solid #e2e8f0;
-}
-
-.data-table {
-  width: 100%;
 }
 
 /* Cell Avatar */
@@ -547,106 +325,7 @@
   color: var(--color-text-tertiary);
 }
 
-/* Badges */
-.badge-soft {
-  display: inline-flex;
-  padding: 0.3rem 0.75rem;
-  border-radius: var(--radius-full);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-}
-
-.badge-soft--blue {
-  background: var(--color-primary-light);
-  color: var(--color-primary);
-}
-
-.badge-soft--green {
-  background: var(--color-success-light);
-  color: var(--color-success);
-}
-
-.badge-soft--orange {
-  background: var(--color-warning-light);
-  color: var(--color-warning);
-}
-
-.badge-soft--red {
-  background: var(--color-error-light);
-  color: var(--color-error);
-}
-
-.badge-soft--yellow {
-  background: var(--color-warning-light);
-  color: var(--color-warning-dark);
-}
-
-.badge-soft--gray {
-  background: var(--gray-100);
-  color: var(--color-text-secondary);
-}
-
-/* Action Buttons */
-.action-btn-group {
-  display: flex;
-  gap: 0.375rem;
-  justify-content: center;
-}
-
-.action-btn {
-  width: 34px;
-  height: 34px;
-  border-radius: var(--radius-md);
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.action-btn-edit {
-  background: var(--color-primary-light);
-  color: var(--color-primary);
-}
-
-.action-btn-edit:hover {
-  background: var(--color-primary);
-  color: var(--color-white);
-}
-
-.action-btn-secondary {
-  background: var(--gray-100);
-  color: var(--color-text-secondary);
-}
-
-.action-btn-secondary:hover {
-  background: var(--gray-200);
-}
-
-.action-btn-delete {
-  background: var(--color-error-light);
-  color: var(--color-error);
-}
-
-.action-btn-delete:hover {
-  background: var(--color-error);
-  color: var(--color-white);
-}
-
 /* States */
-.loading-state,
-.empty-state,
-.error-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem 2rem;
-  text-align: center;
-}
-
-.loading-state { color: var(--color-text-secondary); }
 .employee-table-area > .loading-state,
 .employee-table-area > .empty-state,
 .employee-table-area > .error-state,
@@ -657,80 +336,6 @@
 .payroll-report-table-area > .empty-state,
 .payroll-report-table-area > .error-state {
   border-top: 1px solid #e2e8f0;
-}
-
-.loading-state {
-  color: #64748b;
-}
-
-.empty-state h3,
-.error-state h3 {
-  font-size: 1.125rem;
-  color: var(--color-text-primary);
-  margin: 1rem 0 0.5rem;
-}
-
-.empty-state p,
-.error-state p {
-  color: var(--color-text-secondary);
-  margin-bottom: 1.5rem;
-}
-
-/* Pagination */
-.table-pagination {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 1.5rem;
-  background: var(--gray-50);
-  border-top: 1px solid var(--color-border);
-}
-
-.pagination-info {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-}
-
-.pagination-controls {
-  display: flex;
-  gap: 0.375rem;
-}
-
-.pagination-btn {
-  width: 34px;
-  height: 34px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
-  background: var(--color-white);
-  color: var(--color-text-secondary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.pagination-btn:hover:not(:disabled) {
-  background: var(--color-primary);
-  color: var(--color-white);
-  border-color: var(--color-primary);
-}
-
-.pagination-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.pagination-btn.active {
-  background: var(--color-primary);
-  color: var(--color-white);
-  border-color: var(--color-primary);
-}
-
-.table-section { margin-top: 1.5rem; }
-/* Table Section Wrapper */
-.table-section {
-  margin-top: 1.5rem;
 }
 
 .employee-table-section,
@@ -755,11 +360,6 @@
     width: 100%;
   }
 
-  .control-section-inner {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
   .elyra-tabs {
     overflow-x: auto;
     padding-bottom: 0.5rem;
@@ -771,23 +371,6 @@
 
   .control-actions .search-box {
     min-width: 100%;
-  }
-
-  .filter-row {
-    flex-direction: column;
-  }
-
-  .filter-group {
-    min-width: 100%;
-  }
-
-  .data-table {
-    font-size: 0.8rem;
-  }
-
-  .data-table th,
-  .data-table td {
-    padding: 0.75rem;
   }
 }
 
@@ -913,12 +496,9 @@
 
 /* Responsive */
 @media (max-width: 900px) {
-  .control-section-inner { flex-direction: column; align-items: stretch; }
   .elyra-tabs { overflow-x: auto; padding-bottom: 0.5rem; }
   .control-actions { flex-wrap: wrap; }
   .control-actions .search-box { min-width: 100%; }
-  .filter-row { flex-direction: column; }
-  .filter-group { min-width: 100%; }
 }
 
 /* ============================================ */

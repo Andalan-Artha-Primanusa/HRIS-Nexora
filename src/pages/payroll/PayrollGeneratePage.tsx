@@ -28,6 +28,7 @@ import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "./PayrollGeneratePage.css";
 import "./PayrollListPage.css";
+import { PageHeader } from "@/shared/ui";
 
 /* ─────────────────────────────────────────────────────────────
    Helpers
@@ -627,31 +628,21 @@ const PayrollGeneratePage = () => {
   return (
     <div className="crud-page payroll-page" style={S.page}>
       {/* ── Hero ── */}
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Zap size={13} />
-              Operasi Penggajian
-            </div>
-            <h1 className="hero-title">Generate Payroll Bulanan</h1>
-            <p className="hero-subtitle">
-              Sistem otomatisasi penggajian karyawan secara massal untuk periode tertentu
-              dengan akurasi data real-time.
-            </p>
-          </div>
-          <div className="page-header-actions">
-            <button
-              className="btn-outline"
-              onClick={() => void loadPayroll()}
-              disabled={loading}
-            >
-              <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
-              Sync Data
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Generate Payroll Bulanan"
+        subtitle="Sistem otomatisasi penggajian karyawan secara massal untuk periode tertentu dengan akurasi data real-time."
+        badge={{ icon: Zap, label: "Operasi Penggajian" }}
+        actions={
+          <button
+            className="btn-outline"
+            onClick={() => void loadPayroll()}
+            disabled={loading}
+          >
+            <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+            Sync Data
+          </button>
+        }
+      />
 
       {/* ── Summary cards ── */}
       <div style={S.summaryGrid}>
@@ -850,13 +841,9 @@ const PayrollGeneratePage = () => {
           {filteredItems.length > 0 && (
             <div style={S.paginationBar}>
               <span style={S.paginationInfo}>
-                Menampilkan{" "}
-                <strong style={{ color: "#475569" }}>
-                  {(safePage - 1) * itemsPerPage + 1}–
-                  {Math.min(safePage * itemsPerPage, filteredItems.length)}
-                </strong>{" "}
-                dari{" "}
-                <strong style={{ color: "#475569" }}>{filteredItems.length}</strong> data
+                {filteredItems.length === 0
+                  ? 'Menampilkan 0 data'
+                  : `Menampilkan ${(safePage - 1) * itemsPerPage + 1}-${Math.min(safePage * itemsPerPage, filteredItems.length)} dari ${filteredItems.length} data`}
               </span>
 
               <div style={S.paginationControls}>

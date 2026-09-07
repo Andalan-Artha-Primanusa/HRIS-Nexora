@@ -5,6 +5,7 @@ import { RefreshCw, GraduationCap, Users, Search, Filter, CheckCircle, Clock, XC
 import { Card } from '@/shared/ui/Card';
 import { Modal } from '@/shared/ui/Modal';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
+import { PageHeader } from '@/shared/ui';
 import { ApprovalHistoryModal } from '@/shared/components/ApprovalHistoryModal';
 import { trainingService } from '@/features/training/api/training.service';
 import { useAuthStore } from '@/app/store/auth.store';
@@ -250,27 +251,17 @@ const TrainingEnrollmentsPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      {/* Header */}
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <GraduationCap size={16} />
-              <span>L & D</span>
-            </div>
-            <h1 className="hero-title">Pendaftaran Pelatihan</h1>
-            <p className="hero-subtitle">
-              Lacak dan kelola pendaftaran dan kemajuan pelatihan karyawan.
-            </p>
-          </div>
-          <div className="page-header-actions">
-            <button className="btn-outline" onClick={fetchData} disabled={loading}>
-              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-              {loading ? 'Memuat...' : 'Segarkan'}
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Pendaftaran Pelatihan"
+        subtitle="Lacak dan kelola pendaftaran dan kemajuan pelatihan karyawan."
+        badge={{ icon: GraduationCap, label: "L & D" }}
+        actions={
+          <button className="btn-outline" onClick={fetchData} disabled={loading}>
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            {loading ? 'Memuat...' : 'Segarkan'}
+          </button>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="employee-summary-wrapper">
@@ -514,7 +505,9 @@ const TrainingEnrollmentsPage: React.FC = () => {
               {/* Pagination */}
               <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan <strong>{paginatedEnrollments.length}</strong> dari <strong>{filteredEnrollments.length}</strong> pendaftaran
+                  {filteredEnrollments.length === 0
+                    ? 'Menampilkan 0 data'
+                    : `Menampilkan ${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, filteredEnrollments.length)} dari ${filteredEnrollments.length} data`}
                 </div>
                 <div className="pagination-controls">
                   <button

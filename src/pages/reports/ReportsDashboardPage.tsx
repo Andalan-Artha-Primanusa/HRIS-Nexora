@@ -11,11 +11,11 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts';
 import { Card } from '@/shared/ui/Card';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import { api } from '@/shared/api/httpClient';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
 import './ReportsDashboardPage.css';
-import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 
 type Rec = Record<string, unknown>;
 const toRec = (v: unknown): Rec => (v && typeof v === 'object' ? (v as Rec) : {});
@@ -1189,36 +1189,25 @@ const ReportsDashboardPage: React.FC = () => {
   if (loading) {
     return (
       <div className="reports-dashboard">
-        <Card className="page-header">
-          <div className="page-header-inner">
-            <div className="hero-content">
-              <div className="hero-badge"><BarChart3 size={16} /><span>Pusat Laporan</span></div>
-              <h1 className="hero-title">Laporan & Analitik</h1>
-              <p className="hero-subtitle">Memuat data dari seluruh modul...</p>
-              <CompanyScopeBadge />
-            </div>
-          </div>
-        </Card>
+        <PageHeader
+          title="Laporan & Analitik"
+          subtitle="Memuat data dari seluruh modul..."
+          badge={{ icon: BarChart3, label: "Pusat Laporan" }}
+          scope
+        />
       </div>
     );
   }
 
   return (
     <div className="reports-dashboard">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <BarChart3 size={16} />
-              <span>Pusat Laporan</span>
-            </div>
-            <h1 className="hero-title">Laporan & Analitik</h1>
-            <p className="hero-subtitle">
-              Dashboard terpusat laporan HR. Seret dan urutkan widget sesuai preferensi Anda.
-            </p>
-            <CompanyScopeBadge />
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title="Laporan & Analitik"
+        subtitle="Dashboard terpusat laporan HR. Seret dan urutkan widget sesuai preferensi Anda."
+        badge={{ icon: BarChart3, label: "Pusat Laporan" }}
+        scope
+        actions={
+          <>
             <button className="btn-outline" onClick={() => void loadData()} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan
@@ -1227,9 +1216,9 @@ const ReportsDashboardPage: React.FC = () => {
               <TrendingUp size={16} />
               Reset Urutan
             </button>
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       {error && <p className="reports-error">{error}</p>}
 

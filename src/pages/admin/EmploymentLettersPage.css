@@ -19,14 +19,6 @@
   border-bottom: 1px solid #e2e8f0;
 }
 
-.control-section-inner {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-}
-
 .search-filter-group {
   display: flex;
   align-items: center;

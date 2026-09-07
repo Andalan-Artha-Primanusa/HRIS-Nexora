@@ -5,6 +5,7 @@ import { getLocationDetail, updateLocation } from '@/features/location/api/locat
 import type { LocationUpdatePayload } from '@/features/location/types/location.types';
 import { MapPin, ArrowLeft, Save, MapPinned } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
+import { PageHeader } from '@/shared/ui';
 import { showToast } from '@/shared/ui/toast';
 import { Button } from '@/shared/ui/Button';
 import '@/shared/styles/CrudPage.css';
@@ -135,17 +136,12 @@ const EditLocationPage = () => {
   return (
     <div className="crud-page">
       {/* Header Card */}
-      <Card className="page-header" style={{ marginBottom: '2rem' }}>
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <MapPinned size={16} />
-              <span>Location Center</span>
-            </div>
-            <h1 className="hero-title">Edit Lokasi</h1>
-            <p className="hero-subtitle">Perbarui informasi lokasi absensi dan parameter check-in.</p>
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title="Edit Lokasi"
+        subtitle="Perbarui informasi lokasi absensi dan parameter check-in."
+        badge={{ icon: MapPinned, label: "Location Center" }}
+        actions={
+          <>
             <button className="btn-outline" onClick={handleCancel} disabled={loading}>
               <ArrowLeft size={16} />
               Kembali
@@ -154,9 +150,10 @@ const EditLocationPage = () => {
               <Save size={16} />
               {loading ? 'Menyimpan...' : 'Simpan Perubahan'}
             </button>
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+        style={{ marginBottom: '2rem' }}
+      />
 
       {/* Form Card */}
       <Card className="control-card" glass style={{ marginBottom: '2rem' }}>

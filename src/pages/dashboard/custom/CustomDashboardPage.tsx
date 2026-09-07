@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
+import { PageHeader } from "@/shared/ui/PageHeader";
 import { showToast } from "@/shared/ui/toast";
 import { companyService, type Company } from "@/features/company/api/company.service";
 import { dashboardConfigService, type DashboardConfig, type DashboardWidget } from "@/features/dashboard/api/dashboard-config.service";
@@ -36,7 +37,6 @@ import { RBACUtils } from "@/shared/hooks/rbac";
 import { PERMISSIONS } from "@/shared/types/rbac.types";
 import "../overview/OverviewPage.css";
 import "./CustomDashboardPage.css";
-import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 
 const defaultConfig: DashboardConfig = {
   name: "Dashboard Saya",
@@ -357,22 +357,18 @@ const CustomDashboardPage = () => {
 
   return (
     <div className="crud-page custom-dashboard-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge"><LayoutDashboard size={16} /><span>Custom Dashboard</span></div>
-            <h1 className="hero-title">Dashboard Builder</h1>
-            <p className="hero-subtitle">Pilih widget, scope company, dan filter default sesuai role.</p>
-            <CompanyScopeBadge />
-          </div>
-          <div className="page-header-actions">
-            <Button variant="primary" size="md" onClick={save} disabled={saving}>
-              <Save size={16} />
-              {saving ? "Menyimpan..." : "Simpan Dashboard"}
-            </Button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Dashboard Builder"
+        subtitle="Pilih widget, scope company, dan filter default sesuai role."
+        badge={{ icon: LayoutDashboard, label: "Custom Dashboard" }}
+        scope
+        actions={
+          <Button variant="primary" size="md" onClick={save} disabled={saving}>
+            <Save size={16} />
+            {saving ? "Menyimpan..." : "Simpan Dashboard"}
+          </Button>
+        }
+      />
 
       <div className="custom-dashboard-grid">
         <Card className="dashboard-settings-panel">

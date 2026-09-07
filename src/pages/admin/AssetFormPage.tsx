@@ -7,6 +7,7 @@ import {
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { Alert } from '@/shared/ui/Alert';
+import { PageHeader } from '@/shared/ui';
 import { assetService } from '@/features/assets/api/asset.service';
 import '@/shared/styles/CrudPage.css';
 import "../dashboard/overview/OverviewPage.css";
@@ -278,26 +279,17 @@ const AssetFormPage: React.FC = () => {
     <div className="crud-page asset-form-page">
       <style>{FORM_STYLES}</style>
 
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Package size={16} />
-              <span>Inventaris Aset</span>
-            </div>
-            <h1 className="hero-title">{isEdit ? 'Edit Aset' : 'Tambah Aset Baru'}</h1>
-            <p className="hero-subtitle">
-              {isEdit ? 'Perbarui informasi detail aset perusahaan.' : 'Daftarkan aset baru ke dalam sistem inventaris.'}
-            </p>
-          </div>
-          <div className="page-header-actions">
-            <button type="button" className="btn-outline" onClick={() => navigate('/inventory/assets')}>
-              <ArrowLeft size={16} />
-              Kembali
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title={isEdit ? 'Edit Aset' : 'Tambah Aset Baru'}
+        subtitle={isEdit ? 'Perbarui informasi detail aset perusahaan.' : 'Daftarkan aset baru ke dalam sistem inventaris.'}
+        badge={{ icon: Package, label: "Inventaris Aset" }}
+        actions={
+          <button type="button" className="btn-outline" onClick={() => navigate('/inventory/assets')}>
+            <ArrowLeft size={16} />
+            Kembali
+          </button>
+        }
+      />
 
       {errorMessage && (
         <div style={{ marginBottom: '2rem' }}>

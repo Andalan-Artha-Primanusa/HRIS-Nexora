@@ -6,6 +6,7 @@ import {
 } from 'recharts';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import { api } from '@/shared/api/httpClient';
 import { useAuthStore } from '@/app/store/auth.store';
 import { RBACUtils } from '@/shared/hooks/rbac';
@@ -175,26 +176,17 @@ const ReportsAttendancePage: React.FC = () => {
 
   return (
     <div className="reports-dashboard">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <CalendarDays size={16} />
-              <span>Laporan & Analitik</span>
-            </div>
-            <h1 className="hero-title">Laporan Absensi</h1>
-            <p className="hero-subtitle">
-              Analisis kehadiran, ketidakhadiran, dan keterlambatan karyawan secara visual.
-            </p>
-          </div>
-          <div className="page-header-actions">
-            <button className="btn-outline" onClick={() => void load()} disabled={loading}>
-              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-              Segarkan
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Laporan Absensi"
+        subtitle="Analisis kehadiran, ketidakhadiran, dan keterlambatan karyawan secara visual."
+        badge={{ icon: CalendarDays, label: "Laporan & Analitik" }}
+        actions={
+          <button className="btn-outline" onClick={() => void load()} disabled={loading}>
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            Segarkan
+          </button>
+        }
+      />
 
       {error && <p className="reports-error">{error}</p>}
 

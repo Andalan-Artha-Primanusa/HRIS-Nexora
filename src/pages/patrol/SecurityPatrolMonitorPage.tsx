@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Plus, QrCode, RefreshCw, RotateCcw, ShieldCheck, Trash2 } from "lucide-react";
 import { Button } from "@/shared/ui/Button";
 import { Card } from "@/shared/ui/Card";
+import { PageHeader } from "@/shared/ui";
 import { LoadingState } from "@/shared/ui/DataStateDisplay";
 import { showToast } from "@/shared/ui/toast";
 import { companyService, type Company } from "@/features/company/api/company.service";
@@ -138,24 +139,17 @@ const SecurityPatrolMonitorPage = () => {
 
   return (
     <div className="patrol-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <ShieldCheck size={16} />
-              <span>Security Patrol</span>
-            </div>
-            <h1 className="hero-title">Monitoring Ronda Satpam</h1>
-            <p className="hero-subtitle">Kelola QR checkpoint ruangan dan pantau bukti scan setelah jam 20:00.</p>
-          </div>
-          <div className="page-header-actions">
-            <Button variant="outline" size="md" onClick={loadData} disabled={loading}>
-              <RefreshCw size={16} />
-              Segarkan
-            </Button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Monitoring Ronda Satpam"
+        subtitle="Kelola QR checkpoint ruangan dan pantau bukti scan setelah jam 20:00."
+        badge={{ icon: ShieldCheck, label: 'Security Patrol' }}
+        actions={
+          <Button variant="outline" size="md" onClick={loadData} disabled={loading}>
+            <RefreshCw size={16} />
+            Segarkan
+          </Button>
+        }
+      />
 
       <div className="patrol-summary-grid">
         <div className="patrol-summary-card">

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Plus, RefreshCw, Wallet, Search, Eye, Pencil, Trash2, Send, CheckCircle2, Clock, TrendingUp, History } from 'lucide-react';
-import { Card, ConfirmDialog } from '@/shared/ui';
+import { Card, ConfirmDialog, PageHeader } from '@/shared/ui';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { ReimbursementDetailModal } from '@/features/reimbursement/components/ReimbursementDetailModal';
 import { ReimbursementModal } from '@/features/reimbursement/components/ReimbursementModal';
@@ -263,19 +263,12 @@ const MyReimbursementsPage: React.FC = () => {
   return (
     <div className="crud-page">
       {/* Header */}
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Wallet size={16} />
-              <span>Layanan Mandiri</span>
-            </div>
-            <h1 className="hero-title">Imbalan Saya</h1>
-            <p className="hero-subtitle">
-              Lacak dan kelola klaim pengeluaran Anda.
-            </p>
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title="Imbalan Saya"
+        subtitle="Lacak dan kelola klaim pengeluaran Anda."
+        badge={{ icon: Wallet, label: "Layanan Mandiri" }}
+        actions={
+          <>
             <button className="btn-outline" onClick={fetchData} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan
@@ -284,9 +277,9 @@ const MyReimbursementsPage: React.FC = () => {
               <Plus size={16} />
               Klaim Baru
             </button>
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="employee-summary-wrapper">
@@ -466,7 +459,9 @@ const MyReimbursementsPage: React.FC = () => {
               {/* Pagination */}
               <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan <strong>{paginatedItems.length}</strong> dari <strong>{filteredItems.length}</strong> klaim
+                  {filteredItems.length === 0
+                    ? 'Menampilkan 0 data'
+                    : `Menampilkan ${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, filteredItems.length)} dari ${filteredItems.length} data`}
                 </div>
                 <div className="pagination-controls">
                   <button

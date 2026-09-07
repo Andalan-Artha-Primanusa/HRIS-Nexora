@@ -20,7 +20,7 @@ import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "./PayrollListPage.css";
 import "./PayrollShared.css";
-import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
+import { PageHeader } from "@/shared/ui";
 
 type PayrollFormState = {
   id: string;
@@ -358,20 +358,18 @@ const PayrollListPage = () => {
 
   return (
     <div className="crud-page" style={{ fontFamily: "'Poppins', sans-serif" }}>
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge"><Briefcase size={16} /><span>Manajemen Payroll</span></div>
-            <h1 className="hero-title">Daftar Payroll</h1>
-            <p className="hero-subtitle">Lihat, tambah, edit, dan hapus seluruh data payroll karyawan.</p>
-            <CompanyScopeBadge />
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title="Daftar Payroll"
+        subtitle="Lihat, tambah, edit, dan hapus seluruh data payroll karyawan."
+        badge={{ icon: Briefcase, label: "Manajemen Payroll" }}
+        scope
+        actions={
+          <>
             <button className="btn-outline" onClick={() => void loadData()} disabled={loading}><RefreshCw size={16} className={loading ? 'animate-spin' : ''} /> Sync</button>
             {view === "list" && <>{canExport && <button className="btn-outline" onClick={() => setExportModal(true)} style={{ color: "#059669" }}><Download size={16} /> Export</button>}{canCreate && <button className="btn-primary" onClick={() => { setMode("create"); setForm(DEFAULT_FORM); setView("form"); }}><Plus size={16} /> Tambah Payroll</button>}</>}
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       {view === "form" ? formContent : (
         <>
@@ -515,7 +513,9 @@ const PayrollListPage = () => {
                 {totalPages > 1 && (
                   <div className="table-pagination">
                     <div className="pagination-info">
-                      Menampilkan <strong>{paginatedItems.length}</strong> dari <strong>{totalItems}</strong> data
+                      {totalItems === 0
+                        ? 'Menampilkan 0 data'
+                        : `Menampilkan ${(safePage - 1) * pageSize + 1}-${Math.min(safePage * pageSize, totalItems)} dari ${totalItems} data`}
                     </div>
                     <div className="pagination-controls">
                       <button className="pagination-btn" onClick={() => setCurrentPage(Math.max(1, safePage - 1))} disabled={safePage === 1}>‹</button>

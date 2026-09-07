@@ -18,6 +18,7 @@ import {
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { Modal } from '@/shared/ui/Modal';
+import { PageHeader } from '@/shared/ui';
 import { EmptyState, LoadingState } from '@/shared/ui/DataStateDisplay';
 import { ApprovalHistoryModal } from '@/shared/components/ApprovalHistoryModal';
 import { documentService } from '@/features/employee/api/document.service';
@@ -248,19 +249,12 @@ const DocumentReviewPage = () => {
 
   return (
     <div className="crud-page document-review-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <FileCheck2 size={16} />
-              <span>Hukum &amp; Dokumen</span>
-            </div>
-            <h1 className="hero-title">Review Dokumen</h1>
-            <p className="hero-subtitle">
-              Proses dokumen karyawan mengikuti tahap dan role pada konfigurasi Alur Persetujuan.
-            </p>
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title="Review Dokumen"
+        subtitle="Proses dokumen karyawan mengikuti tahap dan role pada konfigurasi Alur Persetujuan."
+        badge={{ icon: FileCheck2, label: "Hukum & Dokumen" }}
+        actions={
+          <>
             <button className="btn-outline" onClick={() => navigate('/approval-flows')}>
               <Settings2 size={16} />
               Alur Persetujuan
@@ -269,9 +263,9 @@ const DocumentReviewPage = () => {
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan
             </button>
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       <div className="summary-grid">
         {summaryCards.map(({ label, subtitle, value, tone, icon: Icon }) => (

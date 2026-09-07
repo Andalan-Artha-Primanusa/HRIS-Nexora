@@ -3,6 +3,7 @@ import DOMPurify from "dompurify";
 import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
+import { PageHeader } from "@/shared/ui";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { showToast } from '@/shared/ui/toast';
 import { RBACUtils } from "@/shared/hooks/rbac";
@@ -76,17 +77,10 @@ const AdminEmailSendPage = () => {
   if (!canAccess) {
     return (
       <div className="crud-page">
-        <Card className="page-header">
-          <div className="page-header-inner">
-            <div className="hero-content">
-              <div className="hero-badge">
-                <Shield size={16} />
-                <span>Admin Center</span>
-              </div>
-              <h1 className="hero-title">Akses Ditolak</h1>
-            </div>
-          </div>
-        </Card>
+        <PageHeader
+          title="Akses Ditolak"
+          badge={{ icon: Shield, label: "Admin Center" }}
+        />
       </div>
     );
   }
@@ -144,20 +138,11 @@ const AdminEmailSendPage = () => {
 
   return (
     <div className="crud-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Mail size={16} />
-              <span>Messenger</span>
-            </div>
-            <h1 className="hero-title">Kirim Notifikasi Email</h1>
-            <p className="hero-subtitle">
-              Gunakan template sistem untuk mengirim pesan resmi ke email karyawan.
-            </p>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Kirim Notifikasi Email"
+        subtitle="Gunakan template sistem untuk mengirim pesan resmi ke email karyawan."
+        badge={{ icon: Mail, label: "Messenger" }}
+      />
 
       <div className="">
         <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '2rem' }}>

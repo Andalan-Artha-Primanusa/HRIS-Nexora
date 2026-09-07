@@ -19,6 +19,7 @@ import {
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
+import { PageHeader } from "@/shared/ui";
 import { showToast } from "@/shared/ui/toast";
 import { companyService, type Company, type CompanyUserAccess } from "@/features/company/api/company.service";
 import { getAllUsers } from "@/features/admin/api/admin.service";
@@ -196,15 +197,11 @@ const CompanyManagementPage = () => {
   if (!canView) {
     return (
       <div className="crud-page">
-        <Card className="page-header">
-          <div className="page-header-inner">
-            <div className="hero-content">
-              <div className="hero-badge"><ShieldCheck size={16} /><span>Company</span></div>
-              <h1 className="hero-title">Akses Ditolak</h1>
-              <p className="hero-subtitle">Anda tidak memiliki izin untuk melihat company.</p>
-            </div>
-          </div>
-        </Card>
+        <PageHeader
+          title="Akses Ditolak"
+          subtitle="Anda tidak memiliki izin untuk melihat company."
+          badge={{ icon: ShieldCheck, label: "Admin Center" }}
+        />
       </div>
     );
   }
@@ -213,25 +210,26 @@ const CompanyManagementPage = () => {
 
   return (
     <div className="crud-page company-management-page">
-      <div className="page-header" style={{ marginBottom: 24 }}>
-        <div className="page-header-title">
-          <div className="page-badge"><Building2 size={14} style={{ marginRight: 6 }} /><span>Multi Company</span></div>
-          <h1>Company Management</h1>
-          <p>Kelola company, legal entity, akses user, dan status operasional.</p>
-        </div>
-        <div className="page-header-actions">
-          <Button variant="secondary" onClick={loadCompanies} disabled={loading}>
-            <RefreshCw size={16} />
-            Refresh
-          </Button>
-          {canManage && (
-            <Button variant="primary" onClick={() => navigate("/companies/create")}>
-              <Plus size={16} />
-              Create Company
+      <PageHeader
+        title="Company Management"
+        subtitle="Kelola company, legal entity, akses user, dan status operasional."
+        badge={{ icon: Building2, label: "Multi Company" }}
+        style={{ marginBottom: 24 }}
+        actions={
+          <>
+            <Button variant="secondary" onClick={loadCompanies} disabled={loading}>
+              <RefreshCw size={16} />
+              Refresh
             </Button>
-          )}
-        </div>
-      </div>
+            {canManage && (
+              <Button variant="primary" onClick={() => navigate("/companies/create")}>
+                <Plus size={16} />
+                Create Company
+              </Button>
+            )}
+          </>
+        }
+      />
 
       {loadError && (
         <Card className="company-error-card">

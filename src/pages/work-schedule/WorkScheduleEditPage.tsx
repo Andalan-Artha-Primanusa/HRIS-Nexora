@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { showToast } from '@/shared/ui/toast';
 import { ChevronLeft, Loader2, Tag } from "lucide-react";
 import { Card } from "@/shared/ui/Card";
+import { PageHeader } from "@/shared/ui";
 import "../dashboard/overview/OverviewPage.css";
 import { getWorkScheduleDetail, updateWorkSchedule } from "@/features/work-schedule/api/work-schedule.service";
 import WorkScheduleForm, { type WorkScheduleFormState } from "./components/WorkScheduleForm";
@@ -70,26 +71,18 @@ const WorkScheduleEditPage = () => {
 
   return (
     <div className="crud-page">
-      <Card className="page-header" style={{ marginBottom: '2rem' }}>
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Tag size={16} />
-              <span>Workforce Center</span>
-            </div>
-            <h1 className="hero-title">Edit Jadwal Kerja</h1>
-            <p className="hero-subtitle">
-              Ubah pengaturan shift kerja yang sudah ada.
-            </p>
-          </div>
-          <div className="page-header-actions">
-            <button type="button" className="btn-outline" onClick={() => navigate("/work-schedules")} disabled={loading}>
-              <ChevronLeft size={16} style={{ marginRight: '8px' }} />
-              Kembali
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Edit Jadwal Kerja"
+        subtitle="Ubah pengaturan shift kerja yang sudah ada."
+        badge={{ icon: Tag, label: "Workforce Center" }}
+        actions={
+          <button type="button" className="btn-outline" onClick={() => navigate("/work-schedules")} disabled={loading}>
+            <ChevronLeft size={16} style={{ marginRight: '8px' }} />
+            Kembali
+          </button>
+        }
+        style={{ marginBottom: '2rem' }}
+      />
 
       <WorkScheduleForm
         formData={formData}

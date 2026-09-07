@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Card, CardHeader } from "@/shared/ui";
+import { Card, CardHeader, PageHeader } from "@/shared/ui";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
 import { showToast } from "@/shared/ui/toast";
@@ -300,26 +300,17 @@ const MyPayrollPage = () => {
   return (
     <div className="crud-page">
       {/* Header */}
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Wallet size={16} />
-              <span>Layanan Mandiri</span>
-            </div>
-            <h1 className="hero-title">Riwayat Gaji Saya</h1>
-            <p className="hero-subtitle">
-              Lihat dan unduh slip gaji bulanan Anda dengan aman.
-            </p>
-          </div>
-          <div className="page-header-actions">
-            <button className="btn-outline" onClick={() => void loadPayroll()} disabled={loading}>
-              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-              Segarkan
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Riwayat Gaji Saya"
+        subtitle="Lihat dan unduh slip gaji bulanan Anda dengan aman."
+        badge={{ icon: Wallet, label: "Layanan Mandiri" }}
+        actions={
+          <button className="btn-outline" onClick={() => void loadPayroll()} disabled={loading}>
+            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+            Segarkan
+          </button>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="employee-summary-wrapper">
@@ -471,7 +462,9 @@ const MyPayrollPage = () => {
               {/* Pagination */}
               <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan <strong>{paginatedItems.length}</strong> dari <strong>{filteredItems.length}</strong> slip gaji
+                  {filteredItems.length === 0
+                    ? 'Menampilkan 0 data'
+                    : `Menampilkan ${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, filteredItems.length)} dari ${filteredItems.length} data`}
                 </div>
                 <div className="pagination-controls">
                   <button

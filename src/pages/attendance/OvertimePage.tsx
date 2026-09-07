@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Card } from '@/shared/ui/Card';
 import { Modal } from '@/shared/ui/Modal';
+import { PageHeader } from '@/shared/ui';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { api } from '@/shared/api/httpClient';
 import { useAuthStore } from '@/app/store/auth.store';
@@ -15,7 +16,7 @@ import { Clock, RefreshCw, Calendar, Timer, AlertCircle, CheckCircle, XCircle, S
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import './AttendanceShared.css';
-import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
+
 
 interface OvertimeRecord {
   id: number;
@@ -418,21 +419,17 @@ const OvertimePage = () => {
 
   return (
     <div className="crud-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge"><Timer size={16} /><span>Layanan Mandiri</span></div>
-            <h1 className="hero-title">{canViewAllOvertime ? 'Manajemen Lembur' : 'Lembur Saya'}</h1>
-            <p className="hero-subtitle">Kelola pengajuan lembur dan bukti pendukung secara efisien.</p>
-            <CompanyScopeBadge />
-          </div>
-          <div className="page-header-actions">
-            <button className="btn-outline" onClick={() => void loadRecords()} disabled={loading}>
-              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} /> Segarkan
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title={canViewAllOvertime ? 'Manajemen Lembur' : 'Lembur Saya'}
+        subtitle="Kelola pengajuan lembur dan bukti pendukung secara efisien."
+        badge={{ icon: Timer, label: 'Layanan Mandiri' }}
+        scope
+        actions={
+          <button className="btn-outline" onClick={() => void loadRecords()} disabled={loading}>
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} /> Segarkan
+          </button>
+        }
+      />
 
       <div className="employee-summary-wrapper">
         {[
@@ -536,7 +533,7 @@ const OvertimePage = () => {
               {totalPages > 1 && (
                 <div className="table-pagination">
                   <div className="pagination-info">
-                    Halaman <strong>{currentPage}</strong> dari <strong>{totalPages}</strong>
+                    Menampilkan halaman {currentPage} dari {totalPages}
                   </div>
                   <div className="pagination-controls">
                     <button className="pagination-btn" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1}>‹</button>

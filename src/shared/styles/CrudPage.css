@@ -2,15 +2,6 @@
 /* Audit Log Table UI Custom */
 /* ========================= */
 
-.data-table tbody tr:nth-child(even) {
-  background: var(--color-primary-lighter, #f3f6fb);
-}
-
-.data-table tbody tr:hover {
-  background: var(--color-primary-light, #e0eaff);
-  transition: background 0.2s;
-}
-
 .cell-user {
   display: flex;
   align-items: center;
@@ -73,114 +64,6 @@
 
 .crud-page::before {
   display: none;
-}
-
-/* ============================================ */
-/* Page Header                                  */
-/* ============================================ */
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-  padding: 2.25rem 2rem;
-  background: linear-gradient(135deg, var(--hero-bg-start), var(--hero-bg-end));
-  border-radius: var(--radius-xl);
-  box-shadow: 0 14px 30px rgba(15, 159, 143, 0.18);
-  position: relative;
-  overflow: hidden;
-}
-
-.page-header::before {
-  content: "";
-  position: absolute;
-  top: -40%;
-  right: -5%;
-  width: 280px;
-  height: 280px;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.14) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-.page-header-title {
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-  position: relative;
-  z-index: 1;
-}
-
-.page-badge {
-  display: inline-flex;
-  align-items: center;
-  width: fit-content;
-  padding: 0.4rem 0.85rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.16);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: var(--color-white);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.page-header-title h1 {
-  margin: 0;
-  font-size: clamp(1.7rem, 2.8vw, 2.4rem);
-  color: var(--color-white);
-  letter-spacing: -0.5px;
-  font-weight: 700;
-}
-
-.page-header-title p {
-  margin: 0;
-  font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.9);
-  max-width: 66ch;
-  line-height: 1.5;
-}
-
-.page-header-actions {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  position: relative;
-  z-index: 1;
-}
-
-/* Solid white action buttons on the teal hero (matches reference design).
-   Scoped to primary/secondary variants so danger/warning actions keep their colors. */
-.page-header-actions .ui-button--primary,
-.page-header-actions .ui-button--secondary,
-.page-header-actions button[type='submit'] {
-  background: var(--color-white);
-  border-color: transparent;
-  color: #075E54;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-}
-
-.page-header-actions .ui-button--primary svg,
-.page-header-actions .ui-button--secondary svg,
-.page-header-actions button[type='submit'] svg {
-  color: #075E54;
-}
-
-.page-header-actions .ui-button--primary:hover:not(:disabled),
-.page-header-actions .ui-button--secondary:hover:not(:disabled),
-.page-header-actions button[type='submit']:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.92);
-  color: #075E54;
-}
-
-.page-header-actions .ui-button--primary:disabled,
-.page-header-actions .ui-button--secondary:disabled,
-.page-header-actions button[type='submit']:disabled {
-  background: rgba(255, 255, 255, 0.5);
-  color: #075E54;
 }
 
 /* ============================================ */
@@ -303,47 +186,6 @@
   flex-wrap: wrap;
 }
 
-.search-box {
-  position: relative;
-  display: flex;
-  align-items: center;
-  min-width: 320px;
-}
-
-.search-icon-inside {
-  position: absolute;
-  left: 1.15rem;
-  color: #94a3b8;
-  pointer-events: none;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.search-input-pill {
-  width: 100%;
-  padding: 0.8rem 1rem 0.8rem 3.5rem;
-  border-radius: 999px;
-  border: none;
-  background: #f1f5f9;
-  font-size: 1rem;
-  color: #1e293b;
-  transition: all 0.25s ease;
-  font-family: 'Poppins', sans-serif;
-}
-
-.search-input-pill:focus {
-  outline: none;
-  background: #ffffff;
-  box-shadow: 0 0 0 4px rgba(15, 159, 143, 0.1), 0 4px 12px rgba(0, 0, 0, 0.03);
-}
-
-.search-input-pill::placeholder {
-  color: #94a3b8;
-  font-weight: 500;
-}
-
 .quick-controls {
   display: flex;
   align-items: center;
@@ -391,33 +233,6 @@
   border-color: var(--color-primary-light);
 }
 
-.filter-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: rgba(234, 247, 244, 0.8);
-  border: 1px solid rgba(15, 159, 143, 0.18);
-  padding: 0.65rem 1rem;
-  border-radius: 12px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: var(--primary);
-  font-family: 'Poppins', sans-serif;
-}
-
-.filter-btn:hover {
-  background: #fff;
-  border-color: var(--color-primary-light);
-}
-
-.filter-btn.active {
-  background: var(--primary);
-  border-color: var(--primary-dark);
-  color: #fff;
-}
-
 .ui-button--primary:hover:not(:disabled) {
   background-color: var(--hero-bg-end);
   color: #ffffff;
@@ -438,27 +253,6 @@
 @keyframes filterSlideDown {
   from { opacity: 0; transform: translateY(-10px); }
   to   { opacity: 1; transform: translateY(0); }
-}
-
-.filter-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1rem;
-}
-
-.filter-group {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.filter-group label {
-  color: var(--primary);
-  font-weight: 600;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .filter-select {
@@ -547,32 +341,6 @@
   padding-bottom: 1rem;
 }
 
-.elyra-tabs {
-  display: flex;
-  gap: 0.5rem;
-  background: #f1f5f9;
-  padding: 0.4rem;
-  border-radius: 999px;
-}
-
-.elyra-tab {
-  padding: 0.6rem 1.5rem;
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: #64748b;
-  border-radius: 999px;
-  cursor: pointer;
-  border: none;
-  background: transparent;
-  transition: all 0.2s ease;
-}
-
-.elyra-tab.active {
-  background: #ffffff;
-  color: #0f172a;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-}
-
 .wuw-actions-area {
   display: flex;
   align-items: center;
@@ -589,11 +357,6 @@
   align-items: center;
   gap: 0.6rem;
   transition: all 0.2s ease;
-}
-
-.wuw-table-area {
-  background: #ffffff;
-  padding: 0;
 }
 
 /* ============================================ */
@@ -636,26 +399,6 @@
   font-size: 0.85rem;
   font-weight: 500;
   color: #64748b;
-}
-
-.table-wrap {
-  overflow-x: auto;
-  padding: 0;
-  scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 transparent;
-}
-
-.table-wrap::-webkit-scrollbar {
-  height: 6px;
-}
-
-.table-wrap::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.table-wrap::-webkit-scrollbar-thumb {
-  background: #c7d2fe;
-  border-radius: 3px;
 }
 
 /* Opt-in integrated toolbar treatment for table listing pages. */
@@ -829,15 +572,6 @@
   text-align: center;
 }
 
-/* Right aligned header */
-.data-table th.th-right {
-  text-align: right;
-}
-
-.data-table th.th-center {
-  text-align: center;
-}
-
 /* Tag/badge inside cells */
 .data-table .cell-tag {
   display: inline-flex;
@@ -859,21 +593,6 @@
 }
 
 /* Soft-Pill Status Badges */
-.badge-soft {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.35rem 0.85rem;
-  border-radius: 10px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-}
-
-.badge-soft--blue { background: #eff6ff; color: var(--color-primary-dark); }
-.badge-soft--green { background: #ecfdf5; color: #059669; }
-.badge-soft--yellow { background: #fffbeb; color: #d97706; }
-.badge-soft--red { background: #fef2f2; color: #dc2626; }
-.badge-soft--gray { background: #f9fafb; color: #4b5563; }
 
 /* Stacked Typography Cell */
 .cell-stacked {
@@ -1133,25 +852,6 @@ select.form-input {
   justify-content: flex-end;
   gap: 0.75rem;
   margin-bottom: 1rem;
-}
-
-/* ============================================ */
-/* Empty State                                  */
-/* ============================================ */
-
-.empty-state {
-  padding: 4rem 2rem;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  color: #64748b;
-}
-
-.empty-state p {
-  margin: 0;
-  font-size: 0.95rem;
 }
 
 /* ============================================ */

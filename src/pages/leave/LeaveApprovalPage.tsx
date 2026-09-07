@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { Card } from "@/shared/ui";
+import { Card, PageHeader } from "@/shared/ui";
 import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { approveLeave, getPendingLeaves, rejectLeave, returnLeave } from "@/features/leave/api/leave.service";
 import { RejectLeaveModal } from "@/features/leave/components/RejectLeaveModal";
@@ -14,7 +14,6 @@ import "@/pages/admin/AdminPermissionsPage.css";
 import { useAuthStore } from "@/app/store/auth.store";
 import { RBACUtils } from "@/shared/hooks/rbac";
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
-import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 
 const formatDate = (dateString: unknown) => {
   if (typeof dateString !== "string" || !dateString) return "-";
@@ -212,28 +211,18 @@ const LeaveApprovalPage = () => {
 
   return (
     <div className="crud-page">
-      {/* Header */}
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Clock3 size={16} />
-              <span>Leave Center</span>
-            </div>
-            <h1 className="hero-title">Leave Approval</h1>
-            <p className="hero-subtitle">
-              Review and approve/reject pending employee leave requests securely.
-            </p>
-            <CompanyScopeBadge />
-          </div>
-          <div className="page-header-actions">
-            <button className="btn-outline" onClick={() => void loadData()} disabled={loading}>
-              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-              Segarkan
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Leave Approval"
+        subtitle="Review and approve/reject pending employee leave requests securely."
+        badge={{ icon: Clock3, label: "Leave Center" }}
+        scope
+        actions={
+          <button className="btn-outline" onClick={() => void loadData()} disabled={loading}>
+            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+            Segarkan
+          </button>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="employee-summary-wrapper">
@@ -468,7 +457,9 @@ const LeaveApprovalPage = () => {
               {/* Pagination */}
                 <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan <strong>{items.length}</strong> dari <strong>{totalItems}</strong> pengajuan
+                  {totalItems === 0
+                    ? 'Menampilkan 0 data'
+                    : `Menampilkan ${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, totalItems)} dari ${totalItems} data`}
                 </div>
                 <div className="pagination-controls">
                   <button

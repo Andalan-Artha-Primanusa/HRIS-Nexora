@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Camera, CameraOff, CheckCircle2, MapPin, QrCode, RefreshCw, ScanLine, ShieldCheck } from "lucide-react";
 import { Button } from "@/shared/ui/Button";
 import { Card } from "@/shared/ui/Card";
+import { PageHeader } from "@/shared/ui";
 import { showToast } from "@/shared/ui/toast";
 import { patrolService } from "@/features/patrol/api/patrol.service";
 import "./SecurityPatrolPage.css";
@@ -135,24 +136,17 @@ const SecurityPatrolScanPage = () => {
 
   return (
     <div className="patrol-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <ShieldCheck size={16} />
-              <span>Security Patrol</span>
-            </div>
-            <h1 className="hero-title">Scan QR Ronda Satpam</h1>
-            <p className="hero-subtitle">Dipakai setelah jam 20:00 untuk bukti satpam sudah keliling dan scan checkpoint ruangan.</p>
-          </div>
-          <div className="page-header-actions">
-            <Button variant="outline" size="md" onClick={cameraActive ? stopCamera : startCamera} disabled={loading}>
-              {cameraActive ? <CameraOff size={16} /> : <Camera size={16} />}
-              {cameraActive ? "Matikan Kamera" : "Aktifkan Kamera"}
-            </Button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Scan QR Ronda Satpam"
+        subtitle="Dipakai setelah jam 20:00 untuk bukti satpam sudah keliling dan scan checkpoint ruangan."
+        badge={{ icon: ShieldCheck, label: 'Security Patrol' }}
+        actions={
+          <Button variant="outline" size="md" onClick={cameraActive ? stopCamera : startCamera} disabled={loading}>
+            {cameraActive ? <CameraOff size={16} /> : <Camera size={16} />}
+            {cameraActive ? "Matikan Kamera" : "Aktifkan Kamera"}
+          </Button>
+        }
+      />
 
       <div className="patrol-status-card">
         <CheckCircle2 size={22} />

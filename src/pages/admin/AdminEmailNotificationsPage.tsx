@@ -5,6 +5,7 @@ import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
 import { ConfirmDialog } from "@/shared/ui/ConfirmDialog";
 import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
+import { PageHeader } from "@/shared/ui";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { showToast } from "@/shared/ui/toast";
 import { RBACUtils } from "@/shared/hooks/rbac";
@@ -153,17 +154,10 @@ const AdminEmailNotificationsPage = () => {
   if (!canAccess) {
     return (
       <div className="crud-page">
-        <Card className="page-header">
-          <div className="page-header-inner">
-            <div className="hero-content">
-              <div className="hero-badge">
-                <Shield size={16} />
-                <span>Admin Center</span>
-              </div>
-              <h1 className="hero-title">Akses Ditolak</h1>
-            </div>
-          </div>
-        </Card>
+        <PageHeader
+          title="Akses Ditolak"
+          badge={{ icon: Shield, label: "Admin Center" }}
+        />
       </div>
     );
   }
@@ -273,19 +267,12 @@ const AdminEmailNotificationsPage = () => {
 
   return (
     <div className="crud-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <BellRing size={16} />
-              <span>Admin Center</span>
-            </div>
-            <h1 className="hero-title">Email Logs & Templates</h1>
-            <p className="hero-subtitle">
-              Pantau riwayat pengiriman email dan kelola template sistem.
-            </p>
-          </div>
-          <div className="page-header-actions" style={{ display: 'flex', gap: '12px' }}>
+      <PageHeader
+        title="Email Logs & Templates"
+        subtitle="Pantau riwayat pengiriman email dan kelola template sistem."
+        badge={{ icon: BellRing, label: "Admin Center" }}
+        actions={
+          <>
             <button className="btn-primary" onClick={() => setShowModal(true)}>
               <RefreshCw size={16} style={{ transform: 'rotate(45deg)' }} />
               Buat Template Baru
@@ -294,9 +281,9 @@ const AdminEmailNotificationsPage = () => {
               <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
               Segarkan Data
             </button>
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       <Modal
         isOpen={showModal}

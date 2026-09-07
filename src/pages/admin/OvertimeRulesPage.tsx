@@ -4,6 +4,7 @@ import { Plus, Clock, RefreshCw, Edit, Trash2, DollarSign, Search, Timer } from 
 import { Card } from '@/shared/ui/Card';
 import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
+import { PageHeader } from '@/shared/ui';
 import { workforceService } from '@/features/workforce/api/workforce.service';
 import { showToast } from '@/shared/ui/toast';
 import '@/shared/styles/CrudPage.css';
@@ -94,19 +95,12 @@ const OvertimeRulesPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Timer size={16} />
-              <span>Workforce</span>
-            </div>
-            <h1 className="hero-title">Aturan Lembur</h1>
-            <p className="hero-subtitle">
-              Konfigurasi pengganda gaji dan batasan jam lembur.
-            </p>
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title="Aturan Lembur"
+        subtitle="Konfigurasi pengganda gaji dan batasan jam lembur."
+        badge={{ icon: Timer, label: "Workforce" }}
+        actions={
+          <>
             <button className="btn-outline" onClick={fetchData} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan
@@ -115,9 +109,9 @@ const OvertimeRulesPage: React.FC = () => {
               <Plus size={16} />
               Buat Aturan
             </button>
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       <div className="employee-summary-wrapper">
         {summaryStats.map((card: any) => {
@@ -266,7 +260,9 @@ const OvertimeRulesPage: React.FC = () => {
 
               <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan <strong>{paginatedRules.length}</strong> dari <strong>{filteredRules.length}</strong> aturan
+                  {filteredRules.length === 0
+                    ? 'Menampilkan 0 data'
+                    : `Menampilkan ${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, filteredRules.length)} dari ${filteredRules.length} data`}
                 </div>
                 <div className="pagination-controls">
                   <button

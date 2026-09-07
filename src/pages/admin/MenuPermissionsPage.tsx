@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Card, CardHeader } from "@/shared/ui";
+import { Card, CardHeader, PageHeader } from "@/shared/ui";
 import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { api } from "@/shared/api/httpClient";
 import { showToast } from "@/shared/ui/toast";
@@ -166,26 +166,16 @@ const MenuPermissionsPage = () => {
 
   return (
     <div className="crud-page">
-      {/* Hero Card */}
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Shield size={16} />
-              <span>Access Control</span>
-            </div>
-            <h1 className="hero-title">Menu Permissions</h1>
-            <p className="hero-subtitle">
-              Manage role-based access for every menu in the system.
-            </p>
-          </div>
-          <div className="page-header-actions">
-            <button className="btn-outline" onClick={() => void loadData()} disabled={loading}>
-              Refresh
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Menu Permissions"
+        subtitle="Manage role-based access for every menu in the system."
+        badge={{ icon: Shield, label: "Access Control" }}
+        actions={
+          <button className="btn-outline" onClick={() => void loadData()} disabled={loading}>
+            Refresh
+          </button>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="employee-summary-wrapper">

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Card } from "@/shared/ui";
+import { Card, PageHeader } from "@/shared/ui";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
 import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
@@ -294,20 +294,16 @@ const MyKpiPage = () => {
 
   return (
     <div className="crud-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge"><Target size={16} /><span>KPI Periode</span></div>
-            <h1 className="hero-title">Performa Saya (KPI Periode)</h1>
-            <p className="hero-subtitle">KPI yang di-assign admin tampil sebagai periode. Alurnya draft, lalu submitted, lalu approved.</p>
-          </div>
-          <div className="page-header-actions">
-            <button className="btn-outline" onClick={loadData} disabled={loading}>
-              <RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Segarkan
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Performa Saya (KPI Periode)"
+        subtitle="KPI yang di-assign admin tampil sebagai periode. Alurnya draft, lalu submitted, lalu approved."
+        badge={{ icon: Target, label: "KPI Periode" }}
+        actions={
+          <button className="btn-outline" onClick={loadData} disabled={loading}>
+            <RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Segarkan
+          </button>
+        }
+      />
 
       <div className="employee-summary-wrapper">
         <div className="employee-summary-card">
@@ -470,7 +466,9 @@ const MyKpiPage = () => {
               </div>
 
               <div className="table-pagination">
-                <div className="pagination-info">Menampilkan <strong>{paginatedPeriods.length}</strong> dari <strong>{filteredPeriods.length}</strong> KPI periode</div>
+                <div className="pagination-info">{filteredPeriods.length === 0
+                  ? 'Menampilkan 0 data'
+                  : `Menampilkan ${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, filteredPeriods.length)} dari ${filteredPeriods.length} data`}</div>
                 <div className="pagination-controls">
                   <button className="pagination-btn" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1}>‹</button>
                   {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (

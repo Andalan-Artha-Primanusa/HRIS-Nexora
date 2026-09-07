@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { RefreshCw, GraduationCap, Clock, CheckCircle, BookOpen, Play, Search, Award, FileText, Star, X, Eye, History } from 'lucide-react';
 import { useAuthStore } from '@/app/store/auth.store';
-import { Card } from '@/shared/ui';
+import { Card, PageHeader } from '@/shared/ui';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { trainingService } from '@/features/training/api/training.service';
 import { RBACUtils } from '@/shared/hooks/rbac';
@@ -145,22 +145,16 @@ const MyTrainingsPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge"><GraduationCap size={16} /><span>Pengembangan Diri</span></div>
-            <h1 className="hero-title">Pelatihan Saya</h1>
-            <p className="hero-subtitle">
-              {isSelfService ? 'Ikuti pelatihan dan lacak kemajuan belajar Anda.' : 'Lihat program pelatihan dan enrollment.'}
-            </p>
-          </div>
-          <div className="page-header-actions">
-            <button className="btn-outline" onClick={fetchData} disabled={loading}>
-              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} /> Segarkan
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Pelatihan Saya"
+        subtitle={isSelfService ? 'Ikuti pelatihan dan lacak kemajuan belajar Anda.' : 'Lihat program pelatihan dan enrollment.'}
+        badge={{ icon: GraduationCap, label: "Pengembangan Diri" }}
+        actions={
+          <button className="btn-outline" onClick={fetchData} disabled={loading}>
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} /> Segarkan
+          </button>
+        }
+      />
 
       <div className="employee-summary-wrapper">
         <div className="employee-summary-card">
@@ -294,7 +288,9 @@ const MyTrainingsPage: React.FC = () => {
               </div>
 
               <div className="table-pagination">
-                <div className="pagination-info">Menampilkan <strong>{paginated.length}</strong> dari <strong>{totalRecords}</strong> data</div>
+                <div className="pagination-info">{totalRecords === 0
+                  ? 'Menampilkan 0 data'
+                  : `Menampilkan ${(page - 1) * pageSize + 1}-${Math.min(page * pageSize, totalRecords)} dari ${totalRecords} data`}</div>
                 <div className="pagination-controls">
                   <button className="pagination-btn" onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1}>‹</button>
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (

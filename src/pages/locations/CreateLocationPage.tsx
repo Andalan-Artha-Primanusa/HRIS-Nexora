@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '@/shared/api/httpClient';
 import { Card } from '@/shared/ui/Card';
+import { PageHeader } from '@/shared/ui';
 import { Button } from '@/shared/ui/Button';
 import { showToast } from '@/shared/ui/toast';
 import { createLocation } from '@/features/location/api/location.service';
@@ -129,26 +130,18 @@ const CreateLocationPage = () => {
 
   return (
     <div className="crud-page">
-      <Card className="page-header" style={{ marginBottom: '2rem' }}>
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <MapPinned size={16} />
-              <span>Location Center</span>
-            </div>
-            <h1 className="hero-title">Buat Lokasi Baru</h1>
-            <p className="hero-subtitle">
-              Tambahkan lokasi absensi dengan koordinat GPS dan radius.
-            </p>
-          </div>
-          <div className="page-header-actions">
-            <button type="button" className="btn-outline" onClick={handleCancel} disabled={loading}>
-              <ArrowLeft size={16} style={{ marginRight: '8px' }} />
-              Kembali
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Buat Lokasi Baru"
+        subtitle="Tambahkan lokasi absensi dengan koordinat GPS dan radius."
+        badge={{ icon: MapPinned, label: "Location Center" }}
+        actions={
+          <button type="button" className="btn-outline" onClick={handleCancel} disabled={loading}>
+            <ArrowLeft size={16} style={{ marginRight: '8px' }} />
+            Kembali
+          </button>
+        }
+        style={{ marginBottom: '2rem' }}
+      />
 
       <form onSubmit={(e) => { e.preventDefault(); void handleCreateLocation(); }}>
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>

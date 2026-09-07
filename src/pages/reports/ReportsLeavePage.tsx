@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { CalendarDays, CheckCircle, XCircle, Clock, Users, TrendingUp, RefreshCw, PieChart as PieIcon, ClipboardList } from 'lucide-react';
 import { BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card } from '@/shared/ui/Card';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import { api } from '@/shared/api/httpClient';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
@@ -62,26 +63,17 @@ const ReportsLeavePage: React.FC = () => {
 
   return (
     <div className="reports-dashboard">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <ClipboardList size={16} />
-              <span>Laporan & Analitik</span>
-            </div>
-            <h1 className="hero-title">Laporan Cuti</h1>
-            <p className="hero-subtitle">
-              Analisis pengajuan cuti, status persetujuan, dan distribusi jenis cuti karyawan.
-            </p>
-          </div>
-          <div className="page-header-actions">
-            <button className="btn-outline" onClick={() => void load()} disabled={loading}>
-              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-              Segarkan
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Laporan Cuti"
+        subtitle="Analisis pengajuan cuti, status persetujuan, dan distribusi jenis cuti karyawan."
+        badge={{ icon: ClipboardList, label: "Laporan & Analitik" }}
+        actions={
+          <button className="btn-outline" onClick={() => void load()} disabled={loading}>
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            Segarkan
+          </button>
+        }
+      />
 
       {error && <p className="reports-error">{error}</p>}
 

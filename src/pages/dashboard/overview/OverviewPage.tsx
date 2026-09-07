@@ -5,12 +5,12 @@ import { KpiCards } from '@/features/dashboard/components/KpiCards';
 import { BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import { api } from '@/shared/api/httpClient';
 import { useAuthStore } from '@/app/store/auth.store';
 import { RBACUtils } from '@/shared/hooks/rbac';
 import { PERMISSIONS } from '@/shared/types/rbac.types';
 import "./OverviewPage.css";
-import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 
 type DashboardRecord = Record<string, unknown>;
 
@@ -385,39 +385,22 @@ const OverviewPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Activity size={16} />
-              <span>{canViewAdminOverview ? 'Pusat Dashboard Admin' : 'Pusat Layanan Mandiri'}</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <div 
-                className="cell-avatar" 
-                style={{ width: '48px', height: '48px', border: '2px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.2)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.2rem' }}
-              >
-                {(user?.name || 'U').charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <h1 className="hero-title">Good Morning, {user?.name?.split(' ')[0] || 'HR Team'}!</h1>
-                <p className="hero-subtitle">Here’s an overview of your workforce today.</p>
-            <CompanyScopeBadge />
-              </div>
-            </div>
-          </div>
-          {canViewAdminOverview && (
-            <div className="page-header-actions">
-              <button className="btn-outline" onClick={() => navigate('/admin/analytics/people')}>
-                Lihat Analitik
-              </button>
-              <button className="btn-primary" onClick={() => navigate('/payroll/approve')}>
-                Jalankan Payroll
-              </button>
-            </div>
-          )}
-        </div>
-      </Card>
+      <PageHeader
+        title={`Good Morning, ${user?.name?.split(' ')[0] || 'HR Team'}!`}
+        subtitle="Here's an overview of your workforce today."
+        badge={{ icon: Activity, label: canViewAdminOverview ? 'Pusat Dashboard Admin' : 'Pusat Layanan Mandiri' }}
+        scope
+        actions={canViewAdminOverview ? (
+          <>
+            <button className="btn-outline" onClick={() => navigate('/admin/analytics/people')}>
+              Lihat Analitik
+            </button>
+            <button className="btn-primary" onClick={() => navigate('/payroll/approve')}>
+              Jalankan Payroll
+            </button>
+          </>
+        ) : undefined}
+      />
 
       {error && (
         <Card className="error-card">

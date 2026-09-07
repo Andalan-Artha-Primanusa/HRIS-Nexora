@@ -13,6 +13,7 @@ import type { EmployeeItem } from "@/features/employee/types/employee.types";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "./PayrollDetailsPage.css";
+import { PageHeader } from "@/shared/ui";
 
 type PayrollComponentType = "allowance" | "deduction";
 
@@ -269,24 +270,17 @@ const PayrollDetailsPage = ({ componentMode, showTabs = true }: PayrollDetailsPa
 
   return (
     <div className="crud-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Wallet size={16} />
-              <span>Pusat Payroll</span>
-            </div>
-            <h1 className="hero-title">{componentMode ? pageTitle : "Komponen Payroll"}</h1>
-            <p className="hero-subtitle">{componentMode ? pageSubtitle : "Kelola komponen tunjangan dan potongan payroll karyawan."}</p>
-          </div>
-          <div className="page-header-actions">
-            <button className="btn-outline" onClick={() => void loadPayrollDetails()} disabled={loading || !payrollId}>
-              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-              Segarkan
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title={componentMode ? pageTitle : "Komponen Payroll"}
+        subtitle={componentMode ? pageSubtitle : "Kelola komponen tunjangan dan potongan payroll karyawan."}
+        badge={{ icon: Wallet, label: "Pusat Payroll" }}
+        actions={
+          <button className="btn-outline" onClick={() => void loadPayrollDetails()} disabled={loading || !payrollId}>
+            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+            Segarkan
+          </button>
+        }
+      />
 
       {showTabs && (
         <div className="payroll-component-tabs">
@@ -423,7 +417,9 @@ const PayrollDetailsPage = ({ componentMode, showTabs = true }: PayrollDetailsPa
         {filteredOverviewItems.length > pageSizeOverview && (
           <div className="payroll-pagination">
             <div className="payroll-pagination-info">
-              Menampilkan <strong>{paginatedOverview.length}</strong> dari <strong>{filteredOverviewItems.length}</strong> data
+              {filteredOverviewItems.length === 0
+                ? 'Menampilkan 0 data'
+                : `Menampilkan ${(currentPageOverview - 1) * pageSizeOverview + 1}-${Math.min(currentPageOverview * pageSizeOverview, filteredOverviewItems.length)} dari ${filteredOverviewItems.length} data`}
             </div>
             <div className="payroll-pagination-controls">
               <button className="payroll-pagination-btn" onClick={() => setCurrentPageOverview(Math.max(1, currentPageOverview - 1))} disabled={currentPageOverview === 1}>{"<"}</button>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { GitBranch, Plus, RefreshCw, Workflow, Edit, Trash2, User, ToggleLeft, ToggleRight } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
+import { PageHeader } from '@/shared/ui';
 import { organizationService } from '@/features/organization/api/organization.service';
 import { ApprovalFlowModal } from '@/features/organization/components/ApprovalFlowModal';
 import { getAllRoles } from '@/features/admin/api/admin.service';
@@ -164,19 +165,12 @@ const ApprovalFlowPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Workflow size={16} />
-              <span>Konfigurasi Sistem</span>
-            </div>
-            <h1 className="hero-title">Alur Persetujuan</h1>
-            <p className="hero-subtitle">
-              Atur alur persetujuan bertingkat untuk modul organisasi.
-            </p>
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title="Alur Persetujuan"
+        subtitle="Atur alur persetujuan bertingkat untuk modul organisasi."
+        badge={{ icon: Workflow, label: "Konfigurasi Sistem" }}
+        actions={
+          <>
             <button className="btn-outline" onClick={fetchData}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
             </button>
@@ -184,9 +178,9 @@ const ApprovalFlowPage: React.FC = () => {
               <Plus size={16} />
               Alur Baru
             </button>
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       <div className="approval-filter-bar">
         <div className="approval-filter-group">

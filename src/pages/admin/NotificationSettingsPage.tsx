@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { RefreshCw, Bell, Mail, Smartphone, CheckCircle, XCircle, Clock, Settings, ShieldCheck, AlertTriangle, ClipboardCheck } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
+import { PageHeader } from '@/shared/ui';
 import { showToast } from '@/shared/ui/toast';
 import { api } from '@/shared/api/httpClient';
 import { useAuthStore } from '@/app/store/auth.store';
@@ -200,7 +201,11 @@ const NotificationSettingsPage: React.FC = () => {
 
   if (!canAccess) {
     return (
-      <div className="crud-page"><Card className="page-header"><div className="page-header-inner"><div className="hero-content"><div className="hero-badge"><ShieldCheck size={16} /><span>Admin Center</span></div><h1 className="hero-title">Akses Ditolak</h1><p className="hero-subtitle">Anda tidak memiliki izin untuk mengakses halaman ini.</p></div></div></Card></div>
+      <div className="crud-page"><PageHeader
+        title="Akses Ditolak"
+        subtitle="Anda tidak memiliki izin untuk mengakses halaman ini."
+        badge={{ icon: ShieldCheck, label: "Admin Center" }}
+      /></div>
     );
   }
 
@@ -299,27 +304,17 @@ const NotificationSettingsPage: React.FC = () => {
 
   return (
     <div className="crud-page training-page notification-page">
-      {/* Header */}
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <ShieldCheck size={16} />
-              <span>System Security</span>
-            </div>
-            <h1 className="hero-title">Pengaturan Notifikasi</h1>
-            <p className="hero-subtitle">
-              Konfigurasikan bagaimana sistem mengirimkan pemberitahuan untuk setiap aktivitas bisnis di HRIS.
-            </p>
-          </div>
-          <div className="page-header-actions">
-            <button className="btn-outline" onClick={fetchData} disabled={loading} style={{ background: 'white' }}>
-              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-              {loading ? 'Memuat...' : 'Segarkan'}
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Pengaturan Notifikasi"
+        subtitle="Konfigurasikan bagaimana sistem mengirimkan pemberitahuan untuk setiap aktivitas bisnis di HRIS."
+        badge={{ icon: ShieldCheck, label: "System Security" }}
+        actions={
+          <button className="btn-outline" onClick={fetchData} disabled={loading} style={{ background: 'white' }}>
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            {loading ? 'Memuat...' : 'Segarkan'}
+          </button>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="training-summary-wrapper">

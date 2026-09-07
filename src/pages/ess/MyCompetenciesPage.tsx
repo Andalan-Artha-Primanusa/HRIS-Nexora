@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { RefreshCw, Award, Search, Users, CheckCircle, Clock } from 'lucide-react';
-import { Card, CardHeader } from '@/shared/ui';
+import { Card, CardHeader, PageHeader } from '@/shared/ui';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { trainingService } from '@/features/training/api/training.service';
 import '@/shared/styles/CrudPage.css';
@@ -179,24 +179,17 @@ const MyCompetenciesPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Award size={16} />
-              <span>Layanan Mandiri</span>
-            </div>
-            <h1 className="hero-title">Kompetensi Saya</h1>
-            <p className="hero-subtitle">Lihat inventaris keterampilan dan tingkat kompetensi Anda.</p>
-          </div>
-          <div className="page-header-actions">
-            <button className="btn-outline" onClick={fetchData} disabled={loading}>
-              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-              Segarkan
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Kompetensi Saya"
+        subtitle="Lihat inventaris keterampilan dan tingkat kompetensi Anda."
+        badge={{ icon: Award, label: "Layanan Mandiri" }}
+        actions={
+          <button className="btn-outline" onClick={fetchData} disabled={loading}>
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            Segarkan
+          </button>
+        }
+      />
 
       <div className="employee-summary-wrapper">
         {summaryCards.map((card) => {
@@ -354,7 +347,9 @@ const MyCompetenciesPage: React.FC = () => {
 
               <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan <strong>{paginatedCompetencies.length}</strong> dari <strong>{sortedCompetencies.length}</strong> kompetensi
+                  {sortedCompetencies.length === 0
+                    ? 'Menampilkan 0 data'
+                    : `Menampilkan ${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, sortedCompetencies.length)} dari ${sortedCompetencies.length} data`}
                 </div>
                 <div className="pagination-controls">
                   <button className="pagination-btn" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1}>‹</button>

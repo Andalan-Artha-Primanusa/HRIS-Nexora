@@ -332,27 +332,7 @@
   border: 1px solid var(--color-border);
 }
 
-.filter-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
 
-.filter-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  min-width: 180px;
-  flex: 1;
-}
-
-.filter-group label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
 
 .filter-select {
   padding: 0.7rem 1rem;
@@ -391,42 +371,7 @@
   margin-bottom: 1rem;
 }
 
-.search-box {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  background: var(--color-surface-soft);
-  border-radius: 10px;
-  border: 1px solid var(--color-border);
-  flex: 1;
-  min-width: 250px;
-  transition: all 0.2s ease;
-}
 
-.search-box:focus-within {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(15, 159, 143, 0.1);
-}
-
-.search-box svg {
-  color: var(--color-text-tertiary);
-  flex-shrink: 0;
-}
-
-.search-input {
-  border: none;
-  background: transparent;
-  outline: none;
-  font-size: 0.9rem;
-  color: var(--color-text-primary);
-  width: 100%;
-  font-family: var(--font-family-heading);
-}
-
-.search-input::placeholder {
-  color: var(--color-text-tertiary);
-}
 
 .quick-controls {
   display: flex;
@@ -476,31 +421,7 @@
   color: var(--color-primary);
 }
 
-.filter-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.65rem 1rem;
-  border-radius: 10px;
-  border: 1px solid var(--color-border);
-  background: var(--color-white);
-  color: var(--color-text-secondary);
-  font-size: 0.85rem;
-  font-family: var(--font-family-heading);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
 
-.filter-btn:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-}
-
-.filter-btn.active {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: var(--color-white);
-}
 
 .btn-clear {
   padding: 0.65rem 1rem;

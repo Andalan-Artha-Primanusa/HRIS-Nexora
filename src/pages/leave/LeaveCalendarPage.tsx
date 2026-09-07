@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Card, CardHeader } from "@/shared/ui";
+import { Card, CardHeader, PageHeader } from "@/shared/ui";
 import { showToast } from '@/shared/ui/toast';
 import { getLeaveCalendar } from "@/features/leave/api/leave.service";
 
@@ -8,7 +8,6 @@ import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "./LeaveShared.css";
 import "./LeavePages.css";
-import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 
 interface CalendarEvent {
   id: number;
@@ -131,26 +130,18 @@ const LeaveCalendarPage = () => {
 
   return (
     <div className="crud-page">
-      {/* Header - Same style as Dashboard */}
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Calendar size={16} />
-              <span>Pusat Kalender</span>
-            </div>
-            <h1 className="hero-title">Kalender Cuti</h1>
-            <p className="hero-subtitle">Visual kalender pengajuan cuti dengan analitik yang konsisten.</p>
-            <CompanyScopeBadge />
-          </div>
-          <div className="page-header-actions">
-            <button className="btn-outline" onClick={() => void loadCalendar()}>
-              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-              Segarkan
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Kalender Cuti"
+        subtitle="Visual kalender pengajuan cuti dengan analitik yang konsisten."
+        badge={{ icon: Calendar, label: "Pusat Kalender" }}
+        scope
+        actions={
+          <button className="btn-outline" onClick={() => void loadCalendar()}>
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            Segarkan
+          </button>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="leave-requests-wrapper">

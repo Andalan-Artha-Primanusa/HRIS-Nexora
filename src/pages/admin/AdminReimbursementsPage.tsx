@@ -3,6 +3,7 @@ import { RefreshCw, Wallet, Search, Filter, Clock, CheckCircle, XCircle, Eye, Tr
 import { Card, ConfirmDialog } from '@/shared/ui';
 import { Modal } from '@/shared/ui/Modal';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
+import { PageHeader } from '@/shared/ui';
 import {
   getAllReimbursements,
   getReimbursementStatistics,
@@ -350,26 +351,17 @@ const AdminReimbursementsPage: React.FC = () => {
   return (
     <div className="crud-page reimbursement-page">
       {/* Header */}
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Wallet size={16} />
-              <span>Pusat Admin</span>
-            </div>
-            <h1 className="hero-title">Pengelolaan Imbalan</h1>
-            <p className="hero-subtitle">
-              Tinjau, setujui, dan kelola klaim imbalan di seluruh perusahaan.
-            </p>
-          </div>
-          <div className="page-header-actions">
-            <button className="btn-outline" onClick={fetchData} disabled={loading}>
-              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-              Segarkan
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Pengelolaan Imbalan"
+        subtitle="Tinjau, setujui, dan kelola klaim imbalan di seluruh perusahaan."
+        badge={{ icon: Wallet, label: "Pusat Admin" }}
+        actions={
+          <button className="btn-outline" onClick={fetchData} disabled={loading}>
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            Segarkan
+          </button>
+        }
+      />
 
       {/* Summary Cards */}
       {stats && (
@@ -564,7 +556,9 @@ const AdminReimbursementsPage: React.FC = () => {
               {/* Pagination */}
               <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan <strong>{paginatedItems.length}</strong> dari <strong>{sortedItems.length}</strong> klaim
+                  {sortedItems.length === 0
+                    ? 'Menampilkan 0 data'
+                    : `Menampilkan ${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, sortedItems.length)} dari ${sortedItems.length} data`}
                 </div>
                 <div className="pagination-controls">
                   <button

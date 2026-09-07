@@ -4,6 +4,7 @@ import { Card } from '@/shared/ui/Card';
 import { Modal } from '@/shared/ui/Modal';
 import overtimeService from '@/features/attendance/api/overtime.service';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
+import { PageHeader } from '@/shared/ui';
 import { api } from '@/shared/api/httpClient';
 import { useAuthStore } from '@/app/store/auth.store';
 import { RBACUtils } from '@/shared/hooks/rbac';
@@ -13,7 +14,6 @@ import '@/pages/dashboard/overview/OverviewPage.css';
 import { showToast } from '@/shared/ui/toast';
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
 import { RejectReasonModal } from "@/shared/components/RejectReasonModal";
-import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 
 interface OvertimeRequest {
   id: number;
@@ -213,19 +213,12 @@ const OvertimeApprovalPage: React.FC = () => {
   if (!canAccess) {
     return (
       <div className="crud-page">
-        <Card className="page-header">
-          <div className="page-header-inner">
-            <div className="hero-content">
-              <div className="hero-badge">
-                <Timer size={16} />
-                <span>Persetujuan</span>
-              </div>
-              <h1 className="hero-title">Persetujuan Lembur</h1>
-              <p className="hero-subtitle">Kelola dan proses pengajuan lembur karyawan.</p>
-              <CompanyScopeBadge />
-            </div>
-          </div>
-        </Card>
+      <PageHeader
+        title="Persetujuan Lembur"
+        subtitle="Kelola dan proses pengajuan lembur karyawan."
+        badge={{ icon: Timer, label: "Persetujuan" }}
+        scope
+      />
 
         <div style={{ padding: '5rem 0' }}>
           <EmptyState
@@ -239,28 +232,18 @@ const OvertimeApprovalPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      {/* Header */}
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Timer size={16} />
-              <span>Persetujuan</span>
-            </div>
-            <h1 className="hero-title">Persetujuan Lembur</h1>
-            <p className="hero-subtitle">
-              Kelola dan proses pengajuan lembur karyawan.
-            </p>
-            <CompanyScopeBadge />
-          </div>
-          <div className="page-header-actions">
-            <button className="btn-outline" onClick={fetchData} disabled={loading}>
-              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-              {loading ? 'Memuat...' : 'Segarkan'}
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Persetujuan Lembur"
+        subtitle="Kelola dan proses pengajuan lembur karyawan."
+        badge={{ icon: Timer, label: "Persetujuan" }}
+        scope
+        actions={
+          <button className="btn-outline" onClick={fetchData} disabled={loading}>
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            {loading ? 'Memuat...' : 'Segarkan'}
+          </button>
+        }
+      />
 
       {/* Summary */}
       <div className="employee-summary-wrapper">
@@ -448,7 +431,9 @@ const OvertimeApprovalPage: React.FC = () => {
               {/* Pagination */}
               <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan <strong>{paginatedRequests.length}</strong> dari <strong>{filteredRequests.length}</strong> pengajuan
+                  {filteredRequests.length === 0
+                    ? 'Menampilkan 0 data'
+                    : `Menampilkan ${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, filteredRequests.length)} dari ${filteredRequests.length} data`}
                 </div>
                 <div className="pagination-controls">
                   <button

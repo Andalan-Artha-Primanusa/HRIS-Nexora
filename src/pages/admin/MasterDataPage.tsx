@@ -6,13 +6,13 @@ import { Button } from '@/shared/ui/Button';
 import { Modal } from '@/shared/ui/Modal';
 import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
+import { PageHeader } from '@/shared/ui';
 import { api } from '@/shared/api/httpClient';
 import { showToast } from '@/shared/ui/toast';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
 import './MasterDataPage.css';
-import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -308,19 +308,13 @@ const MasterDataPage: React.FC = () => {
   return (
     <div className="crud-page">
 
-      {/* Header */}
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Database size={16} />
-              <span>Organization</span>
-            </div>
-            <h1 className="hero-title">Master Data</h1>
-            <p className="hero-subtitle">Kelola data inti organisasi: departemen dan posisi.</p>
-            <CompanyScopeBadge />
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title="Master Data"
+        subtitle="Kelola data inti organisasi: departemen dan posisi."
+        badge={{ icon: Database, label: "Organization" }}
+        scope
+        actions={
+          <>
             <button
               className="btn-outline"
               onClick={fetchData}
@@ -333,9 +327,9 @@ const MasterDataPage: React.FC = () => {
               <Plus size={16} />
               Tambah {tabLabel(activeTab)}
             </button>
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="employee-summary-wrapper">
@@ -484,7 +478,9 @@ const MasterDataPage: React.FC = () => {
               {/* Pagination */}
               <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan <strong>{paginatedData.length}</strong> dari <strong>{sortedData.length}</strong> data
+                  {sortedData.length === 0
+                    ? 'Menampilkan 0 data'
+                    : `Menampilkan ${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, sortedData.length)} dari ${sortedData.length} data`}
                 </div>
                 <div className="pagination-controls">
                   <button

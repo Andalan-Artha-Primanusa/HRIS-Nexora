@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { ConfirmDialog } from "@/shared/ui/ConfirmDialog";
+import { PageHeader } from "@/shared/ui/PageHeader";
 import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import {
   approveReimbursement,
@@ -20,7 +21,6 @@ import { useAuthStore } from "@/app/store/auth.store";
 import { RBACUtils } from "@/shared/hooks/rbac";
 import { PERMISSIONS } from "@/shared/types/rbac.types";
 import "@/shared/styles/CrudPage.css";
-import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 
 const formatDate = (dateString: string | undefined) => {
   if (!dateString) return "-";
@@ -249,26 +249,25 @@ const ReimbursementsManagementPage = () => {
 
   return (
     <div className="crud-page">
-      <div style={{ marginBottom: 16 }}><CompanyScopeBadge /></div>
-      {/* Header */}
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">Reimburse Finance</span>
-          <h1>Reimbursement Ledger</h1>
-          <p>Master list of all company expense reimbursements for Finance processing.</p>
-        </div>
-        <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={() => void loadData()} disabled={loading} style={{ borderColor: "var(--color-primary)", color: "var(--color-primary)" }}>
-            <RefreshCw size={16} />
-            {loading ? "Memuat..." : "Segarkan"}
-          </Button>
-          {canCreate && (
-          <Button variant="primary" size="md" onClick={() => { setForm(DEFAULT_FORM); setIsFormOpen(!isFormOpen); }}>
-            Buat Data Baru
-          </Button>
-          )}
-        </div>
-      </div>
+      <PageHeader
+        title="Reimbursement Ledger"
+        subtitle="Master list of all company expense reimbursements for Finance processing."
+        badge={{ icon: Receipt, label: "Reimburse Finance" }}
+        scope
+        actions={
+          <>
+            <Button variant="outline" size="md" onClick={() => void loadData()} disabled={loading} style={{ borderColor: "var(--color-primary)", color: "var(--color-primary)" }}>
+              <RefreshCw size={16} />
+              {loading ? "Memuat..." : "Segarkan"}
+            </Button>
+            {canCreate && (
+            <Button variant="primary" size="md" onClick={() => { setForm(DEFAULT_FORM); setIsFormOpen(!isFormOpen); }}>
+              Buat Data Baru
+            </Button>
+            )}
+          </>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="summary-grid">

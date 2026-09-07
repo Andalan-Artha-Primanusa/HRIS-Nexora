@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import { showToast } from '@/shared/ui/toast';
 import { getLeaveDetail, updateLeaveRequest } from '@/features/leave/api/leave.service';
 import { api } from '@/shared/api/httpClient';
@@ -145,49 +146,36 @@ const UpdateLeavePage = () => {
   if (loading && !formData.start_date) {
     return (
       <div className="leave-page">
-        <Card className="page-header" style={{ marginBottom: '2rem' }}>
-          <div className="page-header-inner">
-            <div className="hero-content">
-              <div className="hero-badge">
-                <Calendar size={16} />
-                <span>Leave Center</span>
-              </div>
-              <h1 className="hero-title">{isViewMode ? 'Lihat' : 'Edit'} Pengajuan Cuti</h1>
-              <p className="hero-subtitle">Memuat data cuti...</p>
-            </div>
-            <div className="page-header-actions">
-              <button className="btn-outline" onClick={handleCancel} aria-label="Kembali">
-                <ChevronLeft size={18} />
-                Kembali
-              </button>
-            </div>
-          </div>
-        </Card>
+        <PageHeader
+          title={`${isViewMode ? 'Lihat' : 'Edit'} Pengajuan Cuti`}
+          subtitle="Memuat data cuti..."
+          badge={{ icon: Calendar, label: "Leave Center" }}
+          actions={
+            <button className="btn-outline" onClick={handleCancel} aria-label="Kembali">
+              <ChevronLeft size={18} />
+              Kembali
+            </button>
+          }
+          style={{ marginBottom: '2rem' }}
+        />
       </div>
     );
   }
 
   return (
     <div className="leave-page">
-      {/* Header */}
-      <Card className="page-header" style={{ marginBottom: '2rem' }}>
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Calendar size={16} />
-              <span>Leave Center</span>
-            </div>
-            <h1 className="hero-title">{isViewMode ? 'Lihat' : 'Edit'} Pengajuan Cuti</h1>
-            <p className="hero-subtitle">{isViewMode ? 'Informasi detail pengajuan cuti Anda' : 'Perbarui informasi pengajuan cuti Anda'}</p>
-          </div>
-          <div className="page-header-actions">
-            <button className="btn-outline" onClick={handleCancel} aria-label="Kembali">
-              <ChevronLeft size={18} />
-              Kembali
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title={`${isViewMode ? 'Lihat' : 'Edit'} Pengajuan Cuti`}
+        subtitle={isViewMode ? 'Informasi detail pengajuan cuti Anda' : 'Perbarui informasi pengajuan cuti Anda'}
+        badge={{ icon: Calendar, label: "Leave Center" }}
+        actions={
+          <button className="btn-outline" onClick={handleCancel} aria-label="Kembali">
+            <ChevronLeft size={18} />
+            Kembali
+          </button>
+        }
+        style={{ marginBottom: '2rem' }}
+      />
 
       {/* Form Card */}
       <Card className="leave-card" glass>

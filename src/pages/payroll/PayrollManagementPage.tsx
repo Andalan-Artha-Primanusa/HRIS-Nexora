@@ -17,6 +17,7 @@ import {
 } from "@/features/payroll/api/payroll.service";
 import type { PayrollCreatePayload, PayrollItem, PayrollUpdatePayload } from "@/features/payroll/types/payroll.types";
 import { parsePaginatedResponse } from "@/shared/api/pagination";
+import { PageHeader } from "@/shared/ui";
 import "../admin/AdminCrudPages.css";
 
 type PayrollFormState = {
@@ -236,25 +237,23 @@ const PayrollManagementPage = () => {
 
   return (
     <div className="crud-page">
-      <div className="crud-header" style={{ borderBottom: "2px solid var(--color-primary)", paddingBottom: "20px" }}>
-        <div>
-          <h1 style={{ color: "var(--color-primary)", marginBottom: "4px", display: "inline-flex", alignItems: "center", gap: "8px" }}>
-            <Settings2 size={20} />
-            Kelola Payroll
-          </h1>
-          <p style={{ color: "var(--color-text-secondary)", fontSize: "0.9rem" }}>Buat, edit, setujui, dan kelola pembayaran gaji karyawan</p>
-        </div>
-        <Button 
-          variant="outline" 
-          size="md" 
-          onClick={() => void loadPayroll()} 
-          disabled={loading}
-          style={{ borderColor: "var(--color-primary)", color: "var(--color-primary)" }}
-        >
-          <RefreshCw size={16} />
-          Segarkan Data
-        </Button>
-      </div>
+      <PageHeader
+        title="Kelola Payroll"
+        subtitle="Buat, edit, setujui, dan kelola pembayaran gaji karyawan"
+        badge={{ icon: Settings2, label: "Operasi Penggajian" }}
+        actions={
+          <Button 
+            variant="outline" 
+            size="md" 
+            onClick={() => void loadPayroll()} 
+            disabled={loading}
+            style={{ borderColor: "var(--color-primary)", color: "var(--color-primary)" }}
+          >
+            <RefreshCw size={16} />
+            Segarkan Data
+          </Button>
+        }
+      />
 
       <Card className="crud-card" glass style={{ borderTop: "4px solid var(--color-primary)" }}>
         <h2 style={{ color: "var(--color-primary)", marginTop: 0, display: "inline-flex", alignItems: "center", gap: "8px" }}>

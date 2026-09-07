@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
+import { PageHeader } from "@/shared/ui";
 import { showToast } from '@/shared/ui/toast';
 import { assignPermissionsToRole, getAllRoles, getAllPermissions } from "@/features/admin/api/admin.service";
 import { getErrorMessage } from "@/shared/api/errorHandler";
@@ -27,10 +28,10 @@ const AdminRoleAssignPermissionsPage = () => {
   if (!canManageRoles) {
     return (
       <div className="crud-page">
-        <div className="crud-header">
-          <h1>🚫 Akses Ditolak</h1>
-          <p>Anda tidak memiliki izin untuk mengakses halaman ini.</p>
-        </div>
+        <PageHeader
+          title="Akses Ditolak"
+          subtitle="Anda tidak memiliki izin untuk mengakses halaman ini."
+        />
         <Card className="crud-card" glass>
           <p>Silahkan hubungi Administrator untuk mendapatkan akses.</p>
         </Card>
@@ -161,15 +162,16 @@ const AdminRoleAssignPermissionsPage = () => {
 
   return (
     <div className="crud-page">
-      <div className="crud-header">
-        <div>
-          <h1>🔐 Hubungkan Izin & Peran</h1>
-          <p>Tentukan hak akses spesifik untuk setiap tingkatan peran dalam sistem.</p>
-        </div>
-        <Button variant="outline" size="md" onClick={() => navigate("/admin/roles")}>
-          ← Kembali ke Peran
-        </Button>
-      </div>
+      <PageHeader
+        title="Hubungkan Izin & Peran"
+        subtitle="Tentukan hak akses spesifik untuk setiap tingkatan peran dalam sistem."
+        badge={{ icon: Key, label: "Admin Center" }}
+        actions={
+          <Button variant="outline" size="md" onClick={() => navigate("/admin/roles")}>
+            ← Kembali ke Peran
+          </Button>
+        }
+      />
 
       <div className="crud-content-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.8fr)', gap: '1.5rem', alignItems: 'start' }}>
         

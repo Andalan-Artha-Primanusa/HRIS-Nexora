@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import { showToast } from '@/shared/ui/toast';
 import { createLeaveRequest } from '@/features/leave/api/leave.service';
 import { api } from '@/shared/api/httpClient';
@@ -123,25 +124,18 @@ const CreateLeavePage = () => {
 
   return (
     <div className="leave-page">
-      {/* Header */}
-      <Card className="page-header" style={{ marginBottom: '2rem' }}>
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Calendar size={16} />
-              <span>Leave Center</span>
-            </div>
-            <h1 className="hero-title">Buat Pengajuan Cuti</h1>
-            <p className="hero-subtitle">Ajukan pengajuan cuti baru dengan informasi yang lengkap</p>
-          </div>
-          <div className="page-header-actions">
-            <button className="btn-outline" onClick={handleCancel} disabled={loading}>
-              <ChevronLeft size={18} />
-              Kembali
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Buat Pengajuan Cuti"
+        subtitle="Ajukan pengajuan cuti baru dengan informasi yang lengkap"
+        badge={{ icon: Calendar, label: "Leave Center" }}
+        actions={
+          <button className="btn-outline" onClick={handleCancel} disabled={loading}>
+            <ChevronLeft size={18} />
+            Kembali
+          </button>
+        }
+        style={{ marginBottom: '2rem' }}
+      />
 
       {/* Form Card */}
       <Card className="leave-card" glass>

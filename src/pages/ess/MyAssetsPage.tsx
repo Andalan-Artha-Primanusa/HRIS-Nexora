@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { RefreshCw, Package, Laptop, Monitor, Smartphone, Briefcase, ArrowUpFromLine, CheckCircle, Clock, Search, History } from 'lucide-react';
 import { Modal } from '@/shared/ui/Modal';
-import { Card, CardHeader } from '@/shared/ui';
+import { Card, CardHeader, PageHeader } from '@/shared/ui';
 import { Button } from '@/shared/ui/Button';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { assetService } from '@/features/assets/api/asset.service';
@@ -158,24 +158,17 @@ const MyAssetsPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Package size={16} />
-              <span>Employee Self Service</span>
-            </div>
-            <h1 className="hero-title">Aset Saya</h1>
-            <p className="hero-subtitle">Daftar properti perusahaan yang saat ini atau pernah ditugaskan kepada Anda.</p>
-          </div>
-          <div className="page-header-actions">
-            <button className="btn-outline" onClick={fetchData} disabled={loading}>
-              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-              Segarkan
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Aset Saya"
+        subtitle="Daftar properti perusahaan yang saat ini atau pernah ditugaskan kepada Anda."
+        badge={{ icon: Package, label: "Employee Self Service" }}
+        actions={
+          <button className="btn-outline" onClick={fetchData} disabled={loading}>
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            Segarkan
+          </button>
+        }
+      />
 
       <div className="employee-summary-wrapper">
         {summaryCards.map((card) => {

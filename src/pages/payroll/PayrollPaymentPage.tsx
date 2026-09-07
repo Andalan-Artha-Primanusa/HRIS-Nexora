@@ -15,6 +15,7 @@ import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "./PayrollListPage.css";
 import "./PayrollPaymentPage.css";
+import { PageHeader } from "@/shared/ui";
 
 const PayrollPaymentPage = () => {
   const navigate = useNavigate();
@@ -218,19 +219,12 @@ const PayrollPaymentPage = () => {
 
   return (
     <div className="crud-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <CreditCard size={16} />
-              <span>Pusat Payroll</span>
-            </div>
-            <h1 className="hero-title">Pembayaran Payroll</h1>
-            <p className="hero-subtitle">
-              Tandai payroll yang sudah dibayarkan kepada karyawan.
-            </p>
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title="Pembayaran Payroll"
+        subtitle="Tandai payroll yang sudah dibayarkan kepada karyawan."
+        badge={{ icon: CreditCard, label: "Pusat Payroll" }}
+        actions={
+          <>
             <button className="btn-outline" onClick={() => void loadData()} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan
@@ -239,9 +233,9 @@ const PayrollPaymentPage = () => {
               style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.25rem', borderRadius: '10px', border: '1px solid #cbd5e1', background: '#fff', color: 'var(--color-primary)', fontSize: '0.9rem', fontWeight: '600', fontFamily: "'Poppins', sans-serif", cursor: 'pointer' }}>
               Halaman Approval
             </button>
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       <div className="summary-grid">
         {summaryCards.map((card) => {

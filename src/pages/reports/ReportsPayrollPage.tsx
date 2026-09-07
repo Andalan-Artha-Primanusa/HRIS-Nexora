@@ -3,6 +3,7 @@ import { Wallet, CheckCircle, Users, TrendingUp, RefreshCw, BarChart3, PieChart 
 import { BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import { api } from '@/shared/api/httpClient';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
@@ -97,27 +98,17 @@ const ReportsPayrollPage: React.FC = () => {
 
   return (
     <div className="reports-dashboard">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Wallet size={16} />
-              <span>Analitik</span>
-            </div>
-            <h1 className="hero-title">Analitik Data Payroll</h1>
-            <p className="hero-subtitle">
-              Dashboard analisis data payroll yang telah diproses.
-              Lacak tren nominal gaji, status pembayaran per periode, dan distribusi pengeluaran.
-            </p>
-          </div>
-          <div className="page-header-actions">
-            <button className="btn-outline" onClick={() => void load()} disabled={loading}>
-              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-              Segarkan
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Analitik Data Payroll"
+        subtitle="Dashboard analisis data payroll yang telah diproses. Lacak tren nominal gaji, status pembayaran per periode, dan distribusi pengeluaran."
+        badge={{ icon: Wallet, label: "Analitik" }}
+        actions={
+          <button className="btn-outline" onClick={() => void load()} disabled={loading}>
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            Segarkan
+          </button>
+        }
+      />
 
       <div className="reports-filter-bar">
         <label><TrendingUp size={16} style={{ marginRight: '8px' }} /> Filter Periode</label>

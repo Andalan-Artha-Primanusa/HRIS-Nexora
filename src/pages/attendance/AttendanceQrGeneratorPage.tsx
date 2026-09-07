@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Clock, QrCode, RefreshCw } from "lucide-react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
+import { PageHeader } from "@/shared/ui";
 import { showToast } from "@/shared/ui/toast";
 import { companyService, type Company } from "@/features/company/api/company.service";
 import { qrAttendanceService } from "@/features/attendance/api/qr-attendance.service";
@@ -66,21 +67,17 @@ const AttendanceQrGeneratorPage = () => {
 
   return (
     <div className="crud-page attendance-page qr-generator-page">
-      <Card className="qr-generator-hero">
-        <div className="qr-generator-hero__inner">
-          <div className="qr-generator-hero__content">
-            <div className="qr-generator-hero__badge"><QrCode size={16} /><span>QR Attendance</span></div>
-            <h1 className="qr-generator-hero__title">Generate QR Attendance</h1>
-            <p className="qr-generator-hero__subtitle">Buat QR dinamis untuk company, lokasi, dan sesi absensi.</p>
-          </div>
-          <div className="qr-generator-hero__actions">
-            <Button variant="primary" size="md" onClick={generate} disabled={loading}>
-              {loading ? <RefreshCw size={16} /> : <QrCode size={16} />}
-              {loading ? "Membuat..." : "Generate QR"}
-            </Button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Generate QR Attendance"
+        subtitle="Buat QR dinamis untuk company, lokasi, dan sesi absensi."
+        badge={{ icon: QrCode, label: 'QR Attendance' }}
+        actions={
+          <Button variant="primary" size="md" onClick={generate} disabled={loading}>
+            {loading ? <RefreshCw size={16} /> : <QrCode size={16} />}
+            {loading ? "Membuat..." : "Generate QR"}
+          </Button>
+        }
+      />
 
       <div className="qr-generator-grid">
         <Card className="qr-generator-form">

@@ -112,14 +112,6 @@
 /* Table & Content           */
 /* ========================= */
 
-.wuw-table-area {
-  background: var(--color-white);
-  border-radius: 16px;
-  border: 1px solid #e2e8f0;
-  overflow: hidden;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
-}
-
 .notification-table-section {
   margin-top: 0;
 }
@@ -144,37 +136,6 @@
   background: var(--hero-bg-start);
   color: #ffffff;
   box-shadow: 0 4px 10px rgba(15, 159, 143, 0.2);
-}
-
-.data-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-}
-
-.data-table thead th {
-  background: var(--color-surface-soft);
-  padding: 1rem 1.5rem;
-  font-size: 0.75rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  color: var(--color-text-secondary);
-  border-bottom: 1px solid var(--color-border);
-  text-align: left;
-}
-
-.data-table thead th.th-center {
-  text-align: center;
-}
-
-.data-table tbody td {
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid var(--color-surface-soft);
-  vertical-align: middle;
-}
-
-.data-table tbody td.td-center {
-  text-align: center;
 }
 
 .cell-name {
@@ -257,37 +218,6 @@
 .channel-pill-label {
   font-size: 0.75rem;
   font-weight: 700;
-}
-
-/* Tabs */
-.elyra-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  background: var(--color-surface-soft);
-  padding: 0.4rem;
-  border-radius: 18px;
-  width: 100%;
-}
-
-.elyra-tab {
-  padding: 0.6rem 1.5rem;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--color-text-secondary);
-  border-radius: 999px;
-  cursor: pointer;
-  border: none;
-  background: transparent;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-}
-
-.elyra-tab.active {
-  background: var(--color-white);
-  color: var(--color-primary);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 .notification-warning-banner {
@@ -430,11 +360,5 @@
 
   .audit-summary-pill {
     white-space: normal;
-  }
-
-  .elyra-tab {
-    flex: 1 1 auto;
-    justify-content: center;
-    padding-inline: 1rem;
   }
 }

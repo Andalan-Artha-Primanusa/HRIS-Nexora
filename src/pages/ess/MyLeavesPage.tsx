@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Card, CardHeader } from "@/shared/ui";
+import { Card, CardHeader, PageHeader } from "@/shared/ui";
 import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
 
 import { Calendar, RefreshCw, Clock3, CircleCheckBig, CircleX, Wallet, Search, Filter, Plus, Clock, History } from "lucide-react";
@@ -261,21 +261,14 @@ const MyLeavesPage = () => {
   return (
     <div className="crud-page">
       {/* Header */}
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              {isBalanceRoute ? <Wallet size={16} /> : <Calendar size={16} />}
-              <span>{isBalanceRoute ? "Pusat Saldo Cuti" : "Pusat Cuti"}</span>
-            </div>
-            <h1 className="hero-title">{isBalanceRoute ? "Saldo Cuti Saya" : "Cuti Saya"}</h1>
-            <p className="hero-subtitle">
-              {isBalanceRoute
-                ? "Lihat saldo cuti tersedia Anda dengan tampilan visual yang konsisten."
-                : "Lihat riwayat cuti Anda dengan tampilan yang konsisten di seluruh aplikasi."}
-            </p>
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title={isBalanceRoute ? "Saldo Cuti Saya" : "Cuti Saya"}
+        subtitle={isBalanceRoute
+          ? "Lihat saldo cuti tersedia Anda dengan tampilan visual yang konsisten."
+          : "Lihat riwayat cuti Anda dengan tampilan yang konsisten di seluruh aplikasi."}
+        badge={{ icon: isBalanceRoute ? Wallet : Calendar, label: isBalanceRoute ? "Pusat Saldo Cuti" : "Pusat Cuti" }}
+        actions={
+          <>
             <button className="btn-outline" onClick={handleRefresh} disabled={loading}>
               <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
               {loading ? "Memuat..." : "Segarkan"}
@@ -286,9 +279,9 @@ const MyLeavesPage = () => {
                 Ajukan Cuti
               </button>
             )}
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="employee-summary-wrapper">
@@ -514,7 +507,9 @@ const MyLeavesPage = () => {
                 {/* Pagination */}
                 <div className="table-pagination">
                   <div className="pagination-info">
-                    Menampilkan <strong>{paginatedLeaves.length}</strong> dari <strong>{filteredLeaves.length}</strong> cuti
+                    {filteredLeaves.length === 0
+                      ? 'Menampilkan 0 data'
+                      : `Menampilkan ${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, filteredLeaves.length)} dari ${filteredLeaves.length} data`}
                   </div>
                   <div className="pagination-controls">
                     <button

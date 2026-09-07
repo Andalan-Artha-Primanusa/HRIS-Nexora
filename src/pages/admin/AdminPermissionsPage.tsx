@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuthStore } from "@/app/store/auth.store";
 import { Card, Modal, Button } from "@/shared/ui";
 import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
+import { PageHeader } from "@/shared/ui";
 import { RBACUtils } from "@/shared/hooks/rbac";
 import { getAllPermissions, getPermissionById } from "@/features/admin/api/admin.service";
 import { getErrorMessage } from "@/shared/api/errorHandler";
@@ -159,20 +160,11 @@ const AdminPermissionsPage = () => {
   if (!canViewPermissions) {
     return (
       <div className="crud-page">
-        <Card className="page-header">
-          <div className="page-header-inner">
-            <div className="hero-content">
-              <div className="hero-badge">
-                <Shield size={16} />
-                <span>Admin Center</span>
-              </div>
-              <h1 className="hero-title">Akses Ditolak</h1>
-              <p className="hero-subtitle">
-                Anda tidak memiliki izin untuk mengakses halaman ini.
-              </p>
-            </div>
-          </div>
-        </Card>
+        <PageHeader
+          title="Akses Ditolak"
+          subtitle="Anda tidak memiliki izin untuk mengakses halaman ini."
+          badge={{ icon: Shield, label: "Admin Center" }}
+        />
         <div className="">
           <Card glass style={{ padding: '2rem', textAlign: 'center' }}>
             <p>Silakan hubungi Administrator untuk mendapatkan akses.</p>
@@ -185,26 +177,17 @@ const AdminPermissionsPage = () => {
   return (
     <div className="crud-page">
       {/* Header */}
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Shield size={16} />
-              <span>Admin Center</span>
-            </div>
-            <h1 className="hero-title">Manajemen Izin</h1>
-            <p className="hero-subtitle">
-              Kelola dan tampilkan daftar permission yang tersedia untuk pengaturan akses sistem.
-            </p>
-          </div>
-          <div className="page-header-actions">
-            <button className="btn-outline" onClick={() => void loadPermissions()} disabled={loading}>
-              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-              {loading ? "Memuat..." : "Segarkan"}
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Manajemen Izin"
+        subtitle="Kelola dan tampilkan daftar permission yang tersedia untuk pengaturan akses sistem."
+        badge={{ icon: Shield, label: "Admin Center" }}
+        actions={
+          <button className="btn-outline" onClick={() => void loadPermissions()} disabled={loading}>
+            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+            {loading ? "Memuat..." : "Segarkan"}
+          </button>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="employee-summary-wrapper">
@@ -374,7 +357,9 @@ const AdminPermissionsPage = () => {
               {/* Pagination */}
               <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan <strong>{paginatedPermissions.length}</strong> dari <strong>{filteredPermissions.length}</strong> izin
+                  {filteredPermissions.length === 0
+                    ? 'Menampilkan 0 data'
+                    : `Menampilkan ${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, filteredPermissions.length)} dari ${filteredPermissions.length} data`}
                 </div>
                 <div className="pagination-controls">
                   <button

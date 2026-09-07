@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { FileText, ArrowLeft } from 'lucide-react';
+import { PageHeader } from '@/shared/ui';
 import { createKpi } from '@/features/dashboard/api/kpi.service';
 import './KpiPage.css';
 
@@ -87,17 +88,12 @@ const KpiCreatePage = () => {
 
   return (
     <div className="kpi-page">
-      <Card className="kpi-hero" glass>
-        <div className="kpi-header">
-          <div className="kpi-header-copy">
-            <p className="kpi-page-badge">Performance Center</p>
-            <div className="kpi-title-row">
-              <span className="kpi-header-icon"><FileText size={18} /></span>
-              <h1>Create New KPI</h1>
-            </div>
-            <p>Buat KPI baru untuk karyawan. Semua field bertanda * wajib diisi.</p>
-          </div>
-          <div className="kpi-header-actions">
+      <PageHeader
+        badge={{ icon: FileText, label: 'Performance Center' }}
+        title="Create New KPI"
+        subtitle="Buat KPI baru untuk karyawan. Semua field bertanda * wajib diisi."
+        actions={
+          <div className="page-hero-actions">
             <Button
               variant="outline"
               size="md"
@@ -108,8 +104,8 @@ const KpiCreatePage = () => {
               Back to List
             </Button>
           </div>
-        </div>
-      </Card>
+        }
+      />
 
       <Card className="kpi-card" glass>
         <div className="kpi-card-title">

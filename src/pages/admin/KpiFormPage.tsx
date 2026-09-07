@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { showToast } from '@/shared/ui/toast';
+import { PageHeader } from '@/shared/ui';
 import {
   Save,
   User,
@@ -229,35 +230,25 @@ const KpiFormPage = () => {
 
   return (
     <div className="crud-page">
-      <Card className="page-header" style={{ marginBottom: "2rem" }}>
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Target size={16} />
-              <span>Manajemen KPI</span>
-            </div>
-            <h1 className="hero-title">
-              {isEdit ? "Ubah Periode KPI" : "Buat Periode KPI Baru"}
-            </h1>
-            <p className="hero-subtitle">
-              {isEdit
-                ? "Perbarui indikator dan pencapaian KPI periode ini."
-                : "Buat periode KPI baru dengan indikator kinerja multi-item."}
-            </p>
-          </div>
-          <div className="page-header-actions">
-            <button
-              type="button"
-              className="btn-outline"
-              onClick={() => navigate("/kpis")}
-              disabled={loading}
-            >
-              <ChevronLeft size={18} />
-              Kembali
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title={isEdit ? "Ubah Periode KPI" : "Buat Periode KPI Baru"}
+        subtitle={isEdit
+          ? "Perbarui indikator dan pencapaian KPI periode ini."
+          : "Buat periode KPI baru dengan indikator kinerja multi-item."}
+        badge={{ icon: Target, label: "Manajemen KPI" }}
+        style={{ marginBottom: "2rem" }}
+        actions={
+          <button
+            type="button"
+            className="btn-outline"
+            onClick={() => navigate("/kpis")}
+            disabled={loading}
+          >
+            <ChevronLeft size={18} />
+            Kembali
+          </button>
+        }
+      />
 
       <Card
         glass

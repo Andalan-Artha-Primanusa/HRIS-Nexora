@@ -6,6 +6,7 @@ import { createUser, getAllRoles } from "@/features/admin/api/admin.service";
 import { showToast } from "@/shared/ui/toast";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
+import { PageHeader } from "@/shared/ui";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/auth/AuthLayout.css";
 import "@/pages/dashboard/custom/CustomDashboardPage.css";
@@ -139,27 +140,18 @@ const AdminUserCreatePage = () => {
 
   return (
     <div className="crud-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <UserPlus size={16} />
-              <span>Admin Access</span>
-            </div>
-            <h1 className="hero-title">Buat Akun</h1>
-            <p className="hero-subtitle">
-              Buat akun login baru, tetapkan role, dan berikan password sementara untuk reset saat login pertama.
-            </p>
-            <CompanyScopeBadge />
-          </div>
-          <div className="page-header-actions">
-            <button type="button" className="btn-outline" onClick={() => navigate("/admin/users")}>
-              <ArrowLeft size={16} />
-              Kembali
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Buat Akun"
+        subtitle="Buat akun login baru, tetapkan role, dan berikan password sementara untuk reset saat login pertama."
+        badge={{ icon: UserPlus, label: "Admin Access" }}
+        scope
+        actions={
+          <button type="button" className="btn-outline" onClick={() => navigate("/admin/users")}>
+            <ArrowLeft size={16} />
+            Kembali
+          </button>
+        }
+      />
 
       <div className="custom-dashboard-grid" style={{ alignItems: "start" }}>
         <Card className="dashboard-settings-panel">

@@ -5,6 +5,7 @@ import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { Modal } from '@/shared/ui/Modal';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
+import { PageHeader } from '@/shared/ui';
 import { trainingService } from '@/features/training/api/training.service';
 import { employeeService } from '@/features/employee/api/employee.service';
 import type { TrainingProgram } from '@/features/training/types/training.types';
@@ -204,20 +205,12 @@ const TrainingProgramsPage: React.FC = () => {
 
   return (
     <div className="crud-page training-page">
-      {/* Header */}
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <GraduationCap size={16} />
-              <span>L & D</span>
-            </div>
-            <h1 className="hero-title">Program Pelatihan</h1>
-            <p className="hero-subtitle">
-              Kelola program pelatihan karyawan, sertifikasi, dan pengembangan keterampilan.
-            </p>
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title="Program Pelatihan"
+        subtitle="Kelola program pelatihan karyawan, sertifikasi, dan pengembangan keterampilan."
+        badge={{ icon: GraduationCap, label: "L & D" }}
+        actions={
+          <>
             <button className="btn-outline" onClick={fetchData} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan
@@ -226,9 +219,9 @@ const TrainingProgramsPage: React.FC = () => {
               <Plus size={16} />
               Tambah Program
             </button>
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="training-summary-wrapper">
@@ -423,7 +416,9 @@ const TrainingProgramsPage: React.FC = () => {
               {/* Pagination */}
               <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan <strong>{paginatedPrograms.length}</strong> dari <strong>{sortedPrograms.length}</strong> program
+                  {sortedPrograms.length === 0
+                    ? 'Menampilkan 0 data'
+                    : `Menampilkan ${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, sortedPrograms.length)} dari ${sortedPrograms.length} data`}
                 </div>
                 <div className="pagination-controls">
                   <button

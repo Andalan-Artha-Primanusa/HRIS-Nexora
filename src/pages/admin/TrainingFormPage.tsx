@@ -6,6 +6,7 @@ import { Button } from '@/shared/ui/Button';
 import { trainingService } from '@/features/training/api/training.service';
 import type { TrainingProgram } from '@/features/training/types/training.types';
 import { showToast } from '@/shared/ui/toast';
+import { PageHeader } from '@/shared/ui';
 import '@/shared/styles/CrudPage.css';
 import '../dashboard/overview/OverviewPage.css';
 import './TrainingFormPage.css';
@@ -133,24 +134,18 @@ const TrainingFormPage: React.FC = () => {
 
   return (
     <div className="crud-page training-form-page">
-      <Card className="page-header" style={{ marginBottom: '2rem' }}>
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <BookOpen size={16} />
-              <span>Training Center</span>
-            </div>
-            <h1 className="hero-title">{isEdit ? 'Edit Training Program' : 'Develop New Program'}</h1>
-            <p className="hero-subtitle">Design curricula, set schedules, and manage enrollments.</p>
-          </div>
-          <div className="page-header-actions">
-            <button type="button" className="btn-outline" onClick={() => navigate('/training/programs')} disabled={loading}>
-              <ChevronLeft size={18} />
-              Back
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title={isEdit ? 'Edit Training Program' : 'Develop New Program'}
+        subtitle="Design curricula, set schedules, and manage enrollments."
+        badge={{ icon: BookOpen, label: "Training Center" }}
+        style={{ marginBottom: '2rem' }}
+        actions={
+          <button type="button" className="btn-outline" onClick={() => navigate('/training/programs')} disabled={loading}>
+            <ChevronLeft size={18} />
+            Back
+          </button>
+        }
+      />
 
       <form onSubmit={handleSubmit}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>

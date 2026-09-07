@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
+import { PageHeader } from "@/shared/ui";
 import { showToast } from '@/shared/ui/toast';
 import { assignRolesToUser, getAllUsers, getAllRoles } from "@/features/admin/api/admin.service";
 import type { Role } from "@/shared/types/rbac.types";
@@ -114,26 +115,18 @@ const AdminUserAssignRolesPage = () => {
 
   return (
     <div className="crud-page">
-      <Card className="page-header" style={{ marginBottom: '2rem' }}>
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Shield size={16} />
-              <span>Security Center</span>
-            </div>
-            <h1 className="hero-title">Manajemen Peran Pengguna</h1>
-            <p className="hero-subtitle">
-              Pilih karyawan berdasarkan ID atau Nama untuk menyesuaikan hak akses mereka.
-            </p>
-          </div>
-          <div className="page-header-actions">
-            <button type="button" className="btn-outline" onClick={() => navigate("/admin/users")}>
-              <ChevronLeft size={16} style={{ marginRight: '8px' }} />
-              Kembali
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Manajemen Peran Pengguna"
+        subtitle="Pilih karyawan berdasarkan ID atau Nama untuk menyesuaikan hak akses mereka."
+        badge={{ icon: Shield, label: "Security Center" }}
+        actions={
+          <button type="button" className="btn-outline" onClick={() => navigate("/admin/users")}>
+            <ChevronLeft size={16} style={{ marginRight: '8px' }} />
+            Kembali
+          </button>
+        }
+        className="mb-8"
+      />
 
       <div className="crud-content-grid" style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '2rem', alignItems: 'start' }}>
         

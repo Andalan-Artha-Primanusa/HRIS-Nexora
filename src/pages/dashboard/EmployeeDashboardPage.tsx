@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { Card } from '@/shared/ui/Card';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import { api } from '@/shared/api/httpClient';
 import { useAuthStore } from '@/app/store/auth.store';
 import { FileText, Activity, CalendarDays, Clock, CheckCircle2, XCircle } from 'lucide-react';
@@ -270,39 +271,21 @@ const EmployeeDashboardPage = () => {
 
   return (
     <div className="crud-page">
-      {/* Header */}
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Activity size={16} />
-              <span>Dashboard Karyawan</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <div 
-                className="cell-avatar" 
-                style={{ width: '48px', height: '48px', border: '2px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.2)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.2rem', borderRadius: '50%' }}
-              >
-                {(user?.name || 'U').charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <h1 className="hero-title">Halo, {user?.name?.split(' ')[0] || 'User'}!</h1>
-                <p className="hero-subtitle">
-                  Lihat ringkasan aktivitas dan status cuti Anda.
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title={`Halo, ${user?.name?.split(' ')[0] || 'User'}!`}
+        subtitle="Lihat ringkasan aktivitas dan status cuti Anda."
+        badge={{ icon: Activity, label: "Dashboard Karyawan" }}
+        actions={
+          <>
             <button className="btn-primary" onClick={() => navigate('/leave/requests')}>
               Ajukan Cuti
             </button>
             <button className="btn-outline" onClick={() => navigate('/attendance/check-in')}>
               Check In
             </button>
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="employee-summary-wrapper">

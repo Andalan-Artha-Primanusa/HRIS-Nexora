@@ -5,6 +5,7 @@ import { Card } from '@/shared/ui/Card';
 import { Modal } from '@/shared/ui/Modal';
 import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
+import { PageHeader } from '@/shared/ui';
 import { assetService } from '@/features/assets/api/asset.service';
 import { api } from '@/shared/api/httpClient';
 import '@/shared/styles/CrudPage.css';
@@ -277,20 +278,13 @@ const AssetManagementPage: React.FC = () => {
 
   return (
     <div className="crud-page asset-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Package size={16} />
-              <span>Inventaris Perusahaan</span>
-            </div>
-            <h1 className="hero-title">Aset & Properti</h1>
-            <p className="hero-subtitle">
-              Pantau distribusi, kondisi, dan status kepemilikan aset perusahaan secara terpusat.
-            </p>
-            <CompanyScopeBadge />
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title="Aset & Properti"
+        subtitle="Pantau distribusi, kondisi, dan status kepemilikan aset perusahaan secara terpusat."
+        badge={{ icon: Package, label: "Inventaris Perusahaan" }}
+        scope
+        actions={
+          <>
             {canCreate && (
             <button className="btn-primary" onClick={() => navigate('/inventory/assets/create')}>
               <Plus size={16} />
@@ -301,9 +295,9 @@ const AssetManagementPage: React.FC = () => {
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan
             </button>
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       <div className="employee-summary-wrapper">
         {summaryCards.map((card) => {
@@ -437,7 +431,11 @@ const AssetManagementPage: React.FC = () => {
                 </table>
               </div>
               <div className="table-pagination">
-                <div className="pagination-info">Menampilkan <strong>{paginatedAssets.length}</strong> dari <strong>{sortedAssets.length}</strong> aset</div>
+                <div className="pagination-info">
+                  {sortedAssets.length === 0
+                    ? 'Menampilkan 0 data'
+                    : `Menampilkan ${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, sortedAssets.length)} dari ${sortedAssets.length} data`}
+                </div>
                 <div className="pagination-controls">
                   <button className="pagination-btn" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1}>‹</button>
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (

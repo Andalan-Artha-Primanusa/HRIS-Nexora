@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardHeader, ConfirmDialog } from '@/shared/ui';
+import { Card, CardHeader, ConfirmDialog, PageHeader } from '@/shared/ui';
 import { Button } from '@/shared/ui/Button';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { getLocationsPage, deleteLocation } from '@/features/location/api/location.service';
@@ -141,17 +141,12 @@ const LocationsPage = () => {
   return (
     <div className="crud-page">
       {/* Header */}
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <MapPinned size={16} />
-              <span>Location Center</span>
-            </div>
-            <h1 className="hero-title">Daftar Lokasi</h1>
-            <p className="hero-subtitle">Kelola lokasi absensi dan radius untuk setiap tempat kerja.</p>
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title="Daftar Lokasi"
+        subtitle="Kelola lokasi absensi dan radius untuk setiap tempat kerja."
+        badge={{ icon: MapPinned, label: "Location Center" }}
+        actions={
+          <>
             <button className="btn-outline" onClick={() => void loadLocations()} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               {loading ? 'Memuat...' : 'Segarkan'}
@@ -160,9 +155,9 @@ const LocationsPage = () => {
               <Plus size={16} />
               Buat Lokasi Baru
             </button>
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="employee-summary-wrapper">
@@ -332,7 +327,9 @@ const LocationsPage = () => {
               {/* Pagination */}
               <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan <strong>{paginatedLocations.length}</strong> dari <strong>{filteredLocations.length}</strong> lokasi
+                  {filteredLocations.length === 0
+                    ? 'Menampilkan 0 data'
+                    : `Menampilkan ${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, filteredLocations.length)} dari ${filteredLocations.length} data`}
                 </div>
                 <div className="pagination-controls">
                   <button

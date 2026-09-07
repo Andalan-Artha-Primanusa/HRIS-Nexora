@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
+import { PageHeader } from "@/shared/ui";
 import { showToast } from '@/shared/ui/toast';
 import { Briefcase, Users, ChevronLeft } from "lucide-react";
 import { api } from "@/shared/api/httpClient";
@@ -126,24 +127,18 @@ const EmployeeCreatePage = () => {
 
   return (
     <div className="crud-page">
-      <Card className="page-header" style={{ marginBottom: '2rem' }}>
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Users size={16} />
-              <span>People Center</span>
-            </div>
-            <h1 className="hero-title">Tambah Karyawan</h1>
-            <p className="hero-subtitle">Input data jabatan dan penempatan karyawan baru</p>
-          </div>
-          <div className="page-header-actions">
-            <button className="btn-outline" onClick={() => navigate("/employees")} disabled={loading}>
-              <ChevronLeft size={18} />
-              Kembali ke Daftar
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Tambah Karyawan"
+        subtitle="Input data jabatan dan penempatan karyawan baru"
+        badge={{ icon: Users, label: "People Center" }}
+        actions={
+          <button className="btn-outline" onClick={() => navigate("/employees")} disabled={loading}>
+            <ChevronLeft size={18} />
+            Kembali ke Daftar
+          </button>
+        }
+        style={{ marginBottom: '2rem' }}
+      />
 
       <Card className="control-card" glass>
         <div style={{ marginBottom: '1rem' }}>

@@ -31,6 +31,7 @@ import "@/pages/dashboard/overview/OverviewPage.css";
 import "./PayrollListPage.css";
 import "./PayrollShared.css";
 import "./PayrollDashboard.css";
+import { PageHeader } from "@/shared/ui";
 
 const PayrollDashboard: React.FC = () => {
   const [payrollItems, setPayrollItems] = useState<PayrollItem[]>([]);
@@ -163,27 +164,17 @@ const PayrollDashboard: React.FC = () => {
   return (
     <div className="crud-page">
       {/* Header - Same style as Dashboard */}
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Wallet size={16} />
-              <span>Operasi Penggajian</span>
-            </div>
-            <h1 className="hero-title">Dashboard Penggajian</h1>
-            <p className="hero-subtitle">
-              Pusat manajemen payroll perusahaan. Lacak tren, generate data bulanan, 
-              dan kelola slip gaji karyawan secara efisien dalam satu dasbor terpadu.
-            </p>
-          </div>
-          <div className="page-header-actions">
-            <button className="btn-outline" onClick={() => void loadPayrollData()} disabled={loading}>
-              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-              Segarkan
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Dashboard Penggajian"
+        subtitle="Pusat manajemen payroll perusahaan. Lacak tren, generate data bulanan, dan kelola slip gaji karyawan secara efisien dalam satu dasbor terpadu."
+        badge={{ icon: Wallet, label: "Operasi Penggajian" }}
+        actions={
+          <button className="btn-outline" onClick={() => void loadPayrollData()} disabled={loading}>
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            Segarkan
+          </button>
+        }
+      />
 
       {/* Summary Cards - Same style as Employees Page */}
       <div className="payroll-summary-wrapper">

@@ -5,6 +5,7 @@ import { showToast } from '@/shared/ui/toast';
 import { api } from "@/shared/api/httpClient";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { Bell, BellRing, Check, RefreshCw } from "lucide-react";
+import { PageHeader } from "@/shared/ui";
 import "@/shared/styles/CrudPage.css";
 import "../admin/AdminCrudPages.css";
 
@@ -151,23 +152,23 @@ const NotificationsPage = () => {
 
   return (
     <div className="crud-page">
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">Employee Self Service</span>
-          <h1>Notification Center</h1>
-          <p>Lihat notifikasi akun Anda, tandai satu notifikasi atau semua sekaligus sebagai sudah dibaca.</p>
-        </div>
-        <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={() => void loadData()} disabled={loading || processingId !== null} style={{ borderColor: "var(--color-primary)", color: "var(--color-primary)" }}>
-            <RefreshCw size={16} />
-            {loading ? "Memuat..." : "Segarkan"}
-          </Button>
-          <Button variant="primary" size="md" onClick={() => void markAllRead()} disabled={processingId !== null || unreadCount <= 0}>
-            <Check size={16} />
-            Tandai Semua Dibaca
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Notification Center"
+        subtitle="Lihat notifikasi akun Anda, tandai satu notifikasi atau semua sekaligus sebagai sudah dibaca."
+        badge={{ icon: Bell, label: "Employee Self Service" }}
+        actions={
+          <>
+            <Button variant="outline" size="md" onClick={() => void loadData()} disabled={loading || processingId !== null} style={{ borderColor: "var(--color-primary)", color: "var(--color-primary)" }}>
+              <RefreshCw size={16} />
+              {loading ? "Memuat..." : "Segarkan"}
+            </Button>
+            <Button variant="primary" size="md" onClick={() => void markAllRead()} disabled={processingId !== null || unreadCount <= 0}>
+              <Check size={16} />
+              Tandai Semua Dibaca
+            </Button>
+          </>
+        }
+      />
 
       <div className="summary-grid">
         {summaryCards.map((card) => (

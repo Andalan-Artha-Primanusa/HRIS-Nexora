@@ -7,6 +7,7 @@ import WorkScheduleForm, { type WorkScheduleFormState } from "./components/WorkS
 import "./WorkScheduleFormContainer.css";
 import "../dashboard/overview/OverviewPage.css";
 import { Card } from "@/shared/ui/Card";
+import { PageHeader } from "@/shared/ui";
 
 const WorkScheduleCreatePage = () => {
   const navigate = useNavigate();
@@ -37,26 +38,18 @@ const WorkScheduleCreatePage = () => {
 
   return (
     <div className="crud-page">
-      <Card className="page-header" style={{ marginBottom: '2rem' }}>
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Tag size={16} />
-              <span>Workforce Center</span>
-            </div>
-            <h1 className="hero-title">Buat Jadwal Baru</h1>
-            <p className="hero-subtitle">
-              Tambahkan shift kerja baru ke dalam sistem.
-            </p>
-          </div>
-          <div className="page-header-actions">
-            <button type="button" className="btn-outline" onClick={() => navigate("/work-schedules")} disabled={loading}>
-              <ChevronLeft size={16} style={{ marginRight: '8px' }} />
-              Kembali
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Buat Jadwal Baru"
+        subtitle="Tambahkan shift kerja baru ke dalam sistem."
+        badge={{ icon: Tag, label: "Workforce Center" }}
+        actions={
+          <button type="button" className="btn-outline" onClick={() => navigate("/work-schedules")} disabled={loading}>
+            <ChevronLeft size={16} style={{ marginRight: '8px' }} />
+            Kembali
+          </button>
+        }
+        style={{ marginBottom: '2rem' }}
+      />
 
       <WorkScheduleForm
         formData={formData}

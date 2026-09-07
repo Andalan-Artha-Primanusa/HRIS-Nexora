@@ -11,7 +11,7 @@ import { parsePaginatedResponse } from '@/shared/api/pagination';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/employee/EmployeesPage.css';
-import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
+import { PageHeader } from '@/shared/ui';
 
 const formatCurrency = (value: number | string) => {
   const num = typeof value === 'string' ? parseFloat(value) : value;
@@ -146,24 +146,22 @@ const PayrollReportsPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge"><FileText size={16} /><span>Pusat Payroll</span></div>
-            <h1 className="hero-title">Laporan Pajak & Payroll</h1>
-            <p className="hero-subtitle">Laporan komprehensif pajak, BPJS, dan detail payroll karyawan.</p>
-            <CompanyScopeBadge />
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title="Laporan Pajak & Payroll"
+        subtitle="Laporan komprehensif pajak, BPJS, dan detail payroll karyawan."
+        badge={{ icon: FileText, label: "Pusat Payroll" }}
+        scope
+        actions={
+          <>
             <button className="btn-outline" onClick={() => void loadData()} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} /> Segarkan
             </button>
             <button className="btn-outline" onClick={() => setExportModal(true)} style={{ color: '#059669' }}>
               <Download size={16} /> Export
             </button>
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       {error && (
         <div className="alert alert-error" style={{ marginBottom: 24 }}>
@@ -306,7 +304,9 @@ const PayrollReportsPage: React.FC = () => {
               </div>
 
               <div className="table-pagination">
-                <div className="pagination-info">Menampilkan <strong>{paginatedData.length}</strong> dari <strong>{filteredData.length}</strong> data</div>
+                <div className="pagination-info">{filteredData.length === 0
+                  ? 'Menampilkan 0 data'
+                  : `Menampilkan ${(safePage - 1) * pageSize + 1}-${Math.min(safePage * pageSize, filteredData.length)} dari ${filteredData.length} data`}</div>
                 <div className="pagination-controls">
                   <button className="pagination-btn" onClick={() => setCurrentPage(Math.max(1, safePage - 1))} disabled={safePage === 1}>‹</button>
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (

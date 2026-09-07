@@ -54,6 +54,13 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
+    proxy: {
+      "/api": {
+        target: "https://moccasin-crab-693879.hostingersite.com",
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
 
   preview: {

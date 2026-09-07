@@ -687,14 +687,6 @@
   flex-wrap: wrap;
 }
 
-.status-badge {
-  padding: 3px 10px;
-  border-radius: 6px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-}
-
 .status-badge--allowance {
   background: #ecfdf5;
   color: var(--color-success);

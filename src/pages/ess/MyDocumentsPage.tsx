@@ -17,7 +17,7 @@ import {
   Loader2,
   History
 } from 'lucide-react';
-import { Card, CardHeader } from '@/shared/ui';
+import { Card, CardHeader, PageHeader } from '@/shared/ui';
 import { Modal } from '@/shared/ui/Modal';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { documentService } from '@/features/employee/api/document.service';
@@ -583,19 +583,12 @@ const MyDocumentsPage: React.FC = () => {
   return (
     <div className="crud-page my-documents-page">
       {/* Header */}
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <FileText size={16} />
-              <span>Layanan Mandiri</span>
-            </div>
-            <h1 className="hero-title">Dokumen Saya</h1>
-            <p className="hero-subtitle">
-              Akses dokumen resmi, sertifikat, dan catatan pekerjaan Anda.
-            </p>
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title="Dokumen Saya"
+        subtitle="Akses dokumen resmi, sertifikat, dan catatan pekerjaan Anda."
+        badge={{ icon: FileText, label: "Layanan Mandiri" }}
+        actions={
+          <>
             <button className="btn-outline" onClick={fetchDocuments} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan
@@ -604,9 +597,9 @@ const MyDocumentsPage: React.FC = () => {
               <Upload size={16} />
               Unggah Dokumen
             </button>
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="employee-summary-wrapper">
@@ -800,8 +793,9 @@ const MyDocumentsPage: React.FC = () => {
               {/* Pagination */}
               <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan <strong>{paginatedDocuments.length}</strong> dari{' '}
-                  <strong>{filteredDocuments.length}</strong> dokumen
+                  {filteredDocuments.length === 0
+                    ? 'Menampilkan 0 data'
+                    : `Menampilkan ${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, filteredDocuments.length)} dari ${filteredDocuments.length} data`}
                 </div>
                 <div className="pagination-controls">
                   <button

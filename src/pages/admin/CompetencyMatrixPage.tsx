@@ -3,6 +3,7 @@ import { Search, Filter, Award, Target, Plus, RefreshCw, Pencil, Trash2, Users, 
 import { Card } from '@/shared/ui/Card';
 import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
+import { PageHeader } from '@/shared/ui';
 import { trainingService } from '@/features/training/api/training.service';
 import { CompetencyModal } from '@/features/training/components/CompetencyModal';
 import { AssignCompetencyModal } from '@/features/training/components/AssignCompetencyModal';
@@ -168,17 +169,12 @@ const CompetencyMatrixPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Target size={16} />
-              <span>Competencies</span>
-            </div>
-            <h1 className="hero-title">Competency Matrix</h1>
-            <p className="hero-subtitle">Manage employee skills, technical expertise, and core competencies.</p>
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title="Competency Matrix"
+        subtitle="Manage employee skills, technical expertise, and core competencies."
+        badge={{ icon: Target, label: "Competencies" }}
+        actions={
+          <>
             <button className="btn-outline" onClick={fetchData} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan
@@ -187,9 +183,9 @@ const CompetencyMatrixPage: React.FC = () => {
               <Plus size={16} />
               Tambah Kompetensi
             </button>
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       <div className="employee-summary-wrapper">
         {summaryCards.map((card) => {
@@ -395,7 +391,9 @@ const CompetencyMatrixPage: React.FC = () => {
 
               <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan <strong>{paginatedItems.length}</strong> dari <strong>{filteredItems.length}</strong> kompetensi
+                  {filteredItems.length === 0
+                    ? 'Menampilkan 0 data'
+                    : `Menampilkan ${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, filteredItems.length)} dari ${filteredItems.length} data`}
                 </div>
                 <div className="pagination-controls">
                   <button

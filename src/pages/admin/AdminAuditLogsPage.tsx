@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuthStore } from "@/app/store/auth.store";
 import { Card } from "@/shared/ui/Card";
+import { PageHeader } from "@/shared/ui";
 import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { RBACUtils } from "@/shared/hooks/rbac";
@@ -125,20 +126,11 @@ const AdminAuditLogsPage = () => {
   if (!canAccess) {
     return (
       <div className="crud-page">
-        <Card className="page-header">
-          <div className="page-header-inner">
-            <div className="hero-content">
-              <div className="hero-badge">
-                <Shield size={16} />
-                <span>Admin Center</span>
-              </div>
-              <h1 className="hero-title">Akses Ditolak</h1>
-              <p className="hero-subtitle">
-                Anda tidak memiliki izin untuk mengakses halaman ini.
-              </p>
-            </div>
-          </div>
-        </Card>
+        <PageHeader
+          title="Akses Ditolak"
+          subtitle="Anda tidak memiliki izin untuk mengakses halaman ini."
+          badge={{ icon: Shield, label: "Admin Center" }}
+        />
 
         <Card glass style={{ marginTop: '2rem', padding: '2rem', textAlign: 'center' }}>
           <p>Silakan hubungi Administrator untuk mendapatkan akses.</p>
@@ -150,26 +142,17 @@ const AdminAuditLogsPage = () => {
   return (
     <div className="crud-page">
       {/* Header */}
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Shield size={16} />
-              <span>Admin Center</span>
-            </div>
-            <h1 className="hero-title">Audit Logs</h1>
-            <p className="hero-subtitle">
-              Riwayat aktivitas dan perubahan di sistem.
-            </p>
-          </div>
-          <div className="page-header-actions">
-            <button className="btn-outline" onClick={() => void loadLogs()} disabled={loading}>
-              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-              {loading ? "Memuat..." : "Segarkan"}
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Audit Logs"
+        subtitle="Riwayat aktivitas dan perubahan di sistem."
+        badge={{ icon: Shield, label: "Admin Center" }}
+        actions={
+          <button className="btn-outline" onClick={() => void loadLogs()} disabled={loading}>
+            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+            {loading ? "Memuat..." : "Segarkan"}
+          </button>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="employee-summary-wrapper">
@@ -312,7 +295,9 @@ const AdminAuditLogsPage = () => {
               {/* Pagination */}
               <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan <strong>{paginatedLogs.length}</strong> dari <strong>{sortedLogs.length}</strong> log
+                  {sortedLogs.length === 0
+                    ? 'Menampilkan 0 data'
+                    : `Menampilkan ${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, sortedLogs.length)} dari ${sortedLogs.length} data`}
                 </div>
                 <div className="pagination-controls">
                   <button

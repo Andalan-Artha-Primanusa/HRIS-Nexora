@@ -68,6 +68,11 @@ export {
   Card,
 } from './Card';
 
+/* ========================================
+   PAGE HEADER (UNIFIED DESIGN SYSTEM)
+   ======================================== */
+export { PageHeader, type PageHeaderProps, type PageHeaderBadge } from './PageHeader';
+
 export {
   CardHeader,
 } from './CardHeader';

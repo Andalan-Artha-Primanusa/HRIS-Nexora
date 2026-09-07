@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
+import { PageHeader } from "@/shared/ui/PageHeader";
 import { Alert } from "@/shared/ui/Alert";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
@@ -752,19 +753,12 @@ const ProfilesPage = () => {
     const profile = selectedProfile;
     return (
       <div className="crud-page">
-        <Card className="page-header">
-          <div className="page-header-inner">
-            <div className="hero-content">
-              <div className="hero-badge">
-                <User size={16} />
-                <span>HR Management</span>
-              </div>
-              <h1 className="hero-title">Detail Profil</h1>
-              <p className="hero-subtitle">
-                Lihat informasi lengkap profil karyawan.
-              </p>
-            </div>
-            <div className="page-header-actions">
+        <PageHeader
+          title="Detail Profil"
+          subtitle="Lihat informasi lengkap profil karyawan."
+          badge={{ icon: User, label: "HR Management" }}
+          actions={
+            <>
               <button className="btn-outline" onClick={() => navigate("/profiles")}>
                 Kembali
               </button>
@@ -772,9 +766,9 @@ const ProfilesPage = () => {
                 <Pencil size={16} />
                 Edit
               </button>
-            </div>
-          </div>
-        </Card>
+            </>
+          }
+        />
 
         <div className="">
           <Card className="table-card" glass>
@@ -820,25 +814,16 @@ const ProfilesPage = () => {
   if (isUpdatePage) {
     return (
       <div className="crud-page">
-        <Card className="page-header">
-          <div className="page-header-inner">
-            <div className="hero-content">
-              <div className="hero-badge">
-                <User size={16} />
-                <span>HR Management</span>
-              </div>
-              <h1 className="hero-title">Edit Profil</h1>
-              <p className="hero-subtitle">
-                Ubah informasi profil karyawan.
-              </p>
-            </div>
-            <div className="page-header-actions">
-              <button className="btn-outline" onClick={() => navigate("/profiles")} disabled={loading}>
-                Batal
-              </button>
-            </div>
-          </div>
-        </Card>
+        <PageHeader
+          title="Edit Profil"
+          subtitle="Ubah informasi profil karyawan."
+          badge={{ icon: User, label: "HR Management" }}
+          actions={
+            <button className="btn-outline" onClick={() => navigate("/profiles")} disabled={loading}>
+              Batal
+            </button>
+          }
+        />
 
         {errorMessage && (
           <Alert type="error" message={errorMessage} onClose={() => {}} dismissible />
@@ -1009,25 +994,16 @@ const ProfilesPage = () => {
   if (isAddPage) {
     return (
       <div className="crud-page">
-        <Card className="page-header">
-          <div className="page-header-inner">
-            <div className="hero-content">
-              <div className="hero-badge">
-                <User size={16} />
-                <span>HR Management</span>
-              </div>
-              <h1 className="hero-title">Tambah Profil Baru</h1>
-              <p className="hero-subtitle">
-                Lengkapi informasi profil karyawan.
-              </p>
-            </div>
-            <div className="page-header-actions">
-              <button className="btn-outline" onClick={() => navigate("/profiles")} disabled={loading}>
-                Kembali
-              </button>
-            </div>
-          </div>
-        </Card>
+        <PageHeader
+          title="Tambah Profil Baru"
+          subtitle="Lengkapi informasi profil karyawan."
+          badge={{ icon: User, label: "HR Management" }}
+          actions={
+            <button className="btn-outline" onClick={() => navigate("/profiles")} disabled={loading}>
+              Kembali
+            </button>
+          }
+        />
 
         {errorMessage && (
           <Alert type="error" message={errorMessage} onClose={() => {}} dismissible />
@@ -1101,19 +1077,12 @@ const ProfilesPage = () => {
   // Main List Page
   return (
     <div className="crud-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <User size={16} />
-              <span>HR Management</span>
-            </div>
-            <h1 className="hero-title">Kelola Profil Karyawan</h1>
-            <p className="hero-subtitle">
-              Kelola profil dan data karyawan perusahaan.
-            </p>
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title="Kelola Profil Karyawan"
+        subtitle="Kelola profil dan data karyawan perusahaan."
+        badge={{ icon: User, label: "HR Management" }}
+        actions={
+          <>
             <button className="btn-outline" onClick={() => void loadProfiles()}>
               <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
             </button>
@@ -1121,9 +1090,9 @@ const ProfilesPage = () => {
               <Plus size={16} />
               Tambah Profil
             </button>
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       {errorMessage && (
         <Alert type="error" message={errorMessage} onClose={() => {}} dismissible />

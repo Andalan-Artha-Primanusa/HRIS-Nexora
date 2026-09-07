@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/shared/ui/Card";
 import { showToast } from "@/shared/ui/toast";
 import { Button } from "@/shared/ui/Button";
+import { PageHeader } from "@/shared/ui";
 import { getErrorMessage } from "@/shared/api/errorHandler";
 import { MonitorCog, RefreshCw, Wifi, WifiOff, Plus, Edit2 } from "lucide-react";
 import {
@@ -116,19 +117,12 @@ const AdminBiometricDevicesPage = () => {
 
   return (
     <div className="crud-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <MonitorCog size={16} />
-              <span>Admin Center</span>
-            </div>
-            <h1 className="hero-title">Biometric Devices</h1>
-            <p className="hero-subtitle">
-              Kelola perangkat biometric, pantau status koneksi, dan jalankan sinkronisasi attendance.
-            </p>
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title="Biometric Devices"
+        subtitle="Kelola perangkat biometric, pantau status koneksi, dan jalankan sinkronisasi attendance."
+        badge={{ icon: MonitorCog, label: "Admin Center" }}
+        actions={
+          <>
             <button className="btn-outline" onClick={() => void loadDevices()} disabled={loading}>
               <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
               {loading ? "Memuat..." : "Segarkan"}
@@ -137,9 +131,9 @@ const AdminBiometricDevicesPage = () => {
               <Plus size={16} />
               Tambah Device
             </button>
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       <div className="leave-requests-wrapper">
         {summaryCards.map((card) => {

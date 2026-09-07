@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { PageHeader } from '@/shared/ui';
 import { showToast } from '@/shared/ui/toast';
 import { api } from '@/shared/api/httpClient';
 import { Clock } from 'lucide-react';
@@ -33,20 +34,20 @@ const AttendanceTodayPage = () => {
 
   return (
     <div className="attendance-page">
-      <div className="attendance-page-header">
-        <div>
-          <span className="attendance-badge">Today</span>
-          <h1>Attendance Today</h1>
-          <p>Ringkasan kehadiran hari ini dan waktu kerja saat ini.</p>
-        </div>
-        <div className="attendance-status-card">
-          <Clock size={22} />
-          <div>
-            <p>Status</p>
-            <strong>{status}</strong>
+      <PageHeader
+        title="Attendance Today"
+        subtitle="Ringkasan kehadiran hari ini dan waktu kerja saat ini."
+        badge={{ icon: Clock, label: 'Today' }}
+        actions={
+          <div className="attendance-status-card">
+            <Clock size={22} />
+            <div>
+              <p>Status</p>
+              <strong>{status}</strong>
+            </div>
           </div>
-        </div>
-      </div>
+        }
+      />
 
       <Card className="attendance-today-card" glass>
         <div className="attendance-action-row">

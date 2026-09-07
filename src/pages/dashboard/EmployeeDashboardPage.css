@@ -229,44 +229,6 @@
   color: var(--color-text-primary);
 }
 
-.table-wrap {
-  overflow-x: auto;
-  padding: 0;
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-border) transparent;
-}
-
-.data-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  min-width: 600px;
-  font-family: var(--font-family-base);
-}
-
-.data-table thead th {
-  background: var(--color-surface-soft);
-  padding: var(--space-3) var(--space-4);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-wide);
-  color: var(--color-text-secondary);
-  border-bottom: 1px solid var(--color-border);
-  text-align: left;
-}
-
-.data-table tbody td {
-  padding: var(--space-4);
-  border-bottom: 1px solid var(--color-border-light);
-  vertical-align: middle;
-  color: var(--color-text-primary);
-}
-
-.data-table tr:hover {
-  background: var(--color-surface-soft);
-}
-
 .data-table .cell-stacked {
   display: flex;
   flex-direction: column;
@@ -282,52 +244,6 @@
 .data-table .cell-stacked__sub {
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
-}
-
-.td-center {
-  text-align: center;
-}
-
-.th-center {
-  text-align: center;
-}
-
-/* Status Badges */
-.status-badge {
-  display: inline-flex;
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-full);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-}
-
-.status-badge--approved {
-  background: var(--color-success-light);
-  color: var(--color-success);
-}
-
-.status-badge--pending {
-  background: var(--color-warning-light);
-  color: var(--color-warning);
-}
-
-.status-badge--draft {
-  background: var(--color-error-light);
-  color: var(--color-error);
-}
-
-.badge-soft {
-  display: inline-flex;
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-full);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-}
-
-.badge-soft--blue {
-  background: var(--color-primary-light);
-  color: var(--color-primary-dark);
-  color: #0f172a;
 }
 
 .analytics-subtitle {

@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { Card } from "@/shared/ui/Card";
 import { Button } from "@/shared/ui/Button";
 import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
+import { PageHeader } from "@/shared/ui/PageHeader";
 import {
   approveReimbursement,
   getAllReimbursements,
@@ -13,7 +14,6 @@ import { showToast } from "@/shared/ui/toast";
 import { RejectReasonModal } from "@/shared/components/RejectReasonModal";
 import "@/shared/styles/CrudPage.css";
 import { ApprovalHistoryModal } from "@/shared/components/ApprovalHistoryModal";
-import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 import { useAuthStore } from "@/app/store/auth.store";
 import { RBACUtils } from "@/shared/hooks/rbac";
 import { PERMISSIONS } from "@/shared/types/rbac.types";
@@ -162,21 +162,18 @@ const ReimbursementApprovalPage = () => {
 
   return (
     <div className="crud-page">
-      <div style={{ marginBottom: 16 }}><CompanyScopeBadge /></div>
-      {/* Header */}
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">Reimburse Center</span>
-          <h1>Reimbursement Approval</h1>
-          <p>Review and approve/reject pending employee expense reimbursements securely.</p>
-        </div>
-        <div className="page-header-actions">
+      <PageHeader
+        title="Reimbursement Approval"
+        subtitle="Review and approve/reject pending employee expense reimbursements securely."
+        badge={{ icon: Receipt, label: "Reimburse Center" }}
+        scope
+        actions={
           <Button variant="outline" size="md" onClick={() => void loadPending()} disabled={loading} style={{ borderColor: "var(--color-primary)", color: "var(--color-primary)" }}>
             <RefreshCw size={16} />
             {loading ? "Memuat..." : "Segarkan"}
           </Button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="summary-grid">
@@ -308,7 +305,9 @@ const ReimbursementApprovalPage = () => {
         {totalPages > 1 && (
           <div className="table-pagination">
             <div className="pagination-info">
-              Menampilkan <strong>{items.length}</strong> dari <strong>{totalItems}</strong> pengajuan
+              {totalItems === 0
+                ? 'Menampilkan 0 data'
+                : `Menampilkan ${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, totalItems)} dari ${totalItems} data`}
             </div>
             <div className="pagination-controls">
               <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)}>

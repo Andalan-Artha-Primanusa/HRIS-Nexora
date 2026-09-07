@@ -6,6 +6,7 @@ import { api } from '@/shared/api/httpClient';
 import { useAuthStore } from '@/app/store/auth.store';
 import { RBACUtils } from '@/shared/hooks/rbac';
 import { PERMISSIONS } from '@/shared/types/rbac.types';
+import { PageHeader } from '@/shared/ui';
 import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/payroll/PayrollShared.css';
@@ -202,25 +203,22 @@ const CompanySettingsPage: React.FC = () => {
 
   if (!canAccess) {
     return (
-      <div className="crud-page"><Card className="page-header"><div className="page-header-inner"><div className="hero-content"><div className="hero-badge"><ShieldCheck size={16} /><span>Admin Center</span></div><h1 className="hero-title">Akses Ditolak</h1><p className="hero-subtitle">Anda tidak memiliki izin untuk mengakses halaman ini.</p></div></div></Card></div>
+      <div className="crud-page"><PageHeader
+        title="Akses Ditolak"
+        subtitle="Anda tidak memiliki izin untuk mengakses halaman ini."
+        badge={{ icon: ShieldCheck, label: "Admin Center" }}
+      /></div>
     );
   }
 
   return (
     <div className="crud-page settings-page">
-      <Card className="page-header settings-hero-card">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Settings size={16} />
-              <span>Administrasi Sistem</span>
-            </div>
-            <h1 className="hero-title">Pengaturan Perusahaan</h1>
-            <p className="hero-subtitle">
-              Kelola identitas inti organisasi, informasi kontak, dan parameter bisnis.
-            </p>
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title="Pengaturan Perusahaan"
+        subtitle="Kelola identitas inti organisasi, informasi kontak, dan parameter bisnis."
+        badge={{ icon: Settings, label: "Administrasi Sistem" }}
+        actions={
+          <>
             <button className="btn-outline" onClick={fetchData} disabled={loading} style={{ background: 'white' }}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               {loading ? 'Memuat...' : 'Segarkan'}
@@ -231,24 +229,17 @@ const CompanySettingsPage: React.FC = () => {
               {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
             </button>
             )}
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       {/* Logo Section */}
-      <Card className="settings-logo-card">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Upload size={16} />
-              <span>Logo Perusahaan</span>
-            </div>
-            <h1 className="hero-title">Perbarui Logo</h1>
-            <p className="hero-subtitle">
-              Unggah logo perusahaan untuk dokumen dan laporan.
-            </p>
-          </div>
-          <div className="page-header-actions" style={{ flexDirection: 'column', gap: '1rem' }}>
+      <PageHeader
+        badge={{ icon: Upload, label: 'Logo Perusahaan' }}
+        title="Perbarui Logo"
+        subtitle="Unggah logo perusahaan untuk dokumen dan laporan."
+        actions={
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
             {(company.logo || logoPreview) && (
               <div style={{ textAlign: 'center' }}>
                 <img
@@ -280,8 +271,8 @@ const CompanySettingsPage: React.FC = () => {
             </div>
             )}
           </div>
-        </div>
-      </Card>
+        }
+      />
 
       <div className="settings-summary-grid">
         <Card className="summary-card">

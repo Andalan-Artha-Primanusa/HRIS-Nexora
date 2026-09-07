@@ -1,6 +1,6 @@
 import { Mail, ShieldCheck, UserCircle } from "lucide-react";
 import { useAuthStore } from "@/app/store/auth.store";
-import { Card } from "@/shared/ui";
+import { Card, PageHeader } from "@/shared/ui";
 import "@/shared/styles/CrudPage.css";
 import "./ProfilesPage.css";
 
@@ -17,20 +17,11 @@ const MyProfilePage = () => {
 
   return (
     <div className="crud-page profiles-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <UserCircle size={16} />
-              <span>Akun Saya</span>
-            </div>
-            <h1 className="hero-title">Profile Saya</h1>
-            <p className="hero-subtitle">
-              Informasi akun login pribadi. Data karyawan lengkap tetap ada di menu Workforce.
-            </p>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Profile Saya"
+        subtitle="Informasi akun login pribadi. Data karyawan lengkap tetap ada di menu Workforce."
+        badge={{ icon: UserCircle, label: "Akun Saya" }}
+      />
 
       <div className="profile-new-cards profile-card-sections--stack">
         <Card className="profile-details-card">

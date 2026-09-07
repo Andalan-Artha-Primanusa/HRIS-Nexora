@@ -7,6 +7,7 @@ import { Card } from '@/shared/ui/Card';
 import { Modal } from '@/shared/ui/Modal';
 import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
+import { PageHeader } from '@/shared/ui';
 import { trainingService } from '@/features/training/api/training.service';
 import { employeeService } from '@/features/employee/api/employee.service';
 import type { TrainingProgram } from '@/features/training/types/training.types';
@@ -14,7 +15,6 @@ import '@/shared/styles/CrudPage.css';
 import '@/pages/dashboard/overview/OverviewPage.css';
 import '@/pages/leave/LeaveShared.css';
 import './TrainingProgramsPage.css';
-import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 import { useAuthStore } from "@/app/store/auth.store";
 import { RBACUtils } from "@/shared/hooks/rbac";
 import { PERMISSIONS } from "@/shared/types/rbac.types";
@@ -251,7 +251,11 @@ const ProgramsTab: React.FC = () => {
                 </table>
               </div>
               <div className="table-pagination">
-                <div className="pagination-info">Menampilkan <strong>{paginated.length}</strong> dari <strong>{sorted.length}</strong> program</div>
+                <div className="pagination-info">
+                  {sorted.length === 0
+                    ? 'Menampilkan 0 data'
+                    : `Menampilkan ${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, sorted.length)} dari ${sorted.length} data`}
+                </div>
                 <div className="pagination-controls">
                   <button className="pagination-btn" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1}>‹</button>
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
@@ -605,7 +609,11 @@ const EnrollmentsTab: React.FC = () => {
                 </table>
               </div>
               <div className="table-pagination">
-                <div className="pagination-info">Menampilkan <strong>{paginated.length}</strong> dari <strong>{filtered.length}</strong> pendaftaran</div>
+                <div className="pagination-info">
+                  {filtered.length === 0
+                    ? 'Menampilkan 0 data'
+                    : `Menampilkan ${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, filtered.length)} dari ${filtered.length} data`}
+                </div>
                 <div className="pagination-controls">
                   <button className="pagination-btn" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1}>‹</button>
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
@@ -705,24 +713,13 @@ const TrainingManagementPage: React.FC = () => {
 
   return (
     <div className="crud-page training-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <GraduationCap size={16} />
-              <span>L & D</span>
-            </div>
-            <h1 className="hero-title">Pelatihan & Pengembangan</h1>
-            <p className="hero-subtitle">
-              Kelola program pelatihan, pendaftaran, dan pengembangan keterampilan karyawan.
-            </p>
-            <CompanyScopeBadge />
-          </div>
-          <div className="page-header-actions">
-            <RefreshCw size={16} />
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Pelatihan & Pengembangan"
+        subtitle="Kelola program pelatihan, pendaftaran, dan pengembangan keterampilan karyawan."
+        badge={{ icon: GraduationCap, label: "L & D" }}
+        scope
+        actions={<RefreshCw size={16} />}
+      />
 
       <div className="elyra-tabs" style={{ marginBottom: '1.5rem' }}>
         {TABS.map(t => (

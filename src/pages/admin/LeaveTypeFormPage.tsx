@@ -4,6 +4,7 @@ import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { api } from '@/shared/api/httpClient';
 import { showToast } from '@/shared/ui/toast';
+import { PageHeader } from '@/shared/ui';
 import { 
   Save, 
   ArrowLeft, 
@@ -106,19 +107,12 @@ const LeaveTypeFormPage: React.FC = () => {
 
   return (
     <div className="crud-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <CalendarDays size={16} />
-              <span>{isEdit ? 'Edit' : 'Master Data'}</span>
-            </div>
-            <h1 className="hero-title">{isEdit ? 'Edit Jenis Cuti' : 'Tambah Jenis Cuti Baru'}</h1>
-            <p className="hero-subtitle">
-              Konfigurasi kategori cuti dan aturan dasarnya.
-            </p>
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title={isEdit ? 'Edit Jenis Cuti' : 'Tambah Jenis Cuti Baru'}
+        subtitle="Konfigurasi kategori cuti dan aturan dasarnya."
+        badge={{ icon: CalendarDays, label: isEdit ? 'Edit' : 'Master Data' }}
+        actions={
+          <>
             <button className="btn-outline" onClick={() => navigate('/leave/type')}>
               <ArrowLeft size={16} />
               Kembali
@@ -127,9 +121,9 @@ const LeaveTypeFormPage: React.FC = () => {
               {loading ? <RefreshCw size={16} className="animate-spin" /> : <Save size={16} />}
               {loading ? 'Menyimpan...' : (isEdit ? 'Simpan Perubahan' : 'Tambah Jenis Cuti')}
             </button>
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       <form id="leave-type-form" onSubmit={handleSubmit} className="" style={{ maxWidth: '800px', margin: '0 auto' }}>
         <Card glass style={{ padding: '2rem', borderRadius: '24px' }}>

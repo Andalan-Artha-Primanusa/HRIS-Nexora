@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { PageHeader } from '@/shared/ui';
 import { api } from '@/shared/api/httpClient';
 import { CreditCard, FileText, ArrowRight } from 'lucide-react';
 import './PayrollPage.css';
@@ -75,23 +76,16 @@ const PayrollPage = () => {
 
   return (
     <div className="payroll-page">
-      <Card className="page-header" style={{ marginBottom: 'var(--space-6)' }}>
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--space-2)', padding: 'var(--space-1) var(--space-3)', borderRadius: 'var(--radius-full)', fontSize: 'var(--font-size-xs)', fontWeight: 'var(--font-weight-semibold)', letterSpacing: 'var(--letter-spacing-wide)', textTransform: 'uppercase', color: 'var(--color-white)', marginBottom: 'var(--space-3)', background: 'rgba(255, 255, 255, 0.14)' }}>
-              <CreditCard size={16} />
-              <span>Payroll Center</span>
-            </div>
-            <h1 className="hero-title" style={{ fontFamily: 'var(--font-family-heading)', fontSize: 'var(--font-size-2xl)', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-white)', margin: '0 0 var(--space-2) 0', letterSpacing: 'var(--letter-spacing-tight)' }}>Payroll Management</h1>
-            <p className="hero-subtitle" style={{ fontSize: 'var(--font-size-md)', color: 'rgba(255, 255, 255, 0.88)', margin: '0', maxWidth: '50ch' }}>Manage monthly payroll, generate payslips, and review transactions.</p>
-          </div>
-          <div className="page-header-actions" style={{ display: 'flex', gap: 'var(--space-3)' }}>
-            <Button variant="outline" size="md" onClick={loadPayroll} disabled={loading}>
-              Refresh Payroll
-            </Button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Payroll Management"
+        subtitle="Manage monthly payroll, generate payslips, and review transactions."
+        badge={{ icon: CreditCard, label: "Payroll Center" }}
+        actions={
+          <Button variant="outline" size="md" onClick={loadPayroll} disabled={loading}>
+            Refresh Payroll
+          </Button>
+        }
+      />
 
       <div className="payroll-grid">
         <Card className="payroll-card" glass>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, ConfirmDialog } from "@/shared/ui";
+import { Card, ConfirmDialog, PageHeader } from "@/shared/ui";
 import { LoadingState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import {
   getAllLeaves,
@@ -21,7 +21,6 @@ import { RBACUtils } from "@/shared/hooks/rbac";
 import "@/shared/styles/CrudPage.css";
 import "@/pages/dashboard/overview/OverviewPage.css";
 import "./LeaveShared.css";
-import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 
 const LeaveRequestsPage = () => {
   const navigate = useNavigate();
@@ -161,19 +160,13 @@ const LeaveRequestsPage = () => {
 
   return (
     <div className="crud-page">
-      {/* Header - Same style as Dashboard */}
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Calendar size={16} />
-              <span>Leave Center</span>
-            </div>
-            <h1 className="hero-title">Leave Requests</h1>
-            <p className="hero-subtitle">Manage employee leave requests and approvals in one unified dashboard.</p>
-            <CompanyScopeBadge />
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title="Leave Requests"
+        subtitle="Manage employee leave requests and approvals in one unified dashboard."
+        badge={{ icon: Calendar, label: "Leave Center" }}
+        scope
+        actions={
+          <>
             <button className="btn-outline" onClick={() => void loadLeaves()}>
               <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
               Segarkan
@@ -182,9 +175,9 @@ const LeaveRequestsPage = () => {
               <Plus size={16} />
               Buat Pengajuan
             </button>
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       <LeaveSummary stats={stats} />
 
@@ -259,7 +252,9 @@ const LeaveRequestsPage = () => {
           {totalPages > 1 && (
             <div className="table-pagination">
               <div className="pagination-info">
-                Menampilkan <strong>{paginatedItems.length}</strong> dari <strong>{filteredItems.length}</strong> data
+                {filteredItems.length === 0
+                  ? 'Menampilkan 0 data'
+                  : `Menampilkan ${(currentPage - 1) * perPage + 1}-${Math.min(currentPage * perPage, filteredItems.length)} dari ${filteredItems.length} data`}
               </div>
               <div className="pagination-controls">
                 <button

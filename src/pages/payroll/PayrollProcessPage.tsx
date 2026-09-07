@@ -19,7 +19,7 @@ import "@/pages/dashboard/overview/OverviewPage.css";
 import "./PayrollListPage.css";
 import "./PayrollApprovePage.css";
 import "./PayrollProcessPage.css";
-import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
+import { PageHeader } from "@/shared/ui";
 
 const formatCurrency = (v: unknown) => {
   const num = typeof v === "string" ? parseFloat(v) : Number(v);
@@ -79,16 +79,12 @@ const PayrollProcessPage = ({ mode, showTabs = true }: PayrollProcessPageProps) 
 
   return (
     <div className="crud-page payroll-process-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge"><activeMeta.icon size={16} /><span>Operasi Penggajian</span></div>
-            <h1 className="hero-title">{mode ? activeMeta.title : "Proses Payroll"}</h1>
-            <p className="hero-subtitle">{mode ? activeMeta.subtitle : "Mulai dari generate payroll bulanan, approval manager dan HR, sampai pembayaran final."}</p>
-            <CompanyScopeBadge />
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title={mode ? activeMeta.title : "Proses Payroll"}
+        subtitle={mode ? activeMeta.subtitle : "Mulai dari generate payroll bulanan, approval manager dan HR, sampai pembayaran final."}
+        badge={{ icon: activeMeta.icon, label: "Operasi Penggajian" }}
+        scope
+      />
 
       {showTabs && (
         <div className="payroll-tabs">
@@ -303,7 +299,9 @@ const GenerateTab = () => {
           {filtered.length > 0 && (
             <div className="table-pagination">
               <div className="pagination-info">
-                Menampilkan <strong>{paginated.length}</strong> dari <strong>{filtered.length}</strong> data
+                {filtered.length === 0
+                  ? 'Menampilkan 0 data'
+                  : `Menampilkan ${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, filtered.length)} dari ${filtered.length} data`}
               </div>
               <div className="pagination-controls">
                 <button className="pagination-btn" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1}>‹</button>
@@ -491,7 +489,9 @@ const ApproveTab = () => {
         {pendingPayrolls.length > pageSizePending && (
           <div className="table-pagination">
             <div className="pagination-info">
-              Menampilkan <strong>{paginatedPending.length}</strong> dari <strong>{pendingPayrolls.length}</strong> data
+              {pendingPayrolls.length === 0
+                ? 'Menampilkan 0 data'
+                : `Menampilkan ${(safePagePending - 1) * pageSizePending + 1}-${Math.min(safePagePending * pageSizePending, pendingPayrolls.length)} dari ${pendingPayrolls.length} data`}
             </div>
             <div className="pagination-controls">
               <button className="pagination-btn" onClick={() => setCurrentPagePending(Math.max(1, safePagePending - 1))} disabled={safePagePending === 1}>‹</button>
@@ -860,7 +860,9 @@ const PaymentTab = () => {
         {filteredPayrolls.length > pageSizeRecent && (
           <div className="table-pagination">
             <div className="pagination-info">
-              Menampilkan <strong>{recentPayrolls.length}</strong> dari <strong>{filteredPayrolls.length}</strong> data
+              {filteredPayrolls.length === 0
+                ? 'Menampilkan 0 data'
+                : `Menampilkan ${(safePageRecent - 1) * pageSizeRecent + 1}-${Math.min(safePageRecent * pageSizeRecent, filteredPayrolls.length)} dari ${filteredPayrolls.length} data`}
             </div>
             <div className="pagination-controls">
               <button className="pagination-btn" onClick={() => setCurrentPageRecent(Math.max(1, safePageRecent - 1))} disabled={safePageRecent === 1}>‹</button>

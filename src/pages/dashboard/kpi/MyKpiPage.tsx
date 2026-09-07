@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { BarChart3, CheckCircle2, RefreshCw, Send, Target } from 'lucide-react';
+import { PageHeader } from '@/shared/ui';
 import { getMyKpis, submitMyKpi } from '@/features/dashboard/api/kpi.service';
 import './KpiPage.css';
 
@@ -144,24 +145,19 @@ const MyKpiPage = () => {
 
   return (
     <div className="kpi-page">
-      <Card className="kpi-hero" glass>
-        <div className="kpi-header">
-          <div className="kpi-header-copy">
-            <p className="kpi-page-badge">Performance Center</p>
-            <div className="kpi-title-row">
-              <span className="kpi-header-icon"><Target size={18} /></span>
-              <h1>My KPI</h1>
-            </div>
-            <p>Kelola KPI pribadi dengan tampilan yang rapi, konsisten, dan mudah dipindai.</p>
-          </div>
-          <div className="kpi-header-actions">
+      <PageHeader
+        badge={{ icon: Target, label: 'Performance Center' }}
+        title="My KPI"
+        subtitle="Kelola KPI pribadi dengan tampilan yang rapi, konsisten, dan mudah dipindai."
+        actions={
+          <div className="page-hero-actions">
             <Button variant="outline" size="md" onClick={loadMyKpis} disabled={loading}>
               <RefreshCw size={16} />
               Segarkan
             </Button>
           </div>
-        </div>
-      </Card>
+        }
+      />
 
       <div className="kpi-summary-grid">
         {summaryCards.map((card) => {

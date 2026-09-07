@@ -11,6 +11,7 @@ import {
   updateKpi,
 } from '@/features/dashboard/api/kpi.service';
 import { Target, Users, RefreshCw, Trash2, Edit, Check, FileText } from 'lucide-react';
+import { PageHeader } from '@/shared/ui';
 import { showToast } from '@/shared/ui/toast';
 import { useAuthStore } from '@/app/store/auth.store';
 import { RBACUtils } from '@/shared/hooks/rbac';
@@ -269,24 +270,24 @@ const KpiPage = () => {
   return (
     <div className="crud-page">
       {/* Header */}
-      <div className="page-header">
-        <div className="page-header-title">
-          <span className="page-badge">KPI Management</span>
-          <h1>Key Performance Indicators</h1>
-          <p>Kelola target dan pencapaian KPI karyawan.</p>
-        </div>
-        <div className="page-header-actions">
-          <Button variant="outline" size="md" onClick={() => void loadData()} disabled={loading} style={{ borderColor: "var(--color-primary)", color: "var(--color-primary)" }}>
-            <RefreshCw size={16} />
-            {loading ? "Memuat..." : "Segarkan"}
-          </Button>
-          {canCreate && (
-          <Button variant="primary" size="md" onClick={() => { setForm(DEFAULT_FORM); setIsFormOpen(!isFormOpen); }}>
-            Buat KPI Baru
-          </Button>
-          )}
-        </div>
-      </div>
+      <PageHeader
+        badge={{ icon: Target, label: 'KPI Management' }}
+        title="Key Performance Indicators"
+        subtitle="Kelola target dan pencapaian KPI karyawan."
+        actions={
+          <div className="page-hero-actions">
+            <Button variant="outline" size="md" onClick={() => void loadData()} disabled={loading} style={{ borderColor: "var(--color-primary)", color: "var(--color-primary)" }}>
+              <RefreshCw size={16} />
+              {loading ? "Memuat..." : "Segarkan"}
+            </Button>
+            {canCreate && (
+            <Button variant="primary" size="md" onClick={() => { setForm(DEFAULT_FORM); setIsFormOpen(!isFormOpen); }}>
+              Buat KPI Baru
+            </Button>
+            )}
+          </div>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="summary-grid">

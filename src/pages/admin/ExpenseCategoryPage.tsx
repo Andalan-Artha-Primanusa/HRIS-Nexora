@@ -5,6 +5,7 @@ import { Button } from '@/shared/ui/Button';
 import { Modal } from '@/shared/ui/Modal';
 import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { LoadingState, ErrorState, EmptyState } from '@/shared/ui/DataStateDisplay';
+import { PageHeader } from '@/shared/ui';
 import { api } from '@/shared/api/httpClient';
 import { showToast } from '@/shared/ui/toast';
 import '@/shared/styles/CrudPage.css';
@@ -234,20 +235,12 @@ const ExpenseCategoryPage = () => {
 
   return (
     <div className="crud-page">
-      {/* Header */}
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Receipt size={16} />
-              <span>Settings</span>
-            </div>
-            <h1 className="hero-title">Expense Categories</h1>
-            <p className="hero-subtitle">
-              Kelola kategori pengeluaran untuk permintaan reimbursemen.
-            </p>
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title="Expense Categories"
+        subtitle="Kelola kategori pengeluaran untuk permintaan reimbursemen."
+        badge={{ icon: Receipt, label: "Settings" }}
+        actions={
+          <>
             <button className="btn-outline" onClick={fetchData} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               Segarkan
@@ -256,9 +249,9 @@ const ExpenseCategoryPage = () => {
               <Plus size={16} />
               Tambah Kategori
             </button>
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="employee-summary-wrapper">
@@ -428,7 +421,9 @@ const ExpenseCategoryPage = () => {
               {/* Pagination */}
               <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan <strong>{paginatedCategories.length}</strong> dari <strong>{sortedCategories.length}</strong> kategori
+                  {sortedCategories.length === 0
+                    ? 'Menampilkan 0 data'
+                    : `Menampilkan ${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, sortedCategories.length)} dari ${sortedCategories.length} data`}
                 </div>
                 <div className="pagination-controls">
                   <button

@@ -22,6 +22,7 @@ import "@/pages/dashboard/overview/OverviewPage.css";
 import "./PayrollListPage.css";
 import "./PayrollShared.css";
 import "./PayrollApprovePage.css";
+import { PageHeader } from "@/shared/ui";
 
 type ApproveAction = "manager-approve" | "hr-approve" | "reject" | null;
 
@@ -167,16 +168,12 @@ const PayrollApprovePage = () => {
 
   return (
     <div className="crud-page">
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge"><ShieldCheck size={16} /><span>Pusat Payroll</span></div>
-            <h1 className="hero-title">Persetujuan Payroll</h1>
-            <p className="hero-subtitle">
-              Alur approval: <strong>Manager</strong> (draft → pending_hr) → <strong>HR</strong> (pending_hr → approved) → Finance bayar.
-            </p>
-          </div>
-          <div className="page-header-actions">
+      <PageHeader
+        title="Persetujuan Payroll"
+        subtitle="Alur approval: Manager (draft → pending_hr) → HR (pending_hr → approved) → Finance bayar."
+        badge={{ icon: ShieldCheck, label: "Pusat Payroll" }}
+        actions={
+          <>
             <button className="btn-outline" onClick={() => void loadData()} disabled={loading}>
               <RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Segarkan
             </button>
@@ -184,9 +181,9 @@ const PayrollApprovePage = () => {
               style={{ color: "var(--color-primary)", borderColor: "var(--color-primary)" }}>
               Halaman Pembayaran
             </button>
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="payroll-summary-wrapper">

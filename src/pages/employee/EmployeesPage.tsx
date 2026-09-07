@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardHeader } from "@/shared/ui";
+import { Card, CardHeader, PageHeader } from "@/shared/ui";
 import { ConfirmDialog } from "@/shared/ui/ConfirmDialog";
 import { LoadingState, ErrorState, EmptyState } from "@/shared/ui/DataStateDisplay";
 import { showToast } from "@/shared/ui/toast";
@@ -31,7 +31,6 @@ import {
 } from "lucide-react";
 import "@/shared/styles/CrudPage.css";
 import "./EmployeesPage.css";
-import CompanyScopeBadge from "@/shared/components/CompanyScopeBadge";
 
 const formatDateTime = (input: string) => {
   if (!input) return "-";
@@ -167,26 +166,24 @@ const EmployeesPage = () => {
   return (
     <div className="crud-page">
       {/* Header */}
-      <Card className="employees-page-header">
-        <div className="employees-hero-inner">
-          <div className="employees-hero-content">
-            <div className="employees-hero-badge"><Briefcase size={16} /><span>Employee Center</span></div>
-            <h1 className="employees-hero-title">Employee Directory</h1>
-            <p className="employees-hero-subtitle">Manage all employee data and organizational structure in one place.</p>
-            <CompanyScopeBadge />
-          </div>
-          <div className="employees-page-header-actions">
-            <button className="employees-hero-button employees-hero-button--secondary" onClick={() => void loadEmployees()} disabled={loading}>
+      <PageHeader
+        title="Employee Directory"
+        subtitle="Manage all employee data and organizational structure in one place."
+        badge={{ icon: Briefcase, label: "Employee Center" }}
+        scope
+        actions={
+          <>
+            <button className="btn-outline" onClick={() => void loadEmployees()} disabled={loading}>
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} /> Segarkan
             </button>
             {canCreateEmployee && (
-              <button className="employees-hero-button employees-hero-button--primary" onClick={() => navigate("/employees/add")}>
+              <button className="btn-primary" onClick={() => navigate("/employees/add")}>
                 <Plus size={16} /> Tambah Karyawan
               </button>
             )}
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="employee-summary-wrapper">
@@ -314,7 +311,9 @@ const EmployeesPage = () => {
               {/* Pagination */}
               <div className="table-pagination">
                 <div className="pagination-info">
-                  Menampilkan <strong>{items.length}</strong> dari <strong>{totalEmployees}</strong> karyawan
+                  {totalEmployees === 0
+                    ? 'Menampilkan 0 data'
+                    : `Menampilkan ${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, totalEmployees)} dari ${totalEmployees} data`}
                 </div>
                 <div className="pagination-controls">
                   <button className="pagination-btn" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1}>‹</button>

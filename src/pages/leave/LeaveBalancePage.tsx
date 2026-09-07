@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardHeader } from '@/shared/ui';
+import { Card, CardHeader, PageHeader } from '@/shared/ui';
 import { LoadingState, EmptyState } from '@/shared/ui/DataStateDisplay';
 import { getLeaveBalance } from '@/features/leave/api/leave.service';
 import type { LeaveBalanceResponse } from '@/features/leave/types/leave.types';
@@ -68,25 +68,17 @@ const LeaveBalancePage = () => {
 
   return (
     <div className="crud-page">
-      {/* Header - Same style as Leave Requests */}
-      <Card className="page-header">
-        <div className="page-header-inner">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Calendar size={16} />
-              <span>Saldo Cuti</span>
-            </div>
-            <h1 className="hero-title">Saldo Cuti Saya</h1>
-            <p className="hero-subtitle">Lihat rincian kuota dan kebijakan cuti Anda.</p>
-          </div>
-          <div className="page-header-actions">
-            <button className="btn-outline" onClick={() => void loadBalance()}>
-              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-              Segarkan
-            </button>
-          </div>
-        </div>
-      </Card>
+      <PageHeader
+        title="Saldo Cuti Saya"
+        subtitle="Lihat rincian kuota dan kebijakan cuti Anda."
+        badge={{ icon: Calendar, label: "Saldo Cuti" }}
+        actions={
+          <button className="btn-outline" onClick={() => void loadBalance()}>
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            Segarkan
+          </button>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="leave-requests-wrapper">
